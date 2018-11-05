@@ -28,8 +28,8 @@ public class MusicListFragment extends Fragment {
 
     private static final String TAG = "MusicListFragment";
 
-    /**------------------------- DATA -----------------------------*/
-    private volatile ArrayList<String> mMusicPathList = new ArrayList<>();
+    @SuppressWarnings("unused")
+    private static boolean sIsScrolling = false;
 
     private volatile List<String> mSongNameList = new ArrayList<>();
 
@@ -44,8 +44,10 @@ public class MusicListFragment extends Fragment {
     private HandlerThread mHandlerThread;
 
     private boolean CREATE_VIEW_DONE = false;
-
-    private static boolean sIsScrolling = false;
+    /**
+     * ------------------------- DATA -----------------------------
+     */
+    private volatile ArrayList<String> mMusicPathList = new ArrayList<>();
 
     @Override
     public void onAttach(Context context) {
@@ -86,6 +88,7 @@ public class MusicListFragment extends Fragment {
      *
      * @param dir music dir
      */
+    @SuppressWarnings("unused")
     private void findMp3(File dir) {
         Log.d(TAG, "findMp3: doing");
         if (!dir.isDirectory()) {
@@ -186,9 +189,10 @@ public class MusicListFragment extends Fragment {
     }
 
     class NotLeakHandler extends Handler {
+        @SuppressWarnings("unused")
         private WeakReference<MusicListFragment> mWeakReference;
 
-        NotLeakHandler(MusicListFragment fragment,Looper looper) {
+        NotLeakHandler(MusicListFragment fragment, Looper looper) {
             super(looper);
             mWeakReference = new WeakReference<>(fragment);
         }
