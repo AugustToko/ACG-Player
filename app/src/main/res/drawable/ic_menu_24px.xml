@@ -1,0 +1,20 @@
+<!--
+  ~ *************************************************************
+  ~ 文件：ic_menu_24px.xml  模块：app  项目：FuckTest
+  ~ 当前修改时间：2018年09月27日 14:55:13
+  ~ 上次修改时间：2018年09月27日 14:52:37
+  ~ 作者：GiKode
+  ~ Geek Studio: https://blog.geek-studio.top
+  ~ Copyright (c) 2018
+  ~ *************************************************************
+  -->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#fff"
+        android:pathData="M3,18h18v-2h-18v2zM3,13h18v-2h-18v2zM3,6v2h18v-2h-18z"/>
+</vector>
