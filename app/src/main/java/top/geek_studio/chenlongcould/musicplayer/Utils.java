@@ -1,10 +1,20 @@
+/*
+ * ************************************************************
+ * 文件：Utils.java  模块：app  项目：MusicPlayer
+ * 当前修改时间：2018年11月05日 17:54:16
+ * 上次修改时间：2018年11月05日 17:53:42
+ * 作者：chenlongcould
+ * Geek Studio
+ * Copyright (c) 2018
+ * ************************************************************
+ */
+
 package top.geek_studio.chenlongcould.musicplayer;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
-import android.util.Log;
 import android.widget.ImageView;
 
 class Utils {

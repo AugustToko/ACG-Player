@@ -1,3 +1,14 @@
+/*
+ * ************************************************************
+ * 文件：build.gradle  模块：MusicPlayer  项目：MusicPlayer
+ * 当前修改时间：2018年11月05日 17:54:16
+ * 上次修改时间：2018年11月05日 17:53:35
+ * 作者：chenlongcould
+ * Geek Studio
+ * Copyright (c) 2018
+ * ************************************************************
+ */
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {

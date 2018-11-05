@@ -1,10 +1,10 @@
 /*
  * ************************************************************
- * 文件：MyPagerAdapter.java  模块：app  项目：Weather
- * 当前修改时间：2018年09月25日 17:12:14
- * 上次修改时间：2018年09月25日 15:51:14
- * 作者：GiKode
- * Geek Studio: https://blog.geek-studio.top
+ * 文件：MyPagerAdapter.java  模块：app  项目：MusicPlayer
+ * 当前修改时间：2018年11月05日 17:54:16
+ * 上次修改时间：2018年11月05日 17:53:35
+ * 作者：chenlongcould
+ * Geek Studio
  * Copyright (c) 2018
  * ************************************************************
  */
