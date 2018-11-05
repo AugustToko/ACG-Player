@@ -3,7 +3,6 @@ package top.geek_studio.chenlongcould.musicplayer;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -20,7 +19,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,27 +82,27 @@ public class MusicListFragment extends Fragment {
 
     }
 
-    private void findMp3(File dir) {
-        Log.d(TAG, "findMp3: doing");
-        if (!dir.isDirectory()) {
-            return;
-        }
-
-        for (File f:dir.listFiles()) {
-            if (!f.isDirectory()) {
-                mMusicPathList.add(f.getPath());
-
-                String fileName = f.getName();
-                String prefix = fileName.substring(fileName.lastIndexOf(".") + 1);//如果想获得不带点的后缀，变为fileName.lastIndexOf(".")+1
-
-                String fileOtherName = fileName.substring(0, fileName.length() - prefix.length());//得到文件名。去掉了后缀
-                mSongNameList.add(fileOtherName);
-
-            } else {
-                findMp3(f);
-            }
-        }
-    }
+//    private void findMp3(File dir) {
+//        Log.d(TAG, "findMp3: doing");
+//        if (!dir.isDirectory()) {
+//            return;
+//        }
+//
+//        for (File f:dir.listFiles()) {
+//            if (!f.isDirectory()) {
+//                mMusicPathList.add(f.getPath());
+//
+//                String fileName = f.getName();
+//                String prefix = fileName.substring(fileName.lastIndexOf(".") + 1);//如果想获得不带点的后缀，变为fileName.lastIndexOf(".")+1
+//
+//                String fileOtherName = fileName.substring(0, fileName.length() - prefix.length());//得到文件名。去掉了后缀
+//                mSongNameList.add(fileOtherName);
+//
+//            } else {
+//                findMp3(f);
+//            }
+//        }
+//    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
