@@ -207,6 +207,7 @@ public class MusicListFragment extends Fragment {
 
                 }
                 default:
+                    break;
             }
         }
     }
