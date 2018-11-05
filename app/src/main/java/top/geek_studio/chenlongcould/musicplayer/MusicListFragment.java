@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,8 +64,6 @@ public class MusicListFragment extends Fragment {
             mSongNameList.clear();
             mSongAlbumList.clear();
 
-//            findMp3(file);
-
             Cursor cursor = mActivity.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
             if (cursor != null) {
                 cursor.moveToFirst();
@@ -82,27 +81,32 @@ public class MusicListFragment extends Fragment {
 
     }
 
-//    private void findMp3(File dir) {
-//        Log.d(TAG, "findMp3: doing");
-//        if (!dir.isDirectory()) {
-//            return;
-//        }
-//
-//        for (File f:dir.listFiles()) {
-//            if (!f.isDirectory()) {
-//                mMusicPathList.add(f.getPath());
-//
-//                String fileName = f.getName();
-//                String prefix = fileName.substring(fileName.lastIndexOf(".") + 1);//如果想获得不带点的后缀，变为fileName.lastIndexOf(".")+1
-//
-//                String fileOtherName = fileName.substring(0, fileName.length() - prefix.length());//得到文件名。去掉了后缀
-//                mSongNameList.add(fileOtherName);
-//
-//            } else {
-//                findMp3(f);
-//            }
-//        }
-//    }
+    /**
+     * old version
+     *
+     * @param dir music dir
+     */
+    private void findMp3(File dir) {
+        Log.d(TAG, "findMp3: doing");
+        if (!dir.isDirectory()) {
+            return;
+        }
+
+        for (File f : dir.listFiles()) {
+            if (!f.isDirectory()) {
+                mMusicPathList.add(f.getPath());
+
+                String fileName = f.getName();
+                String prefix = fileName.substring(fileName.lastIndexOf(".") + 1);//如果想获得不带点的后缀，变为fileName.lastIndexOf(".")+1
+
+                String fileOtherName = fileName.substring(0, fileName.length() - prefix.length());//得到文件名。去掉了后缀
+                mSongNameList.add(fileOtherName);
+
+            } else {
+                findMp3(f);
+            }
+        }
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -127,6 +131,7 @@ public class MusicListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_music_list_layout, container, false);
         mRecyclerView = view.findViewById(R.id.music_list_fragment_recycler);
 
+        //needn't
 //        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 //            @Override
 //            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
