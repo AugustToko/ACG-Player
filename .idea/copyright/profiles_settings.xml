@@ -1,0 +1,7 @@
+<component name="CopyrightManager">
+  <settings default="profile_one">
+    <module2copyright>
+      <element module="All" copyright="profile_one" />
+    </module2copyright>
+  </settings>
+</component>
