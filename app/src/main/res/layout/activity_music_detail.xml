@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/activity_music_detail_primary_background"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:contentDescription="@string/activity_music_detail_primary_background"
+        android:src="@color/infoBodyPlaying"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_music_detail_album_image" />
+
+    <ImageView
+        android:id="@+id/activity_music_detail_album_image"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:contentDescription="@string/activity_music_detail_album_image"
+        android:scaleType="centerCrop" />
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="0dp"
+        android:layout_height="25dp"
+        android:background="#54767c"
+        android:max="100"
+        android:maxHeight="6dip"
+        android:minHeight="6dip"
+        android:progressDrawable="@drawable/seek_bar_line"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/activity_music_detail_primary_background"
+        tools:progress="30" />
+
+</android.support.constraint.ConstraintLayout>

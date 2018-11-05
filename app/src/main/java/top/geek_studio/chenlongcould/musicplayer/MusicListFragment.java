@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月05日 17:54:16
- * 上次修改时间：2018年11月05日 17:53:35
+ * 当前修改时间：2018年11月06日 07:32:30
+ * 上次修改时间：2018年11月06日 07:32:22
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -44,7 +44,9 @@ public class MusicListFragment extends Fragment {
 
     private volatile List<String> mSongNameList = new ArrayList<>();
 
-    private volatile List<String> mSongAlbumList = new ArrayList<>();
+    private volatile ArrayList<String> mSongAlbumList = new ArrayList<>();
+
+    private MyRecyclerAdapter adapter;
 
     private RecyclerView mRecyclerView;
 
@@ -59,6 +61,10 @@ public class MusicListFragment extends Fragment {
      * ------------------------- DATA -----------------------------
      */
     private volatile ArrayList<String> mMusicPathList = new ArrayList<>();
+
+    public ArrayList<String> getSongAlbumList() {
+        return mSongAlbumList;
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -88,7 +94,7 @@ public class MusicListFragment extends Fragment {
                 cursor.close();
             }
 
-            mHandler.sendEmptyMessage(Values.INIT_MUSIC_LIST_DONE);
+            mHandler.sendEmptyMessage(Values.INIT_MUSIC_LIST);
 
         }).start();
 
@@ -122,11 +128,6 @@ public class MusicListFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
     //实例化一个fragment
     public static MusicListFragment newInstance(int index) {
 
@@ -144,6 +145,13 @@ public class MusicListFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_music_list_layout, container, false);
         mRecyclerView = view.findViewById(R.id.music_list_fragment_recycler);
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
+        mRecyclerView.setHasFixedSize(true);
+
+        adapter = new MyRecyclerAdapter(mMusicPathList, mSongNameList, mSongAlbumList, mActivity, mHandlerThread.getLooper());
+
+        mRecyclerView.setAdapter(adapter);
 
         //needn't
 //        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -152,7 +160,6 @@ public class MusicListFragment extends Fragment {
 //                super.onScrollStateChanged(recyclerView, newState);
 //                if (newState == RecyclerView.SCROLL_STATE_DRAGGING || newState == RecyclerView.SCROLL_STATE_SETTLING) {
 //                    sIsScrolling = true;
-//                    GlideApp.with(mActivity).pauseRequests();
 //                } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 //                    if (sIsScrolling) {
 //                        GlideApp.with(mActivity).resumeRequests();
@@ -168,12 +175,7 @@ public class MusicListFragment extends Fragment {
 //            }
 //        });
 
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL));
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
-        mRecyclerView.setHasFixedSize(true);
-
         CREATE_VIEW_DONE = true;
-
         return view;
     }
 
@@ -188,14 +190,17 @@ public class MusicListFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
     }
 
+    /**
+     * 延迟循环确认是否已经createView
+     */
     private void sureCreateViewDone() {
         if (CREATE_VIEW_DONE) {
-            mActivity.setToolbarSubTitle(mSongNameList.size() + " songs");
+            Values.MUSIC_DATA_INIT_DONE = true;
 
-            MyRecyclerAdapter adapter = new MyRecyclerAdapter(mMusicPathList, mSongNameList, mSongAlbumList, mActivity, mHandlerThread.getLooper());
-            mRecyclerView.setAdapter(adapter);
+            mActivity.setToolbarSubTitle(mSongNameList.size() + " songs");
+            adapter.notifyDataSetChanged();
         } else {
-            new Handler().postDelayed(this::sureCreateViewDone, 1000);
+            new Handler().postDelayed(this::sureCreateViewDone, 1000);      //循环一秒
         }
     }
 
@@ -211,7 +216,7 @@ public class MusicListFragment extends Fragment {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case Values.INIT_MUSIC_LIST_DONE: {
+                case Values.INIT_MUSIC_LIST: {
                     mActivity.runOnUiThread(() -> {
                         if (CREATE_VIEW_DONE) {
                             sureCreateViewDone();

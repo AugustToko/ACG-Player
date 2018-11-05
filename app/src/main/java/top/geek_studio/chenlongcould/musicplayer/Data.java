@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Data.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月05日 17:54:16
- * 上次修改时间：2018年11月05日 17:53:35
+ * 当前修改时间：2018年11月06日 07:32:30
+ * 上次修改时间：2018年11月05日 20:50:32
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -11,41 +11,20 @@
 
 package top.geek_studio.chenlongcould.musicplayer;
 
-public class Data {
+import android.app.Activity;
+import android.graphics.Bitmap;
 
-    private MyRecyclerAdapter.ViewHolder mViewHolder;
+import java.util.ArrayList;
+import java.util.List;
 
-    private String path;
+class Data {
+    static List<Activity> sActivities = new ArrayList<>();
 
-    private int position;
+    static String sCurrentMusicName;
 
-    Data(MyRecyclerAdapter.ViewHolder viewHolder, String path, int position) {
-        mViewHolder = viewHolder;
-        this.path = path;
-        this.position = position;
-    }
+    static String sCurrentMusicPath;
 
-    MyRecyclerAdapter.ViewHolder getViewHolder() {
-        return mViewHolder;
-    }
+    static Bitmap sCurrentMusicBitmap;
 
-    String getPath() {
-        return path;
-    }
-
-    public void setViewHolder(MyRecyclerAdapter.ViewHolder viewHolder) {
-        mViewHolder = viewHolder;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public int getPosition() {
-        return position;
-    }
-
-    public void setPosition(int position) {
-        this.position = position;
-    }
+    static String sCurrentMusicAlbum;
 }

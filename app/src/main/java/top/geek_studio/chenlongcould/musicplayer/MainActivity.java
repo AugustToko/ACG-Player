@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月05日 17:54:16
- * 上次修改时间：2018年11月05日 17:53:36
+ * 当前修改时间：2018年11月06日 07:32:30
+ * 上次修改时间：2018年11月05日 19:45:55
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -12,15 +12,19 @@
 package top.geek_studio.chenlongcould.musicplayer;
 
 import android.Manifest;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -34,9 +38,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -73,18 +80,43 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView mNowPlayingSongAlbumText;
 
+    private ImageView mNowPlayingStatusImage;
+
+    //Body
+    private ConstraintLayout mNowPlayingBody;
+
     /** --------------------- Media Player ----------------------*/
-    private MediaPlayer mMediaPlayer = new MediaPlayer();
+    private MyMusicService.MusicBinder mMusicBinder;
+
+    private ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mMusicBinder = (MyMusicService.MusicBinder) service;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Data.sActivities.add(this);
 
         initPermission();
 
         initView();
 
         initData();
+
+        Intent intent = new Intent(this, MyMusicService.class);
+        startService(intent);
+
+        //bind
+        bindService(new Intent(this, MyMusicService.class), mServiceConnection, BIND_AUTO_CREATE);
 
         mHandlerThread = new HandlerThread("Handler Thread in MainActivity");
         mHandlerThread.start();
@@ -150,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
         String tab_2 = "专辑";
         mTabLayout.addTab(mTabLayout.newTab().setText(tab_2));
         mTitles.add(tab_2);
-        mFragmentList.add(PublicFragment.newInstance(1));
+        mFragmentList.add(AlbumListFragment.newInstance(1));
 
         String tab_3 = "播放列表";
         mTabLayout.addTab(mTabLayout.newTab().setText(tab_3));
@@ -162,11 +194,35 @@ public class MainActivity extends AppCompatActivity {
     private void initView() {
         setContentView(R.layout.activity_main);
 
-        mToolbar = findViewById(R.id.tool_bar);
+        mToolbar = findViewById(R.id.activity_main_tool_bar);
         mDrawerLayout = findViewById(R.id.activity_main_drawer_layout);
         mNowPlayingSongAlbumText = findViewById(R.id.activity_main_now_playing_album_name);
         mNavigationView = findViewById(R.id.activity_main_nav_view);
         mNavHeaderImageView = mNavigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
+        mNowPlayingBody = findViewById(R.id.current_info);
+        mNowPlayingStatusImage = findViewById(R.id.activity_main_info_bar_status_image);
+
+        mNowPlayingStatusImage.setOnClickListener(v -> {
+            if (Values.HAS_PLAYED) {
+                if (Values.NOW_PLAYING) {
+                    getMusicBinder().pauseMusic();
+                    Values.NOW_PLAYING = false;
+                    setCurrentSongInfoStop();
+                } else {
+                    getMusicBinder().playMusic();
+                    Values.NOW_PLAYING = true;
+                    setCurrentSongInfoPlay();
+                }
+            } else {
+                Toast.makeText(MainActivity.this, "Plz select one song!", Toast.LENGTH_SHORT).show();
+            }
+        });
+        mNowPlayingBody.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, MusicDetailActivity.class));
+            }
+        });
 
         setSupportActionBar(mToolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -184,21 +240,6 @@ public class MainActivity extends AppCompatActivity {
         initDrawerToggle();
     }
 
-    public MediaPlayer getMediaPlayer() {
-        return mMediaPlayer;
-    }
-
-    public void setCurrentSongInfo(String songName, String albumName, Bitmap cover) {
-        mNowPlayingSongText.setText(songName);
-        mNowPlayingSongAlbumText.setText(albumName);
-        GlideApp.with(this).load(cover).into(mNowPlayingSongImage);
-        GlideApp.with(this).load(cover).centerCrop().into(mNavHeaderImageView);
-    }
-
-    public void setToolbarSubTitle(String text) {
-        mToolbar.setSubtitle(text);
-    }
-
     private void initDrawerToggle() {
         // 参数：开启抽屉的activity、DrawerLayout的对象、toolbar按钮打开关闭的对象、描述open drawer、描述close drawer
         ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.open, R.string.close);
@@ -206,6 +247,49 @@ public class MainActivity extends AppCompatActivity {
         mDrawerToggle.syncState();
         // 设置按钮的动画效果; 如果不想要打开关闭抽屉时的箭头动画效果，可以不写此行代码
         mDrawerLayout.addDrawerListener(mDrawerToggle);
+    }
+
+    /**
+     * setInfoBar content
+     */
+    public void setCurrentSongInfo(String songName, String albumName, String songPath, Bitmap cover) {
+
+        Data.sCurrentMusicAlbum = albumName;
+        Data.sCurrentMusicName = songName;
+        Data.sCurrentMusicPath = songPath;
+        Data.sCurrentMusicBitmap = cover;
+
+        runOnUiThread(() -> {
+            mNowPlayingSongText.setText(songName);
+            mNowPlayingSongAlbumText.setText(albumName);
+            GlideApp.with(MainActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade()).into(mNowPlayingSongImage);
+            GlideApp.with(MainActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade()).centerCrop().into(mNavHeaderImageView);
+            setCurrentSongInfoPlay();
+        });
+    }
+
+    public void setCurrentSongInfoStop() {
+        runOnUiThread(() -> mNowPlayingStatusImage.setImageResource(R.drawable.ic_play_arrow_black_24dp));
+    }
+
+    public void setCurrentSongInfoPlay() {
+        mNowPlayingStatusImage.setImageResource(R.drawable.ic_pause_white_24dp);
+    }
+
+    public void setToolbarSubTitle(String text) {
+        mToolbar.setSubtitle(text);
+    }
+
+    public MyMusicService.MusicBinder getMusicBinder() {
+        return mMusicBinder;
+    }
+
+    public List<Fragment> getFragmentList() {
+        return mFragmentList;
+    }
+
+    public ConstraintLayout getNowPlayingBody() {
+        return mNowPlayingBody;
     }
 
     @Override
@@ -243,7 +327,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        Data.sActivities.remove(this);
         mHandlerThread.quitSafely();
+        unbindService(mServiceConnection);
         super.onDestroy();
     }
 }
