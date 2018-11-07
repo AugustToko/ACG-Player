@@ -22,27 +22,33 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true">
         <activity
-            android:name=".MainActivity"
+            android:name=".Activities.MainActivity"
             android:launchMode="singleTask"
             android:theme="@style/CommonActivityTheme">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-
+                <category android:name="android.intent.category.DEFAULT" />
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
 
         <service
-            android:name=".MyMusicService"
+            android:name=".Service.MyMusicService"
             android:enabled="true"
             android:exported="false" />
 
         <activity
-            android:name=".MusicDetailActivity"
+            android:name=".Activities.MusicDetailActivity"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme" />
+        <activity
+            android:name=".Activities.SplashActivity"
+            android:launchMode="singleTask"
+            android:theme="@style/SplashActivityTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

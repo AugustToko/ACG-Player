@@ -9,7 +9,7 @@
  * ************************************************************
  */
 
-package top.geek_studio.chenlongcould.musicplayer;
+package top.geek_studio.chenlongcould.musicplayer.Fragments;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -31,6 +31,11 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter2AlbumList;
+import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Values;
+
 public class AlbumListFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
@@ -49,15 +54,8 @@ public class AlbumListFragment extends Fragment {
     private boolean ON_CREATE_VIEW_DONE = false;
 
     //实例化一个fragment
-    public static AlbumListFragment newInstance(int index) {
-
-        AlbumListFragment myFragment = new AlbumListFragment();
-
-        Bundle bundle = new Bundle();
-        //传递参数
-        bundle.putInt(Values.INDEX, index);
-        myFragment.setArguments(bundle);
-        return myFragment;
+    public static AlbumListFragment newInstance() {
+        return new AlbumListFragment();
     }
 
     @Override
@@ -119,6 +117,10 @@ public class AlbumListFragment extends Fragment {
     public void onDestroy() {
         mHandlerThread.quitSafely();
         super.onDestroy();
+    }
+
+    public RecyclerView getRecyclerView() {
+        return mRecyclerView;
     }
 
     class NotLeakHandler extends Handler {

@@ -9,7 +9,7 @@
  * ************************************************************
  */
 
-package top.geek_studio.chenlongcould.musicplayer;
+package top.geek_studio.chenlongcould.musicplayer.Fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -19,6 +19,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Values;
 
 public class PublicFragment extends Fragment {
 

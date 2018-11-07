@@ -12,19 +12,47 @@
 package top.geek_studio.chenlongcould.musicplayer;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.ServiceConnection;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.os.IBinder;
 
 import java.util.ArrayList;
 import java.util.List;
 
-class Data {
-    static List<Activity> sActivities = new ArrayList<>();
+import top.geek_studio.chenlongcould.musicplayer.Service.MyMusicService;
 
-    static String sCurrentMusicName;
+public final class Data {
+    public static List<Activity> sActivities = new ArrayList<>();
 
-    static String sCurrentMusicPath;
+    public static String sCurrentMusicName = null;
 
-    static Bitmap sCurrentMusicBitmap;
+    public static String sCurrentMusicPath = null;
 
-    static String sCurrentMusicAlbum;
+    public static Bitmap sCurrentMusicBitmap = null;
+
+    public static String sCurrentMusicAlbum = null;
+
+    public static ColorStateList sDefTextColorStateList = null;
+
+    public static ColorStateList sDefIcoColorStateList = null;
+
+    /**
+     * --------------------- Media Player ----------------------
+     */
+    public static MyMusicService.MusicBinder sMusicBinder;
+
+    public static ServiceConnection sServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            sMusicBinder = (MyMusicService.MusicBinder) service;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
+
 }

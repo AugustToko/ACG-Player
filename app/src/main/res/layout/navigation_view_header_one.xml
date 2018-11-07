@@ -18,7 +18,7 @@
         android:id="@+id/nav_view_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="#9c00d0ff"
+        android:src="#9c9c9c"
         android:contentDescription="@string/todo" />
 
 </android.support.constraint.ConstraintLayout>

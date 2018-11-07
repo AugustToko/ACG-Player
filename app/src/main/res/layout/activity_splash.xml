@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ *************************************************************
+  ~ 文件：activity_splash.xml  模块：app  项目：FuckTest
+  ~ 当前修改时间：2018年11月05日 17:07:16
+  ~ 上次修改时间：2018年11月05日 17:07:03
+  ~ 作者：GiKode
+  ~ Geek Studio: https://blog.geek-studio.top
+  ~ Copyright (c) 2018
+  ~ *************************************************************
+  -->
+
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#00ffffff"
+    tools:context=".Activities.SplashActivity">
+
+    <ImageView
+        android:id="@+id/splash_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/ramp_bg"
+        android:contentDescription="@string/app_name"
+        android:scaleType="centerCrop" />
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="302dp"
+        android:layout_height="162dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.308">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="8dp"
+            android:contentDescription="@string/app_name"
+            android:scaleX="2"
+            android:scaleY="2"
+            android:src="@mipmap/ic_launcher_round"
+            app:layout_constraintBottom_toTopOf="@+id/splash_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/splash_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:gravity="center"
+            android:shadowColor="#3d000000"
+            android:shadowRadius="3"
+            android:text="@string/app_name"
+            android:textColor="#fff"
+            android:textSize="50sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </android.support.constraint.ConstraintLayout>
+
+</android.support.constraint.ConstraintLayout>

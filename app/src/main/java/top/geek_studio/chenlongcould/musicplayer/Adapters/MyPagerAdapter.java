@@ -9,7 +9,7 @@
  * ************************************************************
  */
 
-package top.geek_studio.chenlongcould.musicplayer;
+package top.geek_studio.chenlongcould.musicplayer.Adapters;
 
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -20,13 +20,13 @@ import android.util.Log;
 
 import java.util.List;
 
-public class MyPagerAdapter extends FragmentStatePagerAdapter {
+public final class MyPagerAdapter extends FragmentStatePagerAdapter {
 
     private static final String TAG = "MyPagerAdapter";
     private List<Fragment> mFragmentList;
     private List<String> mTitles;
 
-    MyPagerAdapter(FragmentManager fm, List<Fragment> fragmentList, List<String> titles) {
+    public MyPagerAdapter(FragmentManager fm, List<Fragment> fragmentList, List<String> titles) {
         super(fm);
         mFragmentList = fragmentList;
         mTitles = titles;

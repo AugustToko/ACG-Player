@@ -9,7 +9,7 @@
  * ************************************************************
  */
 
-package top.geek_studio.chenlongcould.musicplayer;
+package top.geek_studio.chenlongcould.musicplayer.Adapters;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -21,13 +21,16 @@ import android.widget.TextView;
 
 import java.util.List;
 
-public class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRecyclerAdapter2AlbumList.ViewHolder> {
+import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Values;
+
+public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRecyclerAdapter2AlbumList.ViewHolder> {
 
     private List<String> mAlbumList;
 
     private Context mContext;
 
-    MyRecyclerAdapter2AlbumList(Context context, List<String> albumList) {
+    public MyRecyclerAdapter2AlbumList(Context context, List<String> albumList) {
         this.mAlbumList = albumList;
         mContext = context;
     }
@@ -49,6 +52,7 @@ public class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRecycler
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
         viewHolder.mAlbumText.setText(mAlbumList.get(i));
+        Values.CURRENT_BIND_INDEX_ALBUM_LIST = viewHolder.getAdapterPosition();
     }
 
     @Override

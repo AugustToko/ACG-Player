@@ -9,7 +9,7 @@
  * ************************************************************
  */
 
-package top.geek_studio.chenlongcould.musicplayer;
+package top.geek_studio.chenlongcould.musicplayer.Fragments;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -30,10 +30,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
+
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+
+import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
+import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.GlideApp;
+import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Utils;
+import top.geek_studio.chenlongcould.musicplayer.Values;
 
 public class MusicListFragment extends Fragment {
 
@@ -48,7 +58,7 @@ public class MusicListFragment extends Fragment {
 
     private MyRecyclerAdapter adapter;
 
-    private RecyclerView mRecyclerView;
+    private FastScrollRecyclerView mRecyclerView;
 
     private MainActivity mActivity;
 
@@ -66,38 +76,17 @@ public class MusicListFragment extends Fragment {
         return mSongAlbumList;
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
+    //实例化一个fragment
+    public static MusicListFragment newInstance() {
+        return new MusicListFragment();
+    }
 
-        mActivity = (MainActivity) getActivity();
+    public List<String> getSongNameList() {
+        return mSongNameList;
+    }
 
-        mHandlerThread = new HandlerThread("Handler Thread in MusicListFragment");
-        mHandlerThread.start();
-        mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
-
-        // TODO: 2018/11/2 需要转为线程池的使用。
-        new Thread(() -> {
-
-            mMusicPathList.clear();
-            mSongNameList.clear();
-            mSongAlbumList.clear();
-
-            Cursor cursor = mActivity.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-            if (cursor != null) {
-                cursor.moveToFirst();
-                do {
-                    mMusicPathList.add(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)));
-                    mSongNameList.add(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)));
-                    mSongAlbumList.add(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)));
-                } while (cursor.moveToNext());
-                cursor.close();
-            }
-
-            mHandler.sendEmptyMessage(Values.INIT_MUSIC_LIST);
-
-        }).start();
-
+    public ArrayList<String> getMusicPathList() {
+        return mMusicPathList;
     }
 
     /**
@@ -128,16 +117,46 @@ public class MusicListFragment extends Fragment {
         }
     }
 
-    //实例化一个fragment
-    public static MusicListFragment newInstance(int index) {
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
 
-        MusicListFragment myFragment = new MusicListFragment();
+        mActivity = (MainActivity) getActivity();
 
-        Bundle bundle = new Bundle();
-        //传递参数
-        bundle.putInt(Values.INDEX, index);
-        myFragment.setArguments(bundle);
-        return myFragment;
+        mHandlerThread = new HandlerThread("Handler Thread in MusicListFragment");
+        mHandlerThread.start();
+        mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
+
+        // TODO: 2018/11/2 需要转为线程池的使用。
+        new Thread(() -> {
+
+            mMusicPathList.clear();
+            mSongNameList.clear();
+            mSongAlbumList.clear();
+
+            Cursor cursor = mActivity.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+            if (cursor != null) {
+                cursor.moveToFirst();
+
+                //没有歌曲直接退出app
+                if (cursor.getCount() == 0) {
+                    mActivity.runOnUiThread(() -> Utils.Ui.fastToast(mActivity, "Can not find any music!"));
+                    Data.sActivities.get(0).finish();
+                    return;
+                }
+                do {
+                    mMusicPathList.add(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)));
+                    mSongNameList.add(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)));
+                    mSongAlbumList.add(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)));
+                } while (cursor.moveToNext());
+                cursor.close();
+            }
+
+            mHandler.sendEmptyMessage(Values.INIT_MUSIC_LIST);
+            Values.MUSIC_DATA_INIT_DONE = true;
+
+        }).start();
+
     }
 
     @Nullable
@@ -153,41 +172,30 @@ public class MusicListFragment extends Fragment {
 
         mRecyclerView.setAdapter(adapter);
 
-        //needn't
-//        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-//            @Override
-//            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-//                super.onScrollStateChanged(recyclerView, newState);
-//                if (newState == RecyclerView.SCROLL_STATE_DRAGGING || newState == RecyclerView.SCROLL_STATE_SETTLING) {
-//                    sIsScrolling = true;
-//                } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-//                    if (sIsScrolling) {
-//                        GlideApp.with(mActivity).resumeRequests();
-//
-//                    }
-//                    sIsScrolling = false;
-//                }
-//            }
-//
-//            @Override
-//            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-//                super.onScrolled(recyclerView, dx, dy);
-//            }
-//        });
+//        needn't
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING || newState == RecyclerView.SCROLL_STATE_SETTLING) {
+                    sIsScrolling = true;
+                } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    if (sIsScrolling) {
+                        GlideApp.with(mActivity).resumeRequests();
+
+                    }
+                    sIsScrolling = false;
+                }
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+            }
+        });
 
         CREATE_VIEW_DONE = true;
         return view;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    //与 activity 的通信
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
     }
 
     /**
@@ -195,8 +203,6 @@ public class MusicListFragment extends Fragment {
      */
     private void sureCreateViewDone() {
         if (CREATE_VIEW_DONE) {
-            Values.MUSIC_DATA_INIT_DONE = true;
-
             mActivity.setToolbarSubTitle(mSongNameList.size() + " songs");
             adapter.notifyDataSetChanged();
         } else {
@@ -222,7 +228,6 @@ public class MusicListFragment extends Fragment {
                             sureCreateViewDone();
                             Log.d(TAG, "onStart: setAdapter done!");
                         }
-
                     });
 
                 }
@@ -232,11 +237,15 @@ public class MusicListFragment extends Fragment {
         }
     }
 
+    public RecyclerView getRecyclerView() {
+        return mRecyclerView;
+    }
+
     @Override
     public void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "onDestroy: ");
         mHandlerThread.quitSafely();
+        Log.d(TAG, "onDestroy: ");
+        super.onDestroy();
     }
 
 }
