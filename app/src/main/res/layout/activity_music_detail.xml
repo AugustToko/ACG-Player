@@ -4,27 +4,27 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/transparent"
     tools:context=".Activities.MusicDetailActivity">
 
     <ImageView
         android:id="@+id/activity_music_detail_primary_background"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
+        android:layout_height="0dp"
         android:contentDescription="@string/activity_music_detail_primary_background"
-        android:src="@color/colorPrimary" />
+        android:scaleType="centerCrop"
+        android:src="@color/colorPrimary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/layout_seek_bar_1" />
 
     <ImageView
         android:id="@+id/activity_music_detail_album_image"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="50dp"
-        android:layout_marginEnd="8dp"
-        android:contentDescription="@string/activity_music_detail_album_image"
+        android:layout_width="0dp"
+        android:layout_height="400dp"
         android:background="#fff"
-        android:elevation="10dp"
+        android:contentDescription="@string/activity_music_detail_album_image"
         android:scaleType="centerCrop"
+        android:elevation="1dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
@@ -40,12 +40,19 @@
 
     <!--</android.support.v7.widget.Toolbar>-->
 
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="#57000000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/layout_seek_bar_1" />
+
     <android.support.constraint.ConstraintLayout
         android:id="@+id/layout_seek_bar_1"
         android:layout_width="match_parent"
         android:layout_height="30dp"
-        android:layout_marginTop="24dp"
-        android:background="#57000000"
         app:layout_constraintTop_toBottomOf="@+id/activity_music_detail_album_image">
 
         <SeekBar
@@ -88,28 +95,185 @@
 
     </android.support.constraint.ConstraintLayout>
 
-    <View
-        android:id="@+id/view"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:background="#57000000"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <ImageButton
+        android:id="@+id/activity_music_detail_image_play_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/circle"
+        android:contentDescription="@string/todo"
+        android:elevation="2dp"
+        android:src="@drawable/ic_play_arrow_black_24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/layout_seek_bar_1" />
 
+    <ImageButton
+        android:id="@+id/activity_music_detail_image_next_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="#00000000"
+        android:contentDescription="@string/todo"
+        android:src="@drawable/ic_skip_next_white_36dp"
+        app:layout_constraintBottom_toBottomOf="@+id/activity_music_detail_image_play_button"
+        app:layout_constraintStart_toEndOf="@+id/activity_music_detail_image_play_button"
+        app:layout_constraintTop_toTopOf="@+id/activity_music_detail_image_play_button" />
+
+    <ImageButton
+        android:id="@+id/activity_music_detail_image_previous_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="48dp"
+        android:backgroundTint="#00000000"
+        android:contentDescription="@string/todo"
+        android:src="@drawable/ic_skip_previous_white_36dp"
+        app:layout_constraintBottom_toBottomOf="@+id/activity_music_detail_image_play_button"
+        app:layout_constraintEnd_toStartOf="@+id/activity_music_detail_image_play_button"
+        app:layout_constraintTop_toTopOf="@+id/activity_music_detail_image_play_button" />
+
     <android.support.v7.widget.CardView
-        android:id="@+id/cardView"
+        android:id="@+id/activity_music_detail_card_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="500dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:elevation="5dp"
         app:layout_constraintBottom_toBottomOf="@+id/view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/view">
+        app:layout_constraintTop_toTopOf="parent">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/item_layout"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:background="?android:attr/selectableItemBackground">
+
+                <!--<ImageView-->
+                <!--android:id="@+id/item_image"-->
+                <!--android:layout_width="40dp"-->
+                <!--android:layout_height="40dp"-->
+                <!--android:layout_gravity="center_vertical"-->
+                <!--android:layout_marginStart="16dp"-->
+                <!--android:layout_marginTop="10dp"-->
+                <!--android:layout_marginBottom="10dp"-->
+                <!--android:contentDescription="@string/app_name"-->
+                <!--app:layout_constraintBottom_toBottomOf="parent"-->
+                <!--app:layout_constraintStart_toStartOf="parent"-->
+                <!--app:layout_constraintTop_toTopOf="parent"-->
+                <!--tools:src="@color/colorPrimaryDark" />-->
+
+                <TextView
+                    android:id="@+id/item_index_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:maxLines="1"
+                    android:textSize="24sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="0" />
+
+                <android.support.constraint.ConstraintLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/item_menu"
+                    app:layout_constraintStart_toEndOf="@+id/item_index_text"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/item_text_two"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textSize="12sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/item_main_text"
+                        tools:text="@string/app_name" />
+
+                    <TextView
+                        android:id="@+id/item_text_one"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginEnd="8dp"
+                        android:maxLines="1"
+                        android:text="Clover Text"
+                        android:textColor="#7c7c7c"
+                        android:textSize="12sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/item_text_two"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/item_main_text" />
+
+                    <TextView
+                        android:id="@+id/item_main_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="Music Text"
+                        android:textColor="#3c3c3c"
+                        android:textSize="18sp"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </android.support.constraint.ConstraintLayout>
+
+                <ImageButton
+                    android:id="@+id/item_menu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:contentDescription="@string/menu_button"
+                    android:src="@drawable/ic_more_vert_24px"
+                    android:tint="#636363"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </android.support.constraint.ConstraintLayout>
+
+            <include
+                android:id="@+id/activity_music_detail_include_recycler"
+                layout="@layout/include_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/item_layout" />
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:src="@drawable/ramp_bg_3"
+                app:layout_constraintTop_toBottomOf="@+id/item_layout" />
+
+        </android.support.constraint.ConstraintLayout>
 
     </android.support.v7.widget.CardView>
+
 
 </android.support.constraint.ConstraintLayout>

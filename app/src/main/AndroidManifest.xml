@@ -9,7 +9,9 @@
   ~ *************************************************************
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="top.geek_studio.chenlongcould.musicplayer">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="top.geek_studio.chenlongcould.musicplayer"
+    tools:ignore="InnerclassSeparator">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -20,13 +22,15 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true">
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
         <activity
             android:name=".Activities.MainActivity"
             android:launchMode="singleTask"
-            android:theme="@style/CommonActivityTheme">
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
@@ -43,12 +47,30 @@
         <activity
             android:name=".Activities.SplashActivity"
             android:launchMode="singleTask"
-            android:theme="@style/SplashActivityTheme">
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver
+            android:name=".BroadCasts.ReceiverOnMusicPlay"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="top.geek_studio.chenlongcould.musicplayer.ReceiverOnMusicPlay" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".BroadCasts.ReceiverOnMusicStop"
+            android:enabled="true"
+            android:exported="true" />
+        <receiver
+            android:name=".BroadCasts.ReceiverOnMusicPause"
+            android:enabled="true"
+            android:exported="true"></receiver>
     </application>
 
 </manifest>

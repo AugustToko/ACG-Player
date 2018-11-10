@@ -28,10 +28,8 @@ public class PublicFragment extends Fragment {
     //实例化一个fragment
     public static PublicFragment newInstance(int index) {
         PublicFragment myFragment = new PublicFragment();
-
         Bundle bundle = new Bundle();
         //传递参数
-        // TODO: 2018/9/28
         bundle.putInt(Values.INDEX, index);
         myFragment.setArguments(bundle);
         return myFragment;

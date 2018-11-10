@@ -7,81 +7,78 @@
   ~ Geek Studio
   ~ Copyright (c) 2018
   ~ *************************************************************
-  -->
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  --><!--<android.support.constraint.ConstraintLayout--><!--xmlns:android="http://schemas.android.com/apk/res/android"--><!--xmlns:app="http://schemas.android.com/apk/res-auto"--><!--xmlns:tools="http://schemas.android.com/tools"--><!--android:layout_width="match_parent"--><!--android:layout_height="match_parent"--><!--tools:context=".Activities.MainActivity"--><!--android:fitsSystemWindows="true">-->
+
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main_drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/activity_main_drawer_layout"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".Activities.MainActivity">
+        android:layout_height="match_parent">
 
-        <android.support.constraint.ConstraintLayout
+        <android.support.design.widget.CoordinatorLayout
+            android:id="@+id/coordinator_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="#fff"
+            app:elevation="2dp">
 
-            <android.support.design.widget.CoordinatorLayout
-                android:id="@+id/coordinator_layout"
+            <android.support.design.widget.AppBarLayout
+                android:id="@+id/appBarLayout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#fff"
-                android:elevation="2dp">
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimary"
+                android:paddingTop="@dimen/toolbar_padding_top"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-                <android.support.design.widget.AppBarLayout
-                    android:id="@+id/appBarLayout"
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/activity_main_tool_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?actionBarSize"
+                    android:background="@color/colorPrimary"
+                    app:layout_scrollFlags="scroll|enterAlways"
+                    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                    app:subtitle="@string/app_name"
+                    app:title="@string/app_name">
+
+                </android.support.v7.widget.Toolbar>
+
+                <android.support.design.widget.TabLayout
+                    android:id="@+id/tab_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+                    android:background="@color/colorPrimary"
+                    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                    app:tabIndicatorColor="@color/colorAccent"
+                    app:tabIndicatorHeight="2dp"
+                    app:tabMode="scrollable"
+                    app:tabSelectedTextColor="#fff"
+                    app:tabTextColor="#8fffffff" />
 
-                    <android.support.v7.widget.Toolbar
-                        android:id="@+id/activity_main_tool_bar"
-                        android:layout_width="match_parent"
-                        android:layout_height="?actionBarSize"
-                        android:background="@color/colorPrimary"
-                        app:layout_scrollFlags="scroll|enterAlways"
-                        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                        app:subtitle="@string/app_name"
-                        app:title="@string/app_name">
+            </android.support.design.widget.AppBarLayout>
 
-                    </android.support.v7.widget.Toolbar>
+            <android.support.v4.view.ViewPager
+                android:id="@+id/view_pager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="70dp"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-                    <android.support.design.widget.TabLayout
-                        android:id="@+id/tab_layout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@color/colorPrimary"
-                        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-                        app:tabIndicatorColor="#00a2ff"
-                        app:tabIndicatorHeight="2dp"
-                        app:tabMode="scrollable"
-                        app:tabSelectedTextColor="#fff"
-                        app:tabTextColor="#8fffffff" />
+        </android.support.design.widget.CoordinatorLayout>
 
-                </android.support.design.widget.AppBarLayout>
-
-                <android.support.v4.view.ViewPager
-                    android:id="@+id/view_pager"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:paddingBottom="70dp"
-                    app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-
-            </android.support.design.widget.CoordinatorLayout>
-
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="75dp"
+            app:cardElevation="20dp"
+            app:layout_constraintBottom_toBottomOf="parent">
 
             <android.support.constraint.ConstraintLayout
                 android:id="@+id/current_info"
                 android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:background="#fff"
-                android:elevation="10dp"
-                app:layout_constraintBottom_toBottomOf="parent">
+                android:layout_height="match_parent">
 
                 <ImageView
                     android:id="@+id/current_info_background"
@@ -92,8 +89,8 @@
 
                 <ImageView
                     android:id="@+id/recycler_item_clover_image"
-                    android:layout_width="70dp"
-                    android:layout_height="70dp"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
                     android:layout_gravity="center_vertical"
                     android:contentDescription="@string/app_name"
                     android:src="@drawable/ic_audiotrack_24px"
@@ -119,10 +116,10 @@
                         android:layout_marginTop="4dp"
                         android:maxLines="1"
                         android:text="Clover Text"
+                        android:textColor="#1e1e1e"
                         android:textSize="12sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        android:textColor="#1e1e1e"
                         app:layout_constraintTop_toBottomOf="@+id/activity_main_now_playing_name" />
 
                     <TextView
@@ -131,8 +128,8 @@
                         android:layout_height="wrap_content"
                         android:maxLines="1"
                         android:text="Music Text"
-                        android:textSize="18sp"
                         android:textColor="#1e1e1e"
+                        android:textSize="18sp"
                         app:layout_constraintTop_toTopOf="parent" />
 
                 </android.support.constraint.ConstraintLayout>
@@ -152,22 +149,21 @@
 
             </android.support.constraint.ConstraintLayout>
 
-        </android.support.constraint.ConstraintLayout>
+        </android.support.v7.widget.CardView>
 
-        <android.support.design.widget.NavigationView
-            android:id="@+id/activity_main_nav_view"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"
-            android:fitsSystemWindows="true"
-            app:headerLayout="@layout/navigation_view_header_one"
-            app:menu="@menu/menu_nav">
+    </android.support.constraint.ConstraintLayout>
 
-        </android.support.design.widget.NavigationView>
+    <android.support.design.widget.NavigationView
+        android:id="@+id/activity_main_nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/navigation_view_header_one"
+        app:menu="@menu/menu_nav">
 
-    </android.support.v4.widget.DrawerLayout>
+    </android.support.design.widget.NavigationView>
 
-</android.support.constraint.ConstraintLayout>
+</android.support.v4.widget.DrawerLayout>
 
-
-
+    <!--</android.support.constraint.ConstraintLayout>-->

@@ -13,17 +13,26 @@ package top.geek_studio.chenlongcould.musicplayer;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 
+import java.io.IOException;
+import java.util.Random;
+
+import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.Activities.MusicDetailActivity;
+import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
+
+import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public class Utils {
 
@@ -31,14 +40,27 @@ public class Utils {
         private static MediaMetadataRetriever sMediaMetadataRetriever = new MediaMetadataRetriever();
 
         /**
+         * 检测播放器是否准备完毕 (默认进app 为true)
+         */
+        private static volatile boolean READY = true;
+
+        /**
          * 获取封面
          *
          * @param mediaUri mp3 path
          */
         public static Bitmap getMp3Cover(String mediaUri) {
+            if (mediaUri.contains("ogg")) {
+                return null;
+            }
             sMediaMetadataRetriever.setDataSource(mediaUri);
             byte[] picture = sMediaMetadataRetriever.getEmbeddedPicture();
-            return BitmapFactory.decodeByteArray(picture, 0, picture.length);
+            try {
+                return BitmapFactory.decodeByteArray(picture, 0, picture.length);
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
 
         public static byte[] getAlbumByteImage(String path) {
@@ -67,28 +89,102 @@ public class Utils {
             GlideApp.with(context).load(picture).transition(DrawableTransitionOptions.withCrossFade()).override(50, 50).into(musicCover);
         }
 
-    }
+        /**
+         * play_type: random
+         */
+        //shufflePlayback
+        public static boolean shufflePlayback() {
+            MainActivity activity = (MainActivity) Data.sActivities.get(0);
+            if (READY) {            //default: true
+                new Thread(() -> {
+                    if (Values.MUSIC_DATA_INIT_DONE) {
+                        READY = false;
+                        Data.sMusicBinder.resetMusic();
 
-    public static class Ui {
-        static void setPrimaryColor(int color, View... views) {
-            for (View v : views) {
-                v.setBackgroundColor(color);
+                        MusicListFragment musicListFragment = (MusicListFragment) activity.getFragmentList().get(0);
+
+                        Random random = new Random();
+                        int index = random.nextInt(musicListFragment.getSongNameList().size() - 1);
+                        String path = musicListFragment.getMusicPathList().get(index);
+                        String musicName = musicListFragment.getSongNameList().get(index);
+                        String albumName = musicListFragment.getSongAlbumList().get(index);
+
+                        Data.sHistoryPlayIndex.add(index);
+
+                        Bitmap cover = Utils.Audio.getMp3Cover(path);
+
+                        //first set backgroundImage, then set bg(layout) black. To crossFade more Smooth
+                        activity.setCurrentSongInfo(musicName, albumName, path, index, cover);
+                        activity.setButtonTypePlay();
+
+                        if (Data.sActivities.size() >= 2) {
+                            MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
+                            musicDetailActivity.setButtonTypePlay();
+                            musicDetailActivity.setCurrentSongInfo(musicName, albumName, index, getAlbumByteImage(path));
+                        }
+
+                        try {
+                            Data.sMusicBinder.setDataSource(musicListFragment.getMusicPathList().get(index));
+                            Data.sMusicBinder.prepare();
+                            Data.sMusicBinder.playMusic();          //has played, now playing
+
+                            if (Data.sActivities.size() >= 2) {
+                                MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
+                                MusicDetailActivity.NotLeakHandler notLeakHandler = musicDetailActivity.getHandler();
+                                notLeakHandler.sendEmptyMessage(Values.INIT_SEEK_BAR);
+                            }
+
+                            Values.MUSIC_PLAYING = true;
+                            Values.HAS_PLAYED = true;
+                            Values.CURRENT_MUSIC_INDEX = index;
+                            Values.CURRENT_SONG_PATH = path;
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        READY = true;
+                    } else {
+                        activity.runOnUiThread(() -> Utils.Ui.createMessageDialog(activity, "Error", "MUSIC_DATA_INIT_FAIL").show());
+                    }
+                }).start();
+                return true;
+            } else {
+                activity.runOnUiThread(() -> Ui.fastToast(activity, "Preparing..."));
+                return false;
             }
         }
 
-        public static void setNowPlaying(MainActivity activity) {
-            // TODO: 2018/11/6 need get albumPic primaryColor
-            activity.runOnUiThread(activity::setCurrentSongInfoPlay);
+    }
+
+    public static class Ui {
+//        static void setPrimaryColor(int color, View... views) {
+//            for (View v : views) {
+//                v.setBackgroundColor(color);
+//            }
+//        }
+
+//        public static void setNowPlaying(MainActivity activity) {
+//            // TODO: 2018/11/6 need get albumPic primaryColor
+//            Data.sActivities.get(0).runOnUiThread(() -> ((MainActivity) Data.sActivities.get(0)).setButtonTypePlay());
+//            if (Data.sActivities.size() >= 2) {
+//
+//            }
+//        }
+
+        public static void setNowNotPlaying(Context context) {
+            Intent intent = new Intent();
+            intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPause));
+            context.sendBroadcast(intent);
         }
 
-        public static void setNowNotPlaying(MainActivity activity) {
-            activity.runOnUiThread(activity::setCurrentSongInfoStop);
-        }
-
-        public static void setInfoBarBackgroundBlack() {
-            ((MainActivity) Data.sActivities.get(0)).getNowPlayingBody().setBackgroundResource(R.color.notVeryBlack);
-            Values.HAS_SET_INFO_BAR_BACKGROUND_BACK = true;
-        }
+//        public static void setInfoBarBackgroundBlack() {
+//            ((MainActivity) Data.sActivities.get(0)).getNowPlayingBody().setBackgroundResource(R.color.notVeryBlack);
+//            Values.HAS_SET_INFO_BAR_BACKGROUND_BACK = true;
+//        }
+//
+//        public static void setInfoBarBackgroundWhite() {
+//            ((MainActivity) Data.sActivities.get(0)).getNowPlayingBody().setBackgroundColor(Color.WHITE);
+//            Values.HAS_SET_INFO_BAR_BACKGROUND_BACK = false;
+//        }
 
         public static AlertDialog createMessageDialog(Activity context, String title, String message) {
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -101,6 +197,18 @@ public class Utils {
         public static void fastToast(Context context, String content) {
             Toast.makeText(context, content, Toast.LENGTH_SHORT).show();
         }
+
+        //ogg not support cover, so do not need to set bg
+//        public static void firstSetBg2InfoBar(String path) {
+//            if (!path.contains("ogg")) {
+//                //使背景变黑, 使图片过渡更自然
+//                Utils.Ui.setInfoBarBackgroundBlack();
+//            }
+//        }
+
+//        public static void setDefBg2InfoBar() {
+//            Utils.Ui.setInfoBarBackgroundBlack();
+//        }
 
         public static int getBright(Bitmap bm) {
             int width = bm.getWidth() / 4;
@@ -120,6 +228,23 @@ public class Utils {
             }
             return bright / count;
         }
+
+        public static void setBlurEffect(Activity context, byte[] bitmap, ImageView view) {
+            context.runOnUiThread(() -> GlideApp.with(context)
+                    .load(bitmap)
+                    .apply(bitmapTransform(new BlurTransformation(15, 30)))
+                    .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSSFATE_TIME))
+                    .into(view));
+        }
+
+        public static void setBlurEffect(Activity context, Bitmap bitmap, ImageView view) {
+            context.runOnUiThread(() -> GlideApp.with(context)
+                    .load(bitmap)
+                    .apply(bitmapTransform(new BlurTransformation(15, 30)))
+                    .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSSFATE_TIME))
+                    .into(view));
+        }
+
     }
 
 }

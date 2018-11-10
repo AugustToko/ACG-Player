@@ -24,7 +24,13 @@ import java.util.List;
 import top.geek_studio.chenlongcould.musicplayer.Service.MyMusicService;
 
 public final class Data {
+
     public static List<Activity> sActivities = new ArrayList<>();
+
+    /**
+     * 存储播放历史(序列)
+     */
+    public static List<Integer> sHistoryPlayIndex = new ArrayList<>();
 
     public static String sCurrentMusicName = null;
 
@@ -33,6 +39,8 @@ public final class Data {
     public static Bitmap sCurrentMusicBitmap = null;
 
     public static String sCurrentMusicAlbum = null;
+
+    public static int sCurrentMusicIndex = -1;
 
     public static ColorStateList sDefTextColorStateList = null;
 

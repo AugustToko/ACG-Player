@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -52,7 +51,7 @@
                     android:textSize="12sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/fragment_play_list_add_recent_name"
-                    tools:text="@string/app_name" />
+                    android:text="@string/app_name" />
 
                 <TextView
                     android:id="@+id/fragment_play_list_add_recent_text_one"
@@ -68,7 +67,7 @@
                     app:layout_constraintEnd_toStartOf="@+id/fragment_play_list_add_recent_text_two"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/fragment_play_list_add_recent_name"
-                    tools:text="Clover Text" />
+                    android:text="Clover Text" />
 
                 <TextView
                     android:id="@+id/fragment_play_list_add_recent_name"
@@ -147,7 +146,7 @@
                     android:textSize="12sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/fragment_play_list_play_history_name"
-                    tools:text="@string/app_name" />
+                    android:text="@string/app_name" />
 
                 <TextView
                     android:id="@+id/fragment_play_list_play_history_text_one"
@@ -163,7 +162,7 @@
                     app:layout_constraintEnd_toStartOf="@+id/fragment_play_list_play_history_text_two"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/fragment_play_list_play_history_name"
-                    tools:text="Clover Text" />
+                    android:text="Clover Text" />
 
                 <TextView
                     android:id="@+id/fragment_play_list_play_history_name"

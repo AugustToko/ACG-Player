@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ *************************************************************
+  ~ 文件：ramp_bg.xml  模块：app  项目：FuckTest
+  ~ 当前修改时间：2018年09月27日 14:55:13
+  ~ 上次修改时间：2018年09月27日 14:52:37
+  ~ 作者：GiKode
+  ~ Geek Studio: https://blog.geek-studio.top
+  ~ Copyright (c) 2018
+  ~ *************************************************************
+  -->
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <gradient
+        android:angle="90"
+        android:endColor="#ffffff"
+        android:startColor="#00ffffff" />
+
+</shape>

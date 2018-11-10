@@ -12,13 +12,13 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/music_item_layout"
+    android:id="@+id/item_layout"
     android:layout_width="match_parent"
     android:layout_height="70dp"
     android:background="?android:attr/selectableItemBackground">
 
     <ImageView
-        android:id="@+id/recycler_item_album_image"
+        android:id="@+id/item_image"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="center_vertical"
@@ -26,10 +26,10 @@
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
         android:contentDescription="@string/app_name"
-        tools:src="@color/colorPrimaryDark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@color/colorPrimaryDark" />
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="0dp"
@@ -40,21 +40,21 @@
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/recycler_item_menu"
-        app:layout_constraintStart_toEndOf="@+id/recycler_item_album_image"
+        app:layout_constraintStart_toEndOf="@+id/item_image"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/recycler_item_music_type_name"
+            android:id="@+id/item_text_two"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:textSize="12sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/recycler_item_music_name"
+            app:layout_constraintTop_toBottomOf="@+id/item_main_text"
             tools:text="@string/app_name" />
 
         <TextView
-            android:id="@+id/recycler_item_music_album_name"
+            android:id="@+id/item_text_one"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
@@ -65,12 +65,12 @@
             android:textColor="#7c7c7c"
             android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/recycler_item_music_type_name"
+            app:layout_constraintEnd_toStartOf="@+id/item_text_two"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/recycler_item_music_name" />
+            app:layout_constraintTop_toBottomOf="@+id/item_main_text" />
 
         <TextView
-            android:id="@+id/recycler_item_music_name"
+            android:id="@+id/item_main_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:maxLines="1"
@@ -88,13 +88,13 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:contentDescription="Menu Button"
         android:src="@drawable/ic_more_vert_24px"
         android:tint="#636363"
-        android:clickable="true"
-        android:background="?android:attr/selectableItemBackground"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:contentDescription="Menu Button" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

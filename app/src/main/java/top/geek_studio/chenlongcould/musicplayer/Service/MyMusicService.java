@@ -9,7 +9,6 @@ import android.util.Log;
 
 import java.io.IOException;
 
-import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
@@ -27,15 +26,23 @@ public final class MyMusicService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
         Values.SERVICE_RUNNING = true;
 
         mMediaPlayer.setOnCompletionListener(mp -> {
-            if (!Data.sActivities.isEmpty()) {
-                //when mediaPlayer finishes playing, update InfoBar
-                Utils.Ui.setNowNotPlaying((MainActivity) Data.sActivities.get(0));
+            if (Values.CURRENT_PLAY_TYPE.equals("RANDOM")) {
+                if (!Data.sActivities.isEmpty()) {
+                    //when mediaPlayer finishes playing, update InfoBar
+                    mMediaPlayer.reset();
+                    Utils.Audio.shufflePlayback();
+                }
+            } else {
+                Utils.Ui.setNowNotPlaying(this);
             }
-            Values.MUSIC_COMPLETION = true;
+        });
+
+        mMediaPlayer.setOnErrorListener((mp, what, extra) -> {
+            mp.reset();
+            return true;
         });
     }
 
@@ -47,7 +54,7 @@ public final class MyMusicService extends Service {
     @Override
     public void onDestroy() {
         Values.SERVICE_RUNNING = false;
-        Values.NOW_PLAYING = false;
+        Values.MUSIC_PLAYING = false;
         mMediaPlayer.release();
         Log.d(TAG, "onDestroy: ");
         super.onDestroy();
@@ -56,16 +63,8 @@ public final class MyMusicService extends Service {
     public class MusicBinder extends Binder {
 
         public void playMusic() {
-            if (!Values.HAS_PLAYED) {
-                Values.HAS_PLAYED = true;
-
-                //使背景变黑, 使图片过渡更自然
-                Utils.Ui.setInfoBarBackgroundBlack();
-
-                Log.d(TAG, "playMusic: has played");
-            }
             Values.MUSIC_PLAYING = true;
-
+            Values.HAS_PLAYED = true;
             mMediaPlayer.start();
         }
 
@@ -79,7 +78,6 @@ public final class MyMusicService extends Service {
         }
 
         public void pauseMusic() {
-            Values.MUSIC_PLAYING = false;
             mMediaPlayer.pause();
         }
 
@@ -103,6 +101,11 @@ public final class MyMusicService extends Service {
         public int getCurrentPosition() {
             return mMediaPlayer.getCurrentPosition();
         }
+
+        public void seekTo(int position) {
+            mMediaPlayer.seekTo(position);
+        }
+
     }
 
 }

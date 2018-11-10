@@ -11,6 +11,7 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Activities;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
@@ -22,6 +23,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -41,11 +43,9 @@ import android.widget.Toast;
 
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyPagerAdapter;
@@ -68,11 +68,6 @@ public final class MainActivity extends AppCompatActivity {
     private boolean TOOLBAR_CLICKED = false;
 
     private SharedPreferences mDefaultSpf;
-
-    /**
-     * 检测播放器是否准备完毕 (默认进app 为true)
-     */
-    private volatile boolean READY = true;
 
     private List<Fragment> mFragmentList = new ArrayList<>();
 
@@ -143,24 +138,8 @@ public final class MainActivity extends AppCompatActivity {
 
         initView();
 
-    }
-
-    @Override
-    protected void onResume() {
         reLoadInfoBar();
-        super.onResume();
-    }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.d(TAG, "onStart: ");
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.d(TAG, "onStop: ");
     }
 
     @Override
@@ -189,8 +168,10 @@ public final class MainActivity extends AppCompatActivity {
 
             /*--------------- 快速 随机 播放 ----------------*/
             case R.id.menu_toolbar_fast_play: {
-                shufflePlayback();
+                Data.sHistoryPlayIndex.clear();
+                Utils.Audio.shufflePlayback();
             }
+            break;
         }
         return true;
     }
@@ -203,8 +184,8 @@ public final class MainActivity extends AppCompatActivity {
         if (Data.sMusicBinder != null) {
             Log.d(TAG, "initData: not null");
             if (Data.sMusicBinder.isPlayingMusic()) {
-                setCurrentSongInfoPlay();
-                setCurrentSongInfo(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, Data.sCurrentMusicPath, Data.sCurrentMusicBitmap);
+                setCurrentSongInfo(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, Data.sCurrentMusicPath, Data.sCurrentMusicIndex, Data.sCurrentMusicBitmap, "reload");
+                setButtonTypePlay();
             }
         }
     }
@@ -216,8 +197,6 @@ public final class MainActivity extends AppCompatActivity {
         Data.sActivities.add(this);
 
         mDefaultSpf = PreferenceManager.getDefaultSharedPreferences(this);
-
-        reLoadInfoBar();
 
         new Thread(() -> {
             String tab_1 = "歌曲";
@@ -252,75 +231,95 @@ public final class MainActivity extends AppCompatActivity {
     private void initView() {
         setContentView(R.layout.activity_main);
 
-//        int statusBarHeight1 = -1;
-//        //获取status_bar_height资源的ID
-//        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-//        if (resourceId > 0) {
-//            //根据资源ID获取响应的尺寸值
-//            statusBarHeight1 = getResources().getDimensionPixelSize(resourceId);
-//        }
-
         mToolbar = findViewById(R.id.activity_main_tool_bar);
+        if (mToolbar == null) {
+            throw new IllegalStateException("Layout is required to include a Toolbar");
+        } else {
+
+            //根据recycler view的滚动程度, 来判断如何返回顶部
+            mToolbar.setOnClickListener(v -> {
+                if (TOOLBAR_CLICKED) {
+                    switch (Values.CURRENT_PAGE_INDEX) {
+                        case 0: {
+                            if (Values.CURRENT_BIND_INDEX_MUSIC_LIST > 20) {
+                                mMusicListFragment.getRecyclerView().scrollToPosition(0);
+                            } else {
+                                mMusicListFragment.getRecyclerView().smoothScrollToPosition(0);
+                            }
+                        }
+                        break;
+                        case 1: {
+                            if (Values.CURRENT_BIND_INDEX_ALBUM_LIST > 20) {
+                                mAlbumListFragment.getRecyclerView().scrollToPosition(0);
+                            } else {
+                                mAlbumListFragment.getRecyclerView().smoothScrollToPosition(0);
+                            }
+                        }
+                    }
+
+                }
+                TOOLBAR_CLICKED = true;
+                new Handler().postDelayed(() -> TOOLBAR_CLICKED = false, 1000);
+
+            });
+            setSupportActionBar(mToolbar);
+        }
+
         mDrawerLayout = findViewById(R.id.activity_main_drawer_layout);
+        if (mDrawerLayout != null) {
+            mNavigationView = findViewById(R.id.activity_main_nav_view);
+            if (mNavigationView == null) {
+                throw new IllegalStateException("Layout requires a NavigationView");
+            } else {
+                mNavHeaderImageView = mNavigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
+                mNavHeaderImageView.setOnClickListener(v -> {
+                    mDrawerLayout.closeDrawers();
+                    if (Values.HAS_PLAYED) {
+                        startActivity(new Intent(MainActivity.this, MusicDetailActivity.class));
+                    } else {
+                        Utils.Ui.fastToast(MainActivity.this, "No music playing.");
+                    }
+                });
+            }
+        }
+
         mNowPlayingSongAlbumText = findViewById(R.id.activity_main_now_playing_album_name);
-        mNavigationView = findViewById(R.id.activity_main_nav_view);
-        mNavHeaderImageView = mNavigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
         mNowPlayingBody = findViewById(R.id.current_info);
         mNowPlayingStatusImage = findViewById(R.id.activity_main_info_bar_status_image);
         mNowPlayingBackgroundImage = findViewById(R.id.current_info_background);
 
-        mNavHeaderImageView.setOnClickListener(v -> {
-            mDrawerLayout.closeDrawers();
-            startActivity(new Intent(MainActivity.this, MusicDetailActivity.class));
-        });
-
-        mToolbar.setOnClickListener(v -> {
-            if (TOOLBAR_CLICKED) {
-                switch (Values.CURRENT_PAGE_INDEX) {
-                    case 0: {
-                        if (Values.CURRENT_BIND_INDEX_MUSIC_LIST > 20) {
-                            mMusicListFragment.getRecyclerView().scrollToPosition(0);
-                        } else {
-                            mMusicListFragment.getRecyclerView().smoothScrollToPosition(0);
-                        }
-                    }
-                    break;
-                    case 1: {
-                        if (Values.CURRENT_BIND_INDEX_ALBUM_LIST > 20) {
-                            mAlbumListFragment.getRecyclerView().scrollToPosition(0);
-                        } else {
-                            mAlbumListFragment.getRecyclerView().smoothScrollToPosition(0);
-                        }
-                    }
-                }
-
-            }
-            TOOLBAR_CLICKED = true;
-            new Handler().postDelayed(() -> TOOLBAR_CLICKED = false, 1000);
-
-        });
-
         mNowPlayingStatusImage.setOnClickListener(v -> {
+            //判断是否播放过, 如没有默认随机播放
             if (Values.HAS_PLAYED) {
-                if (Values.NOW_PLAYING) {
-                    Data.sMusicBinder.pauseMusic();
-                    Values.NOW_PLAYING = false;
-                    setCurrentSongInfoStop();
+                if (Values.MUSIC_PLAYING) {
+                    Intent intent = new Intent();
+                    intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPause));
+                    sendBroadcast(intent);
+
                 } else {
-                    Data.sMusicBinder.playMusic();
-                    Values.NOW_PLAYING = true;
-                    setCurrentSongInfoPlay();
+                    Intent intent = new Intent();
+                    intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPlay));
+                    intent.putExtra("play_type", 3);
+                    sendBroadcast(intent);
                 }
             } else {
                 Toast.makeText(MainActivity.this, "Shuffle Playback!", Toast.LENGTH_SHORT).show();
-                shufflePlayback();
+                Data.sHistoryPlayIndex.clear();
+                Utils.Audio.shufflePlayback();
             }
         });
-        mNowPlayingBody.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, MusicDetailActivity.class)));
 
-        setSupportActionBar(mToolbar);
+        mNowPlayingBody.setOnClickListener(v -> {
+            if (Values.HAS_PLAYED) {
+                Intent intent = new Intent(MainActivity.this, MusicDetailActivity.class);
+                intent.putExtra("intent_args", "by_clicked_body");
+                startActivity(intent);
+            } else {
+                Utils.Ui.fastToast(MainActivity.this, "No music playing.");
+            }
+        });
+
         ActionBar actionBar = getSupportActionBar();
-
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24px);
@@ -382,49 +381,18 @@ public final class MainActivity extends AppCompatActivity {
         mDrawerLayout.addDrawerListener(mDrawerToggle);
     }
 
-    private void shufflePlayback() {
-        if (READY) {
-            READY = false;
-            new Thread(() -> {
-                if (Values.MUSIC_DATA_INIT_DONE) {
-
-                    Random random = new Random();
-                    int index = random.nextInt(mMusicListFragment.getSongNameList().size());
-                    String path = mMusicListFragment.getMusicPathList().get(index);
-                    String musicName = mMusicListFragment.getSongNameList().get(index);
-                    String albumName = mMusicListFragment.getSongAlbumList().get(index);
-
-                    Data.sMusicBinder.resetMusic();
-                    setCurrentSongInfo(musicName, albumName, path, Utils.Audio.getMp3Cover(path));
-                    Utils.Ui.setNowPlaying(this);
-
-                    try {
-                        Data.sMusicBinder.setDataSource(mMusicListFragment.getMusicPathList().get(index));
-                        Data.sMusicBinder.prepare();
-                        Data.sMusicBinder.playMusic();
-
-                        Values.CURRENT_SONG_PATH = path;
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                } else {
-                    runOnUiThread(() -> Utils.Ui.createMessageDialog(MainActivity.this, "Error", "MUSIC_DATA_INIT_FAIL").show());
-                }
-
-                READY = true;
-            }).start();
-        }
-    }
-
     /**
-     *
      * set Info
-     *
+     * @param songName music name
+     * @param albumName music album name
+     * @param songPath music path
+     * @param cover music cover image, it is @NullAble(some types of music do not have cover)
+     * @param args oth params(if "reload", do not need to set InfoBar again)
      */
-    public void setCurrentSongInfo(String songName, String albumName, String songPath, Bitmap cover) {
+    public void setCurrentSongInfo(String songName, String albumName, String songPath, int index, @Nullable Bitmap cover, String... args) {
 
-        if (Values.CURRENT_SONG_PATH.equals(songPath)) {
+        //if already set the same info(from path) return
+        if (Values.CURRENT_SONG_PATH.equals(songPath) && args != null) {
             return;
         }
 
@@ -434,41 +402,45 @@ public final class MainActivity extends AppCompatActivity {
             Data.sCurrentMusicName = songName;
             Data.sCurrentMusicPath = songPath;
             Data.sCurrentMusicBitmap = cover;
+            Data.sCurrentMusicIndex = index;
 
             mNowPlayingSongText.setText(songName);
             mNowPlayingSongAlbumText.setText(albumName);
 
-            GlideApp.with(MainActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade()).override(200, 200).into(mNowPlayingSongImage);
-            GlideApp.with(MainActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade()).centerCrop().into(mNavHeaderImageView);
+            if (cover != null) {
+                //color set
+                int currentBright = Utils.Ui.getBright(cover);
+                Log.d(TAG, "---------------------setCurrentSongInfo: get bright " + currentBright);
+                GlideApp.with(MainActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade()).override(150, 150).into(mNowPlayingSongImage);
+                GlideApp.with(MainActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade()).centerCrop().into(mNavHeaderImageView);
 
-            //color set
-            int currentBright = Utils.Ui.getBright(cover);
-            Log.d(TAG, "---------------------setCurrentSongInfo: get bright " + currentBright);
+                if (currentBright > (255 / 2)) {
+                    mNowPlayingSongText.setTextColor(Data.sDefTextColorStateList);
+                    mNowPlayingSongAlbumText.setTextColor(Data.sDefTextColorStateList);
+                    mNowPlayingStatusImage.setImageTintList(Data.sDefIcoColorStateList);
+                } else {
+                    mNowPlayingSongText.setTextColor(Color.WHITE);
+                    mNowPlayingSongAlbumText.setTextColor(Color.WHITE);
+                    mNowPlayingStatusImage.setImageTintList(ColorStateList.valueOf(Color.WHITE));
+                }
 
-            if (currentBright > 170) {
-                mNowPlayingSongText.setTextColor(Data.sDefTextColorStateList);
-                mNowPlayingSongAlbumText.setTextColor(Data.sDefTextColorStateList);
-                mNowPlayingStatusImage.setImageTintList(Data.sDefIcoColorStateList);
-            } else {
-                mNowPlayingSongText.setTextColor(Color.WHITE);
-                mNowPlayingSongAlbumText.setTextColor(Color.WHITE);
-                mNowPlayingStatusImage.setImageTintList(ColorStateList.valueOf(Color.WHITE));
+                GlideApp.with(MainActivity.this).load(cover)
+                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSSFATE_TIME))
+                        .apply(bitmapTransform(new BlurTransformation(30, 20)))
+                        .override(100, 100)
+                        .into(mNowPlayingBackgroundImage);
             }
 
-            GlideApp.with(MainActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade())
-                    .apply(bitmapTransform(new BlurTransformation(30, 15)))
-                    .into(mNowPlayingBackgroundImage);
-
-            setCurrentSongInfoPlay();
+            setButtonTypePlay();
         });
     }
 
-    public void setCurrentSongInfoStop() {
+    public void setButtonTypePause() {
         runOnUiThread(() -> mNowPlayingStatusImage.setImageResource(R.drawable.ic_play_arrow_black_24dp));
     }
 
-    public void setCurrentSongInfoPlay() {
-        mNowPlayingStatusImage.setImageResource(R.drawable.ic_pause_white_24dp);
+    public void setButtonTypePlay() {
+        runOnUiThread(() -> mNowPlayingStatusImage.setImageResource(R.drawable.ic_pause_white_24dp));
     }
 
     public void setToolbarSubTitle(String text) {

@@ -43,7 +43,6 @@ public final class MyPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public int getItemPosition(@NonNull Object object) {
-        // TODO Auto-generated method stub
         return PagerAdapter.POSITION_NONE;
     }
 

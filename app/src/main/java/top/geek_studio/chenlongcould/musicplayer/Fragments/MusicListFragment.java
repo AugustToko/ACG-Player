@@ -52,9 +52,12 @@ public class MusicListFragment extends Fragment {
     @SuppressWarnings("unused")
     private static boolean sIsScrolling = false;
 
+    //data
     private volatile List<String> mSongNameList = new ArrayList<>();
 
     private volatile ArrayList<String> mSongAlbumList = new ArrayList<>();
+
+    private volatile List<Integer> mMusicIdList = new ArrayList<>();
 
     private MyRecyclerAdapter adapter;
 
@@ -133,11 +136,10 @@ public class MusicListFragment extends Fragment {
             mMusicPathList.clear();
             mSongNameList.clear();
             mSongAlbumList.clear();
+            mMusicIdList.clear();
 
             Cursor cursor = mActivity.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-            if (cursor != null) {
-                cursor.moveToFirst();
-
+            if (cursor != null && cursor.moveToFirst()) {
                 //没有歌曲直接退出app
                 if (cursor.getCount() == 0) {
                     mActivity.runOnUiThread(() -> Utils.Ui.fastToast(mActivity, "Can not find any music!"));
@@ -145,15 +147,17 @@ public class MusicListFragment extends Fragment {
                     return;
                 }
                 do {
+                    mMusicIdList.add(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)));
                     mMusicPathList.add(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)));
                     mSongNameList.add(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)));
                     mSongAlbumList.add(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)));
                 } while (cursor.moveToNext());
                 cursor.close();
+                mHandler.sendEmptyMessage(Values.INIT_MUSIC_LIST);
+                Values.MUSIC_DATA_INIT_DONE = true;
+            } else {
+                mActivity.runOnUiThread(() -> Utils.Ui.fastToast(mActivity, "cursor == null or moveToFirst Fail"));
             }
-
-            mHandler.sendEmptyMessage(Values.INIT_MUSIC_LIST);
-            Values.MUSIC_DATA_INIT_DONE = true;
 
         }).start();
 
@@ -163,12 +167,12 @@ public class MusicListFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_music_list_layout, container, false);
-        mRecyclerView = view.findViewById(R.id.music_list_fragment_recycler);
+        mRecyclerView = view.findViewById(R.id.recycler_view);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL));
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
         mRecyclerView.setHasFixedSize(true);
 
-        adapter = new MyRecyclerAdapter(mMusicPathList, mSongNameList, mSongAlbumList, mActivity, mHandlerThread.getLooper());
+        adapter = new MyRecyclerAdapter(mMusicPathList, mSongNameList, mSongAlbumList, mActivity);
 
         mRecyclerView.setAdapter(adapter);
 

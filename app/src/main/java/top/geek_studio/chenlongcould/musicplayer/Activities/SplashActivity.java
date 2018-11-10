@@ -37,6 +37,7 @@ public class SplashActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate: done");
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_splash);
 
         initPermission();
