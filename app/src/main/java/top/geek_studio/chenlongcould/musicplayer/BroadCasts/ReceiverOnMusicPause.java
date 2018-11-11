@@ -15,18 +15,13 @@ public class ReceiverOnMusicPause extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(Values.TAG_UNIVERSAL_ONE, "onReceive: on pause");
-
+        Data.sMusicBinder.pauseMusic();
         if (Data.sActivities.size() != 0) {
-
             MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
-
-            Data.sMusicBinder.pauseMusic();
             Values.MUSIC_PLAYING = false;
 
             mainActivity.setButtonTypePause();
-
             if (Data.sActivities.size() >= 2) {
-
                 MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
                 musicDetailActivity.setButtonTypePause();
             }

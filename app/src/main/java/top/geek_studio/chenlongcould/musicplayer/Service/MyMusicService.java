@@ -1,6 +1,7 @@
 package top.geek_studio.chenlongcould.musicplayer.Service;
 
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Binder;
@@ -29,14 +30,21 @@ public final class MyMusicService extends Service {
         Values.SERVICE_RUNNING = true;
 
         mMediaPlayer.setOnCompletionListener(mp -> {
-            if (Values.CURRENT_PLAY_TYPE.equals("RANDOM")) {
+            if (Values.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
                 if (!Data.sActivities.isEmpty()) {
                     //when mediaPlayer finishes playing, update InfoBar
                     mMediaPlayer.reset();
                     Utils.Audio.shufflePlayback();
-                }
+                } else if (Values.CURRENT_PLAY_TYPE.equals(Values.TYPE_COMMON)) {
+                    Utils.Ui.setNowNotPlaying(this);
+                    Intent intent = new Intent();
+                    intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPlay));
+                    intent.putExtra("play_type", 4);
+                    sendBroadcast(intent);
             } else {
                 Utils.Ui.setNowNotPlaying(this);
+                    mMediaPlayer.reset();
+                }
             }
         });
 

@@ -22,4 +22,6 @@
     <string name="current_info_background">current_info_background</string>
     <string name="todo">TODO</string>
     <string name="menu_button">Menu Button</string>
+    <string name="random">random</string>
+    <string name="repeat">repeat</string>
 </resources>

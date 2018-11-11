@@ -28,19 +28,34 @@ public final class Data {
     public static List<Activity> sActivities = new ArrayList<>();
 
     /**
-     * 存储播放历史(序列)
+     * data
+     * */
+    public static volatile ArrayList<String> mMusicPathList = new ArrayList<>();
+
+    public static volatile List<String> mSongNameList = new ArrayList<>();
+
+    public static volatile ArrayList<String> mSongAlbumList = new ArrayList<>();
+
+    public static volatile List<Integer> mMusicIdList = new ArrayList<>();
+
+    // TODO: 2018/11/11 待完善
+    public static volatile List<String> sFavouriteMusic = new ArrayList<>();
+
+    /**
+     * 存储播放历史(序列) default...
      */
     public static List<Integer> sHistoryPlayIndex = new ArrayList<>();
 
+    /**
+     * status
+     */
     public static String sCurrentMusicName = null;
-
-    public static String sCurrentMusicPath = null;
 
     public static Bitmap sCurrentMusicBitmap = null;
 
     public static String sCurrentMusicAlbum = null;
 
-    public static int sCurrentMusicIndex = -1;
+    public static String sNextPlaySongPath = null;
 
     public static ColorStateList sDefTextColorStateList = null;
 

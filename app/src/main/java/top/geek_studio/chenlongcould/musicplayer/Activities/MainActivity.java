@@ -184,7 +184,7 @@ public final class MainActivity extends AppCompatActivity {
         if (Data.sMusicBinder != null) {
             Log.d(TAG, "initData: not null");
             if (Data.sMusicBinder.isPlayingMusic()) {
-                setCurrentSongInfo(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, Data.sCurrentMusicPath, Data.sCurrentMusicIndex, Data.sCurrentMusicBitmap, "reload");
+                setCurrentSongInfo(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, Values.CURRENT_SONG_PATH, Data.sCurrentMusicBitmap, "reload");
                 setButtonTypePlay();
             }
         }
@@ -382,14 +382,14 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * set Info
+     * set Info (auto put in data.)
      * @param songName music name
      * @param albumName music album name
      * @param songPath music path
      * @param cover music cover image, it is @NullAble(some types of music do not have cover)
      * @param args oth params(if "reload", do not need to set InfoBar again)
      */
-    public void setCurrentSongInfo(String songName, String albumName, String songPath, int index, @Nullable Bitmap cover, String... args) {
+    public void setCurrentSongInfo(String songName, String albumName, String songPath, @Nullable Bitmap cover, String... args) {
 
         //if already set the same info(from path) return
         if (Values.CURRENT_SONG_PATH.equals(songPath) && args != null) {
@@ -397,12 +397,6 @@ public final class MainActivity extends AppCompatActivity {
         }
 
         runOnUiThread(() -> {
-
-            Data.sCurrentMusicAlbum = albumName;
-            Data.sCurrentMusicName = songName;
-            Data.sCurrentMusicPath = songPath;
-            Data.sCurrentMusicBitmap = cover;
-            Data.sCurrentMusicIndex = index;
 
             mNowPlayingSongText.setText(songName);
             mNowPlayingSongAlbumText.setText(albumName);
@@ -425,7 +419,7 @@ public final class MainActivity extends AppCompatActivity {
                 }
 
                 GlideApp.with(MainActivity.this).load(cover)
-                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSSFATE_TIME))
+                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                         .apply(bitmapTransform(new BlurTransformation(30, 20)))
                         .override(100, 100)
                         .into(mNowPlayingBackgroundImage);

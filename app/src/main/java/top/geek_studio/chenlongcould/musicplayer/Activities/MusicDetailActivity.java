@@ -16,6 +16,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -78,6 +82,10 @@ public final class MusicDetailActivity extends Activity {
 
     private TextView mMusicNameText;
 
+    private ImageButton mRandomButton;
+
+    private ImageButton mRepeatButton;
+
     /**
      * menu
      */
@@ -110,20 +118,71 @@ public final class MusicDetailActivity extends Activity {
     private void initData() {
         GlideApp.with(this)
                 .load(Data.sCurrentMusicBitmap)
-                .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSSFATE_TIME))
+                .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                 .into(mMusicAlbumImage);
 
-        setInfoBar(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, Data.sCurrentMusicIndex);
+        setInfoBar(Data.sCurrentMusicName, Data.sCurrentMusicAlbum);
 
         if (Values.MUSIC_PLAYING) {
             mPlayButton.setImageResource(R.drawable.ic_pause_black_24dp);
         }
 
         Utils.Ui.setBlurEffect(this, Data.sCurrentMusicBitmap, mPrimaryBackground);
+    }
 
+    private void initAnimation() {
+        /*
+         * init view animation
+         * */
+        //default type is common, but the randomButton alpha is 1f(it menes this button is on), so set animate
+        AlphaAnimation temp = new AlphaAnimation(0, 0.3f);
+        temp.setDuration(500);
+        temp.setFillAfter(true);
+        mRandomButton.clearAnimation();
+        mRandomButton.startAnimation(temp);
+        mRepeatButton.clearAnimation();
+        mRepeatButton.startAnimation(temp);
 
-        mHandler.sendEmptyMessage(Values.INIT_SEEK_BAR);
-        mHandler.sendEmptyMessage(Values.SEEK_BAR_UPDATE);
+        ScaleAnimation mPlayButtonScaleAnimation = new ScaleAnimation(0, mPlayButton.getScaleX(), 0, mPlayButton.getScaleY(),
+                Animation.RELATIVE_TO_SELF, mPlayButton.getScaleX() / 2, Animation.RELATIVE_TO_SELF, mPlayButton.getScaleX() / 2);
+        mPlayButtonScaleAnimation.setDuration(500);
+        mPlayButtonScaleAnimation.setFillAfter(true);
+        mPlayButton.clearAnimation();
+        mPlayButton.setAnimation(mPlayButtonScaleAnimation);
+        mPlayButtonScaleAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                mPlayButton.clearAnimation();
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
+        TranslateAnimation mCardViewTranslateAnimation = new TranslateAnimation(mCardView.getTranslationX(), mCardView.getTranslationX(), 500, mCardView.getTranslationY());
+        mCardViewTranslateAnimation.setDuration(500);
+        mCardViewTranslateAnimation.setFillAfter(true);
+        mCardView.clearAnimation();
+        mCardView.startAnimation(mCardViewTranslateAnimation);
+
+        TranslateAnimation mPreviousButtonTranslateAnimation = new TranslateAnimation(150, mPreviousButton.getTranslationX(), mPreviousButton.getTranslationY(), mPreviousButton.getTranslationY());
+        TranslateAnimation mNextButtonTranslateAnimation = new TranslateAnimation(-150, mNextButton.getTranslationX(), mNextButton.getTranslationY(), mNextButton.getTranslationY());
+        mPreviousButtonTranslateAnimation.setDuration(500);
+        mPreviousButtonTranslateAnimation.setFillAfter(true);
+        mNextButtonTranslateAnimation.setDuration(500);
+        mNextButtonTranslateAnimation.setFillAfter(true);
+        mPreviousButton.clearAnimation();
+        mNextButton.clearAnimation();
+        mNextButton.startAnimation(mNextButtonTranslateAnimation);
+        mPreviousButton.startAnimation(mPreviousButtonTranslateAnimation);
+
     }
 
     private void initView() {
@@ -140,6 +199,34 @@ public final class MusicDetailActivity extends Activity {
         mAlbumNameText = findViewById(R.id.item_text_one);
         mMusicNameText = findViewById(R.id.item_main_text);
         mMenuButton = findViewById(R.id.item_menu);
+        mRandomButton = findViewById(R.id.activity_music_detail_image_random_button);
+        mRepeatButton = findViewById(R.id.activity_music_detail_image_repeat_button);
+
+        initAnimation();
+
+        //init view data
+        mHandler.sendEmptyMessage(Values.INIT_SEEK_BAR);
+        if (getIntent().getStringExtra("intent_args").equals("by_clicked_body")) {
+            mHandler.sendEmptyMessage(Values.SEEK_BAR_UPDATE);
+        }
+
+        mRandomButton.setOnClickListener(v -> {
+            if (Values.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
+                Values.CURRENT_PLAY_TYPE = Values.TYPE_COMMON;
+                AlphaAnimation alphaAnimation = new AlphaAnimation(mRandomButton.getAlpha(), 0.3f);
+                alphaAnimation.setDuration(300);
+                alphaAnimation.setFillAfter(true);
+                mRandomButton.clearAnimation();
+                mRandomButton.startAnimation(alphaAnimation);
+            } else {
+                Values.CURRENT_PLAY_TYPE = Values.TYPE_RANDOM;
+                AlphaAnimation alphaAnimation = new AlphaAnimation(mRandomButton.getAlpha(), 1f);
+                alphaAnimation.setDuration(300);
+                alphaAnimation.setFillAfter(true);
+                mRandomButton.clearAnimation();
+                mRandomButton.startAnimation(alphaAnimation);
+            }
+        });
 
         //Menu...
         mPopupMenu = new PopupMenu(this, mMenuButton);
@@ -196,7 +283,7 @@ public final class MusicDetailActivity extends Activity {
                 anim.start();
                 HAS_BIG = false;
 
-                mRecyclerView.scrollToPosition(Data.sCurrentMusicIndex);
+                mRecyclerView.scrollToPosition(Values.CURRENT_MUSIC_INDEX);
             }
 
         });
@@ -204,9 +291,9 @@ public final class MusicDetailActivity extends Activity {
         mMusicListFragment = (MusicListFragment) ((MainActivity) Data.sActivities.get(0)).getFragmentList().get(0);
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerView.setAdapter(new MyRecyclerAdapter(mMusicListFragment.getMusicPathList()
-                , mMusicListFragment.getSongNameList()
-                , mMusicListFragment.getSongAlbumList()
+        mRecyclerView.setAdapter(new MyRecyclerAdapter(Data.mMusicPathList
+                , Data.mSongNameList
+                , Data.mSongAlbumList
                 , this));
 
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -264,8 +351,7 @@ public final class MusicDetailActivity extends Activity {
 //                intent.putExtra("play_type", 2);
 //                sendBroadcast(intent);
                 Data.sMusicBinder.playMusic();
-                setButtonTypePlay();
-                mMainActivity.setButtonTypePlay();
+                Utils.Ui.setNowPlaying();
             }
         });
 
@@ -273,8 +359,12 @@ public final class MusicDetailActivity extends Activity {
             mSeekBar.setProgress(0);            //防止seekBar跳动到Max
             if (Values.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
                 Utils.Audio.shufflePlayback();
-            } else {
+            } else if (Values.CURRENT_PLAY_TYPE.equals(Values.TYPE_COMMON)) {
                 // TODO: 2018/11/10 more models
+                Intent intent = new Intent();
+                intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPlay));
+                intent.putExtra("play_type", 4);
+                sendBroadcast(intent);
             }
         });
 
@@ -297,31 +387,29 @@ public final class MusicDetailActivity extends Activity {
                         int index = Data.sHistoryPlayIndex.get(tempSize - 2);
                         Data.sHistoryPlayIndex.remove(tempSize - 1);
 
-                        String path = mMusicListFragment.getMusicPathList().get(index);
-                        String musicName = mMusicListFragment.getSongNameList().get(index);
-                        String albumName = mMusicListFragment.getSongAlbumList().get(index);
+                        String path = Data.mMusicPathList.get(index);
+                        String musicName = Data.mSongNameList.get(index);
+                        String albumName = Data.mSongAlbumList.get(index);
 
                         Bitmap cover = Utils.Audio.getMp3Cover(path);
 
                         MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
+                        mainActivity.setCurrentSongInfo(musicName, albumName, path, cover);
+                        setCurrentSongInfo(musicName, albumName, Utils.Audio.getAlbumByteImage(path));
 
-                        mainActivity.setCurrentSongInfo(musicName, albumName, path, index, cover);
-                        mainActivity.setButtonTypePlay();
+                        Utils.Ui.setNowPlaying();
 
-                        setButtonTypePlay();
-                        setCurrentSongInfo(musicName, albumName, index, Utils.Audio.getAlbumByteImage(path));
+                        Values.MUSIC_PLAYING = true;
+                        Values.HAS_PLAYED = true;
+                        Values.CURRENT_MUSIC_INDEX = index;
+                        Values.CURRENT_SONG_PATH = path;
 
                         try {
-                            Data.sMusicBinder.setDataSource(mMusicListFragment.getMusicPathList().get(index));
+                            Data.sMusicBinder.setDataSource(path);
                             Data.sMusicBinder.prepare();
                             Data.sMusicBinder.playMusic();
 
                             mHandler.sendEmptyMessage(Values.INIT_SEEK_BAR);
-
-                            Values.MUSIC_PLAYING = true;
-                            Values.HAS_PLAYED = true;
-                            Values.CURRENT_MUSIC_INDEX = index;
-                            Values.CURRENT_SONG_PATH = path;
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -352,19 +440,19 @@ public final class MusicDetailActivity extends Activity {
         runOnUiThread(() -> mPlayButton.setImageResource(R.drawable.ic_pause_black_24dp));
     }
 
-    public void setCurrentSongInfo(String name, String albumName, int index, byte[] cover) {
+    public void setCurrentSongInfo(String name, String albumName, byte[] cover) {
         runOnUiThread(() -> {
             Utils.Ui.setBlurEffect(MusicDetailActivity.this, cover, mPrimaryBackground);
-            GlideApp.with(MusicDetailActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSSFATE_TIME)).centerCrop().into(mMusicAlbumImage);
-            setInfoBar(name, albumName, index);
+            GlideApp.with(MusicDetailActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME)).centerCrop().into(mMusicAlbumImage);
+            setInfoBar(name, albumName);
         });
     }
 
-    public void setInfoBar(String name, String albumName, int index) {
+    public void setInfoBar(String name, String albumName) {
         mMusicNameText.setText(name);
         mAlbumNameText.setText(albumName);
-        mIndexTextView.setText(String.valueOf(index));
-        mRecyclerView.scrollToPosition(index);
+        mIndexTextView.setText(String.valueOf(Values.CURRENT_MUSIC_INDEX));
+        mRecyclerView.scrollToPosition(Values.CURRENT_MUSIC_INDEX);
     }
 
     @Override
@@ -396,7 +484,7 @@ public final class MusicDetailActivity extends Activity {
                 break;
                 case Values.SEEK_BAR_UPDATE: {
                     //点击body 或 music 正在播放 才可以进行seekBar更新
-                    if (Data.sMusicBinder.isPlayingMusic() || getIntent().getStringExtra("intent_args").equals("by_clicked_body")) {
+                    if (Data.sMusicBinder.isPlayingMusic()) {
                         Log.d(TAG, "handleMessage: seekBar set");
                         mSeekBar.setProgress(Data.sMusicBinder.getCurrentPosition());
                     }

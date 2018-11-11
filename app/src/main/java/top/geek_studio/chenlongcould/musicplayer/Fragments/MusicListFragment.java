@@ -34,8 +34,6 @@ import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
@@ -45,19 +43,17 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
+import static top.geek_studio.chenlongcould.musicplayer.Data.mMusicIdList;
+import static top.geek_studio.chenlongcould.musicplayer.Data.mMusicPathList;
+import static top.geek_studio.chenlongcould.musicplayer.Data.mSongAlbumList;
+import static top.geek_studio.chenlongcould.musicplayer.Data.mSongNameList;
+
 public class MusicListFragment extends Fragment {
 
     private static final String TAG = "MusicListFragment";
 
     @SuppressWarnings("unused")
     private static boolean sIsScrolling = false;
-
-    //data
-    private volatile List<String> mSongNameList = new ArrayList<>();
-
-    private volatile ArrayList<String> mSongAlbumList = new ArrayList<>();
-
-    private volatile List<Integer> mMusicIdList = new ArrayList<>();
 
     private MyRecyclerAdapter adapter;
 
@@ -73,23 +69,10 @@ public class MusicListFragment extends Fragment {
     /**
      * ------------------------- DATA -----------------------------
      */
-    private volatile ArrayList<String> mMusicPathList = new ArrayList<>();
-
-    public ArrayList<String> getSongAlbumList() {
-        return mSongAlbumList;
-    }
 
     //实例化一个fragment
     public static MusicListFragment newInstance() {
         return new MusicListFragment();
-    }
-
-    public List<String> getSongNameList() {
-        return mSongNameList;
-    }
-
-    public ArrayList<String> getMusicPathList() {
-        return mMusicPathList;
     }
 
     /**
@@ -133,30 +116,28 @@ public class MusicListFragment extends Fragment {
         // TODO: 2018/11/2 需要转为线程池的使用。
         new Thread(() -> {
 
-            mMusicPathList.clear();
-            mSongNameList.clear();
-            mSongAlbumList.clear();
-            mMusicIdList.clear();
-
-            Cursor cursor = mActivity.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-            if (cursor != null && cursor.moveToFirst()) {
-                //没有歌曲直接退出app
-                if (cursor.getCount() == 0) {
-                    mActivity.runOnUiThread(() -> Utils.Ui.fastToast(mActivity, "Can not find any music!"));
-                    Data.sActivities.get(0).finish();
-                    return;
+            if (mMusicPathList.isEmpty() || mSongAlbumList.isEmpty() || mSongNameList.isEmpty() || mMusicIdList.isEmpty()) {
+                /*---------------------- init Data!!!! -------------------*/
+                Cursor cursor = mActivity.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+                if (cursor != null && cursor.moveToFirst()) {
+                    //没有歌曲直接退出app
+                    if (cursor.getCount() == 0) {
+                        mActivity.runOnUiThread(() -> Utils.Ui.fastToast(mActivity, "Can not find any music!"));
+                        Data.sActivities.get(0).finish();
+                        return;
+                    }
+                    do {
+                        mMusicIdList.add(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)));
+                        mMusicPathList.add(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)));
+                        mSongNameList.add(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)));
+                        mSongAlbumList.add(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)));
+                    } while (cursor.moveToNext());
+                    cursor.close();
+                    mHandler.sendEmptyMessage(Values.INIT_MUSIC_LIST);
+                    Values.MUSIC_DATA_INIT_DONE = true;
+                } else {
+                    mActivity.runOnUiThread(() -> Utils.Ui.fastToast(mActivity, "cursor == null or moveToFirst Fail"));
                 }
-                do {
-                    mMusicIdList.add(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)));
-                    mMusicPathList.add(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)));
-                    mSongNameList.add(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)));
-                    mSongAlbumList.add(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)));
-                } while (cursor.moveToNext());
-                cursor.close();
-                mHandler.sendEmptyMessage(Values.INIT_MUSIC_LIST);
-                Values.MUSIC_DATA_INIT_DONE = true;
-            } else {
-                mActivity.runOnUiThread(() -> Utils.Ui.fastToast(mActivity, "cursor == null or moveToFirst Fail"));
             }
 
         }).start();

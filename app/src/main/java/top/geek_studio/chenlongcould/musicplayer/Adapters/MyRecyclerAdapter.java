@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -80,8 +81,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
         view.setOnClickListener(v -> new Thread(() -> {
             String clickedPath = mMusicPathList.get(holder.getAdapterPosition());
-            String clickedSongName = mMusicNameList.get(holder.getAdapterPosition());
-            String clickedSongAlbumName = mSongAlbumList.get(holder.getAdapterPosition());
 
             if (Data.sMusicBinder.isPlayingMusic()) {
                 if (clickedPath.equals(Values.CURRENT_SONG_PATH)) {
@@ -94,6 +93,9 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
             Data.sMusicBinder.resetMusic();
 
+            String clickedSongName = mMusicNameList.get(holder.getAdapterPosition());
+            String clickedSongAlbumName = mSongAlbumList.get(holder.getAdapterPosition());
+
             //清楚播放队列, 并加入当前歌曲序列
             Data.sHistoryPlayIndex.clear();
             Data.sHistoryPlayIndex.add(holder.getAdapterPosition());
@@ -105,31 +107,29 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                     clickedSongName
                     , clickedSongAlbumName
                     , mMusicPathList.get(holder.getAdapterPosition())
-                    , holder.getAdapterPosition()
                     , cover
             );
 
-            mMainActivity.runOnUiThread(() -> {
-//                Utils.Ui.setNowPlaying(mMainActivity);
-                Data.sActivities.get(0).runOnUiThread(() -> ((MainActivity) Data.sActivities.get(0)).setButtonTypePlay());
+            Data.sCurrentMusicAlbum = clickedSongAlbumName;
+            Data.sCurrentMusicName = clickedSongName;
+            Data.sCurrentMusicBitmap = cover;
 
-            });
+            Values.MUSIC_PLAYING = true;
+            Values.HAS_PLAYED = true;
+            Values.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
+            Values.CURRENT_SONG_PATH = clickedPath;
+
+            Utils.Ui.setNowPlaying();
 
             if (Data.sActivities.size() >= 2) {
                 MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
-                musicDetailActivity.setButtonTypePlay();
-                musicDetailActivity.setCurrentSongInfo(clickedSongName, clickedSongAlbumName, holder.getAdapterPosition(), Utils.Audio.getAlbumByteImage(clickedPath));
+                musicDetailActivity.setCurrentSongInfo(clickedSongName, clickedSongAlbumName, Utils.Audio.getAlbumByteImage(clickedPath));
             }
 
             try {
                 Data.sMusicBinder.setDataSource(clickedPath);
                 Data.sMusicBinder.prepare();
                 Data.sMusicBinder.playMusic();
-
-                Values.MUSIC_PLAYING = true;
-                Values.HAS_PLAYED = true;
-                Values.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
-                Values.CURRENT_SONG_PATH = clickedPath;
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -150,18 +150,30 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             Values.CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = holder.getAdapterPosition();
 
             switch (item.getItemId()) {
-                case Menu.FIRST: {
-                    SharedPreferences mPlayListSpf = mMainActivity.getSharedPreferences(Values.PLAY_LIST_SPF_NAME, 0);
+                //noinspection PointlessArithmeticExpression
+                case Menu.FIRST + 0: {
+
+                }
+                break;
+
+                case Menu.FIRST + 1: {
+                    // TODO: 2018/11/8 more menu
+                    Data.sFavouriteMusic.add(mMusicPathList.get(holder.getAdapterPosition()));
+                    Utils.Ui.fastToast(Data.sActivities.get(0).getApplicationContext(), "Done!");
+
+                    SharedPreferences mPlayListSpf = mMainActivity.getSharedPreferences(Values.PLAY_LIST_SPF_NAME_MY_FAVOURITE, 0);
                     SharedPreferences.Editor editor = mPlayListSpf.edit();
                     editor.putString(Values.PLAY_LIST_SPF_KEY, mMusicPathList.get(holder.getAdapterPosition()));
                     editor.apply();
                 }
                 break;
 
-                case Menu.FIRST + 1: {
-                    // TODO: 2018/11/8 more menu
+                case Menu.FIRST + 2: {
+                    SharedPreferences mPlayListSpf = mMainActivity.getSharedPreferences(Values.PLAY_LIST_SPF_NAME_, 0);
+                    SharedPreferences.Editor editor = mPlayListSpf.edit();
+                    editor.putString(Values.PLAY_LIST_SPF_KEY, mMusicPathList.get(holder.getAdapterPosition()));
+                    editor.apply();
                 }
-                break;
             }
 
             Values.CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = -1;
@@ -192,8 +204,11 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         String prefix = mMusicPathList.get(i).substring(mMusicPathList.get(i).lastIndexOf(".") + 1);
         viewHolder.mMusicExtName.setText(prefix);
 
+        //type_background
         if (prefix.equals("mp3")) {
             viewHolder.mMusicExtName.setBackgroundResource(R.color.mp3TypeColor);
+        } else {
+            viewHolder.mMusicExtName.setBackgroundColor(Color.CYAN);
         }
 
         /*--- 添加标记以便避免ImageView因为ViewHolder的复用而出现混乱 ---*/
@@ -291,10 +306,11 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
             //noinspection PointlessArithmeticExpression
             mMenu.add(Menu.NONE, Menu.FIRST + 0, 0, "下一首播放");
-            mMenu.add(Menu.NONE, Menu.FIRST + 1, 0, "加入播放列表");
-            mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, "删除");
-            mMenu.add(Menu.NONE, Menu.FIRST + 3, 0, "查看专辑");
-            mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, "详细信息");
+            mMenu.add(Menu.NONE, Menu.FIRST + 1, 0, "喜欢");
+            mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, "加入播放列表");
+            mMenu.add(Menu.NONE, Menu.FIRST + 3, 0, "删除");
+            mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, "查看专辑");
+            mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, "详细信息");
 
             MenuInflater menuInflater = mMainActivity.getMenuInflater();
             menuInflater.inflate(R.menu.recycler_song_item_menu, mMenu);

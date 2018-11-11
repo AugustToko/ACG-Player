@@ -33,6 +33,7 @@ import java.util.HashSet;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter2AlbumList;
+import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
@@ -84,7 +85,7 @@ public class AlbumListFragment extends Fragment {
         if (Values.MUSIC_DATA_INIT_DONE) {
             new Thread(() -> {
                 //去除重复数据
-                HashSet<String> hashSet = new HashSet<>(((MusicListFragment) mMainActivity.getFragmentList().get(0)).getSongAlbumList());
+                HashSet<String> hashSet = new HashSet<>(Data.mSongAlbumList);
                 arrayList = new ArrayList<>(hashSet);
                 arrayList.sort(Values.sort);
 

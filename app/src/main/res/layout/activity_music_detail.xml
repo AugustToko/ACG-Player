@@ -114,7 +114,7 @@
         android:id="@+id/activity_music_detail_image_next_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="48dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:backgroundTint="#00000000"
@@ -128,7 +128,7 @@
         android:id="@+id/activity_music_detail_image_previous_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="48dp"
+        android:layout_marginEnd="8dp"
         android:backgroundTint="#00000000"
         android:contentDescription="@string/todo"
         android:src="@drawable/ic_skip_previous_white_36dp"
@@ -274,6 +274,30 @@
         </android.support.constraint.ConstraintLayout>
 
     </android.support.v7.widget.CardView>
+
+    <ImageButton
+        android:id="@+id/activity_music_detail_image_random_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:backgroundTint="@android:color/transparent"
+        android:contentDescription="@string/random"
+        android:src="@drawable/ic_shuffle_white_24dp"
+        app:layout_constraintBottom_toBottomOf="@+id/activity_music_detail_image_next_button"
+        app:layout_constraintStart_toEndOf="@+id/activity_music_detail_image_next_button"
+        app:layout_constraintTop_toTopOf="@+id/activity_music_detail_image_next_button" />
+
+    <ImageButton
+        android:id="@+id/activity_music_detail_image_repeat_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:backgroundTint="@android:color/transparent"
+        android:contentDescription="@string/repeat"
+        android:src="@drawable/ic_repeat_white_24dp"
+        app:layout_constraintBottom_toBottomOf="@+id/activity_music_detail_image_previous_button"
+        app:layout_constraintEnd_toStartOf="@+id/activity_music_detail_image_previous_button"
+        app:layout_constraintTop_toTopOf="@+id/activity_music_detail_image_previous_button" />
 
 
 </android.support.constraint.ConstraintLayout>

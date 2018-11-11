@@ -30,7 +30,6 @@ import java.util.Random;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MusicDetailActivity;
-import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -90,7 +89,7 @@ public class Utils {
         }
 
         /**
-         * play_type: random
+         * play_type: random, without history clear
          */
         //shufflePlayback
         public static boolean shufflePlayback() {
@@ -101,30 +100,38 @@ public class Utils {
                         READY = false;
                         Data.sMusicBinder.resetMusic();
 
-                        MusicListFragment musicListFragment = (MusicListFragment) activity.getFragmentList().get(0);
-
                         Random random = new Random();
-                        int index = random.nextInt(musicListFragment.getSongNameList().size() - 1);
-                        String path = musicListFragment.getMusicPathList().get(index);
-                        String musicName = musicListFragment.getSongNameList().get(index);
-                        String albumName = musicListFragment.getSongAlbumList().get(index);
+                        int index = random.nextInt(Data.mMusicPathList.size() - 1);
+                        String path = Data.mMusicPathList.get(index);
+                        String musicName = Data.mSongNameList.get(index);
+                        String albumName = Data.mSongAlbumList.get(index);
 
                         Data.sHistoryPlayIndex.add(index);
 
                         Bitmap cover = Utils.Audio.getMp3Cover(path);
 
                         //first set backgroundImage, then set bg(layout) black. To crossFade more Smooth
-                        activity.setCurrentSongInfo(musicName, albumName, path, index, cover);
+                        activity.setCurrentSongInfo(musicName, albumName, path, cover);
                         activity.setButtonTypePlay();
+
+                        Data.sCurrentMusicAlbum = albumName;
+                        Data.sCurrentMusicName = musicName;
+                        Data.sCurrentMusicBitmap = cover;
+
+                        Values.MUSIC_PLAYING = true;
+                        Values.HAS_PLAYED = true;
+                        Values.CURRENT_MUSIC_INDEX = index;
+                        Values.CURRENT_MUSIC_INDEX = index;
+                        Values.CURRENT_SONG_PATH = path;
 
                         if (Data.sActivities.size() >= 2) {
                             MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
                             musicDetailActivity.setButtonTypePlay();
-                            musicDetailActivity.setCurrentSongInfo(musicName, albumName, index, getAlbumByteImage(path));
+                            musicDetailActivity.setCurrentSongInfo(musicName, albumName, getAlbumByteImage(path));
                         }
 
                         try {
-                            Data.sMusicBinder.setDataSource(musicListFragment.getMusicPathList().get(index));
+                            Data.sMusicBinder.setDataSource(path);
                             Data.sMusicBinder.prepare();
                             Data.sMusicBinder.playMusic();          //has played, now playing
 
@@ -134,10 +141,6 @@ public class Utils {
                                 notLeakHandler.sendEmptyMessage(Values.INIT_SEEK_BAR);
                             }
 
-                            Values.MUSIC_PLAYING = true;
-                            Values.HAS_PLAYED = true;
-                            Values.CURRENT_MUSIC_INDEX = index;
-                            Values.CURRENT_SONG_PATH = path;
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -162,13 +165,22 @@ public class Utils {
 //            }
 //        }
 
-//        public static void setNowPlaying(MainActivity activity) {
-//            // TODO: 2018/11/6 need get albumPic primaryColor
-//            Data.sActivities.get(0).runOnUiThread(() -> ((MainActivity) Data.sActivities.get(0)).setButtonTypePlay());
-//            if (Data.sActivities.size() >= 2) {
-//
-//            }
-//        }
+        public static void setNowPlaying() {
+            if (Data.sActivities.size() != 0) {
+                MainActivity activity = (MainActivity) Data.sActivities.get(0);
+                activity.runOnUiThread(() -> {
+                    // TODO: 2018/11/6 need get albumPic primaryColor
+                    MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
+                    mainActivity.setButtonTypePlay();
+
+                    if (Data.sActivities.size() >= 2) {
+                        MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
+                        musicDetailActivity.setButtonTypePlay();
+                    }
+                });
+            }
+
+        }
 
         public static void setNowNotPlaying(Context context) {
             Intent intent = new Intent();
@@ -233,7 +245,7 @@ public class Utils {
             context.runOnUiThread(() -> GlideApp.with(context)
                     .load(bitmap)
                     .apply(bitmapTransform(new BlurTransformation(15, 30)))
-                    .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSSFATE_TIME))
+                    .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                     .into(view));
         }
 
@@ -241,7 +253,7 @@ public class Utils {
             context.runOnUiThread(() -> GlideApp.with(context)
                     .load(bitmap)
                     .apply(bitmapTransform(new BlurTransformation(15, 30)))
-                    .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSSFATE_TIME))
+                    .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                     .into(view));
         }
 
