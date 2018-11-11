@@ -134,49 +134,33 @@ public final class MusicDetailActivity extends Activity {
         /*
          * init view animation
          * */
-        //default type is common, but the randomButton alpha is 1f(it menes this button is on), so set animate
+        //default type is common, but the random button alpha is 1f(it means this button is on), so set animate
         AlphaAnimation temp = new AlphaAnimation(0, 0.3f);
-        temp.setDuration(500);
+        temp.setDuration(300);
         temp.setFillAfter(true);
         mRandomButton.clearAnimation();
-        mRandomButton.startAnimation(temp);
         mRepeatButton.clearAnimation();
+        mRandomButton.startAnimation(temp);
         mRepeatButton.startAnimation(temp);
 
         ScaleAnimation mPlayButtonScaleAnimation = new ScaleAnimation(0, mPlayButton.getScaleX(), 0, mPlayButton.getScaleY(),
                 Animation.RELATIVE_TO_SELF, mPlayButton.getScaleX() / 2, Animation.RELATIVE_TO_SELF, mPlayButton.getScaleX() / 2);
-        mPlayButtonScaleAnimation.setDuration(500);
+        mPlayButtonScaleAnimation.setDuration(300);
         mPlayButtonScaleAnimation.setFillAfter(true);
         mPlayButton.clearAnimation();
         mPlayButton.setAnimation(mPlayButtonScaleAnimation);
-        mPlayButtonScaleAnimation.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                mPlayButton.clearAnimation();
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
 
         TranslateAnimation mCardViewTranslateAnimation = new TranslateAnimation(mCardView.getTranslationX(), mCardView.getTranslationX(), 500, mCardView.getTranslationY());
-        mCardViewTranslateAnimation.setDuration(500);
+        mCardViewTranslateAnimation.setDuration(300);
         mCardViewTranslateAnimation.setFillAfter(true);
         mCardView.clearAnimation();
         mCardView.startAnimation(mCardViewTranslateAnimation);
 
         TranslateAnimation mPreviousButtonTranslateAnimation = new TranslateAnimation(150, mPreviousButton.getTranslationX(), mPreviousButton.getTranslationY(), mPreviousButton.getTranslationY());
         TranslateAnimation mNextButtonTranslateAnimation = new TranslateAnimation(-150, mNextButton.getTranslationX(), mNextButton.getTranslationY(), mNextButton.getTranslationY());
-        mPreviousButtonTranslateAnimation.setDuration(500);
+        mPreviousButtonTranslateAnimation.setDuration(300);
         mPreviousButtonTranslateAnimation.setFillAfter(true);
-        mNextButtonTranslateAnimation.setDuration(500);
+        mNextButtonTranslateAnimation.setDuration(300);
         mNextButtonTranslateAnimation.setFillAfter(true);
         mPreviousButton.clearAnimation();
         mNextButton.clearAnimation();
@@ -346,17 +330,13 @@ public final class MusicDetailActivity extends Activity {
                 intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPause));
                 sendBroadcast(intent);
             } else {
-//                intent = new Intent();
-//                intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPlay));
-//                intent.putExtra("play_type", 2);
-//                sendBroadcast(intent);
                 Data.sMusicBinder.playMusic();
                 Utils.Ui.setNowPlaying();
             }
         });
 
         mNextButton.setOnClickListener(v -> {
-            mSeekBar.setProgress(0);            //防止seekBar跳动到Max
+            mSeekBar.setProgress(0, true);            //防止seekBar跳动到Max
             if (Values.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
                 Utils.Audio.shufflePlayback();
             } else if (Values.CURRENT_PLAY_TYPE.equals(Values.TYPE_COMMON)) {
@@ -366,6 +346,16 @@ public final class MusicDetailActivity extends Activity {
                 intent.putExtra("play_type", 4);
                 sendBroadcast(intent);
             }
+        });
+
+        mNextButton.setOnLongClickListener(v -> {
+            int nowPosition = mSeekBar.getProgress() + Data.sMusicBinder.getDuration() / 20;
+            if (nowPosition >= mSeekBar.getMax()) {
+                nowPosition = mSeekBar.getMax();
+            }
+            mSeekBar.setProgress(nowPosition, true);
+            Data.sMusicBinder.seekTo(nowPosition);
+            return true;
         });
 
         mPreviousButton.setOnClickListener(v -> {
@@ -379,7 +369,7 @@ public final class MusicDetailActivity extends Activity {
                         Data.sMusicBinder.seekTo(0);
 
                     } else if (Data.sHistoryPlayIndex.size() >= 2) {
-                        mSeekBar.setProgress(0);
+                        mSeekBar.setProgress(0, true);
                         Data.sMusicBinder.resetMusic();
 
                         int tempSize = Data.sHistoryPlayIndex.size();
@@ -418,6 +408,16 @@ public final class MusicDetailActivity extends Activity {
                 }
             }
 
+        });
+
+        mPreviousButton.setOnLongClickListener(v -> {
+            int nowPosition = mSeekBar.getProgress() - Data.sMusicBinder.getDuration() / 20;
+            if (nowPosition <= 0) {
+                nowPosition = 0;
+            }
+            mSeekBar.setProgress(nowPosition, true);
+            Data.sMusicBinder.seekTo(nowPosition);
+            return true;
         });
     }
 
@@ -486,7 +486,7 @@ public final class MusicDetailActivity extends Activity {
                     //点击body 或 music 正在播放 才可以进行seekBar更新
                     if (Data.sMusicBinder.isPlayingMusic()) {
                         Log.d(TAG, "handleMessage: seekBar set");
-                        mSeekBar.setProgress(Data.sMusicBinder.getCurrentPosition());
+                        mSeekBar.setProgress(Data.sMusicBinder.getCurrentPosition(), true);
                     }
 
                     //循环更新 0.5s 一次

@@ -64,6 +64,7 @@ public final class MyMusicService extends Service {
         Values.SERVICE_RUNNING = false;
         Values.MUSIC_PLAYING = false;
         mMediaPlayer.release();
+        Data.sMusicBinder = null;
         Log.d(TAG, "onDestroy: ");
         super.onDestroy();
     }

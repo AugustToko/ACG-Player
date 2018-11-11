@@ -29,7 +29,7 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
-public class SplashActivity extends Activity {
+public final class SplashActivity extends Activity {
 
     private String TAG = "SplashActivity";
 

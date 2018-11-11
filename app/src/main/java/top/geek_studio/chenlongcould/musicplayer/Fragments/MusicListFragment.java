@@ -48,7 +48,7 @@ import static top.geek_studio.chenlongcould.musicplayer.Data.mMusicPathList;
 import static top.geek_studio.chenlongcould.musicplayer.Data.mSongAlbumList;
 import static top.geek_studio.chenlongcould.musicplayer.Data.mSongNameList;
 
-public class MusicListFragment extends Fragment {
+public final class MusicListFragment extends Fragment {
 
     private static final String TAG = "MusicListFragment";
 

@@ -18,7 +18,7 @@ import static top.geek_studio.chenlongcould.musicplayer.Data.mMusicPathList;
 import static top.geek_studio.chenlongcould.musicplayer.Data.mSongAlbumList;
 import static top.geek_studio.chenlongcould.musicplayer.Data.mSongNameList;
 
-public class ReceiverOnMusicPlay extends BroadcastReceiver {
+public final class ReceiverOnMusicPlay extends BroadcastReceiver {
     private static final String TAG = "ReceiverOnMusicPlay";
 
     @Override
@@ -47,6 +47,9 @@ public class ReceiverOnMusicPlay extends BroadcastReceiver {
                 MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
                 musicDetailActivity.setButtonTypePlay();
                 mainActivity.setButtonTypePlay();
+
+                MusicDetailActivity.NotLeakHandler notLeakHandler = musicDetailActivity.getHandler();
+                notLeakHandler.sendEmptyMessage(Values.INIT_SEEK_BAR);
             }
             break;
 
@@ -92,6 +95,8 @@ public class ReceiverOnMusicPlay extends BroadcastReceiver {
                 if (Data.sActivities.size() >= 2) {
                     MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
                     musicDetailActivity.setCurrentSongInfo(musicName, albumName, Utils.Audio.getAlbumByteImage(path));
+//                    MusicDetailActivity.NotLeakHandler notLeakHandler = musicDetailActivity.getHandler();
+//                    notLeakHandler.sendEmptyMessage(Values.INIT_SEEK_BAR);
                 }
 
                 Data.sCurrentMusicAlbum = albumName;

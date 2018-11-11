@@ -37,7 +37,7 @@ import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
-public class AlbumListFragment extends Fragment {
+public final class AlbumListFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
 
@@ -71,7 +71,6 @@ public class AlbumListFragment extends Fragment {
         sureGetDataDone();
     }
 
-    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_album_list, container, false);

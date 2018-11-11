@@ -11,6 +11,7 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Adapters;
 
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -21,6 +22,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -28,6 +30,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -130,6 +133,12 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 Data.sMusicBinder.setDataSource(clickedPath);
                 Data.sMusicBinder.prepare();
                 Data.sMusicBinder.playMusic();
+
+                if (Data.sActivities.size() >= 2) {
+                    MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
+                    MusicDetailActivity.NotLeakHandler notLeakHandler = musicDetailActivity.getHandler();
+                    notLeakHandler.sendEmptyMessage(Values.INIT_SEEK_BAR);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -158,21 +167,41 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
                 case Menu.FIRST + 1: {
                     // TODO: 2018/11/8 more menu
-                    Data.sFavouriteMusic.add(mMusicPathList.get(holder.getAdapterPosition()));
-                    Utils.Ui.fastToast(Data.sActivities.get(0).getApplicationContext(), "Done!");
 
                     SharedPreferences mPlayListSpf = mMainActivity.getSharedPreferences(Values.PLAY_LIST_SPF_NAME_MY_FAVOURITE, 0);
                     SharedPreferences.Editor editor = mPlayListSpf.edit();
                     editor.putString(Values.PLAY_LIST_SPF_KEY, mMusicPathList.get(holder.getAdapterPosition()));
                     editor.apply();
+
+                    Utils.Ui.fastToast(Data.sActivities.get(0).getApplicationContext(), "Done!");
                 }
                 break;
 
                 case Menu.FIRST + 2: {
-                    SharedPreferences mPlayListSpf = mMainActivity.getSharedPreferences(Values.PLAY_LIST_SPF_NAME_, 0);
-                    SharedPreferences.Editor editor = mPlayListSpf.edit();
-                    editor.putString(Values.PLAY_LIST_SPF_KEY, mMusicPathList.get(holder.getAdapterPosition()));
-                    editor.apply();
+
+                    SharedPreferences mDefPrefs = PreferenceManager.getDefaultSharedPreferences(mMainActivity);
+
+                    if (mDefPrefs.getInt(Values.SharedPrefsTag.PLAY_LIST_NUM, 0) == 0) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
+                        builder.setTitle("Create a list");
+                        EditText et = new EditText(mMainActivity);
+                        et.setHint("Play List 1");
+                        et.setMaxLines(1);
+                        et.setSingleLine(true);
+                        builder.setView(et);
+                        builder.setCancelable(true);
+                        builder.setNegativeButton("Cancel", null);
+                        builder.setNeutralButton("Enter", (dialog, which) -> {
+                            String name = et.getText().toString();
+                            if (name.equals("")) {
+                                name = "PLAY_LIST_1";
+                            }
+                            // TODO: 2018/11/11 创建一个列表
+                        });
+                    } else {
+
+                    }
+
                 }
             }
 

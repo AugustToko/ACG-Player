@@ -23,6 +23,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.NavigationView;
@@ -100,7 +101,9 @@ public final class MainActivity extends AppCompatActivity {
 
     private AlbumListFragment mAlbumListFragment;
 
-    /**----------------- playing info ---------------------*/
+    /**
+     * ----------------- playing info ---------------------
+     */
     private TextView mNowPlayingSongText;
 
     private ImageView mNowPlayingSongImage;
@@ -117,8 +120,7 @@ public final class MainActivity extends AppCompatActivity {
     /**
      * onXXX
      * Override
-     *
-     * */
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -283,6 +285,14 @@ public final class MainActivity extends AppCompatActivity {
             }
         }
 
+        mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+
+                return true;
+            }
+        });
+
         mNowPlayingSongAlbumText = findViewById(R.id.activity_main_now_playing_album_name);
         mNowPlayingBody = findViewById(R.id.current_info);
         mNowPlayingStatusImage = findViewById(R.id.activity_main_info_bar_status_image);
@@ -383,11 +393,12 @@ public final class MainActivity extends AppCompatActivity {
 
     /**
      * set Info (auto put in data.)
-     * @param songName music name
+     *
+     * @param songName  music name
      * @param albumName music album name
-     * @param songPath music path
-     * @param cover music cover image, it is @NullAble(some types of music do not have cover)
-     * @param args oth params(if "reload", do not need to set InfoBar again)
+     * @param songPath  music path
+     * @param cover     music cover image, it is @NullAble(some types of music do not have cover)
+     * @param args      oth params(if "reload", do not need to set InfoBar again)
      */
     public void setCurrentSongInfo(String songName, String albumName, String songPath, @Nullable Bitmap cover, String... args) {
 
@@ -442,10 +453,8 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     /**
-     *
      * getter
-     *
-     * */
+     */
     public List<Fragment> getFragmentList() {
         return mFragmentList;
     }

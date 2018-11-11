@@ -15,10 +15,14 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -33,7 +37,7 @@ import top.geek_studio.chenlongcould.musicplayer.Activities.MusicDetailActivity;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
-public class Utils {
+public final class Utils {
 
     public static class Audio {
         private static MediaMetadataRetriever sMediaMetadataRetriever = new MediaMetadataRetriever();
@@ -48,7 +52,7 @@ public class Utils {
          *
          * @param mediaUri mp3 path
          */
-        public static Bitmap getMp3Cover(String mediaUri) {
+        public static Bitmap getMp3Cover(@NonNull String mediaUri) {
             if (mediaUri.contains("ogg")) {
                 return null;
             }
@@ -62,17 +66,17 @@ public class Utils {
             }
         }
 
-        public static byte[] getAlbumByteImage(String path) {
+        public static byte[] getAlbumByteImage(@NonNull String path) {
             sMediaMetadataRetriever.setDataSource(path);
             return sMediaMetadataRetriever.getEmbeddedPicture();
         }
 
-        public static void preLoadAlubmImage(Context context, String path) {
+        public static void preLoadAlubmImage(@NonNull Context context, @NonNull String path) {
             sMediaMetadataRetriever.setDataSource(path);
             GlideApp.with(context).load(sMediaMetadataRetriever.getEmbeddedPicture()).override(50, 50).preload();
         }
 
-        public static String getAlbumText(String path) {
+        public static String getAlbumText(@NonNull String path) {
             sMediaMetadataRetriever.setDataSource(path);
             return sMediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
         }
@@ -82,7 +86,7 @@ public class Utils {
          *
          * @param mediaUri MP3文件路径
          */
-        public static void loadingCoverIntoImageView(Context context, ImageView musicCover, String mediaUri) {
+        public static void loadingCoverIntoImageView(@NonNull Context context, @Nullable ImageView musicCover, @NonNull String mediaUri) {
             sMediaMetadataRetriever.setDataSource(mediaUri);
             byte[] picture = sMediaMetadataRetriever.getEmbeddedPicture();
             GlideApp.with(context).load(picture).transition(DrawableTransitionOptions.withCrossFade()).override(50, 50).into(musicCover);
@@ -92,7 +96,7 @@ public class Utils {
          * play_type: random, without history clear
          */
         //shufflePlayback
-        public static boolean shufflePlayback() {
+        public static void shufflePlayback() {
             MainActivity activity = (MainActivity) Data.sActivities.get(0);
             if (READY) {            //default: true
                 new Thread(() -> {
@@ -149,10 +153,8 @@ public class Utils {
                         activity.runOnUiThread(() -> Utils.Ui.createMessageDialog(activity, "Error", "MUSIC_DATA_INIT_FAIL").show());
                     }
                 }).start();
-                return true;
             } else {
                 activity.runOnUiThread(() -> Ui.fastToast(activity, "Preparing..."));
-                return false;
             }
         }
 
@@ -164,6 +166,18 @@ public class Utils {
 //                v.setBackgroundColor(color);
 //            }
 //        }
+public static void createEditTextDialog(Context context, String title, boolean cancelAble, DialogInterface.OnClickListener onEnterListener) {
+    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+    builder.setTitle(title);
+    EditText et = new EditText(context);
+    et.setHint("Play List 1");
+    et.setMaxLines(1);
+    et.setSingleLine(true);
+    builder.setView(et);
+    builder.setCancelable(cancelAble);
+    builder.setNegativeButton("Cancel", null);
+    builder.setNeutralButton("Enter", onEnterListener);
+}
 
         public static void setNowPlaying() {
             if (Data.sActivities.size() != 0) {
@@ -182,7 +196,7 @@ public class Utils {
 
         }
 
-        public static void setNowNotPlaying(Context context) {
+        public static void setNowNotPlaying(@NonNull Context context) {
             Intent intent = new Intent();
             intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPause));
             context.sendBroadcast(intent);
@@ -198,7 +212,7 @@ public class Utils {
 //            Values.HAS_SET_INFO_BAR_BACKGROUND_BACK = false;
 //        }
 
-        public static AlertDialog createMessageDialog(Activity context, String title, String message) {
+        public static AlertDialog createMessageDialog(@NonNull Activity context, @NonNull String title, @NonNull String message) {
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             builder.setTitle(title);
             builder.setMessage(message);
@@ -206,7 +220,7 @@ public class Utils {
             return builder.create();
         }
 
-        public static void fastToast(Context context, String content) {
+        public static void fastToast(@NonNull Context context, @NonNull String content) {
             Toast.makeText(context, content, Toast.LENGTH_SHORT).show();
         }
 
@@ -222,7 +236,7 @@ public class Utils {
 //            Utils.Ui.setInfoBarBackgroundBlack();
 //        }
 
-        public static int getBright(Bitmap bm) {
+        public static int getBright(@NonNull Bitmap bm) {
             int width = bm.getWidth() / 4;
             int height = bm.getHeight() / 4;
             int r, g, b;
@@ -241,7 +255,7 @@ public class Utils {
             return bright / count;
         }
 
-        public static void setBlurEffect(Activity context, byte[] bitmap, ImageView view) {
+        public static void setBlurEffect(@NonNull Activity context, @Nullable byte[] bitmap, @NonNull ImageView view) {
             context.runOnUiThread(() -> GlideApp.with(context)
                     .load(bitmap)
                     .apply(bitmapTransform(new BlurTransformation(15, 30)))
@@ -249,7 +263,7 @@ public class Utils {
                     .into(view));
         }
 
-        public static void setBlurEffect(Activity context, Bitmap bitmap, ImageView view) {
+        public static void setBlurEffect(@NonNull Activity context, @Nullable Bitmap bitmap, @NonNull ImageView view) {
             context.runOnUiThread(() -> GlideApp.with(context)
                     .load(bitmap)
                     .apply(bitmapTransform(new BlurTransformation(15, 30)))

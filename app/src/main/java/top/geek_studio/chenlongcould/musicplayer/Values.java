@@ -19,7 +19,6 @@ public final class Values {
      * final string(s), TAGs
      */
     public static final String INDEX = "index";
-    public static final String PLAY_LIST_NUM = "PLAY_LIST_NUM";
     public static final String TAG_UNIVERSAL_ONE = "TAG_UNIVERSAL_ONE";
     public static final String SURE_GET_PERMISSION = "SURE_GET_PERMISSION";
     public static final String PKG_NAME = "top.geek_studio.chenlongcould.musicplayer";
@@ -28,6 +27,7 @@ public final class Values {
     public static final String TYPE_COMMON = "COMMON";
     public static final String PLAY_LIST_SPF_NAME_ = "PLAY_LIST_SPF_NAME_";           //must add custom tag: PLAY_LIST_SPF_NAME_"CUSTOM"
     public static final String PLAY_LIST_SPF_NAME_MY_FAVOURITE = "PLAY_LIST_SPF_NAME_MY_FAVOURITE";
+    public static boolean HAS_PLAYED = false;           //检测app打开后, 是否播放过音乐 (如果没, 默认点击播放按钮为快速随机播放)
 
     /**
      * Handler msg.what
@@ -52,7 +52,14 @@ public final class Values {
     public static int CURRENT_BIND_INDEX_ALBUM_LIST = -1;
     public static int CURRENT_PAGE_INDEX = -1;
     public static int CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = -1;
-    public static boolean HAS_PLAYED = false;           //检测app打开后, 是否播放过音乐 (如果没, 默认点击播放按钮为随机播放)
+
+    /**
+     * sharedPrefs tag
+     */
+
+    public static final class SharedPrefsTag {
+        public static final String PLAY_LIST_NUM = "PLAY_LIST_NUM";
+    }
     public static int CURRENT_MUSIC_INDEX = -1;
     public static String CURRENT_PLAY_TYPE = "COMMON";
 

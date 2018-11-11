@@ -10,7 +10,7 @@ import top.geek_studio.chenlongcould.musicplayer.Activities.MusicDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
-public class ReceiverOnMusicPause extends BroadcastReceiver {
+public final class ReceiverOnMusicPause extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {

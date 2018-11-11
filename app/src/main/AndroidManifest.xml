@@ -64,13 +64,15 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".BroadCasts.ReceiverOnMusicStop"
-            android:enabled="true"
-            android:exported="true" />
-        <receiver
             android:name=".BroadCasts.ReceiverOnMusicPause"
             android:enabled="true"
-            android:exported="true"></receiver>
+            android:exported="true">
+            <intent-filter>
+                <action android:name="top.geek_studio.chenlongcould.musicplayer.ReceiverOnMusicPause" />
+            </intent-filter>
+        </receiver>
+
+        <activity android:name=".Activities.PublicActivity"></activity>
     </application>
 
 </manifest>
