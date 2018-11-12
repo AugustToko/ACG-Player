@@ -14,10 +14,6 @@ import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
-import static top.geek_studio.chenlongcould.musicplayer.Data.mMusicPathList;
-import static top.geek_studio.chenlongcould.musicplayer.Data.mSongAlbumList;
-import static top.geek_studio.chenlongcould.musicplayer.Data.mSongNameList;
-
 public final class ReceiverOnMusicPlay extends BroadcastReceiver {
     private static final String TAG = "ReceiverOnMusicPlay";
 
@@ -67,7 +63,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
             case 4: {
                 Data.sMusicBinder.resetMusic();
                 int targetIndex = Values.CURRENT_MUSIC_INDEX + 1;
-                if (targetIndex > Data.mMusicPathList.size() - 1) {
+                if (targetIndex > Data.sMusicItems.size() - 1) {
                     targetIndex = 0;
                 }
 
@@ -75,11 +71,11 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 Values.CURRENT_MUSIC_INDEX = targetIndex;
                 Values.MUSIC_PLAYING = true;
                 Values.HAS_PLAYED = true;
-                Values.CURRENT_SONG_PATH = Data.mMusicPathList.get(targetIndex);
+                Values.CURRENT_SONG_PATH = Data.sMusicItems.get(targetIndex).getMusicPath();
 
-                String path = mMusicPathList.get(targetIndex);
-                String musicName = mSongNameList.get(targetIndex);
-                String albumName = mSongAlbumList.get(targetIndex);
+                String path = Data.sMusicItems.get(targetIndex).getMusicPath();
+                String musicName = Data.sMusicItems.get(targetIndex).getMusicName();
+                String albumName = Data.sMusicItems.get(targetIndex).getMusicAlbum();
 
                 Data.sHistoryPlayIndex.add(targetIndex);
 
@@ -105,12 +101,13 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 Values.CURRENT_SONG_PATH = path;
 
                 try {
-                    Data.sMusicBinder.setDataSource(Data.mMusicPathList.get(targetIndex));
+                    Data.sMusicBinder.setDataSource(Data.sMusicItems.get(targetIndex).getMusicPath());
                     Data.sMusicBinder.prepare();
                     Data.sMusicBinder.playMusic();
 
                 } catch (IOException e) {
                     e.printStackTrace();
+                    Data.sMusicBinder.resetMusic();
                 }
             }
         }

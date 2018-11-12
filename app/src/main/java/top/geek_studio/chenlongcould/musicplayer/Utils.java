@@ -92,6 +92,20 @@ public final class Utils {
             GlideApp.with(context).load(picture).transition(DrawableTransitionOptions.withCrossFade()).override(50, 50).into(musicCover);
         }
 
+        public static void doesNextHasMusic() throws IOException {
+            if (Data.sNextWillPlaySongPath != null) {
+                Data.sMusicBinder.resetMusic();
+                try {
+                    Data.sMusicBinder.setDataSource(Data.sNextWillPlaySongPath);
+                    Data.sMusicBinder.prepare();
+                    Data.sMusicBinder.playMusic();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Data.sMusicBinder.resetMusic();
+                }
+            }
+        }
+
         /**
          * play_type: random, without history clear
          */
@@ -105,10 +119,10 @@ public final class Utils {
                         Data.sMusicBinder.resetMusic();
 
                         Random random = new Random();
-                        int index = random.nextInt(Data.mMusicPathList.size() - 1);
-                        String path = Data.mMusicPathList.get(index);
-                        String musicName = Data.mSongNameList.get(index);
-                        String albumName = Data.mSongAlbumList.get(index);
+                        int index = random.nextInt(Data.sMusicItems.size() - 1);
+                        String path = Data.sMusicItems.get(index).getMusicPath();
+                        String musicName = Data.sMusicItems.get(index).getMusicName();
+                        String albumName = Data.sMusicItems.get(index).getMusicAlbum();
 
                         Data.sHistoryPlayIndex.add(index);
 
@@ -147,6 +161,7 @@ public final class Utils {
 
                         } catch (IOException e) {
                             e.printStackTrace();
+                            Data.sMusicBinder.resetMusic();
                         }
                         READY = true;
                     } else {
@@ -161,29 +176,29 @@ public final class Utils {
     }
 
     public static class Ui {
-//        static void setPrimaryColor(int color, View... views) {
+        //        static void setPrimaryColor(int color, View... views) {
 //            for (View v : views) {
 //                v.setBackgroundColor(color);
 //            }
 //        }
-public static void createEditTextDialog(Context context, String title, boolean cancelAble, DialogInterface.OnClickListener onEnterListener) {
-    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-    builder.setTitle(title);
-    EditText et = new EditText(context);
-    et.setHint("Play List 1");
-    et.setMaxLines(1);
-    et.setSingleLine(true);
-    builder.setView(et);
-    builder.setCancelable(cancelAble);
-    builder.setNegativeButton("Cancel", null);
-    builder.setNeutralButton("Enter", onEnterListener);
-}
+        public static void createEditTextDialog(Context context, String title, boolean cancelAble, DialogInterface.OnClickListener onEnterListener) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle(title);
+            EditText et = new EditText(context);
+            et.setHint("Play List 1");
+            et.setMaxLines(1);
+            et.setSingleLine(true);
+            builder.setView(et);
+            builder.setCancelable(cancelAble);
+            builder.setNegativeButton("Cancel", null);
+            builder.setNeutralButton("Enter", onEnterListener);
+        }
 
         public static void setNowPlaying() {
             if (Data.sActivities.size() != 0) {
                 MainActivity activity = (MainActivity) Data.sActivities.get(0);
                 activity.runOnUiThread(() -> {
-                    // TODO: 2018/11/6 need get albumPic primaryColor
+                    // TODO: 2018/11/6 get albumPic primaryColor
                     MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
                     mainActivity.setButtonTypePlay();
 
@@ -193,7 +208,6 @@ public static void createEditTextDialog(Context context, String title, boolean c
                     }
                 });
             }
-
         }
 
         public static void setNowNotPlaying(@NonNull Context context) {

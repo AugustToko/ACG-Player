@@ -30,10 +30,12 @@ import android.view.ViewGroup;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter2AlbumList;
 import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
@@ -84,7 +86,11 @@ public final class AlbumListFragment extends Fragment {
         if (Values.MUSIC_DATA_INIT_DONE) {
             new Thread(() -> {
                 //去除重复数据
-                HashSet<String> hashSet = new HashSet<>(Data.mSongAlbumList);
+                List<String> temp = new ArrayList<>();
+                for (MusicItem item : Data.sMusicItems) {
+                    temp.add(item.getMusicAlbum());
+                }
+                HashSet<String> hashSet = new HashSet<>(temp);
                 arrayList = new ArrayList<>(hashSet);
                 arrayList.sort(Values.sort);
 

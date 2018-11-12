@@ -32,21 +32,16 @@ import android.view.ViewGroup;
 
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
+import top.geek_studio.chenlongcould.musicplayer.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
-
-import static top.geek_studio.chenlongcould.musicplayer.Data.mMusicIdList;
-import static top.geek_studio.chenlongcould.musicplayer.Data.mMusicPathList;
-import static top.geek_studio.chenlongcould.musicplayer.Data.mSongAlbumList;
-import static top.geek_studio.chenlongcould.musicplayer.Data.mSongNameList;
 
 public final class MusicListFragment extends Fragment {
 
@@ -75,33 +70,32 @@ public final class MusicListFragment extends Fragment {
         return new MusicListFragment();
     }
 
-    /**
-     * old version
-     *
-     * @param dir music dir
-     */
-    @SuppressWarnings("unused")
-    private void findMp3(File dir) {
-        Log.d(TAG, "findMp3: doing");
-        if (!dir.isDirectory()) {
-            return;
-        }
-
-        for (File f : dir.listFiles()) {
-            if (!f.isDirectory()) {
-                mMusicPathList.add(f.getPath());
-
-                String fileName = f.getName();
-                String prefix = fileName.substring(fileName.lastIndexOf(".") + 1);//如果想获得不带点的后缀，变为fileName.lastIndexOf(".")+1
-
-                String fileOtherName = fileName.substring(0, fileName.length() - prefix.length());//得到文件名。去掉了后缀
-                mSongNameList.add(fileOtherName);
-
-            } else {
-                findMp3(f);
-            }
-        }
-    }
+//    /**
+//     * old version
+//     *
+//     * @param dir music dir
+//     */
+//    private void findMp3(File dir) {
+//        Log.d(TAG, "findMp3: doing");
+//        if (!dir.isDirectory()) {
+//            return;
+//        }
+//
+//        for (File f : dir.listFiles()) {
+//            if (!f.isDirectory()) {
+//                mMusicPathList.add(f.getPath());
+//
+//                String fileName = f.getName();
+//                String prefix = fileName.substring(fileName.lastIndexOf(".") + 1);//如果想获得不带点的后缀，变为fileName.lastIndexOf(".")+1
+//
+//                String fileOtherName = fileName.substring(0, fileName.length() - prefix.length());//得到文件名。去掉了后缀
+//                mSongNameList.add(fileOtherName);
+//
+//            } else {
+//                findMp3(f);
+//            }
+//        }
+//    }
 
     @Override
     public void onAttach(Context context) {
@@ -116,7 +110,7 @@ public final class MusicListFragment extends Fragment {
         // TODO: 2018/11/2 需要转为线程池的使用。
         new Thread(() -> {
 
-            if (mMusicPathList.isEmpty() || mSongAlbumList.isEmpty() || mSongNameList.isEmpty() || mMusicIdList.isEmpty()) {
+            if (Data.sMusicItems.isEmpty()) {
                 /*---------------------- init Data!!!! -------------------*/
                 Cursor cursor = mActivity.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
                 if (cursor != null && cursor.moveToFirst()) {
@@ -127,10 +121,21 @@ public final class MusicListFragment extends Fragment {
                         return;
                     }
                     do {
-                        mMusicIdList.add(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)));
-                        mMusicPathList.add(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)));
-                        mSongNameList.add(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)));
-                        mSongAlbumList.add(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)));
+                        String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+                        String prefix = path.substring(path.lastIndexOf(".") + 1);
+
+                        // TODO: 2018/11/12 or other
+                        if (prefix.equals("ogg")) {
+                            Data.sNotSupportType.add(path);
+                        }
+
+                        String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+                        String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+                        int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+
+                        Data.sMusicItems.add(new MusicItem(name, path, id, albumName));
+                        Data.sMusicItemsBackUp.add(new MusicItem(name, path, id, albumName));
+
                     } while (cursor.moveToNext());
                     cursor.close();
                     mHandler.sendEmptyMessage(Values.INIT_MUSIC_LIST);
@@ -144,7 +149,6 @@ public final class MusicListFragment extends Fragment {
 
     }
 
-    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_music_list_layout, container, false);
@@ -153,7 +157,7 @@ public final class MusicListFragment extends Fragment {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
         mRecyclerView.setHasFixedSize(true);
 
-        adapter = new MyRecyclerAdapter(mMusicPathList, mSongNameList, mSongAlbumList, mActivity);
+        adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity);
 
         mRecyclerView.setAdapter(adapter);
 
@@ -188,7 +192,7 @@ public final class MusicListFragment extends Fragment {
      */
     private void sureCreateViewDone() {
         if (CREATE_VIEW_DONE) {
-            mActivity.setToolbarSubTitle(mSongNameList.size() + " songs");
+            mActivity.setToolbarSubTitle(Data.sMusicItems.size() + " songs");
             adapter.notifyDataSetChanged();
         } else {
             new Handler().postDelayed(this::sureCreateViewDone, 1000);      //循环一秒
@@ -220,6 +224,10 @@ public final class MusicListFragment extends Fragment {
                     break;
             }
         }
+    }
+
+    public MyRecyclerAdapter getAdapter() {
+        return adapter;
     }
 
     public RecyclerView getRecyclerView() {

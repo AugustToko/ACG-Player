@@ -30,6 +30,16 @@ public final class MyMusicService extends Service {
         Values.SERVICE_RUNNING = true;
 
         mMediaPlayer.setOnCompletionListener(mp -> {
+            if (Data.sNextWillPlaySongPath != null) {
+                try {
+                    Utils.Audio.doesNextHasMusic();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    mMediaPlayer.reset();
+                }
+                return;
+            }
+
             if (Values.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
                 if (!Data.sActivities.isEmpty()) {
                     //when mediaPlayer finishes playing, update InfoBar

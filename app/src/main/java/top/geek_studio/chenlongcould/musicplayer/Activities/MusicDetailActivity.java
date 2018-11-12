@@ -167,6 +167,7 @@ public final class MusicDetailActivity extends Activity {
         mNextButton.startAnimation(mNextButtonTranslateAnimation);
         mPreviousButton.startAnimation(mPreviousButtonTranslateAnimation);
 
+        // TODO: 2018/11/11 more animation... such as AlbumCover (in MusicDetailActivity)
     }
 
     private void initView() {
@@ -187,6 +188,11 @@ public final class MusicDetailActivity extends Activity {
         mRepeatButton = findViewById(R.id.activity_music_detail_image_repeat_button);
 
         initAnimation();
+
+        mRepeatButton.setOnLongClickListener(v -> {
+            // TODO: 2018/11/11 repeat mode...
+            return true;
+        });
 
         //init view data
         mHandler.sendEmptyMessage(Values.INIT_SEEK_BAR);
@@ -228,7 +234,7 @@ public final class MusicDetailActivity extends Activity {
             ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(params);
 
 //            GlideApp.with(this).pauseAllRequests();
-
+            // TODO: 2018/11/11 in MusicDetailActivity's infoBody, fast scroll may lag
             if (!HAS_BIG) {
                 DEF_TOP = params.topMargin;
                 ValueAnimator anim = ValueAnimator.ofInt(params.topMargin, params.leftMargin * 2);
@@ -275,10 +281,7 @@ public final class MusicDetailActivity extends Activity {
         mMusicListFragment = (MusicListFragment) ((MainActivity) Data.sActivities.get(0)).getFragmentList().get(0);
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerView.setAdapter(new MyRecyclerAdapter(Data.mMusicPathList
-                , Data.mSongNameList
-                , Data.mSongAlbumList
-                , this));
+        mRecyclerView.setAdapter(new MyRecyclerAdapter(Data.sMusicItems, this));
 
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -337,14 +340,31 @@ public final class MusicDetailActivity extends Activity {
 
         mNextButton.setOnClickListener(v -> {
             mSeekBar.setProgress(0, true);            //防止seekBar跳动到Max
-            if (Values.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
-                Utils.Audio.shufflePlayback();
-            } else if (Values.CURRENT_PLAY_TYPE.equals(Values.TYPE_COMMON)) {
-                // TODO: 2018/11/10 more models
-                Intent intent = new Intent();
-                intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPlay));
-                intent.putExtra("play_type", 4);
-                sendBroadcast(intent);
+
+            if (Data.sNextWillPlaySongPath != null) {
+                try {
+                    Utils.Audio.doesNextHasMusic();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Data.sMusicBinder.resetMusic();
+                }
+                return;
+            }
+
+            switch (Values.CURRENT_PLAY_TYPE) {
+                case Values.TYPE_RANDOM:
+                    Utils.Audio.shufflePlayback();
+                    break;
+                case Values.TYPE_COMMON:
+                    Intent intent = new Intent();
+                    intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPlay));
+                    intent.putExtra("play_type", 4);
+                    sendBroadcast(intent);
+                    break;
+                default:
+                    Data.sMusicBinder.seekTo(0);
+                    mSeekBar.setProgress(0, true);
+                    break;
             }
         });
 
@@ -377,9 +397,9 @@ public final class MusicDetailActivity extends Activity {
                         int index = Data.sHistoryPlayIndex.get(tempSize - 2);
                         Data.sHistoryPlayIndex.remove(tempSize - 1);
 
-                        String path = Data.mMusicPathList.get(index);
-                        String musicName = Data.mSongNameList.get(index);
-                        String albumName = Data.mSongAlbumList.get(index);
+                        String path = Data.sMusicItems.get(index).getMusicPath();
+                        String musicName = Data.sMusicItems.get(index).getMusicName();
+                        String albumName = Data.sMusicItems.get(index).getMusicAlbum();
 
                         Bitmap cover = Utils.Audio.getMp3Cover(path);
 
@@ -394,6 +414,8 @@ public final class MusicDetailActivity extends Activity {
                         Values.CURRENT_MUSIC_INDEX = index;
                         Values.CURRENT_SONG_PATH = path;
 
+                        mRecyclerView.scrollToPosition(index);
+
                         try {
                             Data.sMusicBinder.setDataSource(path);
                             Data.sMusicBinder.prepare();
@@ -402,6 +424,7 @@ public final class MusicDetailActivity extends Activity {
                             mHandler.sendEmptyMessage(Values.INIT_SEEK_BAR);
                         } catch (IOException e) {
                             e.printStackTrace();
+                            Data.sMusicBinder.resetMusic();
                         }
                     }
                     READY = true;

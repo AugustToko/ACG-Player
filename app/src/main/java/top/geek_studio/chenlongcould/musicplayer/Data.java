@@ -30,16 +30,14 @@ public final class Data {
     /**
      * data
      * */
-    public static volatile ArrayList<String> mMusicPathList = new ArrayList<>();
+    public static volatile List<MusicItem> sMusicItems = new ArrayList<>();
 
-    public static volatile List<String> mSongNameList = new ArrayList<>();
-
-    public static volatile ArrayList<String> mSongAlbumList = new ArrayList<>();
-
-    public static volatile List<Integer> mMusicIdList = new ArrayList<>();
+    public static volatile List<MusicItem> sMusicItemsBackUp = new ArrayList<>();
 
     // TODO: 2018/11/11 待完善
     public static volatile List<String> sFavouriteMusic = new ArrayList<>();
+
+    public static volatile List<String> sNotSupportType = new ArrayList<>();
 
     /**
      * 存储播放历史(序列) default...
@@ -55,7 +53,7 @@ public final class Data {
 
     public static String sCurrentMusicAlbum = null;
 
-    public static String sNextPlaySongPath = null;
+    public static String sNextWillPlaySongPath = null;
 
     public static ColorStateList sDefTextColorStateList = null;
 

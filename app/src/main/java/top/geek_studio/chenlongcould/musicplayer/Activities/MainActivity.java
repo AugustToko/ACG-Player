@@ -23,7 +23,6 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.NavigationView;
@@ -34,7 +33,9 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -55,6 +56,7 @@ import top.geek_studio.chenlongcould.musicplayer.Fragments.AlbumListFragment;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
+import top.geek_studio.chenlongcould.musicplayer.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Service.MyMusicService;
 import top.geek_studio.chenlongcould.musicplayer.Utils;
@@ -93,6 +95,8 @@ public final class MainActivity extends AppCompatActivity {
     private ImageView mNavHeaderImageView;
 
     private Menu mMenu;
+
+    private SearchView mSearchView;
 
     /**
      * ----------------- fragment(s) ----------------------
@@ -154,9 +158,43 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         mMenu = menu;
         getMenuInflater().inflate(R.menu.menu_toolbar, mMenu);
+
+        MenuItem searchItem = menu.findItem(R.id.menu_toolbar_search);
+
+//        mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+
+        mSearchView = (SearchView) searchItem.getActionView();
+
+        mSearchView.setIconifiedByDefault(true);
+        mSearchView.setQueryHint("Enter music name...");
+
+        //默认刚进去就打开搜索栏
+        mSearchView.setIconified(true);
+        //设置提交按钮是否可见
+        mSearchView.setSubmitButtonEnabled(true);
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                mSearchView.setIconified(true);
+                filterData(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filterData(newText);
+                return true;
+            }
+        });
         return true;
     }
 
@@ -179,16 +217,41 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * 根据输入框中的值来过滤数据并更新RecyclerView
+     *
+     * @param filterStr fileName
+     */
+    private void filterData(String filterStr) {
+        if (TextUtils.isEmpty(filterStr)) {
+            Data.sMusicItems.clear();
+            Data.sMusicItems.addAll(Data.sMusicItemsBackUp);
+            mMusicListFragment.getAdapter().notifyDataSetChanged();
+            return;
+        } else {
+            Data.sMusicItems.clear();
+            for (MusicItem item : Data.sMusicItemsBackUp) {
+                String name = item.getMusicName();
+                if (name.contains(filterStr)) {
+                    Data.sMusicItems.add(item);
+                }
+            }
+            mMusicListFragment.getAdapter().notifyDataSetChanged();
+
+        }
+
+    }
+
+    /**
      * when activity finished but service not(music playing in background),
      * the method can reload the music being played info to infoBar
      */
     private void reLoadInfoBar() {
-        if (Data.sMusicBinder != null) {
+        if (Data.sMusicBinder != null && Values.HAS_PLAYED) {
             Log.d(TAG, "initData: not null");
             if (Data.sMusicBinder.isPlayingMusic()) {
-                setCurrentSongInfo(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, Values.CURRENT_SONG_PATH, Data.sCurrentMusicBitmap, "reload");
                 setButtonTypePlay();
             }
+            setCurrentSongInfo(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, Values.CURRENT_SONG_PATH, Data.sCurrentMusicBitmap, "reload");
         }
     }
 
@@ -285,12 +348,15 @@ public final class MainActivity extends AppCompatActivity {
             }
         }
 
-        mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-
-                return true;
+        mNavigationView.setNavigationItemSelectedListener(menuItem -> {
+            switch (menuItem.getItemId()) {
+                // TODO: 2018/11/11 need more menu
+                case R.id.menu_nav_exit: {
+                    finish();
+                }
+                break;
             }
+            return true;
         });
 
         mNowPlayingSongAlbumText = findViewById(R.id.activity_main_now_playing_album_name);
@@ -403,9 +469,9 @@ public final class MainActivity extends AppCompatActivity {
     public void setCurrentSongInfo(String songName, String albumName, String songPath, @Nullable Bitmap cover, String... args) {
 
         //if already set the same info(from path) return
-        if (Values.CURRENT_SONG_PATH.equals(songPath) && args != null) {
-            return;
-        }
+//        if (Values.CURRENT_SONG_PATH.equals(songPath) && args != null) {
+//            return;
+//        }
 
         runOnUiThread(() -> {
 
