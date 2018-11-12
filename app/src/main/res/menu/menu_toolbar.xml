@@ -17,7 +17,6 @@
         android:title="Fast Play"
         app:showAsAction="ifRoom" />
 
-    <!--todo searchView 待完善-->
     <item
         android:id="@+id/menu_toolbar_search"
         android:icon="@drawable/ic_search_white_24dp"

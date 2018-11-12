@@ -25,17 +25,8 @@ public final class Values {
     public static final String PLAY_LIST_SPF_KEY = "PLAY_LIST_SPF_KEY";
     public static final String TYPE_RANDOM = "RANDOM";
     public static final String TYPE_COMMON = "COMMON";
-    public static final String PLAY_LIST_SPF_NAME_ = "PLAY_LIST_SPF_NAME_";           //must add custom tag: PLAY_LIST_SPF_NAME_"CUSTOM"
-    public static final String PLAY_LIST_SPF_NAME_MY_FAVOURITE = "PLAY_LIST_SPF_NAME_MY_FAVOURITE";
-    public static boolean HAS_PLAYED = false;           //检测app打开后, 是否播放过音乐 (如果没, 默认点击播放按钮为快速随机播放)
 
-    /**
-     * Handler msg.what
-     */
-    public static final int INIT_MUSIC_LIST = 50;
-    public static final int GET_DATA_DONE = 52;
-    public static final int SEEK_BAR_UPDATE = 53;
-    public static final int INIT_SEEK_BAR = 54;
+    public static boolean HAS_PLAYED = false;           //检测app打开后, 是否播放过音乐 (如果没, 默认点击播放按钮为快速随机播放)
 
     /**
      * permission RequestCode
@@ -43,25 +34,29 @@ public final class Values {
     public static final int REQUEST_WRITE_EXTERNAL_STORAGE = 60;
     public static final int MAX_HEIGHT_AND_WIDTH = 100;
 
-    /**
-     * TEMP DATA
-     */
-    //default value -1 or null
-    public static String CURRENT_SONG_PATH = "null";
-    public static int CURRENT_BIND_INDEX_MUSIC_LIST = -1;
-    public static int CURRENT_BIND_INDEX_ALBUM_LIST = -1;
-    public static int CURRENT_PAGE_INDEX = -1;
-    public static int CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = -1;            //存储使浮动菜单弹出的item,def = -1
-
-    /**
-     * sharedPrefs tag
-     */
-
-    public static final class SharedPrefsTag {
-        public static final String PLAY_LIST_NUM = "PLAY_LIST_NUM";
+    public static final class HandlerWhat {
+        /**
+         * Handler msg.what
+         */
+        public static final int INIT_MUSIC_LIST = 50;
+        public static final int GET_DATA_DONE = 52;
+        public static final int SEEK_BAR_UPDATE = 53;
+        public static final int INIT_SEEK_BAR = 54;
     }
-    public static int CURRENT_MUSIC_INDEX = -1;
-    public static String CURRENT_PLAY_TYPE = "COMMON";
+
+    public static final class CurrentData {
+        /**
+         * TEMP DATA
+         */
+        //default value -1 or null
+        public static String CURRENT_SONG_PATH = "null";
+        public static int CURRENT_BIND_INDEX_MUSIC_LIST = -1;
+        public static int CURRENT_BIND_INDEX_ALBUM_LIST = -1;
+        public static int CURRENT_PAGE_INDEX = -1;
+        public static int CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = -1;            //存储使浮动菜单弹出的item,def = -1
+        public static int CURRENT_MUSIC_INDEX = -1;
+        public static String CURRENT_PLAY_TYPE = "COMMON";
+    }
 
     /**
      * result(s), status
@@ -72,12 +67,22 @@ public final class Values {
     public static boolean MUSIC_PLAYING = false;
 
     /**
+     * sharedPrefs tag
+     */
+
+    public static final class SharedPrefsTag {
+        public static final String PLAY_LIST_NUM = "PLAY_LIST_NUM";
+        public static final String PLAY_LIST_SPF_NAME_ = "PLAY_LIST_SPF_NAME_";           //must add custom tag: PLAY_LIST_SPF_NAME_"CUSTOM"
+        public static final String PLAY_LIST_SPF_NAME_MY_FAVOURITE = "PLAY_LIST_SPF_NAME_MY_FAVOURITE";
+    }
+
+    /**
      * sort(s)
      */
     public static Comparator<String> sort = String::compareTo;
     public static int DEF_CROSS_FATE_TIME = 500;
 
-    public static class BroadCast {
+    public static final class BroadCast {
         public static String ReceiverOnMusicPlay = "top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay";
         public static String ReceiverOnMusicStop = "top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicStop";
         public static String ReceiverOnMusicPause = "top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPause";

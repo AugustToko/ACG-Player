@@ -52,7 +52,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
         viewHolder.mAlbumText.setText(mAlbumList.get(i));
-        Values.CURRENT_BIND_INDEX_ALBUM_LIST = viewHolder.getAdapterPosition();
+        Values.CurrentData.CURRENT_BIND_INDEX_ALBUM_LIST = viewHolder.getAdapterPosition();
     }
 
     @Override

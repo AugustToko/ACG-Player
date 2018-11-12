@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -18,6 +19,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.RotateAnimation;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageButton;
@@ -127,6 +130,11 @@ public final class MusicDetailActivity extends Activity {
             mPlayButton.setImageResource(R.drawable.ic_pause_black_24dp);
         }
 
+        if (Data.sCurrentMusicBitmap != null) {
+            int temp = Data.sCurrentMusicBitmap.getPixel(Data.sCurrentMusicBitmap.getWidth() / 2, Data.sCurrentMusicBitmap.getHeight() / 2);
+            mSeekBar.getThumb().setColorFilter(temp, PorterDuff.Mode.SRC_ATOP);
+        }
+
         Utils.Ui.setBlurEffect(this, Data.sCurrentMusicBitmap, mPrimaryBackground);
     }
 
@@ -138,6 +146,7 @@ public final class MusicDetailActivity extends Activity {
         AlphaAnimation temp = new AlphaAnimation(0, 0.3f);
         temp.setDuration(300);
         temp.setFillAfter(true);
+        temp.setStartOffset(500);
         mRandomButton.clearAnimation();
         mRepeatButton.clearAnimation();
         mRandomButton.startAnimation(temp);
@@ -145,10 +154,22 @@ public final class MusicDetailActivity extends Activity {
 
         ScaleAnimation mPlayButtonScaleAnimation = new ScaleAnimation(0, mPlayButton.getScaleX(), 0, mPlayButton.getScaleY(),
                 Animation.RELATIVE_TO_SELF, mPlayButton.getScaleX() / 2, Animation.RELATIVE_TO_SELF, mPlayButton.getScaleX() / 2);
+        RotateAnimation mPlayButtonRotationAnimation = new RotateAnimation(-90f, 0, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+
+        AnimationSet mPlayButtonAnimationSet = new AnimationSet(true);
+
+        mPlayButtonRotationAnimation.setDuration(300);
+        mPlayButtonRotationAnimation.setFillAfter(true);
         mPlayButtonScaleAnimation.setDuration(300);
         mPlayButtonScaleAnimation.setFillAfter(true);
+        mPlayButtonScaleAnimation.setStartOffset(500);
+        mPlayButtonRotationAnimation.setStartOffset(500);
         mPlayButton.clearAnimation();
-        mPlayButton.setAnimation(mPlayButtonScaleAnimation);
+
+        mPlayButtonAnimationSet.addAnimation(mPlayButtonRotationAnimation);
+        mPlayButtonAnimationSet.addAnimation(mPlayButtonScaleAnimation);
+
+        mPlayButton.setAnimation(mPlayButtonAnimationSet);
 
         TranslateAnimation mCardViewTranslateAnimation = new TranslateAnimation(mCardView.getTranslationX(), mCardView.getTranslationX(), 500, mCardView.getTranslationY());
         mCardViewTranslateAnimation.setDuration(300);
@@ -195,21 +216,21 @@ public final class MusicDetailActivity extends Activity {
         });
 
         //init view data
-        mHandler.sendEmptyMessage(Values.INIT_SEEK_BAR);
+        mHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
         if (getIntent().getStringExtra("intent_args").equals("by_clicked_body")) {
-            mHandler.sendEmptyMessage(Values.SEEK_BAR_UPDATE);
+            mHandler.sendEmptyMessage(Values.HandlerWhat.SEEK_BAR_UPDATE);
         }
 
         mRandomButton.setOnClickListener(v -> {
-            if (Values.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
-                Values.CURRENT_PLAY_TYPE = Values.TYPE_COMMON;
+            if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
+                Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_COMMON;
                 AlphaAnimation alphaAnimation = new AlphaAnimation(mRandomButton.getAlpha(), 0.3f);
                 alphaAnimation.setDuration(300);
                 alphaAnimation.setFillAfter(true);
                 mRandomButton.clearAnimation();
                 mRandomButton.startAnimation(alphaAnimation);
             } else {
-                Values.CURRENT_PLAY_TYPE = Values.TYPE_RANDOM;
+                Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_RANDOM;
                 AlphaAnimation alphaAnimation = new AlphaAnimation(mRandomButton.getAlpha(), 1f);
                 alphaAnimation.setDuration(300);
                 alphaAnimation.setFillAfter(true);
@@ -230,50 +251,13 @@ public final class MusicDetailActivity extends Activity {
         mMenuButton.setOnClickListener(v -> mPopupMenu.show());
 
         mInfoBody.setOnClickListener(v -> {
-            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mCardView.getLayoutParams();
-            ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(params);
-
-//            GlideApp.with(this).pauseAllRequests();
             // TODO: 2018/11/11 in MusicDetailActivity's infoBody, fast scroll may lag
             if (!HAS_BIG) {
-                DEF_TOP = params.topMargin;
-                ValueAnimator anim = ValueAnimator.ofInt(params.topMargin, params.leftMargin * 2);
-                anim.setDuration(250);
-                anim.addUpdateListener(animation -> {
-                    int currentValue = (Integer) animation.getAnimatedValue();
-                    layoutParams.setMargins(params.leftMargin, currentValue, params.rightMargin, params.bottomMargin);
-                    mCardView.setLayoutParams(layoutParams);
-                    mCardView.requestLayout();
-                });
-
-//                anim.addListener(new AnimatorListenerAdapter() {
-//                    @Override
-//                    public void onAnimationEnd(Animator animation) {
-//                        GlideApp.with(MusicDetailActivity.this).resumeRequests();
-//                    }
-//                });
-                anim.start();
-                HAS_BIG = true;
+                infoBodyScrollUp();
             } else {
-                ValueAnimator anim = ValueAnimator.ofInt(params.topMargin, DEF_TOP);
-                anim.setDuration(250);
-                anim.addUpdateListener(animation -> {
-                    int currentValue = (Integer) animation.getAnimatedValue();
-                    layoutParams.setMargins(params.leftMargin, currentValue, params.rightMargin, params.bottomMargin);
-                    mCardView.setLayoutParams(layoutParams);
-                    mCardView.requestLayout();
-                });
+                infoBodyScrollDown();
 
-//                anim.addListener(new AnimatorListenerAdapter() {
-//                    @Override
-//                    public void onAnimationEnd(Animator animation) {
-//                        GlideApp.with(MusicDetailActivity.this).resumeRequests();
-//                    }
-//                });
-                anim.start();
-                HAS_BIG = false;
-
-                mRecyclerView.scrollToPosition(Values.CURRENT_MUSIC_INDEX);
+                mRecyclerView.scrollToPosition(Values.CurrentData.CURRENT_MUSIC_INDEX);
             }
 
         });
@@ -304,32 +288,13 @@ public final class MusicDetailActivity extends Activity {
 
                 Data.sMusicBinder.seekTo(seekBar.getProgress());
                 Data.sMusicBinder.playMusic();
-//                if (Values.HAS_PLAYED) {
-//                    Utils.Ui.fastToast(MusicDetailActivity.this, "Jumping to " + seekBar.getProgress() + " seconds.");
-//
-//                    new Thread(() -> {
-//                        if (!Values.CURRENT_SONG_PATH.equals("null")) {
-//                            if (!Data.sMusicBinder.isPlayingMusic()) {
-//                                Intent intent = new Intent();
-//                                intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPlay));
-//                                sendBroadcast(intent);
-//                            }
-//                        }
-//
-//                        //首先获取seekBar拖动后的位置
-//                        int progress = seekBar.getProgress();
-//                        //跳转到某个位置播放
-//                        Data.sMusicBinder.seekTo(progress);
-//                    }).start();
-//                }
             }
         });
 
         //just pause or play
         mPlayButton.setOnClickListener(v -> {
-            Intent intent;
             if (Values.MUSIC_PLAYING) {
-                intent = new Intent();
+                Intent intent = new Intent();
                 intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPause));
                 sendBroadcast(intent);
             } else {
@@ -341,17 +306,12 @@ public final class MusicDetailActivity extends Activity {
         mNextButton.setOnClickListener(v -> {
             mSeekBar.setProgress(0, true);            //防止seekBar跳动到Max
 
-            if (Data.sNextWillPlaySongPath != null) {
-                try {
-                    Utils.Audio.doesNextHasMusic();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Data.sMusicBinder.resetMusic();
-                }
+            if (Data.sNextWillPlayIndex != -1) {
+                Utils.Audio.doesNextHasMusic();
                 return;
             }
 
-            switch (Values.CURRENT_PLAY_TYPE) {
+            switch (Values.CurrentData.CURRENT_PLAY_TYPE) {
                 case Values.TYPE_RANDOM:
                     Utils.Audio.shufflePlayback();
                     break;
@@ -409,10 +369,12 @@ public final class MusicDetailActivity extends Activity {
 
                         Utils.Ui.setNowPlaying();
 
+                        mSeekBar.getThumb().setColorFilter(cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
+
                         Values.MUSIC_PLAYING = true;
                         Values.HAS_PLAYED = true;
-                        Values.CURRENT_MUSIC_INDEX = index;
-                        Values.CURRENT_SONG_PATH = path;
+                        Values.CurrentData.CURRENT_MUSIC_INDEX = index;
+                        Values.CurrentData.CURRENT_SONG_PATH = path;
 
                         mRecyclerView.scrollToPosition(index);
 
@@ -421,7 +383,7 @@ public final class MusicDetailActivity extends Activity {
                             Data.sMusicBinder.prepare();
                             Data.sMusicBinder.playMusic();
 
-                            mHandler.sendEmptyMessage(Values.INIT_SEEK_BAR);
+                            mHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
                         } catch (IOException e) {
                             e.printStackTrace();
                             Data.sMusicBinder.resetMusic();
@@ -444,6 +406,23 @@ public final class MusicDetailActivity extends Activity {
         });
     }
 
+    private void infoBodyScrollUp() {
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mCardView.getLayoutParams();
+        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(params);
+
+        DEF_TOP = params.topMargin;
+        ValueAnimator anim = ValueAnimator.ofInt(params.topMargin, params.leftMargin * 2);
+        anim.setDuration(250);
+        anim.addUpdateListener(animation -> {
+            int currentValue = (Integer) animation.getAnimatedValue();
+            layoutParams.setMargins(params.leftMargin, currentValue, params.rightMargin, params.bottomMargin);
+            mCardView.setLayoutParams(layoutParams);
+            mCardView.requestLayout();
+        });
+        anim.start();
+        HAS_BIG = true;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_toolbar, menu);
@@ -452,6 +431,10 @@ public final class MusicDetailActivity extends Activity {
 
     public NotLeakHandler getHandler() {
         return mHandler;
+    }
+
+    public RecyclerView getRecyclerView() {
+        return mRecyclerView;
     }
 
     /*------------------ UI -----------------------*/
@@ -474,15 +457,39 @@ public final class MusicDetailActivity extends Activity {
     public void setInfoBar(String name, String albumName) {
         mMusicNameText.setText(name);
         mAlbumNameText.setText(albumName);
-        mIndexTextView.setText(String.valueOf(Values.CURRENT_MUSIC_INDEX));
-        mRecyclerView.scrollToPosition(Values.CURRENT_MUSIC_INDEX);
+        mIndexTextView.setText(String.valueOf(Values.CurrentData.CURRENT_MUSIC_INDEX));
+        mRecyclerView.scrollToPosition(Values.CurrentData.CURRENT_MUSIC_INDEX);
+    }
+
+    public SeekBar getSeekBar() {
+        return mSeekBar;
     }
 
     @Override
     public void onBackPressed() {
-        finish();
+        if (HAS_BIG) {
+            infoBodyScrollDown();
+        } else {
+            finish();
+        }
     }
-    /*------------------- UI ----------------------*/
+
+    public void infoBodyScrollDown() {
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mCardView.getLayoutParams();
+        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(params);
+
+        ValueAnimator anim = ValueAnimator.ofInt(params.topMargin, DEF_TOP);
+        anim.setDuration(250);
+        anim.addUpdateListener(animation -> {
+            int currentValue = (Integer) animation.getAnimatedValue();
+            layoutParams.setMargins(params.leftMargin, currentValue, params.rightMargin, params.bottomMargin);
+            mCardView.setLayoutParams(layoutParams);
+            mCardView.requestLayout();
+        });
+        anim.start();
+
+        HAS_BIG = false;
+    }
 
     @Override
     protected void onDestroy() {
@@ -501,11 +508,11 @@ public final class MusicDetailActivity extends Activity {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case Values.INIT_SEEK_BAR: {
+                case Values.HandlerWhat.INIT_SEEK_BAR: {
                     mSeekBar.setMax(Data.sMusicBinder.getDuration());
                 }
                 break;
-                case Values.SEEK_BAR_UPDATE: {
+                case Values.HandlerWhat.SEEK_BAR_UPDATE: {
                     //点击body 或 music 正在播放 才可以进行seekBar更新
                     if (Data.sMusicBinder.isPlayingMusic()) {
                         Log.d(TAG, "handleMessage: seekBar set");
@@ -513,7 +520,7 @@ public final class MusicDetailActivity extends Activity {
                     }
 
                     //循环更新 0.5s 一次
-                    mHandler.sendEmptyMessageDelayed(Values.SEEK_BAR_UPDATE, 500);
+                    mHandler.sendEmptyMessageDelayed(Values.HandlerWhat.SEEK_BAR_UPDATE, 500);
                 }
                 default:
             }

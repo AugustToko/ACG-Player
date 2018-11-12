@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.util.Log;
 
 import java.io.IOException;
@@ -45,7 +46,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 mainActivity.setButtonTypePlay();
 
                 MusicDetailActivity.NotLeakHandler notLeakHandler = musicDetailActivity.getHandler();
-                notLeakHandler.sendEmptyMessage(Values.INIT_SEEK_BAR);
+                notLeakHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
             }
             break;
 
@@ -59,19 +60,19 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
             }
             break;
 
-            //by auto-next(mediaPlayer OnCompletionListener)
+            //by auto-next(mediaPlayer OnCompletionListener) of next-play by user, at this time MainActivity is present
             case 4: {
                 Data.sMusicBinder.resetMusic();
-                int targetIndex = Values.CURRENT_MUSIC_INDEX + 1;
+                int targetIndex = Values.CurrentData.CURRENT_MUSIC_INDEX + 1;
                 if (targetIndex > Data.sMusicItems.size() - 1) {
                     targetIndex = 0;
                 }
 
 
-                Values.CURRENT_MUSIC_INDEX = targetIndex;
+                Values.CurrentData.CURRENT_MUSIC_INDEX = targetIndex;
                 Values.MUSIC_PLAYING = true;
                 Values.HAS_PLAYED = true;
-                Values.CURRENT_SONG_PATH = Data.sMusicItems.get(targetIndex).getMusicPath();
+                Values.CurrentData.CURRENT_SONG_PATH = Data.sMusicItems.get(targetIndex).getMusicPath();
 
                 String path = Data.sMusicItems.get(targetIndex).getMusicPath();
                 String musicName = Data.sMusicItems.get(targetIndex).getMusicName();
@@ -91,19 +92,25 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 if (Data.sActivities.size() >= 2) {
                     MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
                     musicDetailActivity.setCurrentSongInfo(musicName, albumName, Utils.Audio.getAlbumByteImage(path));
-//                    MusicDetailActivity.NotLeakHandler notLeakHandler = musicDetailActivity.getHandler();
-//                    notLeakHandler.sendEmptyMessage(Values.INIT_SEEK_BAR);
+                    musicDetailActivity.getSeekBar().getThumb().setColorFilter(cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
+
                 }
 
                 Data.sCurrentMusicAlbum = albumName;
                 Data.sCurrentMusicName = musicName;
                 Data.sCurrentMusicBitmap = cover;
-                Values.CURRENT_SONG_PATH = path;
+                Values.CurrentData.CURRENT_SONG_PATH = path;
 
                 try {
                     Data.sMusicBinder.setDataSource(Data.sMusicItems.get(targetIndex).getMusicPath());
                     Data.sMusicBinder.prepare();
                     Data.sMusicBinder.playMusic();
+
+                    if (Data.sActivities.size() >= 2) {
+                        MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
+                        MusicDetailActivity.NotLeakHandler notLeakHandler = musicDetailActivity.getHandler();
+                        notLeakHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
+                    }
 
                 } catch (IOException e) {
                     e.printStackTrace();

@@ -94,7 +94,7 @@ public final class AlbumListFragment extends Fragment {
                 arrayList = new ArrayList<>(hashSet);
                 arrayList.sort(Values.sort);
 
-                mNotLeakHandler.sendEmptyMessage(Values.GET_DATA_DONE);
+                mNotLeakHandler.sendEmptyMessage(Values.HandlerWhat.GET_DATA_DONE);
             }).start();
         } else {
             new Handler().postDelayed(this::sureGetDataDone, 500);
@@ -141,7 +141,7 @@ public final class AlbumListFragment extends Fragment {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case Values.GET_DATA_DONE: {
+                case Values.HandlerWhat.GET_DATA_DONE: {
                     sureCreateViewDone();
                 }
                 break;

@@ -81,7 +81,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             String clickedPath = mMusicItems.get(holder.getAdapterPosition()).getMusicPath();
 
             if (Data.sMusicBinder.isPlayingMusic()) {
-                if (clickedPath.equals(Values.CURRENT_SONG_PATH)) {
+                if (clickedPath.equals(Values.CurrentData.CURRENT_SONG_PATH)) {
                     Intent intent = new Intent();
                     intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPause));
                     mContext.sendBroadcast(intent);
@@ -114,8 +114,8 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
             Values.MUSIC_PLAYING = true;
             Values.HAS_PLAYED = true;
-            Values.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
-            Values.CURRENT_SONG_PATH = clickedPath;
+            Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
+            Values.CurrentData.CURRENT_SONG_PATH = clickedPath;
 
             Utils.Ui.setNowPlaying();
 
@@ -132,7 +132,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 if (Data.sActivities.size() >= 2) {
                     MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
                     MusicDetailActivity.NotLeakHandler notLeakHandler = musicDetailActivity.getHandler();
-                    notLeakHandler.sendEmptyMessage(Values.INIT_SEEK_BAR);
+                    notLeakHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -154,19 +154,19 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
             int index = holder.getAdapterPosition();
 
-            Values.CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = index;
+            Values.CurrentData.CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = index;
 
             switch (item.getItemId()) {
                 //noinspection PointlessArithmeticExpression
                 case Menu.FIRST + 0: {
-                    Data.sNextWillPlaySongPath = mMusicItems.get(index).getMusicPath();
+                    Data.sNextWillPlayIndex = holder.getAdapterPosition();
                 }
                 break;
 
                 case Menu.FIRST + 1: {
                     // TODO: 2018/11/8 待完善(最喜爱歌曲列表)
 
-                    SharedPreferences mPlayListSpf = mMainActivity.getSharedPreferences(Values.PLAY_LIST_SPF_NAME_MY_FAVOURITE, 0);
+                    SharedPreferences mPlayListSpf = mMainActivity.getSharedPreferences(Values.SharedPrefsTag.PLAY_LIST_SPF_NAME_MY_FAVOURITE, 0);
                     SharedPreferences.Editor editor = mPlayListSpf.edit();
                     editor.putString(Values.PLAY_LIST_SPF_KEY, mMusicItems.get(index).getMusicPath());
                     editor.apply();
@@ -203,7 +203,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 }
             }
 
-            Values.CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = -1;
+            Values.CurrentData.CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = -1;
 
             return false;
         });
@@ -224,7 +224,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         }
 
         /* show song name, use songNameList */
-        Values.CURRENT_BIND_INDEX_MUSIC_LIST = viewHolder.getAdapterPosition();
+        Values.CurrentData.CURRENT_BIND_INDEX_MUSIC_LIST = viewHolder.getAdapterPosition();
 
         viewHolder.mMusicText.setText(mMusicItems.get(viewHolder.getAdapterPosition()).getMusicName());
         viewHolder.mMusicAlbumName.setText(mMusicItems.get(viewHolder.getAdapterPosition()).getMusicAlbum());

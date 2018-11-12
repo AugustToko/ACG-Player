@@ -37,6 +37,7 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -160,6 +161,10 @@ public final class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        if (mDrawerLayout.isDrawerOpen(Gravity.START)) {
+            mDrawerLayout.closeDrawers();
+            return;
+        }
         finish();
     }
 
@@ -170,7 +175,8 @@ public final class MainActivity extends AppCompatActivity {
 
         MenuItem searchItem = menu.findItem(R.id.menu_toolbar_search);
 
-//        mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+//        mSearchView = (Sear-
+// 56`      `1hView) MenuItemCompat.getActionView(searchItem);
 
         mSearchView = (SearchView) searchItem.getActionView();
 
@@ -226,19 +232,20 @@ public final class MainActivity extends AppCompatActivity {
             Data.sMusicItems.clear();
             Data.sMusicItems.addAll(Data.sMusicItemsBackUp);
             mMusicListFragment.getAdapter().notifyDataSetChanged();
-            return;
         } else {
             Data.sMusicItems.clear();
             for (MusicItem item : Data.sMusicItemsBackUp) {
+
+                /*
+                 * //todo 仅支持 音乐名称搜索
+                 * */
                 String name = item.getMusicName();
                 if (name.contains(filterStr)) {
                     Data.sMusicItems.add(item);
                 }
             }
             mMusicListFragment.getAdapter().notifyDataSetChanged();
-
         }
-
     }
 
     /**
@@ -251,7 +258,7 @@ public final class MainActivity extends AppCompatActivity {
             if (Data.sMusicBinder.isPlayingMusic()) {
                 setButtonTypePlay();
             }
-            setCurrentSongInfo(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, Values.CURRENT_SONG_PATH, Data.sCurrentMusicBitmap, "reload");
+            setCurrentSongInfo(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, Values.CurrentData.CURRENT_SONG_PATH, Data.sCurrentMusicBitmap, "reload");
         }
     }
 
@@ -304,9 +311,9 @@ public final class MainActivity extends AppCompatActivity {
             //根据recycler view的滚动程度, 来判断如何返回顶部
             mToolbar.setOnClickListener(v -> {
                 if (TOOLBAR_CLICKED) {
-                    switch (Values.CURRENT_PAGE_INDEX) {
+                    switch (Values.CurrentData.CURRENT_PAGE_INDEX) {
                         case 0: {
-                            if (Values.CURRENT_BIND_INDEX_MUSIC_LIST > 20) {
+                            if (Values.CurrentData.CURRENT_BIND_INDEX_MUSIC_LIST > 20) {
                                 mMusicListFragment.getRecyclerView().scrollToPosition(0);
                             } else {
                                 mMusicListFragment.getRecyclerView().smoothScrollToPosition(0);
@@ -314,7 +321,7 @@ public final class MainActivity extends AppCompatActivity {
                         }
                         break;
                         case 1: {
-                            if (Values.CURRENT_BIND_INDEX_ALBUM_LIST > 20) {
+                            if (Values.CurrentData.CURRENT_BIND_INDEX_ALBUM_LIST > 20) {
                                 mAlbumListFragment.getRecyclerView().scrollToPosition(0);
                             } else {
                                 mAlbumListFragment.getRecyclerView().smoothScrollToPosition(0);
@@ -432,7 +439,7 @@ public final class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
-                Values.CURRENT_PAGE_INDEX = position;
+                Values.CurrentData.CURRENT_PAGE_INDEX = position;
             }
 
             @Override
@@ -557,7 +564,7 @@ public final class MainActivity extends AppCompatActivity {
                             mTabLayout.setupWithViewPager(mViewPager);
                             mViewPager.setCurrentItem(0);
                             mViewPager.setAdapter(mPagerAdapter);
-                            Values.CURRENT_PAGE_INDEX = 0;
+                            Values.CurrentData.CURRENT_PAGE_INDEX = 0;
                         });
                     }
                 }

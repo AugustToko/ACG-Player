@@ -17,8 +17,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PorterDuff;
 import android.media.MediaMetadataRetriever;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -52,9 +54,10 @@ public final class Utils {
          *
          * @param mediaUri mp3 path
          */
+        @NonNull
         public static Bitmap getMp3Cover(@NonNull String mediaUri) {
             if (mediaUri.contains("ogg")) {
-                return null;
+                return BitmapFactory.decodeResource(Resources.getSystem(), R.drawable.ic_audiotrack_24px);
             }
             sMediaMetadataRetriever.setDataSource(mediaUri);
             byte[] picture = sMediaMetadataRetriever.getEmbeddedPicture();
@@ -92,11 +95,40 @@ public final class Utils {
             GlideApp.with(context).load(picture).transition(DrawableTransitionOptions.withCrossFade()).override(50, 50).into(musicCover);
         }
 
-        public static void doesNextHasMusic() throws IOException {
-            if (Data.sNextWillPlaySongPath != null) {
+        /**
+         * 当下一首歌曲存在(被手动指定时), auto-next-play and next-play will call this method
+         */
+        public static void doesNextHasMusic() {
+            if (Data.sNextWillPlayIndex != -1) {
                 Data.sMusicBinder.resetMusic();
+
+                String path = Data.sMusicItems.get(Data.sNextWillPlayIndex).getMusicPath();
+                String musicName = Data.sMusicItems.get(Data.sNextWillPlayIndex).getMusicName();
+                String albumName = Data.sMusicItems.get(Data.sNextWillPlayIndex).getMusicAlbum();
+
+                Bitmap cover = Utils.Audio.getMp3Cover(path);
+
+                Ui.setNowPlaying();
+
+                MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
+                mainActivity.setCurrentSongInfo(musicName, albumName, path, cover);
+
+                if (Data.sActivities.size() >= 2) {
+                    MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
+                    musicDetailActivity.setCurrentSongInfo(musicName, albumName, Utils.Audio.getAlbumByteImage(path));
+                    musicDetailActivity.getRecyclerView().scrollToPosition(Data.sNextWillPlayIndex);
+                    musicDetailActivity.getSeekBar().getThumb().setColorFilter(cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
+                }
+
+                Values.MUSIC_PLAYING = true;
+                Values.HAS_PLAYED = true;
+                Values.CurrentData.CURRENT_MUSIC_INDEX = Data.sNextWillPlayIndex;
+                Values.CurrentData.CURRENT_SONG_PATH = path;
+
+                Data.sNextWillPlayIndex = -1;
+
                 try {
-                    Data.sMusicBinder.setDataSource(Data.sNextWillPlaySongPath);
+                    Data.sMusicBinder.setDataSource(path);
                     Data.sMusicBinder.prepare();
                     Data.sMusicBinder.playMusic();
                 } catch (IOException e) {
@@ -138,14 +170,15 @@ public final class Utils {
 
                         Values.MUSIC_PLAYING = true;
                         Values.HAS_PLAYED = true;
-                        Values.CURRENT_MUSIC_INDEX = index;
-                        Values.CURRENT_MUSIC_INDEX = index;
-                        Values.CURRENT_SONG_PATH = path;
+                        Values.CurrentData.CURRENT_MUSIC_INDEX = index;
+                        Values.CurrentData.CURRENT_MUSIC_INDEX = index;
+                        Values.CurrentData.CURRENT_SONG_PATH = path;
 
                         if (Data.sActivities.size() >= 2) {
                             MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
                             musicDetailActivity.setButtonTypePlay();
                             musicDetailActivity.setCurrentSongInfo(musicName, albumName, getAlbumByteImage(path));
+                            musicDetailActivity.getSeekBar().getThumb().setColorFilter(cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
                         }
 
                         try {
@@ -156,7 +189,9 @@ public final class Utils {
                             if (Data.sActivities.size() >= 2) {
                                 MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
                                 MusicDetailActivity.NotLeakHandler notLeakHandler = musicDetailActivity.getHandler();
-                                notLeakHandler.sendEmptyMessage(Values.INIT_SEEK_BAR);
+
+                                //music after mediaPlayer.setDataSource, because of "Values.HandlerWhat.INIT_SEEK_BAR"
+                                notLeakHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
                             }
 
                         } catch (IOException e) {

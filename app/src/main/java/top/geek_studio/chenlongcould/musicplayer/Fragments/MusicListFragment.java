@@ -138,7 +138,7 @@ public final class MusicListFragment extends Fragment {
 
                     } while (cursor.moveToNext());
                     cursor.close();
-                    mHandler.sendEmptyMessage(Values.INIT_MUSIC_LIST);
+                    mHandler.sendEmptyMessage(Values.HandlerWhat.INIT_MUSIC_LIST);
                     Values.MUSIC_DATA_INIT_DONE = true;
                 } else {
                     mActivity.runOnUiThread(() -> Utils.Ui.fastToast(mActivity, "cursor == null or moveToFirst Fail"));
@@ -211,7 +211,7 @@ public final class MusicListFragment extends Fragment {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case Values.INIT_MUSIC_LIST: {
+                case Values.HandlerWhat.INIT_MUSIC_LIST: {
                     mActivity.runOnUiThread(() -> {
                         if (CREATE_VIEW_DONE) {
                             sureCreateViewDone();

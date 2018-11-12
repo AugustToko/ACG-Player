@@ -34,7 +34,6 @@ public final class Data {
 
     public static volatile List<MusicItem> sMusicItemsBackUp = new ArrayList<>();
 
-    // TODO: 2018/11/11 待完善
     public static volatile List<String> sFavouriteMusic = new ArrayList<>();
 
     public static volatile List<String> sNotSupportType = new ArrayList<>();
@@ -53,7 +52,7 @@ public final class Data {
 
     public static String sCurrentMusicAlbum = null;
 
-    public static String sNextWillPlaySongPath = null;
+    public static int sNextWillPlayIndex = -1;
 
     public static ColorStateList sDefTextColorStateList = null;
 

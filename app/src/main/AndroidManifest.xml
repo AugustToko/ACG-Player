@@ -43,11 +43,11 @@
         <activity
             android:name=".Activities.MusicDetailActivity"
             android:launchMode="singleTop"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/MusicDetailTheme" />
         <activity
             android:name=".Activities.SplashActivity"
             android:launchMode="singleTask"
-            android:theme="@style/AppTheme">
+            android:theme="@style/SplashActivityTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -72,7 +72,7 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".Activities.PublicActivity"></activity>
+        <activity android:name=".Activities.PublicActivity" />
     </application>
 
 </manifest>

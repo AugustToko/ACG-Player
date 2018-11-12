@@ -30,31 +30,26 @@ public final class MyMusicService extends Service {
         Values.SERVICE_RUNNING = true;
 
         mMediaPlayer.setOnCompletionListener(mp -> {
-            if (Data.sNextWillPlaySongPath != null) {
-                try {
-                    Utils.Audio.doesNextHasMusic();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    mMediaPlayer.reset();
-                }
+            if (Data.sNextWillPlayIndex != -1) {
+                Utils.Audio.doesNextHasMusic();
                 return;
             }
 
-            if (Values.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
+            if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
                 if (!Data.sActivities.isEmpty()) {
                     //when mediaPlayer finishes playing, update InfoBar
                     mMediaPlayer.reset();
                     Utils.Audio.shufflePlayback();
-                } else if (Values.CURRENT_PLAY_TYPE.equals(Values.TYPE_COMMON)) {
+                } else {
                     Utils.Ui.setNowNotPlaying(this);
-                    Intent intent = new Intent();
-                    intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPlay));
-                    intent.putExtra("play_type", 4);
-                    sendBroadcast(intent);
-            } else {
-                Utils.Ui.setNowNotPlaying(this);
                     mMediaPlayer.reset();
                 }
+            } else if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_COMMON)) {
+                Utils.Ui.setNowNotPlaying(this);
+                Intent intent = new Intent();
+                intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPlay));
+                intent.putExtra("play_type", 4);
+                sendBroadcast(intent);
             }
         });
 
