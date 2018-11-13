@@ -40,6 +40,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -70,6 +71,8 @@ public final class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     private boolean TOOLBAR_CLICKED = false;
+
+    private boolean BACK_PRESSED = false;
 
     private SharedPreferences mDefaultSpf;
 
@@ -160,12 +163,19 @@ public final class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
         if (mDrawerLayout.isDrawerOpen(Gravity.START)) {
             mDrawerLayout.closeDrawers();
             return;
         }
-        finish();
+
+        if (BACK_PRESSED) {
+            finish();
+        } else {
+            BACK_PRESSED = true;
+            Toast.makeText(this, "Press again to exit!", Toast.LENGTH_SHORT).show();
+            new Handler().postDelayed(() -> BACK_PRESSED = false, 2000);
+        }
+
     }
 
     @Override
@@ -455,6 +465,19 @@ public final class MainActivity extends AppCompatActivity {
         Data.sDefIcoColorStateList = mNowPlayingStatusImage.getImageTintList();
     }
 
+    private void initAnimation() {
+        TranslateAnimation mPlayingBodyTranslateAnimation = new TranslateAnimation(mNowPlayingBody.getTranslationX(), mNowPlayingBody.getTranslationX(), 500, mNowPlayingBody.getTranslationY());
+        mPlayingBodyTranslateAnimation.setDuration(300);
+        mPlayingBodyTranslateAnimation.setFillAfter(true);
+        mNowPlayingBody.clearAnimation();
+        mNowPlayingBody.startAnimation(mPlayingBodyTranslateAnimation);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
     private void initDrawerToggle() {
         // 参数：开启抽屉的activity、DrawerLayout的对象、toolbar按钮打开关闭的对象、描述open drawer、描述close drawer
         ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.open, R.string.close);
@@ -532,15 +555,8 @@ public final class MainActivity extends AppCompatActivity {
         return mFragmentList;
     }
 
-    public ConstraintLayout getNowPlayingBody() {
-        return mNowPlayingBody;
-    }
-
-    public NotLeakHandler getHandler() {
-        return mHandler;
-    }
-
     class NotLeakHandler extends Handler {
+        @SuppressWarnings("unused")
         private WeakReference<MainActivity> mWeakReference;
 
         NotLeakHandler(MainActivity activity, Looper looper) {

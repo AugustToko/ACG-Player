@@ -12,11 +12,13 @@
 package top.geek_studio.chenlongcould.musicplayer.Activities;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -24,6 +26,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+
+import java.lang.reflect.Field;
 
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils;
@@ -37,6 +41,16 @@ public final class SplashActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate: done");
         super.onCreate(savedInstanceState);
+
+        try {
+            @SuppressLint("PrivateApi") Class decorViewClazz = Class.forName("com.android.internal.policy.DecorView");
+            Field field = decorViewClazz.getDeclaredField("mSemiTransparentStatusBarColor");
+            field.setAccessible(true);
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+            field.setInt(getWindow().getDecorView(), Color.TRANSPARENT);  //改为透明
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
 
         setContentView(R.layout.activity_splash);
 

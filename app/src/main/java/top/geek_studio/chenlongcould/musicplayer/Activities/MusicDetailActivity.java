@@ -1,10 +1,14 @@
 package top.geek_studio.chenlongcould.musicplayer.Activities;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,11 +16,14 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.AppBarLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
@@ -33,6 +40,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
 
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.Data;
@@ -52,6 +60,8 @@ public final class MusicDetailActivity extends Activity {
     private boolean HAS_BIG = false;
 
     private int DEF_TOP = -1;
+
+    private boolean HIDE_TOOLBAR = false;
 
     private ImageView mMusicAlbumImage;
 
@@ -89,6 +99,10 @@ public final class MusicDetailActivity extends Activity {
 
     private ImageButton mRepeatButton;
 
+    private Toolbar mToolbar;
+
+    private AppBarLayout mAppBarLayout;
+
     /**
      * menu
      */
@@ -101,6 +115,17 @@ public final class MusicDetailActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        try {
+            @SuppressLint("PrivateApi") Class decorViewClazz = Class.forName("com.android.internal.policy.DecorView");
+            Field field = decorViewClazz.getDeclaredField("mSemiTransparentStatusBarColor");
+            field.setAccessible(true);
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+            field.setInt(getWindow().getDecorView(), Color.TRANSPARENT);  //改为透明
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
         setContentView(R.layout.activity_music_detail);
 
         Data.sActivities.add(this);
@@ -191,6 +216,12 @@ public final class MusicDetailActivity extends Activity {
         // TODO: 2018/11/11 more animation... such as AlbumCover (in MusicDetailActivity)
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initAnimation();
+    }
+
     private void initView() {
         mMusicAlbumImage = findViewById(R.id.activity_music_detail_album_image);
         mPrimaryBackground = findViewById(R.id.activity_music_detail_primary_background);
@@ -207,8 +238,58 @@ public final class MusicDetailActivity extends Activity {
         mMenuButton = findViewById(R.id.item_menu);
         mRandomButton = findViewById(R.id.activity_music_detail_image_random_button);
         mRepeatButton = findViewById(R.id.activity_music_detail_image_repeat_button);
+        mToolbar = findViewById(R.id.activity_music_detail_toolbar);
+        mAppBarLayout = findViewById(R.id.activity_music_detail_appbar);
 
-        initAnimation();
+        mToolbar.setNavigationOnClickListener(v -> finish());
+
+        mToolbar.inflateMenu(R.menu.menu_toolbar);
+
+        mMusicAlbumImage.setOnClickListener(v -> {
+
+            if (HIDE_TOOLBAR) {
+                HIDE_TOOLBAR = false;
+                ValueAnimator anim = ValueAnimator.ofFloat(0, 1f);
+                anim.setDuration(300);
+                anim.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mAppBarLayout.clearAnimation();
+                    }
+
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        mAppBarLayout.setVisibility(View.VISIBLE);
+                    }
+                });
+                anim.addUpdateListener(animation -> mAppBarLayout.setAlpha((Float) animation.getAnimatedValue()));
+                anim.start();
+            } else {
+                HIDE_TOOLBAR = true;
+                AlphaAnimation temp = new AlphaAnimation(1f, 0f);
+                temp.setDuration(300);
+                temp.setFillAfter(false);
+                temp.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        Log.d(TAG, "onAnimationStart: start 2");
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        mAppBarLayout.clearAnimation();
+                        mAppBarLayout.setAlpha(0f);
+                        mAppBarLayout.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+                mAppBarLayout.startAnimation(temp);
+            }
+        });
 
         mRepeatButton.setOnLongClickListener(v -> {
             // TODO: 2018/11/11 repeat mode...
@@ -514,11 +595,10 @@ public final class MusicDetailActivity extends Activity {
                 break;
                 case Values.HandlerWhat.SEEK_BAR_UPDATE: {
                     //点击body 或 music 正在播放 才可以进行seekBar更新
-                    if (Data.sMusicBinder.isPlayingMusic()) {
+                    if (Data.sMusicBinder.isPlayingMusic() || Data.sActivities.size() > 0) {
                         Log.d(TAG, "handleMessage: seekBar set");
                         mSeekBar.setProgress(Data.sMusicBinder.getCurrentPosition(), true);
                     }
-
                     //循环更新 0.5s 一次
                     mHandler.sendEmptyMessageDelayed(Values.HandlerWhat.SEEK_BAR_UPDATE, 500);
                 }
