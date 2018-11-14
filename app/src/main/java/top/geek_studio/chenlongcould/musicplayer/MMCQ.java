@@ -1,23 +1,15 @@
-package top.geek_studio.chenlongcould.musicplayer;
-
 /*
- * Copyright (C) 2015 Henrique Rocha
- * Copyright (C) 2014 Fonpit AG
- *
- * License
- * -------
- * Creative Commons Attribution 2.5 License:
- * http://creativecommons.org/licenses/by/2.5/
- *
- * Thanks
- * ------
- * Simon Oualid - For creating java-colorthief
- * available at https://github.com/soualid/java-colorthief
- *
- * Lokesh Dhakar - for the original Color Thief javascript version
- * available at http://lokeshdhakar.com/projects/color-thief/
- *
+ * ************************************************************
+ * 文件：MMCQ.java  模块：app  项目：MusicPlayer
+ * 当前修改时间：2018年11月14日 15:30:40
+ * 上次修改时间：2018年11月14日 15:29:36
+ * 作者：chenlongcould
+ * Geek Studio
+ * Copyright (c) 2018
+ * ************************************************************
  */
+
+package top.geek_studio.chenlongcould.musicplayer;
 
 import android.graphics.Bitmap;
 
