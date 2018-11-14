@@ -73,6 +73,11 @@
         </receiver>
 
         <activity android:name=".Activities.PublicActivity" />
+
+        <receiver
+            android:name=".BroadCasts.MyHeadSetPlugReceiver"
+            android:enabled="true"
+            android:exported="true"></receiver>
     </application>
 
 </manifest>

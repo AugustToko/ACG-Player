@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent"
     tools:context=".Activities.MusicDetailActivity">
 
     <ImageView
@@ -18,12 +17,22 @@
         app:layout_constraintTop_toTopOf="@+id/layout_seek_bar_1" />
 
     <ImageView
+        android:id="@+id/activity_music_detail_primary_background_down"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:contentDescription="@string/activity_music_detail_primary_background"
+        android:scaleType="centerCrop"
+        android:src="@color/colorPrimary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/layout_seek_bar_1" />
+
+    <ImageView
         android:id="@+id/activity_music_detail_album_image"
         android:layout_width="0dp"
         android:layout_height="400dp"
-        android:background="#fff"
         android:contentDescription="@string/activity_music_detail_album_image"
         android:scaleType="centerCrop"
+        android:transitionName="@string/image_trans"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"

@@ -50,7 +50,6 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public final class MusicDetailActivity extends Activity {
 
     private static final String TAG = "MusicDetailActivity";
@@ -66,6 +65,8 @@ public final class MusicDetailActivity extends Activity {
     private ImageView mMusicAlbumImage;
 
     private ImageView mPrimaryBackground;
+
+    private ImageView mPrimaryBackground_down;
 
     private SeekBar mSeekBar;
 
@@ -138,12 +139,38 @@ public final class MusicDetailActivity extends Activity {
 
         initView();
 
-        if (Values.HAS_PLAYED) {
-            initData();
+        initData();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initAnimation();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (HAS_BIG) {
+            infoBodyScrollDown();
+        } else {
+            finish();
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        Data.sActivities.remove(this);
+        mHandlerThread.quitSafely();
+        super.onDestroy();
+    }
+
     private void initData() {
+        //init view data
+        mHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
+        if (getIntent().getStringExtra("intent_args").equals("by_clicked_body")) {
+            mHandler.sendEmptyMessage(Values.HandlerWhat.SEEK_BAR_UPDATE);
+        }
+
         GlideApp.with(this)
                 .load(Data.sCurrentMusicBitmap)
                 .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
@@ -160,7 +187,7 @@ public final class MusicDetailActivity extends Activity {
             mSeekBar.getThumb().setColorFilter(temp, PorterDuff.Mode.SRC_ATOP);
         }
 
-        Utils.Ui.setBlurEffect(this, Data.sCurrentMusicBitmap, mPrimaryBackground);
+        Utils.Ui.setBlurEffect(this, Data.sCurrentMusicBitmap, mPrimaryBackground, mPrimaryBackground_down);
     }
 
     private void initAnimation() {
@@ -174,8 +201,13 @@ public final class MusicDetailActivity extends Activity {
         temp.setStartOffset(500);
         mRandomButton.clearAnimation();
         mRepeatButton.clearAnimation();
-        mRandomButton.startAnimation(temp);
-        mRepeatButton.startAnimation(temp);
+        if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_COMMON)) {
+            mRandomButton.startAnimation(temp);
+        }
+
+        if (Values.CurrentData.CURRENT_AUTO_NEXT_TYPE.equals(Values.TYPE_COMMON)) {
+            mRepeatButton.startAnimation(temp);
+        }
 
         ScaleAnimation mPlayButtonScaleAnimation = new ScaleAnimation(0, mPlayButton.getScaleX(), 0, mPlayButton.getScaleY(),
                 Animation.RELATIVE_TO_SELF, mPlayButton.getScaleX() / 2, Animation.RELATIVE_TO_SELF, mPlayButton.getScaleX() / 2);
@@ -216,34 +248,61 @@ public final class MusicDetailActivity extends Activity {
         // TODO: 2018/11/11 more animation... such as AlbumCover (in MusicDetailActivity)
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        initAnimation();
-    }
-
     private void initView() {
-        mMusicAlbumImage = findViewById(R.id.activity_music_detail_album_image);
-        mPrimaryBackground = findViewById(R.id.activity_music_detail_primary_background);
-        mSeekBar = findViewById(R.id.seekBar);
-        mNextButton = findViewById(R.id.activity_music_detail_image_next_button);
-        mPreviousButton = findViewById(R.id.activity_music_detail_image_previous_button);
-        mPlayButton = findViewById(R.id.activity_music_detail_image_play_button);
-        mRecyclerView = findViewById(R.id.recycler_view);
-        mInfoBody = findViewById(R.id.item_layout);
-        mCardView = findViewById(R.id.activity_music_detail_card_view);
-        mIndexTextView = findViewById(R.id.item_index_text);
-        mAlbumNameText = findViewById(R.id.item_text_one);
-        mMusicNameText = findViewById(R.id.item_main_text);
-        mMenuButton = findViewById(R.id.item_menu);
-        mRandomButton = findViewById(R.id.activity_music_detail_image_random_button);
-        mRepeatButton = findViewById(R.id.activity_music_detail_image_repeat_button);
-        mToolbar = findViewById(R.id.activity_music_detail_toolbar);
-        mAppBarLayout = findViewById(R.id.activity_music_detail_appbar);
+        findView();
 
         mToolbar.setNavigationOnClickListener(v -> finish());
 
-        mToolbar.inflateMenu(R.menu.menu_toolbar);
+        // TODO: 2018/11/14 问题
+        mRepeatButton.setOnClickListener(v -> {
+
+            /*
+             * COMMON = 0f
+             * REPEAT = 1f
+             * REPEAT_ONE = 1f(another pic)
+             * */
+            switch (Values.CurrentData.CURRENT_AUTO_NEXT_TYPE) {
+                case Values.TYPE_COMMON: {
+                    AlphaAnimation temp = new AlphaAnimation(0.3f, 1f);
+                    temp.setDuration(300);
+                    temp.setFillAfter(true);
+                    temp.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
+
+                        }
+                    });
+                    mRepeatButton.clearAnimation();
+                    mRepeatButton.startAnimation(temp);
+                    Values.CurrentData.CURRENT_AUTO_NEXT_TYPE = "REPEAT";
+                    break;
+                }
+                case Values.TYPE_REPEAT:
+                    mRepeatButton.setImageResource(R.drawable.ic_repeat_one_white_24dp);
+                    Values.CurrentData.CURRENT_AUTO_NEXT_TYPE = Values.TYPE_REPEAT_ONE;
+                    break;
+                case Values.TYPE_REPEAT_ONE: {
+                    mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
+                    AlphaAnimation temp = new AlphaAnimation(1f, 0.3f);
+                    temp.setDuration(300);
+                    temp.setFillAfter(true);
+                    mRepeatButton.startAnimation(temp);
+                    Values.CurrentData.CURRENT_AUTO_NEXT_TYPE = Values.TYPE_COMMON;
+                    break;
+                }
+            }
+        });
+
+        mToolbar.inflateMenu(R.menu.menu_toolbar_in_detail);
 
         mMusicAlbumImage.setOnClickListener(v -> {
 
@@ -295,12 +354,6 @@ public final class MusicDetailActivity extends Activity {
             // TODO: 2018/11/11 repeat mode...
             return true;
         });
-
-        //init view data
-        mHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
-        if (getIntent().getStringExtra("intent_args").equals("by_clicked_body")) {
-            mHandler.sendEmptyMessage(Values.HandlerWhat.SEEK_BAR_UPDATE);
-        }
 
         mRandomButton.setOnClickListener(v -> {
             if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
@@ -380,11 +433,12 @@ public final class MusicDetailActivity extends Activity {
                 sendBroadcast(intent);
             } else {
                 Data.sMusicBinder.playMusic();
-                Utils.Ui.setNowPlaying();
+                Utils.Ui.setPlayButtonNowPlaying();
             }
         });
 
         mNextButton.setOnClickListener(v -> {
+            Values.BUTTON_PRESSED = true;
             mSeekBar.setProgress(0, true);            //防止seekBar跳动到Max
 
             if (Data.sNextWillPlayIndex != -1) {
@@ -407,15 +461,18 @@ public final class MusicDetailActivity extends Activity {
                     mSeekBar.setProgress(0, true);
                     break;
             }
+            Values.BUTTON_PRESSED = false;
         });
 
         mNextButton.setOnLongClickListener(v -> {
+            Values.BUTTON_PRESSED = true;
             int nowPosition = mSeekBar.getProgress() + Data.sMusicBinder.getDuration() / 20;
             if (nowPosition >= mSeekBar.getMax()) {
                 nowPosition = mSeekBar.getMax();
             }
             mSeekBar.setProgress(nowPosition, true);
             Data.sMusicBinder.seekTo(nowPosition);
+            Values.BUTTON_PRESSED = false;
             return true;
         });
 
@@ -448,7 +505,7 @@ public final class MusicDetailActivity extends Activity {
                         mainActivity.setCurrentSongInfo(musicName, albumName, path, cover);
                         setCurrentSongInfo(musicName, albumName, Utils.Audio.getAlbumByteImage(path));
 
-                        Utils.Ui.setNowPlaying();
+                        Utils.Ui.setPlayButtonNowPlaying();
 
                         mSeekBar.getThumb().setColorFilter(cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
 
@@ -487,6 +544,28 @@ public final class MusicDetailActivity extends Activity {
         });
     }
 
+    private void findView() {
+        mMusicAlbumImage = findViewById(R.id.activity_music_detail_album_image);
+        mPrimaryBackground = findViewById(R.id.activity_music_detail_primary_background);
+        mPrimaryBackground_down = findViewById(R.id.activity_music_detail_primary_background_down);
+        mSeekBar = findViewById(R.id.seekBar);
+        mNextButton = findViewById(R.id.activity_music_detail_image_next_button);
+        mPreviousButton = findViewById(R.id.activity_music_detail_image_previous_button);
+        mPlayButton = findViewById(R.id.activity_music_detail_image_play_button);
+        mRecyclerView = findViewById(R.id.recycler_view);
+        mInfoBody = findViewById(R.id.item_layout);
+        mCardView = findViewById(R.id.activity_music_detail_card_view);
+        mIndexTextView = findViewById(R.id.item_index_text);
+        mAlbumNameText = findViewById(R.id.item_text_one);
+        mMusicNameText = findViewById(R.id.item_main_text);
+        mMenuButton = findViewById(R.id.item_menu);
+        mRandomButton = findViewById(R.id.activity_music_detail_image_random_button);
+        mRepeatButton = findViewById(R.id.activity_music_detail_image_repeat_button);
+        mToolbar = findViewById(R.id.activity_music_detail_toolbar);
+        mAppBarLayout = findViewById(R.id.activity_music_detail_appbar);
+    }
+
+    //scroll infoBar Up
     private void infoBodyScrollUp() {
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mCardView.getLayoutParams();
         ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(params);
@@ -504,58 +583,8 @@ public final class MusicDetailActivity extends Activity {
         HAS_BIG = true;
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_toolbar, menu);
-        return true;
-    }
-
-    public NotLeakHandler getHandler() {
-        return mHandler;
-    }
-
-    public RecyclerView getRecyclerView() {
-        return mRecyclerView;
-    }
-
-    /*------------------ UI -----------------------*/
-    public void setButtonTypePause() {
-        runOnUiThread(() -> mPlayButton.setImageResource(R.drawable.ic_play_arrow_black_24dp));
-    }
-
-    public void setButtonTypePlay() {
-        runOnUiThread(() -> mPlayButton.setImageResource(R.drawable.ic_pause_black_24dp));
-    }
-
-    public void setCurrentSongInfo(String name, String albumName, byte[] cover) {
-        runOnUiThread(() -> {
-            Utils.Ui.setBlurEffect(MusicDetailActivity.this, cover, mPrimaryBackground);
-            GlideApp.with(MusicDetailActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME)).centerCrop().into(mMusicAlbumImage);
-            setInfoBar(name, albumName);
-        });
-    }
-
-    public void setInfoBar(String name, String albumName) {
-        mMusicNameText.setText(name);
-        mAlbumNameText.setText(albumName);
-        mIndexTextView.setText(String.valueOf(Values.CurrentData.CURRENT_MUSIC_INDEX));
-        mRecyclerView.scrollToPosition(Values.CurrentData.CURRENT_MUSIC_INDEX);
-    }
-
-    public SeekBar getSeekBar() {
-        return mSeekBar;
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (HAS_BIG) {
-            infoBodyScrollDown();
-        } else {
-            finish();
-        }
-    }
-
-    public void infoBodyScrollDown() {
+    //scroll infoBar Down
+    private void infoBodyScrollDown() {
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mCardView.getLayoutParams();
         ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(params);
 
@@ -572,10 +601,41 @@ public final class MusicDetailActivity extends Activity {
         HAS_BIG = false;
     }
 
-    @Override
-    protected void onDestroy() {
-        Data.sActivities.remove(this);
-        super.onDestroy();
+    public void setButtonTypePause() {
+        runOnUiThread(() -> mPlayButton.setImageResource(R.drawable.ic_play_arrow_black_24dp));
+    }
+
+    public void setButtonTypePlay() {
+        runOnUiThread(() -> mPlayButton.setImageResource(R.drawable.ic_pause_black_24dp));
+    }
+
+    //set infoBar set AlbumImage set PrimaryBackground
+    public void setCurrentSongInfo(String name, String albumName, byte[] cover) {
+        runOnUiThread(() -> {
+            GlideApp.with(MusicDetailActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME)).centerCrop().into(mMusicAlbumImage);
+            Utils.Ui.setBlurEffect(this, cover, mPrimaryBackground, mPrimaryBackground_down);
+            setInfoBar(name, albumName);
+        });
+    }
+
+    //small infoBar
+    public void setInfoBar(String name, String albumName) {
+        mMusicNameText.setText(name);
+        mAlbumNameText.setText(albumName);
+        mIndexTextView.setText(String.valueOf(Values.CurrentData.CURRENT_MUSIC_INDEX));
+        mRecyclerView.scrollToPosition(Values.CurrentData.CURRENT_MUSIC_INDEX);
+    }
+
+    public NotLeakHandler getHandler() {
+        return mHandler;
+    }
+
+    public RecyclerView getRecyclerView() {
+        return mRecyclerView;
+    }
+
+    public SeekBar getSeekBar() {
+        return mSeekBar;
     }
 
     public class NotLeakHandler extends Handler {
@@ -596,7 +656,6 @@ public final class MusicDetailActivity extends Activity {
                 case Values.HandlerWhat.SEEK_BAR_UPDATE: {
                     //点击body 或 music 正在播放 才可以进行seekBar更新
                     if (Data.sMusicBinder.isPlayingMusic() || Data.sActivities.size() > 0) {
-                        Log.d(TAG, "handleMessage: seekBar set");
                         mSeekBar.setProgress(Data.sMusicBinder.getCurrentPosition(), true);
                     }
                     //循环更新 0.5s 一次

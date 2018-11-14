@@ -27,6 +27,7 @@ import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -133,8 +134,6 @@ public final class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d(TAG, "onCreate: ");
-
         mHandlerThread = new HandlerThread("Handler Thread in MainActivity");
         mHandlerThread.start();
         mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
@@ -184,9 +183,6 @@ public final class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_toolbar, mMenu);
 
         MenuItem searchItem = menu.findItem(R.id.menu_toolbar_search);
-
-//        mSearchView = (Sear-
-// 56`      `1hView) MenuItemCompat.getActionView(searchItem);
 
         mSearchView = (SearchView) searchItem.getActionView();
 
@@ -317,7 +313,6 @@ public final class MainActivity extends AppCompatActivity {
         if (mToolbar == null) {
             throw new IllegalStateException("Layout is required to include a Toolbar");
         } else {
-
             //根据recycler view的滚动程度, 来判断如何返回顶部
             mToolbar.setOnClickListener(v -> {
                 if (TOOLBAR_CLICKED) {
@@ -341,7 +336,7 @@ public final class MainActivity extends AppCompatActivity {
 
                 }
                 TOOLBAR_CLICKED = true;
-                new Handler().postDelayed(() -> TOOLBAR_CLICKED = false, 1000);
+                new Handler().postDelayed(() -> TOOLBAR_CLICKED = false, 1000);         //双击机制
 
             });
             setSupportActionBar(mToolbar);
@@ -354,14 +349,19 @@ public final class MainActivity extends AppCompatActivity {
                 throw new IllegalStateException("Layout requires a NavigationView");
             } else {
                 mNavHeaderImageView = mNavigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
-                mNavHeaderImageView.setOnClickListener(v -> {
-                    mDrawerLayout.closeDrawers();
-                    if (Values.HAS_PLAYED) {
-                        startActivity(new Intent(MainActivity.this, MusicDetailActivity.class));
-                    } else {
-                        Utils.Ui.fastToast(MainActivity.this, "No music playing.");
-                    }
-                });
+                //disable
+//                mNavHeaderImageView.setOnClickListener(v -> {
+//                    mDrawerLayout.closeDrawers();
+//                    mDrawerLayout.post(() -> {
+//                        if (Values.HAS_PLAYED) {
+//                            Intent intent = new Intent(MainActivity.this, MusicDetailActivity.class);
+//                            intent.putExtra("intent_args", "by_clicked_body");
+//                            startActivity(intent);
+//                        } else {
+//                            Utils.Ui.fastToast(MainActivity.this, "No music playing.");
+//                        }
+//                    });
+//                });
             }
         }
 
@@ -404,9 +404,10 @@ public final class MainActivity extends AppCompatActivity {
 
         mNowPlayingBody.setOnClickListener(v -> {
             if (Values.HAS_PLAYED) {
+                ActivityOptionsCompat compat = ActivityOptionsCompat.makeSceneTransitionAnimation(this, mNowPlayingSongImage, getString(R.string.image_trans));
                 Intent intent = new Intent(MainActivity.this, MusicDetailActivity.class);
                 intent.putExtra("intent_args", "by_clicked_body");
-                startActivity(intent);
+                startActivity(intent, compat.toBundle());
             } else {
                 Utils.Ui.fastToast(MainActivity.this, "No music playing.");
             }
@@ -478,6 +479,7 @@ public final class MainActivity extends AppCompatActivity {
         super.onResume();
     }
 
+    //drawer toggle
     private void initDrawerToggle() {
         // 参数：开启抽屉的activity、DrawerLayout的对象、toolbar按钮打开关闭的对象、描述open drawer、描述close drawer
         ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.open, R.string.close);
@@ -532,7 +534,7 @@ public final class MainActivity extends AppCompatActivity {
                         .into(mNowPlayingBackgroundImage);
             }
 
-            setButtonTypePlay();
+            Utils.Ui.setPlayButtonNowPlaying();
         });
     }
 

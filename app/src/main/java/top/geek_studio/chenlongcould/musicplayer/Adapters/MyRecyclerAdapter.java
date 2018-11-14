@@ -117,7 +117,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
             Values.CurrentData.CURRENT_SONG_PATH = clickedPath;
 
-            Utils.Ui.setNowPlaying();
+            Utils.Ui.setPlayButtonNowPlaying();
 
             if (Data.sActivities.size() >= 2) {
                 MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);

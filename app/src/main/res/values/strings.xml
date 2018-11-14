@@ -24,4 +24,6 @@
     <string name="menu_button">Menu Button</string>
     <string name="random">random</string>
     <string name="repeat">repeat</string>
+
+    <string name="image_trans">image trans</string>
 </resources>

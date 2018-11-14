@@ -11,11 +11,11 @@
 
 package top.geek_studio.chenlongcould.musicplayer;
 
+import android.animation.Animator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -24,7 +24,9 @@ import android.graphics.PorterDuff;
 import android.media.MediaMetadataRetriever;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.widget.EditText;
+import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -56,16 +58,19 @@ public final class Utils {
          */
         @NonNull
         public static Bitmap getMp3Cover(@NonNull String mediaUri) {
+
+            //检测不支持封面的音乐类型
             if (mediaUri.contains("ogg")) {
                 return BitmapFactory.decodeResource(Resources.getSystem(), R.drawable.ic_audiotrack_24px);
             }
+
             sMediaMetadataRetriever.setDataSource(mediaUri);
             byte[] picture = sMediaMetadataRetriever.getEmbeddedPicture();
             try {
                 return BitmapFactory.decodeByteArray(picture, 0, picture.length);
             } catch (NullPointerException e) {
                 e.printStackTrace();
-                return null;
+                return BitmapFactory.decodeResource(Resources.getSystem(), R.drawable.ic_audiotrack_24px);
             }
         }
 
@@ -89,7 +94,7 @@ public final class Utils {
          *
          * @param mediaUri MP3文件路径
          */
-        public static void loadingCoverIntoImageView(@NonNull Context context, @Nullable ImageView musicCover, @NonNull String mediaUri) {
+        public static void loadingCoverIntoImageView(@NonNull Context context, @NonNull ImageView musicCover, @NonNull String mediaUri) {
             sMediaMetadataRetriever.setDataSource(mediaUri);
             byte[] picture = sMediaMetadataRetriever.getEmbeddedPicture();
             GlideApp.with(context).load(picture).transition(DrawableTransitionOptions.withCrossFade()).override(50, 50).into(musicCover);
@@ -108,7 +113,7 @@ public final class Utils {
 
                 Bitmap cover = Utils.Audio.getMp3Cover(path);
 
-                Ui.setNowPlaying();
+                Ui.setPlayButtonNowPlaying();
 
                 MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
                 mainActivity.setCurrentSongInfo(musicName, albumName, path, cover);
@@ -143,100 +148,85 @@ public final class Utils {
          */
         //shufflePlayback
         public static void shufflePlayback() {
-            MainActivity activity = (MainActivity) Data.sActivities.get(0);
             if (READY) {            //default: true
-                new Thread(() -> {
-                    if (Values.MUSIC_DATA_INIT_DONE) {
-                        READY = false;
-                        Data.sMusicBinder.resetMusic();
+                if (Values.MUSIC_DATA_INIT_DONE) {
+                    READY = false;
+                    Data.sMusicBinder.resetMusic();
 
-                        Random random = new Random();
-                        int index = random.nextInt(Data.sMusicItems.size() - 1);
-                        String path = Data.sMusicItems.get(index).getMusicPath();
-                        String musicName = Data.sMusicItems.get(index).getMusicName();
-                        String albumName = Data.sMusicItems.get(index).getMusicAlbum();
+                    Random random = new Random();
+                    int index = random.nextInt(Data.sMusicItems.size() - 1);
+                    String path = Data.sMusicItems.get(index).getMusicPath();
+                    String musicName = Data.sMusicItems.get(index).getMusicName();
+                    String albumName = Data.sMusicItems.get(index).getMusicAlbum();
 
-                        Data.sHistoryPlayIndex.add(index);
+                    Data.sHistoryPlayIndex.add(index);
 
-                        Bitmap cover = Utils.Audio.getMp3Cover(path);
+                    Bitmap cover = Utils.Audio.getMp3Cover(path);
 
+                    Data.saveGlobalCurrentData(musicName, albumName, cover);
+
+                    Values.MUSIC_PLAYING = true;
+                    Values.HAS_PLAYED = true;
+                    Values.CurrentData.CURRENT_MUSIC_INDEX = index;
+                    Values.CurrentData.CURRENT_SONG_PATH = path;
+
+                    Ui.setPlayButtonNowPlaying();
+
+                    if (Data.sActivities.size() >= 1) {
+                        MainActivity activity = (MainActivity) Data.sActivities.get(0);
                         //first set backgroundImage, then set bg(layout) black. To crossFade more Smooth
                         activity.setCurrentSongInfo(musicName, albumName, path, cover);
-                        activity.setButtonTypePlay();
+                    }
 
-                        Data.sCurrentMusicAlbum = albumName;
-                        Data.sCurrentMusicName = musicName;
-                        Data.sCurrentMusicBitmap = cover;
+                    if (Data.sActivities.size() >= 2) {
+                        MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
+                        musicDetailActivity.setCurrentSongInfo(musicName, albumName, getAlbumByteImage(path));
+                        //设置seekBar颜色
+                        musicDetailActivity.getSeekBar().getThumb().setColorFilter(cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
+                    }
 
-                        Values.MUSIC_PLAYING = true;
-                        Values.HAS_PLAYED = true;
-                        Values.CurrentData.CURRENT_MUSIC_INDEX = index;
-                        Values.CurrentData.CURRENT_MUSIC_INDEX = index;
-                        Values.CurrentData.CURRENT_SONG_PATH = path;
+                    try {
+                        Data.sMusicBinder.setDataSource(path);
+                        Data.sMusicBinder.prepare();
+                        Data.sMusicBinder.playMusic();          //has played, now playing
 
                         if (Data.sActivities.size() >= 2) {
                             MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
-                            musicDetailActivity.setButtonTypePlay();
-                            musicDetailActivity.setCurrentSongInfo(musicName, albumName, getAlbumByteImage(path));
-                            musicDetailActivity.getSeekBar().getThumb().setColorFilter(cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
+                            MusicDetailActivity.NotLeakHandler notLeakHandler = musicDetailActivity.getHandler();
+                            //music after mediaPlayer.setDataSource, because of "Values.HandlerWhat.INIT_SEEK_BAR"
+                            notLeakHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
                         }
 
-                        try {
-                            Data.sMusicBinder.setDataSource(path);
-                            Data.sMusicBinder.prepare();
-                            Data.sMusicBinder.playMusic();          //has played, now playing
-
-                            if (Data.sActivities.size() >= 2) {
-                                MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
-                                MusicDetailActivity.NotLeakHandler notLeakHandler = musicDetailActivity.getHandler();
-
-                                //music after mediaPlayer.setDataSource, because of "Values.HandlerWhat.INIT_SEEK_BAR"
-                                notLeakHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
-                            }
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            Data.sMusicBinder.resetMusic();
-                        }
-                        READY = true;
-                    } else {
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Data.sMusicBinder.resetMusic();
+                    }
+                    READY = true;
+                } else {
+                    if (Data.sActivities.size() >= 1) {
+                        MainActivity activity = (MainActivity) Data.sActivities.get(0);
                         activity.runOnUiThread(() -> Utils.Ui.createMessageDialog(activity, "Error", "MUSIC_DATA_INIT_FAIL").show());
                     }
-                }).start();
+                }
             } else {
-                activity.runOnUiThread(() -> Ui.fastToast(activity, "Preparing..."));
+                if (Data.sActivities.size() >= 1) {
+                    MainActivity activity = (MainActivity) Data.sActivities.get(0);
+                    Ui.fastToast(activity, "Preparing...");
+                }
             }
         }
 
     }
 
     public static class Ui {
-        //        static void setPrimaryColor(int color, View... views) {
-//            for (View v : views) {
-//                v.setBackgroundColor(color);
-//            }
-//        }
-        public static void createEditTextDialog(Context context, String title, boolean cancelAble, DialogInterface.OnClickListener onEnterListener) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
-            builder.setTitle(title);
-            EditText et = new EditText(context);
-            et.setHint("Play List 1");
-            et.setMaxLines(1);
-            et.setSingleLine(true);
-            builder.setView(et);
-            builder.setCancelable(cancelAble);
-            builder.setNegativeButton("Cancel", null);
-            builder.setNeutralButton("Enter", onEnterListener);
-        }
 
-        public static void setNowPlaying() {
+        public static void setPlayButtonNowPlaying() {
             if (Data.sActivities.size() != 0) {
                 MainActivity activity = (MainActivity) Data.sActivities.get(0);
                 activity.runOnUiThread(() -> {
                     // TODO: 2018/11/6 get albumPic primaryColor
                     MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
                     mainActivity.setButtonTypePlay();
-
                     if (Data.sActivities.size() >= 2) {
                         MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
                         musicDetailActivity.setButtonTypePlay();
@@ -251,16 +241,6 @@ public final class Utils {
             context.sendBroadcast(intent);
         }
 
-//        public static void setInfoBarBackgroundBlack() {
-//            ((MainActivity) Data.sActivities.get(0)).getNowPlayingBody().setBackgroundResource(R.color.notVeryBlack);
-//            Values.HAS_SET_INFO_BAR_BACKGROUND_BACK = true;
-//        }
-//
-//        public static void setInfoBarBackgroundWhite() {
-//            ((MainActivity) Data.sActivities.get(0)).getNowPlayingBody().setBackgroundColor(Color.WHITE);
-//            Values.HAS_SET_INFO_BAR_BACKGROUND_BACK = false;
-//        }
-
         public static AlertDialog createMessageDialog(@NonNull Activity context, @NonNull String title, @NonNull String message) {
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             builder.setTitle(title);
@@ -273,18 +253,11 @@ public final class Utils {
             Toast.makeText(context, content, Toast.LENGTH_SHORT).show();
         }
 
-        //ogg not support cover, so do not need to set bg
-//        public static void firstSetBg2InfoBar(String path) {
-//            if (!path.contains("ogg")) {
-//                //使背景变黑, 使图片过渡更自然
-//                Utils.Ui.setInfoBarBackgroundBlack();
-//            }
-//        }
-
-//        public static void setDefBg2InfoBar() {
-//            Utils.Ui.setInfoBarBackgroundBlack();
-//        }
-
+        /**
+         * 获取图片亮度
+         *
+         * @param bm bitmap
+         */
         public static int getBright(@NonNull Bitmap bm) {
             int width = bm.getWidth() / 4;
             int height = bm.getHeight() / 4;
@@ -304,22 +277,102 @@ public final class Utils {
             return bright / count;
         }
 
-        public static void setBlurEffect(@NonNull Activity context, @Nullable byte[] bitmap, @NonNull ImageView view) {
-            context.runOnUiThread(() -> GlideApp.with(context)
-                    .load(bitmap)
-                    .apply(bitmapTransform(new BlurTransformation(15, 30)))
-                    .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-                    .into(view));
+        /**
+         * 设置背景与动画
+         */
+        public static void setBlurEffect(@NonNull Activity context, @Nullable byte[] bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundDown) {
+            primaryBackground.setVisibility(View.VISIBLE);
+            context.runOnUiThread(() -> {
+                primaryBackgroundDown.post(() -> GlideApp.with(context)
+                        .load(bitmap)
+                        .dontAnimate()
+                        .apply(bitmapTransform(new BlurTransformation(15, 30)))
+                        .into(primaryBackgroundDown));
+
+                primaryBackgroundDown.post(() -> {
+                    Animator animator = ViewAnimationUtils.createCircularReveal(
+                            primaryBackgroundDown, primaryBackgroundDown.getWidth() / 2, 170,
+                            0,
+                            (float) Math.hypot(primaryBackgroundDown.getWidth(), primaryBackgroundDown.getHeight()));
+                    animator.setInterpolator(new AccelerateInterpolator());
+                    animator.setDuration(700);
+                    animator.addListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            GlideApp.with(context)
+                                    .load(bitmap)
+                                    .dontAnimate()
+                                    .apply(bitmapTransform(new BlurTransformation(15, 30)))
+                                    .into(primaryBackground);
+                            primaryBackground.setVisibility(View.INVISIBLE);
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+
+                        }
+                    });
+                    animator.start();
+                });
+            });
         }
 
-        public static void setBlurEffect(@NonNull Activity context, @Nullable Bitmap bitmap, @NonNull ImageView view) {
-            context.runOnUiThread(() -> GlideApp.with(context)
-                    .load(bitmap)
-                    .apply(bitmapTransform(new BlurTransformation(15, 30)))
-                    .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-                    .into(view));
+        public static void setBlurEffect(@NonNull Activity context, @Nullable Bitmap bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundDown) {
+            primaryBackground.setVisibility(View.VISIBLE);
+            context.runOnUiThread(() -> {
+                primaryBackgroundDown.post(() -> GlideApp.with(context)
+                        .load(bitmap)
+                        .dontAnimate()
+                        .apply(bitmapTransform(new BlurTransformation(15, 30)))
+                        .into(primaryBackgroundDown));
+
+                primaryBackgroundDown.post(() -> {
+                    Animator animator = ViewAnimationUtils.createCircularReveal(primaryBackgroundDown, primaryBackgroundDown.getWidth() / 2, 170, 0,
+                            (float) Math.hypot(primaryBackgroundDown.getWidth(), primaryBackgroundDown.getHeight()));
+                    animator.setInterpolator(new AccelerateInterpolator());
+                    animator.setDuration(700);
+                    animator.addListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            primaryBackgroundDown.post(() -> GlideApp.with(context)
+                                    .load(bitmap)
+                                    .dontAnimate()
+                                    .apply(bitmapTransform(new BlurTransformation(15, 30)))
+                                    .into(primaryBackground));
+                            primaryBackground.setVisibility(View.INVISIBLE);
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+
+                        }
+                    });
+                    animator.start();
+                });
+
+            });
+
         }
 
     }
-
 }

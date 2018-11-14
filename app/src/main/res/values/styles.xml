@@ -12,22 +12,28 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="MyBaseTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowAllowEnterTransitionOverlap">true</item>
+        <item name="android:windowAllowReturnTransitionOverlap">true</item>
+        <item name="android:windowContentTransitions">true</item>
+    </style>
+
+    <style name="AppTheme" parent="MyBaseTheme">
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
     </style>
 
-    <style name="MusicDetailTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="MusicDetailTheme" parent="MyBaseTheme">
         <item name="android:windowTranslucentNavigation">true</item>
         <item name="android:windowTranslucentStatus">true</item>
     </style>
 
-    <style name="SplashActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="SplashActivityTheme" parent="MyBaseTheme">
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
     </style>
 
-    <style name="CommonActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="CommonActivityTheme" parent="MyBaseTheme">
         <item name="android:statusBarColor">@color/colorPrimaryDark</item>
         <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
     </style>

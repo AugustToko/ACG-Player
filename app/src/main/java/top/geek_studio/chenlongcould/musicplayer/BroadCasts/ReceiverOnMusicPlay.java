@@ -82,7 +82,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
                 Bitmap cover = Utils.Audio.getMp3Cover(path);
 
-                Utils.Ui.setNowPlaying();
+                Utils.Ui.setPlayButtonNowPlaying();
 
                 if (Data.sActivities.size() >= 1) {
                     MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);

@@ -25,6 +25,8 @@ public final class Values {
     public static final String PLAY_LIST_SPF_KEY = "PLAY_LIST_SPF_KEY";
     public static final String TYPE_RANDOM = "RANDOM";
     public static final String TYPE_COMMON = "COMMON";
+    public static final String TYPE_REPEAT = "REPEAT";
+    public static final String TYPE_REPEAT_ONE = "REPEAT_ONE";
 
     public static boolean HAS_PLAYED = false;           //检测app打开后, 是否播放过音乐 (如果没, 默认点击播放按钮为快速随机播放)
 
@@ -44,6 +46,20 @@ public final class Values {
         public static final int INIT_SEEK_BAR = 54;
     }
 
+    public static boolean BUTTON_PRESSED = false;
+
+    /**
+     * result(s), status
+     */
+    //default value false
+    public static boolean MUSIC_DATA_INIT_DONE = false;
+    public static boolean SERVICE_RUNNING = false;
+    public static boolean MUSIC_PLAYING = false;
+    /*
+     * 判断在MusicDetailActivity下动画是否加载完成
+     * */
+    public static boolean ON_ANIMATION_FINISH = true;
+
     public static final class CurrentData {
         /**
          * TEMP DATA
@@ -56,15 +72,9 @@ public final class Values {
         public static int CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = -1;            //存储使浮动菜单弹出的item,def = -1
         public static int CURRENT_MUSIC_INDEX = -1;
         public static String CURRENT_PLAY_TYPE = "COMMON";
+        public static String CURRENT_AUTO_NEXT_TYPE = "COMMON";
+        public static String CURRENT_PLAY_LIST = "default";
     }
-
-    /**
-     * result(s), status
-     * */
-    //default value false
-    public static boolean MUSIC_DATA_INIT_DONE = false;
-    public static boolean SERVICE_RUNNING = false;
-    public static boolean MUSIC_PLAYING = false;
 
     /**
      * sharedPrefs tag
@@ -87,4 +97,5 @@ public final class Values {
         public static String ReceiverOnMusicStop = "top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicStop";
         public static String ReceiverOnMusicPause = "top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPause";
     }
+
 }

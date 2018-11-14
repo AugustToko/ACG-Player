@@ -97,6 +97,7 @@
                     android:layout_gravity="center_vertical"
                     android:contentDescription="@string/app_name"
                     android:src="@drawable/ic_audiotrack_24px"
+                    android:transitionName="@string/image_trans"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent" />
 

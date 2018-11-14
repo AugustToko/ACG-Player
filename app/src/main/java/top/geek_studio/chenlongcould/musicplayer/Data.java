@@ -44,7 +44,7 @@ public final class Data {
     public static List<Integer> sHistoryPlayIndex = new ArrayList<>();
 
     /**
-     * status
+     * sCurrent DATA
      */
     public static String sCurrentMusicName = null;
 
@@ -52,12 +52,20 @@ public final class Data {
 
     public static String sCurrentMusicAlbum = null;
 
+    public static List<String> sCurrentMusicList = new ArrayList<>();
+
+
     public static int sNextWillPlayIndex = -1;
 
     public static ColorStateList sDefTextColorStateList = null;
 
     public static ColorStateList sDefIcoColorStateList = null;
 
+    public static void saveGlobalCurrentData(String musicName, String albumName, Bitmap cover) {
+        sCurrentMusicAlbum = albumName;
+        sCurrentMusicName = musicName;
+        sCurrentMusicBitmap = cover;
+    }
     /**
      * --------------------- Media Player ----------------------
      */
