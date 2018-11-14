@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月14日 15:30:40
- * 上次修改时间：2018年11月14日 15:29:35
+ * 当前修改时间：2018年11月14日 20:29:26
+ * 上次修改时间：2018年11月14日 19:09:20
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -123,11 +123,6 @@ public final class MusicListFragment extends Fragment {
                     do {
                         String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
                         String prefix = path.substring(path.lastIndexOf(".") + 1);
-
-                        // TODO: 2018/11/12 or other
-                        if (prefix.equals("ogg")) {
-                            Data.sNotSupportType.add(path);
-                        }
 
                         String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
                         String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));

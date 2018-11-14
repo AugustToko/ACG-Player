@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月14日 15:30:40
- * 上次修改时间：2018年11月14日 15:29:36
+ * 当前修改时间：2018年11月14日 20:29:26
+ * 上次修改时间：2018年11月14日 19:09:20
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -467,6 +467,7 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     private void initAnimation() {
+        // TODO: 2018/11/14 padding bug
         TranslateAnimation mPlayingBodyTranslateAnimation = new TranslateAnimation(mNowPlayingBody.getTranslationX(), mNowPlayingBody.getTranslationX(), 500, mNowPlayingBody.getTranslationY());
         mPlayingBodyTranslateAnimation.setDuration(300);
         mPlayingBodyTranslateAnimation.setFillAfter(true);

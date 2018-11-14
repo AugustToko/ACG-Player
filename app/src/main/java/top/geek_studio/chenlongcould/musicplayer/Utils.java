@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月14日 15:30:40
- * 上次修改时间：2018年11月14日 15:29:36
+ * 当前修改时间：2018年11月14日 20:29:26
+ * 上次修改时间：2018年11月14日 19:09:20
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -224,7 +224,6 @@ public final class Utils {
             if (Data.sActivities.size() != 0) {
                 MainActivity activity = (MainActivity) Data.sActivities.get(0);
                 activity.runOnUiThread(() -> {
-                    // TODO: 2018/11/6 get albumPic primaryColor
                     MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
                     mainActivity.setButtonTypePlay();
                     if (Data.sActivities.size() >= 2) {
