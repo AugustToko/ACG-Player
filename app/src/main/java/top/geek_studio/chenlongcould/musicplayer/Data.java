@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Data.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月14日 15:30:40
- * 上次修改时间：2018年11月14日 15:29:35
+ * 当前修改时间：2018年11月15日 18:21:41
+ * 上次修改时间：2018年11月15日 08:33:53
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -21,6 +21,7 @@ import android.os.IBinder;
 import java.util.ArrayList;
 import java.util.List;
 
+import top.geek_studio.chenlongcould.musicplayer.BroadCasts.MyHeadSetPlugReceiver;
 import top.geek_studio.chenlongcould.musicplayer.Service.MyMusicService;
 
 public final class Data {
@@ -60,6 +61,8 @@ public final class Data {
     public static ColorStateList sDefTextColorStateList = null;
 
     public static ColorStateList sDefIcoColorStateList = null;
+
+    public static MyHeadSetPlugReceiver mMyHeadSetPlugReceiver = new MyHeadSetPlugReceiver();
 
     public static void saveGlobalCurrentData(String musicName, String albumName, Bitmap cover) {
         sCurrentMusicAlbum = albumName;

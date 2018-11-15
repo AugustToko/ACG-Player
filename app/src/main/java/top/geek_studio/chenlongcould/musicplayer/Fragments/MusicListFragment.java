@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月14日 20:29:26
- * 上次修改时间：2018年11月14日 19:09:20
+ * 当前修改时间：2018年11月15日 18:21:41
+ * 上次修改时间：2018年11月15日 07:20:45
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -61,9 +61,6 @@ public final class MusicListFragment extends Fragment {
     private HandlerThread mHandlerThread;
 
     private boolean CREATE_VIEW_DONE = false;
-    /**
-     * ------------------------- DATA -----------------------------
-     */
 
     //实例化一个fragment
     public static MusicListFragment newInstance() {

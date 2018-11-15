@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月14日 15:30:40
- * 上次修改时间：2018年11月14日 15:29:35
+ * 当前修改时间：2018年11月15日 18:21:41
+ * 上次修改时间：2018年11月15日 18:20:39
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -23,7 +23,6 @@ import android.util.Log;
 
 import java.io.IOException;
 
-import top.geek_studio.chenlongcould.musicplayer.BroadCasts.MyHeadSetPlugReceiver;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
@@ -34,8 +33,6 @@ public final class MyMusicService extends Service {
     private MediaPlayer mMediaPlayer = new MediaPlayer();
 
     private MusicBinder mMusicBinder = new MusicBinder();
-
-    private MyHeadSetPlugReceiver mMyHeadSetPlugReceiver = new MyHeadSetPlugReceiver();
 
     public MyMusicService() {
     }
@@ -48,7 +45,7 @@ public final class MyMusicService extends Service {
         //监听耳机(有线或无线)的插拔动作, 拔出暂停音乐
         IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
-        registerReceiver(mMyHeadSetPlugReceiver, intentFilter);
+        registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
 
         mMediaPlayer.setOnCompletionListener(mp -> {
             if (Data.sNextWillPlayIndex != -1) {
@@ -123,7 +120,7 @@ public final class MyMusicService extends Service {
         mMediaPlayer.release();
         Data.sMusicBinder = null;
         Log.d(TAG, "onDestroy: ");
-        unregisterReceiver(mMyHeadSetPlugReceiver);
+        unregisterReceiver(Data.mMyHeadSetPlugReceiver);
         super.onDestroy();
     }
 
@@ -171,6 +168,10 @@ public final class MyMusicService extends Service {
 
         public void seekTo(int position) {
             mMediaPlayer.seekTo(position);
+        }
+
+        public void release() {
+            mMediaPlayer.release();
         }
 
     }

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月14日 20:29:26
- * 上次修改时间：2018年11月14日 19:09:20
+ * 当前修改时间：2018年11月15日 18:21:41
+ * 上次修改时间：2018年11月15日 08:37:34
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -214,6 +214,8 @@ public final class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_toolbar_exit: {
+                unbindService(Data.sServiceConnection);
+                stopService(new Intent(MainActivity.this, MyMusicService.class));
                 finish();
             }
             break;
