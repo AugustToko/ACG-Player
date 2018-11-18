@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月15日 18:21:41
- * 上次修改时间：2018年11月15日 08:37:34
+ * 当前修改时间：2018年11月18日 21:28:39
+ * 上次修改时间：2018年11月18日 10:21:37
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -248,7 +248,7 @@ public final class MainActivity extends AppCompatActivity {
                  * //todo 仅支持 音乐名称搜索
                  * */
                 String name = item.getMusicName();
-                if (name.contains(filterStr)) {
+                if (name.toLowerCase().contains(filterStr) || name.toUpperCase().contains(filterStr)) {
                     Data.sMusicItems.add(item);
                 }
             }

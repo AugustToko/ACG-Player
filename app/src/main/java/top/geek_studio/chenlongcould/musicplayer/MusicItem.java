@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicItem.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月14日 15:30:40
- * 上次修改时间：2018年11月14日 15:29:35
+ * 当前修改时间：2018年11月18日 21:28:39
+ * 上次修改时间：2018年11月18日 10:09:03
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -18,12 +18,18 @@ public class MusicItem {
     private String mMusicPath;
     private int mMusicID;
     private String mMusicAlbum;
+    private int mDuration;
+    private int mSize;
+    private String mArtist;
 
-    public MusicItem(String musicName, String musicPath, int musicID, String musicAlbum) {
+    public MusicItem(String musicName, String musicPath, int musicID, String musicAlbum, int duration, int size, String artist) {
         mMusicName = musicName;
         mMusicPath = musicPath;
         mMusicID = musicID;
         mMusicAlbum = musicAlbum;
+        mDuration = duration;
+        mSize = size;
+        mArtist = artist;
     }
 
     public String getMusicName() {
@@ -44,5 +50,17 @@ public class MusicItem {
 
     public byte[] getMusicCover() {
         return mMusicCover;
+    }
+
+    public int getDuration() {
+        return mDuration;
+    }
+
+    public int getSize() {
+        return mSize;
+    }
+
+    public String getArtist() {
+        return mArtist;
     }
 }

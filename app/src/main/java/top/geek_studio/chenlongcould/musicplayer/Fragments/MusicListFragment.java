@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月15日 18:21:41
- * 上次修改时间：2018年11月15日 07:20:45
+ * 当前修改时间：2018年11月18日 21:28:39
+ * 上次修改时间：2018年11月18日 21:28:13
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -119,14 +119,16 @@ public final class MusicListFragment extends Fragment {
                     }
                     do {
                         String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-                        String prefix = path.substring(path.lastIndexOf(".") + 1);
-
+                        String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
                         String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
                         String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
                         int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+                        int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
+                        int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+                        String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
 
-                        Data.sMusicItems.add(new MusicItem(name, path, id, albumName));
-                        Data.sMusicItemsBackUp.add(new MusicItem(name, path, id, albumName));
+                        Data.sMusicItems.add(new MusicItem(name, path, id, albumName, duration, size, artist));
+                        Data.sMusicItemsBackUp.add(new MusicItem(name, path, id, albumName, duration, size, artist));
 
                     } while (cursor.moveToNext());
                     cursor.close();

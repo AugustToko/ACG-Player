@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月15日 18:21:41
- * 上次修改时间：2018年11月15日 18:20:39
+ * 当前修改时间：2018年11月18日 21:28:39
+ * 上次修改时间：2018年11月18日 09:51:51
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -95,11 +95,11 @@ public final class MyMusicService extends Service {
                         }
                         break;
                     case Values.TYPE_REPEAT_ONE:
-                        mMediaPlayer.seekTo(0);
+                        mMediaPlayer.start();
                         break;
                 }
             }
-
+            Values.BUTTON_PRESSED = false;
         });
 
         mMediaPlayer.setOnErrorListener((mp, what, extra) -> {

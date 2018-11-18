@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月14日 15:30:40
- * 上次修改时间：2018年11月14日 15:29:35
+ * 当前修改时间：2018年11月18日 21:28:39
+ * 上次修改时间：2018年11月18日 21:28:13
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -12,11 +12,13 @@
 package top.geek_studio.chenlongcould.musicplayer.Fragments;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -29,13 +31,10 @@ import android.view.ViewGroup;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter2AlbumList;
-import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.MusicItem;
+import top.geek_studio.chenlongcould.musicplayer.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
@@ -46,7 +45,7 @@ public final class AlbumListFragment extends Fragment {
     private MyRecyclerAdapter2AlbumList mMyRecyclerAdapter2AlbumList;
 
     //temp
-    private ArrayList<String> arrayList;
+    private ArrayList<AlbumItem> mAlbumList = new ArrayList<>();
 
     private NotLeakHandler mNotLeakHandler;
 
@@ -85,14 +84,28 @@ public final class AlbumListFragment extends Fragment {
     private void sureGetDataDone() {
         if (Values.MUSIC_DATA_INIT_DONE) {
             new Thread(() -> {
-                //去除重复数据
-                List<String> temp = new ArrayList<>();
-                for (MusicItem item : Data.sMusicItems) {
-                    temp.add(item.getMusicAlbum());
+//                //去除重复数据
+//                List<String> temp = new ArrayList<>();
+//                for (MusicItem item : Data.sMusicItems) {
+//                    temp.add(item.getMusicAlbum());
+//                }
+//                HashSet<String> hashSet = new HashSet<>(temp);
+//                arrayList = new ArrayList<>(hashSet);
+//                arrayList.sort(Values.sort);
+
+                Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null, null, null, null);
+                if (cursor != null) {
+                    cursor.moveToFirst();
+
+                    do {
+                        String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM));
+                        String albumId = cursor.getString(cursor.getColumnIndexOrThrow("_id"));
+
+                        mAlbumList.add(new AlbumItem(albumName, Integer.parseInt(albumId)));
+                    } while (cursor.moveToNext());
+
+                    cursor.close();
                 }
-                HashSet<String> hashSet = new HashSet<>(temp);
-                arrayList = new ArrayList<>(hashSet);
-                arrayList.sort(Values.sort);
 
                 mNotLeakHandler.sendEmptyMessage(Values.HandlerWhat.GET_DATA_DONE);
             }).start();
@@ -104,7 +117,7 @@ public final class AlbumListFragment extends Fragment {
     private void sureCreateViewDone() {
         if (ON_CREATE_VIEW_DONE) {
             mMainActivity.runOnUiThread(() -> {
-                mMyRecyclerAdapter2AlbumList = new MyRecyclerAdapter2AlbumList(mMainActivity, arrayList);
+                mMyRecyclerAdapter2AlbumList = new MyRecyclerAdapter2AlbumList(mMainActivity, mAlbumList);
                 mRecyclerView.addItemDecoration(new DividerItemDecoration(mMainActivity, DividerItemDecoration.VERTICAL));
                 mRecyclerView.setHasFixedSize(true);
                 mRecyclerView.setAdapter(mMyRecyclerAdapter2AlbumList);

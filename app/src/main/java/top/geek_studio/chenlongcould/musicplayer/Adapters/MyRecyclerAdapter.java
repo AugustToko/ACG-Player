@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月14日 15:30:40
- * 上次修改时间：2018年11月14日 15:29:35
+ * 当前修改时间：2018年11月18日 21:28:39
+ * 上次修改时间：2018年11月18日 21:28:13
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -11,7 +11,6 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Adapters;
 
-import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -22,7 +21,6 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -30,7 +28,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -41,12 +38,14 @@ import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.Random;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MusicDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.MusicItem;
+import top.geek_studio.chenlongcould.musicplayer.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
@@ -176,30 +175,8 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 break;
 
                 case Menu.FIRST + 2: {
-
-                    SharedPreferences mDefPrefs = PreferenceManager.getDefaultSharedPreferences(mMainActivity);
-
-                    if (mDefPrefs.getInt(Values.SharedPrefsTag.PLAY_LIST_NUM, 0) == 0) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
-                        builder.setTitle("Create a list");
-                        EditText et = new EditText(mMainActivity);
-                        et.setHint("Play List 1");
-                        et.setMaxLines(1);
-                        et.setSingleLine(true);
-                        builder.setView(et);
-                        builder.setCancelable(true);
-                        builder.setNegativeButton("Cancel", null);
-                        builder.setNeutralButton("Enter", (dialog, which) -> {
-                            String name = et.getText().toString();
-                            if (name.equals("")) {
-                                name = "PLAY_LIST_1";
-                            }
-                            // TODO: 2018/11/11 创建一个列表
-                        });
-                    } else {
-
-                    }
-
+                    // TODO: 2018/11/18 test play list
+                    PlayListsUtil.createPlaylist(mContext, String.valueOf(new Random(1000)));
                 }
             }
 
@@ -301,8 +278,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
      */
     @Override
     public void onViewRecycled(@NonNull ViewHolder holder) {
-//        GlideApp.with(mMainActivity).clear(holder.mMusicCloverImage);
-        super.onViewRecycled(holder);
+        GlideApp.with(mMainActivity).clear(holder.mMusicCloverImage);
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
