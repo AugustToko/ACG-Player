@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Data.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月15日 18:21:41
- * 上次修改时间：2018年11月15日 08:33:53
+ * 当前修改时间：2018年11月19日 18:40:42
+ * 上次修改时间：2018年11月19日 17:29:14
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.MyHeadSetPlugReceiver;
+import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.Service.MyMusicService;
 
 public final class Data {

@@ -1,15 +1,15 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 14:04:02
- * 上次修改时间：2018年11月19日 08:58:26
+ * 当前修改时间：2018年11月19日 18:40:42
+ * 上次修改时间：2018年11月19日 17:29:14
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
  * ************************************************************
  */
 
-package top.geek_studio.chenlongcould.musicplayer;
+package top.geek_studio.chenlongcould.musicplayer.Utils;
 
 import android.animation.Animator;
 import android.app.Activity;
@@ -38,6 +38,10 @@ import java.util.Random;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MusicDetailActivity;
+import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.GlideApp;
+import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Values;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 

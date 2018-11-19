@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyHeadSetPlugReceiver.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月14日 15:30:40
- * 上次修改时间：2018年11月14日 15:29:35
+ * 当前修改时间：2018年11月19日 18:40:42
+ * 上次修改时间：2018年11月19日 17:29:57
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -19,7 +19,7 @@ import android.media.AudioManager;
 
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
-public class MyHeadSetPlugReceiver extends BroadcastReceiver {
+public final class MyHeadSetPlugReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {

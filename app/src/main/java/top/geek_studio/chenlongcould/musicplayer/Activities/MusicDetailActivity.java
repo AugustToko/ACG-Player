@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 16:26:19
- * 上次修改时间：2018年11月19日 16:26:13
+ * 当前修改时间：2018年11月19日 18:40:42
+ * 上次修改时间：2018年11月19日 17:29:14
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -62,7 +62,7 @@ import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Utils;
+import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
 public final class MusicDetailActivity extends Activity {
@@ -127,8 +127,6 @@ public final class MusicDetailActivity extends Activity {
     private ImageButton mMenuButton;
 
     private PopupMenu mPopupMenu;
-
-    private Menu mMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -624,12 +622,12 @@ public final class MusicDetailActivity extends Activity {
 
         /*---------------------- Menu -----------------------*/
         mPopupMenu = new PopupMenu(this, mMenuButton);
-        mMenu = mPopupMenu.getMenu();
+        Menu menu = mPopupMenu.getMenu();
 
         //noinspection PointlessArithmeticExpression
-        mMenu.add(Menu.NONE, Menu.FIRST + 0, 0, "加入播放列表");
-        mMenu.add(Menu.NONE, Menu.FIRST + 1, 0, "查看专辑");
-        mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, "详细信息");
+        menu.add(Menu.NONE, Menu.FIRST + 0, 0, "加入播放列表");
+        menu.add(Menu.NONE, Menu.FIRST + 1, 0, "查看专辑");
+        menu.add(Menu.NONE, Menu.FIRST + 2, 0, "详细信息");
 
         mMenuButton.setOnClickListener(v -> mPopupMenu.show());
 

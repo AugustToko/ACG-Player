@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 16:26:19
- * 上次修改时间：2018年11月19日 15:26:55
+ * 当前修改时间：2018年11月19日 18:40:42
+ * 上次修改时间：2018年11月19日 18:40:19
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -49,10 +49,10 @@ import top.geek_studio.chenlongcould.musicplayer.Activities.MusicDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
-import top.geek_studio.chenlongcould.musicplayer.MusicItem;
-import top.geek_studio.chenlongcould.musicplayer.PlayListsUtil;
+import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Utils;
+import top.geek_studio.chenlongcould.musicplayer.Utils.PlayListsUtil;
+import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
 public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {

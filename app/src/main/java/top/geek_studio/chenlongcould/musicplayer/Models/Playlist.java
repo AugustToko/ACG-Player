@@ -1,15 +1,15 @@
 /*
  * ************************************************************
  * 文件：Playlist.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月18日 21:28:39
- * 上次修改时间：2018年11月18日 21:28:14
+ * 当前修改时间：2018年11月19日 18:40:42
+ * 上次修改时间：2018年11月19日 17:29:14
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
  * ************************************************************
  */
 
-package top.geek_studio.chenlongcould.musicplayer;
+package top.geek_studio.chenlongcould.musicplayer.Models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
