@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 14:04:02
- * 上次修改时间：2018年11月19日 14:03:45
+ * 当前修改时间：2018年11月19日 16:26:19
+ * 上次修改时间：2018年11月19日 14:25:32
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -27,6 +27,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -62,15 +63,13 @@ public class AlbumDetailActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
-        mRecyclerView = findViewById(R.id.activity_list_recycler);
-        mToolbar = findViewById(R.id.activity_list_toolbar);
-        mAppBarLayout = findViewById(R.id.activity_list_app_bar);
-        mCollapsingToolbarLayout = findViewById(R.id.activity_list_collapsing_toolbar);
-        mImageView = findViewById(R.id.activity_list_head_pic);
-        mToolbar.inflateMenu(R.menu.menu_toolbar_album_detail);
 
-        mToolbar.setNavigationOnClickListener(v -> onBackPressed());
+        initView();
 
+        initData();
+    }
+
+    private void initData() {
         Intent intent = getIntent();
         if (intent != null) {
             String key = intent.getStringExtra("key");
@@ -123,17 +122,24 @@ public class AlbumDetailActivity extends Activity {
             if (id != -1) {
                 Log.d(TAG, "onCreate: " + "-1");
                 Cursor cursor2 = getContentResolver().query(Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + "/" + id), new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
+
                 if (cursor2 != null) {
                     cursor2.moveToFirst();
                     String img = cursor2.getString(0);
                     File file = new File(img);
+
                     if (file.exists()) {
                         Bitmap bitmap = BitmapFactory.decodeFile(img);
                         if (bitmap != null) GlideApp.with(this).load(bitmap).into(mImageView);
                     } else
                         GlideApp.with(this).load(R.drawable.ic_audiotrack_24px).into(mImageView);
+
                     cursor2.close();
+                } else {
+                    return;
                 }
+            } else {
+                Toast.makeText(this, "Get Image error (-1)", Toast.LENGTH_SHORT).show();
             }
 
             MyRecyclerAdapter adapter = new MyRecyclerAdapter(mSongs, this);
@@ -143,6 +149,17 @@ public class AlbumDetailActivity extends Activity {
             mRecyclerView.setAdapter(adapter);
         }
 
+    }
+
+    private void initView() {
+        mRecyclerView = findViewById(R.id.activity_list_recycler);
+        mToolbar = findViewById(R.id.activity_list_toolbar);
+        mAppBarLayout = findViewById(R.id.activity_list_app_bar);
+        mCollapsingToolbarLayout = findViewById(R.id.activity_list_collapsing_toolbar);
+        mImageView = findViewById(R.id.activity_list_head_pic);
+        mToolbar.inflateMenu(R.menu.menu_toolbar_album_detail);
+
+        mToolbar.setNavigationOnClickListener(v -> onBackPressed());
     }
 
 }

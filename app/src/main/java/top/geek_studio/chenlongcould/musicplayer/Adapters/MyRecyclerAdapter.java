@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 14:04:02
- * 上次修改时间：2018年11月19日 13:58:16
+ * 当前修改时间：2018年11月19日 16:26:19
+ * 上次修改时间：2018年11月19日 15:26:55
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -184,11 +184,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 }
                 break;
 
-                case Menu.FIRST + 3: {
-
-                }
-                break;
-
                 case Menu.FIRST + 4: {
                     String albumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
                     Cursor cursor = mContext.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
@@ -366,7 +361,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             mMenu.add(Menu.NONE, Menu.FIRST + 0, 0, "下一首播放");
             mMenu.add(Menu.NONE, Menu.FIRST + 1, 0, "喜欢");
             mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, "加入播放列表");
-            mMenu.add(Menu.NONE, Menu.FIRST + 3, 0, "删除");
             mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, "查看专辑");
             mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, "详细信息");
 

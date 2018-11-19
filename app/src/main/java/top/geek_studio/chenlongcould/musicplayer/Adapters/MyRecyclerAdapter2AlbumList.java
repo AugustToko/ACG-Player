@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter2AlbumList.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 14:04:02
- * 上次修改时间：2018年11月19日 13:58:16
+ * 当前修改时间：2018年11月19日 16:26:19
+ * 上次修改时间：2018年11月19日 16:26:11
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -22,7 +22,6 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -161,7 +160,6 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
                 img = cursor.getString(0);
                 cursor.close();
             }
-            Log.d(TAG, "doInBackground: " + img);
             return img;
         }
     }

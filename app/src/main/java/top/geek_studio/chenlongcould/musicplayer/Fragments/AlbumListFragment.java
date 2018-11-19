@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 14:04:02
- * 上次修改时间：2018年11月19日 13:49:24
+ * 当前修改时间：2018年11月19日 16:26:19
+ * 上次修改时间：2018年11月19日 15:12:17
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -77,6 +77,7 @@ public final class AlbumListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_album_list, container, false);
         mRecyclerView = view.findViewById(R.id.recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mRecyclerView.setHasFixedSize(true);
         ON_CREATE_VIEW_DONE = true;
         return view;
     }

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：activity_music_detail.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月19日 14:04:02
-  ~ 上次修改时间：2018年11月19日 14:03:47
+  ~ 当前修改时间：2018年11月19日 16:26:19
+  ~ 上次修改时间：2018年11月19日 16:23:12
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -183,6 +183,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <android.support.constraint.ConstraintLayout
+            android:id="@+id/activity_music_detail_scroll_body"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SplashActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月14日 15:30:40
- * 上次修改时间：2018年11月14日 15:29:35
+ * 当前修改时间：2018年11月19日 16:26:19
+ * 上次修改时间：2018年11月19日 14:15:44
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -39,7 +39,6 @@ public final class SplashActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate: done");
         super.onCreate(savedInstanceState);
 
         try {
@@ -85,7 +84,6 @@ public final class SplashActivity extends Activity {
                     initDone();
                 } else {
                     Utils.Ui.fastToast(this, "Failed to get permission, again!");
-
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle("Failed to get permission");
                     builder.setMessage("Try again?");
@@ -93,12 +91,10 @@ public final class SplashActivity extends Activity {
                     builder.setNegativeButton("Sure!", (dialog, which) -> {
                         initPermission();
                     });
-
                     builder.setNeutralButton("Cancel!", (dialog, which) -> {
                         dialog.dismiss();
                         finish();
                     });
-
                     builder.show();
                 }
             }

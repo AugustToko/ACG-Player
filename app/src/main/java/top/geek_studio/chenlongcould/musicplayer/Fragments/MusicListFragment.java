@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 14:04:02
- * 上次修改时间：2018年11月19日 07:38:19
+ * 当前修改时间：2018年11月19日 16:26:19
+ * 上次修改时间：2018年11月19日 15:25:37
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -149,6 +149,7 @@ public final class MusicListFragment extends Fragment {
         mRecyclerView = view.findViewById(R.id.recycler_view);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL));
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
+        mRecyclerView.setHasFixedSize(true);
 
         adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity);
 
@@ -185,7 +186,7 @@ public final class MusicListFragment extends Fragment {
      */
     private void sureCreateViewDone() {
         if (CREATE_VIEW_DONE) {
-            mActivity.setToolbarSubTitle(Data.sMusicItems.size() + " songs");
+            mActivity.setToolbarSubTitle(Data.sMusicItems.size() + " Songs");
             adapter.notifyDataSetChanged();
         } else {
             new Handler().postDelayed(this::sureCreateViewDone, 1000);      //循环一秒

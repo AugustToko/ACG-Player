@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 14:04:02
- * 上次修改时间：2018年11月19日 13:58:16
+ * 当前修改时间：2018年11月19日 16:26:19
+ * 上次修改时间：2018年11月19日 16:26:13
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -16,6 +16,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.database.Cursor;
@@ -30,7 +31,6 @@ import android.os.Message;
 import android.provider.MediaStore;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -119,6 +119,8 @@ public final class MusicDetailActivity extends Activity {
 
     private AppBarLayout mAppBarLayout;
 
+    private ConstraintLayout mScrollBody;
+
     /**
      * menu
      */
@@ -130,6 +132,8 @@ public final class MusicDetailActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setContentView(R.layout.activity_music_detail);
+
         Data.sActivities.add(this);
         mMainActivity = (MainActivity) Data.sActivities.get(0);
         super.onCreate(savedInstanceState);
@@ -160,7 +164,8 @@ public final class MusicDetailActivity extends Activity {
         if (HAS_BIG) {
             infoBodyScrollDown();
         } else {
-            super.onBackPressed();
+//            super.onBackPressed();            //scrollBody may case bug
+            finish();           //without animation(image trans)
         }
     }
 
@@ -174,8 +179,12 @@ public final class MusicDetailActivity extends Activity {
     private void initData() {
         //init view data
         mHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
-        if (getIntent().getStringExtra("intent_args").equals("by_clicked_body")) {
-            mHandler.sendEmptyMessage(Values.HandlerWhat.SEEK_BAR_UPDATE);
+        Intent intent = getIntent();
+        if (intent != null) {
+            String args = getIntent().getStringExtra("intent_args");
+            if (args.equals("by_clicked_body") || args.equals("clicked by navHeaderImage")) {
+                mHandler.sendEmptyMessage(Values.HandlerWhat.SEEK_BAR_UPDATE);
+            }
         }
 
         GlideApp.with(this)
@@ -202,18 +211,155 @@ public final class MusicDetailActivity extends Activity {
          * init view animation
          * */
         //default type is common, but the random button alpha is 1f(it means this button is on), so set animate
-        AlphaAnimation temp = new AlphaAnimation(0, 0.3f);
-        temp.setDuration(300);
-        temp.setFillAfter(true);
-        temp.setStartOffset(500);
+        mRandomButton.setAlpha(0f);
+        mRepeatButton.setAlpha(0f);
         mRandomButton.clearAnimation();
         mRepeatButton.clearAnimation();
-        if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_COMMON)) {
-            mRandomButton.startAnimation(temp);
+        ValueAnimator animator = new ValueAnimator();
+        animator.setStartDelay(500);
+        animator.setDuration(300);
+        if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
+            animator.setFloatValues(0f, 1f);
+            animator.addUpdateListener(animation -> mRandomButton.setAlpha((Float) animation.getAnimatedValue()));
+            animator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mRandomButton.setAlpha(1f);
+                    mRandomButton.clearAnimation();
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+
+                }
+            });
+            animator.start();
+        } else {
+            animator.setFloatValues(0f, 0.3f);
+            animator.addUpdateListener(animation -> mRandomButton.setAlpha((Float) animation.getAnimatedValue()));
+            animator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mRandomButton.setAlpha(0.3f);
+                    mRandomButton.clearAnimation();
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+
+                }
+            });
+            animator.start();
         }
 
-        if (Values.CurrentData.CURRENT_AUTO_NEXT_TYPE.equals(Values.TYPE_COMMON)) {
-            mRepeatButton.startAnimation(temp);
+        switch (Values.CurrentData.CURRENT_AUTO_NEXT_TYPE) {
+            case Values.TYPE_COMMON: {
+                mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
+                animator.setFloatValues(0f, 0.3f);
+                animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));
+                animator.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mRepeatButton.setAlpha(0.3f);
+                        mRepeatButton.clearAnimation();
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                });
+                animator.start();
+                break;
+            }
+            case Values.TYPE_REPEAT: {
+                mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
+                animator.setFloatValues(0f, 1f);
+                animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));
+                animator.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mRepeatButton.setAlpha(1f);
+                        mRepeatButton.clearAnimation();
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                });
+                animator.start();
+            }
+            break;
+            case Values.TYPE_REPEAT_ONE: {
+                mRepeatButton.setImageResource(R.drawable.ic_repeat_one_white_24dp);
+                animator.setFloatValues(0f, 1f);
+                animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));
+                animator.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mRepeatButton.setAlpha(1f);
+                        mRepeatButton.clearAnimation();
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                });
+                animator.start();
+                break;
+            }
         }
 
         ScaleAnimation mPlayButtonScaleAnimation = new ScaleAnimation(0, mPlayButton.getScaleX(), 0, mPlayButton.getScaleY(),
@@ -258,6 +404,9 @@ public final class MusicDetailActivity extends Activity {
     private void initView() {
         findView();
 
+        //load animations...
+        initAnimation();
+
         mToolbar.setOnMenuItemClickListener(menuItem -> {
             switch (menuItem.getItemId()) {
                 case R.id.menu_toolbar_fast_play: {
@@ -272,7 +421,6 @@ public final class MusicDetailActivity extends Activity {
 
         mToolbar.setNavigationOnClickListener(v -> finish());
 
-        // TODO: 2018/11/14 问题
         mRepeatButton.setOnClickListener(v -> {
 
             /*
@@ -280,42 +428,73 @@ public final class MusicDetailActivity extends Activity {
              * REPEAT = 1f
              * REPEAT_ONE = 1f(another pic)
              * */
+            ValueAnimator animator = new ValueAnimator();
+            animator.setDuration(300);
+            mRepeatButton.clearAnimation();
             switch (Values.CurrentData.CURRENT_AUTO_NEXT_TYPE) {
                 case Values.TYPE_COMMON: {
-                    AlphaAnimation temp = new AlphaAnimation(0.3f, 1f);
-                    temp.setDuration(300);
-                    temp.setFillAfter(true);
-                    temp.setAnimationListener(new Animation.AnimationListener() {
+                    Values.CurrentData.CURRENT_AUTO_NEXT_TYPE = Values.TYPE_REPEAT;
+                    mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
+                    animator.setFloatValues(0.3f, 1f);
+                    animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));
+                    animator.addListener(new Animator.AnimatorListener() {
                         @Override
-                        public void onAnimationStart(Animation animation) {
+                        public void onAnimationStart(Animator animation) {
 
                         }
 
                         @Override
-                        public void onAnimationEnd(Animation animation) {
+                        public void onAnimationEnd(Animator animation) {
+                            mRepeatButton.setAlpha(1f);
+                            mRepeatButton.clearAnimation();
                         }
 
                         @Override
-                        public void onAnimationRepeat(Animation animation) {
+                        public void onAnimationCancel(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
 
                         }
                     });
-                    mRepeatButton.clearAnimation();
-                    mRepeatButton.startAnimation(temp);
-                    Values.CurrentData.CURRENT_AUTO_NEXT_TYPE = "REPEAT";
+                    animator.start();
                     break;
                 }
-                case Values.TYPE_REPEAT:
-                    mRepeatButton.setImageResource(R.drawable.ic_repeat_one_white_24dp);
+                case Values.TYPE_REPEAT: {
                     Values.CurrentData.CURRENT_AUTO_NEXT_TYPE = Values.TYPE_REPEAT_ONE;
-                    break;
+                    mRepeatButton.setImageResource(R.drawable.ic_repeat_one_white_24dp);
+                }
+                break;
                 case Values.TYPE_REPEAT_ONE: {
-                    mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
-                    AlphaAnimation temp = new AlphaAnimation(1f, 0.3f);
-                    temp.setDuration(300);
-                    temp.setFillAfter(true);
-                    mRepeatButton.startAnimation(temp);
                     Values.CurrentData.CURRENT_AUTO_NEXT_TYPE = Values.TYPE_COMMON;
+                    mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
+                    animator.setFloatValues(1f, 0.3f);
+                    animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));
+                    animator.addListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            mRepeatButton.setAlpha(0.3f);
+                            mRepeatButton.clearAnimation();
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+
+                        }
+                    });
+                    animator.start();
                     break;
                 }
             }
@@ -371,24 +550,75 @@ public final class MusicDetailActivity extends Activity {
 
         mRepeatButton.setOnLongClickListener(v -> {
             // TODO: 2018/11/11 repeat mode...
-            return true;
+            AlertDialog.Builder builder = new AlertDialog.Builder(MusicDetailActivity.this);
+            builder.setTitle("Repeater");
+            builder.setMessage("Building...");
+            builder.setCancelable(true);
+            builder.show();
+            return false;
         });
 
         mRandomButton.setOnClickListener(v -> {
+            mRandomButton.clearAnimation();
+
             if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
                 Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_COMMON;
-                AlphaAnimation alphaAnimation = new AlphaAnimation(mRandomButton.getAlpha(), 0.3f);
-                alphaAnimation.setDuration(300);
-                alphaAnimation.setFillAfter(true);
-                mRandomButton.clearAnimation();
-                mRandomButton.startAnimation(alphaAnimation);
+                ValueAnimator animator = new ValueAnimator();
+                animator.setFloatValues(1f, 0.3f);
+                animator.setDuration(300);
+                animator.addUpdateListener(animation -> mRandomButton.setAlpha((Float) animation.getAnimatedValue()));
+                animator.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mRandomButton.setAlpha(0.3f);
+                        mRandomButton.clearAnimation();
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                });
+                animator.start();
             } else {
                 Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_RANDOM;
-                AlphaAnimation alphaAnimation = new AlphaAnimation(mRandomButton.getAlpha(), 1f);
-                alphaAnimation.setDuration(300);
-                alphaAnimation.setFillAfter(true);
-                mRandomButton.clearAnimation();
-                mRandomButton.startAnimation(alphaAnimation);
+                ValueAnimator animator = new ValueAnimator();
+                animator.setFloatValues(0.3f, 1f);
+                animator.setDuration(300);
+                animator.addUpdateListener(animation -> mRandomButton.setAlpha((Float) animation.getAnimatedValue()));
+                animator.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mRandomButton.setAlpha(1f);
+                        mRandomButton.clearAnimation();
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                });
+                animator.start();
             }
         });
 
@@ -411,13 +641,11 @@ public final class MusicDetailActivity extends Activity {
                 }
                 break;
                 case Menu.FIRST + 1: {
-                    Log.d(TAG, "initView: clicked");
                     String albumName = Data.sCurrentMusicAlbum;
                     Cursor cursor = getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
                             MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{albumName}, null);
 
                     //int MusicDetailActivity
-                    ActivityOptionsCompat compat = ActivityOptionsCompat.makeSceneTransitionAnimation(MusicDetailActivity.this, mMusicAlbumImage, getString(R.string.image_trans_album));
                     Intent intent = new Intent(MusicDetailActivity.this, AlbumDetailActivity.class);
                     intent.putExtra("key", albumName);
                     if (cursor != null) {
@@ -426,7 +654,12 @@ public final class MusicDetailActivity extends Activity {
                         intent.putExtra("_id", id);
                         cursor.close();
                     }
-                    startActivity(intent, compat.toBundle());
+                    startActivity(intent);
+                }
+                break;
+                case Menu.FIRST + 2: {
+                    Intent intent = new Intent(MusicDetailActivity.this, PublicActivity.class);
+                    startActivity(intent);
                 }
             }
             return false;
@@ -588,10 +821,10 @@ public final class MusicDetailActivity extends Activity {
             Data.sMusicBinder.seekTo(nowPosition);
             return true;
         });
+
     }
 
     private void findView() {
-        setContentView(R.layout.activity_music_detail);
         mMusicAlbumImage = findViewById(R.id.activity_music_detail_album_image);
         mPrimaryBackground = findViewById(R.id.activity_music_detail_primary_background);
         mPrimaryBackground_down = findViewById(R.id.activity_music_detail_primary_background_down);
@@ -610,6 +843,7 @@ public final class MusicDetailActivity extends Activity {
         mRepeatButton = findViewById(R.id.activity_music_detail_image_repeat_button);
         mToolbar = findViewById(R.id.activity_music_detail_toolbar);
         mAppBarLayout = findViewById(R.id.activity_music_detail_appbar);
+        mScrollBody = findViewById(R.id.activity_music_detail_scroll_body);
     }
 
     //scroll infoBar Up

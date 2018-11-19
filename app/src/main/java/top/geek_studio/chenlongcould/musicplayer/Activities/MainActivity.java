@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 14:04:02
- * 上次修改时间：2018年11月19日 10:13:47
+ * 当前修改时间：2018年11月19日 16:26:19
+ * 上次修改时间：2018年11月19日 16:26:13
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -41,7 +41,6 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -133,29 +132,31 @@ public final class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        Data.sActivities.add(this);
 
         mHandlerThread = new HandlerThread("Handler Thread in MainActivity");
         mHandlerThread.start();
         mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
-
-        //service
-        Intent intent = new Intent(this, MyMusicService.class);
-        startService(intent);
-        bindService(new Intent(this, MyMusicService.class), Data.sServiceConnection, BIND_AUTO_CREATE);
 
         initData();
 
         initView();
 
         reLoadInfoBar();
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     @Override
     protected void onDestroy() {
-        Data.sActivities.remove(this);
         mHandlerThread.quitSafely();
         unbindService(Data.sServiceConnection);
+        Data.sActivities.remove(this);
         Log.d(TAG, "onDestroy: ");
         super.onDestroy();
     }
@@ -271,7 +272,6 @@ public final class MainActivity extends AppCompatActivity {
      * init Something
      */
     private void initData() {
-        Data.sActivities.add(this);
 
         mDefaultSpf = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -297,7 +297,7 @@ public final class MainActivity extends AppCompatActivity {
             titles.add(tab_2);
             titles.add(tab_3);
             bundle.putStringArrayList("titles", titles);
-            message.what = 899;
+            message.what = Values.HandlerWhat.INIT_PAGE_DONE;
             message.setData(bundle);
 
             mHandler.sendMessage(message);
@@ -306,63 +306,47 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        setContentView(R.layout.activity_main);
+        findView();
 
-        mToolbar = findViewById(R.id.activity_main_tool_bar);
-        if (mToolbar == null) {
-            throw new IllegalStateException("Layout is required to include a Toolbar");
-        } else {
-            //根据recycler view的滚动程度, 来判断如何返回顶部
-            mToolbar.setOnClickListener(v -> {
-                if (TOOLBAR_CLICKED) {
-                    switch (Values.CurrentData.CURRENT_PAGE_INDEX) {
-                        case 0: {
-                            if (Values.CurrentData.CURRENT_BIND_INDEX_MUSIC_LIST > 20) {
-                                mMusicListFragment.getRecyclerView().scrollToPosition(0);
-                            } else {
-                                mMusicListFragment.getRecyclerView().smoothScrollToPosition(0);
-                            }
-                        }
-                        break;
-                        case 1: {
-                            if (Values.CurrentData.CURRENT_BIND_INDEX_ALBUM_LIST > 20) {
-                                mAlbumListFragment.getRecyclerView().scrollToPosition(0);
-                            } else {
-                                mAlbumListFragment.getRecyclerView().smoothScrollToPosition(0);
-                            }
+        //根据recycler view的滚动程度, 来判断如何返回顶部
+        mToolbar.setOnClickListener(v -> {
+            if (TOOLBAR_CLICKED) {
+                switch (Values.CurrentData.CURRENT_PAGE_INDEX) {
+                    case 0: {
+                        if (Values.CurrentData.CURRENT_BIND_INDEX_MUSIC_LIST > 20) {
+                            mMusicListFragment.getRecyclerView().scrollToPosition(0);
+                        } else {
+                            mMusicListFragment.getRecyclerView().smoothScrollToPosition(0);
                         }
                     }
-
+                    break;
+                    case 1: {
+                        if (Values.CurrentData.CURRENT_BIND_INDEX_ALBUM_LIST > 20) {
+                            mAlbumListFragment.getRecyclerView().scrollToPosition(0);
+                        } else {
+                            mAlbumListFragment.getRecyclerView().smoothScrollToPosition(0);
+                        }
+                    }
                 }
-                TOOLBAR_CLICKED = true;
-                new Handler().postDelayed(() -> TOOLBAR_CLICKED = false, 1000);         //双击机制
 
-            });
-            setSupportActionBar(mToolbar);
-        }
-
-        mDrawerLayout = findViewById(R.id.activity_main_drawer_layout);
-        if (mDrawerLayout != null) {
-            mNavigationView = findViewById(R.id.activity_main_nav_view);
-            if (mNavigationView == null) {
-                throw new IllegalStateException("Layout requires a NavigationView");
-            } else {
-                mNavHeaderImageView = mNavigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
-                //disable
-//                mNavHeaderImageView.setOnClickListener(v -> {
-//                    mDrawerLayout.closeDrawers();
-//                    mDrawerLayout.post(() -> {
-//                        if (Values.HAS_PLAYED) {
-//                            Intent intent = new Intent(MainActivity.this, MusicDetailActivity.class);
-//                            intent.putExtra("intent_args", "by_clicked_body");
-//                            startActivity(intent);
-//                        } else {
-//                            Utils.Ui.fastToast(MainActivity.this, "No music playing.");
-//                        }
-//                    });
-//                });
             }
+            TOOLBAR_CLICKED = true;
+            new Handler().postDelayed(() -> TOOLBAR_CLICKED = false, 1000);         //双击机制
+        });
+        setSupportActionBar(mToolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24px);
         }
+
+        mNavHeaderImageView = mNavigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
+        mNavHeaderImageView.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, MusicDetailActivity.class);
+            intent.putExtra("intent_args", "clicked by navHeaderImage");
+            startActivity(intent);
+        });
 
         mNavigationView.setNavigationItemSelectedListener(menuItem -> {
             switch (menuItem.getItemId()) {
@@ -373,11 +357,6 @@ public final class MainActivity extends AppCompatActivity {
             }
             return true;
         });
-
-        mNowPlayingSongAlbumText = findViewById(R.id.activity_main_now_playing_album_name);
-        mNowPlayingBody = findViewById(R.id.current_info);
-        mNowPlayingStatusImage = findViewById(R.id.activity_main_info_bar_status_image);
-        mNowPlayingBackgroundImage = findViewById(R.id.current_info_background);
 
         mNowPlayingStatusImage.setOnClickListener(v -> {
             //判断是否播放过, 如没有默认随机播放
@@ -410,17 +389,6 @@ public final class MainActivity extends AppCompatActivity {
                 Utils.Ui.fastToast(MainActivity.this, "No music playing.");
             }
         });
-
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24px);
-        }
-
-        mTabLayout = findViewById(R.id.tab_layout);
-        mViewPager = findViewById(R.id.view_pager);
-        mNowPlayingSongText = findViewById(R.id.activity_main_now_playing_name);
-        mNowPlayingSongImage = findViewById(R.id.recycler_item_clover_image);
 
         // 实例代码
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -457,35 +425,33 @@ public final class MainActivity extends AppCompatActivity {
             }
         });
 
-        initDrawerToggle();
-
-        //final
-        Data.sDefTextColorStateList = mNowPlayingSongText.getTextColors();
-        Data.sDefIcoColorStateList = mNowPlayingStatusImage.getImageTintList();
-    }
-
-    private void initAnimation() {
-        // TODO: 2018/11/14 padding bug
-        TranslateAnimation mPlayingBodyTranslateAnimation = new TranslateAnimation(mNowPlayingBody.getTranslationX(), mNowPlayingBody.getTranslationX(), 500, mNowPlayingBody.getTranslationY());
-        mPlayingBodyTranslateAnimation.setDuration(300);
-        mPlayingBodyTranslateAnimation.setFillAfter(true);
-        mNowPlayingBody.clearAnimation();
-        mNowPlayingBody.startAnimation(mPlayingBodyTranslateAnimation);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    //drawer toggle
-    private void initDrawerToggle() {
         // 参数：开启抽屉的activity、DrawerLayout的对象、toolbar按钮打开关闭的对象、描述open drawer、描述close drawer
         ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.open, R.string.close);
         // 添加抽屉按钮，通过点击按钮实现打开和关闭功能; 如果不想要抽屉按钮，只允许在侧边边界拉出侧边栏，可以不写此行代码
         mDrawerToggle.syncState();
         // 设置按钮的动画效果; 如果不想要打开关闭抽屉时的箭头动画效果，可以不写此行代码
         mDrawerLayout.addDrawerListener(mDrawerToggle);
+
+        //at last update data
+        Data.sDefTextColorStateList = mNowPlayingSongText.getTextColors();
+        Data.sDefIcoColorStateList = mNowPlayingStatusImage.getImageTintList();
+    }
+
+    /**
+     * findViewById
+     */
+    private void findView() {
+        mNowPlayingSongAlbumText = findViewById(R.id.activity_main_now_playing_album_name);
+        mNowPlayingBody = findViewById(R.id.current_info);
+        mNowPlayingStatusImage = findViewById(R.id.activity_main_info_bar_status_image);
+        mNowPlayingBackgroundImage = findViewById(R.id.current_info_background);
+        mToolbar = findViewById(R.id.activity_main_tool_bar);
+        mDrawerLayout = findViewById(R.id.activity_main_drawer_layout);
+        mNavigationView = findViewById(R.id.activity_main_nav_view);
+        mTabLayout = findViewById(R.id.tab_layout);
+        mViewPager = findViewById(R.id.view_pager);
+        mNowPlayingSongText = findViewById(R.id.activity_main_now_playing_name);
+        mNowPlayingSongImage = findViewById(R.id.recycler_item_clover_image);
     }
 
     /**
@@ -499,13 +465,7 @@ public final class MainActivity extends AppCompatActivity {
      */
     public void setCurrentSongInfo(String songName, String albumName, String songPath, @Nullable Bitmap cover, String... args) {
 
-        //if already set the same info(from path) return
-//        if (Values.CURRENT_SONG_PATH.equals(songPath) && args != null) {
-//            return;
-//        }
-
         runOnUiThread(() -> {
-
             mNowPlayingSongText.setText(songName);
             mNowPlayingSongAlbumText.setText(albumName);
 
@@ -516,6 +476,7 @@ public final class MainActivity extends AppCompatActivity {
                 GlideApp.with(MainActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade()).override(150, 150).into(mNowPlayingSongImage);
                 GlideApp.with(MainActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade()).centerCrop().into(mNavHeaderImageView);
 
+                //InfoBar background color AND text color balance
                 if (currentBright > (255 / 2)) {
                     mNowPlayingSongText.setTextColor(Data.sDefTextColorStateList);
                     mNowPlayingSongAlbumText.setTextColor(Data.sDefTextColorStateList);
@@ -568,7 +529,7 @@ public final class MainActivity extends AppCompatActivity {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case 899: {
+                case Values.HandlerWhat.INIT_PAGE_DONE: {
                     ArrayList<String> titles = msg.getData().getStringArrayList("titles");
                     if (titles != null) {
                         runOnUiThread(() -> {
@@ -582,6 +543,12 @@ public final class MainActivity extends AppCompatActivity {
                             mViewPager.setCurrentItem(0);
                             mViewPager.setAdapter(mPagerAdapter);
                             Values.CurrentData.CURRENT_PAGE_INDEX = 0;
+
+                            //service
+                            Intent intent = new Intent(mWeakReference.get(), MyMusicService.class);
+                            startService(intent);
+                            bindService(new Intent(mWeakReference.get(), MyMusicService.class), Data.sServiceConnection, BIND_AUTO_CREATE);
+
                         });
                     }
                 }
