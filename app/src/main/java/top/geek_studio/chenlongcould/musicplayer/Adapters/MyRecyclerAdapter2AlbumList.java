@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter2AlbumList.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月18日 21:28:39
- * 上次修改时间：2018年11月18日 21:28:14
+ * 当前修改时间：2018年11月19日 14:04:02
+ * 上次修改时间：2018年11月19日 13:58:16
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -20,23 +20,30 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
+
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-import top.geek_studio.chenlongcould.musicplayer.Activities.ListActivity;
+import top.geek_studio.chenlongcould.musicplayer.Activities.AlbumDetailActivity;
+import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.AlbumItem;
+import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
-public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRecyclerAdapter2AlbumList.ViewHolder> {
+public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRecyclerAdapter2AlbumList.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
 
     private List<AlbumItem> mAlbumNameList;
 
@@ -56,10 +63,13 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
         view.setOnClickListener(v -> {
             // TODO: 2018/11/5 根据点击的项目查找符合要求的歌曲
             String keyWords = mAlbumNameList.get(holder.getAdapterPosition()).getAlbumName();
-            Intent intent = new Intent(mContext, ListActivity.class);
+
+            MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
+            ActivityOptionsCompat compat = ActivityOptionsCompat.makeSceneTransitionAnimation(mainActivity, holder.mAlbumImage, mContext.getString(R.string.image_trans_album));
+            Intent intent = new Intent(mainActivity, AlbumDetailActivity.class);
             intent.putExtra("key", keyWords);
             intent.putExtra("_id", mAlbumNameList.get(holder.getAdapterPosition()).getAlbumId());
-            mContext.startActivity(intent);
+            mContext.startActivity(intent, compat.toBundle());
         });
 
         return holder;
@@ -97,6 +107,12 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
         GlideApp.with(mContext).clear(holder.mAlbumImage);
     }
 
+    @NonNull
+    @Override
+    public String getSectionName(int position) {
+        return String.valueOf(mAlbumNameList.get(position).getAlbumName().charAt(0));
+    }
+
     static class MyTask extends AsyncTask<Void, Void, String> {
 
         private static final String TAG = "MyTask";
@@ -118,12 +134,12 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
                 return;
             }
             mImageViewWeakReference.get().setTag(null);
-            if (albumArt.equals("null")) {
-                GlideApp.with(mContextWeakReference.get()).load(R.drawable.ic_audiotrack_24px).into(mImageViewWeakReference.get());
-            } else {
+            File file = new File(albumArt);
+            if (file.exists()) {
                 Bitmap bitmap = BitmapFactory.decodeFile(albumArt);
                 GlideApp.with(mContextWeakReference.get()).load(bitmap).into(mImageViewWeakReference.get());
-            }
+            } else
+                GlideApp.with(mContextWeakReference.get()).load(R.drawable.ic_audiotrack_24px).into(mImageViewWeakReference.get());
         }
 
         @Override
@@ -145,6 +161,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
                 img = cursor.getString(0);
                 cursor.close();
             }
+            Log.d(TAG, "doInBackground: " + img);
             return img;
         }
     }

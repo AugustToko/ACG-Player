@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：recycler_music_album_list_item.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月14日 15:30:40
-  ~ 上次修改时间：2018年11月14日 15:29:35
+  ~ 当前修改时间：2018年11月19日 14:04:02
+  ~ 上次修改时间：2018年11月19日 14:03:47
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -25,7 +25,9 @@
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
         android:contentDescription="@string/app_name"
-        android:src="@color/colorPrimary"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_audiotrack_24px"
+        android:transitionName="@string/image_trans_album"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

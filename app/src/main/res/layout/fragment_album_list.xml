@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：fragment_album_list.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月14日 15:30:40
-  ~ 上次修改时间：2018年11月14日 15:29:35
+  ~ 当前修改时间：2018年11月19日 14:04:02
+  ~ 上次修改时间：2018年11月19日 14:03:48
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -13,10 +13,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/music_album_list_fragment_recycler"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="vertical" />
+    <include
+        android:id="@+id/fragment_album_list_include_recycler"
+        layout="@layout/include_recycler_view" />
 
 </android.support.constraint.ConstraintLayout>

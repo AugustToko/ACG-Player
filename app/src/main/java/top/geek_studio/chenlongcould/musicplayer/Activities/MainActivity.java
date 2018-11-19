@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月18日 21:28:39
- * 上次修改时间：2018年11月18日 10:21:37
+ * 当前修改时间：2018年11月19日 14:04:02
+ * 上次修改时间：2018年11月19日 10:13:47
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -128,7 +128,7 @@ public final class MainActivity extends AppCompatActivity {
 
     /**
      * onXXX
-     * Override
+     * At Override
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -236,6 +236,7 @@ public final class MainActivity extends AppCompatActivity {
      * @param filterStr fileName
      */
     private void filterData(String filterStr) {
+        // TODO: 2018/11/19 while in the album page...
         if (TextUtils.isEmpty(filterStr)) {
             Data.sMusicItems.clear();
             Data.sMusicItems.addAll(Data.sMusicItemsBackUp);
@@ -243,10 +244,6 @@ public final class MainActivity extends AppCompatActivity {
         } else {
             Data.sMusicItems.clear();
             for (MusicItem item : Data.sMusicItemsBackUp) {
-
-                /*
-                 * //todo 仅支持 音乐名称搜索
-                 * */
                 String name = item.getMusicName();
                 if (name.toLowerCase().contains(filterStr) || name.toUpperCase().contains(filterStr)) {
                     Data.sMusicItems.add(item);
@@ -369,7 +366,6 @@ public final class MainActivity extends AppCompatActivity {
 
         mNavigationView.setNavigationItemSelectedListener(menuItem -> {
             switch (menuItem.getItemId()) {
-                // TODO: 2018/11/11 need more menu
                 case R.id.menu_nav_exit: {
                     finish();
                 }
@@ -406,7 +402,7 @@ public final class MainActivity extends AppCompatActivity {
 
         mNowPlayingBody.setOnClickListener(v -> {
             if (Values.HAS_PLAYED) {
-                ActivityOptionsCompat compat = ActivityOptionsCompat.makeSceneTransitionAnimation(this, mNowPlayingSongImage, getString(R.string.image_trans));
+                ActivityOptionsCompat compat = ActivityOptionsCompat.makeSceneTransitionAnimation(this, mNowPlayingSongImage, getString(R.string.image_trans_album));
                 Intent intent = new Intent(MainActivity.this, MusicDetailActivity.class);
                 intent.putExtra("intent_args", "by_clicked_body");
                 startActivity(intent, compat.toBundle());

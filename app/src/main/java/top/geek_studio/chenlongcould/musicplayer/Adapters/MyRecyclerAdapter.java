@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月18日 21:28:39
- * 上次修改时间：2018年11月18日 21:28:13
+ * 当前修改时间：2018年11月19日 14:04:02
+ * 上次修改时间：2018年11月19日 13:58:16
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -15,13 +15,16 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -40,8 +43,10 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Random;
 
+import top.geek_studio.chenlongcould.musicplayer.Activities.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MusicDetailActivity;
+import top.geek_studio.chenlongcould.musicplayer.Activities.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.MusicItem;
@@ -164,7 +169,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
                 case Menu.FIRST + 1: {
                     // TODO: 2018/11/8 待完善(最喜爱歌曲列表)
-
                     SharedPreferences mPlayListSpf = mMainActivity.getSharedPreferences(Values.SharedPrefsTag.PLAY_LIST_SPF_NAME_MY_FAVOURITE, 0);
                     SharedPreferences.Editor editor = mPlayListSpf.edit();
                     editor.putString(Values.PLAY_LIST_SPF_KEY, mMusicItems.get(index).getMusicPath());
@@ -178,6 +182,56 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                     // TODO: 2018/11/18 test play list
                     PlayListsUtil.createPlaylist(mContext, String.valueOf(new Random(1000)));
                 }
+                break;
+
+                case Menu.FIRST + 3: {
+
+                }
+                break;
+
+                case Menu.FIRST + 4: {
+                    String albumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
+                    Cursor cursor = mContext.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
+                            MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum()}, null);
+                    if (Data.sActivities.size() == 1) {
+
+                        //int MainActivity
+                        MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
+                        ActivityOptionsCompat compat = ActivityOptionsCompat.makeSceneTransitionAnimation(mainActivity, holder.mMusicCloverImage, mContext.getString(R.string.image_trans_album));
+                        Intent intent = new Intent(mainActivity, AlbumDetailActivity.class);
+                        intent.putExtra("key", albumName);
+                        if (cursor != null) {
+                            cursor.moveToFirst();
+                            int id = Integer.parseInt(cursor.getString(0));
+                            intent.putExtra("_id", id);
+                            cursor.close();
+                        }
+                        mContext.startActivity(intent, compat.toBundle());
+                    } else if (Data.sActivities.size() == 2) {
+
+                        //int MusicDetailActivity
+                        MusicDetailActivity activity = (MusicDetailActivity) Data.sActivities.get(1);
+                        ActivityOptionsCompat compat = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, holder.mMusicCloverImage, mContext.getString(R.string.image_trans_album));
+                        Intent intent = new Intent(activity, AlbumDetailActivity.class);
+                        intent.putExtra("key", albumName);
+                        if (cursor != null) {
+                            cursor.moveToFirst();
+                            int id = Integer.parseInt(cursor.getString(0));
+                            intent.putExtra("_id", id);
+                            cursor.close();
+                        }
+                        mContext.startActivity(intent, compat.toBundle());
+                    }
+
+                }
+                break;
+
+                case Menu.FIRST + 5: {
+                    Intent intent = new Intent(mContext, PublicActivity.class);
+                    intent.putExtra("start_by", "detail");
+                    mContext.startActivity(intent);
+                }
+                break;
             }
 
             Values.CurrentData.CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = -1;

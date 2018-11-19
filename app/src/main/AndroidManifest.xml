@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：AndroidManifest.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月18日 21:28:39
-  ~ 上次修改时间：2018年11月18日 17:51:47
+  ~ 当前修改时间：2018年11月19日 14:04:02
+  ~ 上次修改时间：2018年11月19日 14:03:48
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -78,7 +78,9 @@
             android:enabled="true"
             android:exported="false" />
 
-        <activity android:name=".Activities.ListActivity"></activity>
+        <activity
+            android:name=".Activities.AlbumDetailActivity"
+            android:launchMode="singleTask" />
     </application>
 
 </manifest>

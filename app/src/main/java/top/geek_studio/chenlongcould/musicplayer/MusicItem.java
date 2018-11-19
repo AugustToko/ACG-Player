@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicItem.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 07:14:29
- * 上次修改时间：2018年11月19日 07:14:11
+ * 当前修改时间：2018年11月19日 14:04:02
+ * 上次修改时间：2018年11月19日 07:20:06
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -13,7 +13,7 @@ package top.geek_studio.chenlongcould.musicplayer;
 
 public class MusicItem {
 
-    byte[] mMusicCover;
+    private byte[] mMusicCover;
     private String mMimeName;
     private String mMusicName;
     private String mMusicPath;

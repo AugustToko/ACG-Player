@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月14日 20:29:26
- * 上次修改时间：2018年11月14日 19:09:20
+ * 当前修改时间：2018年11月19日 14:04:02
+ * 上次修改时间：2018年11月19日 08:58:26
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -162,7 +162,6 @@ public final class Utils {
                     Data.sHistoryPlayIndex.add(index);
 
                     Bitmap cover = Utils.Audio.getMp3Cover(path);
-
                     Data.saveGlobalCurrentData(musicName, albumName, cover);
 
                     Values.MUSIC_PLAYING = true;

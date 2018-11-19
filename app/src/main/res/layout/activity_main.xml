@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：activity_main.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月14日 15:30:40
-  ~ 上次修改时间：2018年11月14日 15:29:35
+  ~ 当前修改时间：2018年11月19日 14:04:02
+  ~ 上次修改时间：2018年11月19日 10:14:20
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -97,7 +97,7 @@
                     android:layout_gravity="center_vertical"
                     android:contentDescription="@string/app_name"
                     android:src="@drawable/ic_audiotrack_24px"
-                    android:transitionName="@string/image_trans"
+                    android:transitionName="@string/image_trans_album"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent" />
 

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月18日 21:28:39
- * 上次修改时间：2018年11月18日 21:28:13
+ * 当前修改时间：2018年11月19日 14:04:02
+ * 上次修改时间：2018年11月19日 07:38:19
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -149,7 +149,6 @@ public final class MusicListFragment extends Fragment {
         mRecyclerView = view.findViewById(R.id.recycler_view);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL));
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
-        mRecyclerView.setHasFixedSize(true);
 
         adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity);
 

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月14日 15:30:40
- * 上次修改时间：2018年11月14日 15:29:35
+ * 当前修改时间：2018年11月19日 14:04:02
+ * 上次修改时间：2018年11月19日 14:03:45
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -16,7 +16,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
-import android.util.Log;
 
 import java.io.IOException;
 
@@ -29,11 +28,10 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 public final class ReceiverOnMusicPlay extends BroadcastReceiver {
     private static final String TAG = "ReceiverOnMusicPlay";
 
+    public static final int TYPE_SHUFFLE = 90;
+
     @Override
     public void onReceive(Context context, Intent intent) {
-
-        Log.d(TAG, "initView: common");
-
         int type = intent.getIntExtra("play_type", -1);
         switch (type) {
             case -1: {
@@ -41,7 +39,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
             }
 
             //Type Random
-            case 1: {
+            case TYPE_SHUFFLE: {
                 Utils.Audio.shufflePlayback();
             }
             break;
@@ -75,10 +73,16 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
             case 4: {
                 Data.sMusicBinder.resetMusic();
                 int targetIndex = Values.CurrentData.CURRENT_MUSIC_INDEX + 1;
-                if (targetIndex > Data.sMusicItems.size() - 1) {
+                if (targetIndex > Data.sMusicItems.size() - 1) {            //超出范围自动跳转0
                     targetIndex = 0;
                 }
 
+                //防止下一首歌曲与当前相同
+                if (Data.sMusicItems.get(targetIndex).getMusicPath().equals(Values.CurrentData.CURRENT_SONG_PATH)) {
+                    MusicDetailActivity a = (MusicDetailActivity) Data.sActivities.get(1);
+                    Data.sMusicBinder.seekTo(0);
+                    a.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
+                }
 
                 Values.CurrentData.CURRENT_MUSIC_INDEX = targetIndex;
                 Values.MUSIC_PLAYING = true;
@@ -103,8 +107,9 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 if (Data.sActivities.size() >= 2) {
                     MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
                     musicDetailActivity.setCurrentSongInfo(musicName, albumName, Utils.Audio.getAlbumByteImage(path));
-                    musicDetailActivity.getSeekBar().getThumb().setColorFilter(cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
 
+                    //seekBar(Thumb) change color
+                    musicDetailActivity.getSeekBar().getThumb().setColorFilter(cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
                 }
 
                 Data.sCurrentMusicAlbum = albumName;

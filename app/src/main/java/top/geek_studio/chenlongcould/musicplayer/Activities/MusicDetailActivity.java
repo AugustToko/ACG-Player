@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月14日 15:30:40
- * 上次修改时间：2018年11月14日 15:29:35
+ * 当前修改时间：2018年11月19日 14:04:02
+ * 上次修改时间：2018年11月19日 13:58:16
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -18,6 +18,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -26,8 +27,10 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -54,6 +57,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
+import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
@@ -126,8 +130,11 @@ public final class MusicDetailActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Data.sActivities.add(this);
+        mMainActivity = (MainActivity) Data.sActivities.get(0);
         super.onCreate(savedInstanceState);
 
+        //statusBar color
         try {
             @SuppressLint("PrivateApi") Class decorViewClazz = Class.forName("com.android.internal.policy.DecorView");
             Field field = decorViewClazz.getDeclaredField("mSemiTransparentStatusBarColor");
@@ -138,11 +145,6 @@ public final class MusicDetailActivity extends Activity {
             e.printStackTrace();
         }
 
-        setContentView(R.layout.activity_music_detail);
-
-        Data.sActivities.add(this);
-
-        mMainActivity = (MainActivity) Data.sActivities.get(0);
 
         mHandlerThread = new HandlerThread("Handler Thread in MusicDetailActivity");
         mHandlerThread.start();
@@ -154,17 +156,11 @@ public final class MusicDetailActivity extends Activity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        initAnimation();
-    }
-
-    @Override
     public void onBackPressed() {
         if (HAS_BIG) {
             infoBodyScrollDown();
         } else {
-            finish();
+            super.onBackPressed();
         }
     }
 
@@ -261,6 +257,18 @@ public final class MusicDetailActivity extends Activity {
 
     private void initView() {
         findView();
+
+        mToolbar.setOnMenuItemClickListener(menuItem -> {
+            switch (menuItem.getItemId()) {
+                case R.id.menu_toolbar_fast_play: {
+                    Intent intent = new Intent(MusicDetailActivity.this, ReceiverOnMusicPlay.class);
+                    intent.putExtra("play_type", ReceiverOnMusicPlay.TYPE_SHUFFLE);
+                    sendBroadcast(intent);
+                }
+                break;
+            }
+            return false;
+        });
 
         mToolbar.setNavigationOnClickListener(v -> finish());
 
@@ -384,7 +392,7 @@ public final class MusicDetailActivity extends Activity {
             }
         });
 
-        //Menu...
+        /*---------------------- Menu -----------------------*/
         mPopupMenu = new PopupMenu(this, mMenuButton);
         mMenu = mPopupMenu.getMenu();
 
@@ -394,6 +402,36 @@ public final class MusicDetailActivity extends Activity {
         mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, "详细信息");
 
         mMenuButton.setOnClickListener(v -> mPopupMenu.show());
+
+        mPopupMenu.setOnMenuItemClickListener(item -> {
+            switch (item.getItemId()) {
+                //noinspection PointlessArithmeticExpression
+                case Menu.FIRST + 0: {
+
+                }
+                break;
+                case Menu.FIRST + 1: {
+                    Log.d(TAG, "initView: clicked");
+                    String albumName = Data.sCurrentMusicAlbum;
+                    Cursor cursor = getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
+                            MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{albumName}, null);
+
+                    //int MusicDetailActivity
+                    ActivityOptionsCompat compat = ActivityOptionsCompat.makeSceneTransitionAnimation(MusicDetailActivity.this, mMusicAlbumImage, getString(R.string.image_trans_album));
+                    Intent intent = new Intent(MusicDetailActivity.this, AlbumDetailActivity.class);
+                    intent.putExtra("key", albumName);
+                    if (cursor != null) {
+                        cursor.moveToFirst();
+                        int id = Integer.parseInt(cursor.getString(0));
+                        intent.putExtra("_id", id);
+                        cursor.close();
+                    }
+                    startActivity(intent, compat.toBundle());
+                }
+            }
+            return false;
+        });
+        /*---------------------- Menu -----------------------*/
 
         mInfoBody.setOnClickListener(v -> {
             // TODO: 2018/11/11 in MusicDetailActivity's infoBody, fast scroll may lag
@@ -468,8 +506,6 @@ public final class MusicDetailActivity extends Activity {
                     sendBroadcast(intent);
                     break;
                 default:
-                    Data.sMusicBinder.seekTo(0);
-                    mSeekBar.setProgress(0, true);
                     break;
             }
             Values.BUTTON_PRESSED = false;
@@ -531,7 +567,6 @@ public final class MusicDetailActivity extends Activity {
                             Data.sMusicBinder.setDataSource(path);
                             Data.sMusicBinder.prepare();
                             Data.sMusicBinder.playMusic();
-
                             mHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -556,6 +591,7 @@ public final class MusicDetailActivity extends Activity {
     }
 
     private void findView() {
+        setContentView(R.layout.activity_music_detail);
         mMusicAlbumImage = findViewById(R.id.activity_music_detail_album_image);
         mPrimaryBackground = findViewById(R.id.activity_music_detail_primary_background);
         mPrimaryBackground_down = findViewById(R.id.activity_music_detail_primary_background_down);
@@ -608,7 +644,6 @@ public final class MusicDetailActivity extends Activity {
             mCardView.requestLayout();
         });
         anim.start();
-
         HAS_BIG = false;
     }
 
@@ -661,6 +696,7 @@ public final class MusicDetailActivity extends Activity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case Values.HandlerWhat.INIT_SEEK_BAR: {
+                    mSeekBar.setProgress(0, true);
                     mSeekBar.setMax(Data.sMusicBinder.getDuration());
                 }
                 break;
@@ -669,8 +705,10 @@ public final class MusicDetailActivity extends Activity {
                     if (Data.sMusicBinder.isPlayingMusic() || Data.sActivities.size() > 0) {
                         mSeekBar.setProgress(Data.sMusicBinder.getCurrentPosition(), true);
                     }
+
                     //循环更新 0.5s 一次
                     mHandler.sendEmptyMessageDelayed(Values.HandlerWhat.SEEK_BAR_UPDATE, 500);
+                    Log.d(TAG, "handleMessage: seekBar update!");
                 }
                 default:
             }

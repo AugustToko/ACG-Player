@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：activity_list.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月18日 21:28:39
-  ~ 上次修改时间：2018年11月18日 21:28:14
+  ~ 当前修改时间：2018年11月19日 14:04:02
+  ~ 上次修改时间：2018年11月19日 13:58:16
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -14,7 +14,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Activities.ListActivity">
+    tools:context=".Activities.AlbumDetailActivity">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/activity_list_app_bar"
@@ -39,6 +39,7 @@
                 android:fitsSystemWindows="true"
                 android:scaleType="centerCrop"
                 app:layout_collapseMode="parallax"
+                android:transitionName="@string/image_trans_album"
                 tools:src="@color/colorPrimary" />
 
             <ImageView

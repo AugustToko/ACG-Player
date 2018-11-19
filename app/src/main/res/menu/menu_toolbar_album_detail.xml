@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
-  ~ 文件：menu_nav.xml  模块：app  项目：MusicPlayer
+  ~ 文件：menu_toolbar_album_detail.xml  模块：app  项目：MusicPlayer
   ~ 当前修改时间：2018年11月19日 14:04:02
   ~ 上次修改时间：2018年11月19日 14:03:48
   ~ 作者：chenlongcould
@@ -10,13 +10,9 @@
   -->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
     <item
-        android:id="@+id/menu_nav_setting"
-        android:title="Settings" />
-    <item
-        android:id="@+id/menu_nav_about"
-        android:title="About" />
-    <item android:id="@+id/menu_nav_exit"
-        android:icon="@drawable/ic_exit_to_app_black_24dp"
-        android:title="Exit"/>
+        android:id="@+id/menu_toolbar_album_exit"
+        android:title="@string/exit" />
+
 </menu>
