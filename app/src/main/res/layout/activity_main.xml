@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：activity_main.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月19日 14:04:02
-  ~ 上次修改时间：2018年11月19日 10:14:20
+  ~ 当前修改时间：2018年11月20日 21:06:43
+  ~ 上次修改时间：2018年11月20日 10:59:06
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -29,7 +29,7 @@
             app:elevation="2dp">
 
             <android.support.design.widget.AppBarLayout
-                android:id="@+id/appBarLayout"
+                android:id="@+id/activity_main_appbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/colorPrimary"

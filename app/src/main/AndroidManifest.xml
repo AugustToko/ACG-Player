@@ -1,28 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：AndroidManifest.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月19日 14:04:02
-  ~ 上次修改时间：2018年11月19日 14:03:48
+  ~ 当前修改时间：2018年11月20日 21:06:44
+  ~ 上次修改时间：2018年11月20日 21:01:04
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
   ~ *************************************************************
   -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="top.geek_studio.chenlongcould.musicplayer"
-    tools:ignore="InnerclassSeparator">
+    package="top.geek_studio.chenlongcould.musicplayer">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
+        android:name=".MyApplication"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_descriptor"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
             android:name=".Activities.MainActivity"
             android:launchMode="singleTask"
@@ -81,6 +80,15 @@
         <activity
             android:name=".Activities.AlbumDetailActivity"
             android:launchMode="singleTask" />
+        <activity
+            android:name=".Activities.SettingsActivity"
+            android:launchMode="singleTask" />
+
+        <activity
+            android:name=".Activities.AboutLic"
+            android:launchMode="singleTask"
+            android:theme="@style/CommonActivityTheme" />
     </application>
+
 
 </manifest>

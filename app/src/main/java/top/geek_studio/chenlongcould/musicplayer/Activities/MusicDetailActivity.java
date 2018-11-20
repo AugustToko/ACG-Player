@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 18:40:42
- * 上次修改时间：2018年11月19日 17:29:14
+ * 当前修改时间：2018年11月20日 21:06:43
+ * 上次修改时间：2018年11月20日 20:47:28
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -15,7 +15,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -23,6 +22,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -65,7 +65,7 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
-public final class MusicDetailActivity extends Activity {
+public final class MusicDetailActivity extends MyBaseActivity {
 
     private static final String TAG = "MusicDetailActivity";
 
@@ -719,7 +719,11 @@ public final class MusicDetailActivity extends Activity {
 
         mNextButton.setOnClickListener(v -> {
             Values.BUTTON_PRESSED = true;
-            mSeekBar.setProgress(0, true);            //防止seekBar跳动到Max
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                mSeekBar.setProgress(0, true);            //防止seekBar跳动到Max
+            } else {
+                mSeekBar.setProgress(0);            //防止seekBar跳动到Max
+            }
 
             if (Data.sNextWillPlayIndex != -1) {
                 Utils.Audio.doesNextHasMusic();
@@ -748,7 +752,11 @@ public final class MusicDetailActivity extends Activity {
             if (nowPosition >= mSeekBar.getMax()) {
                 nowPosition = mSeekBar.getMax();
             }
-            mSeekBar.setProgress(nowPosition, true);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                mSeekBar.setProgress(nowPosition, true);
+            } else {
+                mSeekBar.setProgress(nowPosition);
+            }
             Data.sMusicBinder.seekTo(nowPosition);
             Values.BUTTON_PRESSED = false;
             return true;
@@ -765,7 +773,11 @@ public final class MusicDetailActivity extends Activity {
                         Data.sMusicBinder.seekTo(0);
 
                     } else if (Data.sHistoryPlayIndex.size() >= 2) {
-                        mSeekBar.setProgress(0, true);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            mSeekBar.setProgress(0, true);
+                        } else {
+                            mSeekBar.setProgress(0);
+                        }
                         Data.sMusicBinder.resetMusic();
 
                         int tempSize = Data.sHistoryPlayIndex.size();
@@ -815,7 +827,11 @@ public final class MusicDetailActivity extends Activity {
             if (nowPosition <= 0) {
                 nowPosition = 0;
             }
-            mSeekBar.setProgress(nowPosition, true);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                mSeekBar.setProgress(nowPosition, true);
+            } else {
+                mSeekBar.setProgress(nowPosition);
+            }
             Data.sMusicBinder.seekTo(nowPosition);
             return true;
         });
@@ -928,14 +944,22 @@ public final class MusicDetailActivity extends Activity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case Values.HandlerWhat.INIT_SEEK_BAR: {
-                    mSeekBar.setProgress(0, true);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        mSeekBar.setProgress(0, true);
+                    } else {
+                        mSeekBar.setProgress(0);
+                    }
                     mSeekBar.setMax(Data.sMusicBinder.getDuration());
                 }
                 break;
                 case Values.HandlerWhat.SEEK_BAR_UPDATE: {
                     //点击body 或 music 正在播放 才可以进行seekBar更新
                     if (Data.sMusicBinder.isPlayingMusic() || Data.sActivities.size() > 0) {
-                        mSeekBar.setProgress(Data.sMusicBinder.getCurrentPosition(), true);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            mSeekBar.setProgress(Data.sMusicBinder.getCurrentPosition(), true);
+                        } else {
+                            mSeekBar.setProgress(Data.sMusicBinder.getCurrentPosition());
+                        }
                     }
 
                     //循环更新 0.5s 一次

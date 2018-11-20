@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：build.gradle  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月14日 15:30:40
- * 上次修改时间：2018年11月14日 15:29:35
+ * 当前修改时间：2018年11月20日 21:06:44
+ * 上次修改时间：2018年11月20日 20:24:29
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -12,19 +12,35 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'chenlongcould'
+            keyPassword '18551348272Chen'
+            storeFile file('C:/Users/chenlongcould/Desktop/AndroidStudio_KEY_Store/chenlongcould.jks')
+            storePassword '18551348272Chen'
+        }
+    }
     compileSdkVersion 28
     defaultConfig {
         applicationId "top.geek_studio.chenlongcould.musicplayer"
-        minSdkVersion 27
+        minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        signingConfig signingConfigs.config
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
+            zipAlignEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+            renderscriptOptimLevel 5
+            pseudoLocalesEnabled false
+            applicationIdSuffix '.Common'
+            versionNameSuffix '1.0'
         }
     }
     buildToolsVersion '28.0.3'
@@ -47,4 +63,5 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
     implementation 'jp.co.cyberagent.android.gpuimage:gpuimage-library:1.4.1'
     implementation 'jp.wasabeef:glide-transformations:3.3.0'
+    implementation 'com.jrummyapps:colorpicker:2.1.7'
 }

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 16:26:19
- * 上次修改时间：2018年11月19日 16:26:13
+ * 当前修改时间：2018年11月20日 21:06:43
+ * 上次修改时间：2018年11月20日 21:01:03
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -51,6 +51,8 @@ public final class Values {
         public static final int INIT_PAGE_DONE = 59;
     }
 
+    public static boolean STYLE_CHANGED = false;
+
     public static boolean BUTTON_PRESSED = false;
 
     /**
@@ -60,6 +62,15 @@ public final class Values {
     public static boolean MUSIC_DATA_INIT_DONE = false;
     public static boolean SERVICE_RUNNING = false;
     public static boolean MUSIC_PLAYING = false;
+
+    public static final class ColorInt {
+        public static final String PRIMARY_COLOR = "mPrimaryColor";
+
+        public static final String PRIMARY_DARK_COLOR = "mPrimaryDarkColor";
+
+        public static final String ACCENT_COLOR = "mAccentColor";
+    }
+
     /*
      * 判断在MusicDetailActivity下动画是否加载完成
      * */

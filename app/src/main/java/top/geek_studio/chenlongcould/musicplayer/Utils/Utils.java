@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 18:40:42
- * 上次修改时间：2018年11月19日 17:29:14
+ * 当前修改时间：2018年11月20日 21:06:43
+ * 上次修改时间：2018年11月20日 21:01:02
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -17,13 +17,16 @@ import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
 import android.media.MediaMetadataRetriever;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateInterpolator;
@@ -57,7 +60,6 @@ public final class Utils {
 
         /**
          * 获取封面
-         *
          * @param mediaUri mp3 path
          */
         @NonNull
@@ -223,6 +225,12 @@ public final class Utils {
 
     public static class Ui {
 
+        public static void setAppBarColor(Activity context, AppBarLayout toolBarColor) {
+            SharedPreferences mDefPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+            toolBarColor.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, R.color.colorPrimary));
+            context.getWindow().setNavigationBarColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, R.color.colorPrimaryDark));
+        }
+
         public static void setPlayButtonNowPlaying() {
             if (Data.sActivities.size() != 0) {
                 MainActivity activity = (MainActivity) Data.sActivities.get(0);
@@ -375,6 +383,5 @@ public final class Utils {
             });
 
         }
-
     }
 }

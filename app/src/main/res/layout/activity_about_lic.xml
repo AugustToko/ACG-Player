@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ *************************************************************
+  ~ 文件：activity_about_lic.xml  模块：app  项目：MusicPlayer
+  ~ 当前修改时间：2018年11月20日 21:06:43
+  ~ 上次修改时间：2018年11月20日 21:01:04
+  ~ 作者：chenlongcould
+  ~ Geek Studio
+  ~ Copyright (c) 2018
+  ~ *************************************************************
+  -->
+
+<!--<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"--><!--android:id="@+id/activity_main"--><!--android:layout_width="300dp"--><!--android:layout_height="400dp"--><!--android:layout_gravity="center"--><!--android:background="#ddffdd"--><!--android:orientation="vertical">--><!--<LinearLayout--><!--android:layout_width="match_parent"--><!--android:layout_height="wrap_content"--><!--android:layout_above="@+id/btn_update"--><!--android:layout_marginBottom="24dp"--><!--android:layout_marginLeft="20dp"--><!--android:layout_marginRight="20dp"--><!--android:orientation="vertical">--><!--<TextView--><!--android:layout_width="wrap_content"--><!--android:layout_height="wrap_content"--><!--android:layout_gravity="center_horizontal"--><!--android:text="Version"--><!--android:textColor="#53BAF8"--><!--android:textSize="14sp" />--><!--<ScrollView--><!--android:layout_width="match_parent"--><!--android:layout_height="100dp"--><!--android:layout_gravity="center_horizontal"--><!--android:layout_marginTop="12dp">--><!--<TextView--><!--android:layout_width="wrap_content"--><!--android:layout_height="wrap_content"--><!--android:text="Nowadays， when it comes to the issues of robots， individuals’ opinions vary from person to person。 Some people believe that robots will enlighten our life， while other are worried about that they will ruin the whole world。 As I see， the increasing number of robots has the power to alter everything in the coming future entirely。"--><!--android:textColor="#404040"--><!--android:textSize="12sp" />--><!--</ScrollView>--><!--</LinearLayout>--><!--<Button--><!--android:id="@+id/btn_update"--><!--android:layout_width="130dp"--><!--android:layout_height="32dp"--><!--android:layout_alignParentBottom="true"--><!--android:layout_centerHorizontal="true"--><!--android:layout_marginBottom="16dp"--><!--android:background="@color/colorAccent"--><!--android:gravity="center"--><!--android:text="Update now"--><!--android:textColor="#FFFFFF"--><!--android:textSize="14sp" />--><!--</RelativeLayout>-->
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="20dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        app:cardBackgroundColor="#fff"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:text="许可"
+                android:textColor="#000"
+                android:textIsSelectable="true"
+                android:textSize="25sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <android.support.constraint.ConstraintLayout
+                android:id="@+id/constraintLayout2"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toTopOf="@+id/close_button_activity_lic"
+                app:layout_constraintTop_toBottomOf="@+id/textView3">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp">
+
+                    <ScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        tools:layout_editor_absoluteX="16dp"
+                        tools:layout_editor_absoluteY="463dp">
+
+                        <TextView
+                            android:id="@+id/show_lic_activity_lic"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            tools:text="@string/app_name" />
+                    </ScrollView>
+                </LinearLayout>
+
+            </android.support.constraint.ConstraintLayout>
+
+            <Button
+                android:id="@+id/close_button_activity_lic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:text="CLOSE"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </android.support.constraint.ConstraintLayout>
+
+    </android.support.v7.widget.CardView>
+
+</android.support.constraint.ConstraintLayout>

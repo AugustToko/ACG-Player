@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 18:40:42
- * 上次修改时间：2018年11月19日 17:29:14
+ * 当前修改时间：2018年11月20日 21:06:43
+ * 上次修改时间：2018年11月20日 21:01:04
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -25,6 +25,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -33,7 +34,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -66,7 +66,7 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
-public final class MainActivity extends AppCompatActivity {
+public final class MainActivity extends MyBaseCompatActivity {
 
     private static final String TAG = "MainActivity";
 
@@ -91,6 +91,8 @@ public final class MainActivity extends AppCompatActivity {
     private ArrayList<String> mTitles = new ArrayList<>();
 
     private Toolbar mToolbar;
+
+    private AppBarLayout mAppBarLayout;
 
     private DrawerLayout mDrawerLayout;
 
@@ -150,6 +152,13 @@ public final class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (Values.STYLE_CHANGED) {
+            Utils.Ui.setAppBarColor(this, mAppBarLayout);
+            int color = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.ColorInt.PRIMARY_COLOR, R.color.colorPrimary);
+            mToolbar.setBackgroundColor(color);
+            mTabLayout.setBackgroundColor(color);
+            Values.STYLE_CHANGED = false;
+        }
     }
 
     @Override
@@ -308,6 +317,11 @@ public final class MainActivity extends AppCompatActivity {
     private void initView() {
         findView();
 
+        Utils.Ui.setAppBarColor(this, mAppBarLayout);
+        int color = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.ColorInt.PRIMARY_COLOR, R.color.colorPrimary);
+        mToolbar.setBackgroundColor(color);
+        mTabLayout.setBackgroundColor(color);
+
         //根据recycler view的滚动程度, 来判断如何返回顶部
         mToolbar.setOnClickListener(v -> {
             if (TOOLBAR_CLICKED) {
@@ -343,15 +357,27 @@ public final class MainActivity extends AppCompatActivity {
 
         mNavHeaderImageView = mNavigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
         mNavHeaderImageView.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, MusicDetailActivity.class);
-            intent.putExtra("intent_args", "clicked by navHeaderImage");
-            startActivity(intent);
+            if (Values.HAS_PLAYED) {
+                Intent intent = new Intent(MainActivity.this, MusicDetailActivity.class);
+                intent.putExtra("intent_args", "clicked by navHeaderImage");
+                startActivity(intent);
+            }
         });
 
         mNavigationView.setNavigationItemSelectedListener(menuItem -> {
             switch (menuItem.getItemId()) {
                 case R.id.menu_nav_exit: {
                     finish();
+                }
+                break;
+                case R.id.menu_nav_setting: {
+                    Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                    startActivity(intent);
+                }
+                break;
+                case R.id.menu_nav_about: {
+                    Intent intent = new Intent(MainActivity.this, AboutLic.class);
+                    startActivity(intent);
                 }
                 break;
             }
@@ -452,6 +478,7 @@ public final class MainActivity extends AppCompatActivity {
         mViewPager = findViewById(R.id.view_pager);
         mNowPlayingSongText = findViewById(R.id.activity_main_now_playing_name);
         mNowPlayingSongImage = findViewById(R.id.recycler_item_clover_image);
+        mAppBarLayout = findViewById(R.id.activity_main_appbar);
     }
 
     /**
