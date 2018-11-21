@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Data.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月21日 20:55:27
- * 上次修改时间：2018年11月21日 20:17:00
+ * 当前修改时间：2018年11月21日 21:31:36
+ * 上次修改时间：2018年11月21日 20:57:58
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -69,6 +69,18 @@ public final class Data {
         sCurrentMusicAlbum = albumName;
         sCurrentMusicName = musicName;
         sCurrentMusicBitmap = cover;
+    }
+
+    public static String getCurrentMusicName() {
+        return sCurrentMusicName;
+    }
+
+    public static Bitmap getCurrentMusicBitmap() {
+        return sCurrentMusicBitmap;
+    }
+
+    public static String getCurrentMusicAlbum() {
+        return sCurrentMusicAlbum;
     }
 
     /**

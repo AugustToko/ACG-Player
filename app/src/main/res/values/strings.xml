@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月21日 11:01:53
-  ~ 上次修改时间：2018年11月21日 09:42:13
+  ~ 当前修改时间：2018年11月21日 21:31:36
+  ~ 上次修改时间：2018年11月21日 21:31:32
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -35,4 +35,10 @@
     <string name="exit">Exit</string>
     <string name="fast_play">Fast Play</string>
     <string name="search">Search</string>
+    <string name="app_color">App Color</string>
+    <string name="color_primary">Color Primary</string>
+    <string name="this_is_dark_color_like_status_bar">This is dark color like status bar</string>
+    <string name="style_settings">Style Settings</string>
+    <string name="this_is_body_color_like_toolbar">This is body color like toolbar</string>
+    <string name="the_accent_color_like_button">The accent color like button</string>
 </resources>

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月21日 20:55:27
- * 上次修改时间：2018年11月21日 20:41:16
+ * 当前修改时间：2018年11月21日 21:31:36
+ * 上次修改时间：2018年11月21日 20:59:19
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -122,9 +122,8 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                     musicDetailActivity.getSeekBar().getThumb().setColorFilter(cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
                 }
 
-                Data.sCurrentMusicAlbum = albumName;
-                Data.sCurrentMusicName = musicName;
-                Data.sCurrentMusicBitmap = cover;
+                Data.saveGlobalCurrentData(musicName, albumName, cover);
+
                 Values.CurrentData.CURRENT_SONG_PATH = path;
 
                 try {
@@ -168,9 +167,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                         String albumName = Data.sMusicItems.get(index).getMusicAlbum();
                         Bitmap cover = Utils.Audio.getMp3Cover(path);
 
-                        Data.sCurrentMusicBitmap = cover;
-                        Data.sCurrentMusicName = musicName;
-                        Data.sCurrentMusicAlbum = albumName;
+                        Data.saveGlobalCurrentData(musicName, albumName, cover);
 
                         Values.MUSIC_PLAYING = true;
                         Values.HAS_PLAYED = true;
