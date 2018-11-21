@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月21日 11:01:53
- * 上次修改时间：2018年11月21日 11:01:41
+ * 当前修改时间：2018年11月21日 20:55:27
+ * 上次修改时间：2018年11月21日 20:48:43
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -23,15 +23,20 @@ import android.util.Log;
 import java.io.IOException;
 
 import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Utils.NotificationUtils;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
 public final class MyMusicService extends Service {
 
     private static final String TAG = "MyMusicService";
+
     private MediaPlayer mMediaPlayer = new MediaPlayer();
 
     private MusicBinder mMusicBinder = new MusicBinder();
+
+    private NotificationUtils notificationUtils;
 
     public MyMusicService() {
     }
@@ -39,6 +44,10 @@ public final class MyMusicService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
         Values.SERVICE_RUNNING = true;
 
         //监听耳机(有线或无线)的插拔动作, 拔出暂停音乐
@@ -94,6 +103,7 @@ public final class MyMusicService extends Service {
             mp.reset();
             return true;
         });
+        return START_STICKY;
     }
 
     @Override
@@ -103,12 +113,15 @@ public final class MyMusicService extends Service {
 
     @Override
     public void onDestroy() {
+        Log.d(TAG, "onDestroy: ");
+        unregisterReceiver(Data.mMyHeadSetPlugReceiver);
         Values.SERVICE_RUNNING = false;
         Values.MUSIC_PLAYING = false;
         mMediaPlayer.release();
         Data.sMusicBinder = null;
-        Log.d(TAG, "onDestroy: ");
-        unregisterReceiver(Data.mMyHeadSetPlugReceiver);
+        if (notificationUtils != null) {
+            notificationUtils.disMiss(NotificationUtils.ID);
+        }
         super.onDestroy();
     }
 
@@ -118,6 +131,8 @@ public final class MyMusicService extends Service {
             Values.MUSIC_PLAYING = true;
             Values.HAS_PLAYED = true;
             mMediaPlayer.start();
+            notificationUtils = new NotificationUtils(MyMusicService.this, "Now Playing...");
+            notificationUtils.start(notificationUtils.getNot(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, R.drawable.ic_pause_white_24dp, MyMusicService.this));
         }
 
         public void stopMusic() {
@@ -131,6 +146,8 @@ public final class MyMusicService extends Service {
 
         public void pauseMusic() {
             mMediaPlayer.pause();
+            notificationUtils = new NotificationUtils(MyMusicService.this, "Now Playing...");
+            notificationUtils.start(notificationUtils.getNot(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, R.drawable.ic_play_arrow_black_24dp, MyMusicService.this));
         }
 
         public void resetMusic() {

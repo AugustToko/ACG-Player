@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：build.gradle  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月20日 21:06:44
- * 上次修改时间：2018年11月20日 20:24:29
+ * 当前修改时间：2018年11月21日 20:55:27
+ * 上次修改时间：2018年11月21日 19:06:47
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -64,4 +64,5 @@ dependencies {
     implementation 'jp.co.cyberagent.android.gpuimage:gpuimage-library:1.4.1'
     implementation 'jp.wasabeef:glide-transformations:3.3.0'
     implementation 'com.jrummyapps:colorpicker:2.1.7'
+    implementation 'com.android.support:palette-v7:28.0.0'
 }

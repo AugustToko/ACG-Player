@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月21日 11:01:53
- * 上次修改时间：2018年11月21日 11:01:44
+ * 当前修改时间：2018年11月21日 20:55:27
+ * 上次修改时间：2018年11月21日 20:55:18
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -25,6 +25,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.media.MediaMetadataRetriever;
 import android.preference.PreferenceManager;
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
@@ -42,7 +43,6 @@ import java.util.Random;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MusicDetailActivity;
-import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPause;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.R;
@@ -379,6 +379,11 @@ public final class Utils {
             });
 
         }
+
+        public static boolean isColorLight(@ColorInt int color) {
+            double darkness = 1.0D - (0.299D * (double) Color.red(color) + 0.587D * (double) Color.green(color) + 0.114D * (double) Color.blue(color)) / 255.0D;
+            return darkness < 0.4D;
+        }
     }
 
     /**
@@ -388,11 +393,10 @@ public final class Utils {
 
         /**
          * send broadcast by pause
-         *
          * @param context context
          */
         public static void sendPause(Context context) {
-            Intent intent = new Intent(context, ReceiverOnMusicPause.class);
+            Intent intent = new Intent();
             intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPause));
             context.sendBroadcast(intent);
         }

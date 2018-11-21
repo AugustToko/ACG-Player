@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月21日 11:01:53
- * 上次修改时间：2018年11月21日 11:01:41
+ * 当前修改时间：2018年11月21日 20:55:27
+ * 上次修改时间：2018年11月21日 20:06:26
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -132,6 +132,12 @@ public final class MusicDetailActivity extends MyBaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_music_detail);
+
+        if (Data.sActivities.size() == 0) {
+            startActivity(new Intent(MusicDetailActivity.this, SplashActivity.class));
+            finish();
+            return;
+        }
 
         Data.sActivities.add(this);
         mMainActivity = (MainActivity) Data.sActivities.get(0);
@@ -715,29 +721,7 @@ public final class MusicDetailActivity extends MyBaseActivity {
         });
 
         mNextButton.setOnClickListener(v -> {
-            Values.BUTTON_PRESSED = true;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                mSeekBar.setProgress(0, true);            //防止seekBar跳动到Max
-            } else {
-                mSeekBar.setProgress(0);            //防止seekBar跳动到Max
-            }
-
-            if (Data.sNextWillPlayIndex != -1) {
-                Utils.Audio.doesNextHasMusic();
-                return;
-            }
-
-            switch (Values.CurrentData.CURRENT_PLAY_TYPE) {
-                case Values.TYPE_RANDOM:
-                    Utils.Audio.shufflePlayback();
-                    break;
-                case Values.TYPE_COMMON:
-                    Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, 4);
-                    break;
-                default:
-                    break;
-            }
-            Values.BUTTON_PRESSED = false;
+            Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, 6);
         });
 
         mNextButton.setOnLongClickListener(v -> {
@@ -757,13 +741,7 @@ public final class MusicDetailActivity extends MyBaseActivity {
         });
 
         mPreviousButton.setOnClickListener(v -> {
-            //当进度条大于播放总长 1/20 那么重新播放该歌曲
-            if (Data.sMusicBinder.getCurrentPosition() > Data.sMusicBinder.getDuration() / 20) {
-                Data.sMusicBinder.seekTo(0);
-            } else {
-                Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, 5);
-            }
-
+            Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, 5);
         });
 
         mPreviousButton.setOnLongClickListener(v -> {

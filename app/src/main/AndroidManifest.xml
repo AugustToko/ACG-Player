@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：AndroidManifest.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月21日 11:01:53
-  ~ 上次修改时间：2018年11月21日 11:01:44
+  ~ 当前修改时间：2018年11月21日 20:55:27
+  ~ 上次修改时间：2018年11月21日 20:55:18
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -18,6 +18,7 @@
         android:protectionLevel="signature" />
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts" />
 
     <application
         android:name=".MyApplication"
@@ -45,6 +46,7 @@
             android:launchMode="singleTop"
             android:exported="false"
             android:theme="@style/MusicDetailTheme" />
+
         <activity
             android:name=".Activities.SplashActivity"
             android:launchMode="singleTask"
@@ -61,7 +63,7 @@
         <receiver
             android:name=".BroadCasts.ReceiverOnMusicPlay"
             android:enabled="true"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay" />
             </intent-filter>
@@ -70,7 +72,7 @@
         <receiver
             android:name=".BroadCasts.ReceiverOnMusicPause"
             android:enabled="true"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPause" />
             </intent-filter>
@@ -79,7 +81,7 @@
         <receiver
             android:name=".BroadCasts.MyHeadSetPlugReceiver"
             android:enabled="true"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.HEADSET_PLUG" />
             </intent-filter>

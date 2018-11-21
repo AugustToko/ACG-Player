@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月21日 11:01:53
- * 上次修改时间：2018年11月21日 11:01:41
+ * 当前修改时间：2018年11月21日 20:55:27
+ * 上次修改时间：2018年11月21日 20:55:16
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -13,7 +13,6 @@ package top.geek_studio.chenlongcould.musicplayer.Activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -33,6 +32,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -163,7 +163,10 @@ public final class MainActivity extends MyBaseCompatActivity {
     @Override
     protected void onDestroy() {
         mHandlerThread.quitSafely();
-        unbindService(Data.sServiceConnection);
+        if (Values.BIND_SERVICE) {
+            unbindService(Data.sServiceConnection);
+            Values.BIND_SERVICE = false;
+        }
         Data.sActivities.remove(this);
         Log.d(TAG, "onDestroy: ");
         super.onDestroy();
@@ -491,21 +494,24 @@ public final class MainActivity extends MyBaseCompatActivity {
 
             if (cover != null) {
                 //color set
-                int currentBright = Utils.Ui.getBright(cover);
-                Log.d(TAG, "---------------------setCurrentSongInfo: get bright " + currentBright);
                 GlideApp.with(MainActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade()).override(150, 150).into(mNowPlayingSongImage);
                 GlideApp.with(MainActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade()).centerCrop().into(mNavHeaderImageView);
 
-                //InfoBar background color AND text color balance
-                if (currentBright > (255 / 2)) {
-                    mNowPlayingSongText.setTextColor(Data.sDefTextColorStateList);
-                    mNowPlayingSongAlbumText.setTextColor(Data.sDefTextColorStateList);
-                    mNowPlayingStatusImage.setImageTintList(Data.sDefIcoColorStateList);
-                } else {
-                    mNowPlayingSongText.setTextColor(Color.WHITE);
-                    mNowPlayingSongAlbumText.setTextColor(Color.WHITE);
-                    mNowPlayingStatusImage.setImageTintList(ColorStateList.valueOf(Color.WHITE));
-                }
+                Palette.Builder paletteBuilder = Palette.from(Data.sCurrentMusicBitmap);
+                paletteBuilder.generate(palette -> {
+                    if (palette != null) {
+                        Palette.Swatch vibrant = palette.getVibrantSwatch();
+                        if (!Utils.Ui.isColorLight(vibrant == null ? Color.TRANSPARENT : vibrant.getRgb())) {
+                            mNowPlayingSongText.setTextColor(Data.sDefTextColorStateList);
+                            mNowPlayingSongAlbumText.setTextColor(Data.sDefTextColorStateList);
+                            mNowPlayingStatusImage.setColorFilter(Color.BLACK);
+                        } else {
+                            mNowPlayingSongText.setTextColor(Color.WHITE);
+                            mNowPlayingSongAlbumText.setTextColor(Color.WHITE);
+                            mNowPlayingStatusImage.setColorFilter(Color.WHITE);
+                        }
+                    }
+                });
 
                 GlideApp.with(MainActivity.this).load(cover)
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
@@ -568,7 +574,7 @@ public final class MainActivity extends MyBaseCompatActivity {
                             Intent intent = new Intent(mWeakReference.get(), MyMusicService.class);
                             startService(intent);
                             bindService(new Intent(mWeakReference.get(), MyMusicService.class), Data.sServiceConnection, BIND_AUTO_CREATE);
-
+                            Values.BIND_SERVICE = true;
                         });
                     }
                 }
@@ -576,5 +582,8 @@ public final class MainActivity extends MyBaseCompatActivity {
                 default:
             }
         }
+
+
     }
+
 }

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
-  ~ 文件：toolbar_padding_top.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月14日 15:30:40
-  ~ 上次修改时间：2018年11月14日 15:29:56
+  ~ 文件：dimen.xml  模块：app  项目：MusicPlayer
+  ~ 当前修改时间：2018年11月21日 20:55:27
+  ~ 上次修改时间：2018年11月21日 18:02:44
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -11,4 +11,5 @@
 
 <resources>
     <dimen name="toolbar_padding_top">25dp</dimen>
+    <dimen name="noti_height">64dp</dimen>
 </resources>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ *************************************************************
+  ~ 文件：notification_layout.xml  模块：app  项目：MusicPlayer
+  ~ 当前修改时间：2018年11月21日 20:55:27
+  ~ 上次修改时间：2018年11月21日 20:55:18
+  ~ 作者：chenlongcould
+  ~ Geek Studio
+  ~ Copyright (c) 2018
+  ~ *************************************************************
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/noti_body"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/noti_height"
+    android:orientation="horizontal">
+
+    <!--<ImageView-->
+    <!--android:id="@+id/noti_bg"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:contentDescription="@string/current_info_background"-->
+    <!--android:scaleType="centerCrop" />-->
+
+    <ImageView
+        android:id="@+id/noti_clover_image"
+        android:layout_width="@dimen/noti_height"
+        android:layout_height="@dimen/noti_height"
+        android:layout_gravity="center_vertical"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:contentDescription="@string/app_name"
+        android:src="@drawable/ic_audiotrack_24px"
+        android:transitionName="@string/image_trans_album" />
+
+    <LinearLayout
+        android:id="@+id/constraintLayout"
+        android:layout_width="300dp"
+        android:layout_height="@dimen/noti_height"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/noti_music_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:text="Music Text"
+            android:textColor="#1e1e1e"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/noti_album_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:text="Clover Text"
+            android:textColor="#1e1e1e"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/noti_height"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/noti_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:clickable="true"
+            android:contentDescription="@string/play_status"
+            android:src="@drawable/ic_play_arrow_black_24dp"
+            android:tint="#d6d6d6" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月21日 11:01:53
- * 上次修改时间：2018年11月21日 08:40:49
+ * 当前修改时间：2018年11月21日 20:55:27
+ * 上次修改时间：2018年11月21日 20:55:17
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -36,7 +36,22 @@ public final class Values {
     public static final int REQUEST_WRITE_EXTERNAL_STORAGE = 60;
     public static final int MAX_HEIGHT_AND_WIDTH = 100;
 
+    public static boolean BIND_SERVICE = false;
+
+    public static boolean STYLE_CHANGED = false;
+
+    public static boolean BUTTON_PRESSED = false;
+
+    /**
+     * result(s), status
+     */
+    //default value false
+    public static boolean MUSIC_DATA_INIT_DONE = false;
+    public static boolean SERVICE_RUNNING = false;
+    public static boolean MUSIC_PLAYING = false;
+
     public static final class HandlerWhat {
+
         /**
          * Handler msg.what
          */
@@ -50,18 +65,6 @@ public final class Values {
          */
         public static final int INIT_PAGE_DONE = 59;
     }
-
-    public static boolean STYLE_CHANGED = false;
-
-    public static boolean BUTTON_PRESSED = false;
-
-    /**
-     * result(s), status
-     */
-    //default value false
-    public static boolean MUSIC_DATA_INIT_DONE = false;
-    public static boolean SERVICE_RUNNING = false;
-    public static boolean MUSIC_PLAYING = false;
 
     public static final class ColorInt {
         public static final String PRIMARY_COLOR = "mPrimaryColor";
@@ -77,6 +80,7 @@ public final class Values {
     public static boolean ON_ANIMATION_FINISH = true;
 
     public static final class CurrentData {
+
         /**
          * TEMP DATA
          */
@@ -95,10 +99,8 @@ public final class Values {
     /**
      * sharedPrefs tag
      */
-
     public static final class SharedPrefsTag {
         public static final String PLAY_LIST_NUM = "PLAY_LIST_NUM";
-        public static final String PLAY_LIST_SPF_NAME_ = "PLAY_LIST_SPF_NAME_";           //must add custom tag: PLAY_LIST_SPF_NAME_"CUSTOM"
         public static final String PLAY_LIST_SPF_NAME_MY_FAVOURITE = "PLAY_LIST_SPF_NAME_MY_FAVOURITE";
     }
 
