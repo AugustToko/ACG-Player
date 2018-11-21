@@ -1,21 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：AndroidManifest.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月20日 21:06:44
-  ~ 上次修改时间：2018年11月20日 21:01:04
+  ~ 当前修改时间：2018年11月21日 11:01:53
+  ~ 上次修改时间：2018年11月21日 11:01:44
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
   ~ *************************************************************
   -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="top.geek_studio.chenlongcould.musicplayer">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="top.geek_studio.chenlongcould.musicplayer"
+    tools:ignore="InnerclassSeparator">
+
+    <permission
+        android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts"
+        android:protectionLevel="signature" />
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name=".MyApplication"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:fullBackupContent="@xml/backup_descriptor"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -26,11 +32,7 @@
             android:name=".Activities.MainActivity"
             android:launchMode="singleTask"
             android:theme="@style/AppTheme">
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT" />
 
-                <action android:name="android.intent.action.VIEW" />
-            </intent-filter>
         </activity>
 
         <service
@@ -41,15 +43,18 @@
         <activity
             android:name=".Activities.MusicDetailActivity"
             android:launchMode="singleTop"
+            android:exported="false"
             android:theme="@style/MusicDetailTheme" />
         <activity
             android:name=".Activities.SplashActivity"
             android:launchMode="singleTask"
+            android:exported="true"
             android:theme="@style/SplashActivityTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
+                <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
@@ -58,37 +63,46 @@
             android:enabled="true"
             android:exported="false">
             <intent-filter>
-                <action android:name="top.geek_studio.chenlongcould.musicplayer.ReceiverOnMusicPlay" />
+                <action android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay" />
             </intent-filter>
         </receiver>
+
         <receiver
             android:name=".BroadCasts.ReceiverOnMusicPause"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
-                <action android:name="top.geek_studio.chenlongcould.musicplayer.ReceiverOnMusicPause" />
+                <action android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPause" />
             </intent-filter>
         </receiver>
-
-        <activity android:name=".Activities.PublicActivity" />
 
         <receiver
             android:name=".BroadCasts.MyHeadSetPlugReceiver"
             android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.HEADSET_PLUG" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name=".Activities.PublicActivity"
             android:exported="false" />
 
         <activity
             android:name=".Activities.AlbumDetailActivity"
+            android:exported="false"
             android:launchMode="singleTask" />
+
         <activity
             android:name=".Activities.SettingsActivity"
+            android:exported="false"
             android:launchMode="singleTask" />
 
         <activity
             android:name=".Activities.AboutLic"
             android:launchMode="singleTask"
+            android:exported="false"
             android:theme="@style/CommonActivityTheme" />
     </application>
-
-
 </manifest>

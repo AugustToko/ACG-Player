@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月20日 21:06:43
- * 上次修改时间：2018年11月20日 21:01:04
+ * 当前修改时间：2018年11月21日 11:01:53
+ * 上次修改时间：2018年11月21日 11:01:41
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -11,7 +11,6 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Activities;
 
-import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
@@ -154,7 +153,7 @@ public final class MainActivity extends MyBaseCompatActivity {
         super.onResume();
         if (Values.STYLE_CHANGED) {
             Utils.Ui.setAppBarColor(this, mAppBarLayout);
-            int color = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.ColorInt.PRIMARY_COLOR, R.color.colorPrimary);
+            int color = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577"));
             mToolbar.setBackgroundColor(color);
             mTabLayout.setBackgroundColor(color);
             Values.STYLE_CHANGED = false;
@@ -318,7 +317,7 @@ public final class MainActivity extends MyBaseCompatActivity {
         findView();
 
         Utils.Ui.setAppBarColor(this, mAppBarLayout);
-        int color = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.ColorInt.PRIMARY_COLOR, R.color.colorPrimary);
+        int color = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577"));
         mToolbar.setBackgroundColor(color);
         mTabLayout.setBackgroundColor(color);
 
@@ -388,15 +387,9 @@ public final class MainActivity extends MyBaseCompatActivity {
             //判断是否播放过, 如没有默认随机播放
             if (Values.HAS_PLAYED) {
                 if (Values.MUSIC_PLAYING) {
-                    Intent intent = new Intent();
-                    intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPause));
-                    sendBroadcast(intent);
-
+                    Utils.SendSomeThing.sendPause(MainActivity.this);
                 } else {
-                    Intent intent = new Intent();
-                    intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPlay));
-                    intent.putExtra("play_type", 3);
-                    sendBroadcast(intent);
+                    Utils.SendSomeThing.sendPlay(MainActivity.this, 3);
                 }
             } else {
                 Toast.makeText(MainActivity.this, "Shuffle Playback!", Toast.LENGTH_SHORT).show();

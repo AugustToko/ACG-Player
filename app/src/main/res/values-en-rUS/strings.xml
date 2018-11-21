@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ *************************************************************
+  ~ 文件：strings.xml  模块：app  项目：MusicPlayer
+  ~ 当前修改时间：2018年11月21日 11:01:53
+  ~ 上次修改时间：2018年11月21日 11:01:44
+  ~ 作者：chenlongcould
+  ~ Geek Studio
+  ~ Copyright (c) 2018
+  ~ *************************************************************
+  -->
+
+<resources>
+    <string name="app_name">MusicPlayer</string>
+    <string name="open">open</string>
+    <string name="close">close</string>
+    <string name="play_status">Play Status</string>
+    <string name="add">add</string>
+    <string name="remove">remove</string>
+    <string name="random">random</string>
+    <string name="repeat">repeat</string>
+    <string name="color_picker">Color Picker</string>
+    <string name="exit">Exit</string>
+    <string name="color_accent">Color Accent</string>
+    <string name="colorprimarydark">Color Primary Dark</string>
+    <string name="search">Search</string>
+    <string name="fast_play">Fast Play</string>
+    <string name="about">About</string>
+    <string name="settings">Settings</string>
+</resources>

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 18:40:42
- * 上次修改时间：2018年11月19日 17:29:14
+ * 当前修改时间：2018年11月21日 11:01:53
+ * 上次修改时间：2018年11月21日 07:54:04
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -38,7 +38,7 @@ import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 
-public class AlbumDetailActivity extends Activity {
+public final class AlbumDetailActivity extends Activity {
 
     private static final String TAG = "AlbumDetailActivity";
 

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AboutLic.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月20日 21:06:43
- * 上次修改时间：2018年11月20日 19:03:15
+ * 当前修改时间：2018年11月21日 11:01:53
+ * 上次修改时间：2018年11月21日 07:54:04
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -23,7 +23,7 @@ import java.io.InputStream;
 
 import top.geek_studio.chenlongcould.musicplayer.R;
 
-public class AboutLic extends Activity {
+public final class AboutLic extends Activity {
 
     private static final String TAG = "AboutLic";
 

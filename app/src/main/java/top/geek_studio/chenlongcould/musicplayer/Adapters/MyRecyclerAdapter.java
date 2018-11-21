@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 18:40:42
- * 上次修改时间：2018年11月19日 18:40:19
+ * 当前修改时间：2018年11月21日 11:01:53
+ * 上次修改时间：2018年11月21日 11:01:41
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -11,7 +11,6 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Adapters;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -86,9 +85,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
             if (Data.sMusicBinder.isPlayingMusic()) {
                 if (clickedPath.equals(Values.CurrentData.CURRENT_SONG_PATH)) {
-                    Intent intent = new Intent();
-                    intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPause));
-                    mContext.sendBroadcast(intent);
+                    Utils.SendSomeThing.sendPause(mContext);
                     return;
                 }
             }
@@ -147,7 +144,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
         view.setOnLongClickListener(v -> {
             if (Data.sMusicBinder.isPlayingMusic()) {
-                Utils.Ui.setNowNotPlaying(mContext);
+                Utils.SendSomeThing.sendPause(mContext);
             }
             return true;
         });

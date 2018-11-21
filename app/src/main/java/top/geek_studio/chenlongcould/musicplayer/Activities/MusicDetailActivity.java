@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月20日 21:06:43
- * 上次修改时间：2018年11月20日 20:47:28
+ * 当前修改时间：2018年11月21日 11:01:53
+ * 上次修改时间：2018年11月21日 11:01:41
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -16,10 +16,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Build;
@@ -52,9 +50,10 @@ import android.widget.TextView;
 
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
@@ -68,8 +67,6 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 public final class MusicDetailActivity extends MyBaseActivity {
 
     private static final String TAG = "MusicDetailActivity";
-
-    private boolean READY = true;
 
     private boolean HAS_BIG = false;
 
@@ -85,7 +82,7 @@ public final class MusicDetailActivity extends MyBaseActivity {
 
     private SeekBar mSeekBar;
 
-    private NotLeakHandler mHandler;
+    public NotLeakHandler mHandler;
 
     private HandlerThread mHandlerThread;
 
@@ -120,6 +117,10 @@ public final class MusicDetailActivity extends MyBaseActivity {
     private AppBarLayout mAppBarLayout;
 
     private ConstraintLayout mScrollBody;
+
+    private TextView mLeftTime;
+
+    private TextView mRightTime;
 
     /**
      * menu
@@ -408,9 +409,7 @@ public final class MusicDetailActivity extends MyBaseActivity {
         mToolbar.setOnMenuItemClickListener(menuItem -> {
             switch (menuItem.getItemId()) {
                 case R.id.menu_toolbar_fast_play: {
-                    Intent intent = new Intent(MusicDetailActivity.this, ReceiverOnMusicPlay.class);
-                    intent.putExtra("play_type", ReceiverOnMusicPlay.TYPE_SHUFFLE);
-                    sendBroadcast(intent);
+                    Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, ReceiverOnMusicPlay.TYPE_SHUFFLE);
                 }
                 break;
             }
@@ -708,9 +707,7 @@ public final class MusicDetailActivity extends MyBaseActivity {
         //just pause or play
         mPlayButton.setOnClickListener(v -> {
             if (Values.MUSIC_PLAYING) {
-                Intent intent = new Intent();
-                intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPause));
-                sendBroadcast(intent);
+                Utils.SendSomeThing.sendPause(MusicDetailActivity.this);
             } else {
                 Data.sMusicBinder.playMusic();
                 Utils.Ui.setPlayButtonNowPlaying();
@@ -735,10 +732,7 @@ public final class MusicDetailActivity extends MyBaseActivity {
                     Utils.Audio.shufflePlayback();
                     break;
                 case Values.TYPE_COMMON:
-                    Intent intent = new Intent();
-                    intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPlay));
-                    intent.putExtra("play_type", 4);
-                    sendBroadcast(intent);
+                    Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, 4);
                     break;
                 default:
                     break;
@@ -767,57 +761,7 @@ public final class MusicDetailActivity extends MyBaseActivity {
             if (Data.sMusicBinder.getCurrentPosition() > Data.sMusicBinder.getDuration() / 20) {
                 Data.sMusicBinder.seekTo(0);
             } else {
-                if (READY) {
-                    READY = false;
-                    if (Data.sHistoryPlayIndex.size() == 1) {
-                        Data.sMusicBinder.seekTo(0);
-
-                    } else if (Data.sHistoryPlayIndex.size() >= 2) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            mSeekBar.setProgress(0, true);
-                        } else {
-                            mSeekBar.setProgress(0);
-                        }
-                        Data.sMusicBinder.resetMusic();
-
-                        int tempSize = Data.sHistoryPlayIndex.size();
-
-                        int index = Data.sHistoryPlayIndex.get(tempSize - 2);
-                        Data.sHistoryPlayIndex.remove(tempSize - 1);
-
-                        String path = Data.sMusicItems.get(index).getMusicPath();
-                        String musicName = Data.sMusicItems.get(index).getMusicName();
-                        String albumName = Data.sMusicItems.get(index).getMusicAlbum();
-
-                        Bitmap cover = Utils.Audio.getMp3Cover(path);
-
-                        MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
-                        mainActivity.setCurrentSongInfo(musicName, albumName, path, cover);
-                        setCurrentSongInfo(musicName, albumName, Utils.Audio.getAlbumByteImage(path));
-
-                        Utils.Ui.setPlayButtonNowPlaying();
-
-                        mSeekBar.getThumb().setColorFilter(cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
-
-                        Values.MUSIC_PLAYING = true;
-                        Values.HAS_PLAYED = true;
-                        Values.CurrentData.CURRENT_MUSIC_INDEX = index;
-                        Values.CurrentData.CURRENT_SONG_PATH = path;
-
-                        mRecyclerView.scrollToPosition(index);
-
-                        try {
-                            Data.sMusicBinder.setDataSource(path);
-                            Data.sMusicBinder.prepare();
-                            Data.sMusicBinder.playMusic();
-                            mHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            Data.sMusicBinder.resetMusic();
-                        }
-                    }
-                    READY = true;
-                }
+                Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, 5);
             }
 
         });
@@ -858,6 +802,8 @@ public final class MusicDetailActivity extends MyBaseActivity {
         mToolbar = findViewById(R.id.activity_music_detail_toolbar);
         mAppBarLayout = findViewById(R.id.activity_music_detail_appbar);
         mScrollBody = findViewById(R.id.activity_music_detail_scroll_body);
+        mLeftTime = findViewById(R.id.activity_music_detail_left_text);
+        mRightTime = findViewById(R.id.activity_music_detail_right_text);
     }
 
     //scroll infoBar Up
@@ -944,27 +890,35 @@ public final class MusicDetailActivity extends MyBaseActivity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case Values.HandlerWhat.INIT_SEEK_BAR: {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        mSeekBar.setProgress(0, true);
-                    } else {
-                        mSeekBar.setProgress(0);
-                    }
-                    mSeekBar.setMax(Data.sMusicBinder.getDuration());
+                    runOnUiThread(() -> {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            mWeakReference.get().mSeekBar.setProgress(0, true);
+                        } else {
+                            mWeakReference.get().mSeekBar.setProgress(0);
+                        }
+                        SimpleDateFormat sd = new SimpleDateFormat("mm:ss");
+                        mWeakReference.get().mRightTime.setText(String.valueOf(sd.format(new Date(Data.sMusicBinder.getDuration()))));
+                        mWeakReference.get().mSeekBar.setMax(Data.sMusicBinder.getDuration());
+                    });
+
                 }
                 break;
                 case Values.HandlerWhat.SEEK_BAR_UPDATE: {
-                    //点击body 或 music 正在播放 才可以进行seekBar更新
-                    if (Data.sMusicBinder.isPlayingMusic() || Data.sActivities.size() > 0) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            mSeekBar.setProgress(Data.sMusicBinder.getCurrentPosition(), true);
-                        } else {
-                            mSeekBar.setProgress(Data.sMusicBinder.getCurrentPosition());
+                    runOnUiThread(() -> {
+                        //点击body 或 music 正在播放 才可以进行seekBar更新
+                        if (Data.sMusicBinder.isPlayingMusic() || Data.sActivities.size() > 0) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                mWeakReference.get().mSeekBar.setProgress(Data.sMusicBinder.getCurrentPosition(), true);
+                            } else {
+                                mWeakReference.get().mSeekBar.setProgress(Data.sMusicBinder.getCurrentPosition());
+                            }
+                            SimpleDateFormat sd = new SimpleDateFormat("mm:ss");
+                            mWeakReference.get().mLeftTime.setText(String.valueOf(sd.format(new Date(Data.sMusicBinder.getCurrentPosition()))));
                         }
-                    }
 
-                    //循环更新 0.5s 一次
-                    mHandler.sendEmptyMessageDelayed(Values.HandlerWhat.SEEK_BAR_UPDATE, 500);
-                    Log.d(TAG, "handleMessage: seekBar update!");
+                        //循环更新 0.5s 一次
+                        mWeakReference.get().mHandler.sendEmptyMessageDelayed(Values.HandlerWhat.SEEK_BAR_UPDATE, 500);
+                    });
                 }
                 default:
             }

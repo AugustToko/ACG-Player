@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月20日 21:06:43
- * 上次修改时间：2018年11月20日 21:01:02
+ * 当前修改时间：2018年11月21日 11:01:53
+ * 上次修改时间：2018年11月21日 11:01:44
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -21,6 +21,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.media.MediaMetadataRetriever;
 import android.preference.PreferenceManager;
@@ -41,6 +42,7 @@ import java.util.Random;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MusicDetailActivity;
+import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPause;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.R;
@@ -227,8 +229,8 @@ public final class Utils {
 
         public static void setAppBarColor(Activity context, AppBarLayout toolBarColor) {
             SharedPreferences mDefPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-            toolBarColor.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, R.color.colorPrimary));
-            context.getWindow().setNavigationBarColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, R.color.colorPrimaryDark));
+            toolBarColor.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")));
+            context.getWindow().setNavigationBarColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
         }
 
         public static void setPlayButtonNowPlaying() {
@@ -243,12 +245,6 @@ public final class Utils {
                     }
                 });
             }
-        }
-
-        public static void setNowNotPlaying(@NonNull Context context) {
-            Intent intent = new Intent();
-            intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPause));
-            context.sendBroadcast(intent);
         }
 
         public static AlertDialog createMessageDialog(@NonNull Activity context, @NonNull String title, @NonNull String message) {
@@ -382,6 +378,30 @@ public final class Utils {
 
             });
 
+        }
+    }
+
+    /**
+     * start activity, broadcast, service...
+     */
+    public static final class SendSomeThing {
+
+        /**
+         * send broadcast by pause
+         *
+         * @param context context
+         */
+        public static void sendPause(Context context) {
+            Intent intent = new Intent(context, ReceiverOnMusicPause.class);
+            intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPause));
+            context.sendBroadcast(intent);
+        }
+
+        public static void sendPlay(Context context, int playType) {
+            Intent intent = new Intent();
+            intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPlay));
+            intent.putExtra("play_type", playType);
+            context.sendBroadcast(intent);
         }
     }
 }

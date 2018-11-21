@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月20日 21:06:43
- * 上次修改时间：2018年11月20日 21:01:03
+ * 当前修改时间：2018年11月21日 11:01:53
+ * 上次修改时间：2018年11月21日 08:40:49
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -112,6 +112,16 @@ public final class Values {
         public static String ReceiverOnMusicPlay = "top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay";
         public static String ReceiverOnMusicStop = "top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicStop";
         public static String ReceiverOnMusicPause = "top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPause";
+    }
+
+    public static final class Color {
+        public static final String PRIMARY = "#008577";
+        public static final String PRIMARY_DARK = "#00574B";
+        public static final String ACCENT = "#D81B60";
+    }
+
+    public static final class Permission {
+        public static final String BROAD_CAST = "top.geek_studio.chenlongcould.musicplayer.BroadCasts";
     }
 
 }

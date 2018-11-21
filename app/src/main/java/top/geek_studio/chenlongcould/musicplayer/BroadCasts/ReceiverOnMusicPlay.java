@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 18:40:42
- * 上次修改时间：2018年11月19日 17:29:14
+ * 当前修改时间：2018年11月21日 11:01:53
+ * 上次修改时间：2018年11月21日 10:24:15
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -16,6 +16,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
+import android.os.Build;
+import android.util.Log;
 
 import java.io.IOException;
 
@@ -30,8 +32,11 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
     public static final int TYPE_SHUFFLE = 90;
 
+    private boolean READY = true;
+
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.d(TAG, "onReceive: ");
         int type = intent.getIntExtra("play_type", -1);
         switch (type) {
             case -1: {
@@ -131,6 +136,65 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 } catch (IOException e) {
                     e.printStackTrace();
                     Data.sMusicBinder.resetMusic();
+                }
+            }
+            break;
+
+            //by MusicDetailActivity preview imageButton (view history song list)
+            case 5: {
+                if (READY) {
+                    READY = false;
+                    if (Data.sHistoryPlayIndex.size() == 1) {
+                        Data.sMusicBinder.seekTo(0);
+
+                    } else if (Data.sHistoryPlayIndex.size() >= 2) {
+
+                        MusicDetailActivity activity = (MusicDetailActivity) Data.sActivities.get(1);
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            activity.getSeekBar().setProgress(0, true);
+                        } else {
+                            activity.getSeekBar().setProgress(0);
+                        }
+                        Data.sMusicBinder.resetMusic();
+
+                        int tempSize = Data.sHistoryPlayIndex.size();
+
+                        int index = Data.sHistoryPlayIndex.get(tempSize - 2);
+                        Data.sHistoryPlayIndex.remove(tempSize - 1);
+
+                        String path = Data.sMusicItems.get(index).getMusicPath();
+                        String musicName = Data.sMusicItems.get(index).getMusicName();
+                        String albumName = Data.sMusicItems.get(index).getMusicAlbum();
+
+                        Bitmap cover = Utils.Audio.getMp3Cover(path);
+
+                        MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
+                        mainActivity.setCurrentSongInfo(musicName, albumName, path, cover);
+                        activity.setCurrentSongInfo(musicName, albumName, Utils.Audio.getAlbumByteImage(path));
+
+                        Utils.Ui.setPlayButtonNowPlaying();
+
+                        activity.getSeekBar().getThumb().setColorFilter(cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
+
+                        Values.MUSIC_PLAYING = true;
+                        Values.HAS_PLAYED = true;
+                        Values.CurrentData.CURRENT_MUSIC_INDEX = index;
+                        Values.CurrentData.CURRENT_SONG_PATH = path;
+
+                        activity.getRecyclerView().scrollToPosition(index);
+
+                        try {
+                            Data.sMusicBinder.setDataSource(path);
+                            Data.sMusicBinder.prepare();
+                            Data.sMusicBinder.playMusic();
+                            activity.mHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            Data.sMusicBinder.resetMusic();
+                        }
+                    }
+                    READY = true;
                 }
             }
         }

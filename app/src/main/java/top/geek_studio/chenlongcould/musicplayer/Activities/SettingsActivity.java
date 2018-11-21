@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月20日 21:06:43
- * 上次修改时间：2018年11月20日 21:06:05
+ * 当前修改时间：2018年11月21日 11:01:53
+ * 上次修改时间：2018年11月21日 11:01:44
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -14,6 +14,7 @@ package top.geek_studio.chenlongcould.musicplayer.Activities;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -40,10 +41,13 @@ public class SettingsActivity extends MyBaseActivity {
 
     public static final int ACCENT = 2;
 
+    @SuppressWarnings("FieldCanBeLocal")
     private ConstraintLayout mPrimaryOpt;
 
+    @SuppressWarnings("FieldCanBeLocal")
     private ConstraintLayout mPrimaryDarkOpt;
 
+    @SuppressWarnings("FieldCanBeLocal")
     private ConstraintLayout mAccentOpt;
 
     private ImageView mPrimaryImage;
@@ -52,6 +56,7 @@ public class SettingsActivity extends MyBaseActivity {
 
     private ImageView mAccentImage;
 
+    @SuppressWarnings("FieldCanBeLocal")
     private Toolbar mToolbar;
 
     private AppBarLayout mAppBarLayout;
@@ -113,7 +118,6 @@ public class SettingsActivity extends MyBaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-
         mDefPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         mPrimaryOpt = findViewById(R.id.primer_color_option);
@@ -138,9 +142,9 @@ public class SettingsActivity extends MyBaseActivity {
                         editor.putInt(Values.ColorInt.PRIMARY_COLOR, getResources().getColor(R.color.colorPrimary, getTheme()));
                         editor.putInt(Values.ColorInt.PRIMARY_DARK_COLOR, getResources().getColor(R.color.colorPrimaryDark, getTheme()));
                     } else {
-                        editor.putInt(Values.ColorInt.ACCENT_COLOR, R.color.colorAccent);
-                        editor.putInt(Values.ColorInt.PRIMARY_COLOR, R.color.colorPrimary);
-                        editor.putInt(Values.ColorInt.PRIMARY_DARK_COLOR, R.color.colorPrimaryDark);
+                        editor.putInt(Values.ColorInt.ACCENT_COLOR, Color.parseColor(Values.Color.ACCENT));
+                        editor.putInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor(Values.Color.PRIMARY));
+                        editor.putInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor(Values.Color.PRIMARY_DARK));
                     }
                     editor.apply();
                 }
@@ -151,7 +155,7 @@ public class SettingsActivity extends MyBaseActivity {
         mToolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         mPrimaryOpt.setOnClickListener(v -> {
-            ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, R.color.colorPrimary))
+            ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")))
                     .setDialogTitle(R.string.color_picker)
                     .setDialogType(ColorPickerDialog.TYPE_CUSTOM)
                     .setShowAlphaSlider(true)
@@ -159,11 +163,12 @@ public class SettingsActivity extends MyBaseActivity {
                     .setAllowPresets(false)
                     .create();
             colorPickerDialog.setColorPickerDialogListener(pickerDialogListener);
+            //noinspection deprecation
             colorPickerDialog.show(getFragmentManager(), "color-picker-dialog");
         });
 
         mPrimaryDarkOpt.setOnClickListener(v -> {
-            ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, R.color.colorPrimaryDark))
+            ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")))
                     .setDialogTitle(R.string.color_picker)
                     .setDialogType(ColorPickerDialog.TYPE_CUSTOM)
                     .setShowAlphaSlider(true)
@@ -171,11 +176,12 @@ public class SettingsActivity extends MyBaseActivity {
                     .setAllowPresets(false)
                     .create();
             colorPickerDialog.setColorPickerDialogListener(pickerDialogListener);
+            //noinspection deprecation
             colorPickerDialog.show(getFragmentManager(), "color-picker-dialog");
         });
 
         mAccentOpt.setOnClickListener(v -> {
-            ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorInt.ACCENT_COLOR, R.color.colorAccent))
+            ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorInt.ACCENT_COLOR, Color.parseColor("#D81B60")))
                     .setDialogTitle(R.string.color_picker)
                     .setDialogType(ColorPickerDialog.TYPE_CUSTOM)
                     .setShowAlphaSlider(true)
@@ -183,15 +189,16 @@ public class SettingsActivity extends MyBaseActivity {
                     .setAllowPresets(false)
                     .create();
             colorPickerDialog.setColorPickerDialogListener(pickerDialogListener);
+            //noinspection deprecation
             colorPickerDialog.show(getFragmentManager(), "color-picker-dialog");
         });
     }
 
     private void initPreView() {
-        mPrimaryImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, R.color.colorPrimary));
-        mPrimaryDarkImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, R.color.colorPrimaryDark));
-        mAccentImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.ACCENT_COLOR, R.color.colorAccent));
-        getWindow().setNavigationBarColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, R.color.colorPrimaryDark));
+        mPrimaryImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")));
+        mPrimaryDarkImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
+        mAccentImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.ACCENT_COLOR, Color.parseColor("#D81B60")));
+        getWindow().setNavigationBarColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
         Utils.Ui.setAppBarColor(this, mAppBarLayout);
     }
 

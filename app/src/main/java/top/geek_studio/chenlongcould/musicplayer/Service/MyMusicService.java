@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 18:40:42
- * 上次修改时间：2018年11月19日 17:29:14
+ * 当前修改时间：2018年11月21日 11:01:53
+ * 上次修改时间：2018年11月21日 11:01:41
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -12,7 +12,6 @@
 package top.geek_studio.chenlongcould.musicplayer.Service;
 
 import android.app.Service;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
@@ -58,19 +57,12 @@ public final class MyMusicService extends Service {
                 if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
                     Utils.Audio.shufflePlayback();
                 } else if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_COMMON)) {
-                    Intent intent = new Intent();
-                    intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPlay));
-                    intent.putExtra("play_type", 4);
-                    sendBroadcast(intent);
+                    Utils.SendSomeThing.sendPlay(MyMusicService.this, 4);
                 }
             } else {
                 switch (Values.CurrentData.CURRENT_AUTO_NEXT_TYPE) {
                     case Values.TYPE_COMMON:
-                        Log.d(TAG, "onCreate: auto-next type_common" + Values.CurrentData.CURRENT_AUTO_NEXT_TYPE);
-                        Intent intent = new Intent();
-                        intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPlay));
-                        intent.putExtra("play_type", 4);
-                        sendBroadcast(intent);
+                        Utils.SendSomeThing.sendPlay(MyMusicService.this, 4);
                         break;
                     case Values.TYPE_REPEAT:
                         if (Values.CurrentData.CURRENT_PLAY_LIST != null && !Values.CurrentData.CURRENT_PLAY_LIST.equals("default") && Data.sCurrentMusicList.size() != 0) {
@@ -87,11 +79,7 @@ public final class MyMusicService extends Service {
                                 }
                             }
                         } else {
-                            Log.d(TAG, "onCreate: auto-next type_common");
-                            Intent intent2 = new Intent();
-                            intent2.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPlay));
-                            intent2.putExtra("play_type", 4);
-                            sendBroadcast(intent2);
+                            Utils.SendSomeThing.sendPlay(MyMusicService.this, 4);
                         }
                         break;
                     case Values.TYPE_REPEAT_ONE:
