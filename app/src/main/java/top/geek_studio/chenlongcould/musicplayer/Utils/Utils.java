@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月21日 20:55:27
- * 上次修改时间：2018年11月21日 20:55:18
+ * 当前修改时间：2018年11月22日 08:04:12
+ * 上次修改时间：2018年11月22日 08:03:19
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -284,7 +284,7 @@ public final class Utils {
         }
 
         /**
-         * 设置背景与动画
+         * 设置背景与动画 (blur style)
          */
         public static void setBlurEffect(@NonNull Activity context, @Nullable byte[] bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundDown) {
             primaryBackground.setVisibility(View.VISIBLE);

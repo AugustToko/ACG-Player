@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月21日 20:55:27
- * 上次修改时间：2018年11月21日 20:06:26
+ * 当前修改时间：2018年11月22日 08:04:12
+ * 上次修改时间：2018年11月22日 08:03:19
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -172,6 +172,14 @@ public final class MusicDetailActivity extends MyBaseActivity {
 //            super.onBackPressed();            //scrollBody may case bug
             finish();           //without animation(image trans)
         }
+    }
+
+    @Override
+    protected void onResume() {
+        if (Values.Style.STYLE_CHANGED) {
+            recreate();
+        }
+        super.onResume();
     }
 
     @Override

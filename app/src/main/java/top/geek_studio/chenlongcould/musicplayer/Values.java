@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月21日 20:55:27
- * 上次修改时间：2018年11月21日 20:55:17
+ * 当前修改时间：2018年11月22日 08:04:12
+ * 上次修改时间：2018年11月22日 08:03:19
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -102,6 +102,7 @@ public final class Values {
     public static final class SharedPrefsTag {
         public static final String PLAY_LIST_NUM = "PLAY_LIST_NUM";
         public static final String PLAY_LIST_SPF_NAME_MY_FAVOURITE = "PLAY_LIST_SPF_NAME_MY_FAVOURITE";
+        public static final String DETAIL_BG_STYLE = "DETAIL_BG_STYLE";
     }
 
     /**
@@ -124,6 +125,15 @@ public final class Values {
 
     public static final class Permission {
         public static final String BROAD_CAST = "top.geek_studio.chenlongcould.musicplayer.BroadCasts";
+    }
+
+    public static final class Style {
+        public static final String STYLE_BACKGROUND_BLUR = "BLUR";
+        public static final String STYLE_BACKGROUND_AUTO_COLOR = "AUTO_COLOR";
+
+        public static boolean STYLE_CHANGED = false;
+
+        public static String DETAIL_BACKGROUND = STYLE_BACKGROUND_BLUR;
     }
 
 }
