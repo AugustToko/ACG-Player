@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月21日 20:55:27
- * 上次修改时间：2018年11月21日 20:52:28
+ * 当前修改时间：2018年11月23日 11:17:30
+ * 上次修改时间：2018年11月22日 14:29:53
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -110,8 +110,9 @@ public final class AlbumDetailActivity extends Activity {
                         int size = (int) cursor2.getLong(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
                         int duration = cursor2.getInt(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
                         String artist = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+                        long addTime = cursor2.getLong(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
 
-                        mSongs.add(new MusicItem(name, path, id, albumName, duration, size, artist));
+                        mSongs.add(new MusicItem(name, path, id, albumName, duration, size, artist, (int) addTime));
                     } while (cursor2.moveToNext());
                     cursor2.close();
                 }

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月21日 20:55:27
- * 上次修改时间：2018年11月21日 20:55:16
+ * 当前修改时间：2018年11月23日 11:17:30
+ * 上次修改时间：2018年11月23日 11:16:06
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -13,6 +13,7 @@ package top.geek_studio.chenlongcould.musicplayer.Activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -152,10 +153,7 @@ public final class MainActivity extends MyBaseCompatActivity {
     protected void onResume() {
         super.onResume();
         if (Values.STYLE_CHANGED) {
-            Utils.Ui.setAppBarColor(this, mAppBarLayout);
-            int color = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577"));
-            mToolbar.setBackgroundColor(color);
-            mTabLayout.setBackgroundColor(color);
+            initStyle();
             Values.STYLE_CHANGED = false;
         }
     }
@@ -163,10 +161,13 @@ public final class MainActivity extends MyBaseCompatActivity {
     @Override
     protected void onDestroy() {
         mHandlerThread.quitSafely();
-        if (Values.BIND_SERVICE) {
-            unbindService(Data.sServiceConnection);
-            Values.BIND_SERVICE = false;
-        }
+        // FIXME: 2018/11/23 momo
+//        if (Values.BIND_SERVICE) {
+//            if (Data.sServiceConnection != null) {
+//                unbindService(Data.sServiceConnection);
+//            }
+//            Values.BIND_SERVICE = false;
+//        }
         Data.sActivities.remove(this);
         Log.d(TAG, "onDestroy: ");
         super.onDestroy();
@@ -287,17 +288,17 @@ public final class MainActivity extends MyBaseCompatActivity {
         mDefaultSpf = PreferenceManager.getDefaultSharedPreferences(this);
 
         new Thread(() -> {
-            String tab_1 = "歌曲";
+            String tab_1 = getResources().getString(R.string.music);
             mTitles.add(tab_1);
             mMusicListFragment = MusicListFragment.newInstance();
             mFragmentList.add(mMusicListFragment);
 
-            String tab_2 = "专辑";
+            String tab_2 = getResources().getString(R.string.album);
             mTitles.add(tab_2);
             mAlbumListFragment = AlbumListFragment.newInstance();
             mFragmentList.add(mAlbumListFragment);
 
-            String tab_3 = "播放列表";
+            String tab_3 = getResources().getString(R.string.play_list);
             mTitles.add(tab_3);
             mFragmentList.add(PlayListFragment.newInstance(2));
 
@@ -319,10 +320,7 @@ public final class MainActivity extends MyBaseCompatActivity {
     private void initView() {
         findView();
 
-        Utils.Ui.setAppBarColor(this, mAppBarLayout);
-        int color = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577"));
-        mToolbar.setBackgroundColor(color);
-        mTabLayout.setBackgroundColor(color);
+        initStyle();
 
         //根据recycler view的滚动程度, 来判断如何返回顶部
         mToolbar.setOnClickListener(v -> {
@@ -475,6 +473,15 @@ public final class MainActivity extends MyBaseCompatActivity {
         mNowPlayingSongText = findViewById(R.id.activity_main_now_playing_name);
         mNowPlayingSongImage = findViewById(R.id.recycler_item_clover_image);
         mAppBarLayout = findViewById(R.id.activity_main_appbar);
+    }
+
+    private void initStyle() {
+
+        Utils.Ui.setAppBarColor(this, mAppBarLayout, mToolbar);
+        int color = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577"));
+        mTabLayout.setBackgroundColor(color);
+
+        int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
     }
 
     /**

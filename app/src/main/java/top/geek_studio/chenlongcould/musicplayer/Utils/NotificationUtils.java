@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：NotificationUtils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月21日 20:55:27
- * 上次修改时间：2018年11月21日 20:55:18
+ * 当前修改时间：2018年11月23日 11:17:30
+ * 上次修改时间：2018年11月23日 10:21:59
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -78,21 +78,21 @@ public class NotificationUtils extends ContextWrapper {
         PendingIntent pi = PendingIntent.getActivity(context, 0, intent, 0);
 
         Intent pause = new Intent();
-        pause.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPause));
+        pause.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPause));
         PendingIntent pauseIntent = PendingIntent.getBroadcast(context, REQUEST_PAUSE, pause, 0);
 
         Intent play = new Intent();
-        play.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPlay));
-        play.putExtra("play_type", 0);
+        play.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
+        play.putExtra("play_type", 2);
         PendingIntent playIntent = PendingIntent.getBroadcast(context, REQUEST_PLAY, play, 0);
 
         Intent next = new Intent();
-        next.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPlay));
+        next.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
         next.putExtra("play_type", 6);
         PendingIntent nextIntent = PendingIntent.getBroadcast(context, REQUEST_NEXT, next, 0);
 
         Intent pre = new Intent();
-        pre.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPlay));
+        pre.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
         pre.putExtra("play_type", 5);
         PendingIntent preIntent = PendingIntent.getBroadcast(context, REQUEST_PRE, pre, 0);
 

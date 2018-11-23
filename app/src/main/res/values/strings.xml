@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月21日 21:31:36
-  ~ 上次修改时间：2018年11月21日 21:31:32
+  ~ 当前修改时间：2018年11月23日 11:17:30
+  ~ 上次修改时间：2018年11月22日 14:34:48
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -10,7 +10,7 @@
   -->
 
 <resources>
-    <string name="app_name">MusicPlayer</string>
+    <string name="app_name" translatable="false">MusicPlayer</string>
     <string name="open">open</string>
     <string name="close">close</string>
     <string name="play_status">Play Status</string>
@@ -21,10 +21,15 @@
     <string name="remove">remove</string>
     <string name="current_info_background" translatable="false">current_info_background</string>
     <string name="todo" translatable="false">TODO</string>
-    <string name="menu_button" translatable="false">Menu Button</string>
+    <string name="menu_button">Menu Button</string>
     <string name="random">random</string>
     <string name="repeat">repeat</string>
     <string name="color_picker">Color Picker</string>
+    <string name="album">Album</string>
+    <string name="music">Music</string>
+    <string name="play_list">Play List</string>
+    <string name="add_recent">Add Recent</string>
+    <string name="my_favourite">My Favourite</string>
 
     <string name="image_trans_album" translatable="false">image trans album</string>
     <string name="color_accent">Color Accent</string>

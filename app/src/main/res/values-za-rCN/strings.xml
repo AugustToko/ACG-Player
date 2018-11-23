@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月21日 21:31:36
-  ~ 上次修改时间：2018年11月21日 21:14:56
+  ~ 当前修改时间：2018年11月23日 11:17:30
+  ~ 上次修改时间：2018年11月22日 14:34:48
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -10,7 +10,6 @@
   -->
 
 <resources>
-    <string name="app_name">MusicPlayer</string>
     <string name="open">打开</string>
     <string name="close">关闭</string>
     <string name="play_status">播放状态</string>
@@ -32,4 +31,10 @@
     <string name="style_settings">风格设置</string>
     <string name="this_is_body_color_like_toolbar">这是像Toolbar的颜色</string>
     <string name="the_accent_color_like_button">这是强调颜色</string>
+    <string name="album">专辑</string>
+    <string name="music">音乐</string>
+    <string name="play_list">播放列表</string>
+    <string name="menu_button">菜单按钮</string>
+    <string name="add_recent">最近添加</string>
+    <string name="my_favourite">我的最爱</string>
 </resources>

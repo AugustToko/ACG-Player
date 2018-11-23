@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月21日 11:01:53
- * 上次修改时间：2018年11月21日 11:01:44
+ * 当前修改时间：2018年11月23日 11:17:30
+ * 上次修改时间：2018年11月23日 11:16:10
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -23,6 +23,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.widget.Toolbar;
 import android.widget.ImageView;
+import android.widget.Switch;
 
 import com.jrummyapps.android.colorpicker.ColorPickerDialog;
 import com.jrummyapps.android.colorpicker.ColorPickerDialogListener;
@@ -50,6 +51,10 @@ public class SettingsActivity extends MyBaseActivity {
     @SuppressWarnings("FieldCanBeLocal")
     private ConstraintLayout mAccentOpt;
 
+    private ConstraintLayout mAutoNightOpt;
+
+    private Switch mNightSwitch;
+
     private ImageView mPrimaryImage;
 
     private ImageView mPrimaryDarkImage;
@@ -68,6 +73,10 @@ public class SettingsActivity extends MyBaseActivity {
             SharedPreferences.Editor editor = mDefPrefs.edit();
             Values.STYLE_CHANGED = true;
             switch (dialogId) {
+
+                /*
+                 * Primary (toolbar tabLayout...)
+                 * */
                 case PRIMARY: {
                     mPrimaryImage.clearAnimation();
                     ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, R.color.colorPrimary), color);
@@ -75,6 +84,7 @@ public class SettingsActivity extends MyBaseActivity {
                     animator.addUpdateListener(animation -> {
                         mPrimaryImage.setBackgroundColor((Integer) animation.getAnimatedValue());
                         mAppBarLayout.setBackgroundColor((Integer) animation.getAnimatedValue());
+                        mToolbar.setBackgroundColor((Integer) animation.getAnimatedValue());
                     });
                     animator.start();
                     editor.putInt(Values.ColorInt.PRIMARY_COLOR, color);
@@ -83,6 +93,9 @@ public class SettingsActivity extends MyBaseActivity {
                 }
                 break;
 
+                /*
+                 * Dark Primary
+                 * */
                 case PRIMARY_DARK: {
                     mPrimaryDarkImage.clearAnimation();
                     ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, R.color.colorPrimaryDark), color);
@@ -98,6 +111,9 @@ public class SettingsActivity extends MyBaseActivity {
                 }
                 break;
 
+                /*
+                 * Accent Color
+                 * */
                 case ACCENT: {
                     mAccentImage.setBackgroundColor(color);
                     editor.putInt(Values.ColorInt.ACCENT_COLOR, color);
@@ -128,6 +144,8 @@ public class SettingsActivity extends MyBaseActivity {
         mAccentImage = findViewById(R.id.activity_settings_preview_acc);
         mToolbar = findViewById(R.id.activity_settings_toolbar);
         mAppBarLayout = findViewById(R.id.activity_settings_appbar);
+        mAutoNightOpt = findViewById(R.id.night_style);
+        mNightSwitch = findViewById(R.id.activity_settings_night_switch);
 
         mToolbar.inflateMenu(R.menu.menu_toolbar_settings);
 
@@ -147,6 +165,34 @@ public class SettingsActivity extends MyBaseActivity {
                         editor.putInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor(Values.Color.PRIMARY_DARK));
                     }
                     editor.apply();
+
+                    clearAnimation();
+                    ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor(Values.Color.PRIMARY)), Color.parseColor(Values.Color.PRIMARY));
+                    animator.setDuration(300);
+                    animator.addUpdateListener(animation -> {
+                        mPrimaryImage.setBackgroundColor((Integer) animation.getAnimatedValue());
+                        mAppBarLayout.setBackgroundColor((Integer) animation.getAnimatedValue());
+                        mToolbar.setBackgroundColor((Integer) animation.getAnimatedValue());
+                    });
+
+                    ValueAnimator animator2 = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor(Values.Color.PRIMARY_DARK)), Color.parseColor(Values.Color.PRIMARY_DARK));
+                    animator2.setDuration(300);
+                    animator2.addUpdateListener(animation -> {
+                        mPrimaryDarkImage.setBackgroundColor((Integer) animator2.getAnimatedValue());
+                        getWindow().setNavigationBarColor((Integer) animator2.getAnimatedValue());
+                    });
+
+                    ValueAnimator animator3 = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.ColorInt.ACCENT_COLOR, Color.parseColor(Values.Color.ACCENT)), Color.parseColor(Values.Color.ACCENT));
+                    animator3.setDuration(300);
+                    animator3.addUpdateListener(animation -> {
+                        mAccentImage.setBackgroundColor((Integer) animator3.getAnimatedValue());
+                    });
+
+                    animator.start();
+                    animator2.start();
+                    animator3.start();
+
+                    clearAnimation();
                 }
             }
             return false;
@@ -192,6 +238,40 @@ public class SettingsActivity extends MyBaseActivity {
             //noinspection deprecation
             colorPickerDialog.show(getFragmentManager(), "color-picker-dialog");
         });
+
+        mAutoNightOpt.setOnClickListener(v -> {
+            SharedPreferences.Editor editor = mDefPrefs.edit();
+            if (Values.Style.AUTO_NIGHT_MODE) {
+                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false);
+                mNightSwitch.setChecked(false);
+                Values.Style.AUTO_NIGHT_MODE = false;
+            } else {
+                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, true);
+                mNightSwitch.setChecked(true);
+                Values.Style.AUTO_NIGHT_MODE = true;
+            }
+            editor.apply();
+        });
+
+        mNightSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            SharedPreferences.Editor editor = mDefPrefs.edit();
+            if (isChecked) {
+                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, true);
+                Values.Style.AUTO_NIGHT_MODE = true;
+            } else {
+                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false);
+                Values.Style.AUTO_NIGHT_MODE = false;
+            }
+            editor.apply();
+        });
+    }
+
+    private void clearAnimation() {
+        mPrimaryImage.clearAnimation();
+        mToolbar.clearAnimation();
+        mAppBarLayout.clearAnimation();
+        mPrimaryDarkImage.clearAnimation();
+        mAccentImage.clearAnimation();
     }
 
     private void initPreView() {
@@ -199,14 +279,14 @@ public class SettingsActivity extends MyBaseActivity {
         mPrimaryDarkImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
         mAccentImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.ACCENT_COLOR, Color.parseColor("#D81B60")));
         getWindow().setNavigationBarColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
-        Utils.Ui.setAppBarColor(this, mAppBarLayout);
+        Utils.Ui.setAppBarColor(this, mAppBarLayout, mToolbar);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         if (Values.STYLE_CHANGED) {
-            Utils.Ui.setAppBarColor(this, mAppBarLayout);
+            Utils.Ui.setAppBarColor(this, mAppBarLayout, mToolbar);
             Values.STYLE_CHANGED = false;
         }
     }

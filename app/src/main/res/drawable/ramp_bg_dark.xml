@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
-  ~ 文件：ramp_bg_3.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月14日 15:30:40
-  ~ 上次修改时间：2018年11月14日 15:29:35
+  ~ 文件：ramp_bg_dark.xml  模块：app  项目：MusicPlayer
+  ~ 当前修改时间：2018年11月23日 11:17:30
+  ~ 上次修改时间：2018年11月23日 10:48:18
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -13,7 +13,7 @@
 
     <gradient
         android:angle="90"
-        android:endColor="#ffffff"
+        android:endColor="#000000"
         android:startColor="#00ffffff" />
 
 </shape>

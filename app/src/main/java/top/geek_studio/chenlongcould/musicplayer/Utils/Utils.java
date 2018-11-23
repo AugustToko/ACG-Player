@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月22日 08:04:12
- * 上次修改时间：2018年11月22日 08:03:19
+ * 当前修改时间：2018年11月23日 11:17:30
+ * 上次修改时间：2018年11月23日 11:16:10
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -29,11 +29,13 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 
@@ -227,9 +229,24 @@ public final class Utils {
 
     public static class Ui {
 
-        public static void setAppBarColor(Activity context, AppBarLayout toolBarColor) {
+        /**
+         * set color (style)
+         *
+         * @param context      context
+         * @param toolBarColor appBarLayout
+         * @param toolbar      toolbar
+         */
+        public static void setAppBarColor(Activity context, AppBarLayout toolBarColor, Toolbar toolbar) {
             SharedPreferences mDefPrefs = PreferenceManager.getDefaultSharedPreferences(context);
             toolBarColor.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")));
+            toolbar.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")));
+            context.getWindow().setNavigationBarColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
+        }
+
+        public static void setAppBarColor(Activity context, AppBarLayout toolBarColor, android.support.v7.widget.Toolbar toolbar) {
+            SharedPreferences mDefPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+            toolBarColor.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")));
+            toolbar.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")));
             context.getWindow().setNavigationBarColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
         }
 
@@ -391,21 +408,24 @@ public final class Utils {
      */
     public static final class SendSomeThing {
 
+        public static final String TAG = "SendSomeThing";
+
         /**
          * send broadcast by pause
          * @param context context
          */
         public static void sendPause(Context context) {
             Intent intent = new Intent();
-            intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPause));
-            context.sendBroadcast(intent);
+            intent.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPause));
+            context.sendBroadcast(intent, Values.Permission.BROAD_CAST);
         }
 
         public static void sendPlay(Context context, int playType) {
             Intent intent = new Intent();
-            intent.setComponent(new ComponentName(Values.PKG_NAME, Values.BroadCast.ReceiverOnMusicPlay));
+            intent.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
+            Log.d(TAG, "sendPlay: " + context.getPackageName());
             intent.putExtra("play_type", playType);
-            context.sendBroadcast(intent);
+            context.sendBroadcast(intent, Values.Permission.BROAD_CAST);
         }
     }
 }

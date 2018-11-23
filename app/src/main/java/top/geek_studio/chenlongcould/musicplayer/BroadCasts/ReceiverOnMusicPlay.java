@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月21日 21:31:36
- * 上次修改时间：2018年11月21日 20:59:19
+ * 当前修改时间：2018年11月23日 11:17:30
+ * 上次修改时间：2018年11月22日 08:31:50
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -59,13 +59,14 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
              * */
             case 2: {
                 Data.sMusicBinder.playMusic();
-                MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
-                MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
-                musicDetailActivity.setButtonTypePlay();
-                mainActivity.setButtonTypePlay();
-
-                MusicDetailActivity.NotLeakHandler notLeakHandler = musicDetailActivity.getHandler();
-                notLeakHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
+                if (Data.sActivities.size() == 2) {
+                    MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
+                    MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
+                    musicDetailActivity.setButtonTypePlay();
+                    mainActivity.setButtonTypePlay();
+                    MusicDetailActivity.NotLeakHandler notLeakHandler = musicDetailActivity.getHandler();
+                    notLeakHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
+                }
             }
             break;
 

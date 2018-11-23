@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：AndroidManifest.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月21日 20:55:27
-  ~ 上次修改时间：2018年11月21日 20:55:18
+  ~ 当前修改时间：2018年11月23日 11:17:30
+  ~ 上次修改时间：2018年11月23日 10:21:59
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -63,7 +63,8 @@
         <receiver
             android:name=".BroadCasts.ReceiverOnMusicPlay"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            android:permission="top.geek_studio.chenlongcould.musicplayer.BroadCasts">
             <intent-filter>
                 <action android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay" />
             </intent-filter>
@@ -72,7 +73,8 @@
         <receiver
             android:name=".BroadCasts.ReceiverOnMusicPause"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            android:permission="top.geek_studio.chenlongcould.musicplayer.BroadCasts">
             <intent-filter>
                 <action android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPause" />
             </intent-filter>
@@ -81,7 +83,8 @@
         <receiver
             android:name=".BroadCasts.MyHeadSetPlugReceiver"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            android:permission="top.geek_studio.chenlongcould.musicplayer.BroadCasts">
             <intent-filter>
                 <action android:name="android.intent.action.HEADSET_PLUG" />
             </intent-filter>

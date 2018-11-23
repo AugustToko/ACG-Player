@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月22日 08:04:12
- * 上次修改时间：2018年11月22日 08:03:19
+ * 当前修改时间：2018年11月23日 11:17:30
+ * 上次修改时间：2018年11月23日 10:55:49
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -21,7 +21,7 @@ public final class Values {
     public static final String INDEX = "index";
     public static final String TAG_UNIVERSAL_ONE = "TAG_UNIVERSAL_ONE";
     public static final String SURE_GET_PERMISSION = "SURE_GET_PERMISSION";
-    public static final String PKG_NAME = "top.geek_studio.chenlongcould.musicplayer";
+    public static final String PKG_NAME = "top.geek_studio.chenlongcould.musicplayer.Common";
     public static final String PLAY_LIST_SPF_KEY = "PLAY_LIST_SPF_KEY";
     public static final String TYPE_RANDOM = "RANDOM";
     public static final String TYPE_COMMON = "COMMON";
@@ -103,6 +103,7 @@ public final class Values {
         public static final String PLAY_LIST_NUM = "PLAY_LIST_NUM";
         public static final String PLAY_LIST_SPF_NAME_MY_FAVOURITE = "PLAY_LIST_SPF_NAME_MY_FAVOURITE";
         public static final String DETAIL_BG_STYLE = "DETAIL_BG_STYLE";
+        public static final String AUTO_NIGHT_MODE = "AUTO_NIGHT_MODE";
     }
 
     /**
@@ -121,6 +122,7 @@ public final class Values {
         public static final String PRIMARY = "#008577";
         public static final String PRIMARY_DARK = "#00574B";
         public static final String ACCENT = "#D81B60";
+        public static final String NOT_VERY_BLACK = "#1d1d1d";
     }
 
     public static final class Permission {
@@ -132,6 +134,8 @@ public final class Values {
         public static final String STYLE_BACKGROUND_AUTO_COLOR = "AUTO_COLOR";
 
         public static boolean STYLE_CHANGED = false;
+
+        public static boolean AUTO_NIGHT_MODE = false;
 
         public static String DETAIL_BACKGROUND = STYLE_BACKGROUND_BLUR;
     }

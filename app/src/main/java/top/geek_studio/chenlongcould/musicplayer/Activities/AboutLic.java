@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AboutLic.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月21日 11:01:53
- * 上次修改时间：2018年11月21日 07:54:04
+ * 当前修改时间：2018年11月23日 11:17:30
+ * 上次修改时间：2018年11月22日 14:53:00
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -45,9 +45,10 @@ public final class AboutLic extends Activity {
         try {
             InputStream inputStream = getAssets().open("Licenses");
             byte[] b = new byte[inputStream.available()];
-            inputStream.read(b);
-            String s = new String(b);
-            textView.setText(s);
+            if (inputStream.read(b) != -1) {
+                String s = new String(b);
+                textView.setText(s);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

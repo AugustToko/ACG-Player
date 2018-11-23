@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 18:40:42
- * 上次修改时间：2018年11月19日 17:29:14
+ * 当前修改时间：2018年11月23日 11:17:30
+ * 上次修改时间：2018年11月22日 13:39:28
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -126,9 +126,10 @@ public final class MusicListFragment extends Fragment {
                         int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
                         int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
                         String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+                        long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
 
-                        Data.sMusicItems.add(new MusicItem(name, path, id, albumName, duration, size, artist));
-                        Data.sMusicItemsBackUp.add(new MusicItem(name, path, id, albumName, duration, size, artist));
+                        Data.sMusicItems.add(new MusicItem(name, path, id, albumName, duration, size, artist, (int) addTime));
+                        Data.sMusicItemsBackUp.add(new MusicItem(name, path, id, albumName, duration, size, artist, (int) addTime));
 
                     } while (cursor.moveToNext());
                     cursor.close();

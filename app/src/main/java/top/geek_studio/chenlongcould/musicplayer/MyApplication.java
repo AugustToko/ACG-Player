@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月22日 08:04:12
- * 上次修改时间：2018年11月22日 08:03:19
+ * 当前修改时间：2018年11月23日 11:17:30
+ * 上次修改时间：2018年11月23日 11:04:30
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -14,6 +14,7 @@ package top.geek_studio.chenlongcould.musicplayer;
 import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
 
 public class MyApplication extends Application {
@@ -46,6 +47,11 @@ public class MyApplication extends Application {
             }
         } else {
             Values.Style.DETAIL_BACKGROUND = Values.Style.STYLE_BACKGROUND_BLUR;
+        }
+
+        if (mDefSharedPreferences.getBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false)) {
+            Values.Style.AUTO_NIGHT_MODE = true;
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
         }
 
     }
