@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月23日 11:17:30
- * 上次修改时间：2018年11月23日 11:16:10
+ * 当前修改时间：2018年11月23日 16:43:35
+ * 上次修改时间：2018年11月23日 16:43:24
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -37,8 +37,6 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-
 import java.io.IOException;
 import java.util.Random;
 
@@ -52,6 +50,7 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
+@SuppressWarnings("WeakerAccess")
 public final class Utils {
 
     public static class Audio {
@@ -87,27 +86,6 @@ public final class Utils {
         public static byte[] getAlbumByteImage(@NonNull String path) {
             sMediaMetadataRetriever.setDataSource(path);
             return sMediaMetadataRetriever.getEmbeddedPicture();
-        }
-
-        public static void preLoadAlubmImage(@NonNull Context context, @NonNull String path) {
-            sMediaMetadataRetriever.setDataSource(path);
-            GlideApp.with(context).load(sMediaMetadataRetriever.getEmbeddedPicture()).override(50, 50).preload();
-        }
-
-        public static String getAlbumText(@NonNull String path) {
-            sMediaMetadataRetriever.setDataSource(path);
-            return sMediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-        }
-
-        /**
-         * 加载封面
-         *
-         * @param mediaUri MP3文件路径
-         */
-        public static void loadingCoverIntoImageView(@NonNull Context context, @NonNull ImageView musicCover, @NonNull String mediaUri) {
-            sMediaMetadataRetriever.setDataSource(mediaUri);
-            byte[] picture = sMediaMetadataRetriever.getEmbeddedPicture();
-            GlideApp.with(context).load(picture).transition(DrawableTransitionOptions.withCrossFade()).override(50, 50).into(musicCover);
         }
 
         /**
@@ -254,8 +232,7 @@ public final class Utils {
             if (Data.sActivities.size() != 0) {
                 MainActivity activity = (MainActivity) Data.sActivities.get(0);
                 activity.runOnUiThread(() -> {
-                    MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
-                    mainActivity.setButtonTypePlay();
+                    Utils.HandlerSend.sendToMain(Values.HandlerWhat.SET_MAIN_BUTTON_PLAY);
                     if (Data.sActivities.size() >= 2) {
                         MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
                         musicDetailActivity.setButtonTypePlay();
@@ -303,20 +280,20 @@ public final class Utils {
         /**
          * 设置背景与动画 (blur style)
          */
-        public static void setBlurEffect(@NonNull Activity context, @Nullable byte[] bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundDown) {
+        public static void setBlurEffect(@NonNull Activity context, @Nullable byte[] bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundBef) {
             primaryBackground.setVisibility(View.VISIBLE);
             context.runOnUiThread(() -> {
-                primaryBackgroundDown.post(() -> GlideApp.with(context)
+                primaryBackgroundBef.post(() -> GlideApp.with(context)
                         .load(bitmap)
                         .dontAnimate()
-                        .apply(bitmapTransform(new BlurTransformation(15, 30)))
-                        .into(primaryBackgroundDown));
+                        .apply(bitmapTransform(new BlurTransformation(20, 30)))
+                        .into(primaryBackgroundBef));
 
-                primaryBackgroundDown.post(() -> {
+                primaryBackgroundBef.post(() -> {
                     Animator animator = ViewAnimationUtils.createCircularReveal(
-                            primaryBackgroundDown, primaryBackgroundDown.getWidth() / 2, 170,
+                            primaryBackgroundBef, primaryBackgroundBef.getWidth() / 2, 170,
                             0,
-                            (float) Math.hypot(primaryBackgroundDown.getWidth(), primaryBackgroundDown.getHeight()));
+                            (float) Math.hypot(primaryBackgroundBef.getWidth(), primaryBackgroundBef.getHeight()));
                     animator.setInterpolator(new AccelerateInterpolator());
                     animator.setDuration(700);
                     animator.addListener(new Animator.AnimatorListener() {
@@ -330,9 +307,9 @@ public final class Utils {
                             GlideApp.with(context)
                                     .load(bitmap)
                                     .dontAnimate()
-                                    .apply(bitmapTransform(new BlurTransformation(15, 30)))
+                                    .apply(bitmapTransform(new BlurTransformation(20, 30)))
                                     .into(primaryBackground);
-                            primaryBackground.setVisibility(View.INVISIBLE);
+                            primaryBackground.setVisibility(View.GONE);
                         }
 
                         @Override
@@ -350,18 +327,18 @@ public final class Utils {
             });
         }
 
-        public static void setBlurEffect(@NonNull Activity context, @Nullable Bitmap bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundDown) {
+        public static void setBlurEffect(@NonNull Activity context, @Nullable Bitmap bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundBef) {
             primaryBackground.setVisibility(View.VISIBLE);
             context.runOnUiThread(() -> {
-                primaryBackgroundDown.post(() -> GlideApp.with(context)
+                primaryBackgroundBef.post(() -> GlideApp.with(context)
                         .load(bitmap)
                         .dontAnimate()
-                        .apply(bitmapTransform(new BlurTransformation(15, 30)))
-                        .into(primaryBackgroundDown));
+                        .apply(bitmapTransform(new BlurTransformation(20, 30)))
+                        .into(primaryBackgroundBef));
 
-                primaryBackgroundDown.post(() -> {
-                    Animator animator = ViewAnimationUtils.createCircularReveal(primaryBackgroundDown, primaryBackgroundDown.getWidth() / 2, 170, 0,
-                            (float) Math.hypot(primaryBackgroundDown.getWidth(), primaryBackgroundDown.getHeight()));
+                primaryBackgroundBef.post(() -> {
+                    Animator animator = ViewAnimationUtils.createCircularReveal(primaryBackgroundBef, primaryBackgroundBef.getWidth() / 2, 170, 0,
+                            (float) Math.hypot(primaryBackgroundBef.getWidth(), primaryBackgroundBef.getHeight()));
                     animator.setInterpolator(new AccelerateInterpolator());
                     animator.setDuration(700);
                     animator.addListener(new Animator.AnimatorListener() {
@@ -372,12 +349,12 @@ public final class Utils {
 
                         @Override
                         public void onAnimationEnd(Animator animation) {
-                            primaryBackgroundDown.post(() -> GlideApp.with(context)
+                            primaryBackgroundBef.post(() -> GlideApp.with(context)
                                     .load(bitmap)
                                     .dontAnimate()
-                                    .apply(bitmapTransform(new BlurTransformation(15, 30)))
+                                    .apply(bitmapTransform(new BlurTransformation(20, 30)))
                                     .into(primaryBackground));
-                            primaryBackground.setVisibility(View.INVISIBLE);
+                            primaryBackground.setVisibility(View.GONE);
                         }
 
                         @Override
@@ -400,6 +377,13 @@ public final class Utils {
         public static boolean isColorLight(@ColorInt int color) {
             double darkness = 1.0D - (0.299D * (double) Color.red(color) + 0.587D * (double) Color.green(color) + 0.114D * (double) Color.blue(color)) / 255.0D;
             return darkness < 0.4D;
+        }
+    }
+
+    public static final class HandlerSend {
+        public static void sendToMain(int msg) {
+            MainActivity.NotLeakHandler handler = ((MainActivity) Data.sActivities.get(0)).getHandler();
+            handler.sendEmptyMessage(msg);
         }
     }
 

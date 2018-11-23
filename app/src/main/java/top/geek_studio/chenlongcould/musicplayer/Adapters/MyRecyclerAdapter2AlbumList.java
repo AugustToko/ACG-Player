@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter2AlbumList.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 18:40:42
- * 上次修改时间：2018年11月19日 18:40:19
+ * 当前修改时间：2018年11月23日 16:43:35
+ * 上次修改时间：2018年11月23日 15:29:57
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -87,22 +87,9 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
         return mAlbumNameList.size();
     }
 
-    private String getAlbumArt(int album_id) {
-        String mUriAlbums = "content://media/external/audio/albums";
-        String[] projection = new String[]{"album_art"};
-        Cursor cur = mContext.getContentResolver().query(Uri.parse(mUriAlbums + "/" + Integer.toString(album_id)), projection, null, null, null);
-        String album_art = null;
-        if (cur.getCount() > 0 && cur.getColumnCount() > 0) {
-            cur.moveToNext();
-            album_art = cur.getString(0);
-        }
-        cur.close();
-        cur = null;
-        return album_art;
-    }
-
     @Override
     public void onViewRecycled(@NonNull ViewHolder holder) {
+        holder.mAlbumImage.setTag(null);
         GlideApp.with(mContext).clear(holder.mAlbumImage);
     }
 
@@ -144,13 +131,21 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
         @Override
         protected String doInBackground(Void... voids) {
             //根据position判断是否为复用ViewHolder
+            if (mImageViewWeakReference.get() == null) {
+                return null;
+            }
+
+            if (mImageViewWeakReference.get().getTag(R.string.key_id_1) == null) {
+                return null;
+            }
+
             if (((int) mImageViewWeakReference.get().getTag(R.string.key_id_1)) != mPosition - 1) {
                 GlideApp.with(mContextWeakReference.get()).clear(mImageViewWeakReference.get());
                 return null;
             }
 
             String img = "null";
-            Cursor cursor = mContextWeakReference.get().getContentResolver().query(Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + "/" + mPosition),
+            Cursor cursor = mContextWeakReference.get().getContentResolver().query(Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + mPosition),
                     new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
             if (cursor != null) {
                 cursor.moveToFirst();
@@ -162,6 +157,20 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
             }
             return img;
         }
+
+//
+//        public String getAlbumArt(int album_id) {
+//            String mUriAlbums = "content://media/external/audio/albums";
+//            String[] projection = new String[]{"album_art"};
+//            Cursor cur = mContextWeakReference.get().getContentResolver().query(Uri.parse(mUriAlbums + "/" + Integer.toString(album_id)), projection, null, null, null);
+//            String album_art = null;
+//            if (cur.getCount() > 0 && cur.getColumnCount() > 0) {
+//                cur.moveToNext();
+//                album_art = cur.getString(0);
+//            }
+//            cur.close();
+//            return album_art;
+//        }
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {

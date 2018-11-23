@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月21日 11:01:53
- * 上次修改时间：2018年11月21日 11:01:41
+ * 当前修改时间：2018年11月23日 16:43:35
+ * 上次修改时间：2018年11月23日 16:43:26
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -269,6 +269,20 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         task.execute();
     }
 
+    /**
+     * 为复用的ImageView清除内存
+     */
+    @Override
+    public void onViewRecycled(@NonNull ViewHolder holder) {
+        GlideApp.with(mMainActivity).clear(holder.mMusicCloverImage);
+        holder.mMusicCloverImage.setTag(null);
+    }
+
+    @Override
+    public int getItemCount() {
+        return mMusicItems.size();
+    }
+
     static class MyTask extends AsyncTask<Void, Void, byte[]> {
 
         private String mPath;
@@ -305,6 +319,10 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 return null;
             }
 
+            if (mImageViewWeakReference.get().getTag(R.string.key_id_1) == null) {
+                return null;
+            }
+
             //根据position判断是否为复用ViewHolder
             if (((int) mImageViewWeakReference.get().getTag(R.string.key_id_1)) != mPosition) {
                 GlideApp.with(mContextWeakReference.get()).clear(mImageViewWeakReference.get());
@@ -314,24 +332,11 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         }
     }
 
-    @Override
-    public int getItemCount() {
-        return mMusicItems.size();
-    }
-
-    /**
-     * 为复用的ImageView清除内存
-     */
-    @Override
-    public void onViewRecycled(@NonNull ViewHolder holder) {
-        GlideApp.with(mMainActivity).clear(holder.mMusicCloverImage);
-    }
-
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        ImageView mMusicCloverImage;
+        volatile ImageView mMusicCloverImage;
 
-        ImageView mItemMenuButton;
+        volatile ImageView mItemMenuButton;
 
         TextView mMusicText;
 

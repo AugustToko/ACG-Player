@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月23日 11:17:30
- * 上次修改时间：2018年11月22日 08:31:50
+ * 当前修改时间：2018年11月23日 16:43:35
+ * 上次修改时间：2018年11月23日 13:18:33
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -59,11 +59,12 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
              * */
             case 2: {
                 Data.sMusicBinder.playMusic();
-                if (Data.sActivities.size() == 2) {
+                if (Data.sActivities.size() >= 1) {
+                    Utils.HandlerSend.sendToMain(Values.HandlerWhat.SET_MAIN_BUTTON_PLAY);
+                }
+                if (Data.sActivities.size() >= 2) {
                     MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
-                    MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
                     musicDetailActivity.setButtonTypePlay();
-                    mainActivity.setButtonTypePlay();
                     MusicDetailActivity.NotLeakHandler notLeakHandler = musicDetailActivity.getHandler();
                     notLeakHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
                 }
@@ -75,8 +76,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
              * */
             case 3: {
                 Data.sMusicBinder.playMusic();
-                MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
-                mainActivity.setButtonTypePlay();
+                Utils.HandlerSend.sendToMain(Values.HandlerWhat.SET_MAIN_BUTTON_PLAY);
             }
             break;
 
@@ -152,17 +152,33 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                     Data.sMusicBinder.seekTo(0);
                 } else {
                     if (READY) {
-                        READY = false;
 
                         if (Data.sActivities.size() == 1) {
                             Data.sMusicBinder.seekTo(0);
                             return;
                         }
 
+                        READY = false;
+
                         Data.sMusicBinder.resetMusic();
                         int tempSize = Data.sHistoryPlayIndex.size();
-                        int index = Data.sHistoryPlayIndex.get(tempSize - 2);
-                        Data.sHistoryPlayIndex.remove(tempSize - 1);
+
+                        int index = Data.sHistoryPlayIndex.get(0);
+                        switch (tempSize) {
+                            case 0: {
+                                Data.sMusicBinder.seekTo(0);
+                            }
+                            break;
+
+                            case 1: {
+                                Data.sMusicBinder.seekTo(0);
+                            }
+                            break;
+
+                            default:
+                                index = Data.sHistoryPlayIndex.get(tempSize - 2);
+                                Data.sHistoryPlayIndex.remove(tempSize - 1);
+                        }
                         String path = Data.sMusicItems.get(index).getMusicPath();
                         String musicName = Data.sMusicItems.get(index).getMusicName();
                         String albumName = Data.sMusicItems.get(index).getMusicAlbum();

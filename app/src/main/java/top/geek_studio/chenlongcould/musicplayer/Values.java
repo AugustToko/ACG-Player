@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月23日 11:17:30
- * 上次修改时间：2018年11月23日 10:55:49
+ * 当前修改时间：2018年11月23日 16:43:35
+ * 上次修改时间：2018年11月23日 16:43:24
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -11,8 +11,7 @@
 
 package top.geek_studio.chenlongcould.musicplayer;
 
-import java.util.Comparator;
-
+@SuppressWarnings("WeakerAccess")
 public final class Values {
 
     /**
@@ -21,7 +20,6 @@ public final class Values {
     public static final String INDEX = "index";
     public static final String TAG_UNIVERSAL_ONE = "TAG_UNIVERSAL_ONE";
     public static final String SURE_GET_PERMISSION = "SURE_GET_PERMISSION";
-    public static final String PKG_NAME = "top.geek_studio.chenlongcould.musicplayer.Common";
     public static final String PLAY_LIST_SPF_KEY = "PLAY_LIST_SPF_KEY";
     public static final String TYPE_RANDOM = "RANDOM";
     public static final String TYPE_COMMON = "COMMON";
@@ -64,6 +62,8 @@ public final class Values {
          * in MainActivity
          */
         public static final int INIT_PAGE_DONE = 59;
+        public static final int SET_MAIN_BUTTON_PLAY = 58;
+        public static final int SET_MAIN_BUTTON_PAUSE = 57;
     }
 
     public static final class ColorInt {
@@ -109,7 +109,6 @@ public final class Values {
     /**
      * sort(s)
      */
-    public static Comparator<String> sort = String::compareTo;
     public static int DEF_CROSS_FATE_TIME = 500;
 
     public static final class BroadCast {

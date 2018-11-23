@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月23日 11:17:30
- * 上次修改时间：2018年11月22日 13:39:28
+ * 当前修改时间：2018年11月23日 16:43:35
+ * 上次修改时间：2018年11月23日 15:00:15
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -156,17 +156,17 @@ public final class MusicListFragment extends Fragment {
 
         mRecyclerView.setAdapter(adapter);
 
-//        needn't
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
+//                super.onScrollStateChanged(recyclerView, newState);
                 if (newState == RecyclerView.SCROLL_STATE_DRAGGING || newState == RecyclerView.SCROLL_STATE_SETTLING) {
                     sIsScrolling = true;
                 } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (sIsScrolling) {
                         GlideApp.with(mActivity).resumeRequests();
-
+                    } else {
+                        GlideApp.with(mActivity).pauseAllRequests();
                     }
                     sIsScrolling = false;
                 }
@@ -187,7 +187,8 @@ public final class MusicListFragment extends Fragment {
      */
     private void sureCreateViewDone() {
         if (CREATE_VIEW_DONE) {
-            mActivity.setToolbarSubTitle(Data.sMusicItems.size() + " Songs");
+            MainActivity.NotLeakHandler handler = mActivity.getHandler();
+            handler.sendEmptyMessage(Values.HandlerWhat.INIT_MUSIC_LIST);
             adapter.notifyDataSetChanged();
         } else {
             new Handler().postDelayed(this::sureCreateViewDone, 1000);      //循环一秒

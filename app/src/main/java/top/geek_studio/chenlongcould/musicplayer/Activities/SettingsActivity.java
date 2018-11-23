@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月23日 11:17:30
- * 上次修改时间：2018年11月23日 11:16:10
+ * 当前修改时间：2018年11月23日 16:43:35
+ * 上次修改时间：2018年11月23日 12:05:17
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -280,6 +280,8 @@ public class SettingsActivity extends MyBaseActivity {
         mAccentImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.ACCENT_COLOR, Color.parseColor("#D81B60")));
         getWindow().setNavigationBarColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
         Utils.Ui.setAppBarColor(this, mAppBarLayout, mToolbar);
+
+        mNightSwitch.setChecked(Values.Style.AUTO_NIGHT_MODE);
     }
 
     @Override

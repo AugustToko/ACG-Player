@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月21日 20:55:27
- * 上次修改时间：2018年11月21日 20:48:43
+ * 当前修改时间：2018年11月23日 16:43:35
+ * 上次修改时间：2018年11月23日 16:35:06
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -113,12 +113,11 @@ public final class MyMusicService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy: ");
-        unregisterReceiver(Data.mMyHeadSetPlugReceiver);
         Values.SERVICE_RUNNING = false;
         Values.MUSIC_PLAYING = false;
         mMediaPlayer.release();
         Data.sMusicBinder = null;
+        unregisterReceiver(Data.mMyHeadSetPlugReceiver);
         if (notificationUtils != null) {
             notificationUtils.disMiss(NotificationUtils.ID);
         }
@@ -173,10 +172,6 @@ public final class MyMusicService extends Service {
 
         public void seekTo(int position) {
             mMediaPlayer.seekTo(position);
-        }
-
-        public void release() {
-            mMediaPlayer.release();
         }
 
     }

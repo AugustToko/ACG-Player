@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月23日 11:17:30
- * 上次修改时间：2018年11月23日 11:16:06
+ * 当前修改时间：2018年11月23日 16:43:35
+ * 上次修改时间：2018年11月23日 16:43:25
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -11,9 +11,8 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Activities;
 
+import android.app.NotificationManager;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -33,7 +32,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.graphics.Palette;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -61,6 +59,7 @@ import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Service.MyMusicService;
+import top.geek_studio.chenlongcould.musicplayer.Utils.NotificationUtils;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
@@ -73,8 +72,6 @@ public final class MainActivity extends MyBaseCompatActivity {
     private boolean TOOLBAR_CLICKED = false;
 
     private boolean BACK_PRESSED = false;
-
-    private SharedPreferences mDefaultSpf;
 
     private List<Fragment> mFragmentList = new ArrayList<>();
 
@@ -100,6 +97,7 @@ public final class MainActivity extends MyBaseCompatActivity {
 
     private ImageView mNavHeaderImageView;
 
+    @SuppressWarnings("FieldCanBeLocal")
     private Menu mMenu;
 
     private SearchView mSearchView;
@@ -136,8 +134,6 @@ public final class MainActivity extends MyBaseCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Data.sActivities.add(this);
-
         mHandlerThread = new HandlerThread("Handler Thread in MainActivity");
         mHandlerThread.start();
         mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
@@ -161,14 +157,14 @@ public final class MainActivity extends MyBaseCompatActivity {
     @Override
     protected void onDestroy() {
         mHandlerThread.quitSafely();
-        // FIXME: 2018/11/23 momo
-//        if (Values.BIND_SERVICE) {
-//            if (Data.sServiceConnection != null) {
-//                unbindService(Data.sServiceConnection);
-//            }
-//            Values.BIND_SERVICE = false;
-//        }
+        if (Values.BIND_SERVICE) {
+            if (Data.sServiceConnection != null) {
+                unbindService(Data.sServiceConnection);
+            }
+            Values.BIND_SERVICE = false;
+        }
         Data.sActivities.remove(this);
+        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(NotificationUtils.ID);
         Log.d(TAG, "onDestroy: ");
         super.onDestroy();
     }
@@ -205,13 +201,13 @@ public final class MainActivity extends MyBaseCompatActivity {
         //默认刚进去就打开搜索栏
         mSearchView.setIconified(true);
         //设置提交按钮是否可见
-        mSearchView.setSubmitButtonEnabled(true);
+        mSearchView.setSubmitButtonEnabled(false);
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                mSearchView.setIconified(true);
-                filterData(query);
-                return true;
+//                mSearchView.setIconified(true);
+//                filterData(query);
+                return false;
             }
 
             @Override
@@ -258,9 +254,12 @@ public final class MainActivity extends MyBaseCompatActivity {
             Data.sMusicItems.clear();
             for (MusicItem item : Data.sMusicItemsBackUp) {
                 String name = item.getMusicName();
-                if (name.toLowerCase().contains(filterStr) || name.toUpperCase().contains(filterStr)) {
+                if (name.toLowerCase().contains(filterStr.toLowerCase()) || name.toUpperCase().contains(filterStr.toUpperCase())) {
                     Data.sMusicItems.add(item);
                 }
+//                if (name.contains(filterStr)) {
+//                    Data.sMusicItems.add(item);
+//                }
             }
             mMusicListFragment.getAdapter().notifyDataSetChanged();
         }
@@ -274,7 +273,7 @@ public final class MainActivity extends MyBaseCompatActivity {
         if (Data.sMusicBinder != null && Values.HAS_PLAYED) {
             Log.d(TAG, "initData: not null");
             if (Data.sMusicBinder.isPlayingMusic()) {
-                setButtonTypePlay();
+                runOnUiThread(() -> mNowPlayingStatusImage.setImageResource(R.drawable.ic_play_arrow_black_24dp));
             }
             setCurrentSongInfo(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, Values.CurrentData.CURRENT_SONG_PATH, Data.sCurrentMusicBitmap, "reload");
         }
@@ -285,7 +284,7 @@ public final class MainActivity extends MyBaseCompatActivity {
      */
     private void initData() {
 
-        mDefaultSpf = PreferenceManager.getDefaultSharedPreferences(this);
+        Data.sActivities.add(this);
 
         new Thread(() -> {
             String tab_1 = getResources().getString(R.string.music);
@@ -401,6 +400,11 @@ public final class MainActivity extends MyBaseCompatActivity {
 
         mNowPlayingBody.setOnClickListener(v -> {
             if (Values.HAS_PLAYED) {
+
+                // FIXME: 2018/11/23 If scrolling, the recyclerView may case a bug from makeSceneTransitionAnimation
+                mMusicListFragment.getRecyclerView().stopScroll();
+                mAlbumListFragment.getRecyclerView().stopScroll();
+
                 ActivityOptionsCompat compat = ActivityOptionsCompat.makeSceneTransitionAnimation(this, mNowPlayingSongImage, getString(R.string.image_trans_album));
                 Intent intent = new Intent(MainActivity.this, MusicDetailActivity.class);
                 intent.putExtra("intent_args", "by_clicked_body");
@@ -476,12 +480,9 @@ public final class MainActivity extends MyBaseCompatActivity {
     }
 
     private void initStyle() {
-
         Utils.Ui.setAppBarColor(this, mAppBarLayout, mToolbar);
         int color = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577"));
         mTabLayout.setBackgroundColor(color);
-
-        int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
     }
 
     /**
@@ -501,24 +502,37 @@ public final class MainActivity extends MyBaseCompatActivity {
 
             if (cover != null) {
                 //color set
-                GlideApp.with(MainActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade()).override(150, 150).into(mNowPlayingSongImage);
+                GlideApp.with(MainActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade()).into(mNowPlayingSongImage);
                 GlideApp.with(MainActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade()).centerCrop().into(mNavHeaderImageView);
 
-                Palette.Builder paletteBuilder = Palette.from(Data.sCurrentMusicBitmap);
-                paletteBuilder.generate(palette -> {
-                    if (palette != null) {
-                        Palette.Swatch vibrant = palette.getVibrantSwatch();
-                        if (!Utils.Ui.isColorLight(vibrant == null ? Color.TRANSPARENT : vibrant.getRgb())) {
-                            mNowPlayingSongText.setTextColor(Data.sDefTextColorStateList);
-                            mNowPlayingSongAlbumText.setTextColor(Data.sDefTextColorStateList);
-                            mNowPlayingStatusImage.setColorFilter(Color.BLACK);
-                        } else {
-                            mNowPlayingSongText.setTextColor(Color.WHITE);
-                            mNowPlayingSongAlbumText.setTextColor(Color.WHITE);
-                            mNowPlayingStatusImage.setColorFilter(Color.WHITE);
-                        }
-                    }
-                });
+//                Palette.Builder paletteBuilder = Palette.from(Data.sCurrentMusicBitmap);
+//                paletteBuilder.generate(palette -> {
+//                    if (palette != null) {
+//                        Palette.Swatch vibrant = palette.getVibrantSwatch();
+//                        if (!Utils.Ui.isColorLight(vibrant == null ? Color.TRANSPARENT : vibrant.getRgb())) {
+//                            mNowPlayingSongText.setTextColor(Data.sDefTextColorStateList);
+//                            mNowPlayingSongAlbumText.setTextColor(Data.sDefTextColorStateList);
+//                            mNowPlayingStatusImage.setColorFilter(Color.BLACK);
+//                        } else {
+//                            mNowPlayingSongText.setTextColor(Color.WHITE);
+//                            mNowPlayingSongAlbumText.setTextColor(Color.WHITE);
+//                            mNowPlayingStatusImage.setColorFilter(Color.WHITE);
+//                        }
+//                    }
+//                });
+
+                int currentBright = Utils.Ui.getBright(cover);
+
+                //InfoBar background color AND text color balance
+                if (currentBright > (255 / 2)) {
+                    mNowPlayingSongText.setTextColor(Data.sDefTextColorStateList);
+                    mNowPlayingSongAlbumText.setTextColor(Data.sDefTextColorStateList);
+                    mNowPlayingStatusImage.setColorFilter(Color.BLACK);
+                } else {
+                    mNowPlayingSongText.setTextColor(Color.WHITE);
+                    mNowPlayingSongAlbumText.setTextColor(Color.WHITE);
+                    mNowPlayingStatusImage.setColorFilter(Color.WHITE);
+                }
 
                 GlideApp.with(MainActivity.this).load(cover)
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
@@ -531,16 +545,8 @@ public final class MainActivity extends MyBaseCompatActivity {
         });
     }
 
-    public void setButtonTypePause() {
-        runOnUiThread(() -> mNowPlayingStatusImage.setImageResource(R.drawable.ic_play_arrow_black_24dp));
-    }
-
-    public void setButtonTypePlay() {
-        runOnUiThread(() -> mNowPlayingStatusImage.setImageResource(R.drawable.ic_pause_white_24dp));
-    }
-
-    public void setToolbarSubTitle(String text) {
-        mToolbar.setSubtitle(text);
+    public NotLeakHandler getHandler() {
+        return mHandler;
     }
 
     /**
@@ -550,7 +556,7 @@ public final class MainActivity extends MyBaseCompatActivity {
         return mFragmentList;
     }
 
-    class NotLeakHandler extends Handler {
+    public class NotLeakHandler extends Handler {
         @SuppressWarnings("unused")
         private WeakReference<MainActivity> mWeakReference;
 
@@ -584,6 +590,23 @@ public final class MainActivity extends MyBaseCompatActivity {
                             Values.BIND_SERVICE = true;
                         });
                     }
+                }
+                break;
+
+                case Values.HandlerWhat.INIT_MUSIC_LIST: {
+                    mWeakReference.get().runOnUiThread(() -> mToolbar.setSubtitle(Data.sMusicItems.size() + " Songs"));
+                }
+                break;
+
+                case Values.HandlerWhat.SET_MAIN_BUTTON_PLAY: {
+                    runOnUiThread(() -> mNowPlayingStatusImage.setImageResource(R.drawable.ic_pause_white_24dp));
+                    Log.d(TAG, "handleMessage: do pause");
+                }
+                break;
+
+                case Values.HandlerWhat.SET_MAIN_BUTTON_PAUSE: {
+                    runOnUiThread(() -> mNowPlayingStatusImage.setImageResource(R.drawable.ic_play_arrow_black_24dp));
+                    Log.d(TAG, "handleMessage: do play");
                 }
                 break;
                 default:

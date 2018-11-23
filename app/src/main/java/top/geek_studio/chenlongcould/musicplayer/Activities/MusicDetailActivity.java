@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月23日 11:17:30
- * 上次修改时间：2018年11月23日 10:51:01
+ * 当前修改时间：2018年11月23日 16:43:35
+ * 上次修改时间：2018年11月23日 16:17:50
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -35,7 +35,6 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -56,6 +55,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
@@ -157,7 +157,6 @@ public final class MusicDetailActivity extends MyBaseActivity {
         } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }
-
 
         mHandlerThread = new HandlerThread("Handler Thread in MusicDetailActivity");
         mHandlerThread.start();
@@ -398,6 +397,22 @@ public final class MusicDetailActivity extends MyBaseActivity {
 
         mPlayButtonAnimationSet.addAnimation(mPlayButtonRotationAnimation);
         mPlayButtonAnimationSet.addAnimation(mPlayButtonScaleAnimation);
+        mPlayButtonAnimationSet.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                showToolbar();
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
 
         mPlayButton.setAnimation(mPlayButtonAnimationSet);
 
@@ -421,6 +436,50 @@ public final class MusicDetailActivity extends MyBaseActivity {
         // TODO: 2018/11/11 more animation... such as AlbumCover (in MusicDetailActivity)
     }
 
+    private void showToolbar() {
+        HIDE_TOOLBAR = false;
+        ValueAnimator anim = ValueAnimator.ofFloat(0, 1f);
+        anim.setDuration(300);
+        anim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mAppBarLayout.clearAnimation();
+            }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mAppBarLayout.setVisibility(View.VISIBLE);
+            }
+        });
+        anim.addUpdateListener(animation1 -> mAppBarLayout.setAlpha((Float) animation1.getAnimatedValue()));
+        anim.start();
+    }
+
+    private void hideToolbar() {
+        HIDE_TOOLBAR = true;
+        AlphaAnimation temp = new AlphaAnimation(1f, 0f);
+        temp.setDuration(300);
+        temp.setFillAfter(false);
+        temp.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                mAppBarLayout.clearAnimation();
+                mAppBarLayout.setAlpha(0f);
+                mAppBarLayout.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        mAppBarLayout.startAnimation(temp);
+    }
+
     private void initView() {
         findView();
 
@@ -428,6 +487,9 @@ public final class MusicDetailActivity extends MyBaseActivity {
 
         //load animations...
         initAnimation();
+
+        mAppBarLayout.setVisibility(View.GONE);
+        HIDE_TOOLBAR = true;
 
         mToolbar.setOnMenuItemClickListener(menuItem -> {
             switch (menuItem.getItemId()) {
@@ -525,46 +587,9 @@ public final class MusicDetailActivity extends MyBaseActivity {
         mMusicAlbumImage.setOnClickListener(v -> {
 
             if (HIDE_TOOLBAR) {
-                HIDE_TOOLBAR = false;
-                ValueAnimator anim = ValueAnimator.ofFloat(0, 1f);
-                anim.setDuration(300);
-                anim.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mAppBarLayout.clearAnimation();
-                    }
-
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        mAppBarLayout.setVisibility(View.VISIBLE);
-                    }
-                });
-                anim.addUpdateListener(animation -> mAppBarLayout.setAlpha((Float) animation.getAnimatedValue()));
-                anim.start();
+                showToolbar();
             } else {
-                HIDE_TOOLBAR = true;
-                AlphaAnimation temp = new AlphaAnimation(1f, 0f);
-                temp.setDuration(300);
-                temp.setFillAfter(false);
-                temp.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-                        Log.d(TAG, "onAnimationStart: start 2");
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        mAppBarLayout.clearAnimation();
-                        mAppBarLayout.setAlpha(0f);
-                        mAppBarLayout.setVisibility(View.GONE);
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
-                });
-                mAppBarLayout.startAnimation(temp);
+                hideToolbar();
             }
         });
 
@@ -719,7 +744,7 @@ public final class MusicDetailActivity extends MyBaseActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
-                mMainActivity.setButtonTypePlay();
+                Utils.HandlerSend.sendToMain(Values.HandlerWhat.SET_MAIN_BUTTON_PLAY);
                 musicDetailActivity.setButtonTypePlay();
 
                 Data.sMusicBinder.seekTo(seekBar.getProgress());
@@ -737,9 +762,7 @@ public final class MusicDetailActivity extends MyBaseActivity {
             }
         });
 
-        mNextButton.setOnClickListener(v -> {
-            Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, 6);
-        });
+        mNextButton.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, 6));
 
         mNextButton.setOnLongClickListener(v -> {
             Values.BUTTON_PRESSED = true;
@@ -757,9 +780,7 @@ public final class MusicDetailActivity extends MyBaseActivity {
             return true;
         });
 
-        mPreviousButton.setOnClickListener(v -> {
-            Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, 5);
-        });
+        mPreviousButton.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, 5));
 
         mPreviousButton.setOnLongClickListener(v -> {
             int nowPosition = mSeekBar.getProgress() - Data.sMusicBinder.getDuration() / 20;
@@ -899,7 +920,7 @@ public final class MusicDetailActivity extends MyBaseActivity {
                         } else {
                             mWeakReference.get().mSeekBar.setProgress(0);
                         }
-                        SimpleDateFormat sd = new SimpleDateFormat("mm:ss");
+                        SimpleDateFormat sd = new SimpleDateFormat("mm:ss", Locale.CHINESE);
                         mWeakReference.get().mRightTime.setText(String.valueOf(sd.format(new Date(Data.sMusicBinder.getDuration()))));
                         mWeakReference.get().mSeekBar.setMax(Data.sMusicBinder.getDuration());
                     });
@@ -915,7 +936,7 @@ public final class MusicDetailActivity extends MyBaseActivity {
                             } else {
                                 mWeakReference.get().mSeekBar.setProgress(Data.sMusicBinder.getCurrentPosition());
                             }
-                            SimpleDateFormat sd = new SimpleDateFormat("mm:ss");
+                            SimpleDateFormat sd = new SimpleDateFormat("mm:ss", Locale.CHINESE);
                             mWeakReference.get().mLeftTime.setText(String.valueOf(sd.format(new Date(Data.sMusicBinder.getCurrentPosition()))));
                         }
 
