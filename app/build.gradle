@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：build.gradle  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月21日 20:55:27
- * 上次修改时间：2018年11月21日 19:06:47
+ * 当前修改时间：2018年11月24日 17:50:10
+ * 上次修改时间：2018年11月24日 17:02:05
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -29,6 +29,16 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++11"
+            }
+        }
+        ndk {
+            moduleName "native-lib"
+            stl "stlport_static"
+            ldLibs "log"
+        }
     }
     buildTypes {
         release {
@@ -44,6 +54,11 @@ android {
         }
     }
     buildToolsVersion '28.0.3'
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+        }
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8

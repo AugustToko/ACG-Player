@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月23日 16:43:35
- * 上次修改时间：2018年11月23日 16:43:24
+ * 当前修改时间：2018年11月24日 17:50:10
+ * 上次修改时间：2018年11月24日 14:37:09
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -54,7 +54,7 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 public final class Utils {
 
     public static class Audio {
-        private static MediaMetadataRetriever sMediaMetadataRetriever = new MediaMetadataRetriever();
+        private final static MediaMetadataRetriever sMediaMetadataRetriever = new MediaMetadataRetriever();
 
         /**
          * 检测播放器是否准备完毕 (默认进app 为true)
@@ -412,4 +412,5 @@ public final class Utils {
             context.sendBroadcast(intent, Values.Permission.BROAD_CAST);
         }
     }
+
 }

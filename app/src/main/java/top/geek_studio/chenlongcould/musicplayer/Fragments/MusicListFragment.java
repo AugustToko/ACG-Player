@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月23日 16:43:35
- * 上次修改时间：2018年11月23日 15:00:15
+ * 当前修改时间：2018年11月24日 17:50:10
+ * 上次修改时间：2018年11月24日 17:49:20
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -195,7 +195,15 @@ public final class MusicListFragment extends Fragment {
         }
     }
 
-    class NotLeakHandler extends Handler {
+    public final MyRecyclerAdapter getAdapter() {
+        return adapter;
+    }
+
+    public final RecyclerView getRecyclerView() {
+        return mRecyclerView;
+    }
+
+    final class NotLeakHandler extends Handler {
         @SuppressWarnings("unused")
         private WeakReference<MusicListFragment> mWeakReference;
 
@@ -220,14 +228,6 @@ public final class MusicListFragment extends Fragment {
                     break;
             }
         }
-    }
-
-    public MyRecyclerAdapter getAdapter() {
-        return adapter;
-    }
-
-    public RecyclerView getRecyclerView() {
-        return mRecyclerView;
     }
 
     @Override

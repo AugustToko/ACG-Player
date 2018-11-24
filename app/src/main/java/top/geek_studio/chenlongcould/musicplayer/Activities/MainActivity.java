@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月23日 16:43:35
- * 上次修改时间：2018年11月23日 16:43:25
+ * 当前修改时间：2018年11月24日 17:50:10
+ * 上次修改时间：2018年11月24日 13:35:53
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -100,6 +100,7 @@ public final class MainActivity extends MyBaseCompatActivity {
     @SuppressWarnings("FieldCanBeLocal")
     private Menu mMenu;
 
+    @SuppressWarnings("FieldCanBeLocal")
     private SearchView mSearchView;
 
     /**

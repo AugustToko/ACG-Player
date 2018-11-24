@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SplashActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月20日 21:06:43
- * 上次修改时间：2018年11月20日 21:01:02
+ * 当前修改时间：2018年11月24日 17:50:10
+ * 上次修改时间：2018年11月24日 16:50:43
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -34,7 +34,7 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 
 public final class SplashActivity extends MyBaseActivity {
 
-    private String TAG = "SplashActivity";
+    private static final String TAG = "SplashActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,9 +87,7 @@ public final class SplashActivity extends MyBaseActivity {
                     builder.setTitle("Failed to get permission");
                     builder.setMessage("Try again?");
                     builder.setCancelable(false);
-                    builder.setNegativeButton("Sure!", (dialog, which) -> {
-                        initPermission();
-                    });
+                    builder.setNegativeButton("Sure!", (dialog, which) -> initPermission());
                     builder.setNeutralButton("Cancel!", (dialog, which) -> {
                         dialog.dismiss();
                         finish();

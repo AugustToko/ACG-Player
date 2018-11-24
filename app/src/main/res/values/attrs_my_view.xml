@@ -1,0 +1,19 @@
+<!--
+  ~ *************************************************************
+  ~ 文件：attrs_my_view.xml  模块：app  项目：MusicPlayer
+  ~ 当前修改时间：2018年11月24日 17:50:10
+  ~ 上次修改时间：2018年11月24日 16:52:23
+  ~ 作者：chenlongcould
+  ~ Geek Studio
+  ~ Copyright (c) 2018
+  ~ *************************************************************
+  -->
+
+<resources>
+    <declare-styleable name="MyView">
+        <attr name="exampleString" format="string" />
+        <attr name="exampleDimension" format="dimension" />
+        <attr name="exampleColor" format="color" />
+        <attr name="exampleDrawable" format="color|reference" />
+    </declare-styleable>
+</resources>
