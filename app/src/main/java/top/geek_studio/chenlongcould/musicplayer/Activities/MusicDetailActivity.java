@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月24日 17:50:10
- * 上次修改时间：2018年11月24日 17:49:16
+ * 当前修改时间：2018年11月25日 17:17:32
+ * 上次修改时间：2018年11月25日 17:17:26
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -17,6 +17,7 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -27,6 +28,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
@@ -69,6 +71,8 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 public final class MusicDetailActivity extends MyBaseActivity {
 
     private static final String TAG = "MusicDetailActivity";
+
+    ConstraintLayout.LayoutParams params;
 
     private boolean HAS_BIG = false;
 
@@ -132,6 +136,8 @@ public final class MusicDetailActivity extends MyBaseActivity {
     private ImageButton mMenuButton;
 
     private PopupMenu mPopupMenu;
+    ConstraintLayout.LayoutParams layoutParams;
+    private float mCardSize = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -488,6 +494,9 @@ public final class MusicDetailActivity extends MyBaseActivity {
         //load animations...
         initAnimation();
 
+        params = (ConstraintLayout.LayoutParams) mCardView.getLayoutParams();
+        layoutParams = new ConstraintLayout.LayoutParams(params);
+
         mAppBarLayout.setVisibility(View.GONE);
         HIDE_TOOLBAR = true;
 
@@ -605,7 +614,7 @@ public final class MusicDetailActivity extends MyBaseActivity {
 
         mRandomButton.setOnClickListener(v -> {
             mRandomButton.clearAnimation();
-
+            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(MusicDetailActivity.this).edit();
             if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
                 Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_COMMON;
                 ValueAnimator animator = new ValueAnimator();
@@ -622,6 +631,8 @@ public final class MusicDetailActivity extends MyBaseActivity {
                     public void onAnimationEnd(Animator animation) {
                         mRandomButton.setAlpha(0.3f);
                         mRandomButton.clearAnimation();
+                        editor.putString(Values.SharedPrefsTag.PLAY_TYPE, Values.TYPE_COMMON);
+                        editor.apply();
                     }
 
                     @Override
@@ -651,6 +662,8 @@ public final class MusicDetailActivity extends MyBaseActivity {
                     public void onAnimationEnd(Animator animation) {
                         mRandomButton.setAlpha(1f);
                         mRandomButton.clearAnimation();
+                        editor.putString(Values.SharedPrefsTag.PLAY_TYPE, Values.TYPE_RANDOM);
+                        editor.apply();
                     }
 
                     @Override
@@ -832,8 +845,8 @@ public final class MusicDetailActivity extends MyBaseActivity {
 
     //scroll infoBar Up
     private void infoBodyScrollUp() {
-        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mCardView.getLayoutParams();
-        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(params);
+//        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mCardView.getLayoutParams();
+//        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(params);
 
         DEF_TOP = params.topMargin;
         ValueAnimator anim = ValueAnimator.ofInt(params.topMargin, params.leftMargin * 2);
@@ -850,8 +863,8 @@ public final class MusicDetailActivity extends MyBaseActivity {
 
     //scroll infoBar Down
     private void infoBodyScrollDown() {
-        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mCardView.getLayoutParams();
-        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(params);
+//        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mCardView.getLayoutParams();
+//        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(params);
 
         ValueAnimator anim = ValueAnimator.ofInt(params.topMargin, DEF_TOP);
         anim.setDuration(250);

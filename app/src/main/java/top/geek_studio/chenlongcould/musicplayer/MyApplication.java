@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月23日 11:17:30
- * 上次修改时间：2018年11月23日 11:04:30
+ * 当前修改时间：2018年11月25日 17:17:32
+ * 上次修改时间：2018年11月25日 16:12:34
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -54,6 +54,7 @@ public class MyApplication extends Application {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
         }
 
+        Values.CurrentData.CURRENT_PLAY_TYPE = mDefSharedPreferences.getString(Values.SharedPrefsTag.PLAY_TYPE, Values.TYPE_COMMON);
     }
 
 }

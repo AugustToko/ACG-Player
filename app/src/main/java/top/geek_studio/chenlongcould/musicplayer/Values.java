@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月24日 17:50:10
- * 上次修改时间：2018年11月23日 19:04:07
+ * 当前修改时间：2018年11月25日 17:17:32
+ * 上次修改时间：2018年11月25日 16:10:38
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -104,6 +104,7 @@ public final class Values {
         public static final String PLAY_LIST_SPF_NAME_MY_FAVOURITE = "PLAY_LIST_SPF_NAME_MY_FAVOURITE";
         public static final String DETAIL_BG_STYLE = "DETAIL_BG_STYLE";
         public static final String AUTO_NIGHT_MODE = "AUTO_NIGHT_MODE";
+        public volatile static String PLAY_TYPE = "COMMON";
     }
 
     /**

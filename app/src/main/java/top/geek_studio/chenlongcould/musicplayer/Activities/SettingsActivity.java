@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月24日 17:50:10
- * 上次修改时间：2018年11月23日 19:04:08
+ * 当前修改时间：2018年11月25日 17:17:32
+ * 上次修改时间：2018年11月25日 14:05:36
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -154,6 +154,9 @@ public class SettingsActivity extends MyBaseActivity {
         mToolbar.setOnMenuItemClickListener(menuItem -> {
             switch (menuItem.getItemId()) {
                 case R.id.menu_toolbar_settings_reset: {
+
+                    Values.STYLE_CHANGED = true;
+
                     SharedPreferences.Editor editor = mDefPrefs.edit();
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         editor.putInt(Values.ColorInt.ACCENT_COLOR, getResources().getColor(R.color.colorAccent, getTheme()));
