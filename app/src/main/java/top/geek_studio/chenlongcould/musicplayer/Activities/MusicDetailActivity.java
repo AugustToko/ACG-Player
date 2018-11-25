@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月25日 17:17:32
- * 上次修改时间：2018年11月25日 17:17:26
+ * 当前修改时间：2018年11月25日 18:47:45
+ * 上次修改时间：2018年11月25日 18:47:39
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -18,7 +18,6 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -32,7 +31,6 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
-import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -72,7 +70,6 @@ public final class MusicDetailActivity extends MyBaseActivity {
 
     private static final String TAG = "MusicDetailActivity";
 
-    ConstraintLayout.LayoutParams params;
 
     private boolean HAS_BIG = false;
 
@@ -122,8 +119,6 @@ public final class MusicDetailActivity extends MyBaseActivity {
 
     private AppBarLayout mAppBarLayout;
 
-    private ConstraintLayout mScrollBody;
-
     private TextView mLeftTime;
 
     private TextView mRightTime;
@@ -136,8 +131,9 @@ public final class MusicDetailActivity extends MyBaseActivity {
     private ImageButton mMenuButton;
 
     private PopupMenu mPopupMenu;
-    ConstraintLayout.LayoutParams layoutParams;
-    private float mCardSize = 0;
+
+    private ConstraintLayout.LayoutParams layoutParams;
+    private ConstraintLayout.LayoutParams params;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -185,7 +181,7 @@ public final class MusicDetailActivity extends MyBaseActivity {
 
     @Override
     protected void onResume() {
-        if (Values.Style.STYLE_CHANGED) {
+        if (Values.Style.COLOR_CHANGED) {
             recreate();
         }
         super.onResume();
@@ -812,8 +808,7 @@ public final class MusicDetailActivity extends MyBaseActivity {
     }
 
     private void initStyle() {
-        int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        if (currentNightMode == AppCompatDelegate.MODE_NIGHT_YES) {
+        if (Values.Style.AUTO_NIGHT_MODE) {
             mRecyclerMask.setImageResource(R.drawable.ramp_bg_dark);
         }
     }
@@ -837,7 +832,6 @@ public final class MusicDetailActivity extends MyBaseActivity {
         mRepeatButton = findViewById(R.id.activity_music_detail_image_repeat_button);
         mToolbar = findViewById(R.id.activity_music_detail_toolbar);
         mAppBarLayout = findViewById(R.id.activity_music_detail_appbar);
-        mScrollBody = findViewById(R.id.activity_music_detail_scroll_body);
         mLeftTime = findViewById(R.id.activity_music_detail_left_text);
         mRightTime = findViewById(R.id.activity_music_detail_right_text);
         mRecyclerMask = findViewById(R.id.recycler_mask);

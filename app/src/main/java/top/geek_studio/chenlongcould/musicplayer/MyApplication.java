@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月25日 17:17:32
- * 上次修改时间：2018年11月25日 16:12:34
+ * 当前修改时间：2018年11月25日 18:47:45
+ * 上次修改时间：2018年11月25日 18:46:37
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -26,32 +26,15 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-//        Configuration config = getResources().getConfiguration();
-//        config.locale = Locale.SIMPLIFIED_CHINESE;
-//        DisplayMetrics dm = getResources().getDisplayMetrics();
-//        getResources().updateConfiguration(config, dm);
         Log.d(TAG, "onCreate: ");
 
         mDefSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String DETAIL_BG_STYLE = mDefSharedPreferences.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_BLUR);
-        if (DETAIL_BG_STYLE != null) {
-            switch (DETAIL_BG_STYLE) {
-                case Values.Style.STYLE_BACKGROUND_BLUR: {
-                    Values.Style.DETAIL_BACKGROUND = Values.Style.STYLE_BACKGROUND_BLUR;
-                }
-                break;
 
-                case Values.Style.STYLE_BACKGROUND_AUTO_COLOR: {
-                    Values.Style.DETAIL_BACKGROUND = Values.Style.STYLE_BACKGROUND_AUTO_COLOR;
-                }
-            }
-        } else {
-            Values.Style.DETAIL_BACKGROUND = Values.Style.STYLE_BACKGROUND_BLUR;
-        }
+        Values.Style.DETAIL_BACKGROUND = mDefSharedPreferences.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_BLUR);
 
         if (mDefSharedPreferences.getBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false)) {
             Values.Style.AUTO_NIGHT_MODE = true;
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         }
 
         Values.CurrentData.CURRENT_PLAY_TYPE = mDefSharedPreferences.getString(Values.SharedPrefsTag.PLAY_TYPE, Values.TYPE_COMMON);

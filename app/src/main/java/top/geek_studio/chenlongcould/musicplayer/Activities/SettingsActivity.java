@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月25日 17:17:32
- * 上次修改时间：2018年11月25日 14:05:36
+ * 当前修改时间：2018年11月25日 18:47:45
+ * 上次修改时间：2018年11月25日 18:47:39
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -21,6 +21,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.ColorInt;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.widget.ImageView;
 import android.widget.Switch;
@@ -53,7 +54,11 @@ public class SettingsActivity extends MyBaseActivity {
 
     private ConstraintLayout mAutoNightOpt;
 
+    private ConstraintLayout mStyleOpt;
+
     private Switch mNightSwitch;
+
+    private Switch mStyleSwitch;
 
     private ImageView mPrimaryImage;
 
@@ -146,6 +151,8 @@ public class SettingsActivity extends MyBaseActivity {
         mAppBarLayout = findViewById(R.id.activity_settings_appbar);
         mAutoNightOpt = findViewById(R.id.night_style);
         mNightSwitch = findViewById(R.id.activity_settings_night_switch);
+        mStyleOpt = findViewById(R.id.detail_background_style);
+        mStyleSwitch = findViewById(R.id.activity_settings_style_switch);
 
         mToolbar.inflateMenu(R.menu.menu_toolbar_settings);
 
@@ -261,12 +268,42 @@ public class SettingsActivity extends MyBaseActivity {
             if (isChecked) {
                 editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, true);
                 Values.Style.AUTO_NIGHT_MODE = true;
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             } else {
                 editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false);
                 Values.Style.AUTO_NIGHT_MODE = false;
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
             }
             editor.apply();
         });
+
+        mStyleOpt.setOnClickListener(v -> {
+            SharedPreferences.Editor editor = mDefPrefs.edit();
+            if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
+                mStyleSwitch.setChecked(false);
+                editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_AUTO_COLOR);
+                Values.Style.DETAIL_BACKGROUND = Values.Style.STYLE_BACKGROUND_AUTO_COLOR;
+            } else {
+                mStyleSwitch.setChecked(true);
+                editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_BLUR);
+                Values.Style.DETAIL_BACKGROUND = Values.Style.STYLE_BACKGROUND_BLUR;
+            }
+            editor.apply();
+        });
+
+        mStyleSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            SharedPreferences.Editor editor = mDefPrefs.edit();
+            mStyleSwitch.setChecked(isChecked);
+            if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
+                mStyleSwitch.setChecked(false);
+                editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_AUTO_COLOR);
+            } else {
+                mStyleSwitch.setChecked(true);
+                editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_BLUR);
+            }
+            editor.apply();
+        });
+
     }
 
     private void clearAnimation() {
@@ -285,6 +322,12 @@ public class SettingsActivity extends MyBaseActivity {
         Utils.Ui.setAppBarColor(this, mAppBarLayout, mToolbar);
 
         mNightSwitch.setChecked(Values.Style.AUTO_NIGHT_MODE);
+
+        if (mDefPrefs.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_AUTO_COLOR).equals(Values.Style.STYLE_BACKGROUND_AUTO_COLOR)) {
+            mStyleSwitch.setChecked(false);
+        } else {
+            mStyleSwitch.setChecked(true);
+        }
     }
 
     @Override

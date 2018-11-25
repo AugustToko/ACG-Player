@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月24日 17:50:10
- * 上次修改时间：2018年11月24日 13:35:53
+ * 当前修改时间：2018年11月25日 18:47:45
+ * 上次修改时间：2018年11月25日 18:37:53
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -403,8 +403,8 @@ public final class MainActivity extends MyBaseCompatActivity {
             if (Values.HAS_PLAYED) {
 
                 // FIXME: 2018/11/23 If scrolling, the recyclerView may case a bug from makeSceneTransitionAnimation
-                mMusicListFragment.getRecyclerView().stopScroll();
-                mAlbumListFragment.getRecyclerView().stopScroll();
+                if (mMusicListFragment != null) mMusicListFragment.getRecyclerView().stopScroll();
+                if (mAlbumListFragment != null) mAlbumListFragment.getRecyclerView().stopScroll();
 
                 ActivityOptionsCompat compat = ActivityOptionsCompat.makeSceneTransitionAnimation(this, mNowPlayingSongImage, getString(R.string.image_trans_album));
                 Intent intent = new Intent(MainActivity.this, MusicDetailActivity.class);

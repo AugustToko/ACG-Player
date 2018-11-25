@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月24日 17:50:10
- * 上次修改时间：2018年11月24日 14:37:09
+ * 当前修改时间：2018年11月25日 18:47:45
+ * 上次修改时间：2018年11月25日 18:47:39
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -27,8 +27,8 @@ import android.media.MediaMetadataRetriever;
 import android.preference.PreferenceManager;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
+import android.support.v7.graphics.Palette;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -63,6 +63,7 @@ public final class Utils {
 
         /**
          * 获取封面
+         *
          * @param mediaUri mp3 path
          */
         @NonNull
@@ -277,23 +278,44 @@ public final class Utils {
             return bright / count;
         }
 
+        public static boolean ANIMATION_IN_DETAIL_DONE = true;
+
         /**
          * 设置背景与动画 (blur style)
          */
-        public static void setBlurEffect(@NonNull Activity context, @Nullable byte[] bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundBef) {
-            primaryBackground.setVisibility(View.VISIBLE);
+        public static void setBlurEffect(@NonNull Activity context, @NonNull byte[] bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundBef) {
             context.runOnUiThread(() -> {
-                primaryBackgroundBef.post(() -> GlideApp.with(context)
-                        .load(bitmap)
-                        .dontAnimate()
-                        .apply(bitmapTransform(new BlurTransformation(20, 30)))
-                        .into(primaryBackgroundBef));
+                ANIMATION_IN_DETAIL_DONE = false;
+                primaryBackground.setVisibility(View.VISIBLE);
+
+                if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
+                    Log.d(Values.TAG_UNIVERSAL_ONE, "setBlurEffect: is blur");
+                    primaryBackgroundBef.post(() -> GlideApp.with(context)
+                            .load(bitmap)
+                            .dontAnimate()
+                            .apply(bitmapTransform(new BlurTransformation(20, 30)))
+                            .into(primaryBackgroundBef));
+                } else {
+                    Palette.from(BitmapFactory.decodeByteArray(bitmap, 0, bitmap.length)).generate(p -> {
+                        // Use generated instance
+//                            primaryBackgroundBef.post(() -> GlideApp.with(context)
+//                                    .load()
+//                                    .dontAnimate()
+//                                    .apply(bitmapTransform(new BlurTransformation(20, 30)))
+//                                    .into(primaryBackgroundBef));
+                        if (p != null) {
+                            primaryBackgroundBef.setBackgroundColor(p.getVibrantColor(Color.TRANSPARENT));
+                        }
+                    });
+
+                }
 
                 primaryBackgroundBef.post(() -> {
                     Animator animator = ViewAnimationUtils.createCircularReveal(
                             primaryBackgroundBef, primaryBackgroundBef.getWidth() / 2, 170,
                             0,
                             (float) Math.hypot(primaryBackgroundBef.getWidth(), primaryBackgroundBef.getHeight()));
+
                     animator.setInterpolator(new AccelerateInterpolator());
                     animator.setDuration(700);
                     animator.addListener(new Animator.AnimatorListener() {
@@ -304,12 +326,22 @@ public final class Utils {
 
                         @Override
                         public void onAnimationEnd(Animator animation) {
-                            GlideApp.with(context)
-                                    .load(bitmap)
-                                    .dontAnimate()
-                                    .apply(bitmapTransform(new BlurTransformation(20, 30)))
-                                    .into(primaryBackground);
+                            if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
+                                GlideApp.with(context)
+                                        .load(bitmap)
+                                        .dontAnimate()
+                                        .apply(bitmapTransform(new BlurTransformation(20, 30)))
+                                        .into(primaryBackground);
+                            } else {
+                                Palette.from(BitmapFactory.decodeByteArray(bitmap, 0, bitmap.length)).generate(p -> {
+                                    if (p != null) {
+                                        primaryBackground.setBackgroundColor(p.getVibrantColor(Color.TRANSPARENT));
+                                    }
+                                });
+                            }
+
                             primaryBackground.setVisibility(View.GONE);
+                            ANIMATION_IN_DETAIL_DONE = true;
                         }
 
                         @Override
@@ -327,18 +359,40 @@ public final class Utils {
             });
         }
 
-        public static void setBlurEffect(@NonNull Activity context, @Nullable Bitmap bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundBef) {
-            primaryBackground.setVisibility(View.VISIBLE);
+        public static void setBlurEffect(@NonNull Activity context, @NonNull Bitmap bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundBef) {
             context.runOnUiThread(() -> {
-                primaryBackgroundBef.post(() -> GlideApp.with(context)
-                        .load(bitmap)
-                        .dontAnimate()
-                        .apply(bitmapTransform(new BlurTransformation(20, 30)))
-                        .into(primaryBackgroundBef));
+                ANIMATION_IN_DETAIL_DONE = false;
+                primaryBackground.setVisibility(View.VISIBLE);
+
+                if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
+                    Log.d(Values.TAG_UNIVERSAL_ONE, "setBlurEffect: is blur");
+                    primaryBackgroundBef.post(() -> GlideApp.with(context)
+                            .load(bitmap)
+                            .dontAnimate()
+                            .apply(bitmapTransform(new BlurTransformation(20, 30)))
+                            .into(primaryBackgroundBef));
+                } else {
+                    Palette.from(bitmap).generate(p -> {
+                        // Use generated instance
+//                            primaryBackgroundBef.post(() -> GlideApp.with(context)
+//                                    .load()
+//                                    .dontAnimate()
+//                                    .apply(bitmapTransform(new BlurTransformation(20, 30)))
+//                                    .into(primaryBackgroundBef));
+                        if (p != null) {
+                            primaryBackgroundBef.setBackgroundColor(p.getVibrantColor(Color.TRANSPARENT));
+                        }
+                    });
+
+
+                }
 
                 primaryBackgroundBef.post(() -> {
-                    Animator animator = ViewAnimationUtils.createCircularReveal(primaryBackgroundBef, primaryBackgroundBef.getWidth() / 2, 170, 0,
+                    Animator animator = ViewAnimationUtils.createCircularReveal(
+                            primaryBackgroundBef, primaryBackgroundBef.getWidth() / 2, 170,
+                            0,
                             (float) Math.hypot(primaryBackgroundBef.getWidth(), primaryBackgroundBef.getHeight()));
+
                     animator.setInterpolator(new AccelerateInterpolator());
                     animator.setDuration(700);
                     animator.addListener(new Animator.AnimatorListener() {
@@ -349,12 +403,22 @@ public final class Utils {
 
                         @Override
                         public void onAnimationEnd(Animator animation) {
-                            primaryBackgroundBef.post(() -> GlideApp.with(context)
-                                    .load(bitmap)
-                                    .dontAnimate()
-                                    .apply(bitmapTransform(new BlurTransformation(20, 30)))
-                                    .into(primaryBackground));
+                            if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
+                                GlideApp.with(context)
+                                        .load(bitmap)
+                                        .dontAnimate()
+                                        .apply(bitmapTransform(new BlurTransformation(20, 30)))
+                                        .into(primaryBackground);
+                            } else {
+                                Palette.from(bitmap).generate(p -> {
+                                    if (p != null) {
+                                        primaryBackground.setBackgroundColor(p.getVibrantColor(Color.TRANSPARENT));
+                                    }
+                                });
+                            }
+
                             primaryBackground.setVisibility(View.GONE);
+                            ANIMATION_IN_DETAIL_DONE = true;
                         }
 
                         @Override
@@ -369,9 +433,7 @@ public final class Utils {
                     });
                     animator.start();
                 });
-
             });
-
         }
 
         public static boolean isColorLight(@ColorInt int color) {
@@ -396,6 +458,7 @@ public final class Utils {
 
         /**
          * send broadcast by pause
+         *
          * @param context context
          */
         public static void sendPause(Context context) {

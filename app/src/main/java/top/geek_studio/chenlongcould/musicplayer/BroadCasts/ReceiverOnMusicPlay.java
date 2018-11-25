@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月24日 17:50:10
- * 上次修改时间：2018年11月23日 19:04:07
+ * 当前修改时间：2018年11月25日 18:47:45
+ * 上次修改时间：2018年11月25日 17:47:56
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -18,6 +18,7 @@ import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.os.Build;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.IOException;
 
@@ -37,6 +38,12 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "onReceive: ");
+
+        if (!Utils.Ui.ANIMATION_IN_DETAIL_DONE) {
+            Toast.makeText(context, "Wait...", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         int type = intent.getIntExtra("play_type", -1);
         switch (type) {
             case -1: {

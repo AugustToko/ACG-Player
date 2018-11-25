@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：activity_settings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月23日 11:17:30
-  ~ 上次修改时间：2018年11月23日 11:04:30
+  ~ 当前修改时间：2018年11月25日 18:47:45
+  ~ 上次修改时间：2018年11月25日 18:16:38
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -251,7 +251,7 @@
                     app:layout_constraintTop_toBottomOf="@+id/text_view_5" />
 
                 <Switch
-                    android:id="@+id/switch1"
+                    android:id="@+id/activity_settings_style_switch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
