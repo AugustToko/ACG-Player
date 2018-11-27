@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月23日 11:17:30
-  ~ 上次修改时间：2018年11月22日 14:34:48
+  ~ 当前修改时间：2018年11月28日 07:53:38
+  ~ 上次修改时间：2018年11月28日 07:38:36
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -37,4 +37,5 @@
     <string name="menu_button">Menu Button</string>
     <string name="add_recent">Add Recent</string>
     <string name="my_favourite">My Favourite</string>
+    <string name="licenses">Licenses</string>
 </resources>

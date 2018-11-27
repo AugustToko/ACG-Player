@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：activity_about_lic.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月23日 11:17:30
-  ~ 上次修改时间：2018年11月23日 11:16:10
+  ~ 当前修改时间：2018年11月28日 07:53:38
+  ~ 上次修改时间：2018年11月28日 07:53:10
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -43,7 +43,7 @@
                 android:layout_margin="10dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
-                android:text="许可"
+                android:text="@string/licenses"
                 android:textColor="#000"
                 android:textIsSelectable="true"
                 android:textSize="25sp"
@@ -60,24 +60,16 @@
                 app:layout_constraintBottom_toTopOf="@+id/close_button_activity_lic"
                 app:layout_constraintTop_toBottomOf="@+id/textView3">
 
-                <LinearLayout
+                <ScrollView
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="10dp">
+                    android:layout_height="match_parent">
 
-                    <ScrollView
+                    <TextView
+                        android:id="@+id/show_lic_activity_lic"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        tools:layout_editor_absoluteX="16dp"
-                        tools:layout_editor_absoluteY="463dp">
-
-                        <TextView
-                            android:id="@+id/show_lic_activity_lic"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            tools:text="@string/app_name" />
-                    </ScrollView>
-                </LinearLayout>
+                        android:layout_height="wrap_content"
+                        tools:text="@string/app_name" />
+                </ScrollView>
 
             </android.support.constraint.ConstraintLayout>
 
@@ -88,7 +80,7 @@
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="16dp"
                 android:background="?android:attr/selectableItemBackground"
-                android:text="CLOSE"
+                android:text="@string/close"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 

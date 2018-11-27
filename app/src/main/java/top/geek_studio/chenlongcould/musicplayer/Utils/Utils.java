@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月27日 11:16:33
- * 上次修改时间：2018年11月27日 08:41:28
+ * 当前修改时间：2018年11月28日 07:53:38
+ * 上次修改时间：2018年11月27日 13:57:55
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -30,6 +30,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.graphics.Palette;
+import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -53,6 +54,8 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 @SuppressWarnings("WeakerAccess")
 public final class Utils {
+
+    private static LinearLayoutManager mLinearLayoutManager;
 
     public static class Audio {
         private final static MediaMetadataRetriever sMediaMetadataRetriever = new MediaMetadataRetriever();
@@ -489,4 +492,10 @@ public final class Utils {
         }
     }
 
+    public static LinearLayoutManager getLinearLayoutManager(Context context) {
+        if (mLinearLayoutManager == null) {
+            mLinearLayoutManager = new LinearLayoutManager(context);
+        }
+        return mLinearLayoutManager;
+    }
 }

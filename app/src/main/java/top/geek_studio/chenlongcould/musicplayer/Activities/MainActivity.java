@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月27日 11:16:33
- * 上次修改时间：2018年11月27日 11:14:21
+ * 当前修改时间：2018年11月28日 07:53:38
+ * 上次修改时间：2018年11月28日 07:51:22
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -173,13 +173,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     @Override
     protected void onDestroy() {
         mHandlerThread.quitSafely();
-        if (Values.BIND_SERVICE) {
-            if (Data.sServiceConnection != null && Data.sMusicBinder.isBinderAlive()) {
-                Data.sMusicBinder = null;
-                unbindService(Data.sServiceConnection);
-            }
-            Values.BIND_SERVICE = false;
-        }
         Data.sActivities.remove(this);
         ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(NotificationUtils.ID);
         super.onDestroy();
@@ -273,8 +266,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 if (name.toLowerCase().contains(filterStr.toLowerCase()) || name.toUpperCase().contains(filterStr.toUpperCase())) {
                     Data.sMusicItems.add(item);
                 }
-//                if (name.contains(filterStr)) {
-//                    Data.sMusicItems.add(item);d
             }
             mMusicListFragment.getAdapter().notifyDataSetChanged();
         }
@@ -425,6 +416,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 ActivityOptionsCompat compat = ActivityOptionsCompat.makeSceneTransitionAnimation(this, mNowPlayingSongImage, getString(R.string.image_trans_album));
                 Intent intent = new Intent(MainActivity.this, MusicDetailActivity.class);
                 intent.putExtra("intent_args", "by_clicked_body");
+//                startActivity(intent);
                 startActivity(intent, compat.toBundle());
             } else {
                 Utils.Ui.fastToast(MainActivity.this, "No music playing.");

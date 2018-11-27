@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月27日 11:16:33
- * 上次修改时间：2018年11月27日 10:46:10
+ * 当前修改时间：2018年11月28日 07:53:38
+ * 上次修改时间：2018年11月27日 13:24:32
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -322,6 +322,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             GlideApp.with(mContextWeakReference.get()).load(picData)
                     .transition(DrawableTransitionOptions.withCrossFade())
                     .override(Values.MAX_HEIGHT_AND_WIDTH, Values.MAX_HEIGHT_AND_WIDTH)
+                    .skipMemoryCache(true)
                     .into(mImageViewWeakReference.get());
         }
 

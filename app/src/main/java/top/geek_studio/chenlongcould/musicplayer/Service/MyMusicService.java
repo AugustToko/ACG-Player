@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月27日 11:16:33
- * 上次修改时间：2018年11月27日 11:16:22
+ * 当前修改时间：2018年11月28日 07:53:38
+ * 上次修改时间：2018年11月27日 11:23:29
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -100,12 +100,17 @@ public final class MyMusicService extends Service {
             mp.reset();
             return true;
         });
-        return super.onStartCommand(intent, flags, startId);
+        return START_STICKY;
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         return mMusicBinder;
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        return super.onUnbind(intent);
     }
 
     @Override
@@ -115,6 +120,15 @@ public final class MyMusicService extends Service {
         mMediaPlayer.release();
         if (regReceiver) unregisterReceiver(Data.mMyHeadSetPlugReceiver);
         if (notificationUtils != null) notificationUtils.disMiss(NotificationUtils.ID);
+
+        if (Values.BIND_SERVICE) {
+            if (Data.sServiceConnection != null && Data.sMusicBinder.isBinderAlive()) {
+                Data.sMusicBinder = null;
+                unbindService(Data.sServiceConnection);
+            }
+            Values.BIND_SERVICE = false;
+        }
+
         super.onDestroy();
     }
 

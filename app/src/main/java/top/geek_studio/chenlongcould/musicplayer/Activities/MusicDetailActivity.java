@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月27日 11:16:33
- * 上次修改时间：2018年11月27日 08:41:28
+ * 当前修改时间：2018年11月28日 07:53:38
+ * 上次修改时间：2018年11月28日 07:51:25
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -32,7 +32,6 @@ import android.provider.MediaStore;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.widget.CardView;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -57,7 +56,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
+import top.geek_studio.chenlongcould.musicplayer.Adapters.MyWaitListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
@@ -137,7 +136,6 @@ public final class MusicDetailActivity extends MyBaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setContentView(R.layout.activity_music_detail);
 
         if (Data.sActivities.size() == 0) {
             startActivity(new Intent(MusicDetailActivity.this, SplashActivity.class));
@@ -145,9 +143,11 @@ public final class MusicDetailActivity extends MyBaseActivity {
             return;
         }
 
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_music_detail);
+
         Data.sActivities.add(this);
         mMainActivity = (MainActivity) Data.sActivities.get(0);
-        super.onCreate(savedInstanceState);
 
         //statusBar color
         try {
@@ -181,6 +181,12 @@ public final class MusicDetailActivity extends MyBaseActivity {
 
     @Override
     protected void onResume() {
+        GlideApp.with(this)
+                .load(Data.sCurrentMusicBitmap)
+                .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                .into(mMusicAlbumImage);
+
+
         if (Values.Style.COLOR_CHANGED) {
             recreate();
         }
@@ -207,11 +213,6 @@ public final class MusicDetailActivity extends MyBaseActivity {
 //                }
 //            }
 //        }
-
-        GlideApp.with(this)
-                .load(Data.sCurrentMusicBitmap)
-                .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-                .into(mMusicAlbumImage);
 
         setInfoBar(Data.sCurrentMusicName, Data.sCurrentMusicAlbum);
 
@@ -734,8 +735,8 @@ public final class MusicDetailActivity extends MyBaseActivity {
 
         mMusicListFragment = (MusicListFragment) ((MainActivity) Data.sActivities.get(0)).getFragmentList().get(0);
 
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerView.setAdapter(new MyRecyclerAdapter(Data.sMusicItems, this));
+        mRecyclerView.setLayoutManager(Utils.getLinearLayoutManager(this));
+        mRecyclerView.setAdapter(new MyWaitListAdapter(this, Data.sMusicItems));
 
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -872,16 +873,16 @@ public final class MusicDetailActivity extends MyBaseActivity {
         HAS_BIG = false;
     }
 
-    public void setButtonTypePause() {
+    public final void setButtonTypePause() {
         runOnUiThread(() -> mPlayButton.setImageResource(R.drawable.ic_play_arrow_black_24dp));
     }
 
-    public void setButtonTypePlay() {
+    public final void setButtonTypePlay() {
         runOnUiThread(() -> mPlayButton.setImageResource(R.drawable.ic_pause_black_24dp));
     }
 
     //set infoBar set AlbumImage set PrimaryBackground
-    public void setCurrentSongInfo(String name, String albumName, byte[] cover) {
+    public final void setCurrentSongInfo(String name, String albumName, byte[] cover) {
         runOnUiThread(() -> {
             GlideApp.with(MusicDetailActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME)).centerCrop().into(mMusicAlbumImage);
             Utils.Ui.setBlurEffect(this, cover, mPrimaryBackground, mPrimaryBackground_down);
@@ -890,26 +891,26 @@ public final class MusicDetailActivity extends MyBaseActivity {
     }
 
     //small infoBar
-    public void setInfoBar(String name, String albumName) {
+    public final void setInfoBar(String name, String albumName) {
         mMusicNameText.setText(name);
         mAlbumNameText.setText(albumName);
         mIndexTextView.setText(String.valueOf(Values.CurrentData.CURRENT_MUSIC_INDEX));
         mRecyclerView.scrollToPosition(Values.CurrentData.CURRENT_MUSIC_INDEX);
     }
 
-    public NotLeakHandler getHandler() {
+    public final NotLeakHandler getHandler() {
         return mHandler;
     }
 
-    public RecyclerView getRecyclerView() {
+    public final RecyclerView getRecyclerView() {
         return mRecyclerView;
     }
 
-    public SeekBar getSeekBar() {
+    public final SeekBar getSeekBar() {
         return mSeekBar;
     }
 
-    public class NotLeakHandler extends Handler {
+    public final class NotLeakHandler extends Handler {
         private WeakReference<MusicDetailActivity> mWeakReference;
 
         NotLeakHandler(MusicDetailActivity activity, Looper looper) {

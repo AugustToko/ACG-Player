@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月23日 11:17:30
-  ~ 上次修改时间：2018年11月22日 14:34:48
+  ~ 当前修改时间：2018年11月28日 07:53:38
+  ~ 上次修改时间：2018年11月28日 07:38:36
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -46,4 +46,5 @@
     <string name="style_settings">Style Settings</string>
     <string name="this_is_body_color_like_toolbar">This is body color like toolbar</string>
     <string name="the_accent_color_like_button">The accent color like button</string>
+    <string name="licenses">Licenses</string>
 </resources>
