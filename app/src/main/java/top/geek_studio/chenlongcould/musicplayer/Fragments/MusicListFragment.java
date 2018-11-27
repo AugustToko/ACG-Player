@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月24日 17:50:10
- * 上次修改时间：2018年11月24日 17:49:20
+ * 当前修改时间：2018年11月27日 11:16:33
+ * 上次修改时间：2018年11月27日 11:16:22
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -147,15 +147,13 @@ public final class MusicListFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_music_list_layout, container, false);
-        mRecyclerView = view.findViewById(R.id.recycler_view);
+        findId(view);
+
         mRecyclerView.addItemDecoration(new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL));
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
         mRecyclerView.setHasFixedSize(true);
-
         adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity);
-
         mRecyclerView.setAdapter(adapter);
-
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -180,6 +178,10 @@ public final class MusicListFragment extends Fragment {
 
         CREATE_VIEW_DONE = true;
         return view;
+    }
+
+    private void findId(View view) {
+        mRecyclerView = view.findViewById(R.id.recycler_view);
     }
 
     /**

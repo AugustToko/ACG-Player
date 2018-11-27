@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter2AlbumList.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月24日 17:50:10
- * 上次修改时间：2018年11月23日 19:04:07
+ * 当前修改时间：2018年11月27日 11:16:33
+ * 上次修改时间：2018年11月26日 20:09:01
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
@@ -76,6 +77,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
+        viewHolder.mAlbumText.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
         viewHolder.mAlbumText.setText(mAlbumNameList.get(i).getAlbumName());
         viewHolder.mAlbumImage.setTag(R.string.key_id_1, i);
         new MyTask(viewHolder.mAlbumImage, mContext, i + 1).execute();

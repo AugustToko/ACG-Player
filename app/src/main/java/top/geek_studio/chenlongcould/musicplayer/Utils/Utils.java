@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月25日 18:47:45
- * 上次修改时间：2018年11月25日 18:47:39
+ * 当前修改时间：2018年11月27日 11:16:33
+ * 上次修改时间：2018年11月27日 08:41:28
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -28,6 +28,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
 import android.view.View;
@@ -439,6 +440,18 @@ public final class Utils {
         public static boolean isColorLight(@ColorInt int color) {
             double darkness = 1.0D - (0.299D * (double) Color.red(color) + 0.587D * (double) Color.green(color) + 0.114D * (double) Color.blue(color)) / 255.0D;
             return darkness < 0.4D;
+        }
+
+        public static void upDateStyle(SharedPreferences mDefSharedPreferences) {
+            if (mDefSharedPreferences.getBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false)) {
+                Values.Style.NIGHT_MODE = true;
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                Values.Color.TEXT_COLOR = "#7c7c7c";
+            } else {
+                Values.Style.NIGHT_MODE = false;
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                Values.Color.TEXT_COLOR = "#3c3c3c";
+            }
         }
     }
 

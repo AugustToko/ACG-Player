@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月25日 18:47:45
- * 上次修改时间：2018年11月25日 18:47:39
+ * 当前修改时间：2018年11月27日 11:16:33
+ * 上次修改时间：2018年11月27日 08:59:18
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -29,11 +29,12 @@ import android.widget.Switch;
 import com.jrummyapps.android.colorpicker.ColorPickerDialog;
 import com.jrummyapps.android.colorpicker.ColorPickerDialogListener;
 
+import top.geek_studio.chenlongcould.musicplayer.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
-public class SettingsActivity extends MyBaseActivity {
+public class SettingsActivity extends MyBaseActivity implements IStyle {
 
     public static final String TAG = "SettingsActivity";
 
@@ -251,30 +252,35 @@ public class SettingsActivity extends MyBaseActivity {
 
         mAutoNightOpt.setOnClickListener(v -> {
             SharedPreferences.Editor editor = mDefPrefs.edit();
-            if (Values.Style.AUTO_NIGHT_MODE) {
+            if (Values.Style.NIGHT_MODE) {
                 editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false);
                 mNightSwitch.setChecked(false);
-                Values.Style.AUTO_NIGHT_MODE = false;
+                Values.Style.NIGHT_MODE = false;
             } else {
                 editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, true);
                 mNightSwitch.setChecked(true);
-                Values.Style.AUTO_NIGHT_MODE = true;
+                Values.Style.NIGHT_MODE = true;
             }
             editor.apply();
+
+            Utils.Ui.upDateStyle(mDefPrefs);
+
         });
 
         mNightSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             SharedPreferences.Editor editor = mDefPrefs.edit();
             if (isChecked) {
                 editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, true);
-                Values.Style.AUTO_NIGHT_MODE = true;
+                Values.Style.NIGHT_MODE = true;
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             } else {
                 editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false);
-                Values.Style.AUTO_NIGHT_MODE = false;
+                Values.Style.NIGHT_MODE = false;
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
             }
             editor.apply();
+
+            Utils.Ui.upDateStyle(mDefPrefs);
         });
 
         mStyleOpt.setOnClickListener(v -> {
@@ -315,13 +321,8 @@ public class SettingsActivity extends MyBaseActivity {
     }
 
     private void initPreView() {
-        mPrimaryImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")));
-        mPrimaryDarkImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
-        mAccentImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.ACCENT_COLOR, Color.parseColor("#D81B60")));
-        getWindow().setNavigationBarColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
-        Utils.Ui.setAppBarColor(this, mAppBarLayout, mToolbar);
-
-        mNightSwitch.setChecked(Values.Style.AUTO_NIGHT_MODE);
+        initStyle();
+        mNightSwitch.setChecked(Values.Style.NIGHT_MODE);
 
         if (mDefPrefs.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_AUTO_COLOR).equals(Values.Style.STYLE_BACKGROUND_AUTO_COLOR)) {
             mStyleSwitch.setChecked(false);
@@ -337,5 +338,15 @@ public class SettingsActivity extends MyBaseActivity {
             Utils.Ui.setAppBarColor(this, mAppBarLayout, mToolbar);
             Values.STYLE_CHANGED = false;
         }
+    }
+
+    @Override
+    public void initStyle() {
+        mPrimaryImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")));
+        mPrimaryDarkImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
+        mAccentImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.ACCENT_COLOR, Color.parseColor("#D81B60")));
+        getWindow().setNavigationBarColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
+        Utils.Ui.setAppBarColor(this, mAppBarLayout, mToolbar);
+
     }
 }

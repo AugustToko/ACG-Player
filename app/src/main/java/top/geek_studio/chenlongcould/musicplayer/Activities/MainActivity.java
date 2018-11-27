@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月25日 18:47:45
- * 上次修改时间：2018年11月25日 18:37:53
+ * 当前修改时间：2018年11月27日 11:16:33
+ * 上次修改时间：2018年11月27日 11:14:21
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -56,6 +56,7 @@ import top.geek_studio.chenlongcould.musicplayer.Fragments.AlbumListFragment;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
+import top.geek_studio.chenlongcould.musicplayer.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Service.MyMusicService;
@@ -65,7 +66,7 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
-public final class MainActivity extends MyBaseCompatActivity {
+public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     private static final String TAG = "MainActivity";
 
@@ -110,6 +111,8 @@ public final class MainActivity extends MyBaseCompatActivity {
 
     private AlbumListFragment mAlbumListFragment;
 
+    private PlayListFragment mPlayListFragment;
+
     /**
      * ----------------- playing info ---------------------
      */
@@ -135,6 +138,8 @@ public final class MainActivity extends MyBaseCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Data.sActivities.add(this);
+
         mHandlerThread = new HandlerThread("Handler Thread in MainActivity");
         mHandlerThread.start();
         mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
@@ -144,6 +149,16 @@ public final class MainActivity extends MyBaseCompatActivity {
         initView();
 
         reLoadInfoBar();
+
+        if (savedInstanceState != null) {
+            mViewPager.setCurrentItem(savedInstanceState.getInt("viewpage", 0), true);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt("viewpage", mViewPager.getCurrentItem());
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -159,14 +174,14 @@ public final class MainActivity extends MyBaseCompatActivity {
     protected void onDestroy() {
         mHandlerThread.quitSafely();
         if (Values.BIND_SERVICE) {
-            if (Data.sServiceConnection != null) {
+            if (Data.sServiceConnection != null && Data.sMusicBinder.isBinderAlive()) {
+                Data.sMusicBinder = null;
                 unbindService(Data.sServiceConnection);
             }
             Values.BIND_SERVICE = false;
         }
         Data.sActivities.remove(this);
         ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(NotificationUtils.ID);
-        Log.d(TAG, "onDestroy: ");
         super.onDestroy();
     }
 
@@ -259,8 +274,7 @@ public final class MainActivity extends MyBaseCompatActivity {
                     Data.sMusicItems.add(item);
                 }
 //                if (name.contains(filterStr)) {
-//                    Data.sMusicItems.add(item);
-//                }
+//                    Data.sMusicItems.add(item);d
             }
             mMusicListFragment.getAdapter().notifyDataSetChanged();
         }
@@ -272,7 +286,6 @@ public final class MainActivity extends MyBaseCompatActivity {
      */
     private void reLoadInfoBar() {
         if (Data.sMusicBinder != null && Values.HAS_PLAYED) {
-            Log.d(TAG, "initData: not null");
             if (Data.sMusicBinder.isPlayingMusic()) {
                 runOnUiThread(() -> mNowPlayingStatusImage.setImageResource(R.drawable.ic_play_arrow_black_24dp));
             }
@@ -281,11 +294,9 @@ public final class MainActivity extends MyBaseCompatActivity {
     }
 
     /**
-     * init Something
+     * init fragments
      */
     private void initData() {
-
-        Data.sActivities.add(this);
 
         new Thread(() -> {
             String tab_1 = getResources().getString(R.string.music);
@@ -300,7 +311,8 @@ public final class MainActivity extends MyBaseCompatActivity {
 
             String tab_3 = getResources().getString(R.string.play_list);
             mTitles.add(tab_3);
-            mFragmentList.add(PlayListFragment.newInstance(2));
+            mPlayListFragment = PlayListFragment.newInstance(2);
+            mFragmentList.add(mPlayListFragment);
 
             Message message = Message.obtain();
             Bundle bundle = new Bundle();
@@ -403,8 +415,12 @@ public final class MainActivity extends MyBaseCompatActivity {
             if (Values.HAS_PLAYED) {
 
                 // FIXME: 2018/11/23 If scrolling, the recyclerView may case a bug from makeSceneTransitionAnimation
-                if (mMusicListFragment != null) mMusicListFragment.getRecyclerView().stopScroll();
-                if (mAlbumListFragment != null) mAlbumListFragment.getRecyclerView().stopScroll();
+                if (mMusicListFragment.getRecyclerView() != null) {
+                    mMusicListFragment.getRecyclerView().stopScroll();
+                }
+                if (mAlbumListFragment.getRecyclerView() != null) {
+                    mAlbumListFragment.getRecyclerView().stopScroll();
+                }
 
                 ActivityOptionsCompat compat = ActivityOptionsCompat.makeSceneTransitionAnimation(this, mNowPlayingSongImage, getString(R.string.image_trans_album));
                 Intent intent = new Intent(MainActivity.this, MusicDetailActivity.class);
@@ -480,7 +496,8 @@ public final class MainActivity extends MyBaseCompatActivity {
         mAppBarLayout = findViewById(R.id.activity_main_appbar);
     }
 
-    private void initStyle() {
+    @Override
+    public void initStyle() {
         Utils.Ui.setAppBarColor(this, mAppBarLayout, mToolbar);
         int color = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577"));
         mTabLayout.setBackgroundColor(color);

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月24日 17:50:10
- * 上次修改时间：2018年11月23日 19:04:08
+ * 当前修改时间：2018年11月27日 11:16:33
+ * 上次修改时间：2018年11月27日 10:46:10
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -48,19 +48,22 @@ import top.geek_studio.chenlongcould.musicplayer.Activities.MusicDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
+import top.geek_studio.chenlongcould.musicplayer.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
-public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
+public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter, IStyle {
 
     private List<MusicItem> mMusicItems;
 
     private MainActivity mMainActivity;
 
     private Context mContext;
+
+    private ViewHolder currentBind;
 
     public MyRecyclerAdapter(List<MusicItem> musicItems, Context context) {
         mMusicItems = musicItems;
@@ -237,14 +240,11 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 
         //no crash
-        if (i < 0 || i > mMusicItems.size() && viewHolder.getAdapterPosition() < 0 || viewHolder.getAdapterPosition() > mMusicItems.size()) {
+        if (mMusicItems.size() == 0 || i < 0 || i > mMusicItems.size() && viewHolder.getAdapterPosition() < 0 || viewHolder.getAdapterPosition() > mMusicItems.size()) {
             return;
         }
 
-        //no crash
-        if (mMusicItems.size() == 0) {
-            return;
-        }
+        currentBind = viewHolder;
 
         /* show song name, use songNameList */
         Values.CurrentData.CURRENT_BIND_INDEX_MUSIC_LIST = viewHolder.getAdapterPosition();
@@ -254,13 +254,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         String prefix = mMusicItems.get(i).getMusicPath().substring(mMusicItems.get(i).getMusicPath().lastIndexOf(".") + 1);
         viewHolder.mMusicExtName.setText(prefix);
 
-        //type_background
-        if (prefix.equals("mp3")) {
-            viewHolder.mMusicExtName.setBackgroundResource(R.color.mp3TypeColor);
-        } else {
-            viewHolder.mMusicExtName.setBackgroundColor(Color.CYAN);
-            return;
-        }
+        initStyle();
 
         /*--- 添加标记以便避免ImageView因为ViewHolder的复用而出现混乱 ---*/
         viewHolder.mMusicCloverImage.setTag(R.string.key_id_1, i);
@@ -281,6 +275,25 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
     @Override
     public int getItemCount() {
         return mMusicItems.size();
+    }
+
+    @Override
+    public void initStyle() {
+
+        //type_background
+        if (Values.Style.NIGHT_MODE) {
+            currentBind.mMusicExtName.setBackgroundColor(Color.GRAY);
+        } else {
+            if (currentBind.mMusicExtName.getText().equals("mp3")) {
+                currentBind.mMusicExtName.setBackgroundResource(R.color.mp3TypeColor);
+            } else {
+                currentBind.mMusicExtName.setBackgroundColor(Color.CYAN);
+                return;
+            }
+        }
+
+        //style
+        currentBind.mMusicText.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
     }
 
     static class MyTask extends AsyncTask<Void, Void, byte[]> {

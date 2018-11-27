@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月25日 18:47:45
- * 上次修改时间：2018年11月25日 18:47:39
+ * 当前修改时间：2018年11月27日 11:16:33
+ * 上次修改时间：2018年11月27日 08:41:28
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -70,7 +70,6 @@ public final class MusicDetailActivity extends MyBaseActivity {
 
     private static final String TAG = "MusicDetailActivity";
 
-
     private boolean HAS_BIG = false;
 
     private int DEF_TOP = -1;
@@ -133,6 +132,7 @@ public final class MusicDetailActivity extends MyBaseActivity {
     private PopupMenu mPopupMenu;
 
     private ConstraintLayout.LayoutParams layoutParams;
+
     private ConstraintLayout.LayoutParams params;
 
     @Override
@@ -808,7 +808,7 @@ public final class MusicDetailActivity extends MyBaseActivity {
     }
 
     private void initStyle() {
-        if (Values.Style.AUTO_NIGHT_MODE) {
+        if (Values.Style.NIGHT_MODE) {
             mRecyclerMask.setImageResource(R.drawable.ramp_bg_dark);
         }
     }
