@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 16:12:44
- * 上次修改时间：2018年11月28日 15:39:49
+ * 当前修改时间：2018年11月28日 20:02:19
+ * 上次修改时间：2018年11月28日 17:38:13
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -202,6 +202,7 @@ public final class MusicDetailActivity extends MyBaseActivity implements IStyle 
         //init view data
         mHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
         mHandler.sendEmptyMessage(Values.HandlerWhat.SEEK_BAR_UPDATE);
+        mHandler.sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
 
 //        Intent intent = getIntent();
 //        if (intent != null) {
@@ -596,7 +597,6 @@ public final class MusicDetailActivity extends MyBaseActivity implements IStyle 
         });
 
         mRepeatButton.setOnLongClickListener(v -> {
-            // TODO: 2018/11/11 repeat mode...
             AlertDialog.Builder builder = new AlertDialog.Builder(MusicDetailActivity.this);
             builder.setTitle("Repeater");
             builder.setMessage("Building...");
@@ -897,7 +897,6 @@ public final class MusicDetailActivity extends MyBaseActivity implements IStyle 
         mAlbumNameText.setText(albumName);
         mIndexTextView.setText(String.valueOf(Values.CurrentData.CURRENT_MUSIC_INDEX));
 
-        mHandler.sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
     }
 
     public final NotLeakHandler getHandler() {
@@ -956,7 +955,7 @@ public final class MusicDetailActivity extends MyBaseActivity implements IStyle 
                 }
                 break;
                 case Values.HandlerWhat.SET_SEEK_STYLE: {
-                    // TODO: 2018/11/28 need??
+                    // TODO: 2018/11/28 need?? ------yes!
                 }
                 break;
                 case Values.HandlerWhat.RECYCLER_SCROLL: {

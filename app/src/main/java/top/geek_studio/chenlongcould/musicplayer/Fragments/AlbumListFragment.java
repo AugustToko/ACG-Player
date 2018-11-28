@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 16:12:44
- * 上次修改时间：2018年11月28日 16:12:22
+ * 当前修改时间：2018年11月28日 20:02:19
+ * 上次修改时间：2018年11月28日 20:02:10
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -42,6 +42,9 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
 public final class AlbumListFragment extends Fragment {
+
+    public static final String TAG = "AlbumListFragment";
+
     private static boolean sIsScrolling = false;
 
     private RecyclerView mRecyclerView;

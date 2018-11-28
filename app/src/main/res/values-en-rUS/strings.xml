@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月28日 16:12:44
-  ~ 上次修改时间：2018年11月28日 11:21:09
+  ~ 当前修改时间：2018年11月28日 20:02:19
+  ~ 上次修改时间：2018年11月28日 17:11:55
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -45,4 +45,7 @@
     <string name="auto_night_mode">Night Mode</string>
     <string name="set_app_background_color_dark">Set app background color dark</string>
     <string name="next_play">Next Play</string>
+    <string name="album_layout">Album Layout</string>
+    <string name="linear">Linear</string>
+    <string name="grid">Grid</string>
 </resources>

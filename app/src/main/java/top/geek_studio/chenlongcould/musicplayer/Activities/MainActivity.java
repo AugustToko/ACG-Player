@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 16:12:44
- * 上次修改时间：2018年11月28日 16:12:22
+ * 当前修改时间：2018年11月28日 20:02:19
+ * 上次修改时间：2018年11月28日 20:02:10
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -13,6 +13,7 @@ package top.geek_studio.chenlongcould.musicplayer.Activities;
 
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -51,6 +52,7 @@ import java.util.List;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyPagerAdapter;
+import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter2AlbumList;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.AlbumListFragment;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
@@ -58,6 +60,7 @@ import top.geek_studio.chenlongcould.musicplayer.Fragments.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
+import top.geek_studio.chenlongcould.musicplayer.MyApplication;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Service.MyMusicService;
 import top.geek_studio.chenlongcould.musicplayer.Utils.NotificationUtils;
@@ -207,9 +210,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mSearchView.setIconifiedByDefault(true);
         mSearchView.setQueryHint("Enter music name...");
 
-        //默认刚进去就打开搜索栏
         mSearchView.setIconified(true);
-        //设置提交按钮是否可见
         mSearchView.setSubmitButtonEnabled(false);
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -242,6 +243,22 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 Utils.Audio.shufflePlayback();
             }
             break;
+
+            case R.id.menu_toolbar_linear: {
+                SharedPreferences.Editor editor = MyApplication.mDefSharedPreferences.edit();
+                editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.LINEAR_TYPE);
+                editor.apply();
+                mPagerAdapter.notifyDataSetChanged();
+            }
+            break;
+
+            case R.id.menu_toolbar_grid: {
+                SharedPreferences.Editor editor = MyApplication.mDefSharedPreferences.edit();
+                editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
+                editor.apply();
+                mPagerAdapter.notifyDataSetChanged();
+            }
+            break;
         }
         return true;
     }
@@ -252,7 +269,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
      * @param filterStr fileName
      */
     private void filterData(String filterStr) {
-        // TODO: 2018/11/19 while in the album page...
+        // TODO: 2018/11/19 searchView while in the album page...
         if (TextUtils.isEmpty(filterStr)) {
             Data.sMusicItems.clear();
             Data.sMusicItems.addAll(Data.sMusicItemsBackUp);
@@ -446,12 +463,28 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 //
 //                mToolbar.setBackgroundColor(evaluate);
 //                mTabLayout.setBackgroundColor(evaluate);
-//                mStatusView.setBackgroundColor(evaluate);
             }
 
             @Override
             public void onPageSelected(int position) {
                 Values.CurrentData.CURRENT_PAGE_INDEX = position;
+                switch (position) {
+                    case 0: {
+                        mMenu.findItem(R.id.menu_toolbar_layout).setVisible(false);
+                        mMenu.findItem(R.id.menu_toolbar_search).setVisible(true);
+                    }
+                    break;
+                    case 1: {
+                        mMenu.findItem(R.id.menu_toolbar_layout).setVisible(true);
+                        mMenu.findItem(R.id.menu_toolbar_search).setVisible(false);
+                    }
+                    break;
+                    case 2: {
+                        mMenu.findItem(R.id.menu_toolbar_layout).setVisible(false);
+                        mMenu.findItem(R.id.menu_toolbar_search).setVisible(false);
+                    }
+                    break;
+                }
             }
 
             @Override
