@@ -1,0 +1,31 @@
+<!--
+  ~ *************************************************************
+  ~ 文件：pref_headers.xml  模块：app  项目：MusicPlayer
+  ~ 当前修改时间：2018年11月28日 16:12:44
+  ~ 上次修改时间：2018年11月28日 10:55:30
+  ~ 作者：chenlongcould
+  ~ Geek Studio
+  ~ Copyright (c) 2018
+  ~ *************************************************************
+  -->
+
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- These settings headers are only used on tablets. -->
+
+    <header
+        android:fragment="top.geek_studio.chenlongcould.musicplayer.Activities.ActivitySets$GeneralPreferenceFragment"
+        android:icon="@drawable/ic_info_black_24dp"
+        android:title="@string/pref_header_general" />
+
+    <header
+        android:fragment="top.geek_studio.chenlongcould.musicplayer.Activities.ActivitySets$NotificationPreferenceFragment"
+        android:icon="@drawable/ic_notifications_black_24dp"
+        android:title="@string/pref_header_notifications" />
+
+    <header
+        android:fragment="top.geek_studio.chenlongcould.musicplayer.Activities.ActivitySets$DataSyncPreferenceFragment"
+        android:icon="@drawable/ic_sync_black_24dp"
+        android:title="@string/pref_header_data_sync" />
+
+</preference-headers>

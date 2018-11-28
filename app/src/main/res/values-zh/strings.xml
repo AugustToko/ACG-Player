@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月28日 07:53:38
-  ~ 上次修改时间：2018年11月28日 07:38:36
+  ~ 当前修改时间：2018年11月28日 16:12:44
+  ~ 上次修改时间：2018年11月28日 11:21:09
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -38,4 +38,9 @@
     <string name="add_recent">最近添加</string>
     <string name="my_favourite">我的最爱</string>
     <string name="licenses">许可</string>
+    <string name="music_detail_background">音乐详情背景</string>
+    <string name="set_background_color_or_image_with_blur">设置背景颜色为单色或模糊专辑封面</string>
+    <string name="auto_night_mode">夜间模式</string>
+    <string name="set_app_background_color_dark">设置背景色为暗色</string>
+    <string name="next_play">下一首播放</string>
 </resources>

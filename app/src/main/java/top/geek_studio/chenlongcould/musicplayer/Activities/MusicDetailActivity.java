@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 07:53:38
- * 上次修改时间：2018年11月28日 07:51:25
+ * 当前修改时间：2018年11月28日 16:12:44
+ * 上次修改时间：2018年11月28日 15:39:49
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -32,6 +32,7 @@ import android.provider.MediaStore;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -61,11 +62,12 @@ import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
+import top.geek_studio.chenlongcould.musicplayer.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
-public final class MusicDetailActivity extends MyBaseActivity {
+public final class MusicDetailActivity extends MyBaseActivity implements IStyle {
 
     private static final String TAG = "MusicDetailActivity";
 
@@ -129,10 +131,6 @@ public final class MusicDetailActivity extends MyBaseActivity {
     private ImageButton mMenuButton;
 
     private PopupMenu mPopupMenu;
-
-    private ConstraintLayout.LayoutParams layoutParams;
-
-    private ConstraintLayout.LayoutParams params;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -491,8 +489,6 @@ public final class MusicDetailActivity extends MyBaseActivity {
         //load animations...
         initAnimation();
 
-        params = (ConstraintLayout.LayoutParams) mCardView.getLayoutParams();
-        layoutParams = new ConstraintLayout.LayoutParams(params);
 
         mAppBarLayout.setVisibility(View.GONE);
         HIDE_TOOLBAR = true;
@@ -682,7 +678,7 @@ public final class MusicDetailActivity extends MyBaseActivity {
         Menu menu = mPopupMenu.getMenu();
 
         //noinspection PointlessArithmeticExpression
-        menu.add(Menu.NONE, Menu.FIRST + 0, 0, "加入播放列表");
+        menu.add(Menu.NONE, Menu.FIRST + 0, 0, getResources().getString(R.string.next_play));
         menu.add(Menu.NONE, Menu.FIRST + 1, 0, "查看专辑");
         menu.add(Menu.NONE, Menu.FIRST + 2, 0, "详细信息");
 
@@ -727,15 +723,14 @@ public final class MusicDetailActivity extends MyBaseActivity {
                 infoBodyScrollUp();
             } else {
                 infoBodyScrollDown();
-
-                mRecyclerView.scrollToPosition(Values.CurrentData.CURRENT_MUSIC_INDEX);
+                mHandler.sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
             }
 
         });
 
         mMusicListFragment = (MusicListFragment) ((MainActivity) Data.sActivities.get(0)).getFragmentList().get(0);
 
-        mRecyclerView.setLayoutManager(Utils.getLinearLayoutManager(this));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(new MyWaitListAdapter(this, Data.sMusicItems));
 
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -808,7 +803,9 @@ public final class MusicDetailActivity extends MyBaseActivity {
 
     }
 
-    private void initStyle() {
+    @Override
+    public void initStyle() {
+        mMusicNameText.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
         if (Values.Style.NIGHT_MODE) {
             mRecyclerMask.setImageResource(R.drawable.ramp_bg_dark);
         }
@@ -840,8 +837,8 @@ public final class MusicDetailActivity extends MyBaseActivity {
 
     //scroll infoBar Up
     private void infoBodyScrollUp() {
-//        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mCardView.getLayoutParams();
-//        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(params);
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mCardView.getLayoutParams();
+        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(params);
 
         DEF_TOP = params.topMargin;
         ValueAnimator anim = ValueAnimator.ofInt(params.topMargin, params.leftMargin * 2);
@@ -858,8 +855,8 @@ public final class MusicDetailActivity extends MyBaseActivity {
 
     //scroll infoBar Down
     private void infoBodyScrollDown() {
-//        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mCardView.getLayoutParams();
-//        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(params);
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mCardView.getLayoutParams();
+        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(params);
 
         ValueAnimator anim = ValueAnimator.ofInt(params.topMargin, DEF_TOP);
         anim.setDuration(250);
@@ -884,7 +881,11 @@ public final class MusicDetailActivity extends MyBaseActivity {
     //set infoBar set AlbumImage set PrimaryBackground
     public final void setCurrentSongInfo(String name, String albumName, byte[] cover) {
         runOnUiThread(() -> {
-            GlideApp.with(MusicDetailActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME)).centerCrop().into(mMusicAlbumImage);
+            GlideApp.with(MusicDetailActivity.this)
+                    .load(cover)
+                    .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                    .centerCrop()
+                    .into(mMusicAlbumImage);
             Utils.Ui.setBlurEffect(this, cover, mPrimaryBackground, mPrimaryBackground_down);
             setInfoBar(name, albumName);
         });
@@ -895,7 +896,8 @@ public final class MusicDetailActivity extends MyBaseActivity {
         mMusicNameText.setText(name);
         mAlbumNameText.setText(albumName);
         mIndexTextView.setText(String.valueOf(Values.CurrentData.CURRENT_MUSIC_INDEX));
-        mRecyclerView.scrollToPosition(Values.CurrentData.CURRENT_MUSIC_INDEX);
+
+        mHandler.sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
     }
 
     public final NotLeakHandler getHandler() {
@@ -952,6 +954,15 @@ public final class MusicDetailActivity extends MyBaseActivity {
                         mWeakReference.get().mHandler.sendEmptyMessageDelayed(Values.HandlerWhat.SEEK_BAR_UPDATE, 500);
                     });
                 }
+                break;
+                case Values.HandlerWhat.SET_SEEK_STYLE: {
+                    // TODO: 2018/11/28 need??
+                }
+                break;
+                case Values.HandlerWhat.RECYCLER_SCROLL: {
+                    mWeakReference.get().runOnUiThread(() -> mRecyclerView.scrollToPosition(Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sMusicItems.size() ? Values.CurrentData.CURRENT_MUSIC_INDEX : Values.CurrentData.CURRENT_MUSIC_INDEX + 1));
+                }
+                break;
                 default:
             }
         }

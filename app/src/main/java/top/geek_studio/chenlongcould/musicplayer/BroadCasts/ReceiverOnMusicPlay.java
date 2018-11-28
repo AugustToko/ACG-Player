@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月25日 18:47:45
- * 上次修改时间：2018年11月25日 17:47:56
+ * 当前修改时间：2018年11月28日 16:12:44
+ * 上次修改时间：2018年11月28日 13:10:41
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -28,6 +28,7 @@ import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
+// TODO: 2018/11/28 need optimization
 public final class ReceiverOnMusicPlay extends BroadcastReceiver {
     private static final String TAG = "ReceiverOnMusicPlay";
 
@@ -50,6 +51,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 return;
             }
 
+            //unUsed
             case 0: {
                 Data.sMusicBinder.playMusic();
             }
@@ -143,6 +145,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                         MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
                         MusicDetailActivity.NotLeakHandler notLeakHandler = musicDetailActivity.getHandler();
                         notLeakHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
+                        notLeakHandler.sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
                     }
 
                 } catch (IOException e) {

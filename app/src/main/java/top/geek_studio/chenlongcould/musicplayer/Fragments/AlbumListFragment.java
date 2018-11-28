@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月24日 17:50:10
- * 上次修改时间：2018年11月23日 19:04:07
+ * 当前修改时间：2018年11月28日 16:12:44
+ * 上次修改时间：2018年11月28日 16:12:22
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -12,17 +12,19 @@
 package top.geek_studio.chenlongcould.musicplayer.Fragments;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -69,7 +71,6 @@ public final class AlbumListFragment extends Fragment {
         mHandlerThread.start();
         mNotLeakHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
         mMainActivity = (MainActivity) getActivity();
-
         //wait MusicFragment data init
         sureGetDataDone();
     }
@@ -78,13 +79,10 @@ public final class AlbumListFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_album_list, container, false);
         mRecyclerView = view.findViewById(R.id.recycler_view);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setHasFixedSize(true);
-        //        needn't
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-//                super.onScrollStateChanged(recyclerView, newState);
                 if (newState == RecyclerView.SCROLL_STATE_DRAGGING || newState == RecyclerView.SCROLL_STATE_SETTLING) {
                     sIsScrolling = true;
                 } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
@@ -142,8 +140,19 @@ public final class AlbumListFragment extends Fragment {
     private void sureCreateViewDone() {
         if (ON_CREATE_VIEW_DONE) {
             mMainActivity.runOnUiThread(() -> {
-                mMyRecyclerAdapter2AlbumList = new MyRecyclerAdapter2AlbumList(mMainActivity, mAlbumList);
-                mRecyclerView.addItemDecoration(new DividerItemDecoration(mMainActivity, DividerItemDecoration.VERTICAL));
+                SharedPreferences mDef = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                int type = mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
+                switch (type) {
+                    case MyRecyclerAdapter2AlbumList.LINEAR_TYPE: {
+                        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                    }
+                    break;
+                    case MyRecyclerAdapter2AlbumList.GRID_TYPE: {
+                        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2)));
+                    }
+                    break;
+                }
+                mMyRecyclerAdapter2AlbumList = new MyRecyclerAdapter2AlbumList(mMainActivity, mAlbumList, type);
                 mRecyclerView.setAdapter(mMyRecyclerAdapter2AlbumList);
             });
         } else {

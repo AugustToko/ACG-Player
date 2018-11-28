@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月27日 11:16:33
- * 上次修改时间：2018年11月27日 11:16:22
+ * 当前修改时间：2018年11月28日 16:12:44
+ * 上次修改时间：2018年11月28日 10:28:31
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
@@ -114,11 +115,18 @@ public final class MusicListFragment extends Fragment {
                     //没有歌曲直接退出app
                     if (cursor.getCount() == 0) {
                         mActivity.runOnUiThread(() -> Utils.Ui.fastToast(mActivity, "Can not find any music!"));
-                        Data.sActivities.get(0).finish();
+                        mActivity.finish();
                         return;
                     }
                     do {
                         String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+
+                        File file = new File(path);
+                        if (!file.exists()) {
+                            Log.e(TAG, "onAttach: song file: " + path + " does not exits, skip this!!!");
+                            break;
+                        }
+
                         String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
                         String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
                         String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
@@ -128,8 +136,16 @@ public final class MusicListFragment extends Fragment {
                         String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
                         long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
 
-                        Data.sMusicItems.add(new MusicItem(name, path, id, albumName, duration, size, artist, (int) addTime));
-                        Data.sMusicItemsBackUp.add(new MusicItem(name, path, id, albumName, duration, size, artist, (int) addTime));
+                        MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
+                                .musicAlbum(albumName)
+                                .addTime((int) addTime)
+                                .artist(artist)
+                                .duration(duration)
+                                .mimeName(mimeType)
+                                .size(size);
+
+                        Data.sMusicItems.add(builder.build());
+                        Data.sMusicItemsBackUp.add(builder.build());
 
                     } while (cursor.moveToNext());
                     cursor.close();
@@ -157,7 +173,6 @@ public final class MusicListFragment extends Fragment {
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-//                super.onScrollStateChanged(recyclerView, newState);
                 if (newState == RecyclerView.SCROLL_STATE_DRAGGING || newState == RecyclerView.SCROLL_STATE_SETTLING) {
                     sIsScrolling = true;
                 } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {

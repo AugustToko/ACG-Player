@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月27日 11:16:33
- * 上次修改时间：2018年11月27日 08:59:18
+ * 当前修改时间：2018年11月28日 16:12:44
+ * 上次修改时间：2018年11月28日 10:49:01
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -44,19 +44,6 @@ public class SettingsActivity extends MyBaseActivity implements IStyle {
 
     public static final int ACCENT = 2;
 
-    @SuppressWarnings("FieldCanBeLocal")
-    private ConstraintLayout mPrimaryOpt;
-
-    @SuppressWarnings("FieldCanBeLocal")
-    private ConstraintLayout mPrimaryDarkOpt;
-
-    @SuppressWarnings("FieldCanBeLocal")
-    private ConstraintLayout mAccentOpt;
-
-    private ConstraintLayout mAutoNightOpt;
-
-    private ConstraintLayout mStyleOpt;
-
     private Switch mNightSwitch;
 
     private Switch mStyleSwitch;
@@ -67,7 +54,6 @@ public class SettingsActivity extends MyBaseActivity implements IStyle {
 
     private ImageView mAccentImage;
 
-    @SuppressWarnings("FieldCanBeLocal")
     private Toolbar mToolbar;
 
     private AppBarLayout mAppBarLayout;
@@ -142,17 +128,17 @@ public class SettingsActivity extends MyBaseActivity implements IStyle {
 
         mDefPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        mPrimaryOpt = findViewById(R.id.primer_color_option);
-        mPrimaryDarkOpt = findViewById(R.id.primer_color_dark_option);
-        mAccentOpt = findViewById(R.id.accent_color_option);
+        final ConstraintLayout primaryOpt = findViewById(R.id.primer_color_option);
+        final ConstraintLayout primaryDarkOpt = findViewById(R.id.primer_color_dark_option);
+        final ConstraintLayout accentOpt = findViewById(R.id.accent_color_option);
         mPrimaryImage = findViewById(R.id.activity_settings_preview_primary);
         mPrimaryDarkImage = findViewById(R.id.activity_settings_preview_primary_dark);
         mAccentImage = findViewById(R.id.activity_settings_preview_acc);
         mToolbar = findViewById(R.id.activity_settings_toolbar);
         mAppBarLayout = findViewById(R.id.activity_settings_appbar);
-        mAutoNightOpt = findViewById(R.id.night_style);
+        final ConstraintLayout autoNightOpt = findViewById(R.id.night_style);
         mNightSwitch = findViewById(R.id.activity_settings_night_switch);
-        mStyleOpt = findViewById(R.id.detail_background_style);
+        final ConstraintLayout styleOpt = findViewById(R.id.detail_background_style);
         mStyleSwitch = findViewById(R.id.activity_settings_style_switch);
 
         mToolbar.inflateMenu(R.menu.menu_toolbar_settings);
@@ -195,9 +181,7 @@ public class SettingsActivity extends MyBaseActivity implements IStyle {
 
                     ValueAnimator animator3 = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.ColorInt.ACCENT_COLOR, Color.parseColor(Values.Color.ACCENT)), Color.parseColor(Values.Color.ACCENT));
                     animator3.setDuration(300);
-                    animator3.addUpdateListener(animation -> {
-                        mAccentImage.setBackgroundColor((Integer) animator3.getAnimatedValue());
-                    });
+                    animator3.addUpdateListener(animation -> mAccentImage.setBackgroundColor((Integer) animator3.getAnimatedValue()));
 
                     animator.start();
                     animator2.start();
@@ -211,7 +195,7 @@ public class SettingsActivity extends MyBaseActivity implements IStyle {
 
         mToolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-        mPrimaryOpt.setOnClickListener(v -> {
+        primaryOpt.setOnClickListener(v -> {
             ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")))
                     .setDialogTitle(R.string.color_picker)
                     .setDialogType(ColorPickerDialog.TYPE_CUSTOM)
@@ -224,7 +208,7 @@ public class SettingsActivity extends MyBaseActivity implements IStyle {
             colorPickerDialog.show(getFragmentManager(), "color-picker-dialog");
         });
 
-        mPrimaryDarkOpt.setOnClickListener(v -> {
+        primaryDarkOpt.setOnClickListener(v -> {
             ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")))
                     .setDialogTitle(R.string.color_picker)
                     .setDialogType(ColorPickerDialog.TYPE_CUSTOM)
@@ -237,7 +221,7 @@ public class SettingsActivity extends MyBaseActivity implements IStyle {
             colorPickerDialog.show(getFragmentManager(), "color-picker-dialog");
         });
 
-        mAccentOpt.setOnClickListener(v -> {
+        accentOpt.setOnClickListener(v -> {
             ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorInt.ACCENT_COLOR, Color.parseColor("#D81B60")))
                     .setDialogTitle(R.string.color_picker)
                     .setDialogType(ColorPickerDialog.TYPE_CUSTOM)
@@ -250,7 +234,7 @@ public class SettingsActivity extends MyBaseActivity implements IStyle {
             colorPickerDialog.show(getFragmentManager(), "color-picker-dialog");
         });
 
-        mAutoNightOpt.setOnClickListener(v -> {
+        autoNightOpt.setOnClickListener(v -> {
             SharedPreferences.Editor editor = mDefPrefs.edit();
             if (Values.Style.NIGHT_MODE) {
                 editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false);
@@ -283,7 +267,7 @@ public class SettingsActivity extends MyBaseActivity implements IStyle {
             Utils.Ui.upDateStyle(mDefPrefs);
         });
 
-        mStyleOpt.setOnClickListener(v -> {
+        styleOpt.setOnClickListener(v -> {
             SharedPreferences.Editor editor = mDefPrefs.edit();
             if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
                 mStyleSwitch.setChecked(false);
@@ -324,7 +308,8 @@ public class SettingsActivity extends MyBaseActivity implements IStyle {
         initStyle();
         mNightSwitch.setChecked(Values.Style.NIGHT_MODE);
 
-        if (mDefPrefs.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_AUTO_COLOR).equals(Values.Style.STYLE_BACKGROUND_AUTO_COLOR)) {
+        //noinspection ConstantConditions
+        if (mDefPrefs.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_BLUR).equals(Values.Style.STYLE_BACKGROUND_AUTO_COLOR)) {
             mStyleSwitch.setChecked(false);
         } else {
             mStyleSwitch.setChecked(true);

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 07:53:38
- * 上次修改时间：2018年11月27日 13:24:32
+ * 当前修改时间：2018年11月28日 16:12:44
+ * 上次修改时间：2018年11月28日 11:21:09
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -164,6 +164,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 //noinspection PointlessArithmeticExpression
                 case Menu.FIRST + 0: {
                     Data.sNextWillPlayIndex = holder.getAdapterPosition();
+                    Data.sHistoryPlayIndex.add(holder.getAdapterPosition());
                 }
                 break;
 
@@ -249,15 +250,15 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         /* show song name, use songNameList */
         Values.CurrentData.CURRENT_BIND_INDEX_MUSIC_LIST = viewHolder.getAdapterPosition();
 
-        viewHolder.mMusicText.setText(mMusicItems.get(viewHolder.getAdapterPosition()).getMusicName());
-        viewHolder.mMusicAlbumName.setText(mMusicItems.get(viewHolder.getAdapterPosition()).getMusicAlbum());
+        viewHolder.mMusicText.setText(mMusicItems.get(i).getMusicName());
+        viewHolder.mMusicAlbumName.setText(mMusicItems.get(i).getMusicAlbum());
         String prefix = mMusicItems.get(i).getMusicPath().substring(mMusicItems.get(i).getMusicPath().lastIndexOf(".") + 1);
         viewHolder.mMusicExtName.setText(prefix);
 
         initStyle();
 
         /*--- 添加标记以便避免ImageView因为ViewHolder的复用而出现混乱 ---*/
-        viewHolder.mMusicCloverImage.setTag(R.string.key_id_1, i);
+        viewHolder.mMusicCloverImage.setTag(R.string.key_id_1, viewHolder.getAdapterPosition());
 
         MyTask task = new MyTask(viewHolder.mMusicCloverImage, mContext, mMusicItems.get(i).getMusicPath(), i);
         task.execute();

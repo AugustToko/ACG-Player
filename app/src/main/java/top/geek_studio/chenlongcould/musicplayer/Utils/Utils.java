@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 07:53:38
- * 上次修改时间：2018年11月27日 13:57:55
+ * 当前修改时间：2018年11月28日 16:12:44
+ * 上次修改时间：2018年11月28日 13:24:49
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -170,8 +170,9 @@ public final class Utils {
                         activity.setCurrentSongInfo(musicName, albumName, path, cover);
                     }
 
+                    MusicDetailActivity musicDetailActivity = null;
                     if (Data.sActivities.size() >= 2) {
-                        MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
+                        musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
                         musicDetailActivity.setCurrentSongInfo(musicName, albumName, getAlbumByteImage(path));
                         //设置seekBar颜色
                         musicDetailActivity.getSeekBar().getThumb().setColorFilter(cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
@@ -183,10 +184,11 @@ public final class Utils {
                         Data.sMusicBinder.playMusic();          //has played, now playing
 
                         if (Data.sActivities.size() >= 2) {
-                            MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
+                            assert musicDetailActivity != null;
                             MusicDetailActivity.NotLeakHandler notLeakHandler = musicDetailActivity.getHandler();
                             //music after mediaPlayer.setDataSource, because of "Values.HandlerWhat.INIT_SEEK_BAR"
                             notLeakHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
+                            notLeakHandler.sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
                         }
 
                     } catch (IOException e) {

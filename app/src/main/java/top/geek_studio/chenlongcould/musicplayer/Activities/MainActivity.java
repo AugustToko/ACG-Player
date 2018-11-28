@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 07:53:38
- * 上次修改时间：2018年11月28日 07:51:22
+ * 当前修改时间：2018年11月28日 16:12:44
+ * 上次修改时间：2018年11月28日 16:12:22
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -232,8 +232,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_toolbar_exit: {
-                unbindService(Data.sServiceConnection);
-                stopService(new Intent(MainActivity.this, MyMusicService.class));
                 finish();
             }
             break;
@@ -383,6 +381,10 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     startActivity(intent);
                 }
                 break;
+                case R.id.debug: {
+                    Intent intent = new Intent(MainActivity.this, ActivitySets.class);
+                    startActivity(intent);
+                }
             }
             return true;
         });
@@ -596,8 +598,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                             //service
                             Intent intent = new Intent(mWeakReference.get(), MyMusicService.class);
                             startService(intent);
-                            bindService(new Intent(mWeakReference.get(), MyMusicService.class), Data.sServiceConnection, BIND_AUTO_CREATE);
-                            Values.BIND_SERVICE = true;
+                            Values.BIND_SERVICE = bindService(new Intent(mWeakReference.get(), MyMusicService.class), Data.sServiceConnection, BIND_AUTO_CREATE);
                         });
                     }
                 }

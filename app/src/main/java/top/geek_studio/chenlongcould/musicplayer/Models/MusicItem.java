@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicItem.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月25日 17:17:32
- * 上次修改时间：2018年11月25日 17:17:26
+ * 当前修改时间：2018年11月28日 16:12:44
+ * 上次修改时间：2018年11月28日 10:34:43
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -27,16 +27,16 @@ public final class MusicItem implements Parcelable {
     private String mArtist;
     private int mAddTime;
 
-    public MusicItem(String musicName, String musicPath, int musicID, String musicAlbum, int duration, int size, String artist, int addTime) {
-        mMusicName = musicName;
-        mMusicPath = musicPath;
-        mMusicID = musicID;
-        mMusicAlbum = musicAlbum;
-        mDuration = duration;
-        mSize = size;
-        mArtist = artist;
-        mAddTime = addTime;
-    }
+//    public MusicItem(String musicName, String musicPath, int musicID, String musicAlbum, int duration, int size, String artist, int addTime) {
+//        mMusicName = musicName;
+//        mMusicPath = musicPath;
+//        mMusicID = musicID;
+//        mMusicAlbum = musicAlbum;
+//        mDuration = duration;
+//        mSize = size;
+//        mArtist = artist;
+//        mAddTime = addTime;
+//    }
 
     public String getMusicName() {
         return mMusicName;
@@ -116,5 +116,76 @@ public final class MusicItem implements Parcelable {
         dest.writeInt(this.mSize);
         dest.writeString(this.mArtist);
         dest.writeInt(this.mAddTime);
+    }
+
+    private MusicItem(Builder builder) {
+        mMusicID = builder.mMusicID;
+        mMusicAlbum = builder.mMusicAlbum;
+        mMusicName = builder.mMusicName;
+        mAddTime = builder.mAddTime;
+        mDuration = builder.mDuration;
+        mSize = builder.mSize;
+        mMusicPath = builder.mMusicPath;
+        mArtist = builder.mArtist;
+        mMusicCover = builder.mMusicCover;
+    }
+
+    public static class Builder {
+        private int mMusicID;
+        private String mMusicName;
+        private String mMusicPath;
+
+        private byte[] mMusicCover = null;
+        private String mMimeName = "null";
+        private String mMusicAlbum = "null";
+        private int mDuration = -1;
+        private int mSize = -1;
+        private String mArtist = "null";
+        private int mAddTime = -1;
+
+        public Builder(int musicID, String musicName, String musicPath) {
+            mMusicID = musicID;
+            mMusicName = musicName;
+            mMusicPath = musicPath;
+        }
+
+        public Builder musicCover(byte[] cover) {
+            mMusicCover = cover;
+            return this;
+        }
+
+        public Builder mimeName(String mime) {
+            mMimeName = mime;
+            return this;
+        }
+
+        public Builder musicAlbum(String album) {
+            mMusicAlbum = album;
+            return this;
+        }
+
+        public Builder duration(int time) {
+            mDuration = time;
+            return this;
+        }
+
+        public Builder size(int size) {
+            mSize = size;
+            return this;
+        }
+
+        public Builder artist(String artist) {
+            mArtist = artist;
+            return this;
+        }
+
+        public Builder addTime(int time) {
+            mAddTime = time;
+            return this;
+        }
+
+        public MusicItem build() {
+            return new MusicItem(this);
+        }
     }
 }

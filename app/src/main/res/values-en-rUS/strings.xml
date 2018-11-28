@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月28日 07:53:38
-  ~ 上次修改时间：2018年11月28日 07:38:36
+  ~ 当前修改时间：2018年11月28日 16:12:44
+  ~ 上次修改时间：2018年11月28日 11:21:09
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -38,4 +38,11 @@
     <string name="add_recent">Add Recent</string>
     <string name="my_favourite">My Favourite</string>
     <string name="licenses">Licenses</string>
+    <string name="music_detail_background">Music Detail Background</string>
+    <string name="set_background_color_or_image_with_blur">Set background color or image with blur</string>
+    <string name="tablayout_auto_color_accent">TabLayout Auto Color Accent</string>
+    <string name="set_tablayout_with_music_cover_accent_color">Set TabLayout with music cover accent color</string>
+    <string name="auto_night_mode">Night Mode</string>
+    <string name="set_app_background_color_dark">Set app background color dark</string>
+    <string name="next_play">Next Play</string>
 </resources>

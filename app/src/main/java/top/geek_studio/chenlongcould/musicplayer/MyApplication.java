@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 07:53:38
- * 上次修改时间：2018年11月28日 07:51:22
+ * 当前修改时间：2018年11月28日 16:12:44
+ * 上次修改时间：2018年11月28日 16:12:22
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -19,6 +19,7 @@ import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import java.io.File;
 import java.util.Locale;
 
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
@@ -33,6 +34,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        //set language
         Resources resources = getResources();
         DisplayMetrics dm = resources.getDisplayMetrics();
         Configuration config = resources.getConfiguration();
@@ -41,11 +43,22 @@ public class MyApplication extends Application {
 
         mDefSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
+        //first or not
+        Values.FIRST_USE = mDefSharedPreferences.getBoolean(Values.SharedPrefsTag.FIRST_USE, true);
+
+        //bg style
         Values.Style.DETAIL_BACKGROUND = mDefSharedPreferences.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_BLUR);
 
+        //update style
         Utils.Ui.upDateStyle(mDefSharedPreferences);
 
+        //set play type
         Values.CurrentData.CURRENT_PLAY_TYPE = mDefSharedPreferences.getString(Values.SharedPrefsTag.PLAY_TYPE, Values.TYPE_COMMON);
+
+        new Thread(() -> {
+            File file = new File(getFilesDir().getPath() + File.separatorChar + "AppData");
+            Log.d(TAG, "run: " + file.getPath());
+        }).start();
     }
 
     @Override

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：AndroidManifest.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月23日 11:17:30
-  ~ 上次修改时间：2018年11月23日 10:21:59
+  ~ 当前修改时间：2018年11月28日 16:12:44
+  ~ 上次修改时间：2018年11月28日 13:35:15
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -27,14 +27,11 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:theme="@style/AppTheme">
-
+        android:theme="@style/GreenTheme">
         <activity
             android:name=".Activities.MainActivity"
             android:launchMode="singleTask"
-            android:theme="@style/AppTheme">
-
-        </activity>
+            android:theme="@style/GreenTheme" />
 
         <service
             android:name=".Service.MyMusicService"
@@ -43,18 +40,18 @@
 
         <activity
             android:name=".Activities.MusicDetailActivity"
-            android:launchMode="singleTop"
             android:exported="false"
+            android:launchMode="singleTop"
             android:theme="@style/MusicDetailTheme" />
-
         <activity
             android:name=".Activities.SplashActivity"
-            android:launchMode="singleTask"
             android:exported="true"
+            android:launchMode="singleTask"
             android:theme="@style/SplashActivityTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -69,7 +66,6 @@
                 <action android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay" />
             </intent-filter>
         </receiver>
-
         <receiver
             android:name=".BroadCasts.ReceiverOnMusicPause"
             android:enabled="true"
@@ -79,7 +75,6 @@
                 <action android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPause" />
             </intent-filter>
         </receiver>
-
         <receiver
             android:name=".BroadCasts.MyHeadSetPlugReceiver"
             android:enabled="true"
@@ -93,21 +88,27 @@
         <activity
             android:name=".Activities.PublicActivity"
             android:exported="false" />
-
         <activity
             android:name=".Activities.AlbumDetailActivity"
             android:exported="false"
             android:launchMode="singleTask" />
-
         <activity
             android:name=".Activities.SettingsActivity"
             android:exported="false"
             android:launchMode="singleTask" />
-
         <activity
             android:name=".Activities.AboutLic"
-            android:launchMode="singleTask"
             android:exported="false"
+            android:launchMode="singleTask"
             android:theme="@style/CommonActivityTheme" />
+        <activity
+            android:name=".Activities.ActivitySets"
+            android:label="@string/title_activity_sets"
+            android:parentActivityName=".Activities.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity" />
+        </activity>
     </application>
+
 </manifest>

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月27日 11:16:33
- * 上次修改时间：2018年11月27日 08:41:28
+ * 当前修改时间：2018年11月28日 16:12:44
+ * 上次修改时间：2018年11月28日 15:44:29
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -13,6 +13,8 @@ package top.geek_studio.chenlongcould.musicplayer;
 
 @SuppressWarnings("WeakerAccess")
 public final class Values {
+
+    public static boolean FIRST_USE = true;
 
     /**
      * final string(s), TAGs
@@ -64,6 +66,9 @@ public final class Values {
         public static final int INIT_PAGE_DONE = 59;
         public static final int SET_MAIN_BUTTON_PLAY = 58;
         public static final int SET_MAIN_BUTTON_PAUSE = 57;
+
+        public static final int RECYCLER_SCROLL = 55001;
+        public static final int SET_SEEK_STYLE = 5002;
     }
 
     public static final class ColorInt {
@@ -106,6 +111,10 @@ public final class Values {
         public static final String DETAIL_BG_STYLE = "DETAIL_BG_STYLE";
         public static final String AUTO_NIGHT_MODE = "NIGHT_MODE";
         public volatile static String PLAY_TYPE = Values.TYPE_COMMON;
+        public static final String FIRST_USE = "FIRST_USE";
+
+        public static final String ALBUM_LIST_DISPLAY_TYPE = "ALBUM_LIST_DISPLAY_TYPE";
+        public static final String ALBUM_LIST_GRID_TYPE_COUNT = "ALBUM_LIST_GRID_TYPE_COUNT";
     }
 
     /**
@@ -124,6 +133,7 @@ public final class Values {
         public static final String PRIMARY_DARK = "#00574B";
         public static final String ACCENT = "#D81B60";
         public static final String NOT_VERY_BLACK = "#1d1d1d";
+        public static final String NOT_VERY_WHITE = "#dddddd";
         public static String TEXT_COLOR = "#3c3c3c";
 
     }

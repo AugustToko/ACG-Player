@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：styles.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月23日 11:17:30
-  ~ 上次修改时间：2018年11月23日 10:33:33
+  ~ 当前修改时间：2018年11月28日 16:12:44
+  ~ 上次修改时间：2018年11月28日 09:35:49
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -18,9 +18,9 @@
         <item name="android:windowContentTransitions">true</item>
     </style>
 
-    <style name="AppTheme" parent="MyBaseTheme">
+    <style name="MyBaseThemeWithAlpha" parent="MyBaseTheme">
         <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
+        <item name="android:windowTranslucentNavigation">true</item>
     </style>
 
     <style name="MusicDetailTheme" parent="MyBaseTheme">
@@ -28,14 +28,14 @@
         <item name="android:windowTranslucentStatus">true</item>
     </style>
 
+    <style name="CommonActivityTheme" parent="MyBaseTheme">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
+    </style>
+
     <style name="SplashActivityTheme" parent="MyBaseTheme">
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
-    </style>
-
-    <style name="CommonActivityTheme" parent="MyBaseTheme">
-        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
-        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
     </style>
 
     <style name="GreenTheme" parent="CommonActivityTheme">

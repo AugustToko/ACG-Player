@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 07:53:38
- * 上次修改时间：2018年11月27日 11:23:29
+ * 当前修改时间：2018年11月28日 16:12:44
+ * 上次修改时间：2018年11月28日 10:34:41
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -122,13 +122,9 @@ public final class MyMusicService extends Service {
         if (notificationUtils != null) notificationUtils.disMiss(NotificationUtils.ID);
 
         if (Values.BIND_SERVICE) {
-            if (Data.sServiceConnection != null && Data.sMusicBinder.isBinderAlive()) {
-                Data.sMusicBinder = null;
-                unbindService(Data.sServiceConnection);
-            }
-            Values.BIND_SERVICE = false;
+            unbindService(Data.sServiceConnection);
+            stopService(new Intent(this, MyMusicService.class));
         }
-
         super.onDestroy();
     }
 

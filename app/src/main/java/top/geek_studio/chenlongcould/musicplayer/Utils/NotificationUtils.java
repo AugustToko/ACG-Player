@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：NotificationUtils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月23日 11:17:30
- * 上次修改时间：2018年11月23日 10:21:59
+ * 当前修改时间：2018年11月28日 16:12:44
+ * 上次修改时间：2018年11月28日 16:12:26
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -109,7 +109,7 @@ public class NotificationUtils extends ContextWrapper {
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setAutoCancel(false)
                 .setOngoing(true)
-                .setColorized(true);
+                .setPriority(Notification.PRIORITY_MAX);
 
 
         if (Data.sMusicBinder.isPlayingMusic()) {
@@ -141,6 +141,10 @@ public class NotificationUtils extends ContextWrapper {
                 .setContentIntent(pi)
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
                 .setDefaults(Notification.DEFAULT_ALL)
+                .setPriority(Notification.PRIORITY_MAX)
+                .setColorized(true)
+                .setColor(Color.argb(1, 1, 1, 1))
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setAutoCancel(false);
         return builder;
     }
