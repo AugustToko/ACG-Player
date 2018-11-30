@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 20:02:19
- * 上次修改时间：2018年11月28日 16:32:47
+ * 当前修改时间：2018年11月30日 20:36:09
+ * 上次修改时间：2018年11月30日 20:35:23
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -13,12 +13,10 @@ package top.geek_studio.chenlongcould.musicplayer.Activities;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.ColorInt;
 import android.support.constraint.ConstraintLayout;
@@ -252,12 +250,9 @@ public class SettingsActivity extends MyBaseActivity implements IStyle {
 
             Utils.Ui.upDateStyle(mDefPrefs);
 
-            new Handler().postDelayed(() -> startActivity(new Intent(SettingsActivity.this, SettingsActivity.class)), 1000);
-
-            finish();
-
         });
 
+        //night opt
         mNightSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             SharedPreferences.Editor editor = mDefPrefs.edit();
             if (isChecked) {
@@ -300,7 +295,6 @@ public class SettingsActivity extends MyBaseActivity implements IStyle {
             }
             editor.apply();
         });
-
     }
 
     private void clearAnimation() {

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Data.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月21日 21:31:36
- * 上次修改时间：2018年11月21日 20:57:58
+ * 当前修改时间：2018年11月30日 20:36:09
+ * 上次修改时间：2018年11月30日 13:07:32
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -48,11 +48,11 @@ public final class Data {
     /**
      * sCurrent DATA
      */
-    public static String sCurrentMusicName = null;
+    public static String sCurrentMusicName = "null";
 
     public static volatile Bitmap sCurrentMusicBitmap = null;
 
-    public static String sCurrentMusicAlbum = null;
+    public static String sCurrentMusicAlbum = "null";
 
     public static List<String> sCurrentMusicList = new ArrayList<>();
 

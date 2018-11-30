@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 20:02:19
- * 上次修改时间：2018年11月28日 17:13:32
+ * 当前修改时间：2018年11月30日 20:36:09
+ * 上次修改时间：2018年11月30日 20:35:23
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -59,6 +59,8 @@ public class MyApplication extends Application {
             File file = new File(getFilesDir().getPath() + File.separatorChar + "AppData");
             Log.d(TAG, "run: " + file.getPath());
         }).start();
+
+        Utils.Ui.inDayNightSet(mDefSharedPreferences);
     }
 
     @Override

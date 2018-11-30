@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 20:02:19
- * 上次修改时间：2018年11月28日 20:02:10
+ * 当前修改时间：2018年11月30日 20:36:08
+ * 上次修改时间：2018年11月30日 20:35:23
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -22,13 +22,12 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -36,25 +35,25 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyPagerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter2AlbumList;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.AlbumListFragment;
+import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
@@ -67,11 +66,15 @@ import top.geek_studio.chenlongcould.musicplayer.Utils.NotificationUtils;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
-import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
-
 public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     private static final String TAG = "MainActivity";
+
+    public static final int UP = 50070;
+
+    public static final int DOWN = 50071;
+
+    public static final int ENABLE_TOUCH = 50072;
 
     private boolean TOOLBAR_CLICKED = false;
 
@@ -101,11 +104,11 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     private ImageView mNavHeaderImageView;
 
-    @SuppressWarnings("FieldCanBeLocal")
     private Menu mMenu;
 
-    @SuppressWarnings("FieldCanBeLocal")
     private SearchView mSearchView;
+
+    private SlidingUpPanelLayout mSlidingUpPanelLayout;
 
     /**
      * ----------------- fragment(s) ----------------------
@@ -116,21 +119,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     private PlayListFragment mPlayListFragment;
 
-    /**
-     * ----------------- playing info ---------------------
-     */
-    private TextView mNowPlayingSongText;
-
-    private ImageView mNowPlayingSongImage;
-
-    private TextView mNowPlayingSongAlbumText;
-
-    private ImageView mNowPlayingStatusImage;
-
-    private ImageView mNowPlayingBackgroundImage;
-
-    //Body
-    private ConstraintLayout mNowPlayingBody;
+    private MusicDetailFragment mMusicDetailFragment;
 
     /**
      * onXXX
@@ -139,19 +128,20 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_new);
 
         Data.sActivities.add(this);
+
+        //service
+        Intent intent = new Intent(this, MyMusicService.class);
+        startService(intent);
+        Values.BIND_SERVICE = bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
 
         mHandlerThread = new HandlerThread("Handler Thread in MainActivity");
         mHandlerThread.start();
         mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
 
-        initData();
-
         initView();
-
-        reLoadInfoBar();
 
         if (savedInstanceState != null) {
             mViewPager.setCurrentItem(savedInstanceState.getInt("viewpage", 0), true);
@@ -177,14 +167,24 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     protected void onDestroy() {
         mHandlerThread.quitSafely();
         Data.sActivities.remove(this);
-        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(NotificationUtils.ID);
         super.onDestroy();
     }
 
     @Override
     public void onBackPressed() {
+
         if (mDrawerLayout.isDrawerOpen(Gravity.START)) {
             mDrawerLayout.closeDrawers();
+            return;
+        }
+
+        if (getMusicDetailFragment().getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+            getMusicDetailFragment().getSlidingUpPanelLayout().setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+            return;
+        }
+
+        if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+            mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
             return;
         }
 
@@ -233,7 +233,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_toolbar_exit: {
-                finish();
+                exitApp();
             }
             break;
 
@@ -287,24 +287,11 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     }
 
     /**
-     * when activity finished but service not(music playing in background),
-     * the method can reload the music being played info to infoBar
-     */
-    private void reLoadInfoBar() {
-        if (Data.sMusicBinder != null && Values.HAS_PLAYED) {
-            if (Data.sMusicBinder.isPlayingMusic()) {
-                runOnUiThread(() -> mNowPlayingStatusImage.setImageResource(R.drawable.ic_play_arrow_black_24dp));
-            }
-            setCurrentSongInfo(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, Values.CurrentData.CURRENT_SONG_PATH, Data.sCurrentMusicBitmap, "reload");
-        }
-    }
-
-    /**
      * init fragments
      */
     private void initData() {
 
-        new Thread(() -> {
+        runOnUiThread(() -> {
             String tab_1 = getResources().getString(R.string.music);
             mTitles.add(tab_1);
             mMusicListFragment = MusicListFragment.newInstance();
@@ -320,19 +307,71 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             mPlayListFragment = PlayListFragment.newInstance(2);
             mFragmentList.add(mPlayListFragment);
 
-            Message message = Message.obtain();
-            Bundle bundle = new Bundle();
             ArrayList<String> titles = new ArrayList<>();
             titles.add(tab_1);
             titles.add(tab_2);
             titles.add(tab_3);
-            bundle.putStringArrayList("titles", titles);
-            message.what = Values.HandlerWhat.INIT_PAGE_DONE;
-            message.setData(bundle);
 
-            mHandler.sendMessage(message);
-        }).start();
+            mTabLayout.addTab(mTabLayout.newTab().setText(titles.get(0)));
+            mTabLayout.addTab(mTabLayout.newTab().setText(titles.get(1)));
+            mTabLayout.addTab(mTabLayout.newTab().setText(titles.get(2)));
 
+            mPagerAdapter = new MyPagerAdapter(getSupportFragmentManager(), mFragmentList, mTitles);
+            mViewPager.setOffscreenPageLimit(2);
+            mTabLayout.setupWithViewPager(mViewPager);
+            mViewPager.setAdapter(mPagerAdapter);
+//                            mViewPager.setCurrentItem(0);
+            Values.CurrentData.CURRENT_PAGE_INDEX = 0;
+
+            mMusicDetailFragment = MusicDetailFragment.newInstance();
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.replace(R.id.frame_wait, mMusicDetailFragment);
+            transaction.commit();
+
+        });
+
+    }
+
+    public void exitApp() {
+        mHandlerThread.quitSafely();
+        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(NotificationUtils.ID);
+
+        mMusicDetailFragment.onDestroyView();
+
+        Data.sHistoryPlayIndex.clear();
+        Data.sMusicItemsBackUp.clear();
+        Data.sMusicItems.clear();
+
+        Data.sMusicBinder.stopMusic();
+        Data.sMusicBinder.release();
+
+        Data.sMusicBinder = null;
+        stopService(new Intent(MainActivity.this, MyMusicService.class));
+        unbindService(Data.sServiceConnection);
+
+        Data.sActivities.remove(this);
+        finish();
+    }
+
+    public MusicListFragment getMusicListFragment() {
+        return mMusicListFragment;
+    }
+
+    public MusicDetailFragment getMusicDetailFragment() {
+        return mMusicDetailFragment;
+    }
+
+    public AlbumListFragment getAlbumListFragment() {
+        return mAlbumListFragment;
+    }
+
+    public PlayListFragment getPlayListFragment() {
+        return mPlayListFragment;
+    }
+
+    public SlidingUpPanelLayout getSlidingUpPanelLayout() {
+        return mSlidingUpPanelLayout;
     }
 
     private void initView() {
@@ -376,16 +415,57 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mNavHeaderImageView = mNavigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
         mNavHeaderImageView.setOnClickListener(v -> {
             if (Values.HAS_PLAYED) {
-                Intent intent = new Intent(MainActivity.this, MusicDetailActivity.class);
-                intent.putExtra("intent_args", "clicked by navHeaderImage");
-                startActivity(intent);
+                if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+                    mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                } else {
+                    mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                }
+            }
+
+            mDrawerLayout.closeDrawers();
+        });
+
+        mSlidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+            @Override
+            public void onPanelSlide(View panel, float slideOffset) {
+                float current = 1 - slideOffset;
+                mMusicDetailFragment.getNowPlayingBody().setAlpha(current);
+                if (current == 0) {
+                    mMusicDetailFragment.getNowPlayingBody().setVisibility(View.GONE);
+                } else {
+                    mMusicDetailFragment.getNowPlayingBody().setVisibility(View.VISIBLE);
+                }
+
+//                if (current == 0) {
+//                    if (!HAS_PLAYED) {
+//                        getMusicDetailFragment().initAnimation();
+//                        HAS_PLAYED = true;
+//                    }
+//                }
+//
+//                if (current == 1) {
+//                    HAS_PLAYED = false;
+//                }
+
+                //滑动一半的时候, 进行 recycler 跳转
+                if (current == 0.7) {
+                    getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
+                }
+
+            }
+
+            @Override
+            public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
             }
         });
+
+        //First no music no slide
+        mSlidingUpPanelLayout.setTouchEnabled(false);
 
         mNavigationView.setNavigationItemSelectedListener(menuItem -> {
             switch (menuItem.getItemId()) {
                 case R.id.menu_nav_exit: {
-                    finish();
+                    exitApp();
                 }
                 break;
                 case R.id.menu_nav_setting: {
@@ -398,48 +478,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     startActivity(intent);
                 }
                 break;
-                case R.id.debug: {
-                    Intent intent = new Intent(MainActivity.this, ActivitySets.class);
-                    startActivity(intent);
-                }
             }
             return true;
-        });
-
-        mNowPlayingStatusImage.setOnClickListener(v -> {
-            //判断是否播放过, 如没有默认随机播放
-            if (Values.HAS_PLAYED) {
-                if (Values.MUSIC_PLAYING) {
-                    Utils.SendSomeThing.sendPause(MainActivity.this);
-                } else {
-                    Utils.SendSomeThing.sendPlay(MainActivity.this, 3);
-                }
-            } else {
-                Toast.makeText(MainActivity.this, "Shuffle Playback!", Toast.LENGTH_SHORT).show();
-                Data.sHistoryPlayIndex.clear();
-                Utils.Audio.shufflePlayback();
-            }
-        });
-
-        mNowPlayingBody.setOnClickListener(v -> {
-            if (Values.HAS_PLAYED) {
-
-                // FIXME: 2018/11/23 If scrolling, the recyclerView may case a bug from makeSceneTransitionAnimation
-                if (mMusicListFragment.getRecyclerView() != null) {
-                    mMusicListFragment.getRecyclerView().stopScroll();
-                }
-                if (mAlbumListFragment.getRecyclerView() != null) {
-                    mAlbumListFragment.getRecyclerView().stopScroll();
-                }
-
-                ActivityOptionsCompat compat = ActivityOptionsCompat.makeSceneTransitionAnimation(this, mNowPlayingSongImage, getString(R.string.image_trans_album));
-                Intent intent = new Intent(MainActivity.this, MusicDetailActivity.class);
-                intent.putExtra("intent_args", "by_clicked_body");
-//                startActivity(intent);
-                startActivity(intent, compat.toBundle());
-            } else {
-                Utils.Ui.fastToast(MainActivity.this, "No music playing.");
-            }
         });
 
         // 实例代码
@@ -499,28 +539,19 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mDrawerToggle.syncState();
         // 设置按钮的动画效果; 如果不想要打开关闭抽屉时的箭头动画效果，可以不写此行代码
         mDrawerLayout.addDrawerListener(mDrawerToggle);
-
-        //at last update data
-        Data.sDefTextColorStateList = mNowPlayingSongText.getTextColors();
-        Data.sDefIcoColorStateList = mNowPlayingStatusImage.getImageTintList();
     }
 
     /**
      * findViewById
      */
     private void findView() {
-        mNowPlayingSongAlbumText = findViewById(R.id.activity_main_now_playing_album_name);
-        mNowPlayingBody = findViewById(R.id.current_info);
-        mNowPlayingStatusImage = findViewById(R.id.activity_main_info_bar_status_image);
-        mNowPlayingBackgroundImage = findViewById(R.id.current_info_background);
         mToolbar = findViewById(R.id.activity_main_tool_bar);
         mDrawerLayout = findViewById(R.id.activity_main_drawer_layout);
         mNavigationView = findViewById(R.id.activity_main_nav_view);
         mTabLayout = findViewById(R.id.tab_layout);
         mViewPager = findViewById(R.id.view_pager);
-        mNowPlayingSongText = findViewById(R.id.activity_main_now_playing_name);
-        mNowPlayingSongImage = findViewById(R.id.recycler_item_clover_image);
         mAppBarLayout = findViewById(R.id.activity_main_appbar);
+        mSlidingUpPanelLayout = findViewById(R.id.activity_main_sliding_layout);
     }
 
     @Override
@@ -528,66 +559,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         Utils.Ui.setAppBarColor(this, mAppBarLayout, mToolbar);
         int color = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577"));
         mTabLayout.setBackgroundColor(color);
-    }
-
-    /**
-     * set Info (auto put in data.)
-     *
-     * @param songName  music name
-     * @param albumName music album name
-     * @param songPath  music path
-     * @param cover     music cover image, it is @NullAble(some types of music do not have cover)
-     * @param args      oth params(if "reload", do not need to set InfoBar again)
-     */
-    public void setCurrentSongInfo(String songName, String albumName, String songPath, @Nullable Bitmap cover, String... args) {
-
-        runOnUiThread(() -> {
-            mNowPlayingSongText.setText(songName);
-            mNowPlayingSongAlbumText.setText(albumName);
-
-            if (cover != null) {
-                //color set
-                GlideApp.with(MainActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade()).into(mNowPlayingSongImage);
-                GlideApp.with(MainActivity.this).load(cover).transition(DrawableTransitionOptions.withCrossFade()).centerCrop().into(mNavHeaderImageView);
-
-//                Palette.Builder paletteBuilder = Palette.from(Data.sCurrentMusicBitmap);
-//                paletteBuilder.generate(palette -> {
-//                    if (palette != null) {
-//                        Palette.Swatch vibrant = palette.getVibrantSwatch();
-//                        if (!Utils.Ui.isColorLight(vibrant == null ? Color.TRANSPARENT : vibrant.getRgb())) {
-//                            mNowPlayingSongText.setTextColor(Data.sDefTextColorStateList);
-//                            mNowPlayingSongAlbumText.setTextColor(Data.sDefTextColorStateList);
-//                            mNowPlayingStatusImage.setColorFilter(Color.BLACK);
-//                        } else {
-//                            mNowPlayingSongText.setTextColor(Color.WHITE);
-//                            mNowPlayingSongAlbumText.setTextColor(Color.WHITE);
-//                            mNowPlayingStatusImage.setColorFilter(Color.WHITE);
-//                        }
-//                    }
-//                });
-
-                int currentBright = Utils.Ui.getBright(cover);
-
-                //InfoBar background color AND text color balance
-                if (currentBright > (255 / 2)) {
-                    mNowPlayingSongText.setTextColor(Data.sDefTextColorStateList);
-                    mNowPlayingSongAlbumText.setTextColor(Data.sDefTextColorStateList);
-                    mNowPlayingStatusImage.setColorFilter(Color.BLACK);
-                } else {
-                    mNowPlayingSongText.setTextColor(Color.WHITE);
-                    mNowPlayingSongAlbumText.setTextColor(Color.WHITE);
-                    mNowPlayingStatusImage.setColorFilter(Color.WHITE);
-                }
-
-                GlideApp.with(MainActivity.this).load(cover)
-                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-                        .apply(bitmapTransform(new BlurTransformation(30, 20)))
-                        .override(100, 100)
-                        .into(mNowPlayingBackgroundImage);
-            }
-
-            Utils.Ui.setPlayButtonNowPlaying();
-        });
     }
 
     public NotLeakHandler getHandler() {
@@ -599,6 +570,10 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
      */
     public List<Fragment> getFragmentList() {
         return mFragmentList;
+    }
+
+    public ImageView getNavHeaderImageView() {
+        return mNavHeaderImageView;
     }
 
     public class NotLeakHandler extends Handler {
@@ -613,27 +588,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case Values.HandlerWhat.INIT_PAGE_DONE: {
-                    ArrayList<String> titles = msg.getData().getStringArrayList("titles");
-                    if (titles != null) {
-                        runOnUiThread(() -> {
-                            mTabLayout.addTab(mTabLayout.newTab().setText(titles.get(0)));
-                            mTabLayout.addTab(mTabLayout.newTab().setText(titles.get(1)));
-                            mTabLayout.addTab(mTabLayout.newTab().setText(titles.get(2)));
-
-                            mPagerAdapter = new MyPagerAdapter(getSupportFragmentManager(), mFragmentList, mTitles);
-                            mViewPager.setOffscreenPageLimit(2);
-                            mTabLayout.setupWithViewPager(mViewPager);
-                            mViewPager.setCurrentItem(0);
-                            mViewPager.setAdapter(mPagerAdapter);
-                            Values.CurrentData.CURRENT_PAGE_INDEX = 0;
-
-                            //service
-                            Intent intent = new Intent(mWeakReference.get(), MyMusicService.class);
-                            startService(intent);
-                            Values.BIND_SERVICE = bindService(new Intent(mWeakReference.get(), MyMusicService.class), Data.sServiceConnection, BIND_AUTO_CREATE);
-                        });
-                    }
+                case Values.HandlerWhat.ON_SERVICE_START: {
+                    initData();
                 }
                 break;
 
@@ -642,17 +598,30 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 }
                 break;
 
-                case Values.HandlerWhat.SET_MAIN_BUTTON_PLAY: {
-                    runOnUiThread(() -> mNowPlayingStatusImage.setImageResource(R.drawable.ic_pause_white_24dp));
-                    Log.d(TAG, "handleMessage: do pause");
+                case Values.HandlerWhat.LOAD_INTO_NAV_IMAGE: {
+                    mWeakReference.get().runOnUiThread(() -> {
+                        Bitmap cover = (Bitmap) msg.obj;
+                        GlideApp.with(mWeakReference.get())
+                                .load(cover == null ? R.drawable.ic_audiotrack_24px : cover)
+                                .transition(DrawableTransitionOptions.withCrossFade())
+                                .centerCrop().into(mNavHeaderImageView);
+                    });
                 }
                 break;
 
-                case Values.HandlerWhat.SET_MAIN_BUTTON_PAUSE: {
-                    runOnUiThread(() -> mNowPlayingStatusImage.setImageResource(R.drawable.ic_play_arrow_black_24dp));
-                    Log.d(TAG, "handleMessage: do play");
+                case ENABLE_TOUCH: {
+                    mSlidingUpPanelLayout.setTouchEnabled(true);
                 }
                 break;
+
+                case UP: {
+                    mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                }
+                break;
+
+                case DOWN: {
+                    mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                }
                 default:
             }
         }

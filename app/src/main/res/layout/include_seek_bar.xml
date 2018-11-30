@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ *************************************************************
+  ~ 文件：include_seek_bar.xml  模块：app  项目：MusicPlayer
+  ~ 当前修改时间：2018年11月30日 20:36:09
+  ~ 上次修改时间：2018年11月30日 20:35:29
+  ~ 作者：chenlongcould
+  ~ Geek Studio
+  ~ Copyright (c) 2018
+  ~ *************************************************************
+  -->
+
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/layout_seek_bar_1"
+        android:layout_width="match_parent"
+        android:layout_height="30dp">
+
+        <SeekBar
+            android:id="@+id/seekBar"
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:max="100"
+            android:maxHeight="30dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/activity_music_detail_right_text"
+            app:layout_constraintStart_toEndOf="@+id/activity_music_detail_left_text"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:progress="30" />
+
+        <TextView
+            android:id="@+id/activity_music_detail_left_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:contentDescription="@string/add"
+            android:src="@drawable/ic_remove_white_24dp"
+            android:text="@string/_00_00"
+            android:textColor="#fff"
+            app:layout_constraintBottom_toBottomOf="@+id/seekBar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/seekBar" />
+
+        <TextView
+            android:id="@+id/activity_music_detail_right_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:contentDescription="@string/remove"
+            android:src="@drawable/ic_add_white_24dp"
+            android:text="@string/_10_00"
+            android:textColor="#fff"
+            app:layout_constraintBottom_toBottomOf="@+id/seekBar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/seekBar" />
+
+    </android.support.constraint.ConstraintLayout>
+
+</android.support.constraint.ConstraintLayout>

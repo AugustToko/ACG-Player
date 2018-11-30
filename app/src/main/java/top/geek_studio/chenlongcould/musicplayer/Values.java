@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 16:12:44
- * 上次修改时间：2018年11月28日 15:44:29
+ * 当前修改时间：2018年11月30日 20:36:09
+ * 上次修改时间：2018年11月30日 15:47:02
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -64,11 +64,14 @@ public final class Values {
          * in MainActivity
          */
         public static final int INIT_PAGE_DONE = 59;
-        public static final int SET_MAIN_BUTTON_PLAY = 58;
-        public static final int SET_MAIN_BUTTON_PAUSE = 57;
+        public static final int SET_BUTTON_PLAY = 58;
+        public static final int SET_BUTTON_PAUSE = 57;
+        public static final int LOAD_INTO_NAV_IMAGE = 5003;
+        public static final int ON_SERVICE_START = 50007;
 
         public static final int RECYCLER_SCROLL = 55001;
         public static final int SET_SEEK_STYLE = 5002;
+
     }
 
     public static final class ColorInt {
@@ -126,6 +129,7 @@ public final class Values {
         public static String ReceiverOnMusicPlay = "top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay";
         public static String ReceiverOnMusicStop = "top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicStop";
         public static String ReceiverOnMusicPause = "top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPause";
+        public static String DayNightReceiver = "top.geek_studio.chenlongcould.musicplayer.BroadCasts.DayNightReceiver";
     }
 
     public static final class Color {
@@ -135,6 +139,9 @@ public final class Values {
         public static final String NOT_VERY_BLACK = "#1d1d1d";
         public static final String NOT_VERY_WHITE = "#dddddd";
         public static String TEXT_COLOR = "#3c3c3c";
+
+        public static String TEXT_COLOR_IN_NIGHT = "#C6C6C6";
+        public static String TEXT_COLOR_IN_DAY = "#434343";
 
     }
 

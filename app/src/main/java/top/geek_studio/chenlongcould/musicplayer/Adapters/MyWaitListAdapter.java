@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyWaitListAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 16:12:44
- * 上次修改时间：2018年11月28日 10:34:41
+ * 当前修改时间：2018年11月30日 20:36:09
+ * 上次修改时间：2018年11月30日 16:54:09
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -37,7 +37,6 @@ import java.util.Random;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.Activities.MusicDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.IStyle;
@@ -90,12 +89,8 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
             MainActivity activity = (MainActivity) Data.sActivities.get(0);
 
             //set InfoBar
-            activity.setCurrentSongInfo(
-                    clickedSongName
-                    , clickedSongAlbumName
-                    , mMusicItems.get(holder.getAdapterPosition()).getMusicPath()
-                    , cover
-            );
+            activity.getMusicDetailFragment().setSlideInfo(clickedSongName, clickedSongAlbumName, mMusicItems.get(holder.getAdapterPosition()).getMusicPath(), cover);
+            activity.getMusicDetailFragment().setCurrentInfo(clickedSongName, clickedSongAlbumName, Utils.Audio.getAlbumByteImage(clickedPath));
 
             Data.sCurrentMusicAlbum = clickedSongAlbumName;
             Data.sCurrentMusicName = clickedSongName;
@@ -108,21 +103,13 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
             Utils.Ui.setPlayButtonNowPlaying();
 
-            if (Data.sActivities.size() >= 2) {
-                MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
-                musicDetailActivity.setCurrentSongInfo(clickedSongName, clickedSongAlbumName, Utils.Audio.getAlbumByteImage(clickedPath));
-            }
-
             try {
                 Data.sMusicBinder.setDataSource(clickedPath);
                 Data.sMusicBinder.prepare();
                 Data.sMusicBinder.playMusic();
 
-                if (Data.sActivities.size() >= 2) {
-                    MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
-                    MusicDetailActivity.NotLeakHandler notLeakHandler = musicDetailActivity.getHandler();
-                    notLeakHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
-                }
+                activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
+
             } catch (IOException e) {
                 e.printStackTrace();
                 Data.sMusicBinder.resetMusic();
@@ -169,37 +156,22 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
                 }
                 break;
 
+                // TODO: 2018/11/30 to new
                 case Menu.FIRST + 4: {
                     String albumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
                     Cursor cursor = mContext.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
                             MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum()}, null);
-                    if (Data.sActivities.size() == 1) {
-
-                        //int MainActivity
-                        MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
-                        Intent intent = new Intent(mainActivity, AlbumDetailActivity.class);
-                        intent.putExtra("key", albumName);
-                        if (cursor != null) {
-                            cursor.moveToFirst();
-                            int id = Integer.parseInt(cursor.getString(0));
-                            intent.putExtra("_id", id);
-                            cursor.close();
-                        }
-                        mContext.startActivity(intent);
-                    } else if (Data.sActivities.size() == 2) {
-
-                        //int MusicDetailActivity
-                        MusicDetailActivity activity = (MusicDetailActivity) Data.sActivities.get(1);
-                        Intent intent = new Intent(activity, AlbumDetailActivity.class);
-                        intent.putExtra("key", albumName);
-                        if (cursor != null) {
-                            cursor.moveToFirst();
-                            int id = Integer.parseInt(cursor.getString(0));
-                            intent.putExtra("_id", id);
-                            cursor.close();
-                        }
-                        mContext.startActivity(intent);
+                    //int MainActivity
+                    MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
+                    Intent intent = new Intent(mainActivity, AlbumDetailActivity.class);
+                    intent.putExtra("key", albumName);
+                    if (cursor != null) {
+                        cursor.moveToFirst();
+                        int id = Integer.parseInt(cursor.getString(0));
+                        intent.putExtra("_id", id);
+                        cursor.close();
                     }
+                    mContext.startActivity(intent);
 
                 }
                 break;
@@ -257,6 +229,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
         //style
         currentBind.mMusicNameText.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
+        currentBind.mAlbumText.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
     }
 
 

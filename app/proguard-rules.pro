@@ -59,3 +59,4 @@
 -dontwarn android.support.test.**
 -dontwarn org.junit.**
 -dontwarn com.simplecityapps.**
+-dontwarn com.sothree.slidinguppanel.**

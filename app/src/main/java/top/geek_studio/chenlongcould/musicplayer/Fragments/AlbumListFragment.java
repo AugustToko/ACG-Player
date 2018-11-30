@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 20:02:19
- * 上次修改时间：2018年11月28日 20:02:10
+ * 当前修改时间：2018年11月30日 20:36:09
+ * 上次修改时间：2018年11月30日 20:35:23
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -31,8 +31,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.ListPreloader;
+import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
+import com.bumptech.glide.util.ViewPreloadSizeProvider;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.List;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter2AlbumList;
@@ -81,28 +87,40 @@ public final class AlbumListFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_album_list, container, false);
+
+        ViewPreloadSizeProvider<AlbumItem> preloadSizeProvider = new ViewPreloadSizeProvider<>();
+        AlbumListFragment.MyPreloadModelProvider preloadModelProvider = new AlbumListFragment.MyPreloadModelProvider();
+
+        RecyclerViewPreloader<AlbumItem> preLoader = new RecyclerViewPreloader<>(this, preloadModelProvider, preloadSizeProvider, 10);
+
         mRecyclerView = view.findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                if (newState == RecyclerView.SCROLL_STATE_DRAGGING || newState == RecyclerView.SCROLL_STATE_SETTLING) {
-                    sIsScrolling = true;
-                } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (sIsScrolling) {
-                        GlideApp.with(mMainActivity).resumeRequests();
-                    } else {
-                        GlideApp.with(mMainActivity).pauseAllRequests();
-                    }
-                    sIsScrolling = false;
-                }
-            }
+        mRecyclerView.addOnScrollListener(preLoader);
+//        mRecyclerView.setRecyclerListener(holder -> {
+//            MyRecyclerAdapter2AlbumList.ViewHolder myViewHolder = (MyRecyclerAdapter2AlbumList.ViewHolder) holder;
+//            GlideApp.with(this).clear(myViewHolder.mAlbumImage);
+//        });
 
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-            }
-        });
+//        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//            @Override
+//            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+//                if (newState == RecyclerView.SCROLL_STATE_DRAGGING || newState == RecyclerView.SCROLL_STATE_SETTLING) {
+//                    sIsScrolling = true;
+//                } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+//                    if (sIsScrolling) {
+//                        GlideApp.with(mMainActivity).resumeRequests();
+//                    } else {
+//                        GlideApp.with(mMainActivity).pauseAllRequests();
+//                    }
+//                    sIsScrolling = false;
+//                }
+//            }
+//
+//            @Override
+//            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+//                super.onScrolled(recyclerView, dx, dy);
+//            }
+//        });
         ON_CREATE_VIEW_DONE = true;
         return view;
     }
@@ -110,15 +128,6 @@ public final class AlbumListFragment extends Fragment {
     private void sureGetDataDone() {
         if (Values.MUSIC_DATA_INIT_DONE) {
             new Thread(() -> {
-//                //去除重复数据
-//                List<String> temp = new ArrayList<>();
-//                for (MusicItem item : Data.sMusicItems) {
-//                    temp.add(item.getMusicAlbum());
-//                }
-//                HashSet<String> hashSet = new HashSet<>(temp);
-//                arrayList = new ArrayList<>(hashSet);
-//                arrayList.sort(Values.sort);
-
                 Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null, null, null, null);
                 if (cursor != null) {
                     cursor.moveToFirst();
@@ -126,7 +135,6 @@ public final class AlbumListFragment extends Fragment {
                     do {
                         String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM));
                         String albumId = cursor.getString(cursor.getColumnIndexOrThrow("_id"));
-
                         mAlbumList.add(new AlbumItem(albumName, Integer.parseInt(albumId)));
                     } while (cursor.moveToNext());
 
@@ -199,4 +207,19 @@ public final class AlbumListFragment extends Fragment {
             }
         }
     }
+
+    public class MyPreloadModelProvider implements ListPreloader.PreloadModelProvider<AlbumItem> {
+        @NonNull
+        @Override
+        public List<AlbumItem> getPreloadItems(int position) {
+            return mAlbumList.subList(position, position + 1);
+        }
+
+        @Nullable
+        @Override
+        public RequestBuilder<?> getPreloadRequestBuilder(@NonNull AlbumItem item) {
+            return GlideApp.with(mMainActivity).load(item);
+        }
+    }
+
 }

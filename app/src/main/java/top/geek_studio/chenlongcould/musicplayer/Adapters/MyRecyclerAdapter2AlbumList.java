@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter2AlbumList.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 16:12:44
- * 上次修改时间：2018年11月28日 16:12:26
+ * 当前修改时间：2018年11月30日 20:36:09
+ * 上次修改时间：2018年11月30日 20:35:23
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -32,7 +32,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.io.File;
@@ -50,6 +49,8 @@ import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
 public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRecyclerAdapter2AlbumList.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter, IStyle {
+
+    private static final String TAG = "AlbumAdapter";
 
     public static final int LINEAR_TYPE = 0;
 
@@ -119,6 +120,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
     @Override
     public void onViewRecycled(@NonNull ViewHolder holder) {
+        Log.d(TAG, "onViewRecycled: done");
         holder.mAlbumImage.setTag(null);
         GlideApp.with(mContext).clear(holder.mAlbumImage);
     }
@@ -172,6 +174,8 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
                 //...mode set
                 switch (mType) {
                     case GRID_TYPE: {
+
+                        //color set (album tag)
                         Palette.from(bitmap).generate(p -> {
                             if (p != null) {
                                 @ColorInt int color = p.getVibrantColor(Color.parseColor(Values.Color.NOT_VERY_BLACK));
@@ -187,36 +191,34 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
                     break;
                 }
 
-                Log.d(TAG, "onPostExecute: file exits");
                 GlideApp.with(mContextWeakReference.get())
                         .load(bitmap)
-                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+//                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                         .centerCrop()
                         .into(mViewHolderWeakReference.get().mAlbumImage);
             } else {
                 GlideApp.with(mContextWeakReference.get())
                         .load(R.drawable.ic_audiotrack_24px)
-                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+//                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                         .into(mViewHolderWeakReference.get().mAlbumImage);
-                Log.d(TAG, "onPostExecute: file not exits");
+                Log.e(TAG, "onPostExecute: file not exits");
             }
         }
 
         @Override
         protected String doInBackground(Void... voids) {
-            //根据position判断是否为复用ViewHolder
 
+            //根据position判断是否为复用ViewHolder
             ImageView imageView = mViewHolderWeakReference.get().mAlbumImage;
 
-            if (imageView == null) {
+            if (imageView == null || imageView.getTag(R.string.key_id_1) == null) {
+                Log.e(TAG, "doInBackground: null");
                 return null;
             }
 
-            if (imageView.getTag(R.string.key_id_1) == null) {
-                return null;
-            }
             if (((int) imageView.getTag(R.string.key_id_1)) != mPosition - 1) {
                 GlideApp.with(mContextWeakReference.get()).clear(imageView);
+                Log.e(TAG, "doInBackground: position not true");
                 return null;
             }
 
@@ -233,22 +235,6 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
             }
             return img;
         }
-
-//        public String getAlbumArt(int album_id) {
-//            String mUriAlbums = "content://media/external/audio/albums";
-//            String[] projection = new String[]{"album_art"};
-//            Cursor cur = mContextWeakReference.get().getContentResolver().query(Uri.parse(mUriAlbums + "/" + Integer.toString(album_id)), projection, null, null, null);
-//            String album_art = null;
-//            if (cur != null) {
-//                if (cur.getCount() > 0 && cur.getColumnCount() > 0) {
-//                    cur.moveToNext();
-//                    album_art = cur.getString(0);
-//                }
-//                cur.close();
-//            }
-//
-//            return album_art;
-//        }
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {

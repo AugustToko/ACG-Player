@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：activity_settings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月28日 16:12:44
-  ~ 上次修改时间：2018年11月28日 16:12:25
+  ~ 当前修改时间：2018年11月30日 20:36:09
+  ~ 上次修改时间：2018年11月30日 20:13:38
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -37,7 +37,7 @@
     </android.support.design.widget.AppBarLayout>
 
     <ScrollView
-        android:layout_width="411dp"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activity_settings_appbar">

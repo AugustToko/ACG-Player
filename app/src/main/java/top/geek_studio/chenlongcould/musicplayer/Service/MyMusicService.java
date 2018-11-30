@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 16:12:44
- * 上次修改时间：2018年11月28日 10:34:41
+ * 当前修改时间：2018年11月30日 20:36:09
+ * 上次修改时间：2018年11月30日 20:35:29
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -18,9 +18,12 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Log;
+import android.widget.Toast;
 
 import java.io.IOException;
 
+import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.NotificationUtils;
@@ -34,9 +37,9 @@ public final class MyMusicService extends Service {
 
     private boolean regReceiver = false;
 
-    private MediaPlayer mMediaPlayer = new MediaPlayer();
+    private final MediaPlayer mMediaPlayer = new MediaPlayer();
 
-    private MusicBinder mMusicBinder = new MusicBinder();
+    private final MusicBinder mMusicBinder = new MusicBinder();
 
     private NotificationUtils notificationUtils;
 
@@ -105,32 +108,20 @@ public final class MyMusicService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        if (Data.sActivities.size() >= 1)
+            ((MainActivity) Data.sActivities.get(0))
+                    .getHandler()
+                    .sendEmptyMessage(Values.HandlerWhat.ON_SERVICE_START);
         return mMusicBinder;
     }
 
-    @Override
-    public boolean onUnbind(Intent intent) {
-        return super.onUnbind(intent);
-    }
+    public final class MusicBinder extends Binder {
 
-    @Override
-    public void onDestroy() {
-        Values.SERVICE_RUNNING = false;
-        Values.MUSIC_PLAYING = false;
-        mMediaPlayer.release();
-        if (regReceiver) unregisterReceiver(Data.mMyHeadSetPlugReceiver);
-        if (notificationUtils != null) notificationUtils.disMiss(NotificationUtils.ID);
+        public final void playMusic() {
+//            Log.d(TAG, "playMusic: ");
+            if (Data.sActivities.size() > 0)
+                ((MainActivity) Data.sActivities.get(0)).getHandler().sendEmptyMessage(MainActivity.ENABLE_TOUCH);
 
-        if (Values.BIND_SERVICE) {
-            unbindService(Data.sServiceConnection);
-            stopService(new Intent(this, MyMusicService.class));
-        }
-        super.onDestroy();
-    }
-
-    public class MusicBinder extends Binder {
-
-        public void playMusic() {
             Values.MUSIC_PLAYING = true;
             Values.HAS_PLAYED = true;
             mMediaPlayer.start();
@@ -138,44 +129,61 @@ public final class MyMusicService extends Service {
             notificationUtils.start(notificationUtils.getNot(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, R.drawable.ic_pause_white_24dp, MyMusicService.this));
         }
 
-        public void stopMusic() {
+        public final void stopMusic() {
             Values.MUSIC_PLAYING = false;
             mMediaPlayer.stop();
         }
 
-        public boolean isPlayingMusic() {
+        public final boolean isPlayingMusic() {
+//            Log.d(TAG, "isPlayingMusic: ");
             return mMediaPlayer.isPlaying();
         }
 
-        public void pauseMusic() {
+        public final void pauseMusic() {
+            Log.d(TAG, "pauseMusic: ");
             mMediaPlayer.pause();
             notificationUtils = new NotificationUtils(MyMusicService.this, "Now Playing...");
             notificationUtils.start(notificationUtils.getNot(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, R.drawable.ic_play_arrow_black_24dp, MyMusicService.this));
         }
 
-        public void resetMusic() {
+        public final void resetMusic() {
+//            Log.d(TAG, "resetMusic: ");
             mMediaPlayer.reset();
         }
 
-        public void setDataSource(String path) throws IOException {
+        public final void setDataSource(String path) {
+//            Log.d(TAG, "setDataSource: ");
             mMediaPlayer.reset();
-            mMediaPlayer.setDataSource(path);
+            try {
+                mMediaPlayer.setDataSource(path);
+            } catch (IOException e) {
+                Toast.makeText(MyMusicService.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
         }
 
-        public void prepare() throws IOException {
+        public final void prepare() throws IOException {
+//            Log.d(TAG, "prepare: ");
             mMediaPlayer.prepare();
         }
 
-        public int getDuration() {
+        public final int getDuration() {
+//            Log.d(TAG, "getDuration: ");
             return mMediaPlayer.getDuration();
         }
 
-        public int getCurrentPosition() {
+        public final int getCurrentPosition() {
+//            Log.d(TAG, "getCurrentPosition: ");
             return mMediaPlayer.getCurrentPosition();
         }
 
-        public void seekTo(int position) {
+        public final void seekTo(int position) {
+//            Log.d(TAG, "seekTo: ");
             mMediaPlayer.seekTo(position);
+        }
+
+        public final void release() {
+            mMediaPlayer.release();
         }
 
     }

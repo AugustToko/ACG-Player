@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：NotificationUtils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 16:12:44
- * 上次修改时间：2018年11月28日 16:12:26
+ * 当前修改时间：2018年11月30日 20:36:09
+ * 上次修改时间：2018年11月30日 12:41:54
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -29,7 +29,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v7.graphics.Palette;
 import android.widget.RemoteViews;
 
-import top.geek_studio.chenlongcould.musicplayer.Activities.MusicDetailActivity;
+import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
@@ -74,7 +74,9 @@ public class NotificationUtils extends ContextWrapper {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private Notification.Builder getChannelNotification(String title, String content, @DrawableRes int resId, Context context) {
-        Intent intent = new Intent(context, MusicDetailActivity.class).putExtra("intent_args", "by_clicked_body");
+
+        // TODO: 2018/11/30
+        Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
         PendingIntent pi = PendingIntent.getActivity(context, 0, intent, 0);
 
         Intent pause = new Intent();
@@ -131,7 +133,7 @@ public class NotificationUtils extends ContextWrapper {
     }
 
     private NotificationCompat.Builder getNotification_25(String title, String content, Context context) {
-        Intent intent = new Intent(context, MusicDetailActivity.class).putExtra("intent_args", "by_clicked_body");
+        Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
         PendingIntent pi = PendingIntent.getActivity(context, 0, intent, 0);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), id)
                 .setContentTitle(title)

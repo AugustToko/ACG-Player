@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 16:12:44
- * 上次修改时间：2018年11月28日 10:28:31
+ * 当前修改时间：2018年11月30日 20:36:09
+ * 上次修改时间：2018年11月30日 09:36:44
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -30,10 +30,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.ListPreloader;
+import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
+import com.bumptech.glide.util.ViewPreloadSizeProvider;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
@@ -165,31 +170,45 @@ public final class MusicListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_music_list_layout, container, false);
         findId(view);
 
+        ViewPreloadSizeProvider<MusicItem> preloadSizeProvider = new ViewPreloadSizeProvider<>();
+        MyPreloadModelProvider preloadModelProvider = new MyPreloadModelProvider();
+
+        RecyclerViewPreloader<MusicItem> preLoader = new RecyclerViewPreloader<>(this, preloadModelProvider
+                , preloadSizeProvider, 10);
+
         mRecyclerView.addItemDecoration(new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL));
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
         mRecyclerView.setHasFixedSize(true);
         adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity);
         mRecyclerView.setAdapter(adapter);
-        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                if (newState == RecyclerView.SCROLL_STATE_DRAGGING || newState == RecyclerView.SCROLL_STATE_SETTLING) {
-                    sIsScrolling = true;
-                } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    if (sIsScrolling) {
-                        GlideApp.with(mActivity).resumeRequests();
-                    } else {
-                        GlideApp.with(mActivity).pauseAllRequests();
-                    }
-                    sIsScrolling = false;
-                }
-            }
 
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-            }
-        });
+        mRecyclerView.addOnScrollListener(preLoader);
+
+//        mRecyclerView.setRecyclerListener(holder -> {
+//            MyRecyclerAdapter.ViewHolder myViewHolder = (MyRecyclerAdapter.ViewHolder) holder;
+//            GlideApp.with(this).clear(myViewHolder.mMusicCloverImage);
+//        });
+
+//        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//            @Override
+//            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+//                if (newState == RecyclerView.SCROLL_STATE_DRAGGING || newState == RecyclerView.SCROLL_STATE_SETTLING) {
+//                    sIsScrolling = true;
+//                } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+//                    if (sIsScrolling) {
+//                        GlideApp.with(mActivity).resumeRequests();
+//                    } else {
+//                        GlideApp.with(mActivity).pauseAllRequests();
+//                    }
+//                    sIsScrolling = false;
+//                }
+//            }
+//
+//            @Override
+//            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+//                super.onScrolled(recyclerView, dx, dy);
+//            }
+//        });
 
         CREATE_VIEW_DONE = true;
         return view;
@@ -253,5 +272,20 @@ public final class MusicListFragment extends Fragment {
         Log.d(TAG, "onDestroy: ");
         super.onDestroy();
     }
+
+    public class MyPreloadModelProvider implements ListPreloader.PreloadModelProvider<MusicItem> {
+        @NonNull
+        @Override
+        public List<MusicItem> getPreloadItems(int position) {
+            return Data.sMusicItems.subList(position, position + 1);
+        }
+
+        @Nullable
+        @Override
+        public RequestBuilder<?> getPreloadRequestBuilder(@NonNull MusicItem item) {
+            return GlideApp.with(mActivity).load(item);
+        }
+    }
+
 
 }

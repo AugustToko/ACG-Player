@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：PublicActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月23日 11:17:30
- * 上次修改时间：2018年11月22日 14:39:00
+ * 当前修改时间：2018年11月30日 20:36:09
+ * 上次修改时间：2018年11月30日 18:45:38
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -76,5 +76,11 @@ public class PublicActivity extends MyBaseActivity {
             break;
             default:
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        mRecyclerView.stopScroll();
+        super.onBackPressed();
     }
 }

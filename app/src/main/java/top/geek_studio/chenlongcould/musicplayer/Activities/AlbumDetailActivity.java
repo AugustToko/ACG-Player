@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 16:12:44
- * 上次修改时间：2018年11月28日 10:28:31
+ * 当前修改时间：2018年11月30日 20:36:08
+ * 上次修改时间：2018年11月30日 20:35:29
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -139,9 +139,10 @@ public final class AlbumDetailActivity extends Activity {
                         File file = new File(img);
                         if (file.exists()) {
                             Bitmap bitmap = BitmapFactory.decodeFile(img);
-                            if (bitmap != null) GlideApp.with(this).load(bitmap).into(mImageView);
+                            if (bitmap != null)
+                                GlideApp.with(AlbumDetailActivity.this).load(bitmap).into(mImageView);
                         } else
-                            GlideApp.with(this).load(R.drawable.ic_audiotrack_24px).into(mImageView);
+                            GlideApp.with(AlbumDetailActivity.this).load(R.drawable.ic_audiotrack_24px).into(mImageView);
                     }
                     cursor2.close();
                 } else {

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicItem.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月28日 16:12:44
- * 上次修改时间：2018年11月28日 10:34:43
+ * 当前修改时间：2018年11月30日 20:36:09
+ * 上次修改时间：2018年11月30日 08:43:36
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -26,17 +26,6 @@ public final class MusicItem implements Parcelable {
     private int mSize;
     private String mArtist;
     private int mAddTime;
-
-//    public MusicItem(String musicName, String musicPath, int musicID, String musicAlbum, int duration, int size, String artist, int addTime) {
-//        mMusicName = musicName;
-//        mMusicPath = musicPath;
-//        mMusicID = musicID;
-//        mMusicAlbum = musicAlbum;
-//        mDuration = duration;
-//        mSize = size;
-//        mArtist = artist;
-//        mAddTime = addTime;
-//    }
 
     public String getMusicName() {
         return mMusicName;
