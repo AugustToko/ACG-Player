@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月30日 20:36:09
- * 上次修改时间：2018年11月30日 20:35:23
+ * 当前修改时间：2018年12月01日 11:07:06
+ * 上次修改时间：2018年12月01日 11:06:38
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -18,7 +18,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -27,10 +26,12 @@ import android.media.MediaMetadataRetriever;
 import android.preference.PreferenceManager;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateInterpolator;
@@ -58,6 +59,7 @@ public final class Utils {
 
     public static class Audio {
         private final static MediaMetadataRetriever sMediaMetadataRetriever = new MediaMetadataRetriever();
+        private static final String TAG = "Audio";
 
         /**
          * 检测播放器是否准备完毕 (默认进app 为true)
@@ -69,21 +71,21 @@ public final class Utils {
          *
          * @param mediaUri mp3 path
          */
-        @NonNull
+        @Nullable
         public static Bitmap getMp3Cover(@NonNull String mediaUri) {
 
-            //检测不支持封面的音乐类型
-            if (mediaUri.contains("ogg")) {
-                return BitmapFactory.decodeResource(Resources.getSystem(), R.drawable.ic_audiotrack_24px);
-            }
+//            //检测不支持封面的音乐类型
+//            if (mediaUri.contains("ogg") || mediaUri.contains("flac")) {
+//                return BitmapFactory.decodeResource(Resources.getSystem(), R.drawable.ic_audiotrack_24px);
+//            }
 
             sMediaMetadataRetriever.setDataSource(mediaUri);
             byte[] picture = sMediaMetadataRetriever.getEmbeddedPicture();
-            try {
+            if (picture != null) {
                 return BitmapFactory.decodeByteArray(picture, 0, picture.length);
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-                return BitmapFactory.decodeResource(Resources.getSystem(), R.drawable.ic_audiotrack_24px);
+            } else {
+                Log.d(TAG, "getMp3Cover: return def");
+                return BitmapFactory.decodeResource(Data.sActivities.get(0).getResources(), R.drawable.ic_audiotrack_24px);
             }
         }
 
@@ -167,7 +169,8 @@ public final class Utils {
                         activity.getMusicDetailFragment().setSlideInfo(musicName, albumName, path, cover);
                         activity.getMusicDetailFragment().setCurrentInfo(musicName, albumName, cover);
                         //设置seekBar颜色
-                        activity.getMusicDetailFragment().getSeekBar().getThumb().setColorFilter(cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
+                        activity.getMusicDetailFragment().getSeekBar().getThumb()
+                                .setColorFilter(cover == null ? Color.GRAY : cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
                     }
 
                     try {

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：NotificationUtils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月30日 20:36:09
- * 上次修改时间：2018年11月30日 12:41:54
+ * 当前修改时间：2018年12月01日 11:07:06
+ * 上次修改时间：2018年12月01日 11:06:38
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -27,16 +27,12 @@ import android.support.annotation.DrawableRes;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.graphics.Palette;
-import android.widget.RemoteViews;
+import android.util.Log;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
-
-/**
- * Created by LaoZhao on 2017/11/19.
- */
 
 public class NotificationUtils extends ContextWrapper {
 
@@ -51,8 +47,6 @@ public class NotificationUtils extends ContextWrapper {
     private String id = "Player";
 
     private String name;
-
-    private RemoteViews mRemoteViews;
 
     public NotificationUtils(Context context, String name) {
         super(context);
@@ -106,13 +100,12 @@ public class NotificationUtils extends ContextWrapper {
                 .setContentText(content)
                 .setStyle(mediaStyle)
                 .setSmallIcon(R.drawable.ic_audiotrack_24px)
-                .setLargeIcon(Data.sCurrentMusicBitmap)
+                .setLargeIcon(Data.sCurrentMusicBitmap == null ? BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px) : Data.sCurrentMusicBitmap)
                 .setContentIntent(pi)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setAutoCancel(false)
                 .setOngoing(true)
                 .setPriority(Notification.PRIORITY_MAX);
-
 
         if (Data.sMusicBinder.isPlayingMusic()) {
             Notification.Action[] actions = {new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_previous_white_24dp), "Pre", preIntent).build()
@@ -126,8 +119,13 @@ public class NotificationUtils extends ContextWrapper {
             builder.setActions(actions);
         }
 
-        Palette palette = Palette.from(Data.sCurrentMusicBitmap).generate();
-        builder.setColor(palette.getVibrantColor(Color.TRANSPARENT));
+        if (Data.sCurrentMusicBitmap != null) {
+            Palette palette = Palette.from(Data.sCurrentMusicBitmap).generate();
+            builder.setColor(palette.getVibrantColor(Color.TRANSPARENT));
+        } else {
+            builder.setColor(Color.WHITE);
+        }
+        builder.setColorized(true);
 
         return builder;
     }
@@ -135,11 +133,12 @@ public class NotificationUtils extends ContextWrapper {
     private NotificationCompat.Builder getNotification_25(String title, String content, Context context) {
         Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
         PendingIntent pi = PendingIntent.getActivity(context, 0, intent, 0);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), id)
+
+        @SuppressWarnings("UnnecessaryLocalVariable") NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), id)
                 .setContentTitle(title)
                 .setContentText(content)
                 .setSmallIcon(R.drawable.ic_audiotrack_24px)
-                .setLargeIcon(Data.sCurrentMusicBitmap)
+                .setLargeIcon(Data.sCurrentMusicBitmap == null ? BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px) : Data.sCurrentMusicBitmap)
                 .setContentIntent(pi)
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
                 .setDefaults(Notification.DEFAULT_ALL)
@@ -156,6 +155,7 @@ public class NotificationUtils extends ContextWrapper {
             createNotificationChannel();
             return getChannelNotification(title, content, res, context).build();
         } else {
+            Log.d(TAG, "getNot: get 25 noti");
             return getNotification_25(title, content, context).build();
         }
     }

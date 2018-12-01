@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月30日 20:36:09
- * 上次修改时间：2018年11月30日 20:35:27
+ * 当前修改时间：2018年12月01日 11:07:06
+ * 上次修改时间：2018年12月01日 11:00:14
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -82,15 +82,24 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public class MusicDetailFragment extends Fragment implements IStyle {
 
+    public static final float DEF_BUTTON_ALPHA = 0.3f;
+
     public static final int SET_SEEK_BAR_COLOR = 9001;
 
     private static final String TAG = "MusicDetailActivity";
+
     public MusicDetailFragment.NotLeakHandler mHandler;
+
     private boolean HIDE_TOOLBAR = false;
+
     private ImageView mMusicAlbumImage;
+
     private ImageView mPrimaryBackground;
+
     private ImageView mPrimaryBackground_down;
+
     private SeekBar mSeekBar;
+
     private HandlerThread mHandlerThread;
 
     private ImageButton mPlayButton;
@@ -212,15 +221,6 @@ public class MusicDetailFragment extends Fragment implements IStyle {
         mHandler.sendEmptyMessage(Values.HandlerWhat.SEEK_BAR_UPDATE);
         mHandler.sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
 
-//        Intent intent = getIntent();
-//        if (intent != null) {
-//            String args = getIntent().getStringExtra("intent_args");
-//            if (args != null) {
-//                if (args.equals("by_clicked_body") || args.equals("clicked by navHeaderImage")) {
-//                }
-//            }
-//        }
-
         setData();
 
         if (Values.MUSIC_PLAYING) {
@@ -228,12 +228,15 @@ public class MusicDetailFragment extends Fragment implements IStyle {
         }
 
         if (Data.sCurrentMusicBitmap != null) {
-            int temp = Data.sCurrentMusicBitmap.getPixel(Data.sCurrentMusicBitmap.getWidth() / 2, Data.sCurrentMusicBitmap.getHeight() / 2);
+            final int temp = Data.sCurrentMusicBitmap.getPixel(Data.sCurrentMusicBitmap.getWidth() / 2, Data.sCurrentMusicBitmap.getHeight() / 2);
             mSeekBar.getThumb().setColorFilter(temp, PorterDuff.Mode.SRC_ATOP);
         }
 
         // TODO: 2018/11/30
 //        Utils.Ui.setBlurEffect(mMainActivity, Data.sCurrentMusicBitmap, mPrimaryBackground, mPrimaryBackground_down, mNextWillText);
+        GlideApp.with(this).load(R.drawable.ic_audiotrack_24px).into(mMusicAlbumImage);
+        GlideApp.with(this).load(R.drawable.ic_audiotrack_24px).into(mNowPlayingSongImage);
+        GlideApp.with(this).load(R.drawable.ic_audiotrack_24px).into(mPrimaryBackground_down);
     }
 
     private void findView(View view) {
@@ -269,20 +272,20 @@ public class MusicDetailFragment extends Fragment implements IStyle {
         mNowPlayingSongImage = view.findViewById(R.id.recycler_item_clover_image);
     }
 
-    public ConstraintLayout getNowPlayingBody() {
+    public final ConstraintLayout getNowPlayingBody() {
         return mNowPlayingBody;
     }
 
-    public void initAnimation() {
+    public final void initAnimation() {
         /*
          * init view animation
          * */
         //default type is common, but the random button alpha is 1f(it means this button is on), so set animate
-        mRandomButton.setAlpha(0f);
-        mRepeatButton.setAlpha(0f);
+        mRandomButton.setAlpha(DEF_BUTTON_ALPHA);
+        mRepeatButton.setAlpha(DEF_BUTTON_ALPHA);
         mRandomButton.clearAnimation();
         mRepeatButton.clearAnimation();
-        ValueAnimator animator = new ValueAnimator();
+        final ValueAnimator animator = new ValueAnimator();
         animator.setStartDelay(500);
         animator.setDuration(300);
         if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
@@ -429,11 +432,11 @@ public class MusicDetailFragment extends Fragment implements IStyle {
             }
         }
 
-        ScaleAnimation mPlayButtonScaleAnimation = new ScaleAnimation(0, mPlayButton.getScaleX(), 0, mPlayButton.getScaleY(),
+        final ScaleAnimation mPlayButtonScaleAnimation = new ScaleAnimation(0, mPlayButton.getScaleX(), 0, mPlayButton.getScaleY(),
                 Animation.RELATIVE_TO_SELF, mPlayButton.getScaleX() / 2, Animation.RELATIVE_TO_SELF, mPlayButton.getScaleX() / 2);
-        RotateAnimation mPlayButtonRotationAnimation = new RotateAnimation(-90f, 0, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        final RotateAnimation mPlayButtonRotationAnimation = new RotateAnimation(-90f, 0, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
 
-        AnimationSet mPlayButtonAnimationSet = new AnimationSet(true);
+        final AnimationSet mPlayButtonAnimationSet = new AnimationSet(true);
 
         mPlayButtonRotationAnimation.setDuration(300);
         mPlayButtonRotationAnimation.setFillAfter(true);
@@ -469,8 +472,8 @@ public class MusicDetailFragment extends Fragment implements IStyle {
 //        mCardView.clearAnimation();
 //        mCardView.startAnimation(mCardViewTranslateAnimation);
 
-        TranslateAnimation mPreviousButtonTranslateAnimation = new TranslateAnimation(150, mPreviousButton.getTranslationX(), mPreviousButton.getTranslationY(), mPreviousButton.getTranslationY());
-        TranslateAnimation mNextButtonTranslateAnimation = new TranslateAnimation(-150, mNextButton.getTranslationX(), mNextButton.getTranslationY(), mNextButton.getTranslationY());
+        final TranslateAnimation mPreviousButtonTranslateAnimation = new TranslateAnimation(150, mPreviousButton.getTranslationX(), mPreviousButton.getTranslationY(), mPreviousButton.getTranslationY());
+        final TranslateAnimation mNextButtonTranslateAnimation = new TranslateAnimation(-150, mNextButton.getTranslationX(), mNextButton.getTranslationY(), mNextButton.getTranslationY());
         mPreviousButtonTranslateAnimation.setDuration(300);
         mPreviousButtonTranslateAnimation.setFillAfter(true);
         mNextButtonTranslateAnimation.setDuration(300);
@@ -492,8 +495,10 @@ public class MusicDetailFragment extends Fragment implements IStyle {
         //load animations...
 //        initAnimation();
 
-        mPlayButton.setTranslationX(0);
-        mPlayButton.setTranslationY(0);
+        mRandomButton.setAlpha(DEF_BUTTON_ALPHA);
+        mRepeatButton.setAlpha(DEF_BUTTON_ALPHA);
+        mRandomButton.clearAnimation();
+        mRepeatButton.clearAnimation();
 
         /*------------------toolbar--------------------*/
         mToolbar.inflateMenu(R.menu.menu_toolbar_in_detail);
@@ -520,7 +525,7 @@ public class MusicDetailFragment extends Fragment implements IStyle {
              * REPEAT = 1f
              * REPEAT_ONE = 1f(another pic)
              * */
-            ValueAnimator animator = new ValueAnimator();
+            final ValueAnimator animator = new ValueAnimator();
             animator.setDuration(300);
             mRepeatButton.clearAnimation();
             switch (Values.CurrentData.CURRENT_AUTO_NEXT_TYPE) {
@@ -593,7 +598,7 @@ public class MusicDetailFragment extends Fragment implements IStyle {
         });
 
         mRepeatButton.setOnLongClickListener(v -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
+            final AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
             builder.setTitle("Repeater");
             builder.setMessage("Building...");
             builder.setCancelable(true);
@@ -603,10 +608,10 @@ public class MusicDetailFragment extends Fragment implements IStyle {
 
         mRandomButton.setOnClickListener(v -> {
             mRandomButton.clearAnimation();
-            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit();
+            final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit();
             if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
                 Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_COMMON;
-                ValueAnimator animator = new ValueAnimator();
+                final ValueAnimator animator = new ValueAnimator();
                 animator.setFloatValues(1f, 0.3f);
                 animator.setDuration(300);
                 animator.addUpdateListener(animation -> mRandomButton.setAlpha((Float) animation.getAnimatedValue()));
@@ -637,7 +642,7 @@ public class MusicDetailFragment extends Fragment implements IStyle {
                 animator.start();
             } else {
                 Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_RANDOM;
-                ValueAnimator animator = new ValueAnimator();
+                final ValueAnimator animator = new ValueAnimator();
                 animator.setFloatValues(0.3f, 1f);
                 animator.setDuration(300);
                 animator.addUpdateListener(animation -> mRandomButton.setAlpha((Float) animation.getAnimatedValue()));
@@ -682,7 +687,7 @@ public class MusicDetailFragment extends Fragment implements IStyle {
         /*---------------------- Menu -----------------------*/
         mPopupMenu = new PopupMenu(mMainActivity, mMenuButton);
 
-        Menu menu = mPopupMenu.getMenu();
+        final Menu menu = mPopupMenu.getMenu();
 
         mMenuButton.setOnClickListener(v -> mPopupMenu.show());
 
@@ -843,11 +848,11 @@ public class MusicDetailFragment extends Fragment implements IStyle {
         mSlidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
-                if (slideOffset == 1) {
-                    mMainActivity.getSlidingUpPanelLayout().setTouchEnabled(false);
-                }
+
                 if (slideOffset == 0) {
                     mMainActivity.getSlidingUpPanelLayout().setTouchEnabled(true);
+                } else {
+                    mMainActivity.getSlidingUpPanelLayout().setTouchEnabled(false);
                 }
             }
 
@@ -875,7 +880,7 @@ public class MusicDetailFragment extends Fragment implements IStyle {
     //in this Fragment
     private void showToolbar() {
         HIDE_TOOLBAR = false;
-        ValueAnimator anim = ValueAnimator.ofFloat(0, 1f);
+        final ValueAnimator anim = ValueAnimator.ofFloat(0, 1f);
         anim.setDuration(300);
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -894,7 +899,7 @@ public class MusicDetailFragment extends Fragment implements IStyle {
 
     private void hideToolbar() {
         HIDE_TOOLBAR = true;
-        AlphaAnimation temp = new AlphaAnimation(1f, 0f);
+        final AlphaAnimation temp = new AlphaAnimation(1f, 0f);
         temp.setDuration(300);
         temp.setFillAfter(false);
         temp.setAnimationListener(new Animation.AnimationListener() {
@@ -918,31 +923,44 @@ public class MusicDetailFragment extends Fragment implements IStyle {
     }
 
     //set infoBar set AlbumImage set PrimaryBackground
-    public final void setCurrentInfo(String name, String albumName, byte[] cover) {
+    public final void setCurrentInfo(@NonNull String name, @NonNull String albumName, byte[] cover) {
         mMainActivity.runOnUiThread(() -> {
             mCurrentMusicNameText.setText(name);
             mCurrentAlbumNameText.setText(albumName);
 
-            GlideApp.with(mMainActivity)
-                    .load(cover)
-                    .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-                    .centerCrop()
-                    .into(mMusicAlbumImage);
-            Utils.Ui.setBlurEffect(mMainActivity, cover, mPrimaryBackground, mPrimaryBackground_down, mNextWillText);
+            if (cover != null) {
+                GlideApp.with(mMainActivity)
+                        .load(cover)
+                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                        .centerCrop()
+                        .into(mMusicAlbumImage);
+                Utils.Ui.setBlurEffect(mMainActivity, cover, mPrimaryBackground, mPrimaryBackground_down, mNextWillText);
+            }
+
         });
     }
 
-    public final void setCurrentInfo(String name, String albumName, Bitmap cover) {
+    public final void setCurrentInfo(@NonNull String name, @NonNull String albumName, @Nullable Bitmap cover) {
         mMainActivity.runOnUiThread(() -> {
             mCurrentMusicNameText.setText(name);
             mCurrentAlbumNameText.setText(albumName);
 
-            GlideApp.with(mMainActivity)
-                    .load(cover)
-                    .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-                    .centerCrop()
-                    .into(mMusicAlbumImage);
-            Utils.Ui.setBlurEffect(mMainActivity, cover, mPrimaryBackground, mPrimaryBackground_down, mNextWillText);
+            if (cover != null) {
+                GlideApp.with(mMainActivity)
+                        .load(cover)
+                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                        .centerCrop()
+                        .into(mMusicAlbumImage);
+                Utils.Ui.setBlurEffect(mMainActivity, cover, mPrimaryBackground, mPrimaryBackground_down, mNextWillText);
+
+            } else {
+                mMusicAlbumImage.setImageResource(R.drawable.ic_audiotrack_24px);
+                mPrimaryBackground.setImageDrawable(null);
+                mPrimaryBackground.setBackgroundColor(Color.GRAY);
+                mPrimaryBackground_down.setImageDrawable(null);
+                mPrimaryBackground_down.setBackgroundColor(Color.GRAY);
+            }
+
         });
     }
 
@@ -966,11 +984,6 @@ public class MusicDetailFragment extends Fragment implements IStyle {
             mNowPlayingSongText.setText(songName);
             mNowPlayingSongAlbumText.setText(albumName);
 
-            if (cover != null) {
-                //color set
-
-                GlideApp.with(mMainActivity).load(cover).transition(DrawableTransitionOptions.withCrossFade()).into(mNowPlayingSongImage);
-                GlideApp.with(mMainActivity).load(cover).transition(DrawableTransitionOptions.withCrossFade()).into(mMainActivity.getNavHeaderImageView());
 
 //                Palette.Builder paletteBuilder = Palette.from(Data.sCurrentMusicBitmap);
 //                paletteBuilder.generate(palette -> {
@@ -988,31 +1001,39 @@ public class MusicDetailFragment extends Fragment implements IStyle {
 //                    }
 //                });
 
-                int currentBright = Utils.Ui.getBright(cover);
+            if (cover != null) {
+
+                //color set
+                GlideApp.with(mMainActivity).load(cover).transition(DrawableTransitionOptions.withCrossFade()).into(mNowPlayingSongImage);
+                GlideApp.with(mMainActivity).load(cover).transition(DrawableTransitionOptions.withCrossFade()).into(mMainActivity.getNavHeaderImageView());
+
 
                 //InfoBar background color AND text color balance
+                final int currentBright = Utils.Ui.getBright(cover);
                 if (currentBright > (255 / 2)) {
-                    mNowPlayingSongText.setTextColor(Color.BLACK);
-                    mNowPlayingSongAlbumText.setTextColor(Color.BLACK);
-                    mNowPlayingStatusImage.setColorFilter(Color.BLACK);
+                    @ColorInt final int target = Color.parseColor(Values.Color.NOT_VERY_BLACK);
+                    mNowPlayingSongText.setTextColor(target);
+                    mNowPlayingSongAlbumText.setTextColor(target);
+                    mNowPlayingStatusImage.setColorFilter(target);
 
-                    mRandomButton.setColorFilter(Color.BLACK);
-                    mRepeatButton.setColorFilter(Color.BLACK);
-                    mNextButton.setColorFilter(Color.BLACK);
-                    mPreviousButton.setColorFilter(Color.BLACK);
-                    mLeftTime.setTextColor(Color.BLACK);
-                    mRightTime.setTextColor(Color.BLACK);
+                    mRandomButton.setColorFilter(target);
+                    mRepeatButton.setColorFilter(target);
+                    mNextButton.setColorFilter(target);
+                    mPreviousButton.setColorFilter(target);
+                    mLeftTime.setTextColor(target);
+                    mRightTime.setTextColor(target);
                 } else {
-                    mNowPlayingSongText.setTextColor(Color.WHITE);
-                    mNowPlayingSongAlbumText.setTextColor(Color.WHITE);
-                    mNowPlayingStatusImage.setColorFilter(Color.WHITE);
+                    @ColorInt final int target = Color.parseColor(Values.Color.NOT_VERY_WHITE);
+                    mNowPlayingSongText.setTextColor(target);
+                    mNowPlayingSongAlbumText.setTextColor(target);
+                    mNowPlayingStatusImage.setColorFilter(target);
 
-                    mRandomButton.setColorFilter(Color.WHITE);
-                    mRepeatButton.setColorFilter(Color.WHITE);
-                    mNextButton.setColorFilter(Color.WHITE);
-                    mPreviousButton.setColorFilter(Color.WHITE);
-                    mLeftTime.setTextColor(Color.WHITE);
-                    mRightTime.setTextColor(Color.WHITE);
+                    mRandomButton.setColorFilter(target);
+                    mRepeatButton.setColorFilter(target);
+                    mNextButton.setColorFilter(target);
+                    mPreviousButton.setColorFilter(target);
+                    mLeftTime.setTextColor(target);
+                    mRightTime.setTextColor(target);
                 }
 
                 GlideApp.with(mMainActivity).load(cover)
@@ -1020,6 +1041,23 @@ public class MusicDetailFragment extends Fragment implements IStyle {
                         .apply(bitmapTransform(new BlurTransformation(30, 20)))
                         .override(100, 100)
                         .into(mNowPlayingBackgroundImage);
+
+            } else {
+                mNowPlayingBackgroundImage.setImageDrawable(null);
+                mNowPlayingBackgroundImage.setBackgroundColor(Color.WHITE);
+                GlideApp.with(mMainActivity).load(R.drawable.ic_audiotrack_24px).transition(DrawableTransitionOptions.withCrossFade()).into(mNowPlayingSongImage);
+                GlideApp.with(mMainActivity).load(R.drawable.ic_audiotrack_24px).transition(DrawableTransitionOptions.withCrossFade()).into(mMainActivity.getNavHeaderImageView());
+
+                mNowPlayingSongText.setTextColor(Color.BLACK);
+                mNowPlayingSongAlbumText.setTextColor(Color.BLACK);
+                mNowPlayingStatusImage.setColorFilter(Color.BLACK);
+
+                mRandomButton.setColorFilter(Color.BLACK);
+                mRepeatButton.setColorFilter(Color.BLACK);
+                mNextButton.setColorFilter(Color.BLACK);
+                mPreviousButton.setColorFilter(Color.BLACK);
+                mLeftTime.setTextColor(Color.BLACK);
+                mRightTime.setTextColor(Color.BLACK);
             }
 
             Utils.Ui.setPlayButtonNowPlaying();
@@ -1058,7 +1096,7 @@ public class MusicDetailFragment extends Fragment implements IStyle {
                         } else {
                             mSeekBar.setProgress(0);
                         }
-                        SimpleDateFormat sd = new SimpleDateFormat("mm:ss", Locale.CHINESE);
+                        final SimpleDateFormat sd = new SimpleDateFormat("mm:ss", Locale.CHINESE);
                         mRightTime.setText(String.valueOf(sd.format(new Date(Data.sMusicBinder.getDuration()))));
                         mSeekBar.setMax(Data.sMusicBinder.getDuration());
                     });
@@ -1074,7 +1112,7 @@ public class MusicDetailFragment extends Fragment implements IStyle {
                             } else {
                                 mSeekBar.setProgress(Data.sMusicBinder.getCurrentPosition());
                             }
-                            SimpleDateFormat sd = new SimpleDateFormat("mm:ss", Locale.CHINESE);
+                            final SimpleDateFormat sd = new SimpleDateFormat("mm:ss", Locale.CHINESE);
                             mLeftTime.setText(String.valueOf(sd.format(new Date(Data.sMusicBinder.getCurrentPosition()))));
                         }
 
@@ -1113,8 +1151,8 @@ public class MusicDetailFragment extends Fragment implements IStyle {
                 break;
 
                 case SET_SEEK_BAR_COLOR: {
-                    @ColorInt int color = msg.arg1;
-                    mSeekBar.getThumb().setColorFilter(color, PorterDuff.Mode.DST_ATOP);
+                    @ColorInt final int color = msg.arg1;
+                    mSeekBar.getThumb().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
                 }
                 break;
 

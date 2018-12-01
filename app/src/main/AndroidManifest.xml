@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：AndroidManifest.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月30日 20:36:09
-  ~ 上次修改时间：2018年11月30日 18:45:38
+  ~ 当前修改时间：2018年12月01日 11:07:06
+  ~ 上次修改时间：2018年12月01日 11:06:41
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -30,7 +30,8 @@
         android:theme="@style/GreenTheme">
         <activity
             android:name=".Activities.MainActivity"
-            android:launchMode="singleTask" />
+            android:launchMode="singleTask"
+            android:theme="@style/SplashActivityTheme" />
 
         <service
             android:name=".Service.MyMusicService"

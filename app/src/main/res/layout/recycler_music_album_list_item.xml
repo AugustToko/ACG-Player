@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：recycler_music_album_list_item.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月19日 14:04:02
-  ~ 上次修改时间：2018年11月19日 14:03:47
+  ~ 当前修改时间：2018年12月01日 11:07:06
+  ~ 上次修改时间：2018年12月01日 10:12:37
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -48,10 +48,15 @@
             android:id="@+id/recycler_item_song_album_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="0dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
             android:maxLines="1"
             android:text="Music Text"
             android:textColor="#3c3c3c"
             android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
     </android.support.constraint.ConstraintLayout>

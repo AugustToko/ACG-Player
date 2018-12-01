@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月30日 20:36:09
- * 上次修改时间：2018年11月30日 09:36:44
+ * 当前修改时间：2018年12月01日 11:07:06
+ * 上次修改时间：2018年12月01日 08:51:52
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -131,6 +131,8 @@ public final class MusicListFragment extends Fragment {
                             Log.e(TAG, "onAttach: song file: " + path + " does not exits, skip this!!!");
                             break;
                         }
+
+                        Log.i(TAG, "onAttach: music path: " + path);
 
                         String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
                         String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：item_in_detail.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月30日 20:36:09
-  ~ 上次修改时间：2018年11月30日 20:35:29
+  ~ 当前修改时间：2018年12月01日 11:07:06
+  ~ 上次修改时间：2018年12月01日 11:06:40
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -33,11 +33,12 @@
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
-                android:maxLines="1"
+                android:ellipsize="start"
                 android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
+                android:singleLine="true"
                 tools:text="0" />
 
             <android.support.constraint.ConstraintLayout
@@ -58,6 +59,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:textSize="12sp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/item_main_text"
                     tools:text="@string/app_name" />
@@ -70,6 +73,7 @@
                     android:layout_marginTop="4dp"
                     android:layout_marginEnd="8dp"
                     android:maxLines="1"
+                    android:ellipsize="end"
                     android:text="@string/album"
                     android:textSize="12sp"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -81,9 +85,13 @@
                     android:id="@+id/item_main_text"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:ellipsize="end"
                     android:maxLines="1"
                     android:text="@string/music"
                     android:textSize="18sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
             </android.support.constraint.ConstraintLayout>

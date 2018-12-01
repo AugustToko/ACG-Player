@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月30日 20:36:09
- * 上次修改时间：2018年11月30日 20:35:29
+ * 当前修改时间：2018年12月01日 11:07:06
+ * 上次修改时间：2018年12月01日 11:06:38
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -30,6 +30,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.io.IOException;
@@ -48,6 +49,8 @@ import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
 public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter, IStyle {
+
+    private static final String TAG = "MyRecyclerAdapter";
 
     private List<MusicItem> mMusicItems;
 
@@ -78,6 +81,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         view.setOnClickListener(v -> new Thread(() -> {
             String clickedPath = mMusicItems.get(holder.getAdapterPosition()).getMusicPath();
 
+            //song clicked same as playing
             if (Data.sMusicBinder.isPlayingMusic()) {
                 if (clickedPath.equals(Values.CurrentData.CURRENT_SONG_PATH)) {
                     Utils.SendSomeThing.sendPause(mContext);
@@ -96,13 +100,16 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
             Bitmap cover = Utils.Audio.getMp3Cover(clickedPath);
 
-            //set InfoBar
-            mMainActivity.getMusicDetailFragment().setSlideInfo(clickedSongName, clickedSongAlbumName, mMusicItems.get(holder.getAdapterPosition()).getMusicPath(), cover);
-            mMainActivity.getMusicDetailFragment().setCurrentInfo(clickedSongName, clickedSongAlbumName, Utils.Audio.getAlbumByteImage(clickedPath));
-
             Data.sCurrentMusicAlbum = clickedSongAlbumName;
             Data.sCurrentMusicName = clickedSongName;
             Data.sCurrentMusicBitmap = cover;
+
+            //set InfoBar
+            mMainActivity.getMusicDetailFragment().setSlideInfo(clickedSongName, clickedSongAlbumName, mMusicItems.get(holder.getAdapterPosition()).getMusicPath(), cover);
+            mMainActivity.getMusicDetailFragment().setCurrentInfo(clickedSongName, clickedSongAlbumName, cover);
+
+            // TODO: 2018/12/1 custom image (with blur)
+//            mMainActivity.getHandler().sendEmptyMessage(MainActivity.SET_VIEWPAGER_BG);
 
             Values.MUSIC_PLAYING = true;
             Values.HAS_PLAYED = true;
@@ -136,7 +143,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
         holder.mPopupMenu.setOnMenuItemClickListener(item -> {
 
-            int index = holder.getAdapterPosition();
+            @SuppressWarnings("UnnecessaryLocalVariable") int index = holder.getAdapterPosition();
 
             Values.CurrentData.CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = index;
 
@@ -199,6 +206,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
             return false;
         });
+
         return holder;
     }
 
@@ -255,7 +263,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 currentBind.mMusicExtName.setBackgroundResource(R.color.mp3TypeColor);
             } else {
                 currentBind.mMusicExtName.setBackgroundColor(Color.CYAN);
-                return;
             }
         }
 
@@ -287,7 +294,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             }
             mImageViewWeakReference.get().setTag(null);
             GlideApp.with(mContextWeakReference.get()).load(picData)
-//                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .transition(DrawableTransitionOptions.withCrossFade())
                     .override(Values.MAX_HEIGHT_AND_WIDTH, Values.MAX_HEIGHT_AND_WIDTH)
                     .skipMemoryCache(true)
                     .into(mImageViewWeakReference.get());

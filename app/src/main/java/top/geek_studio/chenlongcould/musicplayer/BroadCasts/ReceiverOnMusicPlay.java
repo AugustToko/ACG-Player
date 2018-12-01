@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月30日 20:36:09
- * 上次修改时间：2018年11月30日 20:35:23
+ * 当前修改时间：2018年12月01日 11:07:06
+ * 上次修改时间：2018年12月01日 11:00:14
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -127,22 +127,27 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                     musicDetailFragment.setSlideInfo(musicName, albumName, path, cover);
                     musicDetailFragment.setCurrentInfo(musicName, albumName, Utils.Audio.getAlbumByteImage(path));
 
-                    //seekBar(Thumb) change color
-                    Palette.from(cover).generate(palette -> {
-                        Message setColor = Message.obtain();
-                        setColor.what = MusicDetailFragment.SET_SEEK_BAR_COLOR;
-                        if (palette != null) {
-                            setColor.arg1 = palette.getVibrantColor(cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2));
-                        } else {
-                            setColor.arg1 = cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2);
-                        }
+                    Message setColor = Message.obtain();
+                    setColor.what = MusicDetailFragment.SET_SEEK_BAR_COLOR;
+                    if (cover != null) {
+                        Palette.from(cover).generate(palette -> {
 
-                        if (setColor.arg1 == Color.WHITE) setColor.arg1 = Color.BLACK;
+                            if (palette != null) {
+                                setColor.arg1 = palette.getVibrantColor(cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2));
+                            } else {
+                                setColor.arg1 = cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2);
+                            }
 
+                            if (setColor.arg1 == Color.WHITE) setColor.arg1 = Color.BLACK;
+
+                            musicDetailFragment.getHandler().sendMessage(setColor);
+                        });
+                    } else {
+                        setColor.arg1 = Color.WHITE;
                         musicDetailFragment.getHandler().sendMessage(setColor);
-                    });
-                }
+                    }
 
+                }
 
                 Data.saveGlobalCurrentData(musicName, albumName, cover);
 
@@ -226,19 +231,26 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                                 musicDetailFragment.getSeekBar().setProgress(0);
                             }
 
-                            Palette.from(cover).generate(palette -> {
-                                Message setColor = Message.obtain();
-                                setColor.what = MusicDetailFragment.SET_SEEK_BAR_COLOR;
-                                if (palette != null) {
-                                    setColor.arg1 = palette.getVibrantColor(cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2));
-                                } else {
-                                    setColor.arg1 = cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2);
-                                }
+                            Message setColor = Message.obtain();
+                            setColor.what = MusicDetailFragment.SET_SEEK_BAR_COLOR;
+                            if (cover != null) {
+                                Palette.from(cover).generate(palette -> {
 
-                                if (setColor.arg1 == Color.WHITE) setColor.arg1 = Color.BLACK;
+                                    if (palette != null) {
+                                        setColor.arg1 = palette.getVibrantColor(cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2));
+                                    } else {
+                                        setColor.arg1 = cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2);
+                                    }
 
+                                    if (setColor.arg1 == Color.WHITE) setColor.arg1 = Color.BLACK;
+
+                                    musicDetailFragment.getHandler().sendMessage(setColor);
+                                });
+                            } else {
+                                setColor.arg1 = Color.WHITE;
                                 musicDetailFragment.getHandler().sendMessage(setColor);
-                            });
+                            }
+
                             musicDetailFragment.setSlideInfo(musicName, albumName, path, cover);
                             musicDetailFragment.setCurrentInfo(musicName, albumName, Utils.Audio.getAlbumByteImage(path));
                             musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);

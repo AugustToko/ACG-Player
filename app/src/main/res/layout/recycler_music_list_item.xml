@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：recycler_music_list_item.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月27日 11:16:33
-  ~ 上次修改时间：2018年11月26日 20:08:02
+  ~ 当前修改时间：2018年12月01日 11:07:06
+  ~ 上次修改时间：2018年12月01日 11:06:41
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -49,6 +49,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:textSize="12sp"
+            android:ellipsize="end"
+            android:maxLines="1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/recycler_item_music_name"
             tools:text="@string/app_name" />
@@ -61,6 +63,7 @@
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
             android:maxLines="1"
+            android:ellipsize="end"
             android:text="Clover Text"
             android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -72,9 +75,14 @@
             android:id="@+id/recycler_item_music_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="0dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
             android:maxLines="1"
             android:text="Music Text"
             android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
     </android.support.constraint.ConstraintLayout>

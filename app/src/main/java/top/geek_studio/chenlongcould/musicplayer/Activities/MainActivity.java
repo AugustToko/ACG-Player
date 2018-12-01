@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月30日 20:36:08
- * 上次修改时间：2018年11月30日 20:35:23
+ * 当前修改时间：2018年12月01日 11:07:06
+ * 上次修改时间：2018年12月01日 11:06:38
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -49,6 +49,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyPagerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter2AlbumList;
 import top.geek_studio.chenlongcould.musicplayer.Data;
@@ -66,6 +67,8 @@ import top.geek_studio.chenlongcould.musicplayer.Utils.NotificationUtils;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
+import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
+
 public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     private static final String TAG = "MainActivity";
@@ -75,6 +78,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     public static final int DOWN = 50071;
 
     public static final int ENABLE_TOUCH = 50072;
+
+    public static final int SET_VIEWPAGER_BG = 50073;
 
     private boolean TOOLBAR_CLICKED = false;
 
@@ -92,7 +97,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     private MyPagerAdapter mPagerAdapter;
 
-    private ArrayList<String> mTitles = new ArrayList<>();
+    private final ArrayList<String> mTitles = new ArrayList<>();
 
     private Toolbar mToolbar;
 
@@ -109,6 +114,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     private SearchView mSearchView;
 
     private SlidingUpPanelLayout mSlidingUpPanelLayout;
+
+    private ImageView mBackgroundImage;
 
     /**
      * ----------------- fragment(s) ----------------------
@@ -146,6 +153,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         if (savedInstanceState != null) {
             mViewPager.setCurrentItem(savedInstanceState.getInt("viewpage", 0), true);
         }
+
     }
 
     @Override
@@ -333,7 +341,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     }
 
-    public void exitApp() {
+    public final void exitApp() {
         mHandlerThread.quitSafely();
         ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(NotificationUtils.ID);
 
@@ -354,23 +362,23 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         finish();
     }
 
-    public MusicListFragment getMusicListFragment() {
+    public final MusicListFragment getMusicListFragment() {
         return mMusicListFragment;
     }
 
-    public MusicDetailFragment getMusicDetailFragment() {
+    public final MusicDetailFragment getMusicDetailFragment() {
         return mMusicDetailFragment;
     }
 
-    public AlbumListFragment getAlbumListFragment() {
+    public final AlbumListFragment getAlbumListFragment() {
         return mAlbumListFragment;
     }
 
-    public PlayListFragment getPlayListFragment() {
+    public final PlayListFragment getPlayListFragment() {
         return mPlayListFragment;
     }
 
-    public SlidingUpPanelLayout getSlidingUpPanelLayout() {
+    public final SlidingUpPanelLayout getSlidingUpPanelLayout() {
         return mSlidingUpPanelLayout;
     }
 
@@ -552,6 +560,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mViewPager = findViewById(R.id.view_pager);
         mAppBarLayout = findViewById(R.id.activity_main_appbar);
         mSlidingUpPanelLayout = findViewById(R.id.activity_main_sliding_layout);
+        mBackgroundImage = findViewById(R.id.back_ground_image);
     }
 
     @Override
@@ -561,22 +570,22 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mTabLayout.setBackgroundColor(color);
     }
 
-    public NotLeakHandler getHandler() {
+    public final NotLeakHandler getHandler() {
         return mHandler;
     }
 
     /**
      * getter
      */
-    public List<Fragment> getFragmentList() {
+    public final List<Fragment> getFragmentList() {
         return mFragmentList;
     }
 
-    public ImageView getNavHeaderImageView() {
+    public final ImageView getNavHeaderImageView() {
         return mNavHeaderImageView;
     }
 
-    public class NotLeakHandler extends Handler {
+    public final class NotLeakHandler extends Handler {
         @SuppressWarnings("unused")
         private WeakReference<MainActivity> mWeakReference;
 
@@ -622,6 +631,17 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 case DOWN: {
                     mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
                 }
+
+                case SET_VIEWPAGER_BG: {
+                    mBackgroundImage.post(() -> GlideApp
+                            .with(mWeakReference.get())
+                            .load(Data.sCurrentMusicBitmap)
+                            .apply(bitmapTransform(new BlurTransformation(10, 10)))
+                            .transition(DrawableTransitionOptions.withCrossFade())
+                            .into(mBackgroundImage));
+                }
+                break;
+
                 default:
             }
         }

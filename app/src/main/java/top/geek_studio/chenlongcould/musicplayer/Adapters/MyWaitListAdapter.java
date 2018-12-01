@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyWaitListAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月30日 20:36:09
- * 上次修改时间：2018年11月30日 16:54:09
+ * 当前修改时间：2018年12月01日 11:07:06
+ * 上次修改时间：2018年12月01日 09:56:01
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -223,7 +223,6 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
                 currentBind.mExtName.setBackgroundResource(R.color.mp3TypeColor);
             } else {
                 currentBind.mExtName.setBackgroundColor(Color.CYAN);
-                return;
             }
         }
 
