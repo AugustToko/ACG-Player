@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月01日 11:07:06
- * 上次修改时间：2018年12月01日 08:51:52
+ * 当前修改时间：2018年12月01日 16:21:06
+ * 上次修改时间：2018年12月01日 16:20:48
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -12,13 +12,11 @@
 package top.geek_studio.chenlongcould.musicplayer.Fragments;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -29,6 +27,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.RequestBuilder;
@@ -36,7 +35,6 @@ import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
 import com.bumptech.glide.util.ViewPreloadSizeProvider;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
@@ -46,7 +44,6 @@ import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
 public final class MusicListFragment extends Fragment {
@@ -110,61 +107,6 @@ public final class MusicListFragment extends Fragment {
         mHandlerThread.start();
         mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
 
-        // TODO: 2018/11/2 需要转为线程池的使用。
-        new Thread(() -> {
-
-            if (Data.sMusicItems.isEmpty()) {
-                /*---------------------- init Data!!!! -------------------*/
-                Cursor cursor = mActivity.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-                if (cursor != null && cursor.moveToFirst()) {
-                    //没有歌曲直接退出app
-                    if (cursor.getCount() == 0) {
-                        mActivity.runOnUiThread(() -> Utils.Ui.fastToast(mActivity, "Can not find any music!"));
-                        mActivity.finish();
-                        return;
-                    }
-                    do {
-                        String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-
-                        File file = new File(path);
-                        if (!file.exists()) {
-                            Log.e(TAG, "onAttach: song file: " + path + " does not exits, skip this!!!");
-                            break;
-                        }
-
-                        Log.i(TAG, "onAttach: music path: " + path);
-
-                        String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
-                        String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-                        String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
-                        int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
-                        int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-                        int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-                        String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-                        long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
-
-                        MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
-                                .musicAlbum(albumName)
-                                .addTime((int) addTime)
-                                .artist(artist)
-                                .duration(duration)
-                                .mimeName(mimeType)
-                                .size(size);
-
-                        Data.sMusicItems.add(builder.build());
-                        Data.sMusicItemsBackUp.add(builder.build());
-
-                    } while (cursor.moveToNext());
-                    cursor.close();
-                    mHandler.sendEmptyMessage(Values.HandlerWhat.INIT_MUSIC_LIST);
-                    Values.MUSIC_DATA_INIT_DONE = true;
-                } else {
-                    mActivity.runOnUiThread(() -> Utils.Ui.fastToast(mActivity, "cursor == null or moveToFirst Fail"));
-                }
-            }
-
-        }).start();
-
     }
 
     @Override
@@ -225,8 +167,6 @@ public final class MusicListFragment extends Fragment {
      */
     private void sureCreateViewDone() {
         if (CREATE_VIEW_DONE) {
-            MainActivity.NotLeakHandler handler = mActivity.getHandler();
-            handler.sendEmptyMessage(Values.HandlerWhat.INIT_MUSIC_LIST);
             adapter.notifyDataSetChanged();
         } else {
             new Handler().postDelayed(this::sureCreateViewDone, 1000);      //循环一秒
@@ -253,11 +193,11 @@ public final class MusicListFragment extends Fragment {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case Values.HandlerWhat.INIT_MUSIC_LIST: {
+                case Values.HandlerWhat.INIT_MUSIC_LIST_DONE: {
                     mActivity.runOnUiThread(() -> {
                         if (CREATE_VIEW_DONE) {
                             sureCreateViewDone();
-                            Log.d(TAG, "onStart: setAdapter done!");
+                            Toast.makeText(mWeakReference.get().getActivity(), "Loading", Toast.LENGTH_SHORT).show();
                         }
                     });
 

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：AndroidManifest.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月01日 11:07:06
-  ~ 上次修改时间：2018年12月01日 11:06:41
+  ~ 当前修改时间：2018年12月01日 16:21:06
+  ~ 上次修改时间：2018年12月01日 13:33:41
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -22,6 +22,7 @@
 
     <application
         android:name=".MyApplication"
+        android:largeHeap="true"
         android:allowBackup="false"
         android:fullBackupContent="@xml/backup_descriptor"
         android:icon="@mipmap/ic_launcher"

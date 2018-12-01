@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月30日 20:36:09
- * 上次修改时间：2018年11月30日 15:47:02
+ * 当前修改时间：2018年12月01日 16:21:06
+ * 上次修改时间：2018年12月01日 13:39:29
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -55,7 +55,7 @@ public final class Values {
         /**
          * Handler msg.what
          */
-        public static final int INIT_MUSIC_LIST = 50;
+        public static final int INIT_MUSIC_LIST_DONE = 50;
         public static final int GET_DATA_DONE = 52;
         public static final int SEEK_BAR_UPDATE = 53;
         public static final int INIT_SEEK_BAR = 54;

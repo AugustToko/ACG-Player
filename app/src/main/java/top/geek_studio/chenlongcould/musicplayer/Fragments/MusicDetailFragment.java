@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月01日 11:07:06
- * 上次修改时间：2018年12月01日 11:00:14
+ * 当前修改时间：2018年12月01日 16:21:06
+ * 上次修改时间：2018年12月01日 16:20:48
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -46,10 +46,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.RotateAnimation;
-import android.view.animation.ScaleAnimation;
-import android.view.animation.TranslateAnimation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -276,17 +272,26 @@ public class MusicDetailFragment extends Fragment implements IStyle {
         return mNowPlayingBody;
     }
 
+    public void setDefAnimation() {
+        mRandomButton.setAlpha(0f);
+        mRepeatButton.setAlpha(0f);
+    }
+
+    public void clearAnimations() {
+        mRandomButton.clearAnimation();
+        mRepeatButton.clearAnimation();
+        mPlayButton.clearAnimation();
+        mPreviousButton.clearAnimation();
+        mNextButton.clearAnimation();
+    }
+
     public final void initAnimation() {
         /*
          * init view animation
          * */
         //default type is common, but the random button alpha is 1f(it means this button is on), so set animate
-        mRandomButton.setAlpha(DEF_BUTTON_ALPHA);
-        mRepeatButton.setAlpha(DEF_BUTTON_ALPHA);
-        mRandomButton.clearAnimation();
-        mRepeatButton.clearAnimation();
         final ValueAnimator animator = new ValueAnimator();
-        animator.setStartDelay(500);
+//        animator.setStartDelay(500);
         animator.setDuration(300);
         if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
             animator.setFloatValues(0f, 1f);
@@ -432,56 +437,40 @@ public class MusicDetailFragment extends Fragment implements IStyle {
             }
         }
 
-        final ScaleAnimation mPlayButtonScaleAnimation = new ScaleAnimation(0, mPlayButton.getScaleX(), 0, mPlayButton.getScaleY(),
-                Animation.RELATIVE_TO_SELF, mPlayButton.getScaleX() / 2, Animation.RELATIVE_TO_SELF, mPlayButton.getScaleX() / 2);
-        final RotateAnimation mPlayButtonRotationAnimation = new RotateAnimation(-90f, 0, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-
-        final AnimationSet mPlayButtonAnimationSet = new AnimationSet(true);
-
-        mPlayButtonRotationAnimation.setDuration(300);
-        mPlayButtonRotationAnimation.setFillAfter(true);
-        mPlayButtonScaleAnimation.setDuration(300);
-        mPlayButtonScaleAnimation.setFillAfter(true);
-        mPlayButtonScaleAnimation.setStartOffset(500);
-        mPlayButtonRotationAnimation.setStartOffset(500);
-        mPlayButton.clearAnimation();
-
-        mPlayButtonAnimationSet.addAnimation(mPlayButtonRotationAnimation);
-        mPlayButtonAnimationSet.addAnimation(mPlayButtonScaleAnimation);
-        mPlayButtonAnimationSet.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-
-        mPlayButton.setAnimation(mPlayButtonAnimationSet);
-
-//        TranslateAnimation mCardViewTranslateAnimation = new TranslateAnimation(mCardView.getTranslationX(), mCardView.getTranslationX(), 500, mCardView.getTranslationY());
-//        mCardViewTranslateAnimation.setDuration(300);
-//        mCardViewTranslateAnimation.setFillAfter(true);
-//        mCardView.clearAnimation();
-//        mCardView.startAnimation(mCardViewTranslateAnimation);
-
-        final TranslateAnimation mPreviousButtonTranslateAnimation = new TranslateAnimation(150, mPreviousButton.getTranslationX(), mPreviousButton.getTranslationY(), mPreviousButton.getTranslationY());
-        final TranslateAnimation mNextButtonTranslateAnimation = new TranslateAnimation(-150, mNextButton.getTranslationX(), mNextButton.getTranslationY(), mNextButton.getTranslationY());
-        mPreviousButtonTranslateAnimation.setDuration(300);
-        mPreviousButtonTranslateAnimation.setFillAfter(true);
-        mNextButtonTranslateAnimation.setDuration(300);
-        mNextButtonTranslateAnimation.setFillAfter(true);
-        mPreviousButton.clearAnimation();
-        mNextButton.clearAnimation();
-        mNextButton.startAnimation(mNextButtonTranslateAnimation);
-        mPreviousButton.startAnimation(mPreviousButtonTranslateAnimation);
+//        final ScaleAnimation mPlayButtonScaleAnimation = new ScaleAnimation(0, mPlayButton.getScaleX(), 0, mPlayButton.getScaleY(),
+//                Animation.RELATIVE_TO_SELF, mPlayButton.getScaleX() / 2, Animation.RELATIVE_TO_SELF, mPlayButton.getScaleX() / 2);
+//        final RotateAnimation mPlayButtonRotationAnimation = new RotateAnimation(-90f, 0, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+//
+//        final AnimationSet mPlayButtonAnimationSet = new AnimationSet(true);
+//
+//        mPlayButtonRotationAnimation.setDuration(300);
+//        mPlayButtonRotationAnimation.setFillAfter(true);
+//        mPlayButtonScaleAnimation.setDuration(300);
+//        mPlayButtonScaleAnimation.setFillAfter(true);
+//        mPlayButtonScaleAnimation.setStartOffset(500);
+//        mPlayButtonRotationAnimation.setStartOffset(500);
+//        mPlayButton.clearAnimation();
+//
+//        mPlayButtonAnimationSet.addAnimation(mPlayButtonRotationAnimation);
+//        mPlayButtonAnimationSet.addAnimation(mPlayButtonScaleAnimation);
+//        mPlayButton.setAnimation(mPlayButtonAnimationSet);
+//
+////        TranslateAnimation mCardViewTranslateAnimation = new TranslateAnimation(mCardView.getTranslationX(), mCardView.getTranslationX(), 500, mCardView.getTranslationY());
+////        mCardViewTranslateAnimation.setDuration(300);
+////        mCardViewTranslateAnimation.setFillAfter(true);
+////        mCardView.clearAnimation();
+////        mCardView.startAnimation(mCardViewTranslateAnimation);
+//
+//        final TranslateAnimation mPreviousButtonTranslateAnimation = new TranslateAnimation(150, mPreviousButton.getTranslationX(), mPreviousButton.getTranslationY(), mPreviousButton.getTranslationY());
+//        final TranslateAnimation mNextButtonTranslateAnimation = new TranslateAnimation(-150, mNextButton.getTranslationX(), mNextButton.getTranslationY(), mNextButton.getTranslationY());
+//        mPreviousButtonTranslateAnimation.setDuration(300);
+//        mPreviousButtonTranslateAnimation.setFillAfter(true);
+//        mNextButtonTranslateAnimation.setDuration(300);
+//        mNextButtonTranslateAnimation.setFillAfter(true);
+//        mPreviousButton.clearAnimation();
+//        mNextButton.clearAnimation();
+//        mNextButton.startAnimation(mNextButtonTranslateAnimation);
+//        mPreviousButton.startAnimation(mPreviousButtonTranslateAnimation);
 
         // TODO: 2018/11/11 more animation... such as AlbumCover (in MusicDetailActivity)
     }
@@ -495,10 +484,8 @@ public class MusicDetailFragment extends Fragment implements IStyle {
         //load animations...
 //        initAnimation();
 
-        mRandomButton.setAlpha(DEF_BUTTON_ALPHA);
-        mRepeatButton.setAlpha(DEF_BUTTON_ALPHA);
-        mRandomButton.clearAnimation();
-        mRepeatButton.clearAnimation();
+        setDefAnimation();
+        clearAnimations();
 
         /*------------------toolbar--------------------*/
         mToolbar.inflateMenu(R.menu.menu_toolbar_in_detail);
@@ -983,8 +970,6 @@ public class MusicDetailFragment extends Fragment implements IStyle {
         mMainActivity.runOnUiThread(() -> {
             mNowPlayingSongText.setText(songName);
             mNowPlayingSongAlbumText.setText(albumName);
-
-
 //                Palette.Builder paletteBuilder = Palette.from(Data.sCurrentMusicBitmap);
 //                paletteBuilder.generate(palette -> {
 //                    if (palette != null) {
@@ -1000,13 +985,11 @@ public class MusicDetailFragment extends Fragment implements IStyle {
 //                        }
 //                    }
 //                });
-
             if (cover != null) {
 
                 //color set
                 GlideApp.with(mMainActivity).load(cover).transition(DrawableTransitionOptions.withCrossFade()).into(mNowPlayingSongImage);
                 GlideApp.with(mMainActivity).load(cover).transition(DrawableTransitionOptions.withCrossFade()).into(mMainActivity.getNavHeaderImageView());
-
 
                 //InfoBar background color AND text color balance
                 final int currentBright = Utils.Ui.getBright(cover);
@@ -1043,8 +1026,6 @@ public class MusicDetailFragment extends Fragment implements IStyle {
                         .into(mNowPlayingBackgroundImage);
 
             } else {
-                mNowPlayingBackgroundImage.setImageDrawable(null);
-                mNowPlayingBackgroundImage.setBackgroundColor(Color.WHITE);
                 GlideApp.with(mMainActivity).load(R.drawable.ic_audiotrack_24px).transition(DrawableTransitionOptions.withCrossFade()).into(mNowPlayingSongImage);
                 GlideApp.with(mMainActivity).load(R.drawable.ic_audiotrack_24px).transition(DrawableTransitionOptions.withCrossFade()).into(mMainActivity.getNavHeaderImageView());
 

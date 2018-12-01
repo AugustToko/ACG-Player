@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：activity_music_detail_new.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月30日 20:36:09
-  ~ 上次修改时间：2018年11月30日 20:35:29
+  ~ 当前修改时间：2018年12月01日 16:21:06
+  ~ 上次修改时间：2018年12月01日 14:24:44
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -14,8 +14,7 @@
     xmlns:sothree="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#000">
+    android:layout_height="match_parent">
 
     <com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:sothree="http://schemas.android.com/apk/res-auto"
         android:id="@+id/activity_detail_sliding_layout"
@@ -41,7 +40,6 @@
                 android:id="@+id/activity_music_detail_primary_background"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:background="#000"
                 android:contentDescription="@string/activity_music_detail_primary_background"
                 android:scaleType="centerCrop"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -51,7 +49,6 @@
                 android:id="@+id/activity_music_detail_primary_background_down"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:background="#000"
                 android:contentDescription="@string/activity_music_detail_primary_background"
                 android:scaleType="centerCrop"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -79,7 +76,6 @@
                     android:id="@+id/activity_music_detail_album_image"
                     android:layout_width="0dp"
                     android:layout_height="400dp"
-                    android:background="@color/colorPrimaryDark"
                     android:contentDescription="@string/activity_music_detail_album_image"
                     android:scaleType="centerCrop"
                     android:transitionName="@string/image_trans_album"

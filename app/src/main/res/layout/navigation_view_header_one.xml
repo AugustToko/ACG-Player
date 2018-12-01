@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：navigation_view_header_one.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月20日 21:06:43
-  ~ 上次修改时间：2018年11月20日 18:19:46
+  ~ 当前修改时间：2018年12月01日 16:21:06
+  ~ 上次修改时间：2018年12月01日 15:24:16
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -12,7 +12,8 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="180dp">
+    android:layout_height="180dp"
+    android:foreground="@drawable/my_ripple_mask">
 
     <ImageView
         android:id="@+id/nav_view_image"

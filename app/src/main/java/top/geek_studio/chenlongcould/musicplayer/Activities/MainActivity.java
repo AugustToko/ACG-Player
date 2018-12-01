@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月01日 11:07:06
- * 上次修改时间：2018年12月01日 11:06:38
+ * 当前修改时间：2018年12月01日 16:21:06
+ * 上次修改时间：2018年12月01日 16:20:49
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -14,14 +14,17 @@ package top.geek_studio.chenlongcould.musicplayer.Activities;
 import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -35,6 +38,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -45,6 +49,7 @@ import android.widget.Toast;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,6 +85,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     public static final int ENABLE_TOUCH = 50072;
 
     public static final int SET_VIEWPAGER_BG = 50073;
+
+    public static boolean ANIMATION_FLAG = true;
 
     private boolean TOOLBAR_CLICKED = false;
 
@@ -150,10 +157,84 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         initView();
 
+        Toast.makeText(this, "Loading", Toast.LENGTH_SHORT).show();
+        new AsyncTask<Void, Void, Integer>() {
+
+            @Override
+            protected Integer doInBackground(Void... voids) {
+                if (Data.sMusicItems.isEmpty()) {
+                    /*---------------------- init Data!!!! -------------------*/
+                    Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+                    if (cursor != null && cursor.moveToFirst()) {
+                        //没有歌曲直接退出app
+                        if (cursor.getCount() == 0) {
+                            return -2;
+                        }
+                        do {
+                            String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+
+                            File file = new File(path);
+                            if (!file.exists()) {
+                                Log.e(TAG, "onAttach: song file: " + path + " does not exits, skip this!!!");
+                                break;
+                            }
+
+                            Log.i(TAG, "onAttach: music path: " + path);
+
+                            String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+                            String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+                            String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+                            int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+                            int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
+                            int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+                            String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+                            long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
+
+                            MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
+                                    .musicAlbum(albumName)
+                                    .addTime((int) addTime)
+                                    .artist(artist)
+                                    .duration(duration)
+                                    .mimeName(mimeType)
+                                    .size(size);
+
+                            Data.sMusicItems.add(builder.build());
+                            Data.sMusicItemsBackUp.add(builder.build());
+
+                        } while (cursor.moveToNext());
+                        cursor.close();
+                        Values.MUSIC_DATA_INIT_DONE = true;
+                    } else {
+                        return -1;
+                    }
+                }
+                return 0;
+            }
+
+            @Override
+            protected void onPostExecute(Integer result) {
+                if (result == -1)
+                    Utils.Ui.fastToast(MainActivity.this, "cursor == null or moveToFirst Fail");
+                if (result == -2) {
+                    Utils.Ui.fastToast(MainActivity.this, "Can not find any music!");
+                    mHandler.postDelayed(() -> exitApp(), 1000);
+                }
+                mToolbar.setSubtitle(Data.sMusicItems.size() + " Songs");
+            }
+        }.execute();
+
         if (savedInstanceState != null) {
             mViewPager.setCurrentItem(savedInstanceState.getInt("viewpage", 0), true);
         }
 
+    }
+
+    @Override
+    public void onAttachFragment(Fragment fragment) {
+        Log.d(TAG, "onAttachFragment: " + fragment.getClass().getName());
+        super.onAttachFragment(fragment);
+        if (fragment instanceof MusicDetailFragment)
+            mMusicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_MUSIC_LIST_DONE);
     }
 
     @Override
@@ -223,6 +304,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                mMusicListFragment.getRecyclerView().stopScroll();
 //                mSearchView.setIconified(true);
 //                filterData(query);
                 return false;
@@ -305,6 +387,12 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             mMusicListFragment = MusicListFragment.newInstance();
             mFragmentList.add(mMusicListFragment);
 
+            mMusicDetailFragment = MusicDetailFragment.newInstance();
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.replace(R.id.frame_wait, mMusicDetailFragment);
+            transaction.commit();
+
             String tab_2 = getResources().getString(R.string.album);
             mTitles.add(tab_2);
             mAlbumListFragment = AlbumListFragment.newInstance();
@@ -330,12 +418,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             mViewPager.setAdapter(mPagerAdapter);
 //                            mViewPager.setCurrentItem(0);
             Values.CurrentData.CURRENT_PAGE_INDEX = 0;
-
-            mMusicDetailFragment = MusicDetailFragment.newInstance();
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction transaction = fragmentManager.beginTransaction();
-            transaction.replace(R.id.frame_wait, mMusicDetailFragment);
-            transaction.commit();
 
         });
 
@@ -383,6 +465,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     }
 
     private void initView() {
+
         findView();
 
         initStyle();
@@ -422,12 +505,14 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         mNavHeaderImageView = mNavigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
         mNavHeaderImageView.setOnClickListener(v -> {
-            if (Values.HAS_PLAYED) {
-                if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
-                    mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
-                } else {
-                    mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-                }
+            if (getMusicDetailFragment().getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+                getMusicDetailFragment().getSlidingUpPanelLayout().setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                return;
+            }
+
+            if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+                mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                return;
             }
 
             mDrawerLayout.closeDrawers();
@@ -444,16 +529,16 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     mMusicDetailFragment.getNowPlayingBody().setVisibility(View.VISIBLE);
                 }
 
-//                if (current == 0) {
-//                    if (!HAS_PLAYED) {
-//                        getMusicDetailFragment().initAnimation();
-//                        HAS_PLAYED = true;
-//                    }
-//                }
-//
-//                if (current == 1) {
-//                    HAS_PLAYED = false;
-//                }
+                if (current == 0) {
+                    if (ANIMATION_FLAG) getMusicDetailFragment().initAnimation();
+                    ANIMATION_FLAG = false;
+                }
+
+                if (current == 1) {
+                    mMusicDetailFragment.setDefAnimation();
+                    mMusicDetailFragment.clearAnimations();
+                    ANIMATION_FLAG = true;
+                }
 
                 //滑动一半的时候, 进行 recycler 跳转
                 if (current == 0.7) {
@@ -520,11 +605,13 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     case 0: {
                         mMenu.findItem(R.id.menu_toolbar_layout).setVisible(false);
                         mMenu.findItem(R.id.menu_toolbar_search).setVisible(true);
+                        mToolbar.setSubtitle(Data.sMusicItems.size() + " Songs");
                     }
                     break;
                     case 1: {
                         mMenu.findItem(R.id.menu_toolbar_layout).setVisible(true);
                         mMenu.findItem(R.id.menu_toolbar_search).setVisible(false);
+                        mToolbar.setSubtitle(mAlbumListFragment.getAlbumList().size() + " Albums");
                     }
                     break;
                     case 2: {
@@ -601,12 +688,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     initData();
                 }
                 break;
-
-                case Values.HandlerWhat.INIT_MUSIC_LIST: {
-                    mWeakReference.get().runOnUiThread(() -> mToolbar.setSubtitle(Data.sMusicItems.size() + " Songs"));
-                }
-                break;
-
                 case Values.HandlerWhat.LOAD_INTO_NAV_IMAGE: {
                     mWeakReference.get().runOnUiThread(() -> {
                         Bitmap cover = (Bitmap) msg.obj;

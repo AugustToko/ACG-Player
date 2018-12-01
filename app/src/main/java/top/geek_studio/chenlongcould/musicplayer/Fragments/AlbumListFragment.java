@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月30日 20:36:09
- * 上次修改时间：2018年11月30日 20:35:23
+ * 当前修改时间：2018年12月01日 16:21:06
+ * 上次修改时间：2018年12月01日 16:17:09
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -91,37 +91,35 @@ public final class AlbumListFragment extends Fragment {
         ViewPreloadSizeProvider<AlbumItem> preloadSizeProvider = new ViewPreloadSizeProvider<>();
         AlbumListFragment.MyPreloadModelProvider preloadModelProvider = new AlbumListFragment.MyPreloadModelProvider();
 
-        RecyclerViewPreloader<AlbumItem> preLoader = new RecyclerViewPreloader<>(this, preloadModelProvider, preloadSizeProvider, 10);
+        RecyclerViewPreloader<AlbumItem> preLoader = new RecyclerViewPreloader<>(this, preloadModelProvider, preloadSizeProvider, 2);
 
         mRecyclerView = view.findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.addOnScrollListener(preLoader);
-//        mRecyclerView.setRecyclerListener(holder -> {
-//            MyRecyclerAdapter2AlbumList.ViewHolder myViewHolder = (MyRecyclerAdapter2AlbumList.ViewHolder) holder;
-//            GlideApp.with(this).clear(myViewHolder.mAlbumImage);
-//        });
 
-//        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-//            @Override
-//            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-//                if (newState == RecyclerView.SCROLL_STATE_DRAGGING || newState == RecyclerView.SCROLL_STATE_SETTLING) {
-//                    sIsScrolling = true;
-//                } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-//                    if (sIsScrolling) {
-//                        GlideApp.with(mMainActivity).resumeRequests();
-//                    } else {
-//                        GlideApp.with(mMainActivity).pauseAllRequests();
-//                    }
-//                    sIsScrolling = false;
-//                }
-//            }
-//
-//            @Override
-//            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-//                super.onScrolled(recyclerView, dx, dy);
-//            }
-//        });
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING || newState == RecyclerView.SCROLL_STATE_SETTLING) {
+                    sIsScrolling = true;
+                } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    if (sIsScrolling) {
+                        GlideApp.with(mMainActivity).resumeRequests();
+                    } else {
+                        GlideApp.with(mMainActivity).pauseAllRequests();
+                    }
+                    sIsScrolling = false;
+                }
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+            }
+        });
+
         ON_CREATE_VIEW_DONE = true;
+
         return view;
     }
 
@@ -184,6 +182,10 @@ public final class AlbumListFragment extends Fragment {
 
     public RecyclerView getRecyclerView() {
         return mRecyclerView;
+    }
+
+    public ArrayList<AlbumItem> getAlbumList() {
+        return mAlbumList;
     }
 
     class NotLeakHandler extends Handler {

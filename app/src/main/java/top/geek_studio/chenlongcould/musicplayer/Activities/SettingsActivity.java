@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月01日 11:07:06
- * 上次修改时间：2018年12月01日 11:06:38
+ * 当前修改时间：2018年12月01日 16:21:06
+ * 上次修改时间：2018年12月01日 16:20:48
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -28,7 +28,6 @@ import android.widget.Switch;
 import com.jrummyapps.android.colorpicker.ColorPickerDialog;
 import com.jrummyapps.android.colorpicker.ColorPickerDialogListener;
 
-import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
@@ -236,35 +235,35 @@ public class SettingsActivity extends MyBaseActivity implements IStyle {
         });
 
         autoNightOpt.setOnClickListener(v -> {
-//            SharedPreferences.Editor editor = mDefPrefs.edit();
-//            if (Values.Style.NIGHT_MODE) {
-//                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false);
-//                mNightSwitch.setChecked(false);
-//                Values.Style.NIGHT_MODE = false;
-//            } else {
-//                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, true);
-//                mNightSwitch.setChecked(true);
-//                Values.Style.NIGHT_MODE = true;
-//            }
-//            editor.apply();
-//
+            SharedPreferences.Editor editor = mDefPrefs.edit();
+            if (Values.Style.NIGHT_MODE) {
+                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false);
+                mNightSwitch.setChecked(false);
+                Values.Style.NIGHT_MODE = false;
+            } else {
+                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, true);
+                mNightSwitch.setChecked(true);
+                Values.Style.NIGHT_MODE = true;
+            }
+            editor.apply();
+
 //            Utils.Ui.upDateStyle(mDefPrefs);
 
         });
 
         //night opt
         mNightSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-//            SharedPreferences.Editor editor = mDefPrefs.edit();
-//            if (isChecked) {
-//                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, true);
-//                Values.Style.NIGHT_MODE = true;
+            SharedPreferences.Editor editor = mDefPrefs.edit();
+            if (isChecked) {
+                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, true);
+                Values.Style.NIGHT_MODE = true;
 //                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-//            } else {
-//                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false);
-//                Values.Style.NIGHT_MODE = false;
+            } else {
+                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false);
+                Values.Style.NIGHT_MODE = false;
 //                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-//            }
-//            editor.apply();
+            }
+            editor.apply();
 //
 //            Utils.Ui.upDateStyle(mDefPrefs);
 //
@@ -284,9 +283,6 @@ public class SettingsActivity extends MyBaseActivity implements IStyle {
                 Values.Style.DETAIL_BACKGROUND = Values.Style.STYLE_BACKGROUND_BLUR;
             }
             editor.apply();
-
-            Values.BIND_SERVICE = false;
-            unbindService(Data.sServiceConnection);
         });
 
         mStyleSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {

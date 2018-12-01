@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：recycler_music_list_item.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月01日 11:07:06
-  ~ 上次修改时间：2018年12月01日 11:06:41
+  ~ 当前修改时间：2018年12月01日 16:21:06
+  ~ 上次修改时间：2018年12月01日 15:18:53
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -15,7 +15,7 @@
     android:id="@+id/music_item_layout"
     android:layout_width="match_parent"
     android:layout_height="70dp"
-    android:background="?android:attr/selectableItemBackground">
+    android:background="@drawable/my_ripple_mask">
 
     <ImageView
         android:id="@+id/recycler_item_album_image"

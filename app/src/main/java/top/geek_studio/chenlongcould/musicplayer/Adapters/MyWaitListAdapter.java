@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyWaitListAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月01日 11:07:06
- * 上次修改时间：2018年12月01日 09:56:01
+ * 当前修改时间：2018年12月01日 16:21:06
+ * 上次修改时间：2018年12月01日 14:23:30
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -261,6 +261,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
+            itemView.setBackground(null);
             mIndexText = itemView.findViewById(R.id.index_textview);
             mMusicNameText = itemView.findViewById(R.id.item_main_text);
             mAlbumText = itemView.findViewById(R.id.album_text);

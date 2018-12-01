@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter2AlbumList.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月30日 20:36:09
- * 上次修改时间：2018年11月30日 20:35:23
+ * 当前修改时间：2018年12月01日 16:21:06
+ * 上次修改时间：2018年12月01日 14:59:54
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.io.File;
@@ -120,7 +121,6 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
     @Override
     public void onViewRecycled(@NonNull ViewHolder holder) {
-        Log.d(TAG, "onViewRecycled: done");
         holder.mAlbumImage.setTag(null);
         GlideApp.with(mContext).clear(holder.mAlbumImage);
     }
@@ -193,7 +193,8 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
                 GlideApp.with(mContextWeakReference.get())
                         .load(bitmap)
-//                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                        .placeholder(R.drawable.ic_audiotrack_24px)
                         .centerCrop()
                         .into(mViewHolderWeakReference.get().mAlbumImage);
             } else {
@@ -249,6 +250,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
             super(itemView);
             mAlbumText = itemView.findViewById(R.id.recycler_item_song_album_name);
             mAlbumImage = itemView.findViewById(R.id.recycler_item_album_image);
+            itemView.setBackground(null);//新增代码
 
             switch (mType) {
                 case GRID_TYPE: {
