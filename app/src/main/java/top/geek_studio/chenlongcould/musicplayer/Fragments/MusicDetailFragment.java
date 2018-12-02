@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月02日 20:56:24
- * 上次修改时间：2018年12月02日 14:35:34
+ * 当前修改时间：2018年12月02日 21:27:06
+ * 上次修改时间：2018年12月02日 21:25:54
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -270,7 +270,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
         mNowPlayingBackgroundImage = view.findViewById(R.id.current_info_background);
         mNowPlayingSongText = view.findViewById(R.id.activity_main_now_playing_name);
         mNowPlayingSongImage = view.findViewById(R.id.recycler_item_clover_image);
-        mSlideUpGroup = view.findViewById(R.id.slide_up_view);
+        mSlideUpGroup = view.findViewById(R.id.detail_body);
     }
 
     public final ConstraintLayout getNowPlayingBody() {

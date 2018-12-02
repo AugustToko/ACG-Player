@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月02日 20:56:24
- * 上次修改时间：2018年12月02日 20:55:53
+ * 当前修改时间：2018年12月02日 21:27:06
+ * 上次修改时间：2018年12月02日 21:20:15
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -208,6 +208,8 @@ public final class Utils {
 
         private static final String TAG = "Ui";
 
+        public static int POSITION = 200;
+
         public static void inDayNightSet(SharedPreferences sharedPreferences) {
             if (sharedPreferences.getBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false)) {
                 Values.Color.TEXT_COLOR = Values.Color.TEXT_COLOR_IN_NIGHT;
@@ -317,7 +319,7 @@ public final class Utils {
 
                 primaryBackgroundBef.post(() -> {
                     Animator animator = ViewAnimationUtils.createCircularReveal(
-                            primaryBackgroundBef, primaryBackgroundBef.getWidth() / 2, 170,
+                            primaryBackgroundBef, primaryBackgroundBef.getWidth() / 2, POSITION,
                             0,
                             (float) Math.hypot(primaryBackgroundBef.getWidth(), primaryBackgroundBef.getHeight()));
 
@@ -398,7 +400,7 @@ public final class Utils {
 
                 primaryBackgroundBef.post(() -> {
                     Animator animator = ViewAnimationUtils.createCircularReveal(
-                            primaryBackgroundBef, primaryBackgroundBef.getWidth() / 2, 170,
+                            primaryBackgroundBef, primaryBackgroundBef.getWidth() / 2, POSITION,
                             0,
                             (float) Math.hypot(primaryBackgroundBef.getWidth(), primaryBackgroundBef.getHeight()));
 

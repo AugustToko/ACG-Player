@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：activity_music_detail_new.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月02日 20:56:24
-  ~ 上次修改时间：2018年12月02日 20:55:56
+  ~ 当前修改时间：2018年12月02日 21:27:06
+  ~ 上次修改时间：2018年12月02日 21:27:00
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -40,8 +40,9 @@
             android:layout_height="0dp"
             android:contentDescription="@string/activity_music_detail_primary_background"
             android:scaleType="centerCrop"
+            android:layout_marginTop="400dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/slide_up_view" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/activity_music_detail_primary_background_down"
@@ -49,12 +50,12 @@
             android:layout_height="0dp"
             android:contentDescription="@string/activity_music_detail_primary_background"
             android:scaleType="centerCrop"
+            android:layout_marginTop="400dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/slide_up_view"
+            app:layout_constraintTop_toTopOf="parent"
             tools:background="@color/colorPrimaryDark" />
 
         <android.support.constraint.ConstraintLayout
-            android:id="@+id/slide_up_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 

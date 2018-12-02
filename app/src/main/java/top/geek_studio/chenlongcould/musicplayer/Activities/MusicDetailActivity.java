@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月02日 20:56:24
- * 上次修改时间：2018年12月02日 13:45:26
+ * 当前修改时间：2018年12月02日 21:27:06
+ * 上次修改时间：2018年12月02日 21:25:18
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -193,7 +193,6 @@ public final class MusicDetailActivity extends MyBaseActivity implements IStyle,
         initData();
     }
 
-    // TODO: 2018/11/30 in main
     @Override
     public void onBackPressed() {
         if (HAS_BIG) {
@@ -204,7 +203,6 @@ public final class MusicDetailActivity extends MyBaseActivity implements IStyle,
         }
     }
 
-    // TODO: 2018/11/30 in main
     @Override
     protected void onResume() {
         GlideApp.with(this)
@@ -219,7 +217,6 @@ public final class MusicDetailActivity extends MyBaseActivity implements IStyle,
         super.onResume();
     }
 
-    // TODO: 2018/11/30 in main
     @Override
     protected void onDestroy() {
         Data.sActivities.remove(this);

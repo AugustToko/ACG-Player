@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：build.gradle  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月02日 20:56:24
- * 上次修改时间：2018年12月01日 16:22:22
+ * 当前修改时间：2018年12月02日 21:27:06
+ * 上次修改时间：2018年12月02日 20:56:46
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -25,7 +25,7 @@ android {
         applicationId "top.geek_studio.chenlongcould.musicplayer"
         minSdkVersion 21
         targetSdkVersion 28
-        versionName '2.2.4'
+        versionName '2.2.6'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config
 //        externalNativeBuild {
@@ -38,7 +38,7 @@ android {
 //            stl "stlport_static"
 //            ldLibs "log"
 //        }
-        versionCode 5
+        versionCode 6
     }
     buildTypes {
         release {
