@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyWaitListAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月01日 16:21:06
- * 上次修改时间：2018年12月01日 14:23:30
+ * 当前修改时间：2018年12月02日 20:56:24
+ * 上次修改时间：2018年12月02日 20:55:56
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -11,7 +11,6 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Adapters;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -30,6 +29,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.io.IOException;
 import java.util.List;
@@ -48,15 +48,17 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 
 public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter, IStyle {
 
+    private static final String TAG = "MyWaitListAdapter";
+
     private List<MusicItem> mMusicItems;
 
-    private Context mContext;
+    private MainActivity mMainActivity;
 
     private ViewHolder currentBind;
 
-    public MyWaitListAdapter(Context context, List<MusicItem> musicItems) {
+    public MyWaitListAdapter(MainActivity activity, List<MusicItem> musicItems) {
         mMusicItems = musicItems;
-        mContext = context;
+        mMainActivity = activity;
     }
 
     @NonNull
@@ -66,11 +68,12 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
         ViewHolder holder = new ViewHolder(view);
 
         view.setOnClickListener(v -> new Thread(() -> {
+
             String clickedPath = mMusicItems.get(holder.getAdapterPosition()).getMusicPath();
 
             if (Data.sMusicBinder.isPlayingMusic()) {
                 if (clickedPath.equals(Values.CurrentData.CURRENT_SONG_PATH)) {
-                    Utils.SendSomeThing.sendPause(mContext);
+                    Utils.SendSomeThing.sendPause(mMainActivity);
                     return;
                 }
             }
@@ -115,11 +118,18 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
                 Data.sMusicBinder.resetMusic();
             }
 
+            /*
+             * when SlidingUpPanelLayout that in detail is Expanded, if click the item, the SlidingUpPanelLayout in mainActivity may become touchable
+             * so this can fix this
+             * */
+            if (mMainActivity.getMusicDetailFragment().getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED)
+                mMainActivity.getSlidingUpPanelLayout().setTouchEnabled(false);
+
         }).start());
 
         view.setOnLongClickListener(v -> {
             if (Data.sMusicBinder.isPlayingMusic()) {
-                Utils.SendSomeThing.sendPause(mContext);
+                Utils.SendSomeThing.sendPause(mMainActivity);
             }
             return true;
         });
@@ -141,7 +151,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
                 case Menu.FIRST + 1: {
                     // TODO: 2018/11/8 待完善(最喜爱歌曲列表)
-                    SharedPreferences mPlayListSpf = mContext.getSharedPreferences(Values.SharedPrefsTag.PLAY_LIST_SPF_NAME_MY_FAVOURITE, 0);
+                    SharedPreferences mPlayListSpf = mMainActivity.getSharedPreferences(Values.SharedPrefsTag.PLAY_LIST_SPF_NAME_MY_FAVOURITE, 0);
                     SharedPreferences.Editor editor = mPlayListSpf.edit();
                     editor.putString(Values.PLAY_LIST_SPF_KEY, mMusicItems.get(index).getMusicPath());
                     editor.apply();
@@ -152,14 +162,14 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
                 case Menu.FIRST + 2: {
                     // TODO: 2018/11/18 test play list
-                    PlayListsUtil.createPlaylist(mContext, String.valueOf(new Random(1000)));
+                    PlayListsUtil.createPlaylist(mMainActivity, String.valueOf(new Random(1000)));
                 }
                 break;
 
                 // TODO: 2018/11/30 to new
                 case Menu.FIRST + 4: {
                     String albumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
-                    Cursor cursor = mContext.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
+                    Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
                             MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum()}, null);
                     //int MainActivity
                     MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
@@ -171,15 +181,15 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
                         intent.putExtra("_id", id);
                         cursor.close();
                     }
-                    mContext.startActivity(intent);
+                    mMainActivity.startActivity(intent);
 
                 }
                 break;
 
                 case Menu.FIRST + 5: {
-                    Intent intent = new Intent(mContext, PublicActivity.class);
+                    Intent intent = new Intent(mMainActivity, PublicActivity.class);
                     intent.putExtra("start_by", "detail");
-                    mContext.startActivity(intent);
+                    mMainActivity.startActivity(intent);
                 }
                 break;
             }
@@ -268,7 +278,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
             mExtName = itemView.findViewById(R.id.item_in_detail_ext);
             mItemMenuButton = itemView.findViewById(R.id.item_menu);
 
-            mPopupMenu = new PopupMenu(mContext, mItemMenuButton);
+            mPopupMenu = new PopupMenu(mMainActivity, mItemMenuButton);
             mMenu = mPopupMenu.getMenu();
 
             //noinspection PointlessArithmeticExpression

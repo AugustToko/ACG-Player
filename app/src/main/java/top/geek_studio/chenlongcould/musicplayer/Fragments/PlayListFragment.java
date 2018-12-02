@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：PlayListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月30日 20:36:09
- * 上次修改时间：2018年11月30日 20:35:23
+ * 当前修改时间：2018年12月02日 20:56:24
+ * 上次修改时间：2018年12月02日 11:05:21
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -16,14 +16,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import java.lang.ref.WeakReference;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
@@ -31,9 +37,15 @@ import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.VisibleOrGone;
 
-// TODO: 2018/11/26 text color ...
-public final class PlayListFragment extends Fragment implements IStyle {
+public final class PlayListFragment extends Fragment implements IStyle, VisibleOrGone {
+
+    private static final String TAG = "PlayListFragment";
+
+    public static boolean HAS_LOAD = false;
+
+    public static boolean ON_CREATE_VIEW_DONE = false;
 
     private ConstraintLayout mAddRecentItem;
 
@@ -49,6 +61,8 @@ public final class PlayListFragment extends Fragment implements IStyle {
 
     private Activity mActivity;
 
+    private NotLeakHandler mHandler;
+
     //实例化一个fragment
     public static PlayListFragment newInstance(int index) {
         return new PlayListFragment();
@@ -63,7 +77,36 @@ public final class PlayListFragment extends Fragment implements IStyle {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_play_list, container, false);
-        findId(view);
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        ON_CREATE_VIEW_DONE = true;
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        if (isVisibleToUser) {
+            if (!HAS_LOAD) {
+                sureCreateView();
+            }
+        }
+    }
+
+    //确保CreateView
+    private void sureCreateView() {
+        if (ON_CREATE_VIEW_DONE) {
+            initData();
+        } else {
+            Log.d(TAG, "sureCreateView: not create view again!");
+            new Handler().postDelayed(this::sureCreateView, 500);
+        }
+    }
+
+    private void initData() {
+        findId(getView());
 
         initStyle();
 
@@ -83,7 +126,6 @@ public final class PlayListFragment extends Fragment implements IStyle {
             intent.putExtra("start_by", "favourite music");
             startActivity(intent);
         });
-        return view;
     }
 
     private void findId(View view) {
@@ -106,5 +148,27 @@ public final class PlayListFragment extends Fragment implements IStyle {
         mNameRecent.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
         mFavourite.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
 
+    }
+
+    @Override
+    public void visibleOrGone(int status) {
+        mFavouriteMusic.setVisibility(status);
+        mAddRecentItem.setVisibility(status);
+    }
+
+    class NotLeakHandler extends Handler {
+        @SuppressWarnings("unused")
+        private WeakReference<PlayListFragment> mWeakReference;
+
+        NotLeakHandler(PlayListFragment fragment, Looper looper) {
+            super(looper);
+            mWeakReference = new WeakReference<>(fragment);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            }
+        }
     }
 }

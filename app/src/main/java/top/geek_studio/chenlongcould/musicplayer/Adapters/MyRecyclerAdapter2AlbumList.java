@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter2AlbumList.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月01日 16:21:06
- * 上次修改时间：2018年12月01日 14:59:54
+ * 当前修改时间：2018年12月02日 20:56:24
+ * 上次修改时间：2018年12月02日 20:55:53
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -11,7 +11,6 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Adapters;
 
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -19,6 +18,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
@@ -61,13 +61,13 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
     private List<AlbumItem> mAlbumNameList;
 
-    private Context mContext;
+    private MainActivity mMainActivity;
 
     private ViewHolder mCurrentBind;
 
-    public MyRecyclerAdapter2AlbumList(Context context, List<AlbumItem> albumNameList, int type) {
+    public MyRecyclerAdapter2AlbumList(MainActivity activity, List<AlbumItem> albumNameList, int type) {
         this.mAlbumNameList = albumNameList;
-        mContext = context;
+        mMainActivity = activity;
         mType = type;
     }
 
@@ -91,11 +91,11 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
             String keyWords = mAlbumNameList.get(holder.getAdapterPosition()).getAlbumName();
 
             MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
-            ActivityOptionsCompat compat = ActivityOptionsCompat.makeSceneTransitionAnimation(mainActivity, holder.mAlbumImage, mContext.getString(R.string.image_trans_album));
+            ActivityOptionsCompat compat = ActivityOptionsCompat.makeSceneTransitionAnimation(mainActivity, holder.mAlbumImage, mMainActivity.getString(R.string.image_trans_album));
             Intent intent = new Intent(mainActivity, AlbumDetailActivity.class);
             intent.putExtra("key", keyWords);
             intent.putExtra("_id", mAlbumNameList.get(holder.getAdapterPosition()).getAlbumId());
-            mContext.startActivity(intent, compat.toBundle());
+            mMainActivity.startActivity(intent, compat.toBundle());
         });
 
         return holder;
@@ -111,7 +111,8 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
         viewHolder.mAlbumText.setText(mAlbumNameList.get(i).getAlbumName());
         viewHolder.mAlbumImage.setTag(R.string.key_id_1, i);
         viewHolder.mAlbumImage.setTag(R.string.key_id_1, i);
-        new MyTask(viewHolder, mContext, i + 1).execute();
+
+        new Handler().postDelayed(() -> new MyTask(viewHolder, mMainActivity, i + 1).execute(), 100);
     }
 
     @Override
@@ -122,7 +123,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
     @Override
     public void onViewRecycled(@NonNull ViewHolder holder) {
         holder.mAlbumImage.setTag(null);
-        GlideApp.with(mContext).clear(holder.mAlbumImage);
+        GlideApp.with(mMainActivity).clear(holder.mAlbumImage);
     }
 
     @NonNull
@@ -149,13 +150,13 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
         private static final String TAG = "MyTask";
 
-        private final WeakReference<Context> mContextWeakReference;
+        private final WeakReference<MainActivity> mContextWeakReference;
 
         private final WeakReference<ViewHolder> mViewHolderWeakReference;
 
         private final int mPosition;
 
-        MyTask(ViewHolder holder, Context context, int position) {
+        MyTask(ViewHolder holder, MainActivity context, int position) {
             mContextWeakReference = new WeakReference<>(context);
             mViewHolderWeakReference = new WeakReference<>(holder);
             mPosition = position;
@@ -210,6 +211,9 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
         protected String doInBackground(Void... voids) {
 
             //根据position判断是否为复用ViewHolder
+            if (mViewHolderWeakReference.get() == null) {
+                return "null";
+            }
             ImageView imageView = mViewHolderWeakReference.get().mAlbumImage;
 
             if (imageView == null || imageView.getTag(R.string.key_id_1) == null) {

@@ -1,59 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：activity_music_detail_new.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月01日 16:21:06
-  ~ 上次修改时间：2018年12月01日 14:24:44
+  ~ 当前修改时间：2018年12月02日 20:56:24
+  ~ 上次修改时间：2018年12月02日 20:55:56
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
   ~ *************************************************************
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:sothree="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_detail_sliding_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:clickable="false"
+    android:focusable="true"
+    android:gravity="bottom"
+    app:umanoPanelHeight="220dp"
+    app:umanoShadowHeight="2dp"
+    sothree:umanoDragView="@id/item_layout"
+    sothree:umanoScrollableView="@+id/activity_music_detail_card_view">
 
-    <com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:sothree="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/activity_detail_sliding_layout"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/detail_body"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/transparent"
-        android:clickable="false"
-        android:focusable="true"
-        android:gravity="bottom"
-        app:umanoPanelHeight="220dp"
-        app:umanoShadowHeight="2dp"
-        sothree:umanoDragView="@id/item_layout"
-        sothree:umanoScrollableView="@+id/activity_music_detail_card_view">
+        android:gravity="center"
+        tools:context=".Activities.MusicDetailActivity">
+
+        <ImageView
+            android:id="@+id/activity_music_detail_primary_background"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:contentDescription="@string/activity_music_detail_primary_background"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/slide_up_view" />
+
+        <ImageView
+            android:id="@+id/activity_music_detail_primary_background_down"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:contentDescription="@string/activity_music_detail_primary_background"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/slide_up_view"
+            tools:background="@color/colorPrimaryDark" />
 
         <android.support.constraint.ConstraintLayout
-            android:id="@+id/detail_body"
+            android:id="@+id/slide_up_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            tools:context=".Activities.MusicDetailActivity">
-
-            <ImageView
-                android:id="@+id/activity_music_detail_primary_background"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:contentDescription="@string/activity_music_detail_primary_background"
-                android:scaleType="centerCrop"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/layout_seek_bar_1" />
-
-            <ImageView
-                android:id="@+id/activity_music_detail_primary_background_down"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:contentDescription="@string/activity_music_detail_primary_background"
-                android:scaleType="centerCrop"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/layout_seek_bar_1"
-                tools:background="@color/colorPrimaryDark" />
+            android:layout_height="wrap_content">
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -70,7 +73,9 @@
             <android.support.constraint.ConstraintLayout
                 android:id="@+id/out_slide"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true">
 
                 <ImageView
                     android:id="@+id/activity_music_detail_album_image"
@@ -136,18 +141,17 @@
 
         </android.support.constraint.ConstraintLayout>
 
-        <android.support.v7.widget.CardView
-            android:id="@+id/activity_music_detail_card_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="75dp">
 
-            <include layout="@layout/include_wait_play_body" />
+    </android.support.constraint.ConstraintLayout>
 
-        </android.support.v7.widget.CardView>
+    <android.support.v7.widget.CardView
+        android:id="@+id/activity_music_detail_card_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="75dp">
 
-    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+        <include layout="@layout/include_wait_play_body" />
 
-</FrameLayout>
+    </android.support.v7.widget.CardView>
 
-
+</com.sothree.slidinguppanel.SlidingUpPanelLayout>

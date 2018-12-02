@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月01日 16:21:06
- * 上次修改时间：2018年12月01日 16:20:48
+ * 当前修改时间：2018年12月02日 20:56:24
+ * 上次修改时间：2018年12月02日 10:52:29
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -33,7 +33,7 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
-public class SettingsActivity extends MyBaseActivity implements IStyle {
+public final class SettingsActivity extends MyBaseActivity implements IStyle {
 
     public static final String TAG = "SettingsActivity";
 

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月01日 16:21:06
- * 上次修改时间：2018年12月01日 16:20:48
+ * 当前修改时间：2018年12月02日 20:56:24
+ * 上次修改时间：2018年12月02日 11:05:21
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -45,8 +45,9 @@ import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.VisibleOrGone;
 
-public final class MusicListFragment extends Fragment {
+public final class MusicListFragment extends Fragment implements VisibleOrGone {
 
     private static final String TAG = "MusicListFragment";
 
@@ -179,6 +180,11 @@ public final class MusicListFragment extends Fragment {
 
     public final RecyclerView getRecyclerView() {
         return mRecyclerView;
+    }
+
+    @Override
+    public void visibleOrGone(int status) {
+        mRecyclerView.setVisibility(status);
     }
 
     final class NotLeakHandler extends Handler {

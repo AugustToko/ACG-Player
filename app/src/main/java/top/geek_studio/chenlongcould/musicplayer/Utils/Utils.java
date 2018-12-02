@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月01日 11:07:06
- * 上次修改时间：2018年12月01日 11:06:38
+ * 当前修改时间：2018年12月02日 20:56:24
+ * 上次修改时间：2018年12月02日 20:55:53
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -30,7 +30,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.graphics.Palette;
-import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -54,8 +53,6 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 @SuppressWarnings("WeakerAccess")
 public final class Utils {
-
-    private static LinearLayoutManager mLinearLayoutManager;
 
     public static class Audio {
         private final static MediaMetadataRetriever sMediaMetadataRetriever = new MediaMetadataRetriever();
@@ -113,7 +110,8 @@ public final class Utils {
                 mainActivity.getMusicDetailFragment().setSlideInfo(musicName, albumName, path, cover);
 
                 mainActivity.getMusicDetailFragment().setCurrentInfo(musicName, albumName, Utils.Audio.getAlbumByteImage(path));
-                mainActivity.getMusicDetailFragment().getSeekBar().getThumb().setColorFilter(cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
+                mainActivity.getMusicDetailFragment().getSeekBar().getThumb()
+                        .setColorFilter(cover == null ? Color.WHITE : cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
                 mainActivity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
 
                 Values.MUSIC_PLAYING = true;

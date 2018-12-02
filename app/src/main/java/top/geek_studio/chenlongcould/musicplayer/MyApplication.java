@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月30日 20:36:09
- * 上次修改时间：2018年11月30日 20:35:23
+ * 当前修改时间：2018年12月02日 20:56:24
+ * 上次修改时间：2018年12月02日 10:19:32
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -22,6 +22,8 @@ import android.util.Log;
 import java.io.File;
 import java.util.Locale;
 
+import top.geek_studio.chenlongcould.musicplayer.Fragments.AlbumListFragment;
+import top.geek_studio.chenlongcould.musicplayer.Fragments.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 
 public class MyApplication extends Application {
@@ -66,11 +68,22 @@ public class MyApplication extends Application {
     @Override
     public void onTrimMemory(int level) {
         Log.d(TAG, "onTrimMemory: do");
-        super.onTrimMemory(level);
-        if (level == TRIM_MEMORY_UI_HIDDEN) {
-            GlideApp.get(this).clearMemory();
+
+        if (level == TRIM_MEMORY_MODERATE) {
+            if (AlbumListFragment.HAS_LOAD) {
+                Data.sAlbumItems.clear();
+                Log.d(TAG, "onTrimMemory: AlbumFragment recycled");
+            }
+
+            //noinspection StatementWithEmptyBody
+            if (PlayListFragment.HAS_LOAD) {
+                //No data can be recycled
+            }
+            Data.sCurrentMusicBitmap = null;
         }
         GlideApp.get(this).trimMemory(level);
+
+        super.onTrimMemory(level);
     }
 
 }

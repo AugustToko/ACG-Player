@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月01日 16:21:06
- * 上次修改时间：2018年12月01日 16:20:48
+ * 当前修改时间：2018年12月02日 20:56:24
+ * 上次修改时间：2018年12月02日 14:35:34
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -40,6 +40,7 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -73,10 +74,11 @@ import top.geek_studio.chenlongcould.musicplayer.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.VisibleOrGone;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
-public class MusicDetailFragment extends Fragment implements IStyle {
+public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGone {
 
     public static final float DEF_BUTTON_ALPHA = 0.3f;
 
@@ -159,6 +161,8 @@ public class MusicDetailFragment extends Fragment implements IStyle {
     private ImageView mNowPlayingBackgroundImage;
 
     private ConstraintLayout mNowPlayingBody;
+
+    private ConstraintLayout mSlideUpGroup;
 
     //实例化一个fragment
     public static MusicDetailFragment newInstance() {
@@ -266,6 +270,7 @@ public class MusicDetailFragment extends Fragment implements IStyle {
         mNowPlayingBackgroundImage = view.findViewById(R.id.current_info_background);
         mNowPlayingSongText = view.findViewById(R.id.activity_main_now_playing_name);
         mNowPlayingSongImage = view.findViewById(R.id.recycler_item_clover_image);
+        mSlideUpGroup = view.findViewById(R.id.slide_up_view);
     }
 
     public final ConstraintLayout getNowPlayingBody() {
@@ -290,10 +295,10 @@ public class MusicDetailFragment extends Fragment implements IStyle {
          * init view animation
          * */
         //default type is common, but the random button alpha is 1f(it means this button is on), so set animate
-        final ValueAnimator animator = new ValueAnimator();
 //        animator.setStartDelay(500);
-        animator.setDuration(300);
         if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
+            ValueAnimator animator = new ValueAnimator();
+            animator.setDuration(300);
             animator.setFloatValues(0f, 1f);
             animator.addUpdateListener(animation -> mRandomButton.setAlpha((Float) animation.getAnimatedValue()));
             animator.addListener(new Animator.AnimatorListener() {
@@ -319,7 +324,10 @@ public class MusicDetailFragment extends Fragment implements IStyle {
                 }
             });
             animator.start();
+            Log.d(TAG, "initAnimation: random");
         } else {
+            ValueAnimator animator = new ValueAnimator();
+            animator.setDuration(300);
             animator.setFloatValues(0f, 0.3f);
             animator.addUpdateListener(animation -> mRandomButton.setAlpha((Float) animation.getAnimatedValue()));
             animator.addListener(new Animator.AnimatorListener() {
@@ -345,8 +353,11 @@ public class MusicDetailFragment extends Fragment implements IStyle {
                 }
             });
             animator.start();
+            Log.d(TAG, "initAnimation: common");
         }
 
+        ValueAnimator animator = new ValueAnimator();
+        animator.setDuration(300);
         switch (Values.CurrentData.CURRENT_AUTO_NEXT_TYPE) {
             case Values.TYPE_COMMON: {
                 mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
@@ -835,17 +846,16 @@ public class MusicDetailFragment extends Fragment implements IStyle {
         mSlidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
-
-                if (slideOffset == 0) {
-                    mMainActivity.getSlidingUpPanelLayout().setTouchEnabled(true);
-                } else {
-                    mMainActivity.getSlidingUpPanelLayout().setTouchEnabled(false);
-                }
+                mSlideUpGroup.setTranslationY(0 - slideOffset * 120);
             }
 
             @Override
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
-
+                if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+                    mMainActivity.getSlidingUpPanelLayout().setTouchEnabled(true);
+                } else {
+                    mMainActivity.getSlidingUpPanelLayout().setTouchEnabled(false);
+                }
             }
         });
 
@@ -1057,6 +1067,11 @@ public class MusicDetailFragment extends Fragment implements IStyle {
     public void onDestroyView() {
         mHandlerThread.quitSafely();
         super.onDestroyView();
+    }
+
+    @Override
+    public void visibleOrGone(int status) {
+
     }
 
     public final class NotLeakHandler extends Handler {

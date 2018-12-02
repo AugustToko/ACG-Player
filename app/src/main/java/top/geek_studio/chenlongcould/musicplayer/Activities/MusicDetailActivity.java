@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月30日 20:36:09
- * 上次修改时间：2018年11月30日 20:35:29
+ * 当前修改时间：2018年12月02日 20:56:24
+ * 上次修改时间：2018年12月02日 13:45:26
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -768,7 +768,7 @@ public final class MusicDetailActivity extends MyBaseActivity implements IStyle,
 
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
 //        mRecyclerView.addItemDecoration(new DividerItemDecoration(mMainActivity, DividerItemDecoration.VERTICAL));
-        mRecyclerView.setAdapter(new MyWaitListAdapter(this, Data.sMusicItems));
+        mRecyclerView.setAdapter(new MyWaitListAdapter(mMainActivity, Data.sMusicItems));
 
         mSlidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
