@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月30日 20:36:09
- * 上次修改时间：2018年11月30日 20:35:29
+ * 当前修改时间：2018年12月03日 15:10:53
+ * 上次修改时间：2018年12月03日 15:10:19
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -13,8 +13,6 @@ package top.geek_studio.chenlongcould.musicplayer.Service;
 
 import android.app.Service;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
@@ -35,8 +33,6 @@ public final class MyMusicService extends Service {
 
     private static final String TAG = "MyMusicService";
 
-    private boolean regReceiver = false;
-
     private final MediaPlayer mMediaPlayer = new MediaPlayer();
 
     private final MusicBinder mMusicBinder = new MusicBinder();
@@ -49,12 +45,6 @@ public final class MyMusicService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Values.SERVICE_RUNNING = true;
-
-        //监听耳机(有线或无线)的插拔动作, 拔出暂停音乐
-        IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-        intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
-        registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
-        regReceiver = true;
 
         mMediaPlayer.setOnCompletionListener(mp -> {
             if (Data.sNextWillPlayIndex != -1) {

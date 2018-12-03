@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月02日 20:56:24
- * 上次修改时间：2018年12月02日 11:05:21
+ * 当前修改时间：2018年12月03日 15:10:53
+ * 上次修改时间：2018年12月03日 10:42:06
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -14,7 +14,6 @@ package top.geek_studio.chenlongcould.musicplayer.Fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
@@ -23,7 +22,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +34,7 @@ import com.bumptech.glide.util.ViewPreloadSizeProvider;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.lang.ref.WeakReference;
+import java.util.Collections;
 import java.util.List;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
@@ -43,6 +42,7 @@ import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
+import top.geek_studio.chenlongcould.musicplayer.MyApplication;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.VisibleOrGone;
@@ -61,8 +61,6 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
     private MainActivity mActivity;
 
     private NotLeakHandler mHandler;
-
-    private HandlerThread mHandlerThread;
 
     private boolean CREATE_VIEW_DONE = false;
 
@@ -101,13 +99,13 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-
         mActivity = (MainActivity) getActivity();
+    }
 
-        mHandlerThread = new HandlerThread("Handler Thread in MusicListFragment");
-        mHandlerThread.start();
-        mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
-
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mHandler = new NotLeakHandler(this, ((MyApplication) mActivity.getApplication()).getCustomLooper());
     }
 
     @Override
@@ -118,16 +116,16 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
         ViewPreloadSizeProvider<MusicItem> preloadSizeProvider = new ViewPreloadSizeProvider<>();
         MyPreloadModelProvider preloadModelProvider = new MyPreloadModelProvider();
 
-        RecyclerViewPreloader<MusicItem> preLoader = new RecyclerViewPreloader<>(this, preloadModelProvider
+        RecyclerViewPreloader<MusicItem> preLoader = new RecyclerViewPreloader<>(GlideApp.with(this), preloadModelProvider
                 , preloadSizeProvider, 10);
+
+        mRecyclerView.addOnScrollListener(preLoader);
 
         mRecyclerView.addItemDecoration(new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL));
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
         mRecyclerView.setHasFixedSize(true);
         adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity);
         mRecyclerView.setAdapter(adapter);
-
-        mRecyclerView.addOnScrollListener(preLoader);
 
 //        mRecyclerView.setRecyclerListener(holder -> {
 //            MyRecyclerAdapter.ViewHolder myViewHolder = (MyRecyclerAdapter.ViewHolder) holder;
@@ -214,24 +212,17 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
         }
     }
 
-    @Override
-    public void onDestroy() {
-        mHandlerThread.quitSafely();
-        Log.d(TAG, "onDestroy: ");
-        super.onDestroy();
-    }
-
     public class MyPreloadModelProvider implements ListPreloader.PreloadModelProvider<MusicItem> {
         @NonNull
         @Override
         public List<MusicItem> getPreloadItems(int position) {
-            return Data.sMusicItems.subList(position, position + 1);
+            return Collections.singletonList(Data.sMusicItems.get(position));
         }
 
         @Nullable
         @Override
         public RequestBuilder<?> getPreloadRequestBuilder(@NonNull MusicItem item) {
-            return GlideApp.with(mActivity).load(item);
+            return GlideApp.with(MusicListFragment.this).load(item);
         }
     }
 

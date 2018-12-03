@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月02日 21:27:06
- * 上次修改时间：2018年12月02日 21:20:15
+ * 当前修改时间：2018年12月03日 15:10:53
+ * 上次修改时间：2018年12月03日 09:56:55
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -23,11 +23,15 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.media.MediaMetadataRetriever;
+import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
@@ -95,41 +99,66 @@ public final class Utils {
          * 当下一首歌曲存在(被手动指定时), auto-next-play and next-play will call this method
          */
         public static void doesNextHasMusic() {
-            if (Data.sNextWillPlayIndex != -1) {
-                Data.sMusicBinder.resetMusic();
 
-                String path = Data.sMusicItems.get(Data.sNextWillPlayIndex).getMusicPath();
-                String musicName = Data.sMusicItems.get(Data.sNextWillPlayIndex).getMusicName();
-                String albumName = Data.sMusicItems.get(Data.sNextWillPlayIndex).getMusicAlbum();
+            new AsyncTask<Void, Void, Integer>() {
 
-                Bitmap cover = Utils.Audio.getMp3Cover(path);
+                String path;
 
-                Ui.setPlayButtonNowPlaying();
+                String musicName;
 
-                MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
-                mainActivity.getMusicDetailFragment().setSlideInfo(musicName, albumName, path, cover);
+                String albumName;
 
-                mainActivity.getMusicDetailFragment().setCurrentInfo(musicName, albumName, Utils.Audio.getAlbumByteImage(path));
-                mainActivity.getMusicDetailFragment().getSeekBar().getThumb()
-                        .setColorFilter(cover == null ? Color.WHITE : cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
-                mainActivity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
+                Bitmap cover;
 
-                Values.MUSIC_PLAYING = true;
-                Values.HAS_PLAYED = true;
-                Values.CurrentData.CURRENT_MUSIC_INDEX = Data.sNextWillPlayIndex;
-                Values.CurrentData.CURRENT_SONG_PATH = path;
+                @Override
+                protected Integer doInBackground(Void... voids) {
+                    if (Data.sNextWillPlayIndex != -1) {
+                        Data.sMusicBinder.resetMusic();
 
-                Data.sNextWillPlayIndex = -1;
+                        path = Data.sMusicItems.get(Data.sNextWillPlayIndex).getMusicPath();
+                        musicName = Data.sMusicItems.get(Data.sNextWillPlayIndex).getMusicName();
+                        albumName = Data.sMusicItems.get(Data.sNextWillPlayIndex).getMusicAlbum();
+                        cover = Utils.Audio.getMp3Cover(path);
 
-                try {
-                    Data.sMusicBinder.setDataSource(path);
-                    Data.sMusicBinder.prepare();
-                    Data.sMusicBinder.playMusic();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Data.sMusicBinder.resetMusic();
+                        Ui.setPlayButtonNowPlaying();
+
+                        Values.MUSIC_PLAYING = true;
+                        Values.HAS_PLAYED = true;
+                        Values.CurrentData.CURRENT_MUSIC_INDEX = Data.sNextWillPlayIndex;
+                        Values.CurrentData.CURRENT_SONG_PATH = path;
+
+                        Data.sNextWillPlayIndex = -1;
+
+                        try {
+                            Data.sMusicBinder.setDataSource(path);
+                            Data.sMusicBinder.prepare();
+                            Data.sMusicBinder.playMusic();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            Data.sMusicBinder.resetMusic();
+                            return -1;
+                        }
+                    }
+                    return 0;
                 }
-            }
+
+                @Override
+                protected void onPostExecute(Integer status) {
+
+                    if (status != 0) return;
+
+                    MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
+                    mainActivity.getMusicDetailFragment().setSlideInfo(musicName, albumName, path, cover);
+
+                    mainActivity.getMusicDetailFragment().setCurrentInfo(musicName, albumName, Utils.Audio.getAlbumByteImage(path));
+                    mainActivity.getMusicDetailFragment().getSeekBar().getThumb()
+                            .setColorFilter(cover == null ? Color.WHITE : cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
+                    mainActivity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
+
+                }
+            }.execute();
+
+
         }
 
         /**
@@ -139,55 +168,80 @@ public final class Utils {
         public static void shufflePlayback() {
             if (READY) {            //default: true
                 if (Values.MUSIC_DATA_INIT_DONE) {
-                    READY = false;
-                    Data.sMusicBinder.resetMusic();
+                    new AsyncTask<Void, Void, Integer>() {
 
-                    //get data
-                    Random random = new Random();
-                    int index = random.nextInt(Data.sMusicItems.size() - 1);
-                    String path = Data.sMusicItems.get(index).getMusicPath();
-                    String musicName = Data.sMusicItems.get(index).getMusicName();
-                    String albumName = Data.sMusicItems.get(index).getMusicAlbum();
+                        String path;
 
-                    Data.sHistoryPlayIndex.add(index);
+                        String musicName;
 
-                    Bitmap cover = Utils.Audio.getMp3Cover(path);
-                    Data.saveGlobalCurrentData(musicName, albumName, cover);
+                        String albumName;
 
-                    Values.MUSIC_PLAYING = true;
-                    Values.HAS_PLAYED = true;
-                    Values.CurrentData.CURRENT_MUSIC_INDEX = index;
-                    Values.CurrentData.CURRENT_SONG_PATH = path;
+                        Bitmap cover;
 
-                    Ui.setPlayButtonNowPlaying();
+                        int index;
 
-                    if (Data.sActivities.size() >= 1) {
-                        MainActivity activity = (MainActivity) Data.sActivities.get(0);
-                        //first set backgroundImage, then set bg(layout) black. To crossFade more Smooth
-                        activity.getMusicDetailFragment().setSlideInfo(musicName, albumName, path, cover);
-                        activity.getMusicDetailFragment().setCurrentInfo(musicName, albumName, cover);
-                        //设置seekBar颜色
-                        activity.getMusicDetailFragment().getSeekBar().getThumb()
-                                .setColorFilter(cover == null ? Color.GRAY : cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
-                    }
+                        @Override
+                        protected Integer doInBackground(Void... voids) {
+                            READY = false;
+                            Data.sMusicBinder.resetMusic();
 
-                    try {
-                        Data.sMusicBinder.setDataSource(path);
-                        Data.sMusicBinder.prepare();
-                        Data.sMusicBinder.playMusic();          //has played, now playing
+                            //get data
+                            Random random = new Random();
+                            int index = random.nextInt(Data.sMusicItems.size() - 1);
 
-                        if (Data.sActivities.size() >= 1) {
-                            MainActivity activity = (MainActivity) Data.sActivities.get(0);
-                            //music after mediaPlayer.setDataSource, because of "Values.HandlerWhat.INIT_SEEK_BAR"
-                            activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
-                            activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
+                            path = Data.sMusicItems.get(index).getMusicPath();
+                            musicName = Data.sMusicItems.get(index).getMusicName();
+                            albumName = Data.sMusicItems.get(index).getMusicAlbum();
+
+                            Data.sHistoryPlayIndex.add(index);
+
+                            cover = Utils.Audio.getMp3Cover(path);
+                            Data.saveGlobalCurrentData(musicName, albumName, cover);
+
+                            try {
+                                Data.sMusicBinder.setDataSource(path);
+                                Data.sMusicBinder.prepare();
+                                Data.sMusicBinder.playMusic();          //has played, now playing
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                Data.sMusicBinder.resetMusic();
+                                return -1;
+                            }
+
+                            return 0;
                         }
 
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        Data.sMusicBinder.resetMusic();
-                    }
-                    READY = true;
+                        @Override
+                        protected void onPostExecute(Integer status) {
+
+                            if (status != 0) return;
+
+                            Values.MUSIC_PLAYING = true;
+                            Values.HAS_PLAYED = true;
+                            Values.CurrentData.CURRENT_MUSIC_INDEX = index;
+                            Values.CurrentData.CURRENT_SONG_PATH = path;
+
+                            Ui.setPlayButtonNowPlaying();
+
+                            if (Data.sActivities.size() >= 1) {
+                                MainActivity activity = (MainActivity) Data.sActivities.get(0);
+                                //music after mediaPlayer.setDataSource, because of "Values.HandlerWhat.INIT_SEEK_BAR"
+                                activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
+                                activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
+
+                                //first set backgroundImage, then set bg(layout) black. To crossFade more Smooth
+                                activity.getMusicDetailFragment().setSlideInfo(musicName, albumName, path, cover);
+                                activity.getMusicDetailFragment().setCurrentInfo(musicName, albumName, cover);
+                                //设置seekBar颜色
+                                activity.getMusicDetailFragment().getSeekBar().getThumb()
+                                        .setColorFilter(cover == null ? Color.GRAY : cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
+
+                            }
+
+                            READY = true;
+                        }
+                    }.execute();
+
                 } else {
                     if (Data.sActivities.size() >= 1) {
                         MainActivity activity = (MainActivity) Data.sActivities.get(0);
@@ -287,8 +341,9 @@ public final class Utils {
         /**
          * 设置背景与动画 (blur style)
          */
-        public static void setBlurEffect(@NonNull Activity context, @NonNull byte[] bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundBef, TextView nextText) {
-            context.runOnUiThread(() -> {
+        public static void setBlurEffect(@NonNull Fragment fragment, @NonNull byte[] bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundBef, TextView nextText) {
+
+            new Handler(Looper.getMainLooper()).post(() -> {
                 ANIMATION_IN_DETAIL_DONE = false;
                 primaryBackground.setVisibility(View.VISIBLE);
 
@@ -302,8 +357,10 @@ public final class Utils {
                     }
                 });
 
+                //clear
+                GlideApp.with(fragment).clear(primaryBackgroundBef);
                 if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
-                    primaryBackgroundBef.post(() -> GlideApp.with(context)
+                    primaryBackgroundBef.post(() -> GlideApp.with(fragment)
                             .load(bitmap)
                             .dontAnimate()
                             .apply(bitmapTransform(new BlurTransformation(20, 30)))
@@ -333,8 +390,9 @@ public final class Utils {
 
                         @Override
                         public void onAnimationEnd(Animator animation) {
+                            GlideApp.with(fragment).clear(primaryBackground);
                             if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
-                                GlideApp.with(context)
+                                GlideApp.with(fragment)
                                         .load(bitmap)
                                         .dontAnimate()
                                         .apply(bitmapTransform(new BlurTransformation(20, 30)))
@@ -366,8 +424,9 @@ public final class Utils {
             });
         }
 
-        public static void setBlurEffect(@NonNull Activity context, @NonNull Bitmap bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundBef, TextView nextText) {
-            context.runOnUiThread(() -> {
+        public static void setBlurEffect(@NonNull Fragment fragment, @NonNull Bitmap bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundBef, TextView nextText) {
+
+            new Handler(Looper.getMainLooper()).post(() -> {
                 ANIMATION_IN_DETAIL_DONE = false;
                 primaryBackground.setVisibility(View.VISIBLE);
 
@@ -381,9 +440,10 @@ public final class Utils {
                     }
                 });
 
-
+                //clear
+                GlideApp.with(fragment).clear(primaryBackgroundBef);
                 if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
-                    primaryBackgroundBef.post(() -> GlideApp.with(context)
+                    primaryBackgroundBef.post(() -> GlideApp.with(fragment)
                             .load(bitmap)
                             .dontAnimate()
                             .apply(bitmapTransform(new BlurTransformation(20, 30)))
@@ -394,8 +454,6 @@ public final class Utils {
                             primaryBackgroundBef.setBackgroundColor(p.getVibrantColor(Color.TRANSPARENT));
                         }
                     });
-
-
                 }
 
                 primaryBackgroundBef.post(() -> {
@@ -414,8 +472,9 @@ public final class Utils {
 
                         @Override
                         public void onAnimationEnd(Animator animation) {
+                            GlideApp.with(fragment).clear(primaryBackground);
                             if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
-                                GlideApp.with(context)
+                                GlideApp.with(fragment)
                                         .load(bitmap)
                                         .dontAnimate()
                                         .apply(bitmapTransform(new BlurTransformation(20, 30)))

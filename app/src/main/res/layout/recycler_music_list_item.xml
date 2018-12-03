@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：recycler_music_list_item.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月02日 20:56:24
-  ~ 上次修改时间：2018年12月02日 20:55:55
+  ~ 当前修改时间：2018年12月03日 15:10:53
+  ~ 上次修改时间：2018年12月03日 14:39:22
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -62,12 +62,12 @@
             android:layout_alignParentBottom="true"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
-            android:maxLines="1"
             android:ellipsize="end"
+            android:maxLines="1"
             android:text="Clover Text"
             android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/recycler_item_music_type_name"
+            app:layout_constraintEnd_toStartOf="@+id/textView4"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/recycler_item_music_name" />
 
@@ -84,6 +84,17 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:text="Time"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toStartOf="@+id/recycler_item_music_type_name"
+            app:layout_constraintTop_toBottomOf="@+id/recycler_item_music_name" />
 
     </android.support.constraint.ConstraintLayout>
 

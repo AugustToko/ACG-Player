@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Data.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月02日 20:56:24
- * 上次修改时间：2018年12月02日 09:59:54
+ * 当前修改时间：2018年12月03日 15:10:53
+ * 上次修改时间：2018年12月03日 15:10:19
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -14,7 +14,6 @@ package top.geek_studio.chenlongcould.musicplayer;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.os.IBinder;
 
@@ -59,12 +58,7 @@ public final class Data {
 
     public static List<String> sCurrentMusicList = new ArrayList<>();
 
-
     public static int sNextWillPlayIndex = -1;
-
-    public static ColorStateList sDefTextColorStateList = null;
-
-    public static ColorStateList sDefIcoColorStateList = null;
 
     public static MyHeadSetPlugReceiver mMyHeadSetPlugReceiver = new MyHeadSetPlugReceiver();
 

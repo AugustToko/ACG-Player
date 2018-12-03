@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月02日 20:56:24
- * 上次修改时间：2018年12月02日 10:19:32
+ * 当前修改时间：2018年12月03日 15:10:53
+ * 上次修改时间：2018年12月03日 08:20:10
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -15,6 +15,8 @@ import android.app.Application;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -32,9 +34,14 @@ public class MyApplication extends Application {
 
     public static SharedPreferences mDefSharedPreferences;
 
+    private HandlerThread mHandlerThread;
+
     @Override
     public void onCreate() {
         super.onCreate();
+
+        mHandlerThread = new HandlerThread("Handler Thread in MainActivity");
+        mHandlerThread.start();
 
         //set language
         Resources resources = getResources();
@@ -63,6 +70,10 @@ public class MyApplication extends Application {
         }).start();
 
         Utils.Ui.inDayNightSet(mDefSharedPreferences);
+    }
+
+    public final Looper getCustomLooper() {
+        return mHandlerThread.getLooper();
     }
 
     @Override

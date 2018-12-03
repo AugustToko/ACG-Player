@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月30日 20:36:08
- * 上次修改时间：2018年11月30日 20:35:29
+ * 当前修改时间：2018年12月03日 15:10:53
+ * 上次修改时间：2018年12月03日 15:10:22
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -14,8 +14,6 @@ package top.geek_studio.chenlongcould.musicplayer.Activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -25,7 +23,6 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -55,7 +52,7 @@ public final class AlbumDetailActivity extends Activity {
     /**
      * ------------- data ---------------
      */
-    private List<String> mIds = new ArrayList<>();
+    private List<String> mMusicIds = new ArrayList<>();
 
     private List<MusicItem> mSongs = new ArrayList<>();
 
@@ -74,43 +71,50 @@ public final class AlbumDetailActivity extends Activity {
         if (intent != null) {
             String key = intent.getStringExtra("key");
             mCollapsingToolbarLayout.setTitle(key);
+
+            //根据Album名称查music ID
             Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    new String[]{MediaStore.Audio.Albums._ID}, MediaStore.Audio.Media.ALBUM + " = ?", new String[]{key}, null);
+                    new String[]{MediaStore.Audio.Media._ID}, MediaStore.Audio.Media.ALBUM + " = ?", new String[]{key}, null);
             if (cursor != null) {
                 cursor.moveToFirst();
                 do {
-                    String id = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID));
-                    mIds.add(id);
+                    String id = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));     //get music _id
+                    mMusicIds.add(id);
                 } while (cursor.moveToNext());
                 cursor.close();
             }
 
             //selection...
-            if (mIds != null && mIds.size() > 0) {
+            if (mMusicIds != null && mMusicIds.size() > 0) {
                 StringBuilder selection = new StringBuilder(MediaStore.Audio.Media._ID + " IN (");
-                for (int i = 0; i < mIds.size(); i++) {
+                for (int i = 0; i < mMusicIds.size(); i++) {
                     selection.append("?");
-                    if (i != mIds.size() - 1) {
+                    if (i != mMusicIds.size() - 1) {
                         selection.append(",");
                     }
                 }
                 selection.append(")");
-                Cursor cursor2 = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null,
-                        selection.toString(), mIds.toArray(new String[0]), MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
 
-                //获取数据
+                Cursor cursor2 = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null,
+                        selection.toString(), mMusicIds.toArray(new String[0]), MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+
+                //获取数据(该专辑下歌曲)
                 if (cursor2 != null) {
                     cursor2.moveToFirst();
                     do {
-                        String path = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-                        String mimeType = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
-                        String name = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-                        String albumName = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
-                        int id = cursor2.getInt(cursor2.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
-                        int size = (int) cursor2.getLong(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-                        int duration = cursor2.getInt(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-                        String artist = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-                        long addTime = cursor2.getLong(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
+                        final String path = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+
+                        if (!new File(path).exists()) return;
+
+                        final String mimeType = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+                        final String name = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+                        final String albumName = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+                        final int id = cursor2.getInt(cursor2.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+                        final int size = (int) cursor2.getLong(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
+                        final int duration = cursor2.getInt(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+                        final String artist = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+                        final long addTime = cursor2.getLong(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
+                        final int albumId = cursor2.getInt(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
 
                         MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
                                 .musicAlbum(albumName)
@@ -118,7 +122,8 @@ public final class AlbumDetailActivity extends Activity {
                                 .artist(artist)
                                 .duration(duration)
                                 .mimeName(mimeType)
-                                .size(size);
+                                .size(size)
+                                .addAlbumId(albumId);
 
                         mSongs.add(builder.build());
                     } while (cursor2.moveToNext());
@@ -126,24 +131,22 @@ public final class AlbumDetailActivity extends Activity {
                 }
             }
 
-            //获取图像
+            //获取MainAlbum图像
             int id = intent.getIntExtra("_id", -1);
             if (id != -1) {
-                Log.d(TAG, "onCreate: " + "-1");
-                Cursor cursor2 = getContentResolver().query(Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + "/" + id), new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
+                Cursor cursor2 = getContentResolver().query(Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + id), new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
 
                 if (cursor2 != null) {
                     cursor2.moveToFirst();
                     String img = cursor2.getString(0);
                     if (img != null) {
                         File file = new File(img);
-                        if (file.exists()) {
-                            Bitmap bitmap = BitmapFactory.decodeFile(img);
-                            if (bitmap != null)
-                                GlideApp.with(AlbumDetailActivity.this).load(bitmap).into(mImageView);
-                        } else
+                        if (file.exists())
+                            GlideApp.with(AlbumDetailActivity.this).load(file).into(mImageView);
+                        else
                             GlideApp.with(AlbumDetailActivity.this).load(R.drawable.ic_audiotrack_24px).into(mImageView);
-                    }
+                    } else
+                        GlideApp.with(AlbumDetailActivity.this).load(R.drawable.ic_audiotrack_24px).into(mImageView);
                     cursor2.close();
                 } else {
                     return;

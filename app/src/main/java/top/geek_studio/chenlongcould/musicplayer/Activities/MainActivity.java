@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月02日 20:56:24
- * 上次修改时间：2018年12月02日 20:55:56
+ * 当前修改时间：2018年12月03日 15:10:53
+ * 上次修改时间：2018年12月03日 15:10:22
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -13,14 +13,15 @@ package top.geek_studio.chenlongcould.musicplayer.Activities;
 
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -85,6 +86,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     public static final int SET_TOOLBAR_SUBTITLE = 50074;
 
+    public static final int SET_TOOLBAR_TITLE = 50075;
+
     public static boolean ANIMATION_FLAG = true;
 
     private boolean TOOLBAR_CLICKED = false;
@@ -94,8 +97,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     private List<Fragment> mFragmentList = new ArrayList<>();
 
     private NotLeakHandler mHandler;
-
-    private HandlerThread mHandlerThread;
 
     private TabLayout mTabLayout;
 
@@ -145,80 +146,23 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         Data.sActivities.add(this);
 
+        //监听耳机(有线或无线)的插拔动作, 拔出暂停音乐
+        IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+        intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
+        registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
+
         //service
         Intent intent = new Intent(this, MyMusicService.class);
         startService(intent);
         Values.BIND_SERVICE = bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
 
-        mHandlerThread = new HandlerThread("Handler Thread in MainActivity");
-        mHandlerThread.start();
-        mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
+        mHandler = new NotLeakHandler(this, ((MyApplication) getApplication()).getCustomLooper());
 
         initView();
 
         Toast.makeText(this, "Loading", Toast.LENGTH_SHORT).show();
-        new AsyncTask<Void, Void, Integer>() {
 
-            @Override
-            protected Integer doInBackground(Void... voids) {
-                if (Data.sMusicItems.isEmpty()) {
-                    /*---------------------- init Data!!!! -------------------*/
-                    final Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-                    if (cursor != null && cursor.moveToFirst()) {
-                        //没有歌曲直接退出app
-                        if (cursor.getCount() == 0) {
-                            return -2;
-                        }
-                        do {
-                            final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-
-                            final File file = new File(path);
-                            if (!file.exists()) {
-                                Log.e(TAG, "onAttach: song file: " + path + " does not exits, skip this!!!");
-                                break;
-                            }
-
-                            final String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
-                            final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-                            final String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
-                            final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
-                            final int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-                            final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-                            final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-                            final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
-
-                            final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
-                                    .musicAlbum(albumName)
-                                    .addTime((int) addTime)
-                                    .artist(artist)
-                                    .duration(duration)
-                                    .mimeName(mimeType)
-                                    .size(size);
-
-                            Data.sMusicItems.add(builder.build());
-                            Data.sMusicItemsBackUp.add(builder.build());
-
-                        } while (cursor.moveToNext());
-                        cursor.close();
-                        Values.MUSIC_DATA_INIT_DONE = true;
-                    } else {
-                        return -1;
-                    }
-                }
-                return 0;
-            }
-
-            @Override
-            protected void onPostExecute(Integer result) {
-                if (result == -1)
-                    Utils.Ui.fastToast(MainActivity.this, "cursor == null or moveToFirst Fail");
-                if (result == -2) {
-                    Utils.Ui.fastToast(MainActivity.this, "Can not find any music!");
-                    mHandler.postDelayed(() -> exitApp(), 1000);
-                }
-                mToolbar.setSubtitle(Data.sMusicItems.size() + " Songs");
-            }
-        }.execute();
+        new MyDataLoadTask(this).execute();
 
         if (savedInstanceState != null) {
             mViewPager.setCurrentItem(savedInstanceState.getInt("viewpage", 0), true);
@@ -251,7 +195,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     @Override
     protected void onDestroy() {
-        mHandlerThread.quitSafely();
         Data.sActivities.remove(this);
         super.onDestroy();
     }
@@ -302,8 +245,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 mMusicListFragment.getRecyclerView().stopScroll();
-//                mSearchView.setIconified(true);
-//                filterData(query);
                 return false;
             }
 
@@ -312,6 +253,13 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 filterData(newText);
                 return true;
             }
+        });
+
+        mSearchView.setOnSearchClickListener(v -> Data.sMusicItemsBackUp.addAll(Data.sMusicItems));
+
+        mSearchView.setOnCloseListener(() -> {
+            Data.sMusicItemsBackUp.clear();
+            return false;
         });
         return true;
     }
@@ -336,6 +284,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.LINEAR_TYPE);
                 editor.apply();
                 mPagerAdapter.notifyDataSetChanged();
+                mAlbumListFragment.getNotLeakHandler().sendEmptyMessage(Values.HandlerWhat.GET_DATA_DONE);
             }
             break;
 
@@ -344,6 +293,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
                 editor.apply();
                 mPagerAdapter.notifyDataSetChanged();
+                mAlbumListFragment.getNotLeakHandler().sendEmptyMessage(Values.HandlerWhat.GET_DATA_DONE);
             }
             break;
         }
@@ -422,10 +372,9 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     }
 
     public final void exitApp() {
-        mHandlerThread.quitSafely();
-        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(NotificationUtils.ID);
+        AlbumListFragment.HAS_LOAD = false;
 
-        mMusicDetailFragment.onDestroyView();
+        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(NotificationUtils.ID);
 
         Data.sHistoryPlayIndex.clear();
         Data.sMusicItemsBackUp.clear();
@@ -435,11 +384,12 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         Data.sMusicBinder.stopMusic();
         Data.sMusicBinder.release();
 
-        Data.sMusicBinder = null;
         stopService(new Intent(MainActivity.this, MyMusicService.class));
         unbindService(Data.sServiceConnection);
+        Data.sMusicBinder = null;
 
         Data.sActivities.remove(this);
+        GlideApp.get(this).clearMemory();
         finish();
     }
 
@@ -461,6 +411,15 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     public final SlidingUpPanelLayout getSlidingUpPanelLayout() {
         return mSlidingUpPanelLayout;
+    }
+
+    /**
+     * get looper from MyApplication
+     *
+     * @return looper form myApp
+     */
+    public final Looper getLooper() {
+        return ((MyApplication) getApplication()).getCustomLooper();
     }
 
     private void initView() {
@@ -692,6 +651,82 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         return mNavHeaderImageView;
     }
 
+    static class MyDataLoadTask extends AsyncTask<Void, Void, Integer> {
+
+        private WeakReference<MainActivity> mWeakReference;
+
+        MyDataLoadTask(MainActivity mainActivity) {
+            mWeakReference = new WeakReference<>(mainActivity);
+        }
+
+        @Override
+        protected Integer doInBackground(Void... voids) {
+            if (Data.sMusicItems.isEmpty()) {
+                /*---------------------- init Data!!!! -------------------*/
+                final Cursor cursor = mWeakReference.get().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+                if (cursor != null && cursor.moveToFirst()) {
+                    //没有歌曲直接退出app
+                    if (cursor.getCount() == 0) {
+                        return -2;
+                    }
+                    do {
+                        final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+
+                        final File file = new File(path);
+                        if (!file.exists()) {
+                            Log.e(TAG, "onAttach: song file: " + path + " does not exits, skip this!!!");
+                            break;
+                        }
+
+                        final String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+                        final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+                        final String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+                        final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+                        final int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
+                        final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+                        final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+                        final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
+                        final int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+
+                        final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
+                                .musicAlbum(albumName)
+                                .addTime((int) addTime)
+                                .artist(artist)
+                                .duration(duration)
+                                .mimeName(mimeType)
+                                .size(size)
+                                .addAlbumId(albumId);
+
+                        Data.sMusicItems.add(builder.build());
+
+                    } while (cursor.moveToNext());
+                    cursor.close();
+                    Values.MUSIC_DATA_INIT_DONE = true;
+                } else {
+                    return -1;
+                }
+            } else {
+                Values.MUSIC_DATA_INIT_DONE = true;
+            }
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            if (result == -1)
+                Utils.Ui.fastToast(mWeakReference.get(), "cursor == null or moveToFirst Fail");
+            if (result == -2) {
+                Utils.Ui.fastToast(mWeakReference.get(), "Can not find any music!");
+                mWeakReference.get().mHandler.postDelayed(() -> mWeakReference.get().exitApp(), 1000);
+            }
+
+            Message message = Message.obtain();
+            message.what = SET_TOOLBAR_SUBTITLE;
+            message.obj = String.valueOf(Data.sMusicItems.size() + " Songs");
+            mWeakReference.get().getHandler().sendMessage(message);
+        }
+    }
+
     public final class NotLeakHandler extends Handler {
         @SuppressWarnings("unused")
         private WeakReference<MainActivity> mWeakReference;
@@ -752,7 +787,5 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             }
         }
 
-
     }
-
 }

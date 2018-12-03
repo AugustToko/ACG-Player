@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicItem.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月30日 20:36:09
- * 上次修改时间：2018年11月30日 08:43:36
+ * 当前修改时间：2018年12月03日 15:10:53
+ * 上次修改时间：2018年12月03日 15:10:21
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -21,11 +21,26 @@ public final class MusicItem implements Parcelable {
     private String mMusicName;
     private String mMusicPath;
     private int mMusicID;
+    private int mAlbumId;
     private String mMusicAlbum;
     private int mDuration;
     private int mSize;
     private String mArtist;
     private int mAddTime;
+
+    protected MusicItem(Parcel in) {
+        this.mMusicCover = in.createByteArray();
+        this.mMimeName = in.readString();
+        this.mMusicName = in.readString();
+        this.mMusicPath = in.readString();
+        this.mMusicID = in.readInt();
+        this.mMusicAlbum = in.readString();
+        this.mDuration = in.readInt();
+        this.mSize = in.readInt();
+        this.mArtist = in.readString();
+        this.mAddTime = in.readInt();
+        this.mAlbumId = in.readInt();
+    }
 
     public String getMusicName() {
         return mMusicName;
@@ -75,22 +90,26 @@ public final class MusicItem implements Parcelable {
         }
     };
 
-    protected MusicItem(Parcel in) {
-        this.mMusicCover = in.createByteArray();
-        this.mMimeName = in.readString();
-        this.mMusicName = in.readString();
-        this.mMusicPath = in.readString();
-        this.mMusicID = in.readInt();
-        this.mMusicAlbum = in.readString();
-        this.mDuration = in.readInt();
-        this.mSize = in.readInt();
-        this.mArtist = in.readString();
-        this.mAddTime = in.readInt();
+    private MusicItem(Builder builder) {
+        mMusicID = builder.mMusicID;
+        mMusicAlbum = builder.mMusicAlbum;
+        mMusicName = builder.mMusicName;
+        mAddTime = builder.mAddTime;
+        mDuration = builder.mDuration;
+        mSize = builder.mSize;
+        mMusicPath = builder.mMusicPath;
+        mArtist = builder.mArtist;
+        mMusicCover = builder.mMusicCover;
+        mAlbumId = builder.mAlbumId;
     }
 
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    public int getAlbumId() {
+        return mAlbumId;
     }
 
     @Override
@@ -105,18 +124,7 @@ public final class MusicItem implements Parcelable {
         dest.writeInt(this.mSize);
         dest.writeString(this.mArtist);
         dest.writeInt(this.mAddTime);
-    }
-
-    private MusicItem(Builder builder) {
-        mMusicID = builder.mMusicID;
-        mMusicAlbum = builder.mMusicAlbum;
-        mMusicName = builder.mMusicName;
-        mAddTime = builder.mAddTime;
-        mDuration = builder.mDuration;
-        mSize = builder.mSize;
-        mMusicPath = builder.mMusicPath;
-        mArtist = builder.mArtist;
-        mMusicCover = builder.mMusicCover;
+        dest.writeInt(this.mAlbumId);
     }
 
     public static class Builder {
@@ -131,6 +139,7 @@ public final class MusicItem implements Parcelable {
         private int mSize = -1;
         private String mArtist = "null";
         private int mAddTime = -1;
+        private int mAlbumId;
 
         public Builder(int musicID, String musicName, String musicPath) {
             mMusicID = musicID;
@@ -173,8 +182,14 @@ public final class MusicItem implements Parcelable {
             return this;
         }
 
+        public Builder addAlbumId(int id) {
+            mAlbumId = id;
+            return this;
+        }
+
         public MusicItem build() {
             return new MusicItem(this);
         }
+
     }
 }

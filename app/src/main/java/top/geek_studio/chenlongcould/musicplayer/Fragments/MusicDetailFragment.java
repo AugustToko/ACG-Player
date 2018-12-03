@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月02日 21:27:06
- * 上次修改时间：2018年12月02日 21:25:54
+ * 当前修改时间：2018年12月03日 15:10:53
+ * 上次修改时间：2018年12月03日 15:10:19
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -40,7 +40,6 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -169,22 +168,22 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
         return new MusicDetailFragment();
     }
 
-    public static boolean isVisBottom(RecyclerView recyclerView) {
-        LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-        //屏幕中最后一个可见子项的position
-        int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
-        //当前屏幕所看到的子项个数
-        int visibleItemCount = layoutManager.getChildCount();
-        //当前RecyclerView的所有子项个数
-        int totalItemCount = layoutManager.getItemCount();
-        //RecyclerView的滑动状态
-        int state = recyclerView.getScrollState();
-        if (visibleItemCount > 0 && lastVisibleItemPosition == totalItemCount - 1 && state == recyclerView.SCROLL_STATE_IDLE) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+//    public static boolean isVisBottom(RecyclerView recyclerView) {
+//        LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+//        //屏幕中最后一个可见子项的position
+//        int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
+//        //当前屏幕所看到的子项个数
+//        int visibleItemCount = layoutManager.getChildCount();
+//        //当前RecyclerView的所有子项个数
+//        int totalItemCount = layoutManager.getItemCount();
+//        //RecyclerView的滑动状态
+//        int state = recyclerView.getScrollState();
+//        if (visibleItemCount > 0 && lastVisibleItemPosition == totalItemCount - 1 && state == recyclerView.SCROLL_STATE_IDLE) {
+//            return true;
+//        } else {
+//            return false;
+//        }
+//    }
 
     @Override
     public void onAttach(Context context) {
@@ -324,7 +323,6 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                 }
             });
             animator.start();
-            Log.d(TAG, "initAnimation: random");
         } else {
             ValueAnimator animator = new ValueAnimator();
             animator.setDuration(300);
@@ -353,7 +351,6 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                 }
             });
             animator.start();
-            Log.d(TAG, "initAnimation: common");
         }
 
         ValueAnimator animator = new ValueAnimator();
@@ -511,9 +508,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
             return false;
         });
 
-        mToolbar.setNavigationOnClickListener(v -> {
-            mMainActivity.getHandler().sendEmptyMessage(MainActivity.DOWN);
-        });
+        mToolbar.setNavigationOnClickListener(v -> mMainActivity.getHandler().sendEmptyMessage(MainActivity.DOWN));
 
         /*-------------------button---------------------*/
         mRepeatButton.setOnClickListener(v -> {
@@ -847,6 +842,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
                 mSlideUpGroup.setTranslationY(0 - slideOffset * 120);
+                if (slideOffset == 0) mMainActivity.getSlidingUpPanelLayout().setTouchEnabled(true);
             }
 
             @Override
@@ -926,14 +922,14 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
             mCurrentAlbumNameText.setText(albumName);
 
             if (cover != null) {
-                GlideApp.with(mMainActivity)
+                GlideApp.with(this).clear(mMusicAlbumImage);
+                GlideApp.with(this)
                         .load(cover)
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                         .centerCrop()
                         .into(mMusicAlbumImage);
-                Utils.Ui.setBlurEffect(mMainActivity, cover, mPrimaryBackground, mPrimaryBackground_down, mNextWillText);
+                Utils.Ui.setBlurEffect(this, cover, mPrimaryBackground, mPrimaryBackground_down, mNextWillText);
             }
-
         });
     }
 
@@ -948,7 +944,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                         .centerCrop()
                         .into(mMusicAlbumImage);
-                Utils.Ui.setBlurEffect(mMainActivity, cover, mPrimaryBackground, mPrimaryBackground_down, mNextWillText);
+                Utils.Ui.setBlurEffect(this, cover, mPrimaryBackground, mPrimaryBackground_down, mNextWillText);
 
             } else {
                 mMusicAlbumImage.setImageResource(R.drawable.ic_audiotrack_24px);
@@ -1087,6 +1083,9 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
             switch (msg.what) {
                 case Values.HandlerWhat.INIT_SEEK_BAR: {
                     mWeakReference.get().runOnUiThread(() -> {
+
+                        if (Data.sMusicBinder == null) return;
+
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                             mSeekBar.setProgress(0, true);
                         } else {
@@ -1102,6 +1101,9 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                 case Values.HandlerWhat.SEEK_BAR_UPDATE: {
                     mWeakReference.get().runOnUiThread(() -> {
                         //点击body 或 music 正在播放 才可以进行seekBar更新
+
+                        if (Data.sMusicBinder == null) return;
+
                         if (Data.sMusicBinder.isPlayingMusic()) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                                 mSeekBar.setProgress(Data.sMusicBinder.getCurrentPosition(), true);

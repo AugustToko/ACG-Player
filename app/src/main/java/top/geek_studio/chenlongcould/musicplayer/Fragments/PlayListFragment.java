@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：PlayListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月02日 20:56:24
- * 上次修改时间：2018年12月02日 11:05:21
+ * 当前修改时间：2018年12月03日 15:10:53
+ * 上次修改时间：2018年12月03日 08:20:10
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -77,6 +77,7 @@ public final class PlayListFragment extends Fragment implements IStyle, VisibleO
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_play_list, container, false);
+        findId(view);
         return view;
     }
 
@@ -106,8 +107,6 @@ public final class PlayListFragment extends Fragment implements IStyle, VisibleO
     }
 
     private void initData() {
-        findId(getView());
-
         initStyle();
 
         MyRecyclerAdapter adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity);

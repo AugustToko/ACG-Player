@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月02日 20:56:24
- * 上次修改时间：2018年12月02日 20:55:53
+ * 当前修改时间：2018年12月03日 15:10:53
+ * 上次修改时间：2018年12月03日 15:10:19
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -11,12 +11,13 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Fragments;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -27,7 +28,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,13 +57,13 @@ public final class AlbumListFragment extends Fragment implements VisibleOrGone {
 
     public static boolean HAS_LOAD = false;
 
+    public final static int RE_LOAD = 40001;
+
     private RecyclerView mRecyclerView;
 
     private MyRecyclerAdapter2AlbumList mMyRecyclerAdapter2AlbumList;
 
-    private NotLeakHandler mNotLeakHandler;
-
-    private HandlerThread mHandlerThread;
+    private Handler mHandler;
 
     private MainActivity mMainActivity;
 
@@ -77,38 +77,19 @@ public final class AlbumListFragment extends Fragment implements VisibleOrGone {
 
     @Override
     public void onAttach(Context context) {
-        Log.d(TAG, "onAttach: ");
         super.onAttach(context);
-        mHandlerThread = new HandlerThread("Handler Thread in AlbumListFragment");
-        mHandlerThread.start();
-        mNotLeakHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
         mMainActivity = (MainActivity) getActivity();
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mHandler = new NotLeakHandler(this, mMainActivity.getLooper());
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_album_list, container, false);
-//        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-//            @Override
-//            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-//                if (newState == RecyclerView.SCROLL_STATE_DRAGGING || newState == RecyclerView.SCROLL_STATE_SETTLING) {
-//                    sIsScrolling = true;
-//                } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-//                    if (sIsScrolling) {
-//                        GlideApp.with(mMainActivity).resumeRequests();
-//                    } else {
-//                        GlideApp.with(mMainActivity).pauseAllRequests();
-//                    }
-//                    sIsScrolling = false;
-//                }
-//            }
-//
-//            @Override
-//            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-//                super.onScrolled(recyclerView, dx, dy);
-//            }
-//        });
-        return view;
+        return inflater.inflate(R.layout.fragment_album_list, container, false);
     }
 
     @Override
@@ -128,9 +109,12 @@ public final class AlbumListFragment extends Fragment implements VisibleOrGone {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     private void sureGetDataDone() {
-        if (Values.MUSIC_DATA_INIT_DONE) {
-            new Thread(() -> {
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... voids) {
                 Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null, null, null, null);
                 if (cursor != null) {
                     cursor.moveToFirst();
@@ -144,41 +128,45 @@ public final class AlbumListFragment extends Fragment implements VisibleOrGone {
                     cursor.close();
                 }
 
-                mNotLeakHandler.sendEmptyMessage(Values.HandlerWhat.GET_DATA_DONE);
-            }).start();
-        } else {
-            new Handler().postDelayed(this::sureGetDataDone, 500);
+                mHandler.sendEmptyMessage(Values.HandlerWhat.GET_DATA_DONE);
+                return null;
+            }
+        }.execute();
+    }
+
+    private void setRecyclerViewData() {
+        ViewPreloadSizeProvider<AlbumItem> preloadSizeProvider = new ViewPreloadSizeProvider<>();
+        AlbumListFragment.MyPreloadModelProvider preloadModelProvider = new AlbumListFragment.MyPreloadModelProvider();
+        RecyclerViewPreloader<AlbumItem> preLoader = new RecyclerViewPreloader<>(this, preloadModelProvider, preloadSizeProvider, 2);
+
+        assert getView() != null;
+        mRecyclerView = getView().findViewById(R.id.recycler_view);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.addOnScrollListener(preLoader);
+
+        //get type
+        SharedPreferences mDef = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        int type = mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
+        switch (type) {
+            case MyRecyclerAdapter2AlbumList.LINEAR_TYPE: {
+                mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+            }
+            break;
+            case MyRecyclerAdapter2AlbumList.GRID_TYPE: {
+                mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2)));
+            }
+            break;
         }
+
+        mMyRecyclerAdapter2AlbumList = new MyRecyclerAdapter2AlbumList(mMainActivity, Data.sAlbumItems, type);
+        mRecyclerView.setAdapter(mMyRecyclerAdapter2AlbumList);
     }
 
     private void sureCreateViewDone() {
         if (ON_CREATE_VIEW_DONE) {
             mMainActivity.runOnUiThread(() -> {
 
-                ViewPreloadSizeProvider<AlbumItem> preloadSizeProvider = new ViewPreloadSizeProvider<>();
-                AlbumListFragment.MyPreloadModelProvider preloadModelProvider = new AlbumListFragment.MyPreloadModelProvider();
-                RecyclerViewPreloader<AlbumItem> preLoader = new RecyclerViewPreloader<>(this, preloadModelProvider, preloadSizeProvider, 2);
-
-                assert getView() != null;
-                mRecyclerView = getView().findViewById(R.id.recycler_view);
-                mRecyclerView.setHasFixedSize(true);
-                mRecyclerView.addOnScrollListener(preLoader);
-
-                SharedPreferences mDef = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                int type = mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
-                switch (type) {
-                    case MyRecyclerAdapter2AlbumList.LINEAR_TYPE: {
-                        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                    }
-                    break;
-                    case MyRecyclerAdapter2AlbumList.GRID_TYPE: {
-                        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2)));
-                    }
-                    break;
-                }
-
-                mMyRecyclerAdapter2AlbumList = new MyRecyclerAdapter2AlbumList(mMainActivity, Data.sAlbumItems, type);
-                mRecyclerView.setAdapter(mMyRecyclerAdapter2AlbumList);
+                setRecyclerViewData();
 
                 Message message = Message.obtain();
                 message.what = MainActivity.SET_TOOLBAR_SUBTITLE;
@@ -191,14 +179,8 @@ public final class AlbumListFragment extends Fragment implements VisibleOrGone {
     }
 
     @SuppressWarnings("unused")
-    public NotLeakHandler getNotLeakHandler() {
-        return mNotLeakHandler;
-    }
-
-    @Override
-    public void onDestroy() {
-        mHandlerThread.quitSafely();
-        super.onDestroy();
+    public Handler getNotLeakHandler() {
+        return mHandler;
     }
 
     public RecyclerView getRecyclerView() {
@@ -224,6 +206,11 @@ public final class AlbumListFragment extends Fragment implements VisibleOrGone {
             switch (msg.what) {
                 case Values.HandlerWhat.GET_DATA_DONE: {
                     sureCreateViewDone();
+                }
+                break;
+
+                case RE_LOAD: {
+                    setRecyclerViewData();
                 }
                 break;
                 default:

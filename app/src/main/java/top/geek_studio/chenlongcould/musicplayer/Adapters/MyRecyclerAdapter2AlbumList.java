@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter2AlbumList.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月02日 20:56:24
- * 上次修改时间：2018年12月02日 20:55:53
+ * 当前修改时间：2018年12月03日 15:10:53
+ * 上次修改时间：2018年12月03日 14:28:08
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -102,6 +102,17 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
     }
 
     @Override
+    public void onViewDetachedFromWindow(@NonNull ViewHolder holder) {
+        holder.mAlbumImage.setTag(R.string.key_id_1, null);
+    }
+
+    @Override
+    public void onViewRecycled(@NonNull ViewHolder holder) {
+        GlideApp.with(mMainActivity).clear(holder.mAlbumImage);
+        super.onViewRecycled(holder);
+    }
+
+    @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
         mCurrentBind = viewHolder;
         Values.CurrentData.CURRENT_BIND_INDEX_ALBUM_LIST = viewHolder.getAdapterPosition();
@@ -118,12 +129,6 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
     @Override
     public int getItemCount() {
         return mAlbumNameList.size();
-    }
-
-    @Override
-    public void onViewRecycled(@NonNull ViewHolder holder) {
-        holder.mAlbumImage.setTag(null);
-        GlideApp.with(mMainActivity).clear(holder.mAlbumImage);
     }
 
     @NonNull
@@ -164,10 +169,18 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
         @Override
         protected void onPostExecute(String albumArt) {
-            if (albumArt == null || mViewHolderWeakReference.get() == null) {
+            if (mViewHolderWeakReference.get() == null) {
                 return;
             }
-            mViewHolderWeakReference.get().mAlbumImage.setTag(null);
+
+            if (albumArt == null) {
+                GlideApp.with(mContextWeakReference.get())
+                        .load(R.drawable.ic_audiotrack_24px)
+//                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                        .into(mViewHolderWeakReference.get().mAlbumImage);
+                return;
+            }
+
             File file = new File(albumArt);
             if (file.exists()) {
                 Bitmap bitmap = BitmapFactory.decodeFile(albumArt);
@@ -205,6 +218,8 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
                         .into(mViewHolderWeakReference.get().mAlbumImage);
                 Log.e(TAG, "onPostExecute: file not exits");
             }
+
+            mViewHolderWeakReference.get().mAlbumImage.setTag(R.string.key_id_1, null);
         }
 
         @Override
@@ -214,6 +229,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
             if (mViewHolderWeakReference.get() == null) {
                 return "null";
             }
+
             ImageView imageView = mViewHolderWeakReference.get().mAlbumImage;
 
             if (imageView == null || imageView.getTag(R.string.key_id_1) == null) {
@@ -223,7 +239,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
             if (((int) imageView.getTag(R.string.key_id_1)) != mPosition - 1) {
                 GlideApp.with(mContextWeakReference.get()).clear(imageView);
-                Log.e(TAG, "doInBackground: position not true");
+                Log.e(TAG, "doInBackground: position not match");
                 return null;
             }
 
