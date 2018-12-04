@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 11:31:38
- * 上次修改时间：2018年12月04日 11:31:03
+ * 当前修改时间：2018年12月04日 17:59:25
+ * 上次修改时间：2018年12月04日 17:59:10
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -11,6 +11,7 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Adapters;
 
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -21,6 +22,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,6 +30,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -59,9 +62,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
     private volatile boolean READY = true;
 
-    public static final int ALBUM_DETAIL = 0;
-
-    public static final int MUSIC_LIST_FRAGMENT = 1;
+    private boolean HAS_EXPAND = false;
 
     private List<MusicItem> mMusicItems;
 
@@ -89,6 +90,35 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_list_item, viewGroup, false);
         ViewHolder holder = new ViewHolder(view);
+
+        holder.mMusicCoverImage.setOnClickListener(v -> {
+            holder.mExpandView.clearAnimation();
+
+            final ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) holder.mExpandView.getLayoutParams();
+
+            Log.d(TAG, "onCreateViewHolder: topMargin: " + layoutParams.topMargin + " HAS_EXPAND: " + HAS_EXPAND);
+
+            final ValueAnimator animator = new ValueAnimator();
+            animator.setInterpolator(new OvershootInterpolator());
+            animator.setDuration(300);
+
+            if (!HAS_EXPAND) {
+                HAS_EXPAND = true;
+                animator.setIntValues(0, (int) mMainActivity.getResources().getDimension(R.dimen.recycler_expand_view));
+            } else {
+                HAS_EXPAND = false;
+                animator.setIntValues((int) mMainActivity.getResources().getDimension(R.dimen.recycler_expand_view), 0);
+            }
+
+            animator.addUpdateListener(animation -> {
+                layoutParams.setMargins(0, (int) animation.getAnimatedValue(), 0, 0);
+                holder.mExpandView.setLayoutParams(layoutParams);
+                holder.mExpandView.requestLayout();
+            });
+
+            animator.start();
+
+        });
 
         view.setOnClickListener(v -> new AsyncTask<Void, Void, Integer>() {
 
@@ -245,10 +275,9 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 
-        //no crash
-        if (mMusicItems.size() == 0 || i < 0 || i > mMusicItems.size() && viewHolder.getAdapterPosition() < 0 || viewHolder.getAdapterPosition() > mMusicItems.size()) {
-            Log.d(TAG, "onBindViewHolder: crash hide");
-            return;
+        Object tag = viewHolder.mMusicCoverImage.getTag(R.string.key_id_1);
+        if (tag != null && (int) tag != i) {
+            GlideApp.with(mMainActivity).clear(viewHolder.mMusicCoverImage);
         }
 
         currentBind = viewHolder;
@@ -274,16 +303,18 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
     @Override
     public void onViewDetachedFromWindow(@NonNull ViewHolder holder) {
-//        holder.mMusicCoverImage.setImageDrawable(null);
+        HAS_EXPAND = false;
         holder.mMusicCoverImage.setTag(R.string.key_id_1, null);
-//            GlideApp.with(mMainActivity).clear(holder.mMusicCoverImage);
     }
 
     @Override
     public void onViewRecycled(@NonNull ViewHolder holder) {
-        Log.d(TAG, "onViewRecycled: recycler");
-        holder.mMusicCoverImage.setImageDrawable(null);
-        holder.mMusicCoverImage.setTag(R.string.key_id_1, null);
+
+//        final ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) holder.mExpandView.getLayoutParams();
+//        layoutParams.setMargins(0, 0, 0, 0);
+//        holder.itemView.setLayoutParams(layoutParams);
+//        holder.itemView.requestLayout();
+
         GlideApp.with(mMainActivity).clear(holder.mMusicCoverImage);
         super.onViewRecycled(holder);
     }
@@ -400,6 +431,8 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
         Menu mMenu;
 
+        ConstraintLayout mExpandView;
+
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             mMusicAlbumName = itemView.findViewById(R.id.recycler_item_music_album_name);
@@ -408,6 +441,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             mItemMenuButton = itemView.findViewById(R.id.recycler_item_menu);
             mMusicExtName = itemView.findViewById(R.id.recycler_item_music_type_name);
             mTime = itemView.findViewById(R.id.recycler_item_time);
+            mExpandView = itemView.findViewById(R.id.music_item_expand_view);
 
             mPopupMenu = new PopupMenu(mMainActivity, mItemMenuButton);
             mMenu = mPopupMenu.getMenu();

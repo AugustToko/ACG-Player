@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 11:31:38
- * 上次修改时间：2018年12月04日 11:12:41
+ * 当前修改时间：2018年12月04日 17:59:25
+ * 上次修改时间：2018年12月04日 17:11:48
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -29,6 +29,8 @@ public final class Values {
     public static final String TYPE_REPEAT_ONE = "REPEAT_ONE";
 
     public static boolean HAS_PLAYED = false;           //检测app打开后, 是否播放过音乐 (如果没, 默认点击播放按钮为快速随机播放)
+
+    public static boolean PHONE_HAS_NAV = false;
 
     /**
      * permission RequestCode

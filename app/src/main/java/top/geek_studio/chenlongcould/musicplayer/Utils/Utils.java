@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 11:31:38
- * 上次修改时间：2018年12月04日 11:31:03
+ * 当前修改时间：2018年12月04日 17:59:25
+ * 上次修改时间：2018年12月04日 17:59:12
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -18,6 +18,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -104,6 +105,20 @@ public final class Utils {
             } else {
                 Values.Color.TEXT_COLOR = Values.Color.TEXT_COLOR_IN_DAY;
             }
+        }
+
+        /**
+         * 获取导航栏高度
+         *
+         * @param context context
+         * @return nav height
+         */
+        public static int getNavheight(Context context) {
+            Resources resources = context.getResources();
+            int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
+            int height = resources.getDimensionPixelSize(resourceId);
+            Log.v("dbw", "Navi height:" + height);
+            return height;
         }
 
         /**

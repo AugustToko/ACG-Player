@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter2AlbumList.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月03日 15:10:53
- * 上次修改时间：2018年12月03日 14:28:08
+ * 当前修改时间：2018年12月04日 17:59:25
+ * 上次修改时间：2018年12月04日 17:59:10
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -104,23 +104,31 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
     @Override
     public void onViewDetachedFromWindow(@NonNull ViewHolder holder) {
         holder.mAlbumImage.setTag(R.string.key_id_1, null);
+        GlideApp.with(mMainActivity).clear(holder.mAlbumImage);
     }
 
     @Override
     public void onViewRecycled(@NonNull ViewHolder holder) {
         GlideApp.with(mMainActivity).clear(holder.mAlbumImage);
+        holder.mAlbumImage.setTag(R.string.key_id_1, null);
         super.onViewRecycled(holder);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
+
+        Object tag = viewHolder.mAlbumImage.getTag(R.string.key_id_1);
+        if (tag != null && (int) tag != i) {
+            Log.d(TAG, "onBindViewHolder: this is recycled-holder, clear image");
+            GlideApp.with(mMainActivity).clear(viewHolder.mAlbumImage);
+        }
+
         mCurrentBind = viewHolder;
         Values.CurrentData.CURRENT_BIND_INDEX_ALBUM_LIST = viewHolder.getAdapterPosition();
 
         initStyle();
 
         viewHolder.mAlbumText.setText(mAlbumNameList.get(i).getAlbumName());
-        viewHolder.mAlbumImage.setTag(R.string.key_id_1, i);
         viewHolder.mAlbumImage.setTag(R.string.key_id_1, i);
 
         new Handler().postDelayed(() -> new MyTask(viewHolder, mMainActivity, i + 1).execute(), 100);
@@ -176,7 +184,6 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
             if (albumArt == null) {
                 GlideApp.with(mContextWeakReference.get())
                         .load(R.drawable.ic_audiotrack_24px)
-//                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                         .into(mViewHolderWeakReference.get().mAlbumImage);
                 return;
             }
@@ -208,13 +215,11 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
                 GlideApp.with(mContextWeakReference.get())
                         .load(bitmap)
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-                        .placeholder(R.drawable.ic_audiotrack_24px)
                         .centerCrop()
                         .into(mViewHolderWeakReference.get().mAlbumImage);
             } else {
                 GlideApp.with(mContextWeakReference.get())
                         .load(R.drawable.ic_audiotrack_24px)
-//                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                         .into(mViewHolderWeakReference.get().mAlbumImage);
                 Log.e(TAG, "onPostExecute: file not exits");
             }
@@ -233,13 +238,13 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
             ImageView imageView = mViewHolderWeakReference.get().mAlbumImage;
 
             if (imageView == null || imageView.getTag(R.string.key_id_1) == null) {
-                Log.e(TAG, "doInBackground: null");
+                Log.e(TAG, "doInBackground: key null------------------skip");
                 return null;
             }
 
             if (((int) imageView.getTag(R.string.key_id_1)) != mPosition - 1) {
                 GlideApp.with(mContextWeakReference.get()).clear(imageView);
-                Log.e(TAG, "doInBackground: position not match");
+                Log.e(TAG, "doInBackground: key error------------------skip");
                 return null;
             }
 

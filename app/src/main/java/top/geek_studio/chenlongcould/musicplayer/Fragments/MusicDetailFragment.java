@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 11:31:38
- * 上次修改时间：2018年12月04日 11:31:07
+ * 当前修改时间：2018年12月04日 17:59:25
+ * 上次修改时间：2018年12月04日 17:56:15
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -38,6 +38,7 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -161,6 +162,8 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
     private CoordinatorLayout mViewGroup;
 
+    private CardView mWaitCard;
+
     //实例化一个fragment
     public static MusicDetailFragment newInstance() {
         return new MusicDetailFragment();
@@ -267,6 +270,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
         mNowPlayingSongImage = view.findViewById(R.id.recycler_item_clover_image);
         mSlideUpGroup = view.findViewById(R.id.detail_body);
         mViewGroup = view.findViewById(R.id.fragment_detail_group);
+        mWaitCard = view.findViewById(R.id.activity_music_detail_card_view);
     }
 
     public final ConstraintLayout getNowPlayingBody() {
@@ -482,6 +486,10 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
     private void initView(View view) {
         findView(view);
+
+        if (Values.PHONE_HAS_NAV) {
+            mSlidingUpPanelLayout.setPanelHeight((int) (mSlidingUpPanelLayout.getPanelHeight() - getResources().getDimension(R.dimen.nav_height)));
+        }
 
         initStyle();
 
@@ -713,6 +721,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                 break;
                 case Menu.FIRST + 2: {
                     Intent intent = new Intent(mMainActivity, PublicActivity.class);
+                    intent.putExtra("start_by", "detail");
                     startActivity(intent);
                 }
             }

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：PublicActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月30日 20:36:09
- * 上次修改时间：2018年11月30日 18:45:38
+ * 当前修改时间：2018年12月04日 17:59:25
+ * 上次修改时间：2018年12月04日 16:38:22
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -49,33 +49,37 @@ public class PublicActivity extends MyBaseActivity {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         String type = getIntent().getStringExtra("start_by");
-        switch (type) {
-            case "add recent": {
-                // TODO: 2018/11/11  add recent
-                mToolbar.setTitle(getResources().getString(R.string.add_recent));
-                ArrayList<MusicItem> musicItems = new ArrayList<>(Data.sMusicItems);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    musicItems.sort((o1, o2) -> {
-                        if (o1 == null || o2 == null) {
-                            return 0;
-                        }
-                        return Integer.compare(o1.getAddTime(), o2.getAddTime());
-                    });
-                } else {
-                    // TODO: 2018/11/22 quickSort
-                    System.exit(0);
+
+        if (type != null) {
+            switch (type) {
+                case "add recent": {
+                    // TODO: 2018/11/11  add recent
+                    mToolbar.setTitle(getResources().getString(R.string.add_recent));
+                    ArrayList<MusicItem> musicItems = new ArrayList<>(Data.sMusicItems);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        musicItems.sort((o1, o2) -> {
+                            if (o1 == null || o2 == null) {
+                                return 0;
+                            }
+                            return Integer.compare(o1.getAddTime(), o2.getAddTime());
+                        });
+                    } else {
+                        // TODO: 2018/11/22 quickSort
+                        System.exit(0);
+                    }
+                    MyRecyclerAdapter adapter = new MyRecyclerAdapter(musicItems, this);
+                    mRecyclerView.setAdapter(adapter);
                 }
-                MyRecyclerAdapter adapter = new MyRecyclerAdapter(musicItems, this);
-                mRecyclerView.setAdapter(adapter);
+                break;
+                case "favourite music": {
+                    // TODO: 2018/11/11  favourite music
+                    mToolbar.setTitle(getResources().getString(R.string.my_favourite));
+                }
+                break;
+                default:
             }
-            break;
-            case "favourite music": {
-                // TODO: 2018/11/11  favourite music
-                mToolbar.setTitle(getResources().getString(R.string.my_favourite));
-            }
-            break;
-            default:
         }
+
     }
 
     @Override

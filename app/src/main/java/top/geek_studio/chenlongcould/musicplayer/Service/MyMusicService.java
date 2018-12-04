@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 11:31:38
- * 上次修改时间：2018年12月04日 11:31:07
+ * 当前修改时间：2018年12月04日 17:59:25
+ * 上次修改时间：2018年12月04日 17:59:10
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -11,18 +11,20 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Service;
 
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Log;
 
 import java.io.IOException;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Utils.NotificationUtils;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
@@ -93,6 +95,13 @@ public final class MyMusicService extends Service {
     }
 
     @Override
+    public void onDestroy() {
+        Log.d(TAG, "onDestroy: done");
+        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(NotificationUtils.ID);
+        super.onDestroy();
+    }
+
+    @Override
     public IBinder onBind(Intent intent) {
         Values.BIND_SERVICE = true;
         if (Data.sActivities.size() >= 1)
@@ -111,12 +120,13 @@ public final class MyMusicService extends Service {
             mMediaPlayer.start();
 
             //notification
-            Data.notificationUtils.start(Data.notificationUtils.getNot(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, R.drawable.ic_pause_white_24dp, MyMusicService.this));
+            Data.notificationUtils.start(Data.notificationUtils.getNot(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, MyMusicService.this));
         }
 
         public final void stopMusic() {
             Values.MUSIC_PLAYING = false;
             mMediaPlayer.stop();
+            Data.notificationUtils.start(Data.notificationUtils.getNot(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, MyMusicService.this));
         }
 
         public final boolean isPlayingMusic() {

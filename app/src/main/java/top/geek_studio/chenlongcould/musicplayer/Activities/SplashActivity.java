@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SplashActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 11:31:38
- * 上次修改时间：2018年12月03日 15:34:07
+ * 当前修改时间：2018年12月04日 17:59:25
+ * 上次修改时间：2018年12月04日 17:59:12
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -14,9 +14,11 @@ package top.geek_studio.chenlongcould.musicplayer.Activities;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,6 +29,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
@@ -36,23 +39,27 @@ public final class SplashActivity extends MyBaseActivity {
 
     private static final String TAG = "SplashActivity";
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        try {
-            @SuppressLint("PrivateApi") Class decorViewClazz = Class.forName("com.android.internal.policy.DecorView");
-            Field field = decorViewClazz.getDeclaredField("mSemiTransparentStatusBarColor");
-            field.setAccessible(true);
-            getWindow().setStatusBarColor(Color.TRANSPARENT);
-            field.setInt(getWindow().getDecorView(), Color.TRANSPARENT);  //改为透明
-        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
+    public static boolean phoneHasNav(Context context) {
+        boolean hasNavigationBar = false;
+        Resources rs = context.getResources();
+        int id = rs.getIdentifier("config_showNavigationBar", "bool", "android");
+        if (id > 0) {
+            hasNavigationBar = rs.getBoolean(id);
         }
+        try {
+            Class systemPropertiesClass = Class.forName("android.os.SystemProperties");
+            Method m = systemPropertiesClass.getMethod("get", String.class);
+            String navBarOverride = (String) m.invoke(systemPropertiesClass, "qemu.hw.mainkeys");
+            if ("1".equals(navBarOverride)) {
+                hasNavigationBar = false;
+            } else if ("0".equals(navBarOverride)) {
+                hasNavigationBar = true;
+            }
+        } catch (Exception e) {
 
-        setContentView(R.layout.activity_splash);
+        }
+        return hasNavigationBar;
 
-        initPermission();
     }
 
     private void initPermission() {
@@ -104,6 +111,27 @@ public final class SplashActivity extends MyBaseActivity {
             startActivity(new Intent(SplashActivity.this, MainActivity.class));
             finish();
         }, 500);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        try {
+            @SuppressLint("PrivateApi") Class decorViewClazz = Class.forName("com.android.internal.policy.DecorView");
+            Field field = decorViewClazz.getDeclaredField("mSemiTransparentStatusBarColor");
+            field.setAccessible(true);
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+            field.setInt(getWindow().getDecorView(), Color.TRANSPARENT);  //改为透明
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        Values.PHONE_HAS_NAV = phoneHasNav(this);
+
+        setContentView(R.layout.activity_splash);
+
+        initPermission();
     }
 
     @Override

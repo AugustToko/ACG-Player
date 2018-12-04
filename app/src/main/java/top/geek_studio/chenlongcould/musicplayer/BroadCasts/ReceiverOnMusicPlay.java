@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 11:31:38
- * 上次修改时间：2018年12月04日 11:17:29
+ * 当前修改时间：2018年12月04日 17:59:25
+ * 上次修改时间：2018年12月04日 17:59:10
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -35,6 +35,7 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 
 // fixme: 2018/11/28 need optimization
 public final class ReceiverOnMusicPlay extends BroadcastReceiver {
+
     private static final String TAG = "ReceiverOnMusicPlay";
 
     public static final int TYPE_SHUFFLE = 90;
@@ -325,8 +326,10 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
         //after type set
         if (!Data.sActivities.isEmpty()) {
+            Log.d(TAG, "onReceive: detailFragment scrolled");
             ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
         }
+
     }
 
     /**
@@ -417,6 +420,15 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
             cover = Utils.Audio.getMp3Cover(path);
 
+            Data.sHistoryPlayIndex.add(index);
+            Values.CurrentData.CURRENT_MUSIC_INDEX = index;
+            Values.MUSIC_PLAYING = true;
+            Values.HAS_PLAYED = true;
+            Values.CurrentData.CURRENT_MUSIC_INDEX = index;
+            Values.CurrentData.CURRENT_SONG_PATH = path;
+
+            Data.saveGlobalCurrentData(musicName, albumName, cover);
+
             try {
                 Data.sMusicBinder.setDataSource(path);
                 Data.sMusicBinder.prepare();
@@ -427,15 +439,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 return -1;
             }
 
-            Data.sHistoryPlayIndex.add(index);
-            Values.CurrentData.CURRENT_MUSIC_INDEX = index;
-            Values.MUSIC_PLAYING = true;
-            Values.HAS_PLAYED = true;
-            Values.CurrentData.CURRENT_MUSIC_INDEX = index;
-            Values.CurrentData.CURRENT_SONG_PATH = path;
-
-            Data.saveGlobalCurrentData(musicName, albumName, cover);
-
             return 0;
         }
 
@@ -443,7 +446,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
         protected void onPostExecute(Integer status) {
 
             if (status != 0) return;
-
 
             Utils.Ui.setPlayButtonNowPlaying();
 

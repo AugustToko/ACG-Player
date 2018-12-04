@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 11:31:38
- * 上次修改时间：2018年12月04日 11:17:29
+ * 当前修改时间：2018年12月04日 17:59:25
+ * 上次修改时间：2018年12月04日 17:03:56
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -166,8 +166,14 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     @Override
     protected void onDestroy() {
         Log.d(TAG, "onDestroy: ");
-        unbindService(Data.sServiceConnection);
         Data.sActivities.remove(this);
+
+        // FIXME: 2018/12/4 leak
+        try {
+            if (Values.SERVICE_RUNNING) unbindService(Data.sServiceConnection);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         super.onDestroy();
     }
 

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：NotificationUtils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月01日 11:07:06
- * 上次修改时间：2018年12月01日 11:06:38
+ * 当前修改时间：2018年12月04日 17:59:25
+ * 上次修改时间：2018年12月04日 17:59:10
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -23,7 +23,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.os.Build;
-import android.support.annotation.DrawableRes;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.graphics.Palette;
@@ -67,7 +66,7 @@ public class NotificationUtils extends ContextWrapper {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private Notification.Builder getChannelNotification(String title, String content, @DrawableRes int resId, Context context) {
+    private Notification.Builder getChannelNotification(String title, String content, Context context) {
 
         // TODO: 2018/11/30
         Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
@@ -109,12 +108,12 @@ public class NotificationUtils extends ContextWrapper {
 
         if (Data.sMusicBinder.isPlayingMusic()) {
             Notification.Action[] actions = {new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_previous_white_24dp), "Pre", preIntent).build()
-                    , new Notification.Action.Builder(Icon.createWithResource(context, resId), "play", pauseIntent).build()
+                    , new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_pause_white_24dp), "play", pauseIntent).build()
                     , new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_next_white_24dp), "next", nextIntent).build()};
             builder.setActions(actions);
         } else {
             Notification.Action[] actions = {new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_previous_white_24dp), "Pre", preIntent).build()
-                    , new Notification.Action.Builder(Icon.createWithResource(context, resId), "play", playIntent).build()
+                    , new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_play_arrow_black_24dp), "play", playIntent).build()
                     , new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_next_white_24dp), "next", nextIntent).build()};
             builder.setActions(actions);
         }
@@ -150,10 +149,10 @@ public class NotificationUtils extends ContextWrapper {
         return builder;
     }
 
-    public Notification getNot(String title, String content, @DrawableRes int res, Context context) {
+    public Notification getNot(String title, String content, Context context) {
         if (Build.VERSION.SDK_INT >= 26) {
             createNotificationChannel();
-            return getChannelNotification(title, content, res, context).build();
+            return getChannelNotification(title, content, context).build();
         } else {
             Log.d(TAG, "getNot: get 25 noti");
             return getNotification_25(title, content, context).build();
