@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月03日 15:10:53
- * 上次修改时间：2018年12月03日 15:10:19
+ * 当前修改时间：2018年12月04日 11:31:38
+ * 上次修改时间：2018年12月04日 11:31:07
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -16,15 +16,13 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
-import android.util.Log;
-import android.widget.Toast;
 
 import java.io.IOException;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Utils.NotificationUtils;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
@@ -37,8 +35,6 @@ public final class MyMusicService extends Service {
 
     private final MusicBinder mMusicBinder = new MusicBinder();
 
-    private NotificationUtils notificationUtils;
-
     public MyMusicService() {
     }
 
@@ -48,14 +44,14 @@ public final class MyMusicService extends Service {
 
         mMediaPlayer.setOnCompletionListener(mp -> {
             if (Data.sNextWillPlayIndex != -1) {
-                Utils.Audio.doesNextHasMusic();
+                Utils.SendSomeThing.sendPlay(MyMusicService.this, 7);
                 return;
             }
 
             if (Values.BUTTON_PRESSED) {
                 //来自用户的主动点击
                 if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
-                    Utils.Audio.shufflePlayback();
+                    Utils.SendSomeThing.sendPlay(this, ReceiverOnMusicPlay.TYPE_SHUFFLE);
                 } else if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_COMMON)) {
                     Utils.SendSomeThing.sendPlay(MyMusicService.this, 4);
                 }
@@ -98,25 +94,24 @@ public final class MyMusicService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        Values.BIND_SERVICE = true;
         if (Data.sActivities.size() >= 1)
-            ((MainActivity) Data.sActivities.get(0))
-                    .getHandler()
-                    .sendEmptyMessage(Values.HandlerWhat.ON_SERVICE_START);
+            ((MainActivity) Data.sActivities.get(0)).getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_FRAGMENT);
         return mMusicBinder;
     }
 
     public final class MusicBinder extends Binder {
 
         public final void playMusic() {
-//            Log.d(TAG, "playMusic: ");
             if (Data.sActivities.size() > 0)
                 ((MainActivity) Data.sActivities.get(0)).getHandler().sendEmptyMessage(MainActivity.ENABLE_TOUCH);
 
             Values.MUSIC_PLAYING = true;
             Values.HAS_PLAYED = true;
             mMediaPlayer.start();
-            notificationUtils = new NotificationUtils(MyMusicService.this, "Now Playing...");
-            notificationUtils.start(notificationUtils.getNot(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, R.drawable.ic_pause_white_24dp, MyMusicService.this));
+
+            //notification
+            Data.notificationUtils.start(Data.notificationUtils.getNot(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, R.drawable.ic_pause_white_24dp, MyMusicService.this));
         }
 
         public final void stopMusic() {
@@ -125,50 +120,35 @@ public final class MyMusicService extends Service {
         }
 
         public final boolean isPlayingMusic() {
-//            Log.d(TAG, "isPlayingMusic: ");
             return mMediaPlayer.isPlaying();
         }
 
         public final void pauseMusic() {
-            Log.d(TAG, "pauseMusic: ");
             mMediaPlayer.pause();
-            notificationUtils = new NotificationUtils(MyMusicService.this, "Now Playing...");
-            notificationUtils.start(notificationUtils.getNot(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, R.drawable.ic_play_arrow_black_24dp, MyMusicService.this));
         }
 
         public final void resetMusic() {
-//            Log.d(TAG, "resetMusic: ");
             mMediaPlayer.reset();
         }
 
-        public final void setDataSource(String path) {
-//            Log.d(TAG, "setDataSource: ");
+        public final void setDataSource(String path) throws IOException {
             mMediaPlayer.reset();
-            try {
-                mMediaPlayer.setDataSource(path);
-            } catch (IOException e) {
-                Toast.makeText(MyMusicService.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                e.printStackTrace();
-            }
+            mMediaPlayer.setDataSource(path);
         }
 
         public final void prepare() throws IOException {
-//            Log.d(TAG, "prepare: ");
             mMediaPlayer.prepare();
         }
 
         public final int getDuration() {
-//            Log.d(TAG, "getDuration: ");
             return mMediaPlayer.getDuration();
         }
 
         public final int getCurrentPosition() {
-//            Log.d(TAG, "getCurrentPosition: ");
             return mMediaPlayer.getCurrentPosition();
         }
 
         public final void seekTo(int position) {
-//            Log.d(TAG, "seekTo: ");
             mMediaPlayer.seekTo(position);
         }
 

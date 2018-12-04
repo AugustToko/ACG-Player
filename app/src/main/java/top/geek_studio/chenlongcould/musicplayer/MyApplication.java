@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月03日 15:10:53
- * 上次修改时间：2018年12月03日 08:20:10
+ * 当前修改时间：2018年12月04日 11:31:38
+ * 上次修改时间：2018年12月04日 07:45:01
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -12,25 +12,30 @@
 package top.geek_studio.chenlongcould.musicplayer;
 
 import android.app.Application;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.media.AudioManager;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
-import java.io.File;
 import java.util.Locale;
 
 import top.geek_studio.chenlongcould.musicplayer.Fragments.AlbumListFragment;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.PlayListFragment;
+import top.geek_studio.chenlongcould.musicplayer.Utils.NotificationUtils;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 
 public class MyApplication extends Application {
 
     private static final String TAG = "MyApplication";
+
+    public static boolean FIRST_START = true;
 
     public static SharedPreferences mDefSharedPreferences;
 
@@ -39,6 +44,13 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        //监听耳机(有线或无线)的插拔动作, 拔出暂停音乐
+        IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+        intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
+        registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
+
+        Data.notificationUtils = new NotificationUtils(this, "Now Playing...");
 
         mHandlerThread = new HandlerThread("Handler Thread in MainActivity");
         mHandlerThread.start();
@@ -64,11 +76,6 @@ public class MyApplication extends Application {
         //set play type
         Values.CurrentData.CURRENT_PLAY_TYPE = mDefSharedPreferences.getString(Values.SharedPrefsTag.PLAY_TYPE, Values.TYPE_COMMON);
 
-        new Thread(() -> {
-            File file = new File(getFilesDir().getPath() + File.separatorChar + "AppData");
-            Log.d(TAG, "run: " + file.getPath());
-        }).start();
-
         Utils.Ui.inDayNightSet(mDefSharedPreferences);
     }
 
@@ -81,7 +88,7 @@ public class MyApplication extends Application {
         Log.d(TAG, "onTrimMemory: do");
 
         if (level == TRIM_MEMORY_MODERATE) {
-            if (AlbumListFragment.HAS_LOAD) {
+            if (AlbumListFragment.VIEW_HAS_LOAD) {
                 Data.sAlbumItems.clear();
                 Log.d(TAG, "onTrimMemory: AlbumFragment recycled");
             }

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月03日 15:10:53
- * 上次修改时间：2018年12月03日 10:42:06
+ * 当前修改时间：2018年12月04日 11:31:38
+ * 上次修改时间：2018年12月03日 17:39:26
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -22,6 +22,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,7 +61,7 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
 
     private MainActivity mActivity;
 
-    private NotLeakHandler mHandler;
+    private Handler mHandler;
 
     private boolean CREATE_VIEW_DONE = false;
 
@@ -98,18 +99,21 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
 
     @Override
     public void onAttach(Context context) {
+        Log.d(TAG, "onAttach: ");
         super.onAttach(context);
         mActivity = (MainActivity) getActivity();
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         mHandler = new NotLeakHandler(this, ((MyApplication) mActivity.getApplication()).getCustomLooper());
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate: ");
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView: ");
         View view = inflater.inflate(R.layout.fragment_music_list_layout, container, false);
         findId(view);
 
@@ -157,6 +161,18 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
         return view;
     }
 
+    @Override
+    public void onDestroyView() {
+        Log.d(TAG, "onDestroyView: ");
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onDetach() {
+        Log.d(TAG, "onDetach: ");
+        super.onDetach();
+    }
+
     private void findId(View view) {
         mRecyclerView = view.findViewById(R.id.recycler_view);
     }
@@ -180,9 +196,13 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
         return mRecyclerView;
     }
 
+    public Handler getHandler() {
+        return mHandler;
+    }
+
     @Override
     public void visibleOrGone(int status) {
-        mRecyclerView.setVisibility(status);
+        if (mRecyclerView != null) mRecyclerView.setVisibility(status);
     }
 
     final class NotLeakHandler extends Handler {

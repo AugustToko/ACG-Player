@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月03日 15:10:53
- * 上次修改时间：2018年12月03日 09:57:39
+ * 当前修改时间：2018年12月04日 11:31:38
+ * 上次修改时间：2018年12月04日 11:12:41
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -1022,10 +1022,6 @@ public final class MusicDetailActivity extends MyBaseActivity implements IStyle,
                         //循环更新 0.5s 一次
                         mWeakReference.get().mHandler.sendEmptyMessageDelayed(Values.HandlerWhat.SEEK_BAR_UPDATE, 500);
                     });
-                }
-                break;
-                case Values.HandlerWhat.SET_SEEK_STYLE: {
-                    // TODO: 2018/11/28 need?? ------yes!
                 }
                 break;
                 case Values.HandlerWhat.RECYCLER_SCROLL: {

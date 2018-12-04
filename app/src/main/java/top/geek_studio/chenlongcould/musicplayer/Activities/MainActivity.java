@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月03日 15:10:53
- * 上次修改时间：2018年12月03日 15:10:22
+ * 当前修改时间：2018年12月04日 11:31:38
+ * 上次修改时间：2018年12月04日 11:17:29
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -13,12 +13,10 @@ package top.geek_studio.chenlongcould.musicplayer.Activities;
 
 import android.app.NotificationManager;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.media.AudioManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -57,6 +55,7 @@ import java.util.List;
 
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyPagerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter2AlbumList;
+import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.AlbumListFragment;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicDetailFragment;
@@ -83,8 +82,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     public static final int ENABLE_TOUCH = 50072;
 
     public static final int SET_VIEWPAGER_BG = 50073;
-
-    public static final int SET_TOOLBAR_SUBTITLE = 50074;
 
     public static final int SET_TOOLBAR_TITLE = 50075;
 
@@ -141,26 +138,22 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate: ");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_new);
 
-        Data.sActivities.add(this);
-
-        //监听耳机(有线或无线)的插拔动作, 拔出暂停音乐
-        IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-        intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
-        registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
-
-        //service
-        Intent intent = new Intent(this, MyMusicService.class);
-        startService(intent);
-        Values.BIND_SERVICE = bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
+        if (Data.sActivities.isEmpty()) Data.sActivities.add(this);
 
         mHandler = new NotLeakHandler(this, ((MyApplication) getApplication()).getCustomLooper());
 
         initView();
 
         Toast.makeText(this, "Loading", Toast.LENGTH_SHORT).show();
+
+        //service
+        Intent intent = new Intent(this, MyMusicService.class);
+        startService(intent);
+        bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
 
         new MyDataLoadTask(this).execute();
 
@@ -171,11 +164,19 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     }
 
     @Override
+    protected void onDestroy() {
+        Log.d(TAG, "onDestroy: ");
+        unbindService(Data.sServiceConnection);
+        Data.sActivities.remove(this);
+        super.onDestroy();
+    }
+
+    @Override
     public void onAttachFragment(Fragment fragment) {
         Log.d(TAG, "onAttachFragment: " + fragment.getClass().getName());
         super.onAttachFragment(fragment);
-        if (fragment instanceof MusicDetailFragment)
-            mMusicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_MUSIC_LIST_DONE);
+        if (fragment instanceof MusicListFragment)
+            ((MusicListFragment) fragment).getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_MUSIC_LIST_DONE);
     }
 
     @Override
@@ -191,12 +192,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             initStyle();
             Values.STYLE_CHANGED = false;
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        Data.sActivities.remove(this);
-        super.onDestroy();
     }
 
     @Override
@@ -275,7 +270,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             /*--------------- 快速 随机 播放 ----------------*/
             case R.id.menu_toolbar_fast_play: {
                 Data.sHistoryPlayIndex.clear();
-                Utils.Audio.shufflePlayback();
+                Utils.SendSomeThing.sendPlay(this, ReceiverOnMusicPlay.TYPE_SHUFFLE);
             }
             break;
 
@@ -284,7 +279,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.LINEAR_TYPE);
                 editor.apply();
                 mPagerAdapter.notifyDataSetChanged();
-                mAlbumListFragment.getNotLeakHandler().sendEmptyMessage(Values.HandlerWhat.GET_DATA_DONE);
+                mAlbumListFragment.setRecyclerViewData();
             }
             break;
 
@@ -293,7 +288,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
                 editor.apply();
                 mPagerAdapter.notifyDataSetChanged();
-                mAlbumListFragment.getNotLeakHandler().sendEmptyMessage(Values.HandlerWhat.GET_DATA_DONE);
+                mAlbumListFragment.setRecyclerViewData();
             }
             break;
         }
@@ -302,6 +297,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     /**
      * 根据输入框中的值来过滤数据并更新RecyclerView
+     *
      * @param filterStr fileName
      */
     private void filterData(String filterStr) {
@@ -327,31 +323,30 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     /**
      * init fragments
      */
-    private void initData() {
-
+    private void initFragmentData() {
         runOnUiThread(() -> {
-            String tab_1 = getResources().getString(R.string.music);
+            final String tab_1 = getResources().getString(R.string.music);
             mTitles.add(tab_1);
             mMusicListFragment = MusicListFragment.newInstance();
             mFragmentList.add(mMusicListFragment);
 
             mMusicDetailFragment = MusicDetailFragment.newInstance();
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            final FragmentManager fragmentManager = getSupportFragmentManager();
+            final FragmentTransaction transaction = fragmentManager.beginTransaction();
             transaction.replace(R.id.frame_wait, mMusicDetailFragment);
             transaction.commit();
 
-            String tab_2 = getResources().getString(R.string.album);
+            final String tab_2 = getResources().getString(R.string.album);
             mTitles.add(tab_2);
             mAlbumListFragment = AlbumListFragment.newInstance();
             mFragmentList.add(mAlbumListFragment);
 
-            String tab_3 = getResources().getString(R.string.play_list);
+            final String tab_3 = getResources().getString(R.string.play_list);
             mTitles.add(tab_3);
             mPlayListFragment = PlayListFragment.newInstance(2);
             mFragmentList.add(mPlayListFragment);
 
-            ArrayList<String> titles = new ArrayList<>();
+            final ArrayList<String> titles = new ArrayList<>();
             titles.add(tab_1);
             titles.add(tab_2);
             titles.add(tab_3);
@@ -364,15 +359,12 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             mViewPager.setOffscreenPageLimit(2);
             mTabLayout.setupWithViewPager(mViewPager);
             mViewPager.setAdapter(mPagerAdapter);
-//                            mViewPager.setCurrentItem(0);
             Values.CurrentData.CURRENT_PAGE_INDEX = 0;
-
         });
-
     }
 
     public final void exitApp() {
-        AlbumListFragment.HAS_LOAD = false;
+        AlbumListFragment.VIEW_HAS_LOAD = false;
 
         ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(NotificationUtils.ID);
 
@@ -411,15 +403,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     public final SlidingUpPanelLayout getSlidingUpPanelLayout() {
         return mSlidingUpPanelLayout;
-    }
-
-    /**
-     * get looper from MyApplication
-     *
-     * @return looper form myApp
-     */
-    public final Looper getLooper() {
-        return ((MyApplication) getApplication()).getCustomLooper();
     }
 
     private void initView() {
@@ -502,7 +485,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     mTabLayout.setVisibility(View.GONE);
                     mTabLayout.setVisibility(View.GONE);
 
-                    if (AlbumListFragment.HAS_LOAD) mAlbumListFragment.visibleOrGone(View.GONE);
+                    if (AlbumListFragment.VIEW_HAS_LOAD)
+                        mAlbumListFragment.visibleOrGone(View.GONE);
                     if (PlayListFragment.HAS_LOAD) mPlayListFragment.visibleOrGone(View.GONE);
 
                     //start animation
@@ -515,7 +499,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     mTabLayout.setVisibility(View.VISIBLE);
                     mTabLayout.setVisibility(View.VISIBLE);
                     mMusicDetailFragment.getNowPlayingBody().setVisibility(View.VISIBLE);
-                    if (AlbumListFragment.HAS_LOAD) mAlbumListFragment.visibleOrGone(View.VISIBLE);
+                    if (AlbumListFragment.VIEW_HAS_LOAD)
+                        mAlbumListFragment.visibleOrGone(View.VISIBLE);
                     if (PlayListFragment.HAS_LOAD) mPlayListFragment.visibleOrGone(View.VISIBLE);
                     mMusicListFragment.visibleOrGone(View.VISIBLE);
                     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -526,11 +511,23 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
             @Override
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+                if (newState == SlidingUpPanelLayout.PanelState.EXPANDED)
+                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                else if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED)
+                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
             }
         });
 
         //First no music no slide
-        mSlidingUpPanelLayout.setTouchEnabled(false);
+        if (Data.sMusicBinder != null) {
+            if (Data.sMusicBinder.isPlayingMusic())
+                mSlidingUpPanelLayout.setTouchEnabled(true);
+            else
+                mSlidingUpPanelLayout.setTouchEnabled(false);
+        } else {
+            mSlidingUpPanelLayout.setTouchEnabled(false);
+        }
+
 
         mNavigationView.setNavigationItemSelectedListener(menuItem -> {
             switch (menuItem.getItemId()) {
@@ -651,6 +648,10 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         return mNavHeaderImageView;
     }
 
+    public Toolbar getToolbar() {
+        return mToolbar;
+    }
+
     static class MyDataLoadTask extends AsyncTask<Void, Void, Integer> {
 
         private WeakReference<MainActivity> mWeakReference;
@@ -703,12 +704,19 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     cursor.close();
                     Values.MUSIC_DATA_INIT_DONE = true;
                 } else {
+
+                    //cursor null or getCount == 0
                     return -1;
                 }
             } else {
+                //already has data -> initFragment
+                mWeakReference.get().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_FRAGMENT);
                 Values.MUSIC_DATA_INIT_DONE = true;
+                return 0;
             }
-            return 0;
+
+            //def failed
+            return -1;
         }
 
         @Override
@@ -720,10 +728,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 mWeakReference.get().mHandler.postDelayed(() -> mWeakReference.get().exitApp(), 1000);
             }
 
-            Message message = Message.obtain();
-            message.what = SET_TOOLBAR_SUBTITLE;
-            message.obj = String.valueOf(Data.sMusicItems.size() + " Songs");
-            mWeakReference.get().getHandler().sendMessage(message);
+            mWeakReference.get().getToolbar().setSubtitle(Data.sMusicItems.size() + " Songs");
+
         }
     }
 
@@ -739,8 +745,9 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case Values.HandlerWhat.ON_SERVICE_START: {
-                    initData();
+                case Values.HandlerWhat.INIT_FRAGMENT: {
+                    Log.d(TAG, "handleMessage: initFragmentData");
+                    initFragmentData();
                 }
                 break;
                 case Values.HandlerWhat.LOAD_INTO_NAV_IMAGE: {
@@ -767,22 +774,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 case DOWN: {
                     mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
                 }
-
-//                case SET_VIEWPAGER_BG: {
-////                    mBackgroundImage.post(() -> GlideApp
-////                            .with(mWeakReference.get())
-////                            .load(Data.sCurrentMusicBitmap)
-////                            .apply(bitmapTransform(new BlurTransformation(10, 10)))
-////                            .transition(DrawableTransitionOptions.withCrossFade())
-////                            .into(mBackgroundImage));
-//                }
                 break;
-
-                case SET_TOOLBAR_SUBTITLE: {
-                    mToolbar.setSubtitle(((String) msg.obj));
-                }
-                break;
-
                 default:
             }
         }

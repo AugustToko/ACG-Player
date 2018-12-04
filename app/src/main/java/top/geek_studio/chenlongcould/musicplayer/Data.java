@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Data.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月03日 15:10:53
- * 上次修改时间：2018年12月03日 15:10:19
+ * 当前修改时间：2018年12月04日 11:31:38
+ * 上次修改时间：2018年12月04日 07:45:01
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -17,13 +17,16 @@ import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.os.IBinder;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.MyHeadSetPlugReceiver;
 import top.geek_studio.chenlongcould.musicplayer.Models.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.Service.MyMusicService;
+import top.geek_studio.chenlongcould.musicplayer.Utils.NotificationUtils;
 
 public final class Data {
 
@@ -37,10 +40,6 @@ public final class Data {
     public static volatile List<AlbumItem> sAlbumItems = new ArrayList<>();
 
     public static volatile List<MusicItem> sMusicItemsBackUp = new ArrayList<>();
-
-    public static volatile List<String> sFavouriteMusic = new ArrayList<>();
-
-    public static volatile List<String> sNotSupportType = new ArrayList<>();
 
     /**
      * 存储播放历史(序列) default...
@@ -62,22 +61,14 @@ public final class Data {
 
     public static MyHeadSetPlugReceiver mMyHeadSetPlugReceiver = new MyHeadSetPlugReceiver();
 
+    public final static SimpleDateFormat sSimpleDateFormat = new SimpleDateFormat("mm:ss", Locale.CHINESE);
+
+    public static NotificationUtils notificationUtils;
+
     public static void saveGlobalCurrentData(String musicName, String albumName, Bitmap cover) {
         sCurrentMusicAlbum = albumName;
         sCurrentMusicName = musicName;
         sCurrentMusicBitmap = cover;
-    }
-
-    public static String getCurrentMusicName() {
-        return sCurrentMusicName;
-    }
-
-    public static Bitmap getCurrentMusicBitmap() {
-        return sCurrentMusicBitmap;
-    }
-
-    public static String getCurrentMusicAlbum() {
-        return sCurrentMusicAlbum;
     }
 
     /**

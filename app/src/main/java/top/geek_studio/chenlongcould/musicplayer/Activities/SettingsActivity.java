@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月02日 20:56:24
- * 上次修改时间：2018年12月02日 10:52:29
+ * 当前修改时间：2018年12月04日 11:31:38
+ * 上次修改时间：2018年12月04日 11:31:03
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -21,6 +21,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.ColorInt;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.widget.ImageView;
 import android.widget.Switch;
@@ -136,7 +137,7 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
         mAccentImage = findViewById(R.id.activity_settings_preview_acc);
         mToolbar = findViewById(R.id.activity_settings_toolbar);
         mAppBarLayout = findViewById(R.id.activity_settings_appbar);
-        final ConstraintLayout autoNightOpt = findViewById(R.id.night_style);
+        final ConstraintLayout setNightOpt = findViewById(R.id.night_style);
         mNightSwitch = findViewById(R.id.activity_settings_night_switch);
         final ConstraintLayout styleOpt = findViewById(R.id.detail_background_style);
         mStyleSwitch = findViewById(R.id.activity_settings_style_switch);
@@ -234,21 +235,23 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
             colorPickerDialog.show(getFragmentManager(), "color-picker-dialog");
         });
 
-        autoNightOpt.setOnClickListener(v -> {
+        setNightOpt.setOnClickListener(v -> {
+
             SharedPreferences.Editor editor = mDefPrefs.edit();
             if (Values.Style.NIGHT_MODE) {
                 editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false);
                 mNightSwitch.setChecked(false);
                 Values.Style.NIGHT_MODE = false;
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
             } else {
                 editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, true);
                 mNightSwitch.setChecked(true);
                 Values.Style.NIGHT_MODE = true;
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             }
             editor.apply();
 
-//            Utils.Ui.upDateStyle(mDefPrefs);
-
+            Utils.Ui.inDayNightSet(mDefPrefs);
         });
 
         //night opt
@@ -257,18 +260,15 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
             if (isChecked) {
                 editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, true);
                 Values.Style.NIGHT_MODE = true;
-//                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             } else {
                 editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false);
                 Values.Style.NIGHT_MODE = false;
-//                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
             }
             editor.apply();
-//
-//            Utils.Ui.upDateStyle(mDefPrefs);
-//
-//            Values.BIND_SERVICE = false;
-//            unbindService(Data.sServiceConnection);
+
+            Utils.Ui.inDayNightSet(mDefPrefs);
         });
 
         styleOpt.setOnClickListener(v -> {
@@ -337,4 +337,5 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
         Utils.Ui.setAppBarColor(this, mAppBarLayout, mToolbar);
 
     }
+
 }

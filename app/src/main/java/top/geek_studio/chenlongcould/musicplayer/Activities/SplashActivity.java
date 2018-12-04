@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SplashActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月24日 17:50:10
- * 上次修改时间：2018年11月24日 16:50:43
+ * 当前修改时间：2018年12月04日 11:31:38
+ * 上次修改时间：2018年12月03日 15:34:07
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -103,7 +103,7 @@ public final class SplashActivity extends MyBaseActivity {
         handler.postDelayed(() -> {
             startActivity(new Intent(SplashActivity.this, MainActivity.class));
             finish();
-        }, 1000);
+        }, 500);
     }
 
     @Override

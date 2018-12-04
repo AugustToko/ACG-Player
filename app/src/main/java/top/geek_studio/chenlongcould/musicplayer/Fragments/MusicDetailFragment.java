@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月03日 15:10:53
- * 上次修改时间：2018年12月03日 15:10:19
+ * 当前修改时间：2018年12月04日 11:31:38
+ * 上次修改时间：2018年12月04日 11:31:07
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -35,11 +35,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -57,9 +59,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.musicplayer.Activities.AlbumDetailActivity;
@@ -79,8 +79,6 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGone {
 
-    public static final float DEF_BUTTON_ALPHA = 0.3f;
-
     public static final int SET_SEEK_BAR_COLOR = 9001;
 
     private static final String TAG = "MusicDetailActivity";
@@ -88,6 +86,8 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
     public MusicDetailFragment.NotLeakHandler mHandler;
 
     private boolean HIDE_TOOLBAR = false;
+
+    private boolean SNACK_NOTICE = false;
 
     private ImageView mMusicAlbumImage;
 
@@ -112,10 +112,6 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
     private MainActivity mMainActivity;
 
     private ConstraintLayout mCurrentInfoBody;
-
-    private CardView mCardView;
-
-    private TextView mIndexTextView;
 
     private TextView mCurrentAlbumNameText;
 
@@ -163,6 +159,8 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
     private ConstraintLayout mSlideUpGroup;
 
+    private CoordinatorLayout mViewGroup;
+
     //实例化一个fragment
     public static MusicDetailFragment newInstance() {
         return new MusicDetailFragment();
@@ -187,19 +185,20 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
     @Override
     public void onAttach(Context context) {
+        Log.d(TAG, "onAttach: ");
         super.onAttach(context);
         mMainActivity = (MainActivity) context;
 
         mHandlerThread = new HandlerThread("Handler Thread in MusicDetailActivity");
         mHandlerThread.start();
         mHandler = new MusicDetailFragment.NotLeakHandler(mMainActivity, mHandlerThread.getLooper());
-
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.activity_music_detail_new, container, false);
+        Log.d(TAG, "onCreateView: ");
+        View view = inflater.inflate(R.layout.fragment_music_detail, container, false);
 
         initView(view);
 
@@ -208,34 +207,33 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
         return view;
     }
 
-    public final void setData() {
-        //small infoBar
-        mCurrentMusicNameText.setText(Data.sCurrentMusicName);
-        mCurrentAlbumNameText.setText(Data.sCurrentMusicAlbum);
-    }
-
     private void initData() {
         //init view data
         mHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
         mHandler.sendEmptyMessage(Values.HandlerWhat.SEEK_BAR_UPDATE);
         mHandler.sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
 
-        setData();
+        mCurrentMusicNameText.setText(Data.sCurrentMusicName);
+        mCurrentAlbumNameText.setText(Data.sCurrentMusicAlbum);
 
-        if (Values.MUSIC_PLAYING) {
-            mPlayButton.setImageResource(R.drawable.ic_pause_black_24dp);
+        //检测后台播放
+        if (Values.HAS_PLAYED) {
+            if (Data.sMusicBinder.isPlayingMusic()) {
+                mNowPlayingStatusImage.setImageResource(R.drawable.ic_pause_black_24dp);
+                mPlayButton.setImageResource(R.drawable.ic_pause_white_24dp);
+            }
+            setIcoLight(Data.sCurrentMusicBitmap);
+            setSlideInfo(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, Data.sCurrentMusicBitmap);
+            setCurrentInfo(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, Data.sCurrentMusicBitmap);
+        } else {
+            mPlayButton.setImageResource(R.drawable.ic_play_arrow_black_24dp);
         }
 
+        //set SeekBar
         if (Data.sCurrentMusicBitmap != null) {
             final int temp = Data.sCurrentMusicBitmap.getPixel(Data.sCurrentMusicBitmap.getWidth() / 2, Data.sCurrentMusicBitmap.getHeight() / 2);
             mSeekBar.getThumb().setColorFilter(temp, PorterDuff.Mode.SRC_ATOP);
         }
-
-        // TODO: 2018/11/30
-//        Utils.Ui.setBlurEffect(mMainActivity, Data.sCurrentMusicBitmap, mPrimaryBackground, mPrimaryBackground_down, mNextWillText);
-        GlideApp.with(this).load(R.drawable.ic_audiotrack_24px).into(mMusicAlbumImage);
-        GlideApp.with(this).load(R.drawable.ic_audiotrack_24px).into(mNowPlayingSongImage);
-        GlideApp.with(this).load(R.drawable.ic_audiotrack_24px).into(mPrimaryBackground_down);
     }
 
     private void findView(View view) {
@@ -248,8 +246,6 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
         mPlayButton = view.findViewById(R.id.activity_music_detail_image_play_button);
         mRecyclerView = view.findViewById(R.id.recycler_view);
         mCurrentInfoBody = view.findViewById(R.id.item_layout);
-        mCardView = view.findViewById(R.id.activity_music_detail_card_view);
-        mIndexTextView = view.findViewById(R.id.item_index_text);
         mCurrentAlbumNameText = view.findViewById(R.id.item_text_one);
         mCurrentMusicNameText = view.findViewById(R.id.item_main_text);
         mMenuButton = view.findViewById(R.id.item_menu);
@@ -270,6 +266,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
         mNowPlayingSongText = view.findViewById(R.id.activity_main_now_playing_name);
         mNowPlayingSongImage = view.findViewById(R.id.recycler_item_clover_image);
         mSlideUpGroup = view.findViewById(R.id.detail_body);
+        mViewGroup = view.findViewById(R.id.fragment_detail_group);
     }
 
     public final ConstraintLayout getNowPlayingBody() {
@@ -488,10 +485,6 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
         initStyle();
 
-        // TODO: 2018/11/30 在上拉完成时， 开始动画
-        //load animations...
-//        initAnimation();
-
         setDefAnimation();
         clearAnimations();
 
@@ -502,6 +495,16 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
             switch (menuItem.getItemId()) {
                 case R.id.menu_toolbar_fast_play: {
                     Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE);
+                }
+                break;
+
+                case R.id.menu_toolbar_debug: {
+                    Snackbar.make(mViewGroup,
+                            "Next Will play" + Data.sMusicItems.get(Values.CurrentData.CURRENT_MUSIC_INDEX != Data.sMusicItems.size() ? Values.CurrentData.CURRENT_MUSIC_INDEX : 0)
+                            , Snackbar.LENGTH_LONG).setAction("按钮", v -> {
+                        //点击右侧的按钮之后的操作
+                        Utils.SendSomeThing.sendPause(mMainActivity);
+                    }).show();
                 }
                 break;
             }
@@ -816,7 +819,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
             } else {
                 Toast.makeText(mMainActivity, "Shuffle Playback!", Toast.LENGTH_SHORT).show();
                 Data.sHistoryPlayIndex.clear();
-                Utils.Audio.shufflePlayback();
+                Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE);
             }
         });
 
@@ -849,6 +852,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
                 if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
                     mMainActivity.getSlidingUpPanelLayout().setTouchEnabled(true);
+                    mHandler.sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
                 } else {
                     mMainActivity.getSlidingUpPanelLayout().setTouchEnabled(false);
                 }
@@ -928,7 +932,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                         .centerCrop()
                         .into(mMusicAlbumImage);
-                Utils.Ui.setBlurEffect(this, cover, mPrimaryBackground, mPrimaryBackground_down, mNextWillText);
+                Utils.Ui.setBlurEffect(mMainActivity, cover, mPrimaryBackground, mPrimaryBackground_down, mNextWillText);
             }
         });
     }
@@ -944,7 +948,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                         .centerCrop()
                         .into(mMusicAlbumImage);
-                Utils.Ui.setBlurEffect(this, cover, mPrimaryBackground, mPrimaryBackground_down, mNextWillText);
+                Utils.Ui.setBlurEffect(mMainActivity, cover, mPrimaryBackground, mPrimaryBackground_down, mNextWillText);
 
             } else {
                 mMusicAlbumImage.setImageResource(R.drawable.ic_audiotrack_24px);
@@ -967,11 +971,9 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
      *
      * @param songName  music name
      * @param albumName music album name
-     * @param songPath  music path
      * @param cover     music cover image, it is @NullAble(some types of music do not have cover)
-     * @param args      oth params(if "reload", do not need to set InfoBar again)
      */
-    public void setSlideInfo(String songName, String albumName, String songPath, @Nullable Bitmap cover, String... args) {
+    public void setSlideInfo(String songName, String albumName, @Nullable Bitmap cover) {
 
         mMainActivity.runOnUiThread(() -> {
             mNowPlayingSongText.setText(songName);
@@ -992,38 +994,11 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 //                    }
 //                });
             if (cover != null) {
-
                 //color set
                 GlideApp.with(mMainActivity).load(cover).transition(DrawableTransitionOptions.withCrossFade()).into(mNowPlayingSongImage);
                 GlideApp.with(mMainActivity).load(cover).transition(DrawableTransitionOptions.withCrossFade()).into(mMainActivity.getNavHeaderImageView());
 
-                //InfoBar background color AND text color balance
-                final int currentBright = Utils.Ui.getBright(cover);
-                if (currentBright > (255 / 2)) {
-                    @ColorInt final int target = Color.parseColor(Values.Color.NOT_VERY_BLACK);
-                    mNowPlayingSongText.setTextColor(target);
-                    mNowPlayingSongAlbumText.setTextColor(target);
-                    mNowPlayingStatusImage.setColorFilter(target);
-
-                    mRandomButton.setColorFilter(target);
-                    mRepeatButton.setColorFilter(target);
-                    mNextButton.setColorFilter(target);
-                    mPreviousButton.setColorFilter(target);
-                    mLeftTime.setTextColor(target);
-                    mRightTime.setTextColor(target);
-                } else {
-                    @ColorInt final int target = Color.parseColor(Values.Color.NOT_VERY_WHITE);
-                    mNowPlayingSongText.setTextColor(target);
-                    mNowPlayingSongAlbumText.setTextColor(target);
-                    mNowPlayingStatusImage.setColorFilter(target);
-
-                    mRandomButton.setColorFilter(target);
-                    mRepeatButton.setColorFilter(target);
-                    mNextButton.setColorFilter(target);
-                    mPreviousButton.setColorFilter(target);
-                    mLeftTime.setTextColor(target);
-                    mRightTime.setTextColor(target);
-                }
+                setIcoLight(cover);
 
                 GlideApp.with(mMainActivity).load(cover)
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
@@ -1047,8 +1022,46 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                 mRightTime.setTextColor(Color.BLACK);
             }
 
-            Utils.Ui.setPlayButtonNowPlaying();
         });
+    }
+
+    /**
+     * setIcon White or Black (by bitmap light)
+     *
+     * @param bitmap backgroundImage
+     */
+    private void setIcoLight(@Nullable Bitmap bitmap) {
+
+        if (bitmap == null) return;
+
+        //InfoBar background color AND text color balance
+        final int currentBright = Utils.Ui.getBright(bitmap);
+        if (currentBright > (255 / 2)) {
+            @ColorInt final int target = Color.parseColor(Values.Color.NOT_VERY_BLACK);
+            mNowPlayingSongText.setTextColor(target);
+            mNowPlayingSongAlbumText.setTextColor(target);
+            mNowPlayingStatusImage.setColorFilter(target);
+
+            mRandomButton.setColorFilter(target);
+            mRepeatButton.setColorFilter(target);
+            mNextButton.setColorFilter(target);
+            mPreviousButton.setColorFilter(target);
+            mLeftTime.setTextColor(target);
+            mRightTime.setTextColor(target);
+        } else {
+            @ColorInt final int target = Color.parseColor(Values.Color.NOT_VERY_WHITE);
+            mNowPlayingSongText.setTextColor(target);
+            mNowPlayingSongAlbumText.setTextColor(target);
+            mNowPlayingStatusImage.setColorFilter(target);
+
+            mRandomButton.setColorFilter(target);
+            mRepeatButton.setColorFilter(target);
+            mNextButton.setColorFilter(target);
+            mPreviousButton.setColorFilter(target);
+            mLeftTime.setTextColor(target);
+            mRightTime.setTextColor(target);
+        }
+
     }
 
     public SlidingUpPanelLayout getSlidingUpPanelLayout() {
@@ -1061,6 +1074,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
     @Override
     public void onDestroyView() {
+        Log.d(TAG, "onDestroyView: ");
         mHandlerThread.quitSafely();
         super.onDestroyView();
     }
@@ -1091,13 +1105,13 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                         } else {
                             mSeekBar.setProgress(0);
                         }
-                        final SimpleDateFormat sd = new SimpleDateFormat("mm:ss", Locale.CHINESE);
-                        mRightTime.setText(String.valueOf(sd.format(new Date(Data.sMusicBinder.getDuration()))));
+                        mRightTime.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(Data.sMusicBinder.getDuration()))));
                         mSeekBar.setMax(Data.sMusicBinder.getDuration());
                     });
 
                 }
                 break;
+
                 case Values.HandlerWhat.SEEK_BAR_UPDATE: {
                     mWeakReference.get().runOnUiThread(() -> {
                         //点击body 或 music 正在播放 才可以进行seekBar更新
@@ -1110,19 +1124,40 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                             } else {
                                 mSeekBar.setProgress(Data.sMusicBinder.getCurrentPosition());
                             }
-                            final SimpleDateFormat sd = new SimpleDateFormat("mm:ss", Locale.CHINESE);
-                            mLeftTime.setText(String.valueOf(sd.format(new Date(Data.sMusicBinder.getCurrentPosition()))));
+
+                            mLeftTime.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(Data.sMusicBinder.getCurrentPosition()))));
+
+                            Log.d(TAG, "handleMessage: current position " + Data.sMusicBinder.getCurrentPosition() + " ------------ " + Data.sMusicBinder.getDuration());
+
+                            if (Data.sMusicBinder.getCurrentPosition() / 1000 == Data.sMusicBinder.getDuration() / 1000 - 5 && !SNACK_NOTICE) {
+                                SNACK_NOTICE = true;
+
+                                Snackbar snackbar = Snackbar.make(mViewGroup,
+                                        "Next Will play " + Data.sMusicItems.get(Values.CurrentData.CURRENT_MUSIC_INDEX != Data.sMusicItems.size() ? Values.CurrentData.CURRENT_MUSIC_INDEX : 0).getMusicName()
+                                        , Snackbar.LENGTH_LONG).setAction("按钮", v -> {
+                                    //点击右侧的按钮之后的操作
+                                    Utils.SendSomeThing.sendPause(mMainActivity);
+                                });
+                                snackbar.addCallback(new Snackbar.Callback() {
+                                    @Override
+                                    public void onDismissed(Snackbar transientBottomBar, int event) {
+                                        SNACK_NOTICE = false;
+                                        Log.d(TAG, "onDismissed: dismissed...");
+                                    }
+                                });
+
+                                snackbar.show();
+                            }
+
                         }
 
                         //循环更新 0.5s 一次
                         mHandler.sendEmptyMessageDelayed(Values.HandlerWhat.SEEK_BAR_UPDATE, 500);
+
                     });
                 }
                 break;
-                case Values.HandlerWhat.SET_SEEK_STYLE: {
-                    // TODO: 2018/11/28 need?? ------yes!
-                }
-                break;
+
                 case Values.HandlerWhat.RECYCLER_SCROLL: {
                     mWeakReference.get().runOnUiThread(() -> mLinearLayoutManager.scrollToPositionWithOffset(Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sMusicItems.size() ? Values.CurrentData.CURRENT_MUSIC_INDEX : Values.CurrentData.CURRENT_MUSIC_INDEX + 1, 0));
                 }

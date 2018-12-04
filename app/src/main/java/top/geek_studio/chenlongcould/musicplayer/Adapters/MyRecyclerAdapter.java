@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月03日 15:10:53
- * 上次修改时间：2018年12月03日 14:37:30
+ * 当前修改时间：2018年12月04日 11:31:38
+ * 上次修改时间：2018年12月04日 11:31:03
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -11,6 +11,7 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -38,6 +39,7 @@ import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.Date;
 import java.util.List;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.AlbumDetailActivity;
@@ -54,6 +56,8 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter, IStyle {
 
     private static final String TAG = "MyRecyclerAdapter";
+
+    private volatile boolean READY = true;
 
     public static final int ALBUM_DETAIL = 0;
 
@@ -79,65 +83,82 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         return String.valueOf(mMusicItems.get(position).getMusicName().charAt(0));
     }
 
+    @SuppressLint("StaticFieldLeak")
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_list_item, viewGroup, false);
         ViewHolder holder = new ViewHolder(view);
 
-        view.setOnClickListener(v -> new Thread(() -> {
-            String clickedPath = mMusicItems.get(holder.getAdapterPosition()).getMusicPath();
+        view.setOnClickListener(v -> new AsyncTask<Void, Void, Integer>() {
 
-            //song clicked same as playing
-            if (Data.sMusicBinder.isPlayingMusic()) {
-                if (clickedPath.equals(Values.CurrentData.CURRENT_SONG_PATH)) {
-                    Utils.SendSomeThing.sendPause(mContext);
-                    return;
+            @Override
+            protected Integer doInBackground(Void... voids) {
+                Log.d(TAG, "onCreateViewHolder: current status " + READY);
+
+                if (!READY) {
+                    Log.d(TAG, "onCreateViewHolder: MusicBinder not ready!!!");
+                    mMainActivity.runOnUiThread(() -> Toast.makeText(mMainActivity, "Wait...", Toast.LENGTH_SHORT).show());
+                    return null;
                 }
-            }
+                READY = false;
 
-            Data.sMusicBinder.resetMusic();
+                String clickedPath = mMusicItems.get(holder.getAdapterPosition()).getMusicPath();
 
-            String clickedSongName = mMusicItems.get(holder.getAdapterPosition()).getMusicName();
-            String clickedSongAlbumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
+                //song clicked same as playing
+                if (Data.sMusicBinder.isPlayingMusic()) {
+                    if (clickedPath.equals(Values.CurrentData.CURRENT_SONG_PATH)) {
+                        Utils.SendSomeThing.sendPause(mContext);
+                        return null;
+                    }
+                }
 
-            //清楚播放队列, 并加入当前歌曲序列
-            Data.sHistoryPlayIndex.clear();
-            Data.sHistoryPlayIndex.add(holder.getAdapterPosition());
-
-            Bitmap cover = Utils.Audio.getMp3Cover(clickedPath);
-
-            Data.sCurrentMusicAlbum = clickedSongAlbumName;
-            Data.sCurrentMusicName = clickedSongName;
-            Data.sCurrentMusicBitmap = cover;
-
-            //set InfoBar
-            mMainActivity.getMusicDetailFragment().setSlideInfo(clickedSongName, clickedSongAlbumName, mMusicItems.get(holder.getAdapterPosition()).getMusicPath(), cover);
-            mMainActivity.getMusicDetailFragment().setCurrentInfo(clickedSongName, clickedSongAlbumName, cover);
-
-            // TODO: 2018/12/1 custom image (with blur)
-//            mMainActivity.getHandler().sendEmptyMessage(MainActivity.SET_VIEWPAGER_BG);
-
-            Values.MUSIC_PLAYING = true;
-            Values.HAS_PLAYED = true;
-            Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
-            Values.CurrentData.CURRENT_SONG_PATH = clickedPath;
-
-            Utils.Ui.setPlayButtonNowPlaying();
-
-            try {
-                Data.sMusicBinder.setDataSource(clickedPath);
-                Data.sMusicBinder.prepare();
-                Data.sMusicBinder.playMusic();
-
-                mMainActivity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
-
-            } catch (IOException e) {
-                e.printStackTrace();
                 Data.sMusicBinder.resetMusic();
+
+                String clickedSongName = mMusicItems.get(holder.getAdapterPosition()).getMusicName();
+                String clickedSongAlbumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
+
+                //清楚播放队列, 并加入当前歌曲序列
+                Data.sHistoryPlayIndex.clear();
+                Data.sHistoryPlayIndex.add(holder.getAdapterPosition());
+
+                Bitmap cover = Utils.Audio.getMp3Cover(clickedPath);
+
+                Data.sCurrentMusicAlbum = clickedSongAlbumName;
+                Data.sCurrentMusicName = clickedSongName;
+                Data.sCurrentMusicBitmap = cover;
+
+                //set InfoBar
+                mMainActivity.getMusicDetailFragment().setSlideInfo(clickedSongName, clickedSongAlbumName, cover);
+                mMainActivity.getMusicDetailFragment().setCurrentInfo(clickedSongName, clickedSongAlbumName, cover);
+
+                Values.MUSIC_PLAYING = true;
+                Values.HAS_PLAYED = true;
+                Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
+                Values.CurrentData.CURRENT_SONG_PATH = clickedPath;
+
+                try {
+                    Data.sMusicBinder.setDataSource(clickedPath);
+                    Data.sMusicBinder.prepare();
+                    Data.sMusicBinder.playMusic();
+
+                    Utils.Ui.setPlayButtonNowPlaying();
+                    mMainActivity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Data.sMusicBinder.resetMusic();
+                    Toast.makeText(mMainActivity, e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+
+                return null;
             }
 
-        }).start());
+            @Override
+            protected void onPostExecute(Integer result) {
+                READY = true;
+            }
+        }.execute());
 
         view.setOnLongClickListener(v -> {
             if (Data.sMusicBinder.isPlayingMusic()) {
@@ -163,7 +184,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 //noinspection PointlessArithmeticExpression
                 case Menu.FIRST + 0: {
                     Data.sNextWillPlayIndex = holder.getAdapterPosition();
-//                    Data.sHistoryPlayIndex.add(holder.getAdapterPosition());
                 }
                 break;
 
@@ -240,6 +260,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         viewHolder.mMusicAlbumName.setText(mMusicItems.get(i).getMusicAlbum());
         String prefix = mMusicItems.get(i).getMusicPath().substring(mMusicItems.get(i).getMusicPath().lastIndexOf(".") + 1);
         viewHolder.mMusicExtName.setText(prefix);
+        viewHolder.mTime.setText(Data.sSimpleDateFormat.format(new Date(mMusicItems.get(i).getDuration())));
 
         initStyle();
 
@@ -373,6 +394,8 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
         TextView mMusicExtName;
 
+        TextView mTime;
+
         PopupMenu mPopupMenu;
 
         Menu mMenu;
@@ -384,6 +407,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             mMusicText = itemView.findViewById(R.id.recycler_item_music_name);
             mItemMenuButton = itemView.findViewById(R.id.recycler_item_menu);
             mMusicExtName = itemView.findViewById(R.id.recycler_item_music_type_name);
+            mTime = itemView.findViewById(R.id.recycler_item_time);
 
             mPopupMenu = new PopupMenu(mMainActivity, mItemMenuButton);
             mMenu = mPopupMenu.getMenu();

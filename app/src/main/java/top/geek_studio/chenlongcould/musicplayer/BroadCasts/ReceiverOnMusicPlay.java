@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月01日 11:07:06
- * 上次修改时间：2018年12月01日 11:00:14
+ * 当前修改时间：2018年12月04日 11:31:38
+ * 上次修改时间：2018年12月04日 11:17:29
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -16,6 +16,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Message;
 import android.support.v7.graphics.Palette;
@@ -23,6 +25,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.util.Random;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
@@ -36,7 +39,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
     public static final int TYPE_SHUFFLE = 90;
 
-    private boolean READY = true;
+    private static boolean READY = true;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -48,9 +51,10 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
         }
 
         int type = intent.getIntExtra("play_type", -1);
+
         switch (type) {
             case -1: {
-                return;
+                break;
             }
 
             //unUsed
@@ -61,7 +65,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
             //Type Random
             case TYPE_SHUFFLE: {
-                Utils.Audio.shufflePlayback();
+                new ShufflePlayback().execute();
             }
             break;
 
@@ -71,9 +75,9 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
             case 2: {
                 Data.sMusicBinder.playMusic();
                 if (Data.sActivities.size() >= 1) {
-                    MainActivity activity = (MainActivity) Data.sActivities.get(0);
+                    final MainActivity activity = (MainActivity) Data.sActivities.get(0);
                     activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.SET_BUTTON_PLAY);
-                    MusicDetailFragment.NotLeakHandler notLeakHandler = activity.getMusicDetailFragment().getHandler();
+                    final MusicDetailFragment.NotLeakHandler notLeakHandler = activity.getMusicDetailFragment().getHandler();
                     notLeakHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
                 }
 
@@ -85,7 +89,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
              * */
             case 3: {
                 Data.sMusicBinder.playMusic();
-                MainActivity activity = (MainActivity) Data.sActivities.get(0);
+                final MainActivity activity = (MainActivity) Data.sActivities.get(0);
                 activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.SET_BUTTON_PLAY);
             }
             break;
@@ -102,7 +106,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 if (Data.sMusicItems.get(targetIndex).getMusicPath().equals(Values.CurrentData.CURRENT_SONG_PATH)) {
                     Data.sMusicBinder.seekTo(0);
 
-                    MainActivity activity = (MainActivity) Data.sActivities.get(0);
+                    final MainActivity activity = (MainActivity) Data.sActivities.get(0);
                     activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
                 }
 
@@ -111,23 +115,23 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 Values.HAS_PLAYED = true;
                 Values.CurrentData.CURRENT_SONG_PATH = Data.sMusicItems.get(targetIndex).getMusicPath();
 
-                String path = Data.sMusicItems.get(targetIndex).getMusicPath();
-                String musicName = Data.sMusicItems.get(targetIndex).getMusicName();
-                String albumName = Data.sMusicItems.get(targetIndex).getMusicAlbum();
+                final String path = Data.sMusicItems.get(targetIndex).getMusicPath();
+                final String musicName = Data.sMusicItems.get(targetIndex).getMusicName();
+                final String albumName = Data.sMusicItems.get(targetIndex).getMusicAlbum();
 
                 Data.sHistoryPlayIndex.add(targetIndex);
 
-                Bitmap cover = Utils.Audio.getMp3Cover(path);
+                final Bitmap cover = Utils.Audio.getMp3Cover(path);
 
                 Utils.Ui.setPlayButtonNowPlaying();
 
                 if (Data.sActivities.size() >= 1) {
-                    MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
-                    MusicDetailFragment musicDetailFragment = mainActivity.getMusicDetailFragment();
-                    musicDetailFragment.setSlideInfo(musicName, albumName, path, cover);
+                    final MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
+                    final MusicDetailFragment musicDetailFragment = mainActivity.getMusicDetailFragment();
+                    musicDetailFragment.setSlideInfo(musicName, albumName, cover);
                     musicDetailFragment.setCurrentInfo(musicName, albumName, Utils.Audio.getAlbumByteImage(path));
 
-                    Message setColor = Message.obtain();
+                    final Message setColor = Message.obtain();
                     setColor.what = MusicDetailFragment.SET_SEEK_BAR_COLOR;
                     if (cover != null) {
                         Palette.from(cover).generate(palette -> {
@@ -158,8 +162,8 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                     Data.sMusicBinder.prepare();
                     Data.sMusicBinder.playMusic();
 
-                    MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
-                    MusicDetailFragment musicDetailFragment = mainActivity.getMusicDetailFragment();
+                    final MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
+                    final MusicDetailFragment musicDetailFragment = mainActivity.getMusicDetailFragment();
 
                     musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
                     musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
@@ -181,13 +185,13 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
                         if (Data.sHistoryPlayIndex.size() == 1) {
                             Data.sMusicBinder.seekTo(0);
-                            return;
+                            break;
                         }
 
                         READY = false;
 
                         Data.sMusicBinder.resetMusic();
-                        int tempSize = Data.sHistoryPlayIndex.size();
+                        final int tempSize = Data.sHistoryPlayIndex.size();
 
                         int index = Data.sHistoryPlayIndex.get(0);          //default val
 
@@ -206,10 +210,10 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                                 index = Data.sHistoryPlayIndex.get(tempSize - 2);
                                 Data.sHistoryPlayIndex.remove(tempSize - 1);
                         }
-                        String path = Data.sMusicItems.get(index).getMusicPath();
-                        String musicName = Data.sMusicItems.get(index).getMusicName();
-                        String albumName = Data.sMusicItems.get(index).getMusicAlbum();
-                        Bitmap cover = Utils.Audio.getMp3Cover(path);
+                        final String path = Data.sMusicItems.get(index).getMusicPath();
+                        final String musicName = Data.sMusicItems.get(index).getMusicName();
+                        final String albumName = Data.sMusicItems.get(index).getMusicAlbum();
+                        final Bitmap cover = Utils.Audio.getMp3Cover(path);
 
                         Data.saveGlobalCurrentData(musicName, albumName, cover);
 
@@ -222,8 +226,8 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
                         if (Data.sActivities.size() >= 1) {
                             //UI sets
-                            MainActivity activity = (MainActivity) Data.sActivities.get(0);
-                            MusicDetailFragment musicDetailFragment = activity.getMusicDetailFragment();
+                            final MainActivity activity = (MainActivity) Data.sActivities.get(0);
+                            final MusicDetailFragment musicDetailFragment = activity.getMusicDetailFragment();
 
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                                 musicDetailFragment.getSeekBar().setProgress(0, true);
@@ -231,7 +235,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                                 musicDetailFragment.getSeekBar().setProgress(0);
                             }
 
-                            Message setColor = Message.obtain();
+                            final Message setColor = Message.obtain();
                             setColor.what = MusicDetailFragment.SET_SEEK_BAR_COLOR;
                             if (cover != null) {
                                 Palette.from(cover).generate(palette -> {
@@ -251,7 +255,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                                 musicDetailFragment.getHandler().sendMessage(setColor);
                             }
 
-                            musicDetailFragment.setSlideInfo(musicName, albumName, path, cover);
+                            musicDetailFragment.setSlideInfo(musicName, albumName, cover);
                             musicDetailFragment.setCurrentInfo(musicName, albumName, Utils.Audio.getAlbumByteImage(path));
                             musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
 
@@ -263,7 +267,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                             Data.sMusicBinder.playMusic();
 
                             if (Data.sActivities.size() > 0) {
-                                MainActivity activity = (MainActivity) Data.sActivities.get(0);
+                                final MainActivity activity = (MainActivity) Data.sActivities.get(0);
                                 MusicDetailFragment musicDetailFragment = activity.getMusicDetailFragment();
                                 musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
                             }
@@ -282,7 +286,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
             //by next button...(in detail or noti)
             case 6: {
                 Values.BUTTON_PRESSED = true;
-                MusicDetailFragment musicDetailFragment = ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment();
+                final MusicDetailFragment musicDetailFragment = ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment();
 
                 //防止seekBar跳动到Max
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -292,13 +296,13 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 }
 
                 if (Data.sNextWillPlayIndex != -1) {
-                    Utils.Audio.doesNextHasMusic();
-                    return;
+                    new DoesHasNext().execute();
+                    break;
                 }
 
                 switch (Values.CurrentData.CURRENT_PLAY_TYPE) {
                     case Values.TYPE_RANDOM:
-                        Utils.Audio.shufflePlayback();
+                        new ShufflePlayback().execute();
                         break;
                     case Values.TYPE_COMMON:
                         Utils.SendSomeThing.sendPlay(context, 4);
@@ -308,6 +312,156 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 }
                 Values.BUTTON_PRESSED = false;
             }
+            break;
+
+            /*
+             when next-play clicked, will call this
+             */
+            case 7: {
+                new DoesHasNext().execute();
+            }
+            break;
+        }
+
+        //after type set
+        if (!Data.sActivities.isEmpty()) {
+            ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
+        }
+    }
+
+    /**
+     * 当下一首歌曲存在(被手动指定时), auto-next-play and next-play will call this method
+     */
+    public static class DoesHasNext extends AsyncTask<Void, Void, Integer> {
+
+        String path;
+
+        String musicName;
+
+        String albumName;
+
+        Bitmap cover;
+
+        @Override
+        protected Integer doInBackground(Void... voids) {
+            if (Data.sNextWillPlayIndex != -1) {
+                Data.sMusicBinder.resetMusic();
+
+                path = Data.sMusicItems.get(Data.sNextWillPlayIndex).getMusicPath();
+                musicName = Data.sMusicItems.get(Data.sNextWillPlayIndex).getMusicName();
+                albumName = Data.sMusicItems.get(Data.sNextWillPlayIndex).getMusicAlbum();
+                cover = Utils.Audio.getMp3Cover(path);
+
+                Utils.Ui.setPlayButtonNowPlaying();
+
+                Values.MUSIC_PLAYING = true;
+                Values.HAS_PLAYED = true;
+                Values.CurrentData.CURRENT_MUSIC_INDEX = Data.sNextWillPlayIndex;
+                Values.CurrentData.CURRENT_SONG_PATH = path;
+
+                Data.sNextWillPlayIndex = -1;
+
+                try {
+                    Data.sMusicBinder.setDataSource(path);
+                    Data.sMusicBinder.prepare();
+                    Data.sMusicBinder.playMusic();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Data.sMusicBinder.resetMusic();
+                    return -1;
+                }
+            }
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer status) {
+
+            if (status != 0) return;
+
+            final MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
+            mainActivity.getMusicDetailFragment().setSlideInfo(musicName, albumName, cover);
+
+            mainActivity.getMusicDetailFragment().setCurrentInfo(musicName, albumName, Utils.Audio.getAlbumByteImage(path));
+            mainActivity.getMusicDetailFragment().getSeekBar().getThumb()
+                    .setColorFilter(cover == null ? Color.WHITE : cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
+
+        }
+    }
+
+    /**
+     * play_type: random, without history clear (by nextButton or auto-next)
+     */
+    public static class ShufflePlayback extends AsyncTask<Void, Void, Integer> {
+
+        String path;
+
+        String musicName;
+
+        String albumName;
+
+        Bitmap cover;
+
+        @Override
+        protected Integer doInBackground(Void... voids) {
+            READY = false;
+            Data.sMusicBinder.resetMusic();
+
+            //get data
+            final Random random = new Random();
+            final int index = random.nextInt(Data.sMusicItems.size() - 1);
+
+            path = Data.sMusicItems.get(index).getMusicPath();
+            musicName = Data.sMusicItems.get(index).getMusicName();
+            albumName = Data.sMusicItems.get(index).getMusicAlbum();
+
+            cover = Utils.Audio.getMp3Cover(path);
+
+            try {
+                Data.sMusicBinder.setDataSource(path);
+                Data.sMusicBinder.prepare();
+                Data.sMusicBinder.playMusic();          //has played, now playing
+            } catch (IOException e) {
+                e.printStackTrace();
+                Data.sMusicBinder.resetMusic();
+                return -1;
+            }
+
+            Data.sHistoryPlayIndex.add(index);
+            Values.CurrentData.CURRENT_MUSIC_INDEX = index;
+            Values.MUSIC_PLAYING = true;
+            Values.HAS_PLAYED = true;
+            Values.CurrentData.CURRENT_MUSIC_INDEX = index;
+            Values.CurrentData.CURRENT_SONG_PATH = path;
+
+            Data.saveGlobalCurrentData(musicName, albumName, cover);
+
+            return 0;
+        }
+
+        @Override
+        protected void onPostExecute(Integer status) {
+
+            if (status != 0) return;
+
+
+            Utils.Ui.setPlayButtonNowPlaying();
+
+            if (Data.sActivities.size() >= 1) {
+                final MainActivity activity = (MainActivity) Data.sActivities.get(0);
+                //music after mediaPlayer.setDataSource, because of "Values.HandlerWhat.INIT_SEEK_BAR"
+                activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
+
+                //first set backgroundImage, then set bg(layout) black. To crossFade more Smooth
+                activity.getMusicDetailFragment().setSlideInfo(musicName, albumName, cover);
+                activity.getMusicDetailFragment().setCurrentInfo(musicName, albumName, cover);
+                //设置seekBar颜色
+                activity.getMusicDetailFragment().getSeekBar().getThumb()
+                        .setColorFilter(cover == null ? Color.GRAY : cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
+
+            }
+
+            READY = true;
         }
     }
 }

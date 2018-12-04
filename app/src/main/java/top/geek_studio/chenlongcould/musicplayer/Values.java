@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月01日 16:21:06
- * 上次修改时间：2018年12月01日 13:39:29
+ * 当前修改时间：2018年12月04日 11:31:38
+ * 上次修改时间：2018年12月04日 11:12:41
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -56,21 +56,18 @@ public final class Values {
          * Handler msg.what
          */
         public static final int INIT_MUSIC_LIST_DONE = 50;
-        public static final int GET_DATA_DONE = 52;
         public static final int SEEK_BAR_UPDATE = 53;
         public static final int INIT_SEEK_BAR = 54;
 
         /**
          * in MainActivity
          */
-        public static final int INIT_PAGE_DONE = 59;
         public static final int SET_BUTTON_PLAY = 58;
         public static final int SET_BUTTON_PAUSE = 57;
         public static final int LOAD_INTO_NAV_IMAGE = 5003;
-        public static final int ON_SERVICE_START = 50007;
+        public static final int INIT_FRAGMENT = 50007;
 
         public static final int RECYCLER_SCROLL = 55001;
-        public static final int SET_SEEK_STYLE = 5002;
 
     }
 

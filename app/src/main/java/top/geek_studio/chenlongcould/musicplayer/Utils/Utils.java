@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月03日 15:10:53
- * 上次修改时间：2018年12月03日 09:56:55
+ * 当前修改时间：2018年12月04日 11:31:38
+ * 上次修改时间：2018年12月04日 11:31:03
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -21,9 +21,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.media.MediaMetadataRetriever;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
@@ -42,9 +40,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
-
-import java.io.IOException;
-import java.util.Random;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
@@ -93,167 +88,6 @@ public final class Utils {
         public static byte[] getAlbumByteImage(@NonNull String path) {
             sMediaMetadataRetriever.setDataSource(path);
             return sMediaMetadataRetriever.getEmbeddedPicture();
-        }
-
-        /**
-         * 当下一首歌曲存在(被手动指定时), auto-next-play and next-play will call this method
-         */
-        public static void doesNextHasMusic() {
-
-            new AsyncTask<Void, Void, Integer>() {
-
-                String path;
-
-                String musicName;
-
-                String albumName;
-
-                Bitmap cover;
-
-                @Override
-                protected Integer doInBackground(Void... voids) {
-                    if (Data.sNextWillPlayIndex != -1) {
-                        Data.sMusicBinder.resetMusic();
-
-                        path = Data.sMusicItems.get(Data.sNextWillPlayIndex).getMusicPath();
-                        musicName = Data.sMusicItems.get(Data.sNextWillPlayIndex).getMusicName();
-                        albumName = Data.sMusicItems.get(Data.sNextWillPlayIndex).getMusicAlbum();
-                        cover = Utils.Audio.getMp3Cover(path);
-
-                        Ui.setPlayButtonNowPlaying();
-
-                        Values.MUSIC_PLAYING = true;
-                        Values.HAS_PLAYED = true;
-                        Values.CurrentData.CURRENT_MUSIC_INDEX = Data.sNextWillPlayIndex;
-                        Values.CurrentData.CURRENT_SONG_PATH = path;
-
-                        Data.sNextWillPlayIndex = -1;
-
-                        try {
-                            Data.sMusicBinder.setDataSource(path);
-                            Data.sMusicBinder.prepare();
-                            Data.sMusicBinder.playMusic();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            Data.sMusicBinder.resetMusic();
-                            return -1;
-                        }
-                    }
-                    return 0;
-                }
-
-                @Override
-                protected void onPostExecute(Integer status) {
-
-                    if (status != 0) return;
-
-                    MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
-                    mainActivity.getMusicDetailFragment().setSlideInfo(musicName, albumName, path, cover);
-
-                    mainActivity.getMusicDetailFragment().setCurrentInfo(musicName, albumName, Utils.Audio.getAlbumByteImage(path));
-                    mainActivity.getMusicDetailFragment().getSeekBar().getThumb()
-                            .setColorFilter(cover == null ? Color.WHITE : cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
-                    mainActivity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
-
-                }
-            }.execute();
-
-
-        }
-
-        /**
-         * play_type: random, without history clear (by nextButton or auto-next)
-         */
-        //shufflePlayback
-        public static void shufflePlayback() {
-            if (READY) {            //default: true
-                if (Values.MUSIC_DATA_INIT_DONE) {
-                    new AsyncTask<Void, Void, Integer>() {
-
-                        String path;
-
-                        String musicName;
-
-                        String albumName;
-
-                        Bitmap cover;
-
-                        int index;
-
-                        @Override
-                        protected Integer doInBackground(Void... voids) {
-                            READY = false;
-                            Data.sMusicBinder.resetMusic();
-
-                            //get data
-                            Random random = new Random();
-                            int index = random.nextInt(Data.sMusicItems.size() - 1);
-
-                            path = Data.sMusicItems.get(index).getMusicPath();
-                            musicName = Data.sMusicItems.get(index).getMusicName();
-                            albumName = Data.sMusicItems.get(index).getMusicAlbum();
-
-                            Data.sHistoryPlayIndex.add(index);
-
-                            cover = Utils.Audio.getMp3Cover(path);
-                            Data.saveGlobalCurrentData(musicName, albumName, cover);
-
-                            try {
-                                Data.sMusicBinder.setDataSource(path);
-                                Data.sMusicBinder.prepare();
-                                Data.sMusicBinder.playMusic();          //has played, now playing
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                Data.sMusicBinder.resetMusic();
-                                return -1;
-                            }
-
-                            return 0;
-                        }
-
-                        @Override
-                        protected void onPostExecute(Integer status) {
-
-                            if (status != 0) return;
-
-                            Values.MUSIC_PLAYING = true;
-                            Values.HAS_PLAYED = true;
-                            Values.CurrentData.CURRENT_MUSIC_INDEX = index;
-                            Values.CurrentData.CURRENT_SONG_PATH = path;
-
-                            Ui.setPlayButtonNowPlaying();
-
-                            if (Data.sActivities.size() >= 1) {
-                                MainActivity activity = (MainActivity) Data.sActivities.get(0);
-                                //music after mediaPlayer.setDataSource, because of "Values.HandlerWhat.INIT_SEEK_BAR"
-                                activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
-                                activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
-
-                                //first set backgroundImage, then set bg(layout) black. To crossFade more Smooth
-                                activity.getMusicDetailFragment().setSlideInfo(musicName, albumName, path, cover);
-                                activity.getMusicDetailFragment().setCurrentInfo(musicName, albumName, cover);
-                                //设置seekBar颜色
-                                activity.getMusicDetailFragment().getSeekBar().getThumb()
-                                        .setColorFilter(cover == null ? Color.GRAY : cover.getPixel(cover.getWidth() / 2, cover.getHeight() / 2), PorterDuff.Mode.SRC_ATOP);
-
-                            }
-
-                            READY = true;
-                        }
-                    }.execute();
-
-                } else {
-                    if (Data.sActivities.size() >= 1) {
-                        MainActivity activity = (MainActivity) Data.sActivities.get(0);
-                        activity.runOnUiThread(() -> Utils.Ui.createMessageDialog(activity, "Error", "MUSIC_DATA_INIT_FAIL").show());
-                    }
-                }
-            } else {
-                if (Data.sActivities.size() >= 1) {
-                    MainActivity activity = (MainActivity) Data.sActivities.get(0);
-                    Ui.fastToast(activity, "Preparing...");
-                }
-            }
         }
 
     }
@@ -340,8 +174,10 @@ public final class Utils {
 
         /**
          * 设置背景与动画 (blur style)
+         *
+         * @param activity if use fragment may case {@link java.lang.NullPointerException}, glide will call {@link Fragment#getActivity()}
          */
-        public static void setBlurEffect(@NonNull Fragment fragment, @NonNull byte[] bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundBef, TextView nextText) {
+        public static void setBlurEffect(@NonNull MainActivity activity, @NonNull byte[] bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundBef, TextView nextText) {
 
             new Handler(Looper.getMainLooper()).post(() -> {
                 ANIMATION_IN_DETAIL_DONE = false;
@@ -358,9 +194,9 @@ public final class Utils {
                 });
 
                 //clear
-                GlideApp.with(fragment).clear(primaryBackgroundBef);
+                GlideApp.with(activity).clear(primaryBackgroundBef);
                 if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
-                    primaryBackgroundBef.post(() -> GlideApp.with(fragment)
+                    primaryBackgroundBef.post(() -> GlideApp.with(activity)
                             .load(bitmap)
                             .dontAnimate()
                             .apply(bitmapTransform(new BlurTransformation(20, 30)))
@@ -374,57 +210,55 @@ public final class Utils {
 
                 }
 
-                primaryBackgroundBef.post(() -> {
-                    Animator animator = ViewAnimationUtils.createCircularReveal(
-                            primaryBackgroundBef, primaryBackgroundBef.getWidth() / 2, POSITION,
-                            0,
-                            (float) Math.hypot(primaryBackgroundBef.getWidth(), primaryBackgroundBef.getHeight()));
+                Animator animator = ViewAnimationUtils.createCircularReveal(
+                        primaryBackgroundBef, primaryBackgroundBef.getWidth() / 2, POSITION,
+                        0,
+                        (float) Math.hypot(primaryBackgroundBef.getWidth(), primaryBackgroundBef.getHeight()));
 
-                    animator.setInterpolator(new AccelerateInterpolator());
-                    animator.setDuration(700);
-                    animator.addListener(new Animator.AnimatorListener() {
-                        @Override
-                        public void onAnimationStart(Animator animation) {
+                animator.setInterpolator(new AccelerateInterpolator());
+                animator.setDuration(700);
+                animator.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
 
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        GlideApp.with(activity).clear(primaryBackground);
+                        if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
+                            GlideApp.with(activity)
+                                    .load(bitmap)
+                                    .dontAnimate()
+                                    .apply(bitmapTransform(new BlurTransformation(20, 30)))
+                                    .into(primaryBackground);
+                        } else {
+                            Palette.from(BitmapFactory.decodeByteArray(bitmap, 0, bitmap.length)).generate(p -> {
+                                if (p != null) {
+                                    primaryBackground.setBackgroundColor(p.getVibrantColor(Color.TRANSPARENT));
+                                }
+                            });
                         }
 
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            GlideApp.with(fragment).clear(primaryBackground);
-                            if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
-                                GlideApp.with(fragment)
-                                        .load(bitmap)
-                                        .dontAnimate()
-                                        .apply(bitmapTransform(new BlurTransformation(20, 30)))
-                                        .into(primaryBackground);
-                            } else {
-                                Palette.from(BitmapFactory.decodeByteArray(bitmap, 0, bitmap.length)).generate(p -> {
-                                    if (p != null) {
-                                        primaryBackground.setBackgroundColor(p.getVibrantColor(Color.TRANSPARENT));
-                                    }
-                                });
-                            }
+                        primaryBackground.setVisibility(View.GONE);
+                        ANIMATION_IN_DETAIL_DONE = true;
+                    }
 
-                            primaryBackground.setVisibility(View.GONE);
-                            ANIMATION_IN_DETAIL_DONE = true;
-                        }
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
 
-                        @Override
-                        public void onAnimationCancel(Animator animation) {
+                    }
 
-                        }
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
 
-                        @Override
-                        public void onAnimationRepeat(Animator animation) {
-
-                        }
-                    });
-                    animator.start();
+                    }
                 });
+                animator.start();
             });
         }
 
-        public static void setBlurEffect(@NonNull Fragment fragment, @NonNull Bitmap bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundBef, TextView nextText) {
+        public static void setBlurEffect(@NonNull MainActivity activity, @NonNull Bitmap bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundBef, TextView nextText) {
 
             new Handler(Looper.getMainLooper()).post(() -> {
                 ANIMATION_IN_DETAIL_DONE = false;
@@ -441,9 +275,9 @@ public final class Utils {
                 });
 
                 //clear
-                GlideApp.with(fragment).clear(primaryBackgroundBef);
+                GlideApp.with(activity).clear(primaryBackgroundBef);
                 if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
-                    primaryBackgroundBef.post(() -> GlideApp.with(fragment)
+                    primaryBackgroundBef.post(() -> GlideApp.with(activity)
                             .load(bitmap)
                             .dontAnimate()
                             .apply(bitmapTransform(new BlurTransformation(20, 30)))
@@ -456,53 +290,51 @@ public final class Utils {
                     });
                 }
 
-                primaryBackgroundBef.post(() -> {
-                    Animator animator = ViewAnimationUtils.createCircularReveal(
-                            primaryBackgroundBef, primaryBackgroundBef.getWidth() / 2, POSITION,
-                            0,
-                            (float) Math.hypot(primaryBackgroundBef.getWidth(), primaryBackgroundBef.getHeight()));
+                Animator animator = ViewAnimationUtils.createCircularReveal(
+                        primaryBackgroundBef, primaryBackgroundBef.getWidth() / 2, POSITION,
+                        0,
+                        (float) Math.hypot(primaryBackgroundBef.getWidth(), primaryBackgroundBef.getHeight()));
 
-                    animator.setInterpolator(new AccelerateInterpolator());
-                    animator.setDuration(700);
-                    animator.addListener(new Animator.AnimatorListener() {
-                        @Override
-                        public void onAnimationStart(Animator animation) {
+                animator.setInterpolator(new AccelerateInterpolator());
+                animator.setDuration(700);
+                animator.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
 
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        GlideApp.with(activity).clear(primaryBackground);
+                        if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
+                            GlideApp.with(activity)
+                                    .load(bitmap)
+                                    .dontAnimate()
+                                    .apply(bitmapTransform(new BlurTransformation(20, 30)))
+                                    .into(primaryBackground);
+                        } else {
+                            Palette.from(bitmap).generate(p -> {
+                                if (p != null) {
+                                    primaryBackground.setBackgroundColor(p.getVibrantColor(Color.TRANSPARENT));
+                                }
+                            });
                         }
 
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            GlideApp.with(fragment).clear(primaryBackground);
-                            if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
-                                GlideApp.with(fragment)
-                                        .load(bitmap)
-                                        .dontAnimate()
-                                        .apply(bitmapTransform(new BlurTransformation(20, 30)))
-                                        .into(primaryBackground);
-                            } else {
-                                Palette.from(bitmap).generate(p -> {
-                                    if (p != null) {
-                                        primaryBackground.setBackgroundColor(p.getVibrantColor(Color.TRANSPARENT));
-                                    }
-                                });
-                            }
+                        primaryBackground.setVisibility(View.GONE);
+                        ANIMATION_IN_DETAIL_DONE = true;
+                    }
 
-                            primaryBackground.setVisibility(View.GONE);
-                            ANIMATION_IN_DETAIL_DONE = true;
-                        }
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
 
-                        @Override
-                        public void onAnimationCancel(Animator animation) {
+                    }
 
-                        }
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
 
-                        @Override
-                        public void onAnimationRepeat(Animator animation) {
-
-                        }
-                    });
-                    animator.start();
+                    }
                 });
+                animator.start();
             });
         }
 

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyWaitListAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月03日 15:10:53
- * 上次修改时间：2018年12月03日 14:37:30
+ * 当前修改时间：2018年12月04日 11:31:38
+ * 上次修改时间：2018年12月04日 11:14:35
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -69,7 +69,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
         view.setOnClickListener(v -> new Thread(() -> {
 
-            String clickedPath = mMusicItems.get(holder.getAdapterPosition()).getMusicPath();
+            final String clickedPath = mMusicItems.get(holder.getAdapterPosition()).getMusicPath();
 
             if (Data.sMusicBinder.isPlayingMusic()) {
                 if (clickedPath.equals(Values.CurrentData.CURRENT_SONG_PATH)) {
@@ -80,19 +80,19 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
             Data.sMusicBinder.resetMusic();
 
-            String clickedSongName = mMusicItems.get(holder.getAdapterPosition()).getMusicName();
-            String clickedSongAlbumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
+            final String clickedSongName = mMusicItems.get(holder.getAdapterPosition()).getMusicName();
+            final String clickedSongAlbumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
 
             //清楚播放队列, 并加入当前歌曲序列
             Data.sHistoryPlayIndex.clear();
             Data.sHistoryPlayIndex.add(holder.getAdapterPosition());
 
-            Bitmap cover = Utils.Audio.getMp3Cover(clickedPath);
+            final Bitmap cover = Utils.Audio.getMp3Cover(clickedPath);
 
-            MainActivity activity = (MainActivity) Data.sActivities.get(0);
+            final MainActivity activity = (MainActivity) Data.sActivities.get(0);
 
             //set InfoBar
-            activity.getMusicDetailFragment().setSlideInfo(clickedSongName, clickedSongAlbumName, mMusicItems.get(holder.getAdapterPosition()).getMusicPath(), cover);
+            activity.getMusicDetailFragment().setSlideInfo(clickedSongName, clickedSongAlbumName, cover);
             activity.getMusicDetailFragment().setCurrentInfo(clickedSongName, clickedSongAlbumName, Utils.Audio.getAlbumByteImage(clickedPath));
 
             Data.sCurrentMusicAlbum = clickedSongAlbumName;
@@ -104,13 +104,13 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
             Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
             Values.CurrentData.CURRENT_SONG_PATH = clickedPath;
 
-            Utils.Ui.setPlayButtonNowPlaying();
 
             try {
                 Data.sMusicBinder.setDataSource(clickedPath);
                 Data.sMusicBinder.prepare();
                 Data.sMusicBinder.playMusic();
 
+                Utils.Ui.setPlayButtonNowPlaying();
                 activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
 
             } catch (IOException e) {
@@ -136,7 +136,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
         holder.mPopupMenu.setOnMenuItemClickListener(item -> {
 
-            int index = holder.getAdapterPosition();
+            final int index = holder.getAdapterPosition();
 
             Values.CurrentData.CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = index;
 
@@ -149,8 +149,8 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
                 case Menu.FIRST + 1: {
                     // TODO: 2018/11/8 待完善(最喜爱歌曲列表)
-                    SharedPreferences mPlayListSpf = mMainActivity.getSharedPreferences(Values.SharedPrefsTag.PLAY_LIST_SPF_NAME_MY_FAVOURITE, 0);
-                    SharedPreferences.Editor editor = mPlayListSpf.edit();
+                    final SharedPreferences mPlayListSpf = mMainActivity.getSharedPreferences(Values.SharedPrefsTag.PLAY_LIST_SPF_NAME_MY_FAVOURITE, 0);
+                    final SharedPreferences.Editor editor = mPlayListSpf.edit();
                     editor.putString(Values.PLAY_LIST_SPF_KEY, mMusicItems.get(index).getMusicPath());
                     editor.apply();
 
@@ -166,16 +166,16 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
                 // TODO: 2018/11/30 to new
                 case Menu.FIRST + 4: {
-                    String albumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
-                    Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
+                    final String albumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
+                    final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
                             MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum()}, null);
                     //int MainActivity
-                    MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
-                    Intent intent = new Intent(mainActivity, AlbumDetailActivity.class);
+                    final MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
+                    final Intent intent = new Intent(mainActivity, AlbumDetailActivity.class);
                     intent.putExtra("key", albumName);
                     if (cursor != null) {
                         cursor.moveToFirst();
-                        int id = Integer.parseInt(cursor.getString(0));
+                        final int id = Integer.parseInt(cursor.getString(0));
                         intent.putExtra("_id", id);
                         cursor.close();
                     }
@@ -185,7 +185,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
                 break;
 
                 case Menu.FIRST + 5: {
-                    Intent intent = new Intent(mMainActivity, PublicActivity.class);
+                    final Intent intent = new Intent(mMainActivity, PublicActivity.class);
                     intent.putExtra("start_by", "detail");
                     mMainActivity.startActivity(intent);
                 }
@@ -210,7 +210,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
         currentBind = viewHolder;
 
-        String prefix = mMusicItems.get(i).getMusicPath().substring(mMusicItems.get(i).getMusicPath().lastIndexOf(".") + 1);
+        final String prefix = mMusicItems.get(i).getMusicPath().substring(mMusicItems.get(i).getMusicPath().lastIndexOf(".") + 1);
 
         viewHolder.mIndexText.setText(String.valueOf(i));
         viewHolder.mMusicNameText.setText(mMusicItems.get(i).getMusicName());
@@ -253,7 +253,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        volatile ImageView mItemMenuButton;
+        ImageView mItemMenuButton;
 
         TextView mMusicNameText;
 
