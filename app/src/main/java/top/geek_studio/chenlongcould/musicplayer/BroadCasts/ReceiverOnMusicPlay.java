@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 17:59:25
- * 上次修改时间：2018年12月04日 17:59:10
+ * 当前修改时间：2018年12月05日 09:30:08
+ * 上次修改时间：2018年12月05日 09:06:23
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -58,35 +58,20 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 break;
             }
 
-            //unUsed
-            case 0: {
+            //clicked by notif
+            case 2: {
                 Data.sMusicBinder.playMusic();
             }
             break;
 
-            //Type Random
+            //Type Random (play)
             case TYPE_SHUFFLE: {
                 new ShufflePlayback().execute();
             }
             break;
 
             /*
-             * must by MusicDetailActivity, just resume play
-             * */
-            case 2: {
-                Data.sMusicBinder.playMusic();
-                if (Data.sActivities.size() >= 1) {
-                    final MainActivity activity = (MainActivity) Data.sActivities.get(0);
-                    activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.SET_BUTTON_PLAY);
-                    final MusicDetailFragment.NotLeakHandler notLeakHandler = activity.getMusicDetailFragment().getHandler();
-                    notLeakHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
-                }
-
-            }
-            break;
-
-            /*
-             * just resume play
+             * just resume play (form pause to play...)
              * */
             case 3: {
                 Data.sMusicBinder.playMusic();
@@ -163,11 +148,13 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                     Data.sMusicBinder.prepare();
                     Data.sMusicBinder.playMusic();
 
-                    final MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
-                    final MusicDetailFragment musicDetailFragment = mainActivity.getMusicDetailFragment();
+                    if (Data.sActivities.size() != 0) {
+                        final MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
+                        final MusicDetailFragment musicDetailFragment = mainActivity.getMusicDetailFragment();
 
-                    musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
-                    musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
+                        musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
+                        musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
+                    }
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -286,47 +273,46 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
             //by next button...(in detail or noti)
             case 6: {
-                Values.BUTTON_PRESSED = true;
-                final MusicDetailFragment musicDetailFragment = ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment();
 
-                //防止seekBar跳动到Max
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    musicDetailFragment.getSeekBar().setProgress(0, true);
-                } else {
-                    musicDetailFragment.getSeekBar().setProgress(0);
+                Values.BUTTON_PRESSED = true;
+
+                if (Data.sActivities.size() != 0) {
+                    final MusicDetailFragment musicDetailFragment = ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment();
+                    //防止seekBar跳动到Max
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        musicDetailFragment.getSeekBar().setProgress(0, true);
+                    } else {
+                        musicDetailFragment.getSeekBar().setProgress(0);
+                    }
                 }
 
                 if (Data.sNextWillPlayIndex != -1) {
-                    new DoesHasNext().execute();
-                    break;
+                    new DoesHasNextPlay().execute();
+                } else {
+                    switch (Values.CurrentData.CURRENT_PLAY_TYPE) {
+                        case Values.TYPE_RANDOM:
+                            new ShufflePlayback().execute();
+                            break;
+                        case Values.TYPE_COMMON:
+                            Utils.SendSomeThing.sendPlay(context, 4);
+                            break;
+                        default:
+                            break;
+                    }
                 }
 
-                switch (Values.CurrentData.CURRENT_PLAY_TYPE) {
-                    case Values.TYPE_RANDOM:
-                        new ShufflePlayback().execute();
-                        break;
-                    case Values.TYPE_COMMON:
-                        Utils.SendSomeThing.sendPlay(context, 4);
-                        break;
-                    default:
-                        break;
-                }
                 Values.BUTTON_PRESSED = false;
             }
             break;
 
-            /*
-             when next-play clicked, will call this
-             */
             case 7: {
-                new DoesHasNext().execute();
+                new DoesHasNextPlay().execute();
             }
             break;
         }
 
         //after type set
         if (!Data.sActivities.isEmpty()) {
-            Log.d(TAG, "onReceive: detailFragment scrolled");
             ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
         }
 
@@ -335,7 +321,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
     /**
      * 当下一首歌曲存在(被手动指定时), auto-next-play and next-play will call this method
      */
-    public static class DoesHasNext extends AsyncTask<Void, Void, Integer> {
+    public static class DoesHasNextPlay extends AsyncTask<Void, Void, Integer> {
 
         String path;
 
@@ -373,6 +359,8 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                     Data.sMusicBinder.resetMusic();
                     return -1;
                 }
+            } else {
+                return -1;
             }
             return 0;
         }

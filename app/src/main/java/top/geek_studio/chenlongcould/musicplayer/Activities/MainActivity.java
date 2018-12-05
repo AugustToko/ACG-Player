@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 17:59:25
- * 上次修改时间：2018年12月04日 17:03:56
+ * 当前修改时间：2018年12月05日 09:30:08
+ * 上次修改时间：2018年12月05日 09:29:15
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -138,7 +138,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate: ");
+        Log.d(Values.LogTAG.LIFT_TAG, "onCreate: " + TAG);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_new);
 
@@ -165,8 +165,16 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     @Override
     protected void onDestroy() {
-        Log.d(TAG, "onDestroy: ");
-        Data.sActivities.remove(this);
+        Log.d(Values.LogTAG.LIFT_TAG, "onDestroy: " + TAG);
+        goToBg();
+        super.onDestroy();
+    }
+
+    /**
+     * exit app with out stop music
+     */
+    private void goToBg() {
+        AlbumListFragment.VIEW_HAS_LOAD = false;
 
         // FIXME: 2018/12/4 leak
         try {
@@ -174,12 +182,15 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        super.onDestroy();
+
+        Data.sActivities.remove(this);
+        GlideApp.get(this).clearMemory();
+        finish();
     }
 
     @Override
     public void onAttachFragment(Fragment fragment) {
-        Log.d(TAG, "onAttachFragment: " + fragment.getClass().getName());
+        Log.d(Values.LogTAG.LIFT_TAG, "onAttachFragment: " + fragment.getClass().getName());
         super.onAttachFragment(fragment);
         if (fragment instanceof MusicListFragment)
             ((MusicListFragment) fragment).getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_MUSIC_LIST_DONE);
@@ -709,6 +720,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     } while (cursor.moveToNext());
                     cursor.close();
                     Values.MUSIC_DATA_INIT_DONE = true;
+
+                    return 0;
                 } else {
 
                     //cursor null or getCount == 0
@@ -721,8 +734,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 return 0;
             }
 
-            //def failed
-            return -1;
         }
 
         @Override

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 11:31:38
- * 上次修改时间：2018年12月04日 11:31:03
+ * 当前修改时间：2018年12月05日 09:30:08
+ * 上次修改时间：2018年12月04日 21:22:08
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -256,6 +256,7 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
 
         //night opt
         mNightSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+
             SharedPreferences.Editor editor = mDefPrefs.edit();
             if (isChecked) {
                 editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, true);
@@ -269,9 +270,11 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
             editor.apply();
 
             Utils.Ui.inDayNightSet(mDefPrefs);
+
         });
 
         styleOpt.setOnClickListener(v -> {
+
             SharedPreferences.Editor editor = mDefPrefs.edit();
             if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
                 mStyleSwitch.setChecked(false);
@@ -283,6 +286,7 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
                 Values.Style.DETAIL_BACKGROUND = Values.Style.STYLE_BACKGROUND_BLUR;
             }
             editor.apply();
+
         });
 
         mStyleSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {

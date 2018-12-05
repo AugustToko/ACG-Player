@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 11:31:38
- * 上次修改时间：2018年12月03日 17:39:26
+ * 当前修改时间：2018年12月05日 09:30:08
+ * 上次修改时间：2018年12月05日 09:12:55
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -99,7 +99,7 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
 
     @Override
     public void onAttach(Context context) {
-        Log.d(TAG, "onAttach: ");
+        Log.d(Values.LogTAG.LIFT_TAG, "onAttach: " + TAG);
         super.onAttach(context);
         mActivity = (MainActivity) getActivity();
         mHandler = new NotLeakHandler(this, ((MyApplication) mActivity.getApplication()).getCustomLooper());
@@ -107,13 +107,13 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate: ");
+        Log.d(Values.LogTAG.LIFT_TAG, "onCreate: " + TAG);
         super.onCreate(savedInstanceState);
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Log.d(TAG, "onCreateView: ");
+        Log.d(Values.LogTAG.LIFT_TAG, "onCreateView: " + TAG);
         View view = inflater.inflate(R.layout.fragment_music_list_layout, container, false);
         findId(view);
 
@@ -163,13 +163,13 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
 
     @Override
     public void onDestroyView() {
-        Log.d(TAG, "onDestroyView: ");
+        Log.d(Values.LogTAG.LIFT_TAG, "onDestroyView: " + TAG);
         super.onDestroyView();
     }
 
     @Override
     public void onDetach() {
-        Log.d(TAG, "onDetach: ");
+        Log.d(Values.LogTAG.LIFT_TAG, "onDetach: " + TAG);
         super.onDetach();
     }
 

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter2AlbumList.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 17:59:25
- * 上次修改时间：2018年12月04日 17:59:10
+ * 当前修改时间：2018年12月05日 09:30:08
+ * 上次修改时间：2018年12月04日 18:06:37
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -104,7 +104,6 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
     @Override
     public void onViewDetachedFromWindow(@NonNull ViewHolder holder) {
         holder.mAlbumImage.setTag(R.string.key_id_1, null);
-        GlideApp.with(mMainActivity).clear(holder.mAlbumImage);
     }
 
     @Override

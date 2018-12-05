@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Data.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 11:31:38
- * 上次修改时间：2018年12月04日 07:45:01
+ * 当前修改时间：2018年12月05日 09:30:08
+ * 上次修改时间：2018年12月05日 08:27:23
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -45,6 +45,8 @@ public final class Data {
      * 存储播放历史(序列) default...
      */
     public static List<Integer> sHistoryPlayIndex = new ArrayList<>();
+
+    public static MyMusicService sMyMusicService;
 
     /**
      * sCurrent DATA

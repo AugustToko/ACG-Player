@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 17:59:25
- * 上次修改时间：2018年12月04日 17:59:10
+ * 当前修改时间：2018年12月05日 09:30:08
+ * 上次修改时间：2018年12月05日 09:12:55
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -38,10 +38,13 @@ public final class MyMusicService extends Service {
     private final MusicBinder mMusicBinder = new MusicBinder();
 
     public MyMusicService() {
+        Log.d(Values.LogTAG.LIFT_TAG, "MyMusicService: const");
+        Data.sMyMusicService = this;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(Values.LogTAG.LIFT_TAG, "onStartCommand: ");
         Values.SERVICE_RUNNING = true;
 
         mMediaPlayer.setOnCompletionListener(mp -> {
@@ -96,17 +99,25 @@ public final class MyMusicService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy: done");
+        Log.d(Values.LogTAG.LIFT_TAG, "onDestroy: done");
         ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(NotificationUtils.ID);
+        Data.sMyMusicService = null;
         super.onDestroy();
     }
 
     @Override
     public IBinder onBind(Intent intent) {
+        Log.d(Values.LogTAG.LIFT_TAG, "onBind: ");
         Values.BIND_SERVICE = true;
         if (Data.sActivities.size() >= 1)
             ((MainActivity) Data.sActivities.get(0)).getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_FRAGMENT);
         return mMusicBinder;
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.d(Values.LogTAG.LIFT_TAG, "onUnbind: " + intent.getPackage());
+        return super.onUnbind(intent);
     }
 
     public final class MusicBinder extends Binder {
@@ -120,13 +131,13 @@ public final class MyMusicService extends Service {
             mMediaPlayer.start();
 
             //notification
-            Data.notificationUtils.start(Data.notificationUtils.getNot(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, MyMusicService.this));
+            startForeground(NotificationUtils.ID, Data.notificationUtils.getNot(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, MyMusicService.this));
         }
 
         public final void stopMusic() {
             Values.MUSIC_PLAYING = false;
             mMediaPlayer.stop();
-            Data.notificationUtils.start(Data.notificationUtils.getNot(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, MyMusicService.this));
+            stopForeground(true);
         }
 
         public final boolean isPlayingMusic() {

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 17:59:25
- * 上次修改时间：2018年12月04日 17:59:10
+ * 当前修改时间：2018年12月05日 09:30:08
+ * 上次修改时间：2018年12月05日 09:29:15
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -11,7 +11,6 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Adapters;
 
-import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -30,7 +29,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -91,34 +89,45 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_list_item, viewGroup, false);
         ViewHolder holder = new ViewHolder(view);
 
-        holder.mMusicCoverImage.setOnClickListener(v -> {
-            holder.mExpandView.clearAnimation();
-
-            final ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) holder.mExpandView.getLayoutParams();
-
-            Log.d(TAG, "onCreateViewHolder: topMargin: " + layoutParams.topMargin + " HAS_EXPAND: " + HAS_EXPAND);
-
-            final ValueAnimator animator = new ValueAnimator();
-            animator.setInterpolator(new OvershootInterpolator());
-            animator.setDuration(300);
-
-            if (!HAS_EXPAND) {
-                HAS_EXPAND = true;
-                animator.setIntValues(0, (int) mMainActivity.getResources().getDimension(R.dimen.recycler_expand_view));
-            } else {
-                HAS_EXPAND = false;
-                animator.setIntValues((int) mMainActivity.getResources().getDimension(R.dimen.recycler_expand_view), 0);
-            }
-
-            animator.addUpdateListener(animation -> {
-                layoutParams.setMargins(0, (int) animation.getAnimatedValue(), 0, 0);
-                holder.mExpandView.setLayoutParams(layoutParams);
-                holder.mExpandView.requestLayout();
-            });
-
-            animator.start();
-
-        });
+        /*
+         * show ExpandView (more opt)...
+         * */
+        // TODO: 2018/12/4 do
+//        holder.mMusicCoverImage.setOnClickListener(v -> {
+//
+//            holder.mExpandView.clearAnimation();
+//
+//            final ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) holder.mExpandView.getLayoutParams();
+//
+//            Log.d(TAG, "onCreateViewHolder: topMargin: " + layoutParams.topMargin + " HAS_EXPAND: " + HAS_EXPAND);
+//
+//            final ValueAnimator animator = new ValueAnimator();
+//            animator.setInterpolator(new OvershootInterpolator());
+//            animator.setDuration(300);
+//
+//
+//            animator.setIntValues((int) mMainActivity.getResources().getDimension(R.dimen.recycler_expand_view), 0);
+//            animator.setIntValues(0, (int) mMainActivity.getResources().getDimension(R.dimen.recycler_expand_view));
+//
+////            if (!HAS_EXPAND) {
+////                HAS_EXPAND = true;
+////                animator.setIntValues(0, (int) mMainActivity.getResources().getDimension(R.dimen.recycler_expand_view));
+////            } else {
+////                HAS_EXPAND = false;
+////                animator.setIntValues((int) mMainActivity.getResources().getDimension(R.dimen.recycler_expand_view), 0);
+////            }
+//
+//            animator.addUpdateListener(animation -> {
+//                layoutParams.setMargins(0, (int) animation.getAnimatedValue(), 0, 0);
+//                holder.mExpandView.setLayoutParams(layoutParams);
+//                holder.mExpandView.requestLayout();
+//            });
+//
+//            animator.start();
+//
+//            Log.d(TAG, "onCreateViewHolder: " + layoutParams.leftMargin + " " + layoutParams.topMargin + " " + layoutParams.leftMargin + " " + layoutParams.bottomMargin);
+//
+//        });
 
         view.setOnClickListener(v -> new AsyncTask<Void, Void, Integer>() {
 
@@ -303,7 +312,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
     @Override
     public void onViewDetachedFromWindow(@NonNull ViewHolder holder) {
-        HAS_EXPAND = false;
         holder.mMusicCoverImage.setTag(R.string.key_id_1, null);
     }
 
@@ -321,6 +329,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
     @Override
     public boolean onFailedToRecycleView(@NonNull ViewHolder holder) {
+        Log.d(TAG, "onFailedToRecycleView: " + holder.mMusicText);
         GlideApp.with(mMainActivity).clear(holder.mMusicCoverImage);
         holder.itemView.setBackgroundColor(Color.RED);
         holder.mMusicText.setText("This item recycler failed...");

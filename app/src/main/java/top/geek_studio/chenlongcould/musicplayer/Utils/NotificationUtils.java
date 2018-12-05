@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：NotificationUtils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 17:59:25
- * 上次修改时间：2018年12月04日 17:59:10
+ * 当前修改时间：2018年12月05日 09:30:08
+ * 上次修改时间：2018年12月05日 08:38:08
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -54,7 +54,11 @@ public class NotificationUtils extends ContextWrapper {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void createNotificationChannel() {
-        NotificationChannel channel = new NotificationChannel(id, name, NotificationManager.IMPORTANCE_MIN);
+        NotificationChannel channel = new NotificationChannel(id, name, NotificationManager.IMPORTANCE_DEFAULT);
+        channel.setDescription("playing_notification_description");
+        channel.enableLights(false);
+        channel.enableVibration(false);
+        channel.setShowBadge(false);
         getManager().createNotificationChannel(channel);
     }
 
@@ -62,6 +66,7 @@ public class NotificationUtils extends ContextWrapper {
         if (manager == null) {
             manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         }
+
         return manager;
     }
 
@@ -97,14 +102,13 @@ public class NotificationUtils extends ContextWrapper {
         Notification.Builder builder = new Notification.Builder(getApplicationContext(), id)
                 .setContentTitle(title)
                 .setContentText(content)
+                .setSmallIcon(Icon.createWithResource(context, R.drawable.ic_audiotrack_24px))
                 .setStyle(mediaStyle)
-                .setSmallIcon(R.drawable.ic_audiotrack_24px)
                 .setLargeIcon(Data.sCurrentMusicBitmap == null ? BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px) : Data.sCurrentMusicBitmap)
                 .setContentIntent(pi)
-                .setDefaults(Notification.DEFAULT_ALL)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setAutoCancel(false)
-                .setOngoing(true)
-                .setPriority(Notification.PRIORITY_MAX);
+                .setOngoing(true);
 
         if (Data.sMusicBinder.isPlayingMusic()) {
             Notification.Action[] actions = {new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_previous_white_24dp), "Pre", preIntent).build()
@@ -140,10 +144,7 @@ public class NotificationUtils extends ContextWrapper {
                 .setLargeIcon(Data.sCurrentMusicBitmap == null ? BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px) : Data.sCurrentMusicBitmap)
                 .setContentIntent(pi)
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-                .setDefaults(Notification.DEFAULT_ALL)
-                .setPriority(Notification.PRIORITY_MAX)
-                .setColorized(true)
-                .setColor(Color.argb(1, 1, 1, 1))
+                .setPriority(Notification.PRIORITY_DEFAULT)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setAutoCancel(false);
         return builder;

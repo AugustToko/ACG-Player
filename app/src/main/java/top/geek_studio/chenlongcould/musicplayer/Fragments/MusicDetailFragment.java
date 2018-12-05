@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 17:59:25
- * 上次修改时间：2018年12月04日 17:56:15
+ * 当前修改时间：2018年12月05日 09:30:08
+ * 上次修改时间：2018年12月05日 09:19:10
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -188,7 +188,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
     @Override
     public void onAttach(Context context) {
-        Log.d(TAG, "onAttach: ");
+        Log.d(Values.LogTAG.LIFT_TAG, "onAttach: MusicDetailFragment");
         super.onAttach(context);
         mMainActivity = (MainActivity) context;
 
@@ -197,10 +197,16 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
         mHandler = new MusicDetailFragment.NotLeakHandler(mMainActivity, mHandlerThread.getLooper());
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        Log.d(Values.LogTAG.LIFT_TAG, "onCreate: MusicDetailFragment");
+        super.onCreate(savedInstanceState);
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Log.d(TAG, "onCreateView: ");
+        Log.d(Values.LogTAG.LIFT_TAG, "onCreateView: MusicDetailFragment");
         View view = inflater.inflate(R.layout.fragment_music_detail, container, false);
 
         initView(view);
@@ -223,7 +229,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
         if (Values.HAS_PLAYED) {
             if (Data.sMusicBinder.isPlayingMusic()) {
                 mNowPlayingStatusImage.setImageResource(R.drawable.ic_pause_black_24dp);
-                mPlayButton.setImageResource(R.drawable.ic_pause_white_24dp);
+                mPlayButton.setImageResource(R.drawable.ic_pause_black_24dp);
             }
             setIcoLight(Data.sCurrentMusicBitmap);
             setSlideInfo(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, Data.sCurrentMusicBitmap);
@@ -237,6 +243,9 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
             final int temp = Data.sCurrentMusicBitmap.getPixel(Data.sCurrentMusicBitmap.getWidth() / 2, Data.sCurrentMusicBitmap.getHeight() / 2);
             mSeekBar.getThumb().setColorFilter(temp, PorterDuff.Mode.SRC_ATOP);
         }
+
+        setDefAnimation();
+        clearAnimations();
     }
 
     private void findView(View view) {
@@ -1083,9 +1092,21 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
     @Override
     public void onDestroyView() {
-        Log.d(TAG, "onDestroyView: ");
+        Log.d(Values.LogTAG.LIFT_TAG, "onDestroyView: MusicDetailFragment");
         mHandlerThread.quitSafely();
         super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d(Values.LogTAG.LIFT_TAG, "onDestroy: MusicDetailFragment");
+        super.onDestroy();
+    }
+
+    @Override
+    public void onDetach() {
+        Log.d(Values.LogTAG.LIFT_TAG, "onDetach: MusicDetailFragment");
+        super.onDetach();
     }
 
     @Override
