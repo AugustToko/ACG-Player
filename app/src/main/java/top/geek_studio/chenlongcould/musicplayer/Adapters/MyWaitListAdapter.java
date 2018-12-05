@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyWaitListAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 11:31:38
- * 上次修改时间：2018年12月04日 11:14:35
+ * 当前修改时间：2018年12月05日 20:16:39
+ * 上次修改时间：2018年12月05日 14:55:24
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -202,11 +202,6 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-
-        //no crash
-        if (mMusicItems.size() == 0 || i < 0 || i > mMusicItems.size() && viewHolder.getAdapterPosition() < 0 || viewHolder.getAdapterPosition() > mMusicItems.size()) {
-            return;
-        }
 
         currentBind = viewHolder;
 

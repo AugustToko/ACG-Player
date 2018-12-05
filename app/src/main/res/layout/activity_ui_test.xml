@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ *************************************************************
+  ~ 文件：activity_ui_test.xml  模块：app  项目：MusicPlayer
+  ~ 当前修改时间：2018年12月05日 20:16:39
+  ~ 上次修改时间：2018年12月05日 20:16:12
+  ~ 作者：chenlongcould
+  ~ Geek Studio
+  ~ Copyright (c) 2018
+  ~ *************************************************************
+  -->
+
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activities.UiTest">
+
+    <top.geek_studio.chenlongcould.musicplayer.MyCardView
+        android:id="@+id/card_view"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        app:cardBackgroundColor="@color/colorAccent">
+
+    </top.geek_studio.chenlongcould.musicplayer.MyCardView>
+
+</android.support.constraint.ConstraintLayout>

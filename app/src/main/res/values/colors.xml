@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：colors.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月28日 16:12:44
-  ~ 上次修改时间：2018年11月28日 09:43:43
+  ~ 当前修改时间：2018年12月05日 20:16:39
+  ~ 上次修改时间：2018年12月05日 18:23:52
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -33,5 +33,7 @@
 
     <color name="notVeryBlack">#1d1d1d</color>
     <color name="notVeryWhite">#dddddd</color>
+
+    <color name="activityDefaultColor">#fafafa</color>
 
 </resources>

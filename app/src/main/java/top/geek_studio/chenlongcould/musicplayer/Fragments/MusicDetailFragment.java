@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月05日 09:30:08
- * 上次修改时间：2018年12月05日 09:19:10
+ * 当前修改时间：2018年12月05日 20:16:39
+ * 上次修改时间：2018年12月05日 20:16:12
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -35,7 +35,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
@@ -80,11 +79,19 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGone {
 
+    /**
+     * @see Message#what
+     */
     public static final int SET_SEEK_BAR_COLOR = 9001;
+
+    /**
+     * @see MainActivity#CURRENT_SLIDE_OFFSET
+     */
+    public static float CURRENT_SLIDE_OFFSET = 1;
 
     private static final String TAG = "MusicDetailActivity";
 
-    public MusicDetailFragment.NotLeakHandler mHandler;
+    public NotLeakHandler mHandler;
 
     private boolean HIDE_TOOLBAR = false;
 
@@ -159,8 +166,6 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
     private ConstraintLayout mNowPlayingBody;
 
     private ConstraintLayout mSlideUpGroup;
-
-    private CoordinatorLayout mViewGroup;
 
     private CardView mWaitCard;
 
@@ -278,7 +283,6 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
         mNowPlayingSongText = view.findViewById(R.id.activity_main_now_playing_name);
         mNowPlayingSongImage = view.findViewById(R.id.recycler_item_clover_image);
         mSlideUpGroup = view.findViewById(R.id.detail_body);
-        mViewGroup = view.findViewById(R.id.fragment_detail_group);
         mWaitCard = view.findViewById(R.id.activity_music_detail_card_view);
     }
 
@@ -516,7 +520,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                 break;
 
                 case R.id.menu_toolbar_debug: {
-                    Snackbar.make(mViewGroup,
+                    Snackbar.make(mSlidingUpPanelLayout,
                             "Next Will play" + Data.sMusicItems.get(Values.CurrentData.CURRENT_MUSIC_INDEX != Data.sMusicItems.size() ? Values.CurrentData.CURRENT_MUSIC_INDEX : 0)
                             , Snackbar.LENGTH_LONG).setAction("按钮", v -> {
                         //点击右侧的按钮之后的操作
@@ -862,6 +866,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
         mSlidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
+                CURRENT_SLIDE_OFFSET = slideOffset;
                 mSlideUpGroup.setTranslationY(0 - slideOffset * 120);
                 if (slideOffset == 0) mMainActivity.getSlidingUpPanelLayout().setTouchEnabled(true);
             }
@@ -1159,25 +1164,26 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
                             Log.d(TAG, "handleMessage: current position " + Data.sMusicBinder.getCurrentPosition() + " ------------ " + Data.sMusicBinder.getDuration());
 
-                            if (Data.sMusicBinder.getCurrentPosition() / 1000 == Data.sMusicBinder.getDuration() / 1000 - 5 && !SNACK_NOTICE) {
-                                SNACK_NOTICE = true;
-
-                                Snackbar snackbar = Snackbar.make(mViewGroup,
-                                        "Next Will play " + Data.sMusicItems.get(Values.CurrentData.CURRENT_MUSIC_INDEX != Data.sMusicItems.size() ? Values.CurrentData.CURRENT_MUSIC_INDEX : 0).getMusicName()
-                                        , Snackbar.LENGTH_LONG).setAction("按钮", v -> {
-                                    //点击右侧的按钮之后的操作
-                                    Utils.SendSomeThing.sendPause(mMainActivity);
-                                });
-                                snackbar.addCallback(new Snackbar.Callback() {
-                                    @Override
-                                    public void onDismissed(Snackbar transientBottomBar, int event) {
-                                        SNACK_NOTICE = false;
-                                        Log.d(TAG, "onDismissed: dismissed...");
-                                    }
-                                });
-
-                                snackbar.show();
-                            }
+                            // FIXME: 2018/12/5 snack break the layout
+//                            if (Data.sMusicBinder.getCurrentPosition() / 1000 == Data.sMusicBinder.getDuration() / 1000 - 5 && !SNACK_NOTICE) {
+//                                SNACK_NOTICE = true;
+//
+//                                Snackbar snackbar = Snackbar.make(mSlidingUpPanelLayout,
+//                                        "Next Will play " + Data.sMusicItems.get(Values.CurrentData.CURRENT_MUSIC_INDEX != Data.sMusicItems.size() ? Values.CurrentData.CURRENT_MUSIC_INDEX : 0).getMusicName()
+//                                        , Snackbar.LENGTH_LONG).setAction("按钮", v -> {
+//                                    //点击右侧的按钮之后的操作
+//                                    Utils.SendSomeThing.sendPause(mMainActivity);
+//                                });
+//                                snackbar.addCallback(new Snackbar.Callback() {
+//                                    @Override
+//                                    public void onDismissed(Snackbar transientBottomBar, int event) {
+//                                        SNACK_NOTICE = false;
+//                                        Log.d(TAG, "onDismissed: dismissed...");
+//                                    }
+//                                });
+//
+//                                snackbar.show();
+//                            }
 
                         }
 

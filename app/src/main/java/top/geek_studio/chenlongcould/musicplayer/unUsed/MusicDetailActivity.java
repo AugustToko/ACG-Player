@@ -1,15 +1,15 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 11:31:38
- * 上次修改时间：2018年12月04日 11:12:41
+ * 当前修改时间：2018年12月05日 20:16:39
+ * 上次修改时间：2018年12月05日 10:29:00
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
  * ************************************************************
  */
 
-package top.geek_studio.chenlongcould.musicplayer.Activities;
+package top.geek_studio.chenlongcould.musicplayer.unUsed;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -59,6 +59,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import top.geek_studio.chenlongcould.musicplayer.Activities.AlbumDetailActivity;
+import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.Activities.MyBaseActivity;
+import top.geek_studio.chenlongcould.musicplayer.Activities.PublicActivity;
+import top.geek_studio.chenlongcould.musicplayer.Activities.SplashActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyWaitListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;

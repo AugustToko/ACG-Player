@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 11:31:38
- * 上次修改时间：2018年12月04日 11:31:07
+ * 当前修改时间：2018年12月05日 20:16:39
+ * 上次修改时间：2018年12月05日 17:32:24
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -163,7 +163,7 @@ public final class AlbumListFragment extends Fragment implements VisibleOrGone {
 
     @Override
     public void visibleOrGone(int status) {
-        mRecyclerView.setVisibility(status);
+        if (mRecyclerView != null) mRecyclerView.setVisibility(status);
     }
     public class MyPreloadModelProvider implements ListPreloader.PreloadModelProvider<AlbumItem> {
         @NonNull

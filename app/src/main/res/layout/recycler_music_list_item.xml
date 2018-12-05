@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：recycler_music_list_item.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月04日 17:59:25
-  ~ 上次修改时间：2018年12月04日 16:17:58
+  ~ 当前修改时间：2018年12月05日 20:16:39
+  ~ 上次修改时间：2018年12月05日 18:23:52
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -13,24 +13,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/music_item_layout"
-
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:foreground="@drawable/my_ripple_mask">
 
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/music_item_expand_view"
-        android:layout_width="match_parent"
-        android:layout_height="75dp"
-        android:layout_marginTop="0dp"
-        app:layout_constraintTop_toTopOf="parent">
-
-    </android.support.constraint.ConstraintLayout>
+    <include layout="@layout/recycler_music_list_item_expand" />
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/recycler_music_item_view"
         android:layout_width="match_parent"
-        android:layout_height="75dp">
+        android:layout_height="75dp"
+        android:background="@color/activityDefaultColor">
 
         <ImageView
             android:id="@+id/recycler_item_album_image"

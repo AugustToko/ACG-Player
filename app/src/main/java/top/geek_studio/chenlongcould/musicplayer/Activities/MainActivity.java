@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月05日 09:30:08
- * 上次修改时间：2018年12月05日 09:29:15
+ * 当前修改时间：2018年12月05日 20:16:39
+ * 上次修改时间：2018年12月05日 20:16:11
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -75,14 +75,20 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     private static final String TAG = "MainActivity";
 
+    /**
+     * @see Message#what
+     */
     public static final int UP = 50070;
-
+    /**
+     * 检测当前 slide 的位置.
+     * 当滑动 slide {@link SlidingUpPanelLayout} 时, 迅速点击可滑动区域外, slide 会卡住.
+     * 但 slide 状态会变为 {@link SlidingUpPanelLayout.PanelState#COLLAPSED}.
+     * 故立此 FLAG.
+     */
+    public static float CURRENT_SLIDE_OFFSET = 1;
     public static final int DOWN = 50071;
-
     public static final int ENABLE_TOUCH = 50072;
-
     public static final int SET_VIEWPAGER_BG = 50073;
-
     public static final int SET_TOOLBAR_TITLE = 50075;
 
     public static boolean ANIMATION_FLAG = true;
@@ -90,46 +96,35 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     private boolean TOOLBAR_CLICKED = false;
 
     private boolean BACK_PRESSED = false;
-
+    /**
+     * ALL FRAGMENTS
+     */
     private List<Fragment> mFragmentList = new ArrayList<>();
 
     private NotLeakHandler mHandler;
 
+    /**
+     * UI
+     * */
     private TabLayout mTabLayout;
-
     private ViewPager mViewPager;
-
     private MyPagerAdapter mPagerAdapter;
-
     private final ArrayList<String> mTitles = new ArrayList<>();
-
     private Toolbar mToolbar;
-
     private AppBarLayout mAppBarLayout;
-
     private DrawerLayout mDrawerLayout;
-
     private NavigationView mNavigationView;
-
     private ImageView mNavHeaderImageView;
-
     private Menu mMenu;
-
     private SearchView mSearchView;
-
     private SlidingUpPanelLayout mSlidingUpPanelLayout;
-
-//    private ImageView mBackgroundImage;
 
     /**
      * ----------------- fragment(s) ----------------------
      */
     private MusicListFragment mMusicListFragment;
-
     private AlbumListFragment mAlbumListFragment;
-
     private PlayListFragment mPlayListFragment;
-
     private MusicDetailFragment mMusicDetailFragment;
 
     /**
@@ -190,7 +185,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     @Override
     public void onAttachFragment(Fragment fragment) {
-        Log.d(Values.LogTAG.LIFT_TAG, "onAttachFragment: " + fragment.getClass().getName());
         super.onAttachFragment(fragment);
         if (fragment instanceof MusicListFragment)
             ((MusicListFragment) fragment).getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_MUSIC_LIST_DONE);
@@ -214,21 +208,25 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     @Override
     public void onBackPressed() {
 
+        //1
         if (mDrawerLayout.isDrawerOpen(Gravity.START)) {
             mDrawerLayout.closeDrawers();
             return;
         }
 
-        if (getMusicDetailFragment().getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+        //2
+        if (getMusicDetailFragment().getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED || MusicDetailFragment.CURRENT_SLIDE_OFFSET != 1) {
             getMusicDetailFragment().getSlidingUpPanelLayout().setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
             return;
         }
 
-        if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+        //3
+        if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED || CURRENT_SLIDE_OFFSET != 1) {
             mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
             return;
         }
 
+        //4
         if (BACK_PRESSED) {
             finish();
         } else {
@@ -402,6 +400,19 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         finish();
     }
 
+    /**---------------------- getter --------------------*/
+    public final List<Fragment> getFragmentList() {
+        return mFragmentList;
+    }
+
+    public final ImageView getNavHeaderImageView() {
+        return mNavHeaderImageView;
+    }
+
+    public Toolbar getToolbar() {
+        return mToolbar;
+    }
+
     public final MusicListFragment getMusicListFragment() {
         return mMusicListFragment;
     }
@@ -420,6 +431,10 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     public final SlidingUpPanelLayout getSlidingUpPanelLayout() {
         return mSlidingUpPanelLayout;
+    }
+
+    public final NotLeakHandler getHandler() {
+        return mHandler;
     }
 
     private void initView() {
@@ -479,6 +494,9 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mSlidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
+
+                CURRENT_SLIDE_OFFSET = slideOffset;
+
                 float current = 1 - slideOffset;
                 mMusicDetailFragment.getNowPlayingBody().setAlpha(current);
 
@@ -491,6 +509,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 }
 
                 if (current == 0) {
+
                     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
                     fragmentTransaction.hide(mAlbumListFragment).hide(mPlayListFragment).hide(mPlayListFragment);
                     fragmentTransaction.commit();
@@ -563,6 +582,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 }
                 break;
                 case R.id.debug: {
+                    startActivity(new Intent(MainActivity.this, UiTest.class));
                 }
             }
             return true;
@@ -648,25 +668,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         Utils.Ui.setAppBarColor(this, mAppBarLayout, mToolbar);
         int color = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577"));
         mTabLayout.setBackgroundColor(color);
-    }
-
-    public final NotLeakHandler getHandler() {
-        return mHandler;
-    }
-
-    /**
-     * getter
-     */
-    public final List<Fragment> getFragmentList() {
-        return mFragmentList;
-    }
-
-    public final ImageView getNavHeaderImageView() {
-        return mNavHeaderImageView;
-    }
-
-    public Toolbar getToolbar() {
-        return mToolbar;
     }
 
     static class MyDataLoadTask extends AsyncTask<Void, Void, Integer> {

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：PlayListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月03日 15:10:53
- * 上次修改时间：2018年12月03日 08:20:10
+ * 当前修改时间：2018年12月05日 20:16:39
+ * 上次修改时间：2018年12月05日 15:23:33
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -109,7 +109,7 @@ public final class PlayListFragment extends Fragment implements IStyle, VisibleO
     private void initData() {
         initStyle();
 
-        MyRecyclerAdapter adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity);
+        MyRecyclerAdapter adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity, this);
 //        mRecyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
 //        mRecyclerView.setHasFixedSize(true);
 //        mRecyclerView.setAdapter(adapter);

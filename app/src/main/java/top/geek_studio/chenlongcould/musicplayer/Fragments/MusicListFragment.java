@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月05日 09:30:08
- * 上次修改时间：2018年12月05日 09:12:55
+ * 当前修改时间：2018年12月05日 20:16:39
+ * 上次修改时间：2018年12月05日 15:23:33
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -128,7 +128,7 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
         mRecyclerView.addItemDecoration(new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL));
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
         mRecyclerView.setHasFixedSize(true);
-        adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity);
+        adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity, this);
         mRecyclerView.setAdapter(adapter);
 
 //        mRecyclerView.setRecyclerListener(holder -> {

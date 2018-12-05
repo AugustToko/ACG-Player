@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ *************************************************************
+  ~ 文件：activity_bg.xml  模块：app  项目：MusicPlayer
+  ~ 当前修改时间：2018年12月05日 20:16:39
+  ~ 上次修改时间：2018年12月05日 20:16:11
+  ~ 作者：chenlongcould
+  ~ Geek Studio
+  ~ Copyright (c) 2018
+  ~ *************************************************************
+  -->
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <solid android:color="@color/activityDefaultColor" />
+
+</shape>

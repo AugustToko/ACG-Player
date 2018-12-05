@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月05日 09:30:08
- * 上次修改时间：2018年12月05日 09:29:15
+ * 当前修改时间：2018年12月05日 20:16:39
+ * 上次修改时间：2018年12月05日 20:16:12
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -11,7 +11,8 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Adapters;
 
-import android.annotation.SuppressLint;
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -22,6 +23,7 @@ import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -29,6 +31,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.OvershootInterpolator;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -46,7 +50,9 @@ import java.util.List;
 import top.geek_studio.chenlongcould.musicplayer.Activities.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.PublicActivity;
+import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
@@ -58,9 +64,12 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
     private static final String TAG = "MyRecyclerAdapter";
 
-    private volatile boolean READY = true;
+    /**
+     * @see R.layout#recycler_music_list_item_mod
+     */
+    private static final int MOD_TYPE = -1;
 
-    private boolean HAS_EXPAND = false;
+    private volatile boolean READY = true;
 
     private List<MusicItem> mMusicItems;
 
@@ -68,12 +77,15 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
     private Context mContext;
 
-    private ViewHolder currentBind;
+    private ItemHolder currentBind;
 
-    public MyRecyclerAdapter(List<MusicItem> musicItems, Context context) {
+    private Fragment mFragment;
+
+    public MyRecyclerAdapter(List<MusicItem> musicItems, Context context, Fragment calledFrag) {
         mMusicItems = musicItems;
         mMainActivity = (MainActivity) Data.sActivities.get(0);
         mContext = context;
+        mFragment = calledFrag;
     }
 
     @NonNull
@@ -82,129 +94,125 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         return String.valueOf(mMusicItems.get(position).getMusicName().charAt(0));
     }
 
-    @SuppressLint("StaticFieldLeak")
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_list_item, viewGroup, false);
-        ViewHolder holder = new ViewHolder(view);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int itemType) {
+
+        View view;
+
+        ItemHolder holder;
 
         /*
          * show ExpandView (more opt)...
          * */
         // TODO: 2018/12/4 do
-//        holder.mMusicCoverImage.setOnClickListener(v -> {
-//
-//            holder.mExpandView.clearAnimation();
-//
-//            final ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) holder.mExpandView.getLayoutParams();
-//
-//            Log.d(TAG, "onCreateViewHolder: topMargin: " + layoutParams.topMargin + " HAS_EXPAND: " + HAS_EXPAND);
-//
-//            final ValueAnimator animator = new ValueAnimator();
-//            animator.setInterpolator(new OvershootInterpolator());
-//            animator.setDuration(300);
-//
-//
-//            animator.setIntValues((int) mMainActivity.getResources().getDimension(R.dimen.recycler_expand_view), 0);
-//            animator.setIntValues(0, (int) mMainActivity.getResources().getDimension(R.dimen.recycler_expand_view));
-//
-////            if (!HAS_EXPAND) {
-////                HAS_EXPAND = true;
-////                animator.setIntValues(0, (int) mMainActivity.getResources().getDimension(R.dimen.recycler_expand_view));
-////            } else {
-////                HAS_EXPAND = false;
-////                animator.setIntValues((int) mMainActivity.getResources().getDimension(R.dimen.recycler_expand_view), 0);
-////            }
-//
-//            animator.addUpdateListener(animation -> {
-//                layoutParams.setMargins(0, (int) animation.getAnimatedValue(), 0, 0);
-//                holder.mExpandView.setLayoutParams(layoutParams);
-//                holder.mExpandView.requestLayout();
-//            });
-//
-//            animator.start();
-//
-//            Log.d(TAG, "onCreateViewHolder: " + layoutParams.leftMargin + " " + layoutParams.topMargin + " " + layoutParams.leftMargin + " " + layoutParams.bottomMargin);
-//
-//        });
+        if (itemType == MOD_TYPE && mFragment instanceof MusicListFragment) {
+            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_list_item_mod, viewGroup, false);
+            holder = new ModHolder(view);
 
-        view.setOnClickListener(v -> new AsyncTask<Void, Void, Integer>() {
+            onMusicItemClick(view, holder);
 
-            @Override
-            protected Integer doInBackground(Void... voids) {
-                Log.d(TAG, "onCreateViewHolder: current status " + READY);
+            ((ModHolder) holder).mRandomItem.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE));
 
-                if (!READY) {
-                    Log.d(TAG, "onCreateViewHolder: MusicBinder not ready!!!");
-                    mMainActivity.runOnUiThread(() -> Toast.makeText(mMainActivity, "Wait...", Toast.LENGTH_SHORT).show());
-                    return null;
-                }
-                READY = false;
+        } else {
+            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_list_item, viewGroup, false);
+            holder = new ItemHolder(view);
+            onMusicItemClick(view, holder);
+        }
 
-                String clickedPath = mMusicItems.get(holder.getAdapterPosition()).getMusicPath();
+        //默认设置扩展button opacity 0, (default)
+        holder.mButton1.setAlpha(0);
+        holder.mButton2.setAlpha(0);
+        holder.mButton3.setAlpha(0);
+        holder.mButton4.setAlpha(0);
 
-                //song clicked same as playing
-                if (Data.sMusicBinder.isPlayingMusic()) {
-                    if (clickedPath.equals(Values.CurrentData.CURRENT_SONG_PATH)) {
-                        Utils.SendSomeThing.sendPause(mContext);
-                        return null;
+        //默认设置扩展布局GONE 以便优化
+        holder.mExpandView.setVisibility(View.GONE);
+
+        holder.mMusicCoverImage.setOnClickListener(v -> {
+
+            holder.mExpandView.clearAnimation();
+
+            final ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) holder.mExpandView.getLayoutParams();
+
+            final ValueAnimator animator = new ValueAnimator();
+            animator.setDuration(300);
+
+            if (((ConstraintLayout.LayoutParams) holder.mExpandView.getLayoutParams()).topMargin == 0) {
+                animator.setIntValues(0, (int) mMainActivity.getResources().getDimension(R.dimen.recycler_expand_view));
+                holder.setIsRecyclable(false);
+                holder.mExpandView.setVisibility(View.VISIBLE);
+                animator.setInterpolator(new OvershootInterpolator());
+
+                /*--- button alpha animation ---*/
+                ValueAnimator alphaAnim = new ValueAnimator();
+                alphaAnim.setFloatValues(0f, 1f);
+                alphaAnim.setDuration(500);
+                alphaAnim.addUpdateListener(animation -> {
+                    holder.mButton1.setAlpha((Float) animation.getAnimatedValue());
+                    holder.mButton2.postDelayed(() -> holder.mButton2.setAlpha((Float) animation.getAnimatedValue()), 100);
+                    holder.mButton3.postDelayed(() -> holder.mButton3.setAlpha((Float) animation.getAnimatedValue()), 200);
+                    holder.mButton4.postDelayed(() -> holder.mButton4.setAlpha((Float) animation.getAnimatedValue()), 300);
+                });
+                alphaAnim.start();
+                /*--- button alpha animation ---*/
+
+            } else {
+
+                animator.setIntValues((int) mMainActivity.getResources().getDimension(R.dimen.recycler_expand_view), 0);
+                holder.setIsRecyclable(true);
+                animator.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+
                     }
-                }
 
-                Data.sMusicBinder.resetMusic();
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
 
-                String clickedSongName = mMusicItems.get(holder.getAdapterPosition()).getMusicName();
-                String clickedSongAlbumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
+                        //set default...
+                        holder.mExpandView.setVisibility(View.GONE);
+                        holder.mButton1.setAlpha(0);
+                        holder.mButton2.setAlpha(0);
+                        holder.mButton3.setAlpha(0);
+                        holder.mButton4.setAlpha(0);
 
-                //清楚播放队列, 并加入当前歌曲序列
-                Data.sHistoryPlayIndex.clear();
-                Data.sHistoryPlayIndex.add(holder.getAdapterPosition());
+                    }
 
-                Bitmap cover = Utils.Audio.getMp3Cover(clickedPath);
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
 
-                Data.sCurrentMusicAlbum = clickedSongAlbumName;
-                Data.sCurrentMusicName = clickedSongName;
-                Data.sCurrentMusicBitmap = cover;
+                    }
 
-                //set InfoBar
-                mMainActivity.getMusicDetailFragment().setSlideInfo(clickedSongName, clickedSongAlbumName, cover);
-                mMainActivity.getMusicDetailFragment().setCurrentInfo(clickedSongName, clickedSongAlbumName, cover);
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
 
-                Values.MUSIC_PLAYING = true;
-                Values.HAS_PLAYED = true;
-                Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
-                Values.CurrentData.CURRENT_SONG_PATH = clickedPath;
-
-                try {
-                    Data.sMusicBinder.setDataSource(clickedPath);
-                    Data.sMusicBinder.prepare();
-                    Data.sMusicBinder.playMusic();
-
-                    Utils.Ui.setPlayButtonNowPlaying();
-                    mMainActivity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Data.sMusicBinder.resetMusic();
-                    Toast.makeText(mMainActivity, e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-
-                return null;
+                    }
+                });
             }
 
-            @Override
-            protected void onPostExecute(Integer result) {
-                READY = true;
-            }
-        }.execute());
+            ValueAnimator rotationAnima = new ValueAnimator();
+            rotationAnima.setFloatValues(0f, 360f);
+            rotationAnima.setDuration(300);
+            rotationAnima.setInterpolator(new OvershootInterpolator());
+            rotationAnima.addUpdateListener(animation -> holder.mMusicCoverImage.setRotation((Float) animation.getAnimatedValue()));
+            rotationAnima.start();
 
-        view.setOnLongClickListener(v -> {
-            if (Data.sMusicBinder.isPlayingMusic()) {
-                Utils.SendSomeThing.sendPause(mContext);
-            }
-            return true;
+            animator.addUpdateListener(animation -> {
+                layoutParams.setMargins(0, (int) animation.getAnimatedValue(), 0, 0);
+                holder.mExpandView.setLayoutParams(layoutParams);
+                holder.mExpandView.requestLayout();
+            });
+
+            animator.start();
+
         });
+
+        // TODO: 2018/12/5 button
+        holder.mButton1.setOnClickListener(v -> Toast.makeText(mMainActivity, holder.mButton1.getText(), Toast.LENGTH_SHORT).show());
+        holder.mButton2.setOnClickListener(v -> Toast.makeText(mMainActivity, holder.mButton2.getText(), Toast.LENGTH_SHORT).show());
+        holder.mButton3.setOnClickListener(v -> Toast.makeText(mMainActivity, holder.mButton3.getText(), Toast.LENGTH_SHORT).show());
+        holder.mButton4.setOnClickListener(v -> Toast.makeText(mMainActivity, holder.mButton4.getText(), Toast.LENGTH_SHORT).show());
 
         holder.mItemMenuButton.setOnClickListener(v -> holder.mPopupMenu.show());
 
@@ -279,40 +287,126 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         });
 
         return holder;
+
+//            view = LayoutInflater.from(viewGroup.getContext()).inflate(android.R.layout.simple_list_item_1, viewGroup, false);
+//            return new ViewHolder(view);
+    }
+
+    private void onMusicItemClick(View view, ViewHolder holder) {
+        view.setOnClickListener(v -> new AsyncTask<Void, Void, Integer>() {
+
+            @Override
+            protected Integer doInBackground(Void... voids) {
+
+                if (!READY) {
+                    mMainActivity.runOnUiThread(() -> Toast.makeText(mMainActivity, "Wait...", Toast.LENGTH_SHORT).show());
+                    return null;
+                }
+                READY = false;
+
+                String clickedPath = mMusicItems.get(holder.getAdapterPosition()).getMusicPath();
+
+                //song clicked same as playing
+                if (Data.sMusicBinder.isPlayingMusic()) {
+                    if (clickedPath.equals(Values.CurrentData.CURRENT_SONG_PATH)) {
+                        Utils.SendSomeThing.sendPause(mContext);
+                        return null;
+                    }
+                }
+
+                Data.sMusicBinder.resetMusic();
+
+                String clickedSongName = mMusicItems.get(holder.getAdapterPosition()).getMusicName();
+                String clickedSongAlbumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
+
+                //清楚播放队列, 并加入当前歌曲序列
+                Data.sHistoryPlayIndex.clear();
+                Data.sHistoryPlayIndex.add(holder.getAdapterPosition());
+
+                Bitmap cover = Utils.Audio.getMp3Cover(clickedPath);
+
+                Data.sCurrentMusicAlbum = clickedSongAlbumName;
+                Data.sCurrentMusicName = clickedSongName;
+                Data.sCurrentMusicBitmap = cover;
+
+                //set InfoBar
+                mMainActivity.getMusicDetailFragment().setSlideInfo(clickedSongName, clickedSongAlbumName, cover);
+                mMainActivity.getMusicDetailFragment().setCurrentInfo(clickedSongName, clickedSongAlbumName, cover);
+
+                Values.MUSIC_PLAYING = true;
+                Values.HAS_PLAYED = true;
+                Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
+                Values.CurrentData.CURRENT_SONG_PATH = clickedPath;
+
+                try {
+                    Data.sMusicBinder.setDataSource(clickedPath);
+                    Data.sMusicBinder.prepare();
+                    Data.sMusicBinder.playMusic();
+
+                    Utils.Ui.setPlayButtonNowPlaying();
+                    mMainActivity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Data.sMusicBinder.resetMusic();
+                    Toast.makeText(mMainActivity, e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Integer result) {
+                READY = true;
+            }
+        }.execute());
+
+        view.setOnLongClickListener(v -> {
+            if (Data.sMusicBinder.isPlayingMusic()) {
+                Utils.SendSomeThing.sendPause(mContext);
+            }
+            return true;
+        });
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 
-        Object tag = viewHolder.mMusicCoverImage.getTag(R.string.key_id_1);
-        if (tag != null && (int) tag != i) {
-            GlideApp.with(mMainActivity).clear(viewHolder.mMusicCoverImage);
+        if (viewHolder instanceof ItemHolder) {
+
+            ItemHolder holder = ((ItemHolder) viewHolder);
+
+            Object tag = holder.mMusicCoverImage.getTag(R.string.key_id_1);
+            if (tag != null && (int) tag != i) {
+                GlideApp.with(mMainActivity).clear(holder.mMusicCoverImage);
+            }
+
+            currentBind = holder;
+
+            /* show song name, use songNameList */
+            Values.CurrentData.CURRENT_BIND_INDEX_MUSIC_LIST = viewHolder.getAdapterPosition();
+
+            holder.mMusicText.setText(mMusicItems.get(i).getMusicName());
+            holder.mMusicAlbumName.setText(mMusicItems.get(i).getMusicAlbum());
+            String prefix = mMusicItems.get(i).getMusicPath().substring(mMusicItems.get(i).getMusicPath().lastIndexOf(".") + 1);
+            holder.mMusicExtName.setText(prefix);
+            holder.mTime.setText(Data.sSimpleDateFormat.format(new Date(mMusicItems.get(i).getDuration())));
+
+            initStyle();
+
+            /*--- 添加标记以便避免ImageView因为ViewHolder的复用而出现混乱 ---*/
+            holder.mMusicCoverImage.setTag(R.string.key_id_1, i);
+
+            new MyTask(holder.mMusicCoverImage, mMusicItems, mContext, i).execute();
+
         }
-
-        currentBind = viewHolder;
-
-        /* show song name, use songNameList */
-        Values.CurrentData.CURRENT_BIND_INDEX_MUSIC_LIST = viewHolder.getAdapterPosition();
-
-        viewHolder.mMusicText.setText(mMusicItems.get(i).getMusicName());
-        viewHolder.mMusicAlbumName.setText(mMusicItems.get(i).getMusicAlbum());
-        String prefix = mMusicItems.get(i).getMusicPath().substring(mMusicItems.get(i).getMusicPath().lastIndexOf(".") + 1);
-        viewHolder.mMusicExtName.setText(prefix);
-        viewHolder.mTime.setText(Data.sSimpleDateFormat.format(new Date(mMusicItems.get(i).getDuration())));
-
-        initStyle();
-
-        /*--- 添加标记以便避免ImageView因为ViewHolder的复用而出现混乱 ---*/
-        viewHolder.mMusicCoverImage.setTag(R.string.key_id_1, i);
-//        Log.i(TAG, "onBindViewHolder: AdapterPosition: " + viewHolder.getAdapterPosition() + ", i: " + i);
-
-        new MyTask(viewHolder.mMusicCoverImage, mMusicItems, mContext, i).execute();
 
     }
 
     @Override
     public void onViewDetachedFromWindow(@NonNull ViewHolder holder) {
-        holder.mMusicCoverImage.setTag(R.string.key_id_1, null);
+        if (holder instanceof ItemHolder)
+            ((ItemHolder) holder).mMusicCoverImage.setTag(R.string.key_id_1, null);
     }
 
     @Override
@@ -323,22 +417,35 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 //        holder.itemView.setLayoutParams(layoutParams);
 //        holder.itemView.requestLayout();
 
-        GlideApp.with(mMainActivity).clear(holder.mMusicCoverImage);
+        if (holder instanceof ItemHolder) {
+            GlideApp.with(mMainActivity).clear(((ItemHolder) holder).mMusicCoverImage);
+        }
+
         super.onViewRecycled(holder);
     }
 
     @Override
     public boolean onFailedToRecycleView(@NonNull ViewHolder holder) {
-        Log.d(TAG, "onFailedToRecycleView: " + holder.mMusicText);
-        GlideApp.with(mMainActivity).clear(holder.mMusicCoverImage);
-        holder.itemView.setBackgroundColor(Color.RED);
-        holder.mMusicText.setText("This item recycler failed...");
+        if (holder instanceof ItemHolder) {
+            Log.d(TAG, "onFailedToRecycleView: " + ((ItemHolder) holder).mMusicText);
+            GlideApp.with(mMainActivity).clear(((ItemHolder) holder).mMusicCoverImage);
+            holder.itemView.setBackgroundColor(Color.RED);
+            ((ItemHolder) holder).mMusicText.setText("This item recycler failed...");
+        }
         return super.onFailedToRecycleView(holder);
     }
 
     @Override
     public int getItemCount() {
         return mMusicItems.size();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (position == 0) {
+            return MOD_TYPE;
+        }
+        return 0;
     }
 
     @Override
@@ -424,6 +531,13 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
+        ViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+    }
+
+    class ItemHolder extends ViewHolder {
+
         ImageView mMusicCoverImage;
 
         ImageView mItemMenuButton;
@@ -442,7 +556,15 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
         ConstraintLayout mExpandView;
 
-        ViewHolder(@NonNull View itemView) {
+        Button mButton1;
+
+        Button mButton2;
+
+        Button mButton3;
+
+        Button mButton4;
+
+        ItemHolder(@NonNull View itemView) {
             super(itemView);
             mMusicAlbumName = itemView.findViewById(R.id.recycler_item_music_album_name);
             mMusicCoverImage = itemView.findViewById(R.id.recycler_item_album_image);
@@ -451,6 +573,11 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             mMusicExtName = itemView.findViewById(R.id.recycler_item_music_type_name);
             mTime = itemView.findViewById(R.id.recycler_item_time);
             mExpandView = itemView.findViewById(R.id.music_item_expand_view);
+
+            mButton1 = itemView.findViewById(R.id.expand_button_1);
+            mButton2 = itemView.findViewById(R.id.expand_button_2);
+            mButton3 = itemView.findViewById(R.id.expand_button_3);
+            mButton4 = itemView.findViewById(R.id.expand_button_4);
 
             mPopupMenu = new PopupMenu(mMainActivity, mItemMenuButton);
             mMenu = mPopupMenu.getMenu();
@@ -464,6 +591,16 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
             MenuInflater menuInflater = mMainActivity.getMenuInflater();
             menuInflater.inflate(R.menu.recycler_song_item_menu, mMenu);
+        }
+    }
+
+    class ModHolder extends ItemHolder {
+
+        ConstraintLayout mRandomItem;
+
+        ModHolder(@NonNull View itemView) {
+            super(itemView);
+            mRandomItem = itemView.findViewById(R.id.random_play_item);
         }
     }
 
