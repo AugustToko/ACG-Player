@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月05日 20:16:39
- * 上次修改时间：2018年12月05日 20:16:12
+ * 当前修改时间：2018年12月06日 19:19:07
+ * 上次修改时间：2018年12月06日 18:39:39
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -13,6 +13,7 @@ package top.geek_studio.chenlongcould.musicplayer.Adapters;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -112,7 +113,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
             onMusicItemClick(view, holder);
 
-            ((ModHolder) holder).mRandomItem.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE));
+            ((ModHolder) holder).mRandomItem.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE, null));
 
         } else {
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_list_item, viewGroup, false);
@@ -230,7 +231,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             switch (item.getItemId()) {
                 //noinspection PointlessArithmeticExpression
                 case Menu.FIRST + 0: {
-                    Data.sNextWillPlayIndex = holder.getAdapterPosition();
+                    Data.sNextWillPlayItem = Data.sMusicItems.get(holder.getAdapterPosition());
                 }
                 break;
 
@@ -292,6 +293,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 //            return new ViewHolder(view);
     }
 
+    @SuppressLint("StaticFieldLeak")
     private void onMusicItemClick(View view, ViewHolder holder) {
         view.setOnClickListener(v -> new AsyncTask<Void, Void, Integer>() {
 
@@ -308,7 +310,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
                 //song clicked same as playing
                 if (Data.sMusicBinder.isPlayingMusic()) {
-                    if (clickedPath.equals(Values.CurrentData.CURRENT_SONG_PATH)) {
+                    if (holder.getAdapterPosition() == Values.CurrentData.CURRENT_MUSIC_INDEX) {
                         Utils.SendSomeThing.sendPause(mContext);
                         return null;
                     }
@@ -318,10 +320,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
                 String clickedSongName = mMusicItems.get(holder.getAdapterPosition()).getMusicName();
                 String clickedSongAlbumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
-
-                //清楚播放队列, 并加入当前歌曲序列
-                Data.sHistoryPlayIndex.clear();
-                Data.sHistoryPlayIndex.add(holder.getAdapterPosition());
 
                 Bitmap cover = Utils.Audio.getMp3Cover(clickedPath);
 
@@ -336,7 +334,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 Values.MUSIC_PLAYING = true;
                 Values.HAS_PLAYED = true;
                 Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
-                Values.CurrentData.CURRENT_SONG_PATH = clickedPath;
 
                 try {
                     Data.sMusicBinder.setDataSource(clickedPath);

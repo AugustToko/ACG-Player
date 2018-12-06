@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月05日 20:16:39
- * 上次修改时间：2018年12月05日 17:32:24
+ * 当前修改时间：2018年12月06日 19:19:07
+ * 上次修改时间：2018年12月06日 19:18:26
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -31,8 +31,6 @@ import android.view.ViewGroup;
 
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
-import com.bumptech.glide.util.ViewPreloadSizeProvider;
 
 import java.util.List;
 
@@ -73,12 +71,12 @@ public final class AlbumListFragment extends Fragment implements VisibleOrGone {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_album_list, container, false);
         mRecyclerView = view.findViewById(R.id.recycler_view);
-        final ViewPreloadSizeProvider<AlbumItem> preloadSizeProvider = new ViewPreloadSizeProvider<>();
-        final AlbumListFragment.MyPreloadModelProvider preloadModelProvider = new AlbumListFragment.MyPreloadModelProvider();
-        final RecyclerViewPreloader<AlbumItem> preLoader = new RecyclerViewPreloader<>(this, preloadModelProvider, preloadSizeProvider, 2);
+//        final ViewPreloadSizeProvider<AlbumItem> preloadSizeProvider = new ViewPreloadSizeProvider<>();
+//        final AlbumListFragment.MyPreloadModelProvider preloadModelProvider = new AlbumListFragment.MyPreloadModelProvider();
+//        final RecyclerViewPreloader<AlbumItem> preLoader = new RecyclerViewPreloader<>(this, preloadModelProvider, preloadSizeProvider, 2);
 
         mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.addOnScrollListener(preLoader);
+//        mRecyclerView.addOnScrollListener(preLoader);
         return view;
     }
 

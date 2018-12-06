@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月05日 20:16:39
- * 上次修改时间：2018年12月05日 10:29:00
+ * 当前修改时间：2018年12月06日 19:19:07
+ * 上次修改时间：2018年12月06日 15:37:22
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -527,7 +527,7 @@ public final class MusicDetailActivity extends MyBaseActivity implements IStyle,
         mToolbar.setOnMenuItemClickListener(menuItem -> {
             switch (menuItem.getItemId()) {
                 case R.id.menu_toolbar_fast_play: {
-                    Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, ReceiverOnMusicPlay.TYPE_SHUFFLE);
+                    Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, ReceiverOnMusicPlay.TYPE_SHUFFLE, null);
                 }
                 break;
             }
@@ -825,7 +825,7 @@ public final class MusicDetailActivity extends MyBaseActivity implements IStyle,
             }
         });
 
-        mNextButton.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, 6));
+        mNextButton.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, 6, null));
 
         mNextButton.setOnLongClickListener(v -> {
             Values.BUTTON_PRESSED = true;
@@ -843,7 +843,7 @@ public final class MusicDetailActivity extends MyBaseActivity implements IStyle,
             return true;
         });
 
-        mPreviousButton.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, 5));
+        mPreviousButton.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, 6, null));
 
         mPreviousButton.setOnLongClickListener(v -> {
             int nowPosition = mSeekBar.getProgress() - Data.sMusicBinder.getDuration() / 20;

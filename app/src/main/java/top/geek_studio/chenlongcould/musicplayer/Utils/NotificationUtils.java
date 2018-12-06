@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：NotificationUtils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月05日 09:30:08
- * 上次修改时间：2018年12月05日 08:38:08
+ * 当前修改时间：2018年12月06日 19:19:07
+ * 上次修改时间：2018年12月06日 15:30:02
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -73,7 +73,7 @@ public class NotificationUtils extends ContextWrapper {
     @RequiresApi(api = Build.VERSION_CODES.O)
     private Notification.Builder getChannelNotification(String title, String content, Context context) {
 
-        // TODO: 2018/11/30
+        //pi(s)
         Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
         PendingIntent pi = PendingIntent.getActivity(context, 0, intent, 0);
 
@@ -89,11 +89,13 @@ public class NotificationUtils extends ContextWrapper {
         Intent next = new Intent();
         next.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
         next.putExtra("play_type", 6);
+        next.putExtra("args", "next");
         PendingIntent nextIntent = PendingIntent.getBroadcast(context, REQUEST_NEXT, next, 0);
 
         Intent pre = new Intent();
         pre.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
         pre.putExtra("play_type", 5);
+        next.putExtra("args", "previous");
         PendingIntent preIntent = PendingIntent.getBroadcast(context, REQUEST_PRE, pre, 0);
 
         Notification.MediaStyle mediaStyle = new Notification.MediaStyle();

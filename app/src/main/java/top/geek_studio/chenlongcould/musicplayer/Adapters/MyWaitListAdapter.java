@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyWaitListAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月05日 20:16:39
- * 上次修改时间：2018年12月05日 14:55:24
+ * 当前修改时间：2018年12月06日 19:19:07
+ * 上次修改时间：2018年12月06日 18:39:39
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -72,7 +72,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
             final String clickedPath = mMusicItems.get(holder.getAdapterPosition()).getMusicPath();
 
             if (Data.sMusicBinder.isPlayingMusic()) {
-                if (clickedPath.equals(Values.CurrentData.CURRENT_SONG_PATH)) {
+                if (holder.getAdapterPosition() == Values.CurrentData.CURRENT_MUSIC_INDEX) {
                     Utils.SendSomeThing.sendPause(mMainActivity);
                     return;
                 }
@@ -82,10 +82,6 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
             final String clickedSongName = mMusicItems.get(holder.getAdapterPosition()).getMusicName();
             final String clickedSongAlbumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
-
-            //清楚播放队列, 并加入当前歌曲序列
-            Data.sHistoryPlayIndex.clear();
-            Data.sHistoryPlayIndex.add(holder.getAdapterPosition());
 
             final Bitmap cover = Utils.Audio.getMp3Cover(clickedPath);
 
@@ -102,8 +98,6 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
             Values.MUSIC_PLAYING = true;
             Values.HAS_PLAYED = true;
             Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
-            Values.CurrentData.CURRENT_SONG_PATH = clickedPath;
-
 
             try {
                 Data.sMusicBinder.setDataSource(clickedPath);
@@ -143,7 +137,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
             switch (item.getItemId()) {
                 //noinspection PointlessArithmeticExpression
                 case Menu.FIRST + 0: {
-                    Data.sNextWillPlayIndex = holder.getAdapterPosition();
+                    Data.sNextWillPlayItem = Data.sPlayOrderList.get(holder.getAdapterPosition());
                 }
                 break;
 

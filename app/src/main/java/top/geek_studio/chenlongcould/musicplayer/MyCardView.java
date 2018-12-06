@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyCardView.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月05日 20:16:39
- * 上次修改时间：2018年12月05日 20:16:08
+ * 当前修改时间：2018年12月06日 19:19:07
+ * 上次修改时间：2018年12月06日 09:27:40
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -60,57 +60,19 @@ public class MyCardView extends CardView {
                 break;
             case MotionEvent.ACTION_MOVE:
 
-                velocityTracker.addMovement(event);
-                velocityTracker.computeCurrentVelocity(1000);
+//                velocityTracker.addMovement(event);
+//                velocityTracker.computeCurrentVelocity(1000);
 
                 setTranslationX(getX() + (event.getX() - moveX));
 //                setTranslationY(getY() + (event.getY() - moveY));
+
+                Log.d(TAG, "onTouchEvent: getx:" + getX() + " event.getx: " + event.getX() + " pointX: " + moveX + " transX: " + getTranslationX());
+
                 break;
 
             case MotionEvent.ACTION_CANCEL:
                 break;
             case MotionEvent.ACTION_UP:
-
-//                this.clearAnimation();
-//
-//                ValueAnimator animator = new ValueAnimator();
-//
-//                if (mRawX > event.getRawX()) {
-//                    animator.setFloatValues(event.getRawX(), (float) (event.getRawX() + velocityTracker.getXVelocity() * 0.1));
-//                } else {
-//                    animator.setFloatValues(event.getRawX(), (float) (event.getRawX() - velocityTracker.getXVelocity() * 0.1));
-//                }
-//
-//                animator.setDuration(500);
-//                animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//                    @Override
-//                    public void onAnimationUpdate(ValueAnimator animation) {
-//                        setTranslationX(getX() + ((float) animation.getAnimatedValue() - moveX));
-//                    }
-//                });
-//                animator.addListener(new Animator.AnimatorListener() {
-//                    @Override
-//                    public void onAnimationStart(Animator animation) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onAnimationEnd(Animator animation) {
-//                        velocityTracker.clear();
-//                        velocityTracker.recycle();
-//                    }
-//
-//                    @Override
-//                    public void onAnimationCancel(Animator animation) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onAnimationRepeat(Animator animation) {
-//
-//                    }
-//                });
-//                animator.start();
 
                 break;
         }

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月05日 09:30:08
- * 上次修改时间：2018年12月05日 09:12:55
+ * 当前修改时间：2018年12月06日 19:19:07
+ * 上次修改时间：2018年12月06日 19:18:30
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -97,13 +97,26 @@ public final class Values {
          * TEMP DATA
          */
         //default value -1 or null
-        public volatile static String CURRENT_SONG_PATH = "null";
         public volatile static int CURRENT_BIND_INDEX_MUSIC_LIST = -1;
         public volatile static int CURRENT_BIND_INDEX_ALBUM_LIST = -1;
         public volatile static int CURRENT_PAGE_INDEX = -1;
         public volatile static int CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = -1;            //存储使浮动菜单弹出的item,def = -1
         public volatile static int CURRENT_MUSIC_INDEX = -1;
+
+        /**
+         * 用户手动切歌的播放模式
+         * 1. random
+         * 2. common
+         */
         public volatile static String CURRENT_PLAY_TYPE = "COMMON";
+
+        /**
+         * 自动切歌的播放模式
+         * 1. common
+         * 2. repeat one
+         * 3. repeat list
+         * 4. random
+         */
         public volatile static String CURRENT_AUTO_NEXT_TYPE = "COMMON";
         public volatile static String CURRENT_PLAY_LIST = "default";
     }

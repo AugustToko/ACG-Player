@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月05日 20:16:39
- * 上次修改时间：2018年12月05日 20:16:11
+ * 当前修改时间：2018年12月06日 19:19:07
+ * 上次修改时间：2018年12月06日 19:18:30
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -24,6 +24,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -51,6 +52,7 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyPagerAdapter;
@@ -118,6 +120,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     private Menu mMenu;
     private SearchView mSearchView;
     private SlidingUpPanelLayout mSlidingUpPanelLayout;
+    private ConstraintLayout mMainBody;
 
     /**
      * ----------------- fragment(s) ----------------------
@@ -265,8 +268,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             }
         });
 
-        mSearchView.setOnSearchClickListener(v -> Data.sMusicItemsBackUp.addAll(Data.sMusicItems));
-
         mSearchView.setOnCloseListener(() -> {
             Data.sMusicItemsBackUp.clear();
             return false;
@@ -284,8 +285,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
             /*--------------- 快速 随机 播放 ----------------*/
             case R.id.menu_toolbar_fast_play: {
-                Data.sHistoryPlayIndex.clear();
-                Utils.SendSomeThing.sendPlay(this, ReceiverOnMusicPlay.TYPE_SHUFFLE);
+                Utils.SendSomeThing.sendPlay(this, ReceiverOnMusicPlay.TYPE_SHUFFLE, null);
             }
             break;
 
@@ -477,6 +477,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         }
 
         mNavHeaderImageView = mNavigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
+
         mNavHeaderImageView.setOnClickListener(v -> {
             if (getMusicDetailFragment().getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
                 getMusicDetailFragment().getSlidingUpPanelLayout().setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
@@ -496,6 +497,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             public void onPanelSlide(View panel, float slideOffset) {
 
                 CURRENT_SLIDE_OFFSET = slideOffset;
+
+                mMainBody.setTranslationY(0 - slideOffset * 120);
 
                 float current = 1 - slideOffset;
                 mMusicDetailFragment.getNowPlayingBody().setAlpha(current);
@@ -660,6 +663,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mViewPager = findViewById(R.id.view_pager);
         mAppBarLayout = findViewById(R.id.activity_main_appbar);
         mSlidingUpPanelLayout = findViewById(R.id.activity_main_sliding_layout);
+        mMainBody = findViewById(R.id.activity_main_body);
 //        mBackgroundImage = findViewById(R.id.back_ground_image);
     }
 
@@ -690,7 +694,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     }
                     do {
                         final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-
                         final File file = new File(path);
                         if (!file.exists()) {
                             Log.e(TAG, "onAttach: song file: " + path + " does not exits, skip this!!!");
@@ -717,10 +720,15 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                                 .addAlbumId(albumId);
 
                         Data.sMusicItems.add(builder.build());
+                        Data.sMusicItemsBackUp.add(builder.build());
+                        Data.sPlayOrderList.add(builder.build());
 
                     } while (cursor.moveToNext());
                     cursor.close();
                     Values.MUSIC_DATA_INIT_DONE = true;
+
+                    if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM))
+                        Collections.shuffle(Data.sPlayOrderList);
 
                     return 0;
                 } else {

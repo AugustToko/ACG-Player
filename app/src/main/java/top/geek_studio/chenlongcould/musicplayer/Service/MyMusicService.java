@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月05日 09:30:08
- * 上次修改时间：2018年12月05日 09:12:55
+ * 当前修改时间：2018年12月06日 19:19:07
+ * 上次修改时间：2018年12月06日 19:18:26
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -22,7 +22,6 @@ import android.util.Log;
 import java.io.IOException;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Utils.NotificationUtils;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
@@ -48,46 +47,47 @@ public final class MyMusicService extends Service {
         Values.SERVICE_RUNNING = true;
 
         mMediaPlayer.setOnCompletionListener(mp -> {
-            if (Data.sNextWillPlayIndex != -1) {
-                Utils.SendSomeThing.sendPlay(MyMusicService.this, 7);
-                return;
-            }
-
-            if (Values.BUTTON_PRESSED) {
-                //来自用户的主动点击
-                if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
-                    Utils.SendSomeThing.sendPlay(this, ReceiverOnMusicPlay.TYPE_SHUFFLE);
-                } else if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_COMMON)) {
-                    Utils.SendSomeThing.sendPlay(MyMusicService.this, 4);
-                }
-            } else {
-                switch (Values.CurrentData.CURRENT_AUTO_NEXT_TYPE) {
-                    case Values.TYPE_COMMON:
-                        Utils.SendSomeThing.sendPlay(MyMusicService.this, 4);
-                        break;
-                    case Values.TYPE_REPEAT:
-                        if (Values.CurrentData.CURRENT_PLAY_LIST != null && !Values.CurrentData.CURRENT_PLAY_LIST.equals("default") && Data.sCurrentMusicList.size() != 0) {
-                            if (Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sCurrentMusicList.size() - 1) {
-                                Values.CurrentData.CURRENT_MUSIC_INDEX = 0;
-                                mMediaPlayer.reset();
-                                try {
-                                    mMediaPlayer.setDataSource(Data.sCurrentMusicList.get(0));
-                                    mMediaPlayer.prepare();
-                                    mMediaPlayer.start();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        } else {
-                            Utils.SendSomeThing.sendPlay(MyMusicService.this, 4);
-                        }
-                        break;
-                    case Values.TYPE_REPEAT_ONE:
-                        mMediaPlayer.start();
-                        break;
-                }
-            }
-            Values.BUTTON_PRESSED = false;
+            Utils.SendSomeThing.sendPlay(MyMusicService.this, 6, "next");
+//            if (Data.sNextWillPlayIndex != -1) {
+//                Utils.SendSomeThing.sendPlay(MyMusicService.this, 7);
+//                return;
+//            }
+//
+//            if (Values.BUTTON_PRESSED) {
+//                //来自用户的主动点击
+//                if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
+//                    Utils.SendSomeThing.sendPlay(this, ReceiverOnMusicPlay.TYPE_SHUFFLE);
+//                } else if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_COMMON)) {
+//                    Utils.SendSomeThing.sendPlay(MyMusicService.this, 4);
+//                }
+//            } else {
+//                switch (Values.CurrentData.CURRENT_AUTO_NEXT_TYPE) {
+//                    case Values.TYPE_COMMON:
+//                        Utils.SendSomeThing.sendPlay(MyMusicService.this, 4);
+//                        break;
+//                    case Values.TYPE_REPEAT:
+//                        if (Values.CurrentData.CURRENT_PLAY_LIST != null && !Values.CurrentData.CURRENT_PLAY_LIST.equals("default") && Data.sCurrentMusicList.size() != 0) {
+//                            if (Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sCurrentMusicList.size() - 1) {
+//                                Values.CurrentData.CURRENT_MUSIC_INDEX = 0;
+//                                mMediaPlayer.reset();
+//                                try {
+//                                    mMediaPlayer.setDataSource(Data.sCurrentMusicList.get(0));
+//                                    mMediaPlayer.prepare();
+//                                    mMediaPlayer.start();
+//                                } catch (IOException e) {
+//                                    e.printStackTrace();
+//                                }
+//                            }
+//                        } else {
+//                            Utils.SendSomeThing.sendPlay(MyMusicService.this, 4);
+//                        }
+//                        break;
+//                    case Values.TYPE_REPEAT_ONE:
+//                        mMediaPlayer.start();
+//                        break;
+//                }
+//            }
+//            Values.BUTTON_PRESSED = false;
         });
 
         mMediaPlayer.setOnErrorListener((mp, what, extra) -> {

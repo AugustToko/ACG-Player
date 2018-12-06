@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月05日 20:16:39
- * 上次修改时间：2018年12月05日 20:16:12
+ * 当前修改时间：2018年12月06日 19:19:07
+ * 上次修改时间：2018年12月06日 19:18:30
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -35,7 +35,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -44,6 +43,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
@@ -59,6 +60,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.lang.ref.WeakReference;
+import java.util.Collections;
 import java.util.Date;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
@@ -67,6 +69,7 @@ import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyWaitListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
+import top.geek_studio.chenlongcould.musicplayer.CustomView.AlbumImageView;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.IStyle;
@@ -91,13 +94,18 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
     private static final String TAG = "MusicDetailActivity";
 
+    float mLastX = 0;
+    float mLastY = 0;
+    float moveX = 0;
+
     public NotLeakHandler mHandler;
 
     private boolean HIDE_TOOLBAR = false;
 
     private boolean SNACK_NOTICE = false;
-
-    private ImageView mMusicAlbumImage;
+    float moveY = 0;
+    private ImageView.ScaleType mScaleType;
+    private float defXScale;
 
     private ImageView mPrimaryBackground;
 
@@ -114,6 +122,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
     private ImageButton mPreviousButton;
 
     private RecyclerView mRecyclerView;
+    private float defYScale;
 
     private LinearLayoutManager mLinearLayoutManager;
 
@@ -253,6 +262,26 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
         clearAnimations();
     }
 
+    private AlbumImageView mMusicAlbumImage;
+
+    public final ConstraintLayout getNowPlayingBody() {
+        return mNowPlayingBody;
+    }
+
+    private AlbumImageView mMusicAlbumImageOth2;
+
+    public void clearAnimations() {
+        mRandomButton.clearAnimation();
+        mRepeatButton.clearAnimation();
+        mPlayButton.clearAnimation();
+        mPreviousButton.clearAnimation();
+        mNextButton.clearAnimation();
+    }
+
+    private AlbumImageView mMusicAlbumImageOth3;
+    private MyWaitListAdapter mMyWaitListAdapter;
+    private VelocityTracker velocityTracker;
+
     private void findView(View view) {
         mMusicAlbumImage = view.findViewById(R.id.activity_music_detail_album_image);
         mPrimaryBackground = view.findViewById(R.id.activity_music_detail_primary_background);
@@ -275,6 +304,8 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
         mRecyclerMask = view.findViewById(R.id.recycler_mask);
         mSlidingUpPanelLayout = view.findViewById(R.id.activity_detail_sliding_layout);
         mNextWillText = view.findViewById(R.id.next_will_text);
+        mMusicAlbumImageOth2 = view.findViewById(R.id.activity_music_detail_album_image_2);
+        mMusicAlbumImageOth3 = view.findViewById(R.id.activity_music_detail_album_image_3);
 
         mNowPlayingSongAlbumText = view.findViewById(R.id.activity_main_now_playing_album_name);
         mNowPlayingBody = view.findViewById(R.id.current_info);
@@ -286,21 +317,12 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
         mWaitCard = view.findViewById(R.id.activity_music_detail_card_view);
     }
 
-    public final ConstraintLayout getNowPlayingBody() {
-        return mNowPlayingBody;
-    }
-
     public void setDefAnimation() {
         mRandomButton.setAlpha(0f);
         mRepeatButton.setAlpha(0f);
-    }
-
-    public void clearAnimations() {
-        mRandomButton.clearAnimation();
-        mRepeatButton.clearAnimation();
-        mPlayButton.clearAnimation();
-        mPreviousButton.clearAnimation();
-        mNextButton.clearAnimation();
+        mPlayButton.setRotation(-90f);
+        mPlayButton.setScaleX(0);
+        mPlayButton.setScaleY(0);
     }
 
     public final void initAnimation() {
@@ -459,46 +481,223 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
             }
         }
 
-//        final ScaleAnimation mPlayButtonScaleAnimation = new ScaleAnimation(0, mPlayButton.getScaleX(), 0, mPlayButton.getScaleY(),
-//                Animation.RELATIVE_TO_SELF, mPlayButton.getScaleX() / 2, Animation.RELATIVE_TO_SELF, mPlayButton.getScaleX() / 2);
-//        final RotateAnimation mPlayButtonRotationAnimation = new RotateAnimation(-90f, 0, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-//
-//        final AnimationSet mPlayButtonAnimationSet = new AnimationSet(true);
-//
-//        mPlayButtonRotationAnimation.setDuration(300);
-//        mPlayButtonRotationAnimation.setFillAfter(true);
-//        mPlayButtonScaleAnimation.setDuration(300);
-//        mPlayButtonScaleAnimation.setFillAfter(true);
-//        mPlayButtonScaleAnimation.setStartOffset(500);
-//        mPlayButtonRotationAnimation.setStartOffset(500);
-//        mPlayButton.clearAnimation();
-//
-//        mPlayButtonAnimationSet.addAnimation(mPlayButtonRotationAnimation);
-//        mPlayButtonAnimationSet.addAnimation(mPlayButtonScaleAnimation);
-//        mPlayButton.setAnimation(mPlayButtonAnimationSet);
-//
-////        TranslateAnimation mCardViewTranslateAnimation = new TranslateAnimation(mCardView.getTranslationX(), mCardView.getTranslationX(), 500, mCardView.getTranslationY());
-////        mCardViewTranslateAnimation.setDuration(300);
-////        mCardViewTranslateAnimation.setFillAfter(true);
-////        mCardView.clearAnimation();
-////        mCardView.startAnimation(mCardViewTranslateAnimation);
-//
-//        final TranslateAnimation mPreviousButtonTranslateAnimation = new TranslateAnimation(150, mPreviousButton.getTranslationX(), mPreviousButton.getTranslationY(), mPreviousButton.getTranslationY());
-//        final TranslateAnimation mNextButtonTranslateAnimation = new TranslateAnimation(-150, mNextButton.getTranslationX(), mNextButton.getTranslationY(), mNextButton.getTranslationY());
-//        mPreviousButtonTranslateAnimation.setDuration(300);
-//        mPreviousButtonTranslateAnimation.setFillAfter(true);
-//        mNextButtonTranslateAnimation.setDuration(300);
-//        mNextButtonTranslateAnimation.setFillAfter(true);
-//        mPreviousButton.clearAnimation();
-//        mNextButton.clearAnimation();
-//        mNextButton.startAnimation(mNextButtonTranslateAnimation);
-//        mPreviousButton.startAnimation(mPreviousButtonTranslateAnimation);
+        ValueAnimator mPlayButtonRotationAnimation = new ValueAnimator();
+        mPlayButtonRotationAnimation.setFloatValues(-90f, 0f);
+        mPlayButtonRotationAnimation.setDuration(300);
+        mPlayButtonRotationAnimation.addUpdateListener(animation -> mPlayButton.setRotation((Float) animation.getAnimatedValue()));
+        mPlayButtonRotationAnimation.start();
 
-        // TODO: 2018/11/11 more animation... such as AlbumCover (in MusicDetailActivity)
+        ValueAnimator mPlayButtonScale = new ValueAnimator();
+        mPlayButtonScale.setFloatValues(0, defXScale);
+        mPlayButtonScale.setDuration(300);
+        mPlayButtonScale.addUpdateListener(animation -> {
+            mPlayButton.setScaleX((Float) animation.getAnimatedValue());
+            mPlayButton.setScaleY((Float) animation.getAnimatedValue());
+        });
+        mPlayButtonScale.start();
+
     }
 
     private void initView(View view) {
         findView(view);
+
+        //get Default values
+        mScaleType = mPlayButton.getScaleType();
+        defXScale = mPlayButton.getScaleX();
+        defYScale = mPlayButton.getScaleY();
+
+        mMusicAlbumImageOth3.setX(0 - mMusicAlbumImage.getWidth());
+        mMusicAlbumImageOth2.setX(mMusicAlbumImage.getWidth() * 2);
+        mMusicAlbumImageOth2.setVisibility(View.GONE);
+        mMusicAlbumImageOth3.setVisibility(View.GONE);
+
+        mMusicAlbumImage.setOnTouchListener((v, event) -> {
+            int action = event.getAction();
+
+            String befPath = null;
+            String nexPath = null;
+            if (Values.CurrentData.CURRENT_MUSIC_INDEX != 0) {
+                befPath = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX - 1).getMusicPath();
+            }
+            if (Values.CurrentData.CURRENT_MUSIC_INDEX != Data.sMusicItems.size() - 1) {
+                nexPath = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX + 1).getMusicPath();
+            }
+
+            mMusicAlbumImageOth2.setVisibility(View.VISIBLE);
+            mMusicAlbumImageOth3.setVisibility(View.VISIBLE);
+
+            switch (action) {
+                case MotionEvent.ACTION_DOWN:
+                    //预加载
+                    if (befPath != null)
+                        GlideApp.with(this)
+                                .load(Utils.Audio.getMp3Cover(befPath))
+                                .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                                .into(mMusicAlbumImageOth3);
+
+                    if (nexPath != null)
+                        GlideApp.with(this)
+                                .load(Utils.Audio.getMp3Cover(nexPath))
+                                .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                                .into(mMusicAlbumImageOth2);
+
+                    moveX = event.getX();
+                    moveY = event.getY();
+                    mLastX = event.getRawX();
+                    mLastY = event.getRawY();
+
+                    velocityTracker = VelocityTracker.obtain();
+
+                    break;
+                case MotionEvent.ACTION_MOVE:
+
+                    //首尾禁止对应边缘滑动
+                    // FIXME: 2018/12/6
+                    if (Values.CurrentData.CURRENT_MUSIC_INDEX == 0) {
+                        if (event.getRawX() > mLastX) break;
+                    }
+                    if (Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sMusicItems.size() - 1) {
+                        if (event.getRawX() < mLastX) break;
+                    }
+
+                    velocityTracker.addMovement(event);
+                    velocityTracker.computeCurrentVelocity(1000);
+
+                    float val = mMusicAlbumImage.getX() + (event.getX() - moveX);
+                    mMusicAlbumImage.setTranslationX(val);
+                    mMusicAlbumImageOth2.setTranslationX(mMusicAlbumImage.getWidth() + val);
+                    mMusicAlbumImageOth3.setTranslationX(0 - mMusicAlbumImage.getWidth() + val);
+                    break;
+
+                case MotionEvent.ACTION_CANCEL:
+                case MotionEvent.ACTION_UP:
+                    if (Math.abs(Math.abs(event.getRawX()) - Math.abs(mLastX)) < 10 || Math.abs(Math.abs(event.getRawY()) - Math.abs(mLastY)) < 10) {
+                        mMusicAlbumImage.performClick();
+                        break;
+                    }
+
+                    /*
+                     * enter Animation...
+                     * */
+                    ValueAnimator animatorMain = new ValueAnimator();
+                    animatorMain.setDuration(300);
+
+                    //左滑一半 滑过去
+                    if (mMusicAlbumImage.getX() < 0 && Math.abs(mMusicAlbumImage.getX()) >= mMusicAlbumImage.getWidth() / 2) {
+                        animatorMain.setFloatValues(mMusicAlbumImage.getX(), 0 - mMusicAlbumImage.getWidth());
+                        String finalNexPath = nexPath;
+                        animatorMain.addListener(new Animator.AnimatorListener() {
+                            @Override
+                            public void onAnimationStart(Animator animation) {
+
+                            }
+
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                Utils.SendSomeThing.sendPlay(mMainActivity, 6, "next_slide");
+                                GlideApp.with(MusicDetailFragment.this)
+                                        .load(Utils.Audio.getMp3Cover(finalNexPath))
+                                        .into(mMusicAlbumImage);
+                                mMusicAlbumImage.setTranslationX(0);
+                                mMusicAlbumImageOth2.setTranslationX(mMusicAlbumImage.getWidth() * 2);
+                                mMusicAlbumImageOth2.setVisibility(View.GONE);
+                                GlideApp.with(MusicDetailFragment.this).clear(mMusicAlbumImageOth2);
+                            }
+
+                            @Override
+                            public void onAnimationCancel(Animator animation) {
+
+                            }
+
+                            @Override
+                            public void onAnimationRepeat(Animator animation) {
+
+                            }
+                        });
+
+                        /*右滑一半 滑过去*/
+                    } else if (mMusicAlbumImage.getX() > 0 && Math.abs(mMusicAlbumImage.getX()) >= mMusicAlbumImage.getWidth() / 2) {
+                        animatorMain.setFloatValues(mMusicAlbumImage.getX(), mMusicAlbumImage.getWidth());
+                        String finalBefPath = befPath;
+                        animatorMain.addListener(new Animator.AnimatorListener() {
+                            @Override
+                            public void onAnimationStart(Animator animation) {
+
+                            }
+
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                Utils.SendSomeThing.sendPlay(mMainActivity, 6, "previous_slide");
+                                GlideApp.with(MusicDetailFragment.this)
+                                        .load(Utils.Audio.getMp3Cover(finalBefPath))
+                                        .into(mMusicAlbumImage);
+                                mMusicAlbumImage.setTranslationX(0);
+                                mMusicAlbumImageOth3.setVisibility(View.GONE);
+                                mMusicAlbumImageOth3.setTranslationX(0 - mMusicAlbumImage.getWidth());
+                                GlideApp.with(MusicDetailFragment.this).clear(mMusicAlbumImageOth3);
+                            }
+
+                            @Override
+                            public void onAnimationCancel(Animator animation) {
+
+                            }
+
+                            @Override
+                            public void onAnimationRepeat(Animator animation) {
+
+                            }
+                        });
+
+                    } else {
+                        animatorMain.setFloatValues(mMusicAlbumImage.getX(), 0);
+
+                        animatorMain.addListener(new Animator.AnimatorListener() {
+                            @Override
+                            public void onAnimationStart(Animator animation) {
+
+                            }
+
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                mMusicAlbumImage.setTranslationX(0);
+
+                                GlideApp.with(MusicDetailFragment.this).clear(mMusicAlbumImageOth3);
+                                GlideApp.with(MusicDetailFragment.this).clear(mMusicAlbumImageOth2);
+                                mMusicAlbumImageOth2.setTranslationX(mMusicAlbumImage.getWidth() * 2);
+                                mMusicAlbumImageOth3.setTranslationX(0 - mMusicAlbumImage.getWidth());
+                                mMusicAlbumImageOth2.setVisibility(View.GONE);
+                                mMusicAlbumImageOth3.setVisibility(View.GONE);
+                            }
+
+                            @Override
+                            public void onAnimationCancel(Animator animation) {
+
+                            }
+
+                            @Override
+                            public void onAnimationRepeat(Animator animation) {
+
+                            }
+                        });
+                    }
+
+                    animatorMain.addUpdateListener(animation -> {
+                        mMusicAlbumImage.setTranslationX((Float) animation.getAnimatedValue());
+                        mMusicAlbumImageOth2.setTranslationX((Float) animation.getAnimatedValue() + mMusicAlbumImage.getWidth());
+                        mMusicAlbumImageOth3.setTranslationX(0 - mMusicAlbumImage.getWidth() + (Float) animation.getAnimatedValue());
+                    });
+                    animatorMain.start();
+
+                    Log.d(TAG, "initView: current speed: " + velocityTracker.getXVelocity());
+
+
+                    velocityTracker.clear();
+                    velocityTracker.recycle();
+
+
+            }
+            return true;
+        });
 
         if (Values.PHONE_HAS_NAV) {
             mSlidingUpPanelLayout.setPanelHeight((int) (mSlidingUpPanelLayout.getPanelHeight() - getResources().getDimension(R.dimen.nav_height)));
@@ -515,17 +714,17 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
         mToolbar.setOnMenuItemClickListener(menuItem -> {
             switch (menuItem.getItemId()) {
                 case R.id.menu_toolbar_fast_play: {
-                    Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE);
+                    Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE, null);
                 }
                 break;
 
                 case R.id.menu_toolbar_debug: {
-                    Snackbar.make(mSlidingUpPanelLayout,
-                            "Next Will play" + Data.sMusicItems.get(Values.CurrentData.CURRENT_MUSIC_INDEX != Data.sMusicItems.size() ? Values.CurrentData.CURRENT_MUSIC_INDEX : 0)
-                            , Snackbar.LENGTH_LONG).setAction("按钮", v -> {
-                        //点击右侧的按钮之后的操作
-                        Utils.SendSomeThing.sendPause(mMainActivity);
-                    }).show();
+//                    Snackbar.make(mSlidingUpPanelLayout,
+//                            "Next Will play" + Data.sMusicItems.get(Values.CurrentData.CURRENT_MUSIC_INDEX != Data.sMusicItems.size() ? Values.CurrentData.CURRENT_MUSIC_INDEX : 0)
+//                            , Snackbar.LENGTH_LONG).setAction("按钮", v -> {
+//                        //点击右侧的按钮之后的操作
+//                        Utils.SendSomeThing.sendPause(mMainActivity);
+//                    }).show();
                 }
                 break;
             }
@@ -657,6 +856,11 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                     }
                 });
                 animator.start();
+
+                Data.sPlayOrderList.clear();
+                Data.sPlayOrderList.addAll(Data.sMusicItems);
+                mMyWaitListAdapter.notifyDataSetChanged();
+
             } else {
                 Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_RANDOM;
                 final ValueAnimator animator = new ValueAnimator();
@@ -688,6 +892,10 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                     }
                 });
                 animator.start();
+
+                Collections.shuffle(Data.sPlayOrderList);
+                mMyWaitListAdapter.notifyDataSetChanged();
+
             }
         });
 
@@ -763,7 +971,8 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
 //        mRecyclerView.addItemDecoration(new DividerItemDecoration(mMainActivity, DividerItemDecoration.VERTICAL));
-        mRecyclerView.setAdapter(new MyWaitListAdapter(mMainActivity, Data.sMusicItems));
+        mMyWaitListAdapter = new MyWaitListAdapter(mMainActivity, Data.sPlayOrderList);
+        mRecyclerView.setAdapter(mMyWaitListAdapter);
 
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -796,7 +1005,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
             }
         });
 
-        mNextButton.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mMainActivity, 6));
+        mNextButton.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mMainActivity, 6, "next"));
 
         mNextButton.setOnLongClickListener(v -> {
             Values.BUTTON_PRESSED = true;
@@ -814,7 +1023,16 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
             return true;
         });
 
-        mPreviousButton.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mMainActivity, 5));
+        mPreviousButton.setOnClickListener(v -> {
+
+            //当进度条大于播放总长 1/20 那么重新播放该歌曲
+            if (Data.sMusicBinder.getCurrentPosition() > Data.sMusicBinder.getDuration() / 20 || Values.CurrentData.CURRENT_MUSIC_INDEX == 0) {
+                Data.sMusicBinder.seekTo(0);
+            } else {
+                Utils.SendSomeThing.sendPlay(mMainActivity, 6, "previous");
+            }
+
+        });
 
         mPreviousButton.setOnLongClickListener(v -> {
             int nowPosition = mSeekBar.getProgress() - Data.sMusicBinder.getDuration() / 20;
@@ -836,12 +1054,11 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                 if (Values.MUSIC_PLAYING) {
                     Utils.SendSomeThing.sendPause(mMainActivity);
                 } else {
-                    Utils.SendSomeThing.sendPlay(mMainActivity, 3);
+                    Utils.SendSomeThing.sendPlay(mMainActivity, 3, null);
                 }
             } else {
                 Toast.makeText(mMainActivity, "Shuffle Playback!", Toast.LENGTH_SHORT).show();
-                Data.sHistoryPlayIndex.clear();
-                Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE);
+                Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE, null);
             }
         });
 
@@ -957,6 +1174,15 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                         .into(mMusicAlbumImage);
                 Utils.Ui.setBlurEffect(mMainActivity, cover, mPrimaryBackground, mPrimaryBackground_down, mNextWillText);
             }
+        });
+    }
+
+    public final void setCurrentInfoWithoutMainImage(@NonNull String name, @NonNull String albumName, byte[] cover) {
+        mMainActivity.runOnUiThread(() -> {
+            mCurrentMusicNameText.setText(name);
+            mCurrentAlbumNameText.setText(albumName);
+            if (cover != null)
+                Utils.Ui.setBlurEffect(mMainActivity, cover, mPrimaryBackground, mPrimaryBackground_down, mNextWillText);
         });
     }
 
@@ -1195,7 +1421,9 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                 break;
 
                 case Values.HandlerWhat.RECYCLER_SCROLL: {
-                    mWeakReference.get().runOnUiThread(() -> mLinearLayoutManager.scrollToPositionWithOffset(Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sMusicItems.size() ? Values.CurrentData.CURRENT_MUSIC_INDEX : Values.CurrentData.CURRENT_MUSIC_INDEX + 1, 0));
+                    mWeakReference.get().runOnUiThread(() ->
+                            mLinearLayoutManager.scrollToPositionWithOffset(Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sMusicItems.size() ?
+                                    Values.CurrentData.CURRENT_MUSIC_INDEX : Values.CurrentData.CURRENT_MUSIC_INDEX + 1, 0));
                 }
                 break;
 

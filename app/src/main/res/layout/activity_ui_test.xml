@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：activity_ui_test.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月05日 20:16:39
-  ~ 上次修改时间：2018年12月05日 20:16:12
+  ~ 当前修改时间：2018年12月06日 19:19:07
+  ~ 上次修改时间：2018年12月06日 19:18:30
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -20,8 +20,16 @@
         android:id="@+id/card_view"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        app:cardBackgroundColor="@color/colorAccent">
+        android:visibility="gone"
+        app:cardBackgroundColor="@color/colorAccent"
+        app:layout_constraintStart_toStartOf="parent">
 
     </top.geek_studio.chenlongcould.musicplayer.MyCardView>
+
+    <top.geek_studio.chenlongcould.musicplayer.CustomView.AlbumImageView
+        android:id="@+id/my_test_album"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorAccent" />
 
 </android.support.constraint.ConstraintLayout>

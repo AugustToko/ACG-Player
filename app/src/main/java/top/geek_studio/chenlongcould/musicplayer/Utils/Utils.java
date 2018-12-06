@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 17:59:25
- * 上次修改时间：2018年12月04日 17:59:12
+ * 当前修改时间：2018年12月06日 19:19:07
+ * 上次修改时间：2018年12月06日 15:30:02
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -393,10 +393,11 @@ public final class Utils {
             context.sendBroadcast(intent, Values.Permission.BROAD_CAST);
         }
 
-        public static void sendPlay(Context context, int playType) {
+        public static void sendPlay(Context context, int playType, String args) {
             Intent intent = new Intent();
             intent.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
             intent.putExtra("play_type", playType);
+            intent.putExtra("args", args);
             context.sendBroadcast(intent, Values.Permission.BROAD_CAST);
         }
     }

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Data.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月05日 09:30:08
- * 上次修改时间：2018年12月05日 08:27:23
+ * 当前修改时间：2018年12月06日 19:19:07
+ * 上次修改时间：2018年12月06日 19:18:30
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -41,6 +41,14 @@ public final class Data {
 
     public static volatile List<MusicItem> sMusicItemsBackUp = new ArrayList<>();
 
+    public static volatile List<MusicItem> sPlayOrderList = new ArrayList<>();
+
+    /**
+     * nextWillPlay
+     * def null
+     */
+    public static volatile MusicItem sNextWillPlayItem = null;
+
     /**
      * 存储播放历史(序列) default...
      */
@@ -56,10 +64,6 @@ public final class Data {
     public static volatile Bitmap sCurrentMusicBitmap = null;
 
     public static String sCurrentMusicAlbum = "null";
-
-    public static List<String> sCurrentMusicList = new ArrayList<>();
-
-    public static int sNextWillPlayIndex = -1;
 
     public static MyHeadSetPlugReceiver mMyHeadSetPlugReceiver = new MyHeadSetPlugReceiver();
 
