@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月07日 08:59:28
- * 上次修改时间：2018年12月07日 08:20:14
+ * 当前修改时间：2018年12月07日 11:08:31
+ * 上次修改时间：2018年12月07日 11:08:24
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -282,7 +282,9 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
     }
 
     private AlbumImageView mMusicAlbumImageOth3;
+
     private MyWaitListAdapter mMyWaitListAdapter;
+
     private VelocityTracker velocityTracker;
 
     private void findView(View view) {
@@ -532,6 +534,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
             switch (action) {
                 case MotionEvent.ACTION_DOWN:
+                    Log.d(TAG, "initView: down");
                     //预加载
                     if (befPath != null)
                         GlideApp.with(this)
@@ -554,6 +557,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
                     break;
                 case MotionEvent.ACTION_MOVE:
+                    Log.d(TAG, "initView: move");
 
                     //播放未准备好 禁止滑动
                     if (!ReceiverOnMusicPlay.READY) break;
@@ -576,11 +580,19 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                     break;
 
                 case MotionEvent.ACTION_CANCEL:
+                    Log.d(TAG, "initView: cancel");
                 case MotionEvent.ACTION_UP:
-                    if (Math.abs(Math.abs(event.getRawX()) - Math.abs(mLastX)) < 10 || Math.abs(Math.abs(event.getRawY()) - Math.abs(mLastY)) < 10) {
+                    Log.d(TAG, "initView: up");
+                    if (Math.abs(Math.abs(event.getRawX()) - Math.abs(mLastX)) < 5) {
+                        Log.d(TAG, "initView: move small");
                         mMusicAlbumImage.performClick();
                         break;
                     }
+
+                    Log.d(TAG, "initView: speed------------------------: " + velocityTracker.getXVelocity());
+
+                    velocityTracker.clear();
+                    velocityTracker.recycle();
 
                     /*
                      * enter Animation...
@@ -590,6 +602,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
                     //左滑一半 滑过去
                     if (mMusicAlbumImage.getX() < 0 && Math.abs(mMusicAlbumImage.getX()) >= mMusicAlbumImage.getWidth() / 2) {
+                        Log.d(TAG, "initView: scroll to left");
                         animatorMain.setFloatValues(mMusicAlbumImage.getX(), 0 - mMusicAlbumImage.getWidth());
                         String finalNexPath = nexPath;
                         assert finalNexPath != null;
@@ -624,6 +637,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
                         /*右滑一半 滑过去*/
                     } else if (mMusicAlbumImage.getX() > 0 && Math.abs(mMusicAlbumImage.getX()) >= mMusicAlbumImage.getWidth() / 2) {
+                        Log.d(TAG, "initView: scroll to right");
                         animatorMain.setFloatValues(mMusicAlbumImage.getX(), mMusicAlbumImage.getWidth());
                         String finalBefPath = befPath;
                         assert finalBefPath != null;
@@ -657,6 +671,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                         });
 
                     } else {
+                        Log.d(TAG, "initView: reset position");
                         animatorMain.setFloatValues(mMusicAlbumImage.getX(), 0);
 
                         animatorMain.addListener(new Animator.AnimatorListener() {
@@ -695,9 +710,6 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                         mMusicAlbumImageOth3.setTranslationX(0 - mMusicAlbumImage.getWidth() + (Float) animation.getAnimatedValue());
                     });
                     animatorMain.start();
-
-                    velocityTracker.clear();
-                    velocityTracker.recycle();
 
                     return false;
             }
