@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月05日 20:16:39
- * 上次修改时间：2018年12月05日 15:23:33
+ * 当前修改时间：2018年12月07日 08:59:28
+ * 上次修改时间：2018年12月07日 08:26:29
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -50,7 +50,7 @@ import top.geek_studio.chenlongcould.musicplayer.VisibleOrGone;
 
 public final class MusicListFragment extends Fragment implements VisibleOrGone {
 
-    private static final String TAG = "MusicListFragment";
+    public static final String TAG = "MusicListFragment";
 
     @SuppressWarnings("unused")
     private static boolean sIsScrolling = false;
@@ -102,6 +102,7 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
         Log.d(Values.LogTAG.LIFT_TAG, "onAttach: " + TAG);
         super.onAttach(context);
         mActivity = (MainActivity) getActivity();
+
         mHandler = new NotLeakHandler(this, ((MyApplication) mActivity.getApplication()).getCustomLooper());
     }
 
@@ -128,7 +129,7 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
         mRecyclerView.addItemDecoration(new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL));
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
         mRecyclerView.setHasFixedSize(true);
-        adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity, this);
+        adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity, TAG);
         mRecyclerView.setAdapter(adapter);
 
 //        mRecyclerView.setRecyclerListener(holder -> {

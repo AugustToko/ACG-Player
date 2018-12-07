@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月06日 19:19:07
- * 上次修改时间：2018年12月06日 15:37:22
+ * 当前修改时间：2018年12月07日 08:59:28
+ * 上次修改时间：2018年12月07日 07:52:30
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -437,7 +437,6 @@ public final class MusicDetailActivity extends MyBaseActivity implements IStyle,
         mNextButton.startAnimation(mNextButtonTranslateAnimation);
         mPreviousButton.startAnimation(mPreviousButtonTranslateAnimation);
 
-        // TODO: 2018/11/11 more animation... such as AlbumCover (in MusicDetailActivity)
     }
 
     private void showToolbar() {
@@ -748,7 +747,6 @@ public final class MusicDetailActivity extends MyBaseActivity implements IStyle,
         /*---------------------- Menu -----------------------*/
 
         mInfoBody.setOnClickListener(v -> {
-//            // TODO: 2018/11/11 in MusicDetailActivity's infoBody, fast scroll may lag
 //            if (!HAS_BIG) {
 //                infoBodyScrollUp();
 //            } else {
@@ -775,7 +773,6 @@ public final class MusicDetailActivity extends MyBaseActivity implements IStyle,
         mSlidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
-                // TODO: 2018/11/30 onPanelSlide
             }
 
             @Override
@@ -806,7 +803,6 @@ public final class MusicDetailActivity extends MyBaseActivity implements IStyle,
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 MusicDetailActivity musicDetailActivity = (MusicDetailActivity) Data.sActivities.get(1);
-                // TODO: 2018/11/30
 //                Utils.HandlerSend.sendToMain(Values.HandlerWhat.SET_BUTTON_PLAY);
                 musicDetailActivity.setButtonTypePlay();
 

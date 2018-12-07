@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：PublicActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月05日 20:16:39
- * 上次修改时间：2018年12月05日 15:23:33
+ * 当前修改时间：2018年12月07日 08:59:28
+ * 上次修改时间：2018年12月07日 07:56:09
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -27,6 +27,8 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 
 public class PublicActivity extends MyBaseActivity {
+
+    public static final String TAG = "PublicActivity";
 
     private AppBarLayout mAppBarLayout;
 
@@ -67,7 +69,7 @@ public class PublicActivity extends MyBaseActivity {
                         // TODO: 2018/11/22 quickSort
                         System.exit(0);
                     }
-                    MyRecyclerAdapter adapter = new MyRecyclerAdapter(musicItems, this, null);
+                    MyRecyclerAdapter adapter = new MyRecyclerAdapter(musicItems, this, TAG);
                     mRecyclerView.setAdapter(adapter);
                 }
                 break;

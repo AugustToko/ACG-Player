@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月05日 20:16:39
- * 上次修改时间：2018年12月05日 15:18:46
+ * 当前修改时间：2018年12月07日 08:59:28
+ * 上次修改时间：2018年12月07日 07:56:09
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -37,7 +37,7 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 
 public final class AlbumDetailActivity extends Activity {
 
-    private static final String TAG = "AlbumDetailActivity";
+    public static final String TAG = "AlbumDetailActivity";
 
     private Toolbar mToolbar;
 
@@ -155,7 +155,7 @@ public final class AlbumDetailActivity extends Activity {
                 Toast.makeText(this, "Get Image error (-1)", Toast.LENGTH_SHORT).show();
             }
 
-            MyRecyclerAdapter adapter = new MyRecyclerAdapter(mSongs, this, null);
+            MyRecyclerAdapter adapter = new MyRecyclerAdapter(mSongs, this, TAG);
             mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
             mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
             mRecyclerView.setHasFixedSize(true);

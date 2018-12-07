@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月06日 19:19:07
- * 上次修改时间：2018年12月06日 19:18:30
+ * 当前修改时间：2018年12月07日 08:59:28
+ * 上次修改时间：2018年12月07日 08:59:13
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -36,13 +36,18 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
     private static final String TAG = "ReceiverOnMusicPlay";
 
+    /**
+     * @see Message#what
+     */
     public static final int TYPE_SHUFFLE = 90;
 
-    private static boolean READY = true;
+    /**
+     * the mediaPlayer is Ready?
+     */
+    public static boolean READY = true;
 
     /**
      * set SeekBar Color
-     *
      * @param cover               AlbumImage
      * @param musicDetailFragment Fragment
      */
@@ -69,6 +74,9 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
         }
     }
 
+    /**
+     * setSeekBar
+     */
     private static void reSetSeekBar() {
         final MusicDetailFragment musicDetailFragment = ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -235,71 +243,70 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
             }
             break;
 
-            case 9: {
-                final MusicDetailFragment musicDetailFragment = ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment();
-                //防止seekBar跳动到Max
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    musicDetailFragment.getSeekBar().setProgress(0, true);
-                } else {
-                    musicDetailFragment.getSeekBar().setProgress(0);
-                }
-
-                switch (Values.CurrentData.CURRENT_PLAY_TYPE) {
-
-                    // TODO: 2018/12/6 not support
-                    case Values.TYPE_RANDOM:
-//                        new FastShufflePlayback().execute();
-                        break;
-                    case Values.TYPE_COMMON:
-                        Data.sMusicBinder.resetMusic();
-                        int targetIndex = Values.CurrentData.CURRENT_MUSIC_INDEX + 1;
-                        if (targetIndex > Data.sMusicItems.size() - 1) {            //超出范围自动跳转0
-                            targetIndex = 0;
-                        }
-
-                        Values.CurrentData.CURRENT_MUSIC_INDEX = targetIndex;
-                        Values.MUSIC_PLAYING = true;
-                        Values.HAS_PLAYED = true;
-
-                        final String path = Data.sMusicItems.get(targetIndex).getMusicPath();
-                        final String musicName = Data.sMusicItems.get(targetIndex).getMusicName();
-                        final String albumName = Data.sMusicItems.get(targetIndex).getMusicAlbum();
-
-                        final Bitmap cover = Utils.Audio.getMp3Cover(path);
-
-                        Utils.Ui.setPlayButtonNowPlaying();
-
-                        if (Data.sActivities.size() >= 1) {
-                            musicDetailFragment.setSlideInfo(musicName, albumName, cover);
-                            musicDetailFragment.setCurrentInfoWithoutMainImage(musicName, albumName, Utils.Audio.getAlbumByteImage(path));
-
-                            setSeekBarColor(cover, musicDetailFragment);
-
-                            Data.saveGlobalCurrentData(musicName, albumName, cover);
-
-                            try {
-                                Data.sMusicBinder.setDataSource(Data.sMusicItems.get(targetIndex).getMusicPath());
-                                Data.sMusicBinder.prepare();
-                                Data.sMusicBinder.playMusic();
-
-                                //init seekBar, scroll recycler
-                                if (Data.sActivities.size() != 0) {
-                                    musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
-                                    musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
-                                }
-
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                Data.sMusicBinder.resetMusic();
-                            }
-
-                        }
-
-                        break;
-                    default:
-                        break;
-                }
-            }
+//            case 9: {
+//                final MusicDetailFragment musicDetailFragment = ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment();
+//                //防止seekBar跳动到Max
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//                    musicDetailFragment.getSeekBar().setProgress(0, true);
+//                } else {
+//                    musicDetailFragment.getSeekBar().setProgress(0);
+//                }
+//
+//                switch (Values.CurrentData.CURRENT_PLAY_TYPE) {
+//
+//                    case Values.TYPE_RANDOM:
+////                        new FastShufflePlayback().execute();
+//                        break;
+//                    case Values.TYPE_COMMON:
+//                        Data.sMusicBinder.resetMusic();
+//                        int targetIndex = Values.CurrentData.CURRENT_MUSIC_INDEX + 1;
+//                        if (targetIndex > Data.sMusicItems.size() - 1) {            //超出范围自动跳转0
+//                            targetIndex = 0;
+//                        }
+//
+//                        Values.CurrentData.CURRENT_MUSIC_INDEX = targetIndex;
+//                        Values.MUSIC_PLAYING = true;
+//                        Values.HAS_PLAYED = true;
+//
+//                        final String path = Data.sMusicItems.get(targetIndex).getMusicPath();
+//                        final String musicName = Data.sMusicItems.get(targetIndex).getMusicName();
+//                        final String albumName = Data.sMusicItems.get(targetIndex).getMusicAlbum();
+//
+//                        final Bitmap cover = Utils.Audio.getMp3Cover(path);
+//
+//                        Utils.Ui.setPlayButtonNowPlaying();
+//
+//                        if (Data.sActivities.size() >= 1) {
+//                            musicDetailFragment.setSlideInfo(musicName, albumName, cover);
+//                            musicDetailFragment.setCurrentInfoWithoutMainImage(musicName, albumName, Utils.Audio.getAlbumByteImage(path));
+//
+//                            setSeekBarColor(cover, musicDetailFragment);
+//
+//                            Data.saveGlobalCurrentData(musicName, albumName, cover);
+//
+//                            try {
+//                                Data.sMusicBinder.setDataSource(Data.sMusicItems.get(targetIndex).getMusicPath());
+//                                Data.sMusicBinder.prepare();
+//                                Data.sMusicBinder.playMusic();
+//
+//                                //init seekBar, scroll recycler
+//                                if (Data.sActivities.size() != 0) {
+//                                    musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
+//                                    musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
+//                                }
+//
+//                            } catch (IOException e) {
+//                                e.printStackTrace();
+//                                Data.sMusicBinder.resetMusic();
+//                            }
+//
+//                        }
+//
+//                        break;
+//                    default:
+//                        break;
+//                }
+//            }
         }
 
         //after type set

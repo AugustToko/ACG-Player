@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月06日 19:19:07
- * 上次修改时间：2018年12月06日 18:39:39
+ * 当前修改时间：2018年12月07日 08:59:28
+ * 上次修改时间：2018年12月07日 08:59:11
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -24,7 +24,6 @@ import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -80,13 +79,13 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
     private ItemHolder currentBind;
 
-    private Fragment mFragment;
+    private String mCurrentUiPosition;
 
-    public MyRecyclerAdapter(List<MusicItem> musicItems, Context context, Fragment calledFrag) {
+    public MyRecyclerAdapter(List<MusicItem> musicItems, Context context, String calledFrag) {
         mMusicItems = musicItems;
         mMainActivity = (MainActivity) Data.sActivities.get(0);
         mContext = context;
-        mFragment = calledFrag;
+        mCurrentUiPosition = calledFrag;
     }
 
     @NonNull
@@ -107,7 +106,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
          * show ExpandView (more opt)...
          * */
         // TODO: 2018/12/4 do
-        if (itemType == MOD_TYPE && mFragment instanceof MusicListFragment) {
+        if (itemType == MOD_TYPE && mCurrentUiPosition.equals(MusicListFragment.TAG)) {
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_list_item_mod, viewGroup, false);
             holder = new ModHolder(view);
 
@@ -579,12 +578,21 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             mPopupMenu = new PopupMenu(mMainActivity, mItemMenuButton);
             mMenu = mPopupMenu.getMenu();
 
-            //noinspection PointlessArithmeticExpression
-            mMenu.add(Menu.NONE, Menu.FIRST + 0, 0, "下一首播放");
+            //Menu Load
+            if (mCurrentUiPosition.equals(AlbumDetailActivity.TAG)) {
+                //noinspection PointlessArithmeticExpression
+                mMenu.add(Menu.NONE, Menu.FIRST + 0, 0, "下一首播放");
+                mMenu.add(Menu.NONE, Menu.FIRST + 1, 0, "喜欢");
+//                mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, "加入播放列表");
+                mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, "详细信息");
+            } else {
+                //noinspection PointlessArithmeticExpression
+                mMenu.add(Menu.NONE, Menu.FIRST + 0, 0, "下一首播放");
 //            mMenu.add(Menu.NONE, Menu.FIRST + 1, 0, "喜欢");
 //            mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, "加入播放列表");
-            mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, "查看专辑");
-            mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, "详细信息");
+                mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, "查看专辑");
+                mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, "详细信息");
+            }
 
             MenuInflater menuInflater = mMainActivity.getMenuInflater();
             menuInflater.inflate(R.menu.recycler_song_item_menu, mMenu);

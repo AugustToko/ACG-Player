@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：dimen.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月04日 17:59:25
-  ~ 上次修改时间：2018年12月04日 17:56:15
+  ~ 当前修改时间：2018年12月07日 08:59:28
+  ~ 上次修改时间：2018年12月07日 07:36:31
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -15,4 +15,7 @@
     <dimen name="recycler_expand_view">75dp</dimen>
     <dimen name="nav_height">50dp</dimen>
     <dimen name="common_panel_height">220dp</dimen>
+
+    <dimen name="current_info_bar_height">75dp</dimen>
+    <dimen name="current_info_bar_seek_height">3dp</dimen>
 </resources>

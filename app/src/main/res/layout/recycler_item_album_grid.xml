@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：recycler_item_album_grid.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月01日 16:21:06
-  ~ 上次修改时间：2018年12月01日 15:23:11
+  ~ 当前修改时间：2018年12月07日 08:59:28
+  ~ 上次修改时间：2018年12月06日 20:43:07
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -48,13 +48,13 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
         android:gravity="center"
         android:maxLines="1"
-        android:ellipsize="end"
         android:textColor="#fff"
         app:layout_constraintBottom_toBottomOf="@+id/mask"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/mask"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/mask"
         tools:text="@string/app_name" />

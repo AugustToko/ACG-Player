@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月06日 19:19:07
- * 上次修改时间：2018年12月06日 15:30:02
+ * 当前修改时间：2018年12月07日 08:59:28
+ * 上次修改时间：2018年12月07日 07:52:30
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -369,10 +369,6 @@ public final class Utils {
                 Values.Color.TEXT_COLOR = "#3c3c3c";
             }
         }
-    }
-
-    public static final class HandlerSend {
-
     }
 
     /**

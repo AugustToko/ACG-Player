@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ *************************************************************
+  ~ 文件：circle_bg.xml  模块：app  项目：MusicPlayer
+  ~ 当前修改时间：2018年12月07日 08:59:28
+  ~ 上次修改时间：2018年12月06日 20:23:19
+  ~ 作者：chenlongcould
+  ~ Geek Studio
+  ~ Copyright (c) 2018
+  ~ *************************************************************
+  -->
+
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape
+            android:shape="oval"
+            android:tint="#fff">
+            <size
+                android:width="50dp"
+                android:height="50dp" />
+
+        </shape>
+    </item>
+</layer-list>

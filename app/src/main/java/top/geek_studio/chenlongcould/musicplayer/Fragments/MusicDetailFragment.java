@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月06日 19:19:07
- * 上次修改时间：2018年12月06日 19:18:30
+ * 当前修改时间：2018年12月07日 08:59:28
+ * 上次修改时间：2018年12月07日 08:20:14
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -35,6 +35,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -92,7 +93,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
      */
     public static float CURRENT_SLIDE_OFFSET = 1;
 
-    private static final String TAG = "MusicDetailActivity";
+    public static final String TAG = "MusicDetailFragment";
 
     float mLastX = 0;
     float mLastY = 0;
@@ -106,6 +107,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
     float moveY = 0;
     private ImageView.ScaleType mScaleType;
     private float defXScale;
+    private float defYScale;
 
     private ImageView mPrimaryBackground;
 
@@ -113,16 +115,17 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
     private SeekBar mSeekBar;
 
+    private View mCurrentInfoSeek;
+
     private HandlerThread mHandlerThread;
 
-    private ImageButton mPlayButton;
+    private FloatingActionButton mPlayButton;
 
     private ImageButton mNextButton;
 
     private ImageButton mPreviousButton;
 
     private RecyclerView mRecyclerView;
-    private float defYScale;
 
     private LinearLayoutManager mLinearLayoutManager;
 
@@ -245,7 +248,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                 mNowPlayingStatusImage.setImageResource(R.drawable.ic_pause_black_24dp);
                 mPlayButton.setImageResource(R.drawable.ic_pause_black_24dp);
             }
-            setIcoLight(Data.sCurrentMusicBitmap);
+            setIcoLightOrDark(Data.sCurrentMusicBitmap);
             setSlideInfo(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, Data.sCurrentMusicBitmap);
             setCurrentInfo(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, Data.sCurrentMusicBitmap);
         } else {
@@ -287,6 +290,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
         mPrimaryBackground = view.findViewById(R.id.activity_music_detail_primary_background);
         mPrimaryBackground_down = view.findViewById(R.id.activity_music_detail_primary_background_down);
         mSeekBar = view.findViewById(R.id.seekBar);
+        mCurrentInfoSeek = view.findViewById(R.id.info_bar_seek);
         mNextButton = view.findViewById(R.id.activity_music_detail_image_next_button);
         mPreviousButton = view.findViewById(R.id.activity_music_detail_image_previous_button);
         mPlayButton = view.findViewById(R.id.activity_music_detail_image_play_button);
@@ -551,8 +555,10 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                     break;
                 case MotionEvent.ACTION_MOVE:
 
+                    //播放未准备好 禁止滑动
+                    if (!ReceiverOnMusicPlay.READY) break;
+
                     //首尾禁止对应边缘滑动
-                    // FIXME: 2018/12/6
                     if (Values.CurrentData.CURRENT_MUSIC_INDEX == 0) {
                         if (event.getRawX() > mLastX) break;
                     }
@@ -586,6 +592,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                     if (mMusicAlbumImage.getX() < 0 && Math.abs(mMusicAlbumImage.getX()) >= mMusicAlbumImage.getWidth() / 2) {
                         animatorMain.setFloatValues(mMusicAlbumImage.getX(), 0 - mMusicAlbumImage.getWidth());
                         String finalNexPath = nexPath;
+                        assert finalNexPath != null;
                         animatorMain.addListener(new Animator.AnimatorListener() {
                             @Override
                             public void onAnimationStart(Animator animation) {
@@ -619,6 +626,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                     } else if (mMusicAlbumImage.getX() > 0 && Math.abs(mMusicAlbumImage.getX()) >= mMusicAlbumImage.getWidth() / 2) {
                         animatorMain.setFloatValues(mMusicAlbumImage.getX(), mMusicAlbumImage.getWidth());
                         String finalBefPath = befPath;
+                        assert finalBefPath != null;
                         animatorMain.addListener(new Animator.AnimatorListener() {
                             @Override
                             public void onAnimationStart(Animator animation) {
@@ -688,13 +696,10 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                     });
                     animatorMain.start();
 
-                    Log.d(TAG, "initView: current speed: " + velocityTracker.getXVelocity());
-
-
                     velocityTracker.clear();
                     velocityTracker.recycle();
 
-
+                    return false;
             }
             return true;
         });
@@ -1243,11 +1248,12 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 //                    }
 //                });
             if (cover != null) {
-                //color set
+
+                // TODO: 2018/12/7 //AlbumImageAnimation
                 GlideApp.with(mMainActivity).load(cover).transition(DrawableTransitionOptions.withCrossFade()).into(mNowPlayingSongImage);
                 GlideApp.with(mMainActivity).load(cover).transition(DrawableTransitionOptions.withCrossFade()).into(mMainActivity.getNavHeaderImageView());
 
-                setIcoLight(cover);
+                setIcoLightOrDark(cover);
 
                 GlideApp.with(mMainActivity).load(cover)
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
@@ -1279,7 +1285,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
      *
      * @param bitmap backgroundImage
      */
-    private void setIcoLight(@Nullable Bitmap bitmap) {
+    private void setIcoLightOrDark(@Nullable Bitmap bitmap) {
 
         if (bitmap == null) return;
 
@@ -1366,6 +1372,12 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                         } else {
                             mSeekBar.setProgress(0);
                         }
+
+                        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mCurrentInfoSeek.getLayoutParams();
+                        params.width = mCurrentInfoBody.getMaxWidth();
+                        mCurrentInfoSeek.setLayoutParams(params);
+                        mCurrentInfoSeek.requestLayout();
+
                         mRightTime.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(Data.sMusicBinder.getDuration()))));
                         mSeekBar.setMax(Data.sMusicBinder.getDuration());
                     });
@@ -1386,6 +1398,10 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                                 mSeekBar.setProgress(Data.sMusicBinder.getCurrentPosition());
                             }
 
+                            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mCurrentInfoSeek.getLayoutParams();
+                            params.width = mCurrentInfoBody.getWidth() * Data.sMusicBinder.getCurrentPosition() / Data.sMusicBinder.getDuration();
+                            mCurrentInfoSeek.setLayoutParams(params);
+                            mCurrentInfoSeek.requestLayout();
                             mLeftTime.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(Data.sMusicBinder.getCurrentPosition()))));
 
                             Log.d(TAG, "handleMessage: current position " + Data.sMusicBinder.getCurrentPosition() + " ------------ " + Data.sMusicBinder.getDuration());
