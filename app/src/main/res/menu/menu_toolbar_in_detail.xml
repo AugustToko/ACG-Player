@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：menu_toolbar_in_detail.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月10日 14:49:08
-  ~ 上次修改时间：2018年12月10日 14:47:45
+  ~ 当前修改时间：2018年12月10日 15:01:45
+  ~ 上次修改时间：2018年12月10日 15:01:30
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -26,7 +26,7 @@
 
     <item
         android:id="@+id/menu_toolbar_eq"
-        android:title="EQ"
+        android:title="@string/eq"
         android:visible="false" />
 
     <item
