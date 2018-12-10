@@ -1,15 +1,15 @@
 /*
  * ************************************************************
  * 文件：MyCardView.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月06日 19:19:07
- * 上次修改时间：2018年12月06日 09:27:40
+ * 当前修改时间：2018年12月10日 14:49:08
+ * 上次修改时间：2018年12月07日 11:25:12
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
  * ************************************************************
  */
 
-package top.geek_studio.chenlongcould.musicplayer;
+package top.geek_studio.chenlongcould.musicplayer.CustomView;
 
 import android.content.Context;
 import android.support.annotation.NonNull;

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月06日 19:19:07
- * 上次修改时间：2018年12月06日 19:18:30
+ * 当前修改时间：2018年12月10日 14:49:08
+ * 上次修改时间：2018年12月10日 09:12:18
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -526,7 +526,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
                     if (AlbumListFragment.VIEW_HAS_LOAD)
                         mAlbumListFragment.visibleOrGone(View.GONE);
-                    if (PlayListFragment.HAS_LOAD) mPlayListFragment.visibleOrGone(View.GONE);
+                    mPlayListFragment.visibleOrGone(View.GONE);
 
                     //start animation
                     if (ANIMATION_FLAG) {
@@ -540,7 +540,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     mMusicDetailFragment.getNowPlayingBody().setVisibility(View.VISIBLE);
                     if (AlbumListFragment.VIEW_HAS_LOAD)
                         mAlbumListFragment.visibleOrGone(View.VISIBLE);
-                    if (PlayListFragment.HAS_LOAD) mPlayListFragment.visibleOrGone(View.VISIBLE);
+                    mPlayListFragment.visibleOrGone(View.VISIBLE);
                     mMusicListFragment.visibleOrGone(View.VISIBLE);
                     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
                     fragmentTransaction.show(mAlbumListFragment).show(mPlayListFragment).show(mPlayListFragment);

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月07日 08:59:28
- * 上次修改时间：2018年12月07日 07:52:30
+ * 当前修改时间：2018年12月10日 14:49:08
+ * 上次修改时间：2018年12月10日 14:47:36
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -29,6 +29,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatDelegate;
@@ -40,7 +41,9 @@ import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Toolbar;
+
+import java.io.File;
+import java.nio.ByteBuffer;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
@@ -54,14 +57,9 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 @SuppressWarnings("WeakerAccess")
 public final class Utils {
 
-    public static class Audio {
+    public static final class Audio {
         private final static MediaMetadataRetriever sMediaMetadataRetriever = new MediaMetadataRetriever();
         private static final String TAG = "Audio";
-
-        /**
-         * 检测播放器是否准备完毕 (默认进app 为true)
-         */
-        private static volatile boolean READY = true;
 
         /**
          * 获取封面
@@ -69,37 +67,54 @@ public final class Utils {
          * @param mediaUri mp3 path
          */
         @Nullable
-        public static Bitmap getMp3Cover(@NonNull String mediaUri) {
+        public static Bitmap getMp3Cover(final String mediaUri) {
 
 //            //检测不支持封面的音乐类型
 //            if (mediaUri.contains("ogg") || mediaUri.contains("flac")) {
 //                return BitmapFactory.decodeResource(Resources.getSystem(), R.drawable.ic_audiotrack_24px);
 //            }
 
+            if (mediaUri == null)
+                return BitmapFactory.decodeResource(Data.sActivities.get(0).getResources(), R.drawable.ic_audiotrack_24px);
+
+            final File file = new File(mediaUri);
+            if (file.isDirectory() || !file.exists())
+                return BitmapFactory.decodeResource(Data.sActivities.get(0).getResources(), R.drawable.ic_audiotrack_24px);
+
             sMediaMetadataRetriever.setDataSource(mediaUri);
             byte[] picture = sMediaMetadataRetriever.getEmbeddedPicture();
-            if (picture != null) {
+
+            if (picture != null)
                 return BitmapFactory.decodeByteArray(picture, 0, picture.length);
-            } else {
-                Log.d(TAG, "getMp3Cover: return def");
+            else
                 return BitmapFactory.decodeResource(Data.sActivities.get(0).getResources(), R.drawable.ic_audiotrack_24px);
-            }
         }
 
-        public static byte[] getAlbumByteImage(@NonNull String path) {
+        public static byte[] getAlbumByteImage(final String path) {
+
+            if (path == null) {
+                final ByteBuffer buffer = ByteBuffer.allocate(BitmapFactory.decodeResource(Data.sActivities.get(0).getResources(), R.drawable.ic_audiotrack_24px).getByteCount());
+                return buffer.array();
+            }
+
+            final File file = new File(path);
+            if (file.isDirectory() || !file.exists() || file.isDirectory()) {
+                final ByteBuffer buffer = ByteBuffer.allocate(BitmapFactory.decodeResource(Data.sActivities.get(0).getResources(), R.drawable.ic_audiotrack_24px).getByteCount());
+                return buffer.array();
+            }
             sMediaMetadataRetriever.setDataSource(path);
             return sMediaMetadataRetriever.getEmbeddedPicture();
         }
 
     }
 
-    public static class Ui {
+    public static final class Ui {
 
         private static final String TAG = "Ui";
 
         public static int POSITION = 200;
 
-        public static void inDayNightSet(SharedPreferences sharedPreferences) {
+        public static void inDayNightSet(final SharedPreferences sharedPreferences) {
             if (sharedPreferences.getBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false)) {
                 Values.Color.TEXT_COLOR = Values.Color.TEXT_COLOR_IN_NIGHT;
             } else {
@@ -113,7 +128,7 @@ public final class Utils {
          * @param context context
          * @return nav height
          */
-        public static int getNavheight(Context context) {
+        public static int getNavheight(final Context context) {
             Resources resources = context.getResources();
             int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
             int height = resources.getDimensionPixelSize(resourceId);
@@ -128,14 +143,7 @@ public final class Utils {
          * @param toolBarColor appBarLayout
          * @param toolbar      toolbar
          */
-        public static void setAppBarColor(Activity context, AppBarLayout toolBarColor, Toolbar toolbar) {
-            SharedPreferences mDefPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-            toolBarColor.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")));
-            toolbar.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")));
-            context.getWindow().setNavigationBarColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
-        }
-
-        public static void setAppBarColor(Activity context, AppBarLayout toolBarColor, android.support.v7.widget.Toolbar toolbar) {
+        public static void setAppBarColor(final Activity context, final AppBarLayout toolBarColor, final android.support.v7.widget.Toolbar toolbar) {
             SharedPreferences mDefPrefs = PreferenceManager.getDefaultSharedPreferences(context);
             toolBarColor.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")));
             toolbar.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")));
@@ -149,7 +157,7 @@ public final class Utils {
             }
         }
 
-        public static AlertDialog createMessageDialog(@NonNull Activity context, @NonNull String title, @NonNull String message) {
+        public static AlertDialog createMessageDialog(@NonNull final Activity context, @NonNull final String title, @NonNull final String message) {
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             builder.setTitle(title);
             builder.setMessage(message);
@@ -157,7 +165,7 @@ public final class Utils {
             return builder.create();
         }
 
-        public static void fastToast(@NonNull Context context, @NonNull String content) {
+        public static void fastToast(@NonNull final Context context, @NonNull final String content) {
             Toast.makeText(context, content, Toast.LENGTH_SHORT).show();
         }
 
@@ -192,7 +200,7 @@ public final class Utils {
          *
          * @param activity if use fragment may case {@link java.lang.NullPointerException}, glide will call {@link Fragment#getActivity()}
          */
-        public static void setBlurEffect(@NonNull MainActivity activity, @NonNull byte[] bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundBef, TextView nextText) {
+        public static void setBlurEffect(@NonNull final MainActivity activity, @NonNull final byte[] bitmap, @NonNull final ImageView primaryBackground, @NonNull final ImageView primaryBackgroundBef, final TextView nextText) {
 
             new Handler(Looper.getMainLooper()).post(() -> {
                 ANIMATION_IN_DETAIL_DONE = false;
@@ -273,7 +281,7 @@ public final class Utils {
             });
         }
 
-        public static void setBlurEffect(@NonNull MainActivity activity, @NonNull Bitmap bitmap, @NonNull ImageView primaryBackground, @NonNull ImageView primaryBackgroundBef, TextView nextText) {
+        public static void setBlurEffect(@NonNull final MainActivity activity, @NonNull final Bitmap bitmap, @NonNull final ImageView primaryBackground, @NonNull final ImageView primaryBackgroundBef, final TextView nextText) {
 
             new Handler(Looper.getMainLooper()).post(() -> {
                 ANIMATION_IN_DETAIL_DONE = false;
@@ -353,12 +361,12 @@ public final class Utils {
             });
         }
 
-        public static boolean isColorLight(@ColorInt int color) {
+        public static boolean isColorLight(@ColorInt final int color) {
             double darkness = 1.0D - (0.299D * (double) Color.red(color) + 0.587D * (double) Color.green(color) + 0.114D * (double) Color.blue(color)) / 255.0D;
             return darkness < 0.4D;
         }
 
-        public static void upDateStyle(SharedPreferences mDefSharedPreferences) {
+        public static void upDateStyle(final SharedPreferences mDefSharedPreferences) {
             if (mDefSharedPreferences.getBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false)) {
                 Values.Style.NIGHT_MODE = true;
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
@@ -383,13 +391,13 @@ public final class Utils {
          *
          * @param context context
          */
-        public static void sendPause(Context context) {
+        public static void sendPause(final Context context) {
             Intent intent = new Intent();
             intent.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPause));
             context.sendBroadcast(intent, Values.Permission.BROAD_CAST);
         }
 
-        public static void sendPlay(Context context, int playType, String args) {
+        public static void sendPlay(final Context context, final int playType, final String args) {
             Intent intent = new Intent();
             intent.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
             intent.putExtra("play_type", playType);
@@ -398,4 +406,61 @@ public final class Utils {
         }
     }
 
+    public static final class M3Utils {
+        // TODO: 2018/12/10 read the m3u file
+//            new AsyncTask<Void, Void, Void>() {
+//
+//                @Override
+//                protected Void doInBackground(Void... voids) {
+//
+////                    ArrayList<String> pathList = new ArrayList<>();
+////                    ArrayList<String> nameList = new ArrayList<>();
+////                    BufferedReader bufr = null;
+////                    try {
+////                        FileReader fr = new FileReader(file);
+////                        bufr = new BufferedReader(fr);
+////                        String line;
+////
+////                        try {
+////                            while ((line = bufr.readLine()) != null) {
+////                                if (line.contains("#EXTM3U")) continue;
+////                                if (line.contains("#EXTINF")) {
+////                                    String name = line.substring(line.indexOf(',') + 1);
+////                                    nameList.add(name);
+////                                    Log.d(TAG, "doInBackground: name: " + name);
+////                                }
+////                                if (line.contains("/storage/emulated")) {
+////                                    pathList.add(line);
+////                                    Log.d(TAG, "doInBackground: path: " + line);
+////                                }
+////                            }
+////                        } catch (IOException e) {
+////                            e.printStackTrace();
+////                        }
+////
+////                    } catch (FileNotFoundException e) {
+////                        e.printStackTrace();
+////                    } finally {
+////                        if (bufr != null) {
+////                            try {
+////                                bufr.close();
+////                            } catch (IOException e) {
+////                                e.printStackTrace();
+////                            }
+////                        }
+////                    }
+//
+//
+//
+//                    return null;
+//                }
+//            }.execute();
+
+    }
+
+    public static final class Res {
+        public static String getString(final Context context, @StringRes final int id) {
+            return context.getResources().getString(id);
+        }
+    }
 }

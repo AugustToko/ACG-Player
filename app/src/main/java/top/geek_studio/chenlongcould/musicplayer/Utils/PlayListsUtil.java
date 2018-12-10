@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：PlayListsUtil.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月19日 18:40:42
- * 上次修改时间：2018年11月19日 17:29:14
+ * 当前修改时间：2018年12月10日 14:49:08
+ * 上次修改时间：2018年12月10日 14:47:35
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
-import top.geek_studio.chenlongcould.musicplayer.Models.Playlist;
+import top.geek_studio.chenlongcould.musicplayer.Models.PlayListItem;
 
 import static android.provider.MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI;
 
@@ -115,11 +115,11 @@ public final class PlayListsUtil {
      * @param context   context
      * @param playlists playList that will del
      */
-    public static void deletePlaylists(@NonNull final Context context, @NonNull final ArrayList<Playlist> playlists) {
+    public static void deletePlaylists(@NonNull final Context context, @NonNull final ArrayList<PlayListItem> playlists) {
         final StringBuilder selection = new StringBuilder();
         selection.append(MediaStore.Audio.Playlists._ID + " IN (");
         for (int i = 0; i < playlists.size(); i++) {
-            selection.append(playlists.get(i).id);
+            selection.append(playlists.get(i).getId());
             if (i < playlists.size() - 1) {
                 selection.append(",");
             }

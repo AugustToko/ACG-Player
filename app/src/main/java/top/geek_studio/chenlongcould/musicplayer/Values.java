@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月07日 08:59:28
- * 上次修改时间：2018年12月07日 08:59:11
+ * 当前修改时间：2018年12月10日 14:49:08
+ * 上次修改时间：2018年12月10日 14:47:45
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -96,18 +96,18 @@ public final class Values {
          * TEMP DATA
          */
         //default value -1 or null
-        public volatile static int CURRENT_BIND_INDEX_MUSIC_LIST = -1;
-        public volatile static int CURRENT_BIND_INDEX_ALBUM_LIST = -1;
-        public volatile static int CURRENT_PAGE_INDEX = -1;
-        public volatile static int CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = -1;            //存储使浮动菜单弹出的item,def = -1
-        public volatile static int CURRENT_MUSIC_INDEX = -1;
+        public static int CURRENT_BIND_INDEX_MUSIC_LIST = -1;
+        public static int CURRENT_BIND_INDEX_ALBUM_LIST = -1;
+        public static int CURRENT_PAGE_INDEX = -1;
+        public static int CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = -1;            //存储使浮动菜单弹出的item,def = -1
+        public static int CURRENT_MUSIC_INDEX = -1;
 
         /**
          * 用户手动切歌的播放模式
          * 1. random
          * 2. common
          */
-        public volatile static String CURRENT_PLAY_TYPE = "COMMON";
+        public static String CURRENT_PLAY_TYPE = "COMMON";
 
         /**
          * 自动切歌的播放模式
@@ -116,8 +116,13 @@ public final class Values {
          * 3. repeat list
          * 4. random
          */
-        public volatile static String CURRENT_AUTO_NEXT_TYPE = "COMMON";
-        public volatile static String CURRENT_PLAY_LIST = "default";
+        public static String CURRENT_AUTO_NEXT_TYPE = "COMMON";
+
+        /**
+         * current play order (default = all music)
+         */
+        public static String CURRENT_PLAY_LIST = "default";
+
     }
 
     /**
@@ -128,7 +133,7 @@ public final class Values {
         public static final String PLAY_LIST_SPF_NAME_MY_FAVOURITE = "PLAY_LIST_SPF_NAME_MY_FAVOURITE";
         public static final String DETAIL_BG_STYLE = "DETAIL_BG_STYLE";
         public static final String AUTO_NIGHT_MODE = "NIGHT_MODE";
-        public volatile static String PLAY_TYPE = Values.TYPE_COMMON;
+        public static String PLAY_TYPE = Values.TYPE_COMMON;
         public static final String FIRST_USE = "FIRST_USE";
 
         public static final String ALBUM_LIST_DISPLAY_TYPE = "ALBUM_LIST_DISPLAY_TYPE";

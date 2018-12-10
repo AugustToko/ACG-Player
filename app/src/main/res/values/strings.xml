@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月30日 20:36:09
-  ~ 上次修改时间：2018年11月30日 18:08:18
+  ~ 当前修改时间：2018年12月10日 14:49:08
+  ~ 上次修改时间：2018年12月10日 11:01:31
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -99,4 +99,17 @@
     <string name="grid">Grid</string>
     <string name="_10_00" translatable="false">10:00</string>
     <string name="next_will_play">Next Will Play</string>
+    <string name="love_music">Love</string>
+    <string name="add_to_playlist">Add Play List</string>
+    <string name="more_info">More Info</string>
+    <string name="show_album">Show Album</string>
+    <string name="del">Delete</string>
+    <string name="shadow">Shadow</string>
+    <string name="list_icon">list_icon</string>
+    <string name="add_to_play_list">Add To Playlist</string>
+    <string name="new_list">Create A New List</string>
+    <string name="enter_name">Enter a name</string>
+    <string name="cannot_empty">Cannot Empty</string>
+    <string name="cancel">Cancel</string>
+    <string name="sure">Sure</string>
 </resources>

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月07日 08:59:28
- * 上次修改时间：2018年12月07日 08:26:29
+ * 当前修改时间：2018年12月10日 14:49:08
+ * 上次修改时间：2018年12月10日 14:47:36
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -28,21 +28,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.bumptech.glide.ListPreloader;
-import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
-import com.bumptech.glide.util.ViewPreloadSizeProvider;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.lang.ref.WeakReference;
-import java.util.Collections;
-import java.util.List;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.GlideApp;
-import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.MyApplication;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
@@ -118,14 +110,6 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
         View view = inflater.inflate(R.layout.fragment_music_list_layout, container, false);
         findId(view);
 
-        ViewPreloadSizeProvider<MusicItem> preloadSizeProvider = new ViewPreloadSizeProvider<>();
-        MyPreloadModelProvider preloadModelProvider = new MyPreloadModelProvider();
-
-        RecyclerViewPreloader<MusicItem> preLoader = new RecyclerViewPreloader<>(GlideApp.with(this), preloadModelProvider
-                , preloadSizeProvider, 10);
-
-        mRecyclerView.addOnScrollListener(preLoader);
-
         mRecyclerView.addItemDecoration(new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL));
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
         mRecyclerView.setHasFixedSize(true);
@@ -162,18 +146,6 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
         return view;
     }
 
-    @Override
-    public void onDestroyView() {
-        Log.d(Values.LogTAG.LIFT_TAG, "onDestroyView: " + TAG);
-        super.onDestroyView();
-    }
-
-    @Override
-    public void onDetach() {
-        Log.d(Values.LogTAG.LIFT_TAG, "onDetach: " + TAG);
-        super.onDetach();
-    }
-
     private void findId(View view) {
         mRecyclerView = view.findViewById(R.id.recycler_view);
     }
@@ -185,7 +157,7 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
         if (CREATE_VIEW_DONE) {
             adapter.notifyDataSetChanged();
         } else {
-            new Handler().postDelayed(this::sureCreateViewDone, 1000);      //循环一秒
+            new Handler().postDelayed(this::sureCreateViewDone, 500);      //循环一秒
         }
     }
 
@@ -232,20 +204,5 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
             }
         }
     }
-
-    public class MyPreloadModelProvider implements ListPreloader.PreloadModelProvider<MusicItem> {
-        @NonNull
-        @Override
-        public List<MusicItem> getPreloadItems(int position) {
-            return Collections.singletonList(Data.sMusicItems.get(position));
-        }
-
-        @Nullable
-        @Override
-        public RequestBuilder<?> getPreloadRequestBuilder(@NonNull MusicItem item) {
-            return GlideApp.with(MusicListFragment.this).load(item);
-        }
-    }
-
 
 }

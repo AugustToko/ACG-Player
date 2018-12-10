@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月06日 19:19:07
- * 上次修改时间：2018年12月06日 19:18:26
+ * 当前修改时间：2018年12月10日 14:49:08
+ * 上次修改时间：2018年12月09日 16:58:11
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -47,11 +47,9 @@ public final class MyMusicService extends Service {
         Values.SERVICE_RUNNING = true;
 
         mMediaPlayer.setOnCompletionListener(mp -> {
+            Log.d(TAG, "onStartCommand: OnCompletionListener");
             Utils.SendSomeThing.sendPlay(MyMusicService.this, 6, "next");
-//            if (Data.sNextWillPlayIndex != -1) {
-//                Utils.SendSomeThing.sendPlay(MyMusicService.this, 7);
-//                return;
-//            }
+
 //
 //            if (Values.BUTTON_PRESSED) {
 //                //来自用户的主动点击

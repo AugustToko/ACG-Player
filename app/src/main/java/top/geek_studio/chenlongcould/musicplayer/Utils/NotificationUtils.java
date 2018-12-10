@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：NotificationUtils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月06日 19:19:07
- * 上次修改时间：2018年12月06日 15:30:02
+ * 当前修改时间：2018年12月10日 14:49:08
+ * 上次修改时间：2018年12月09日 17:19:34
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -92,14 +92,14 @@ public class NotificationUtils extends ContextWrapper {
         next.putExtra("args", "next");
         PendingIntent nextIntent = PendingIntent.getBroadcast(context, REQUEST_NEXT, next, 0);
 
-        Intent pre = new Intent();
-        pre.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
-        pre.putExtra("play_type", 5);
-        next.putExtra("args", "previous");
-        PendingIntent preIntent = PendingIntent.getBroadcast(context, REQUEST_PRE, pre, 0);
+        Intent previous = new Intent();
+        previous.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
+        previous.putExtra("play_type", 7);
+        previous.putExtra("args", "previous");
+        PendingIntent previousIntent = PendingIntent.getBroadcast(context, REQUEST_PRE, previous, 0);
 
         Notification.MediaStyle mediaStyle = new Notification.MediaStyle();
-        mediaStyle.setShowActionsInCompactView(0, 1, 2);
+//        mediaStyle.setShowActionsInCompactView(0, 1, 2);
 
         Notification.Builder builder = new Notification.Builder(getApplicationContext(), id)
                 .setContentTitle(title)
@@ -113,12 +113,12 @@ public class NotificationUtils extends ContextWrapper {
                 .setOngoing(true);
 
         if (Data.sMusicBinder.isPlayingMusic()) {
-            Notification.Action[] actions = {new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_previous_white_24dp), "Pre", preIntent).build()
+            Notification.Action[] actions = {new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_previous_white_24dp), "previous", previousIntent).build()
                     , new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_pause_white_24dp), "play", pauseIntent).build()
                     , new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_next_white_24dp), "next", nextIntent).build()};
             builder.setActions(actions);
         } else {
-            Notification.Action[] actions = {new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_previous_white_24dp), "Pre", preIntent).build()
+            Notification.Action[] actions = {new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_previous_white_24dp), "previous", previousIntent).build()
                     , new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_play_arrow_black_24dp), "play", playIntent).build()
                     , new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_next_white_24dp), "next", nextIntent).build()};
             builder.setActions(actions);

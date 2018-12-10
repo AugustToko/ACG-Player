@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月30日 20:36:09
-  ~ 上次修改时间：2018年11月30日 18:08:18
+  ~ 当前修改时间：2018年12月10日 14:49:08
+  ~ 上次修改时间：2018年12月10日 11:01:31
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -47,4 +47,15 @@
     <string name="linear">线性布局</string>
     <string name="grid">网格布局</string>
     <string name="next_will_play">接下来播放</string>
+    <string name="love_music">喜欢</string>
+    <string name="add_to_playlist">加入播放列表</string>
+    <string name="more_info">详细信息</string>
+    <string name="show_album">查看专辑</string>
+    <string name="del">删除</string>
+    <string name="add_to_play_list">添加到播放列表</string>
+    <string name="new_list">新建播放列表</string>
+    <string name="enter_name">输入名称</string>
+    <string name="cannot_empty">不能为空</string>
+    <string name="cancel">取消</string>
+    <string name="sure">确定</string>
 </resources>

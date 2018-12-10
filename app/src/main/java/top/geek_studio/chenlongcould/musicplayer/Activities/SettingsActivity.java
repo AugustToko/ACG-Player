@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月05日 09:30:08
- * 上次修改时间：2018年12月04日 21:22:08
+ * 当前修改时间：2018年12月10日 14:49:08
+ * 上次修改时间：2018年12月09日 16:47:55
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -199,7 +199,7 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
         primaryOpt.setOnClickListener(v -> {
             ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")))
                     .setDialogTitle(R.string.color_picker)
-                    .setDialogType(ColorPickerDialog.TYPE_CUSTOM)
+                    .setDialogType(ColorPickerDialog.TYPE_PRESETS)
                     .setShowAlphaSlider(true)
                     .setDialogId(PRIMARY)
                     .setAllowPresets(false)
@@ -212,7 +212,7 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
         primaryDarkOpt.setOnClickListener(v -> {
             ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")))
                     .setDialogTitle(R.string.color_picker)
-                    .setDialogType(ColorPickerDialog.TYPE_CUSTOM)
+                    .setDialogType(ColorPickerDialog.TYPE_PRESETS)
                     .setShowAlphaSlider(true)
                     .setDialogId(PRIMARY_DARK)
                     .setAllowPresets(false)
@@ -225,7 +225,7 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
         accentOpt.setOnClickListener(v -> {
             ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorInt.ACCENT_COLOR, Color.parseColor("#D81B60")))
                     .setDialogTitle(R.string.color_picker)
-                    .setDialogType(ColorPickerDialog.TYPE_CUSTOM)
+                    .setDialogType(ColorPickerDialog.TYPE_PRESETS)
                     .setShowAlphaSlider(true)
                     .setDialogId(ACCENT)
                     .setAllowPresets(false)

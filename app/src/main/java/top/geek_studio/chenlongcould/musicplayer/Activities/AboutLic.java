@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AboutLic.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年11月23日 11:17:30
- * 上次修改时间：2018年11月22日 14:53:00
+ * 当前修改时间：2018年12月10日 14:49:08
+ * 上次修改时间：2018年12月09日 17:47:23
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -13,6 +13,7 @@ package top.geek_studio.chenlongcould.musicplayer.Activities;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -42,16 +43,28 @@ public final class AboutLic extends Activity {
         close.setOnClickListener(v -> finish());
 
         TextView textView = findViewById(R.id.show_lic_activity_lic);
-        try {
-            InputStream inputStream = getAssets().open("Licenses");
-            byte[] b = new byte[inputStream.available()];
-            if (inputStream.read(b) != -1) {
-                String s = new String(b);
-                textView.setText(s);
+        new AsyncTask<Void, Void, String>() {
+
+            @Override
+            protected String doInBackground(Void... voids) {
+                try {
+                    InputStream inputStream = getAssets().open("Licenses");
+                    byte[] b = new byte[inputStream.available()];
+                    if (inputStream.read(b) != -1) {
+                        String s = new String(b);
+                        return s;
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return null;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+            @Override
+            protected void onPostExecute(String s) {
+                if (s != null) textView.setText(s);
+            }
+        }.execute();
     }
 
     @Override

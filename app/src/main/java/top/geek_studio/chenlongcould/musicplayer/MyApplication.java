@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 11:31:38
- * 上次修改时间：2018年12月04日 07:45:01
+ * 当前修改时间：2018年12月10日 14:49:08
+ * 上次修改时间：2018年12月10日 14:47:36
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -27,7 +27,6 @@ import android.util.Log;
 import java.util.Locale;
 
 import top.geek_studio.chenlongcould.musicplayer.Fragments.AlbumListFragment;
-import top.geek_studio.chenlongcould.musicplayer.Fragments.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.Utils.NotificationUtils;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 
@@ -91,11 +90,6 @@ public class MyApplication extends Application {
             if (AlbumListFragment.VIEW_HAS_LOAD) {
                 Data.sAlbumItems.clear();
                 Log.d(TAG, "onTrimMemory: AlbumFragment recycled");
-            }
-
-            //noinspection StatementWithEmptyBody
-            if (PlayListFragment.HAS_LOAD) {
-                //No data can be recycled
             }
             Data.sCurrentMusicBitmap = null;
         }
