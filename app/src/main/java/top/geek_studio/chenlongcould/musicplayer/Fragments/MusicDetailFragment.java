@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月10日 14:49:08
- * 上次修改时间：2018年12月10日 14:47:45
+ * 当前修改时间：2018年12月12日 11:57:29
+ * 上次修改时间：2018年12月12日 11:57:13
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -44,7 +44,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MotionEvent;
-import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
@@ -62,6 +61,7 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.musicplayer.Activities.AlbumDetailActivity;
@@ -93,6 +93,8 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
      */
     public static float CURRENT_SLIDE_OFFSET = 1;
 
+    public static final int UPDATE_TITLE = 9002;
+
     public static final String TAG = "MusicDetailFragment";
 
     float mLastX = 0;
@@ -103,7 +105,6 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
     private boolean HIDE_TOOLBAR = false;
 
-    private boolean SNACK_NOTICE = false;
     float moveY = 0;
     private ImageView.ScaleType mScaleType;
     private float defXScale;
@@ -282,8 +283,6 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
     private AlbumImageView mMusicAlbumImageOth3;
 
     private MyWaitListAdapter mMyWaitListAdapter;
-
-    private VelocityTracker velocityTracker;
 
     private void findView(View view) {
         mMusicAlbumImage = view.findViewById(R.id.activity_music_detail_album_image);
@@ -501,6 +500,18 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
     }
 
+    /**
+     * @see #mMusicAlbumImage 的滑动模式
+     * 0: just x
+     * 1: x & y
+     */
+    int mode = 0;
+    /**
+     * 记录是否为长按 (2000ms)
+     */
+
+    private volatile AtomicBoolean lc = new AtomicBoolean(false);
+
     private void initView(View view) {
         findView(view);
 
@@ -547,7 +558,17 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                     mLastX = event.getRawX();
                     mLastY = event.getRawY();
 
-                    velocityTracker = VelocityTracker.obtain();
+//                    velocityTracker = VelocityTracker.obtain();
+
+                    lc.set(true);
+
+                    new Handler().postDelayed(() -> {
+                        if (lc.get()) {
+                            mSlidingUpPanelLayout.setTouchEnabled(false);
+                            mode = 1;
+                            mMainActivity.runOnUiThread(() -> Toast.makeText(mMainActivity, "Free move mode", Toast.LENGTH_SHORT).show());
+                        }
+                    }, 2000);
 
                     break;
                 case MotionEvent.ACTION_MOVE:
@@ -566,24 +587,38 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                         if (event.getRawX() < mLastX) break;
                     }
 
-                    velocityTracker.addMovement(event);
-                    velocityTracker.computeCurrentVelocity(1000);
+//                    velocityTracker.addMovement(event);
+//                    velocityTracker.computeCurrentVelocity(1000);
 
                     float val = mMusicAlbumImage.getX() + (event.getX() - moveX);
                     mMusicAlbumImage.setTranslationX(val);
                     mMusicAlbumImageOth2.setTranslationX(mMusicAlbumImage.getWidth() + val);
                     mMusicAlbumImageOth3.setTranslationX(0 - mMusicAlbumImage.getWidth() + val);
+
+                    // FIXME: 2018/12/11 上下滑动删除
+//                    if (mode == 1) {
+//                        float val2 = mMusicAlbumImage.getY() + (event.getY() - moveY);
+//                        mMusicAlbumImage.setTranslationY(val2);
+//                    }
+
                     break;
 
                 case MotionEvent.ACTION_CANCEL:
+                    Log.d(TAG, "initView: cancel");
                 case MotionEvent.ACTION_UP:
+
+                    //reset
+                    mode = 0;
+                    lc.set(false);
+                    mSlidingUpPanelLayout.setTouchEnabled(true);
+
                     if (Math.abs(Math.abs(event.getRawX()) - Math.abs(mLastX)) < 5) {
                         mMusicAlbumImage.performClick();
                         break;
                     }
 
-                    velocityTracker.clear();
-                    velocityTracker.recycle();
+//                    velocityTracker.clear();
+//                    velocityTracker.recycle();
 
                     /*
                      * enter Animation...
@@ -690,6 +725,12 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                         });
                     }
 
+                    ValueAnimator animatorY = new ValueAnimator();
+                    animatorY.setDuration(300);
+                    animatorY.setFloatValues(mMusicAlbumImage.getTranslationY(), 0);
+                    animatorY.addUpdateListener(animation -> mMusicAlbumImage.setTranslationY((Float) animation.getAnimatedValue()));
+                    animatorY.start();
+
                     animatorMain.addUpdateListener(animation -> {
                         mMusicAlbumImage.setTranslationX((Float) animation.getAnimatedValue());
                         mMusicAlbumImageOth2.setTranslationX((Float) animation.getAnimatedValue() + mMusicAlbumImage.getWidth());
@@ -697,7 +738,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                     });
                     animatorMain.start();
 
-                    return false;
+                    return true;
             }
             return true;
         });
@@ -717,7 +758,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
         mToolbar.setOnMenuItemClickListener(menuItem -> {
             switch (menuItem.getItemId()) {
                 case R.id.menu_toolbar_fast_play: {
-                    Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE, null);
+                    Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE, PlayListFragment.TAG);
                 }
                 break;
 
@@ -1078,7 +1119,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                 }
             } else {
                 Toast.makeText(mMainActivity, "Shuffle Playback!", Toast.LENGTH_SHORT).show();
-                Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE, null);
+                Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE, TAG);
             }
         });
 
@@ -1282,7 +1323,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 //                });
             if (cover != null) {
                 GlideApp.with(mMainActivity).load(cover).transition(DrawableTransitionOptions.withCrossFade()).into(mNowPlayingSongImage);
-                GlideApp.with(mMainActivity).load(cover).transition(DrawableTransitionOptions.withCrossFade()).into(mMainActivity.getNavHeaderImageView());
+                GlideApp.with(mMainActivity).load(cover).transition(DrawableTransitionOptions.withCrossFade()).centerCrop().into(mMainActivity.getNavHeaderImageView());
 
                 setIcoLightOrDark(cover);
 
@@ -1359,21 +1400,8 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
     @Override
     public void onDestroyView() {
-        Log.d(Values.LogTAG.LIFT_TAG, "onDestroyView: MusicDetailFragment");
         mHandlerThread.quitSafely();
         super.onDestroyView();
-    }
-
-    @Override
-    public void onDestroy() {
-        Log.d(Values.LogTAG.LIFT_TAG, "onDestroy: MusicDetailFragment");
-        super.onDestroy();
-    }
-
-    @Override
-    public void onDetach() {
-        Log.d(Values.LogTAG.LIFT_TAG, "onDetach: MusicDetailFragment");
-        super.onDetach();
     }
 
     @Override
@@ -1496,6 +1524,11 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                 case SET_SEEK_BAR_COLOR: {
                     @ColorInt final int color = msg.arg1;
                     mSeekBar.getThumb().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+                }
+                break;
+
+                case UPDATE_TITLE: {
+                    mWeakReference.get().runOnUiThread(() -> mToolbar.setSubtitle(Values.CurrentData.CURRENT_PLAY_LIST));
                 }
                 break;
 

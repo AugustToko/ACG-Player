@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月10日 14:49:08
- * 上次修改时间：2018年12月10日 14:23:33
+ * 当前修改时间：2018年12月12日 11:57:29
+ * 上次修改时间：2018年12月11日 15:08:10
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -48,6 +48,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
     /**
      * set SeekBar Color
+     *
      * @param cover               AlbumImage
      * @param musicDetailFragment Fragment
      */
@@ -178,9 +179,9 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
             case 4:
             case 5:
 
-            //by next button...(in detail or noti) (must ActivityList isn't empty)
-            //by auto-next(mediaPlayer OnCompletionListener) of next-play by user, at this time MainActivity is present
-            //by MusicDetailFragment preview imageButton (view history song list)
+                //by next button...(in detail or noti) (must ActivityList isn't empty)
+                //by auto-next(mediaPlayer OnCompletionListener) of next-play by user, at this time MainActivity is present
+                //by MusicDetailFragment preview imageButton (view history song list)
             case 6: {
                 if (!READY) break;
 
@@ -321,9 +322,10 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
     }
 
     /**
-     * play_type: random, without history clear (by nextButton or auto-next)
+     * play_type: random, without history clear (by nextButton or auto-next)\
+     * just make a random Index (data by {@link Data#sPlayOrderList})
      */
-    public static class FastShufflePlayback extends AsyncTask<Void, Void, Integer> {
+    public static class FastShufflePlayback extends AsyncTask<String, Void, Integer> {
 
         String path;
 
@@ -336,13 +338,15 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
         int index;
 
         @Override
-        protected Integer doInBackground(Void... voids) {
+        protected Integer doInBackground(String... strings) {
             READY = false;
             Data.sMusicBinder.resetMusic();
 
+            if (Data.sPlayOrderList.isEmpty()) return -1;
+
             //get data
             final Random random = new Random();
-            final int index = random.nextInt(Data.sPlayOrderList.size() - 1);
+            final int index = random.nextInt(Data.sPlayOrderList.size());
             this.index = index;
             Values.CurrentData.CURRENT_MUSIC_INDEX = index;
 

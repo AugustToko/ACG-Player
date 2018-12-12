@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月10日 14:49:08
- * 上次修改时间：2018年12月10日 14:47:36
+ * 当前修改时间：2018年12月12日 11:57:29
+ * 上次修改时间：2018年12月12日 11:57:13
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -11,7 +11,9 @@
 
 package top.geek_studio.chenlongcould.musicplayer;
 
+import android.app.ActivityManager;
 import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -21,9 +23,11 @@ import android.media.AudioManager;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import java.util.List;
 import java.util.Locale;
 
 import top.geek_studio.chenlongcould.musicplayer.Fragments.AlbumListFragment;
@@ -44,42 +48,72 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        //监听耳机(有线或无线)的插拔动作, 拔出暂停音乐
-        IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-        intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
-        registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
+        if (getProcessName(this).equals(getPackageName())) {
+            //监听耳机(有线或无线)的插拔动作, 拔出暂停音乐
+            IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+            intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
+            registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
 
-        Data.notificationUtils = new NotificationUtils(this, "Now Playing...");
+            Data.notificationUtils = new NotificationUtils(this, "Now Playing...");
 
-        mHandlerThread = new HandlerThread("Handler Thread in MainActivity");
-        mHandlerThread.start();
+            mHandlerThread = new HandlerThread("Handler Thread in MainActivity");
+            mHandlerThread.start();
 
-        //set language
-        Resources resources = getResources();
-        DisplayMetrics dm = resources.getDisplayMetrics();
-        Configuration config = resources.getConfiguration();
-        config.locale = Locale.getDefault();
-        resources.updateConfiguration(config, dm);
+            //set language
+            Resources resources = getResources();
+            DisplayMetrics dm = resources.getDisplayMetrics();
+            Configuration config = resources.getConfiguration();
+            config.locale = Locale.getDefault();
+            resources.updateConfiguration(config, dm);
 
-        mDefSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            mDefSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        //first or not
-        Values.FIRST_USE = mDefSharedPreferences.getBoolean(Values.SharedPrefsTag.FIRST_USE, true);
+            //first or not
+            Values.FIRST_USE = mDefSharedPreferences.getBoolean(Values.SharedPrefsTag.FIRST_USE, true);
 
-        //bg style
-        Values.Style.DETAIL_BACKGROUND = mDefSharedPreferences.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_BLUR);
+            //bg style
+            Values.Style.DETAIL_BACKGROUND = mDefSharedPreferences.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_BLUR);
 
-        //update style
-        Utils.Ui.upDateStyle(mDefSharedPreferences);
+            //update style
+            Utils.Ui.upDateStyle(mDefSharedPreferences);
 
-        //set play type
-        Values.CurrentData.CURRENT_PLAY_TYPE = mDefSharedPreferences.getString(Values.SharedPrefsTag.PLAY_TYPE, Values.TYPE_COMMON);
+            //set play type
+            Values.CurrentData.CURRENT_PLAY_TYPE = mDefSharedPreferences.getString(Values.SharedPrefsTag.PLAY_TYPE, Values.TYPE_COMMON);
 
-        Utils.Ui.inDayNightSet(mDefSharedPreferences);
+            Utils.Ui.inDayNightSet(mDefSharedPreferences);
+        } else {
+
+        }
+
     }
 
     public final Looper getCustomLooper() {
         return mHandlerThread.getLooper();
+    }
+
+    /**
+     * 获取进程名。
+     * 由于app是一个多进程应用，因此每个进程被os创建时，
+     * onCreate()方法均会被执行一次，
+     * 进行辨别初始化，针对特定进程进行相应初始化工作，
+     * 此方法可以提高一半启动时间。
+     *
+     * @param context 上下文环境对象
+     * @return 获取此进程的进程名
+     */
+    private String getProcessName(Context context) {
+        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> runningAppProcesses = am.getRunningAppProcesses();
+        if (runningAppProcesses == null) {
+            return "";
+        }
+
+        for (ActivityManager.RunningAppProcessInfo runningAppProcess : runningAppProcesses) {
+            if (runningAppProcess.pid == android.os.Process.myPid() && !TextUtils.isEmpty(runningAppProcess.processName)) {
+                return runningAppProcess.processName;
+            }
+        }
+        return "";
     }
 
     @Override

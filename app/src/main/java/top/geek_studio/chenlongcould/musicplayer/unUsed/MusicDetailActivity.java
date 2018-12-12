@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月07日 08:59:28
- * 上次修改时间：2018年12月07日 07:52:30
+ * 当前修改时间：2018年12月12日 11:57:29
+ * 上次修改时间：2018年12月11日 14:54:41
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -526,7 +526,7 @@ public final class MusicDetailActivity extends MyBaseActivity implements IStyle,
         mToolbar.setOnMenuItemClickListener(menuItem -> {
             switch (menuItem.getItemId()) {
                 case R.id.menu_toolbar_fast_play: {
-                    Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, ReceiverOnMusicPlay.TYPE_SHUFFLE, null);
+                    Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, ReceiverOnMusicPlay.TYPE_SHUFFLE, TAG);
                 }
                 break;
             }

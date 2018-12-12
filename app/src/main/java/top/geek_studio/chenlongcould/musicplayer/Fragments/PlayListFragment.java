@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：PlayListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月10日 14:49:08
- * 上次修改时间：2018年12月10日 14:47:45
+ * 当前修改时间：2018年12月12日 11:57:29
+ * 上次修改时间：2018年12月12日 11:57:09
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -11,11 +11,11 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Fragments;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -36,6 +36,10 @@ import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import java.io.File;
 import java.lang.ref.WeakReference;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.PlayListAdapter;
@@ -48,7 +52,7 @@ import top.geek_studio.chenlongcould.musicplayer.VisibleOrGone;
 
 public final class PlayListFragment extends Fragment implements IStyle, VisibleOrGone {
 
-    private static final String TAG = "PlayListFragment";
+    public static final String TAG = "PlayListFragment";
 
     public static final int RE_LOAD_PLAY_LIST = 80001;
 
@@ -85,7 +89,26 @@ public final class PlayListFragment extends Fragment implements IStyle, VisibleO
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_play_list, container, false);
-        initView(view);
+        findId(view);
+
+        mAddRecentItem.setOnClickListener(v -> {
+            Intent intent = new Intent(mMainActivity, PublicActivity.class);
+            intent.putExtra("start_by", "add recent");
+            startActivity(intent);
+        });
+
+        mFavouriteMusic.setOnClickListener(v -> {
+            Intent intent = new Intent(mMainActivity, PublicActivity.class);
+            intent.putExtra("start_by", "favourite music");
+            startActivity(intent);
+        });
+
+        initStyle();
+
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(mMainActivity));
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(mMainActivity, DividerItemDecoration.VERTICAL));
+
         initData();
         return view;
     }
@@ -93,8 +116,43 @@ public final class PlayListFragment extends Fragment implements IStyle, VisibleO
     /**
      * load data
      */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @SuppressLint("CheckResult")
     private void initData() {
-        new MyLoadListTask(mMainActivity).execute();
+
+        Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+            Data.sPlayListItems.clear();
+            Cursor cursor = mMainActivity.getContentResolver()
+                    .query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    final String filePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATA));
+                    final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists._ID));
+                    final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.NAME));
+                    final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATE_ADDED));
+
+                    // TODO: 2018/12/10 M3U FILE
+                    final File file = new File(filePath + ".m3u");
+
+                    Data.sPlayListItems.add(new PlayListItem(id, name, filePath, addTime));
+                } while (cursor.moveToNext());
+                cursor.close();
+            }
+
+            //done
+            emitter.onNext(0);
+        }).subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(integer -> {
+                    if (integer == 0) {
+
+                        //load recyclerView
+                        mPlayListAdapter = new PlayListAdapter(mMainActivity, Data.sPlayListItems);
+                        mRecyclerView.setAdapter(mPlayListAdapter);
+                    }
+                });
+
+
     }
 
     public PlayListAdapter getPlayListAdapter() {
@@ -114,64 +172,39 @@ public final class PlayListFragment extends Fragment implements IStyle, VisibleO
         mRecyclerView = view.findViewById(R.id.fragment_play_list_recycler);
     }
 
-    private void initView(View view) {
-        findId(view);
-
-        initStyle();
-
-        mPlayListAdapter = new PlayListAdapter(mMainActivity, Data.sPlayListItems);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(mMainActivity));
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(mMainActivity, DividerItemDecoration.VERTICAL));
-        mRecyclerView.setAdapter(mPlayListAdapter);
-
-        mAddRecentItem.setOnClickListener(v -> {
-            Intent intent = new Intent(mMainActivity, PublicActivity.class);
-            intent.putExtra("start_by", "add recent");
-            startActivity(intent);
-        });
-
-        mFavouriteMusic.setOnClickListener(v -> {
-            Intent intent = new Intent(mMainActivity, PublicActivity.class);
-            intent.putExtra("start_by", "favourite music");
-            startActivity(intent);
-        });
-
-    }
-
-    /**
-     * load playlist task
-     */
-    public static class MyLoadListTask extends AsyncTask<Void, Void, Void> {
-
-        private WeakReference<MainActivity> mWeakReference;
-
-        public MyLoadListTask(MainActivity activity) {
-            mWeakReference = new WeakReference<>(activity);
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            Data.sPlayListItems.clear();
-            Cursor cursor = mWeakReference.get().getContentResolver()
-                    .query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null);
-            if (cursor != null && cursor.moveToFirst()) {
-                do {
-                    final String filePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATA));
-                    final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists._ID));
-                    final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.NAME));
-                    final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATE_ADDED));
-
-                    // TODO: 2018/12/10 M3U FILE
-                    final File file = new File(filePath + ".m3u");
-
-                    Data.sPlayListItems.add(new PlayListItem(id, name, filePath, addTime));
-                } while (cursor.moveToNext());
-                cursor.close();
-            }
-            return null;
-        }
-    }
+//    /**
+//     * load playlist task
+//     */
+//    public static class MyLoadListTask extends AsyncTask<Void, Void, Void> {
+//
+//        private WeakReference<MainActivity> mWeakReference;
+//
+//        public MyLoadListTask(MainActivity activity) {
+//            mWeakReference = new WeakReference<>(activity);
+//        }
+//
+//        @Override
+//        protected Void doInBackground(Void... voids) {
+//            Data.sPlayListItems.clear();
+//            Cursor cursor = mWeakReference.get().getContentResolver()
+//                    .query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null);
+//            if (cursor != null && cursor.moveToFirst()) {
+//                do {
+//                    final String filePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATA));
+//                    final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists._ID));
+//                    final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.NAME));
+//                    final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATE_ADDED));
+//
+//                    // TODO: 2018/12/10 M3U FILE
+//                    final File file = new File(filePath + ".m3u");
+//
+//                    Data.sPlayListItems.add(new PlayListItem(id, name, filePath, addTime));
+//                } while (cursor.moveToNext());
+//                cursor.close();
+//            }
+//            return null;
+//        }
+//    }
 
     @Override
     public void initStyle() {

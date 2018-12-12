@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：menu_nav.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月07日 08:59:28
-  ~ 上次修改时间：2018年12月06日 20:00:55
+  ~ 当前修改时间：2018年12月12日 11:57:29
+  ~ 上次修改时间：2018年12月12日 11:57:13
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
   ~ *************************************************************
   -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
     <item
         android:id="@+id/menu_nav_setting"
         android:icon="@drawable/ic_settings_black_24dp"

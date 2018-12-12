@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月10日 14:49:08
- * 上次修改时间：2018年12月10日 14:47:45
+ * 当前修改时间：2018年12月12日 11:57:29
+ * 上次修改时间：2018年12月10日 15:45:05
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -30,7 +30,7 @@ public final class Values {
 
     public static boolean HAS_PLAYED = false;           //检测app打开后, 是否播放过音乐 (如果没, 默认点击播放按钮为快速随机播放)
 
-    public static boolean PHONE_HAS_NAV = false;
+    public static boolean PHONE_HAS_NAV = false;        //phone has navBar?
 
     public static final class LogTAG {
         public static final String LIFT_TAG = "THE_TAG_OF_LIFE";
@@ -110,7 +110,7 @@ public final class Values {
         public static String CURRENT_PLAY_TYPE = "COMMON";
 
         /**
-         * 自动切歌的播放模式
+         * auto switch
          * 1. common
          * 2. repeat one
          * 3. repeat list

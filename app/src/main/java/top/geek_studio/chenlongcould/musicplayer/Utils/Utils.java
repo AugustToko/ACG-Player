@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月10日 14:49:08
- * 上次修改时间：2018年12月10日 14:47:36
+ * 当前修改时间：2018年12月12日 11:57:29
+ * 上次修改时间：2018年12月12日 11:57:13
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -26,6 +26,10 @@ import android.media.MediaMetadataRetriever;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -44,6 +48,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.util.Collections;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
@@ -56,6 +61,9 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 @SuppressWarnings("WeakerAccess")
 public final class Utils {
+
+    private Utils() {
+    }
 
     public static final class Audio {
         private final static MediaMetadataRetriever sMediaMetadataRetriever = new MediaMetadataRetriever();
@@ -376,6 +384,53 @@ public final class Utils {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
                 Values.Color.TEXT_COLOR = "#3c3c3c";
             }
+        }
+
+        public static Bitmap blurBitmap(Bitmap bitmap, float r, Context context) {
+
+            //Let's create an empty bitmap with the same size of the bitmap we want to blur
+            Bitmap outBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+
+            //Instantiate a new Renderscript
+            RenderScript rs = RenderScript.create(context);
+
+            //Create an Intrinsic Blur Script using the Renderscript
+            ScriptIntrinsicBlur blurScript = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
+
+            //Create the Allocations (in/out) with the Renderscript and the in/out bitmaps
+            Allocation allIn = Allocation.createFromBitmap(rs, bitmap);
+            Allocation allOut = Allocation.createFromBitmap(rs, outBitmap);
+
+            //Set the radius of the blur: 0 < radius <= 25
+            blurScript.setRadius(25.0f);
+
+            //Perform the Renderscript
+            blurScript.setInput(allIn);
+            blurScript.forEach(allOut);
+
+            //Copy the final bitmap created by the out Allocation to the outBitmap
+            allOut.copyTo(outBitmap);
+
+            //recycle the original bitmap
+            bitmap.recycle();
+
+            //After finishing everything, we destroy the Renderscript.
+            rs.destroy();
+
+            return outBitmap;
+
+        }
+    }
+
+    public static final class DataSet {
+
+        /**
+         * make a random play list, data by {@link Data#sMusicItems}
+         */
+        public static void makeARandomList() {
+            Data.sPlayOrderList.clear();
+            Data.sPlayOrderList.addAll(Data.sMusicItems);
+            Collections.shuffle(Data.sPlayOrderList);
         }
     }
 

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月10日 14:49:08
- * 上次修改时间：2018年12月10日 14:47:45
+ * 当前修改时间：2018年12月12日 11:57:29
+ * 上次修改时间：2018年12月12日 11:57:09
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -58,7 +58,6 @@ import top.geek_studio.chenlongcould.musicplayer.Activities.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
-import top.geek_studio.chenlongcould.musicplayer.Fragments.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
@@ -102,6 +101,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         return String.valueOf(mMusicItems.get(position).getMusicName().charAt(0));
     }
 
+    @SuppressLint("CheckResult")
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int itemType) {
@@ -120,7 +120,13 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
             onMusicItemClick(view, holder, mCurrentUiPosition);
 
-            ((ModHolder) holder).mRandomItem.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE, null));
+            ((ModHolder) holder).mRandomItem.setOnClickListener(v -> {
+                if (!Values.CurrentData.CURRENT_PLAY_LIST.equals("default")) {
+                    Values.CurrentData.CURRENT_PLAY_LIST = "default";
+                    Utils.DataSet.makeARandomList();
+                }
+                Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE, TAG);
+            });
 
         } else {
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_list_item, viewGroup, false);
@@ -256,9 +262,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
                 //add to list
                 case Menu.FIRST + 2: {
-                    if (Data.sPlayListItems.isEmpty()) {
-                        new PlayListFragment.MyLoadListTask(mMainActivity).execute();
-                    }
 
                     final Resources resources = mMainActivity.getResources();
 
@@ -290,14 +293,17 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                         });
                         b2.show();
                     });
+
+                    builder.setCancelable(true);
+
                     builder.setSingleChoiceItems(mMainActivity.getContentResolver()
                                     .query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null),
                             -1, MediaStore.Audio.Playlists.NAME, (dialog, which) -> {
                                 PlayListsUtil.addToPlaylist(mMainActivity, mMusicItems.get(holder.getAdapterPosition()), Data.sPlayListItems.get(which).getId(), false);
                                 dialog.dismiss();
                             });
-                    builder.setCancelable(true);
                     builder.show();
+
                 }
                 break;
 
@@ -359,7 +365,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 READY = false;
 
                 //使得当前播放列表成为"待播放列表"
-                if (currentUiPosition.equals("PublicActivity") && Values.CurrentData.CURRENT_PLAY_LIST.equals("default")) {
+                if (currentUiPosition.equals("PublicActivityPlayList") && Values.CurrentData.CURRENT_PLAY_LIST.equals("default")) {
                     PublicActivity activity = ((PublicActivity) mContext);
                     Values.CurrentData.CURRENT_PLAY_LIST = activity.getCurrentListName();
                     Data.sPlayOrderList.clear();
