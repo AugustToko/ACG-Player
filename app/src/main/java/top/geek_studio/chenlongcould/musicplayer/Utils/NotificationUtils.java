@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：NotificationUtils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月10日 14:49:08
- * 上次修改时间：2018年12月09日 17:19:34
+ * 当前修改时间：2018年12月13日 10:03:03
+ * 上次修改时间：2018年12月12日 17:04:01
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -19,17 +19,18 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.os.Build;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.graphics.Palette;
-import android.util.Log;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
@@ -71,7 +72,7 @@ public class NotificationUtils extends ContextWrapper {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private Notification.Builder getChannelNotification(String title, String content, Context context) {
+    private Notification.Builder getChannelNotification(String title, String content, @Nullable Bitmap cover, Context context) {
 
         //pi(s)
         Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
@@ -106,13 +107,13 @@ public class NotificationUtils extends ContextWrapper {
                 .setContentText(content)
                 .setSmallIcon(Icon.createWithResource(context, R.drawable.ic_audiotrack_24px))
                 .setStyle(mediaStyle)
-                .setLargeIcon(Data.sCurrentMusicBitmap == null ? BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px) : Data.sCurrentMusicBitmap)
+                .setLargeIcon(cover == null ? BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px) : cover)
                 .setContentIntent(pi)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setAutoCancel(false)
                 .setOngoing(true);
 
-        if (Data.sMusicBinder.isPlayingMusic()) {
+        if (ReceiverOnMusicPlay.isPlayingMusic()) {
             Notification.Action[] actions = {new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_previous_white_24dp), "previous", previousIntent).build()
                     , new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_pause_white_24dp), "play", pauseIntent).build()
                     , new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_next_white_24dp), "next", nextIntent).build()};
@@ -124,8 +125,8 @@ public class NotificationUtils extends ContextWrapper {
             builder.setActions(actions);
         }
 
-        if (Data.sCurrentMusicBitmap != null) {
-            Palette palette = Palette.from(Data.sCurrentMusicBitmap).generate();
+        if (cover != null) {
+            Palette palette = Palette.from(cover).generate();
             builder.setColor(palette.getVibrantColor(Color.TRANSPARENT));
         } else {
             builder.setColor(Color.WHITE);
@@ -135,7 +136,7 @@ public class NotificationUtils extends ContextWrapper {
         return builder;
     }
 
-    private NotificationCompat.Builder getNotification_25(String title, String content, Context context) {
+    private NotificationCompat.Builder getNotification_25(String title, String content, @Nullable Bitmap cover, Context context) {
         Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
         PendingIntent pi = PendingIntent.getActivity(context, 0, intent, 0);
 
@@ -143,7 +144,7 @@ public class NotificationUtils extends ContextWrapper {
                 .setContentTitle(title)
                 .setContentText(content)
                 .setSmallIcon(R.drawable.ic_audiotrack_24px)
-                .setLargeIcon(Data.sCurrentMusicBitmap == null ? BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px) : Data.sCurrentMusicBitmap)
+                .setLargeIcon(cover == null ? BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px) : cover)
                 .setContentIntent(pi)
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
                 .setPriority(Notification.PRIORITY_DEFAULT)
@@ -152,13 +153,12 @@ public class NotificationUtils extends ContextWrapper {
         return builder;
     }
 
-    public Notification getNot(String title, String content, Context context) {
+    public Notification getNot(String title, String content, Bitmap cover, Context context) {
         if (Build.VERSION.SDK_INT >= 26) {
             createNotificationChannel();
-            return getChannelNotification(title, content, context).build();
+            return getChannelNotification(title, content, cover, context).build();
         } else {
-            Log.d(TAG, "getNot: get 25 noti");
-            return getNotification_25(title, content, context).build();
+            return getNotification_25(title, content, cover, context).build();
         }
     }
 

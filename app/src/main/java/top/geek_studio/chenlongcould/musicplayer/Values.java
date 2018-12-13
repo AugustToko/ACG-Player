@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月12日 11:57:29
- * 上次修改时间：2018年12月10日 15:45:05
+ * 当前修改时间：2018年12月13日 10:03:03
+ * 上次修改时间：2018年12月12日 12:12:10
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -53,8 +53,6 @@ public final class Values {
      */
     //default value false
     public static boolean MUSIC_DATA_INIT_DONE = false;
-    public static boolean SERVICE_RUNNING = false;
-    public static boolean MUSIC_PLAYING = false;
 
     public static final class HandlerWhat {
 
@@ -71,7 +69,6 @@ public final class Values {
         public static final int SET_BUTTON_PLAY = 58;
         public static final int SET_BUTTON_PAUSE = 57;
         public static final int LOAD_INTO_NAV_IMAGE = 5003;
-        public static final int INIT_FRAGMENT = 50007;
 
         public static final int RECYCLER_SCROLL = 55001;
 

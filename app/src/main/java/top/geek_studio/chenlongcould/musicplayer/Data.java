@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Data.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月10日 14:49:08
- * 上次修改时间：2018年12月09日 19:49:26
+ * 当前修改时间：2018年12月13日 10:03:03
+ * 上次修改时间：2018年12月13日 10:02:41
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -16,6 +16,7 @@ import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,8 +27,6 @@ import top.geek_studio.chenlongcould.musicplayer.BroadCasts.MyHeadSetPlugReceive
 import top.geek_studio.chenlongcould.musicplayer.Models.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.PlayListItem;
-import top.geek_studio.chenlongcould.musicplayer.Service.MyMusicService;
-import top.geek_studio.chenlongcould.musicplayer.Utils.NotificationUtils;
 
 public final class Data {
 
@@ -57,38 +56,28 @@ public final class Data {
      */
     public static List<Integer> sHistoryPlayIndex = new ArrayList<>();
 
-    public static MyMusicService sMyMusicService;
-
     /**
      * sCurrent DATA
      */
-    public static String sCurrentMusicName = "null";
+    public static MusicItem sCurrentMusicItem = new MusicItem.Builder(-1, "null", "null").build();
 
-    public static Bitmap sCurrentMusicBitmap = null;
-
-    public static String sCurrentMusicAlbum = "null";
+    /**
+     * save temp bitmap
+     */
+    public static Bitmap sCurrentCover = null;
+    /**
+     * --------------------- Media Player ----------------------
+     */
+//    public static MyMusicService.MusicBinder sMusicBinder;
+    public static IMuiscService sMusicBinder;
 
     public static MyHeadSetPlugReceiver mMyHeadSetPlugReceiver = new MyHeadSetPlugReceiver();
 
     public final static SimpleDateFormat sSimpleDateFormat = new SimpleDateFormat("mm:ss", Locale.CHINESE);
-
-    public static NotificationUtils notificationUtils;
-
-    public static void saveGlobalCurrentData(String musicName, String albumName, Bitmap cover) {
-        sCurrentMusicAlbum = albumName;
-        sCurrentMusicName = musicName;
-        sCurrentMusicBitmap = cover;
-    }
-
-    /**
-     * --------------------- Media Player ----------------------
-     */
-    public static MyMusicService.MusicBinder sMusicBinder;
-
     public static ServiceConnection sServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            sMusicBinder = (MyMusicService.MusicBinder) service;
+            sMusicBinder = IMuiscService.Stub.asInterface(service);
         }
 
         @Override
@@ -96,5 +85,9 @@ public final class Data {
 
         }
     };
+
+    public static void setCurrentMusicItem(@NonNull MusicItem item) {
+        sCurrentMusicItem = item;
+    }
 
 }

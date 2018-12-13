@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月12日 11:57:29
- * 上次修改时间：2018年12月12日 11:57:09
+ * 当前修改时间：2018年12月13日 10:03:03
+ * 上次修改时间：2018年12月13日 10:02:41
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -12,7 +12,6 @@
 package top.geek_studio.chenlongcould.musicplayer.Activities;
 
 import android.annotation.SuppressLint;
-import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -39,7 +38,6 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -72,9 +70,8 @@ import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.MyApplication;
+import top.geek_studio.chenlongcould.musicplayer.MyMusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Service.MyMusicService;
-import top.geek_studio.chenlongcould.musicplayer.Utils.NotificationUtils;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
@@ -86,6 +83,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
      * @see Message#what
      */
     public static final int UP = 50070;
+
     /**
      * 检测当前 slide 的位置.
      * 当滑动 slide {@link SlidingUpPanelLayout} 时, 迅速点击可滑动区域外, slide 会卡住.
@@ -94,9 +92,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
      */
     public static float CURRENT_SLIDE_OFFSET = 1;
     public static final int DOWN = 50071;
-    public static final int ENABLE_TOUCH = 50072;
-    public static final int SET_VIEWPAGER_BG = 50073;
-    public static final int SET_TOOLBAR_TITLE = 50075;
 
     public static boolean ANIMATION_FLAG = true;
 
@@ -135,7 +130,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     private PlayListFragment mPlayListFragment;
     private MusicDetailFragment mMusicDetailFragment;
 
-
     /**
      * onXXX
      * At Override
@@ -157,8 +151,13 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         //service
         Intent intent = new Intent(this, MyMusicService.class);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            startForegroundService(intent);
+//        } else {
         startService(intent);
+//        }
         bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
+        Log.d(TAG, "onCreate: pkg name: " + getPackageName());
 
         Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
             if (Data.sMusicItems.isEmpty()) {
@@ -202,35 +201,36 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
                     } while (cursor.moveToNext());
                     cursor.close();
-                    Values.MUSIC_DATA_INIT_DONE = true;
 
                     if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM))
                         Collections.shuffle(Data.sPlayOrderList);
 
                     emitter.onNext(0);
                 } else {
-
                     //cursor null or getCount == 0
                     emitter.onNext(-1);
                 }
             } else {
                 //already has data -> initFragment
-                mHandler.sendEmptyMessage(Values.HandlerWhat.INIT_FRAGMENT);
-                Values.MUSIC_DATA_INIT_DONE = true;
                 emitter.onNext(0);
             }
 
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> {
-                    if (result == -1)
+                    if (result == -1) {
                         Utils.Ui.fastToast(MainActivity.this, "cursor == null or moveToFirst Fail");
+                        mHandler.postDelayed(this::exitApp, 1000);
+                        return;
+                    }
                     if (result == -2) {
                         Utils.Ui.fastToast(MainActivity.this, "Can not find any music!");
                         mHandler.postDelayed(this::exitApp, 1000);
+                        return;
                     }
 
+                    Values.MUSIC_DATA_INIT_DONE = true;
+                    initFragmentData();
                     mToolbar.setSubtitle(Data.sMusicItems.size() + " Songs");
-
                 });
 
         if (savedInstanceState != null) {
@@ -246,19 +246,12 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     }
 
     /**
-     * exit app with out stop music
+     * exit app without stop music
      * without clear data...
      */
     private void goToBackground() {
         AlbumListFragment.VIEW_HAS_LOAD = false;
-
-        // FIXME: 2018/12/4 leak
-        try {
-            if (Values.SERVICE_RUNNING) unbindService(Data.sServiceConnection);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        unbindService(Data.sServiceConnection);
         Data.sActivities.remove(this);
         GlideApp.get(this).clearMemory();
         finish();
@@ -447,20 +440,20 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             mViewPager.setOffscreenPageLimit(2);
             mTabLayout.setupWithViewPager(mViewPager);
             mViewPager.setAdapter(mPagerAdapter);
+
             Values.CurrentData.CURRENT_PAGE_INDEX = 0;
         });
     }
 
     public final void exitApp() {
         AlbumListFragment.VIEW_HAS_LOAD = false;
-
-        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(NotificationUtils.ID);
+        Data.sCurrentCover.recycle();
 
         Data.sHistoryPlayIndex.clear();
         Data.sMusicItemsBackUp.clear();
         Data.sMusicItems.clear();
         Data.sAlbumItems.clear();
-        Data.sMusicBinder.stopMusic();
+        ReceiverOnMusicPlay.stopMusic();
 
         stopService(new Intent(MainActivity.this, MyMusicService.class));
         unbindService(Data.sServiceConnection);
@@ -550,12 +543,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         }
 
         mNavHeaderImageView = mNavigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
-        mNavHeaderImageView.setOnDragListener(new View.OnDragListener() {
-            @Override
-            public boolean onDrag(View v, DragEvent event) {
-                return false;
-            }
-        });
 
         mNavHeaderImageView.setOnClickListener(v -> {
             if (getMusicDetailFragment().getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
@@ -766,27 +753,17 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case Values.HandlerWhat.INIT_FRAGMENT: {
-                    Log.d(TAG, "handleMessage: initFragmentData");
-                    initFragmentData();
-                }
-                break;
                 case Values.HandlerWhat.LOAD_INTO_NAV_IMAGE: {
                     mWeakReference.get().runOnUiThread(() -> {
-                        Bitmap cover = (Bitmap) msg.obj;
+                        final Bitmap cover = (Bitmap) msg.obj;
                         GlideApp.with(mWeakReference.get())
                                 .load(cover == null ? R.drawable.ic_audiotrack_24px : cover)
                                 .transition(DrawableTransitionOptions.withCrossFade())
                                 .into(mNavHeaderImageView);
+                        if (cover != null) cover.recycle();
                     });
                 }
                 break;
-
-                case ENABLE_TOUCH: {
-                    mSlidingUpPanelLayout.setTouchEnabled(true);
-                }
-                break;
-
                 case UP: {
                     mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
                 }

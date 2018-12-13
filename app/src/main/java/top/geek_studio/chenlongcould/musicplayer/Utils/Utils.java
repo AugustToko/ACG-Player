@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月12日 11:57:29
- * 上次修改时间：2018年12月12日 11:57:13
+ * 当前修改时间：2018年12月13日 10:03:03
+ * 上次修改时间：2018年12月13日 10:02:41
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -21,8 +21,11 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
@@ -31,6 +34,7 @@ import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
 import android.support.annotation.ColorInt;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -67,6 +71,7 @@ public final class Utils {
 
     public static final class Audio {
         private final static MediaMetadataRetriever sMediaMetadataRetriever = new MediaMetadataRetriever();
+
         private static final String TAG = "Audio";
 
         /**
@@ -74,7 +79,7 @@ public final class Utils {
          *
          * @param mediaUri mp3 path
          */
-        @Nullable
+        @NonNull
         public static Bitmap getMp3Cover(final String mediaUri) {
 
 //            //检测不支持封面的音乐类型
@@ -98,20 +103,87 @@ public final class Utils {
                 return BitmapFactory.decodeResource(Data.sActivities.get(0).getResources(), R.drawable.ic_audiotrack_24px);
         }
 
-        public static byte[] getAlbumByteImage(final String path) {
+        /**
+         * 获取封面
+         * <p>
+         * same as {@link Audio#getMp3Cover(String)}
+         * may call from {@link top.geek_studio.chenlongcould.musicplayer.MyMusicService}
+         *
+         * @param mediaUri mp3 path
+         */
+        public static Bitmap getMp3Cover(final String mediaUri, Context context) {
 
-            if (path == null) {
-                final ByteBuffer buffer = ByteBuffer.allocate(BitmapFactory.decodeResource(Data.sActivities.get(0).getResources(), R.drawable.ic_audiotrack_24px).getByteCount());
-                return buffer.array();
-            }
+//            //检测不支持封面的音乐类型
+//            if (mediaUri.contains("ogg") || mediaUri.contains("flac")) {
+//                return BitmapFactory.decodeResource(Resources.getSystem(), R.drawable.ic_audiotrack_24px);
+//            }
 
+            if (mediaUri == null)
+                return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
+
+            final File file = new File(mediaUri);
+            if (file.isDirectory() || !file.exists())
+                return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
+
+            sMediaMetadataRetriever.setDataSource(mediaUri);
+            byte[] picture = sMediaMetadataRetriever.getEmbeddedPicture();
+
+            if (picture != null)
+                return BitmapFactory.decodeByteArray(picture, 0, picture.length);
+            else
+                return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
+
+        }
+
+        /**
+         * may call from {@link top.geek_studio.chenlongcould.musicplayer.MyMusicService}
+         */
+        @Nullable
+        public static byte[] getAlbumByteImage(final String path, Context context) {
+            final Bitmap bitmap = getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
             final File file = new File(path);
-            if (file.isDirectory() || !file.exists() || file.isDirectory()) {
-                final ByteBuffer buffer = ByteBuffer.allocate(BitmapFactory.decodeResource(Data.sActivities.get(0).getResources(), R.drawable.ic_audiotrack_24px).getByteCount());
-                return buffer.array();
+
+            if (path == null || file.isDirectory() || !file.exists() || file.isDirectory()) {
+                if (bitmap != null) {
+                    final ByteBuffer buffer = ByteBuffer.allocate(bitmap.getByteCount());
+                    return buffer.array();
+                } else {
+                    return null;
+                }
             }
+
             sMediaMetadataRetriever.setDataSource(path);
-            return sMediaMetadataRetriever.getEmbeddedPicture();
+            byte[] cover = sMediaMetadataRetriever.getEmbeddedPicture();
+
+            if (cover == null) {
+                if (bitmap != null)
+                    return ByteBuffer.allocate(bitmap.getByteCount()).array();
+                else
+                    return null;
+            } else {
+                if (bitmap != null) bitmap.recycle();
+                return cover;
+            }
+
+        }
+
+        @SuppressWarnings("SameParameterValue")
+        @Nullable
+        public static Bitmap getDrawableBitmap(@NonNull Context context, @DrawableRes int vectorDrawableId) {
+            Bitmap bitmap = null;
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+                Drawable vectorDrawable = context.getDrawable(vectorDrawableId);
+                if (vectorDrawable != null) {
+                    bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(),
+                            vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(bitmap);
+                    vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+                    vectorDrawable.draw(canvas);
+                }
+            } else {
+                bitmap = BitmapFactory.decodeResource(context.getResources(), vectorDrawableId);
+            }
+            return bitmap;
         }
 
     }
@@ -159,9 +231,16 @@ public final class Utils {
         }
 
         public static void setPlayButtonNowPlaying() {
-            if (Data.sActivities.size() != 0) {
+            if (!Data.sActivities.isEmpty()) {
                 MainActivity activity = (MainActivity) Data.sActivities.get(0);
-                activity.runOnUiThread(() -> activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.SET_BUTTON_PLAY));
+                activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.SET_BUTTON_PLAY);
+            }
+        }
+
+        public static void setPlayButtonNowPause() {
+            if (!Data.sActivities.isEmpty()) {
+                MainActivity activity = (MainActivity) Data.sActivities.get(0);
+                activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.SET_BUTTON_PAUSE);
             }
         }
 

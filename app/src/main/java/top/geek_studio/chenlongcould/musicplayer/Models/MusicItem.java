@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicItem.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月03日 15:10:53
- * 上次修改时间：2018年12月03日 15:10:21
+ * 当前修改时间：2018年12月13日 10:03:03
+ * 上次修改时间：2018年12月13日 10:02:37
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -16,7 +16,6 @@ import android.os.Parcelable;
 
 public final class MusicItem implements Parcelable {
 
-    private byte[] mMusicCover;
     private String mMimeName;
     private String mMusicName;
     private String mMusicPath;
@@ -29,7 +28,6 @@ public final class MusicItem implements Parcelable {
     private int mAddTime;
 
     protected MusicItem(Parcel in) {
-        this.mMusicCover = in.createByteArray();
         this.mMimeName = in.readString();
         this.mMusicName = in.readString();
         this.mMusicPath = in.readString();
@@ -43,7 +41,7 @@ public final class MusicItem implements Parcelable {
     }
 
     public String getMusicName() {
-        return mMusicName;
+        return mMusicName == null ? "null" : mMusicName;
     }
 
     public String getMusicPath() {
@@ -55,11 +53,7 @@ public final class MusicItem implements Parcelable {
     }
 
     public String getMusicAlbum() {
-        return mMusicAlbum;
-    }
-
-    public byte[] getMusicCover() {
-        return mMusicCover;
+        return mMusicAlbum == null ? "null" : mMusicAlbum;
     }
 
     public int getDuration() {
@@ -99,7 +93,6 @@ public final class MusicItem implements Parcelable {
         mSize = builder.mSize;
         mMusicPath = builder.mMusicPath;
         mArtist = builder.mArtist;
-        mMusicCover = builder.mMusicCover;
         mAlbumId = builder.mAlbumId;
     }
 
@@ -114,7 +107,6 @@ public final class MusicItem implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeByteArray(this.mMusicCover);
         dest.writeString(this.mMimeName);
         dest.writeString(this.mMusicName);
         dest.writeString(this.mMusicPath);
@@ -132,7 +124,6 @@ public final class MusicItem implements Parcelable {
         private String mMusicName;
         private String mMusicPath;
 
-        private byte[] mMusicCover = null;
         private String mMimeName = "null";
         private String mMusicAlbum = "null";
         private int mDuration = -1;
@@ -145,11 +136,6 @@ public final class MusicItem implements Parcelable {
             mMusicID = musicID;
             mMusicName = musicName;
             mMusicPath = musicPath;
-        }
-
-        public Builder musicCover(byte[] cover) {
-            mMusicCover = cover;
-            return this;
         }
 
         public Builder mimeName(String mime) {

@@ -1,18 +1,21 @@
 // IMuiscService.aidl
 package top.geek_studio.chenlongcould.musicplayer;
 
-// Declare any non-default types here with import statements
+import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 
 interface IMuiscService {
-    void play();
-    void pause();
-    void stop();
-    boolean isPlaying();
-    void reset();
+    void playMusic();
+    void pauseMusic();
+    void stopMusic();
+    boolean isPlayingMusic();
+    void resetMusic();
     void setDataSource(String path);
     void prepare();
     int getDuration();
     int getCurrentPosition();
     void seekTo(int position);
     void release();
+
+    //other data input
+    void setCurrentMusicData(in MusicItem item);
 }

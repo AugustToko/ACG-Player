@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月12日 11:57:29
- * 上次修改时间：2018年12月12日 11:57:13
+ * 当前修改时间：2018年12月13日 10:03:03
+ * 上次修改时间：2018年12月12日 17:04:01
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Locale;
 
 import top.geek_studio.chenlongcould.musicplayer.Fragments.AlbumListFragment;
-import top.geek_studio.chenlongcould.musicplayer.Utils.NotificationUtils;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 
 public class MyApplication extends Application {
@@ -53,8 +52,6 @@ public class MyApplication extends Application {
             IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
             intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
             registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
-
-            Data.notificationUtils = new NotificationUtils(this, "Now Playing...");
 
             mHandlerThread = new HandlerThread("Handler Thread in MainActivity");
             mHandlerThread.start();
@@ -120,13 +117,16 @@ public class MyApplication extends Application {
     public void onTrimMemory(int level) {
         Log.d(TAG, "onTrimMemory: do");
 
-        if (level == TRIM_MEMORY_MODERATE) {
-            if (AlbumListFragment.VIEW_HAS_LOAD) {
-                Data.sAlbumItems.clear();
-                Log.d(TAG, "onTrimMemory: AlbumFragment recycled");
+        if (getProcessName(this).equals(getPackageName())) {
+            if (level == TRIM_MEMORY_MODERATE) {
+                if (AlbumListFragment.VIEW_HAS_LOAD) {
+                    Data.sAlbumItems.clear();
+                    Log.d(TAG, "onTrimMemory: AlbumFragment recycled");
+                }
+                Data.sCurrentMusicItem = null;
             }
-            Data.sCurrentMusicBitmap = null;
         }
+
         GlideApp.get(this).trimMemory(level);
 
         super.onTrimMemory(level);

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：build.gradle  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月12日 11:57:29
- * 上次修改时间：2018年12月11日 17:33:01
+ * 当前修改时间：2018年12月13日 10:03:03
+ * 上次修改时间：2018年12月13日 10:01:14
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -63,6 +63,9 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     productFlavors {
+    }
+    dataBinding {
+        enabled = true
     }
 }
 

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyWaitListAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月06日 19:19:07
- * 上次修改时间：2018年12月06日 18:39:39
+ * 当前修改时间：2018年12月13日 10:03:03
+ * 上次修改时间：2018年12月13日 08:35:53
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -31,13 +31,13 @@ import android.widget.TextView;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.PublicActivity;
+import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
@@ -69,49 +69,44 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
         view.setOnClickListener(v -> new Thread(() -> {
 
+            Data.setCurrentMusicItem(Data.sPlayOrderList.get(holder.getAdapterPosition()));
+
             final String clickedPath = mMusicItems.get(holder.getAdapterPosition()).getMusicPath();
 
-            if (Data.sMusicBinder.isPlayingMusic()) {
+            if (ReceiverOnMusicPlay.isPlayingMusic()) {
                 if (holder.getAdapterPosition() == Values.CurrentData.CURRENT_MUSIC_INDEX) {
                     Utils.SendSomeThing.sendPause(mMainActivity);
                     return;
                 }
             }
 
-            Data.sMusicBinder.resetMusic();
+            ReceiverOnMusicPlay.resetMusic();
 
             final String clickedSongName = mMusicItems.get(holder.getAdapterPosition()).getMusicName();
             final String clickedSongAlbumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
 
-            final Bitmap cover = Utils.Audio.getMp3Cover(clickedPath);
+            final Bitmap cover = Utils.Audio.getMp3Cover(clickedPath, mMainActivity);
 
             final MainActivity activity = (MainActivity) Data.sActivities.get(0);
 
             //set InfoBar
             activity.getMusicDetailFragment().setSlideInfo(clickedSongName, clickedSongAlbumName, cover);
-            activity.getMusicDetailFragment().setCurrentInfo(clickedSongName, clickedSongAlbumName, Utils.Audio.getAlbumByteImage(clickedPath));
+            activity.getMusicDetailFragment().setCurrentInfo(clickedSongName, clickedSongAlbumName, Utils.Audio.getAlbumByteImage(clickedPath, mMainActivity));
 
-            Data.sCurrentMusicAlbum = clickedSongAlbumName;
-            Data.sCurrentMusicName = clickedSongName;
-            Data.sCurrentMusicBitmap = cover;
+            if (cover != null) cover.recycle();
 
-            Values.MUSIC_PLAYING = true;
+            //set current data
+            Data.setCurrentMusicItem(mMusicItems.get(holder.getAdapterPosition()));
+
             Values.HAS_PLAYED = true;
             Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
 
-            try {
-                Data.sMusicBinder.setDataSource(clickedPath);
-                Data.sMusicBinder.prepare();
-                Data.sMusicBinder.playMusic();
+            ReceiverOnMusicPlay.setDataSource(clickedPath);
+            ReceiverOnMusicPlay.prepare();
+            ReceiverOnMusicPlay.playMusic();
 
-                Utils.Ui.setPlayButtonNowPlaying();
-                activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                Data.sMusicBinder.resetMusic();
-            }
-
+            Utils.Ui.setPlayButtonNowPlaying();
+            activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
             /*
              * when SlidingUpPanelLayout that in detail is Expanded, if click the item, the SlidingUpPanelLayout in mainActivity may become touchable
              * so this can fix this

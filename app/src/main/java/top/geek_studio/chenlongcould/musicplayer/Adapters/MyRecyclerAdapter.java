@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月12日 11:57:29
- * 上次修改时间：2018年12月12日 11:57:09
+ * 当前修改时间：2018年12月13日 10:03:03
+ * 上次修改时间：2018年12月13日 10:02:37
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -18,7 +18,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -26,6 +25,7 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
@@ -38,7 +38,6 @@ import android.view.animation.OvershootInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,12 +45,16 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.musicplayer.Activities.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.PublicActivity;
@@ -76,7 +79,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
      */
     private static final int MOD_TYPE = -1;
 
-    private volatile boolean READY = true;
+    private AtomicBoolean READY = new AtomicBoolean(true);
 
     private List<MusicItem> mMusicItems;
 
@@ -337,102 +340,80 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
             Values.CurrentData.CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = -1;
 
-            return false;
+            return true;
         });
 
         return holder;
-
-//            view = LayoutInflater.from(viewGroup.getContext()).inflate(android.R.layout.simple_list_item_1, viewGroup, false);
-//            return new ViewHolder(view);
     }
 
-    @SuppressLint("StaticFieldLeak")
     private void onMusicItemClick(View view, ViewHolder holder, String currentUiPosition) {
-        view.setOnClickListener(v -> new AsyncTask<Void, Void, Integer>() {
+        view.setOnClickListener(v -> Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
 
-            String clickedPath;
-            String clickedSongName;
-            String clickedSongAlbumName;
-            Bitmap cover;
+            if (!READY.get()) {
+                observableEmitter.onNext(-1);
+            } else {
+                READY.set(false);
+            }
 
-            @Override
-            protected Integer doInBackground(Void... voids) {
+            ReceiverOnMusicPlay.resetMusic();
 
-                if (!READY) {
-                    mMainActivity.runOnUiThread(() -> Toast.makeText(mMainActivity, "Wait...", Toast.LENGTH_SHORT).show());
-                    return null;
-                }
-                READY = false;
-
-                //使得当前播放列表成为"待播放列表"
-                if (currentUiPosition.equals("PublicActivityPlayList") && Values.CurrentData.CURRENT_PLAY_LIST.equals("default")) {
-                    PublicActivity activity = ((PublicActivity) mContext);
-                    Values.CurrentData.CURRENT_PLAY_LIST = activity.getCurrentListName();
+            //使得当前播放列表成为"待播放列表"
+            if (currentUiPosition.equals("PublicActivityPlayList") && Values.CurrentData.CURRENT_PLAY_LIST.equals("default")) {
+                PublicActivity activity = ((PublicActivity) mContext);
+                Values.CurrentData.CURRENT_PLAY_LIST = activity.getCurrentListName();
+                Data.sPlayOrderList.clear();
+                Data.sPlayOrderList.addAll(activity.getMusicItemList());        //更新数据
+            } else {
+                //恢复待播放列表为通常(ALL MUSIC)
+                if (!Values.CurrentData.CURRENT_PLAY_LIST.equals("default")) {
                     Data.sPlayOrderList.clear();
-                    Data.sPlayOrderList.addAll(activity.getMusicItemList());        //更新数据
-                    Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
-                } else {
-                    //恢复待播放列表为通常(ALL MUSIC)
-                    if (!Values.CurrentData.CURRENT_PLAY_LIST.equals("default")) {
-                        Data.sPlayOrderList.clear();
-                        Data.sPlayOrderList.addAll(Data.sMusicItems);
-                        if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
-                            Collections.shuffle(Data.sPlayOrderList);
-                        }
-                        Values.CurrentData.CURRENT_PLAY_LIST = "default";
-                        Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
-                    }
+                    Data.sPlayOrderList.addAll(Data.sMusicItems);
+                    if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM))
+                        Collections.shuffle(Data.sPlayOrderList);
+                    Values.CurrentData.CURRENT_PLAY_LIST = "default";
                 }
+            }
+            Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
 
-                Data.sMusicBinder.resetMusic();
+            //set current data
+            Data.setCurrentMusicItem(mMusicItems.get(holder.getAdapterPosition()));
 
-                //get & save data
-                clickedPath = mMusicItems.get(holder.getAdapterPosition()).getMusicPath();
-                clickedSongName = mMusicItems.get(holder.getAdapterPosition()).getMusicName();
-                clickedSongAlbumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
-                cover = Utils.Audio.getMp3Cover(clickedPath);
-                Data.sCurrentMusicAlbum = clickedSongAlbumName;
-                Data.sCurrentMusicName = clickedSongName;
-                Data.sCurrentMusicBitmap = cover;
-                Values.MUSIC_PLAYING = true;
-                Values.HAS_PLAYED = true;
+            if (Data.sCurrentCover != null) Data.sCurrentCover.recycle();
 
-                try {
-                    Data.sMusicBinder.setDataSource(clickedPath);
-                    Data.sMusicBinder.prepare();
-                    Data.sMusicBinder.playMusic();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Data.sMusicBinder.resetMusic();
-                    Toast.makeText(mMainActivity, e.getMessage(), Toast.LENGTH_SHORT).show();
+            //get & save data
+            Data.sCurrentCover = Utils.Audio.getMp3Cover(Data.sCurrentMusicItem.getMusicPath());
+
+            ReceiverOnMusicPlay.setDataSource(Data.sCurrentMusicItem.getMusicPath());
+            ReceiverOnMusicPlay.prepare();
+            ReceiverOnMusicPlay.playMusic();
+            Values.HAS_PLAYED = true;
+            mMainActivity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);         //update seek
+
+            for (int i = 0; i < Data.sPlayOrderList.size(); i++) {
+                if (Data.sPlayOrderList.get(i).getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
+                    Values.CurrentData.CURRENT_MUSIC_INDEX = i;
                 }
-
-                for (int i = 0; i < Data.sPlayOrderList.size(); i++) {
-                    if (Data.sPlayOrderList.get(i).getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
-                        Values.CurrentData.CURRENT_MUSIC_INDEX = i;
-                    }
-                }
-
-                return null;
             }
 
-            @Override
-            protected void onPostExecute(Integer result) {
-                READY = true;
+            observableEmitter.onNext(0);
+        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(integer -> {
 
-                mMainActivity.getMusicDetailFragment().getMyWaitListAdapter().notifyDataSetChanged();       //更新UI
+                    if (integer == -1) {
+                        Toast.makeText(mMainActivity, "Wait...", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
-                //set InfoBar
-                mMainActivity.getMusicDetailFragment().setSlideInfo(clickedSongName, clickedSongAlbumName, cover);
-                mMainActivity.getMusicDetailFragment().setCurrentInfo(clickedSongName, clickedSongAlbumName, cover);
+                    READY.set(true);
+                    mMainActivity.getMusicDetailFragment().setSlideInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.sCurrentCover);
+                    mMainActivity.getMusicDetailFragment().setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.sCurrentCover);
+                    Utils.Ui.setPlayButtonNowPlaying();
 
-                Utils.Ui.setPlayButtonNowPlaying();
-                mMainActivity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
-            }
-        }.execute());
+                    mMainActivity.getSlidingUpPanelLayout().setTouchEnabled(true);
+                }, Throwable::printStackTrace));
 
         view.setOnLongClickListener(v -> {
-            if (Data.sMusicBinder.isPlayingMusic()) {
+            if (ReceiverOnMusicPlay.isPlayingMusic()) {
                 Utils.SendSomeThing.sendPause(mContext);
             }
             return true;
