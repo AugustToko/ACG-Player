@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 13:55:33
- * 上次修改时间：2018年12月13日 13:55:23
+ * 当前修改时间：2018年12月13日 16:23:45
+ * 上次修改时间：2018年12月13日 15:38:27
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -19,6 +19,7 @@ import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -59,6 +60,7 @@ import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter2Albu
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.AlbumListFragment;
+import top.geek_studio.chenlongcould.musicplayer.Fragments.FileViewFragment;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.PlayListFragment;
@@ -128,6 +130,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     private AlbumListFragment mAlbumListFragment;
     private PlayListFragment mPlayListFragment;
     private MusicDetailFragment mMusicDetailFragment;
+    private FileViewFragment mFileViewFragment;
 
     /**
      * onXXX
@@ -293,6 +296,11 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             return;
         }
 
+        if (!mFileViewFragment.getCurrentFile().getPath().equals(Environment.getExternalStorageDirectory().getPath())) {
+            mFileViewFragment.onBackPressed();
+            return;
+        }
+
         //4
         if (BACK_PRESSED) {
             goToBackground();
@@ -426,14 +434,21 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             mPlayListFragment = PlayListFragment.newInstance(2);
             mFragmentList.add(mPlayListFragment);
 
+            final String tab_4 = getResources().getString(R.string.tab_file);
+            mTitles.add(tab_4);
+            mFileViewFragment = FileViewFragment.newInstance();
+            mFragmentList.add(mFileViewFragment);
+
             final ArrayList<String> titles = new ArrayList<>();
             titles.add(tab_1);
             titles.add(tab_2);
             titles.add(tab_3);
+            titles.add(tab_4);
 
             mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(titles.get(0)));
             mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(titles.get(1)));
             mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(titles.get(2)));
+            mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(titles.get(3)));
 
             mPagerAdapter = new MyPagerAdapter(getSupportFragmentManager(), mFragmentList, mTitles);
             mMainBinding.viewPager.setOffscreenPageLimit(2);

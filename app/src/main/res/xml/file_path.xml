@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ *************************************************************
+  ~ 文件：file_path.xml  模块：app  项目：MusicPlayer
+  ~ 当前修改时间：2018年12月13日 16:23:45
+  ~ 上次修改时间：2018年09月27日 14:55:13
+  ~ 作者：chenlongcould
+  ~ Geek Studio
+  ~ Copyright (c) 2018
+  ~ *************************************************************
+  -->
+
+<resources>
+    <paths>
+        <external-path
+            name="files_path"
+            path="." />
+    </paths>
+</resources>

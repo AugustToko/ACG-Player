@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 13:55:33
- * 上次修改时间：2018年12月13日 13:55:18
+ * 当前修改时间：2018年12月13日 16:23:45
+ * 上次修改时间：2018年12月13日 14:07:34
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -139,8 +139,12 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
 //            }
 //        });
 
-        CREATE_VIEW_DONE = true;
         return mMusicListBinding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        CREATE_VIEW_DONE = true;
     }
 
     /**

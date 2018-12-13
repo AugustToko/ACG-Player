@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ *************************************************************
+  ~ 文件：fragment_file_viewer.xml  模块：app  项目：MusicPlayer
+  ~ 当前修改时间：2018年12月13日 16:23:45
+  ~ 上次修改时间：2018年12月13日 16:23:35
+  ~ 作者：chenlongcould
+  ~ Geek Studio
+  ~ Copyright (c) 2018
+  ~ *************************************************************
+  -->
+
+<layout>
+
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include
+            android:id="@+id/include_recycler_view"
+            layout="@layout/include_recycler_view" />
+
+    </android.support.constraint.ConstraintLayout>
+</layout>

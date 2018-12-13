@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 13:55:33
- * 上次修改时间：2018年12月13日 13:55:23
+ * 当前修改时间：2018年12月13日 16:23:45
+ * 上次修改时间：2018年12月13日 16:23:32
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -771,6 +771,10 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                     Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE, PlayListFragment.TAG);
                 }
                 break;
+
+                case R.id.menu_toolbar_eq: {
+                    Utils.Audio.openEqualizer(mMainActivity, Data.sCurrentMusicItem.getAlbumId());
+                }
 
                 case R.id.menu_toolbar_debug: {
 //                    Snackbar.make(mSlidingUpPanelLayout,

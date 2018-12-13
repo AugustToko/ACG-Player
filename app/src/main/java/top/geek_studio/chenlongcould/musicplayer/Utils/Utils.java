@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 10:03:03
- * 上次修改时间：2018年12月13日 10:02:41
+ * 当前修改时间：2018年12月13日 16:23:45
+ * 上次修改时间：2018年12月13日 16:05:25
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -14,6 +14,7 @@ package top.geek_studio.chenlongcould.musicplayer.Utils;
 import android.animation.Animator;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +26,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
+import android.media.audiofx.AudioEffect;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -73,6 +75,22 @@ public final class Utils {
         private final static MediaMetadataRetriever sMediaMetadataRetriever = new MediaMetadataRetriever();
 
         private static final String TAG = "Audio";
+
+        public static void openEqualizer(@NonNull final Activity activity, int id) {
+            if (id == AudioEffect.ERROR_BAD_VALUE) {
+                Toast.makeText(activity, activity.getResources().getString(R.string.no_audio_ID), Toast.LENGTH_LONG).show();
+            } else {
+                try {
+                    final Intent effects = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+                    effects.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, id);
+                    effects.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC);
+                    activity.startActivityForResult(effects, 0);
+                } catch (@NonNull final ActivityNotFoundException notFound) {
+                    Toast.makeText(activity, activity.getResources().getString(R.string.no_equalizer), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+
 
         /**
          * 获取封面
