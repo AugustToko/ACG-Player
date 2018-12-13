@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：fragment_music_list_layout.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年11月14日 15:30:40
-  ~ 上次修改时间：2018年11月14日 15:29:35
+  ~ 当前修改时间：2018年12月13日 13:55:33
+  ~ 上次修改时间：2018年12月13日 13:55:23
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
   ~ *************************************************************
   -->
 
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<layout>
 
-    <include
-        android:id="@+id/fragment_music_list_include_recycler"
-        layout="@layout/include_recycler_view" />
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-</android.support.constraint.ConstraintLayout>
+        <include
+            android:id="@+id/include_recycler"
+            layout="@layout/include_recycler_view" />
+
+    </android.support.constraint.ConstraintLayout>
+</layout>

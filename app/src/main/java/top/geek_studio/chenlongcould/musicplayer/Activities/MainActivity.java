@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 10:03:03
- * 上次修改时间：2018年12月13日 10:02:41
+ * 当前修改时间：2018年12月13日 13:55:33
+ * 上次修改时间：2018年12月13日 13:55:23
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -15,6 +15,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -23,10 +24,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.NavigationView;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -35,7 +32,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -67,13 +63,14 @@ import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
-import top.geek_studio.chenlongcould.musicplayer.IStyle;
+import top.geek_studio.chenlongcould.musicplayer.Interface.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.MyApplication;
 import top.geek_studio.chenlongcould.musicplayer.MyMusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityMainBinding;
 
 public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
@@ -105,22 +102,24 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     private NotLeakHandler mHandler;
 
+    private ActivityMainBinding mMainBinding;
+
     /**
      * UI
      */
-    private TabLayout mTabLayout;
-    private ViewPager mViewPager;
+//    private TabLayout mTabLayout;
+//    private ViewPager mViewPager;
     private MyPagerAdapter mPagerAdapter;
     private final ArrayList<String> mTitles = new ArrayList<>();
-    private Toolbar mToolbar;
-    private AppBarLayout mAppBarLayout;
-    private DrawerLayout mDrawerLayout;
-    private NavigationView mNavigationView;
+    //    private Toolbar mToolbar;
+//    private AppBarLayout mAppBarLayout;
+//    private DrawerLayout mDrawerLayout;
+//    private NavigationView mNavigationView;
     private ImageView mNavHeaderImageView;
     private Menu mMenu;
     private SearchView mSearchView;
-    private SlidingUpPanelLayout mSlidingUpPanelLayout;
-    private ConstraintLayout mMainBody;
+//    private SlidingUpPanelLayout mSlidingUpPanelLayout;
+//    private ConstraintLayout mMainBody;
 
     /**
      * ----------------- fragment(s) ----------------------
@@ -137,9 +136,9 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     @SuppressLint("CheckResult")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d(Values.LogTAG.LIFT_TAG, "onCreate: " + TAG);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_new);
+
+        mMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         if (Data.sActivities.isEmpty()) Data.sActivities.add(this);
 
@@ -230,11 +229,11 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
                     Values.MUSIC_DATA_INIT_DONE = true;
                     initFragmentData();
-                    mToolbar.setSubtitle(Data.sMusicItems.size() + " Songs");
+                    mMainBinding.toolBar.setSubtitle(Data.sMusicItems.size() + " Songs");
                 });
 
         if (savedInstanceState != null) {
-            mViewPager.setCurrentItem(savedInstanceState.getInt("viewpage", 0), true);
+            mMainBinding.viewPager.setCurrentItem(savedInstanceState.getInt("viewpage", 0), true);
         }
 
     }
@@ -277,8 +276,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     public void onBackPressed() {
 
         //1
-        if (mDrawerLayout.isDrawerOpen(Gravity.START)) {
-            mDrawerLayout.closeDrawers();
+        if (mMainBinding.drawerLayout.isDrawerOpen(Gravity.START)) {
+            mMainBinding.drawerLayout.closeDrawers();
             return;
         }
 
@@ -289,8 +288,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         }
 
         //3
-        if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
-            mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        if (mMainBinding.slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+            mMainBinding.slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
             return;
         }
 
@@ -322,7 +321,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                mMusicListFragment.getRecyclerView().stopScroll();
+                mMusicListFragment.getMusicListBinding().includeRecycler.recyclerView.stopScroll();
                 return false;
             }
 
@@ -432,14 +431,14 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             titles.add(tab_2);
             titles.add(tab_3);
 
-            mTabLayout.addTab(mTabLayout.newTab().setText(titles.get(0)));
-            mTabLayout.addTab(mTabLayout.newTab().setText(titles.get(1)));
-            mTabLayout.addTab(mTabLayout.newTab().setText(titles.get(2)));
+            mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(titles.get(0)));
+            mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(titles.get(1)));
+            mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(titles.get(2)));
 
             mPagerAdapter = new MyPagerAdapter(getSupportFragmentManager(), mFragmentList, mTitles);
-            mViewPager.setOffscreenPageLimit(2);
-            mTabLayout.setupWithViewPager(mViewPager);
-            mViewPager.setAdapter(mPagerAdapter);
+            mMainBinding.viewPager.setOffscreenPageLimit(2);
+            mMainBinding.tabLayout.setupWithViewPager(mMainBinding.viewPager);
+            mMainBinding.viewPager.setAdapter(mPagerAdapter);
 
             Values.CurrentData.CURRENT_PAGE_INDEX = 0;
         });
@@ -475,10 +474,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         return mNavHeaderImageView;
     }
 
-    public Toolbar getToolbar() {
-        return mToolbar;
-    }
-
     public final MusicListFragment getMusicListFragment() {
         return mMusicListFragment;
     }
@@ -495,29 +490,27 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         return mPlayListFragment;
     }
 
-    public final SlidingUpPanelLayout getSlidingUpPanelLayout() {
-        return mSlidingUpPanelLayout;
-    }
-
     public final NotLeakHandler getHandler() {
         return mHandler;
     }
 
-    private void initView() {
+    public ActivityMainBinding getMainBinding() {
+        return mMainBinding;
+    }
 
-        findView();
+    private void initView() {
 
         initStyle();
 
         //根据recycler view的滚动程度, 来判断如何返回顶部
-        mToolbar.setOnClickListener(v -> {
+        mMainBinding.toolBar.setOnClickListener(v -> {
             if (TOOLBAR_CLICKED) {
                 switch (Values.CurrentData.CURRENT_PAGE_INDEX) {
                     case 0: {
                         if (Values.CurrentData.CURRENT_BIND_INDEX_MUSIC_LIST > 20) {
-                            mMusicListFragment.getRecyclerView().scrollToPosition(0);
+                            mMusicListFragment.getMusicListBinding().includeRecycler.recyclerView.scrollToPosition(0);
                         } else {
-                            mMusicListFragment.getRecyclerView().smoothScrollToPosition(0);
+                            mMusicListFragment.getMusicListBinding().includeRecycler.recyclerView.smoothScrollToPosition(0);
                         }
                     }
                     break;
@@ -534,7 +527,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             TOOLBAR_CLICKED = true;
             new Handler().postDelayed(() -> TOOLBAR_CLICKED = false, 1000);         //双击机制
         });
-        setSupportActionBar(mToolbar);
+        setSupportActionBar(mMainBinding.toolBar);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -542,7 +535,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24px);
         }
 
-        mNavHeaderImageView = mNavigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
+        mNavHeaderImageView = mMainBinding.navigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
 
         mNavHeaderImageView.setOnClickListener(v -> {
             if (getMusicDetailFragment().getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
@@ -550,21 +543,21 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 return;
             }
 
-            if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
-                mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+            if (mMainBinding.slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+                mMainBinding.slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
                 return;
             }
 
-            mDrawerLayout.closeDrawers();
+            mMainBinding.drawerLayout.closeDrawers();
         });
 
-        mSlidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+        mMainBinding.slidingLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
 
                 CURRENT_SLIDE_OFFSET = slideOffset;
 
-                mMainBody.setTranslationY(0 - slideOffset * 120);
+                mMainBinding.mainBody.setTranslationY(0 - slideOffset * 120);
 
                 float current = 1 - slideOffset;
                 mMusicDetailFragment.getNowPlayingBody().setAlpha(current);
@@ -587,8 +580,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     //隐藏BODY
                     mMusicDetailFragment.getNowPlayingBody().setVisibility(View.GONE);
 
-                    mTabLayout.setVisibility(View.GONE);
-                    mTabLayout.setVisibility(View.GONE);
+                    mMainBinding.tabLayout.setVisibility(View.GONE);
+                    mMainBinding.tabLayout.setVisibility(View.GONE);
 
                     if (AlbumListFragment.VIEW_HAS_LOAD)
                         mAlbumListFragment.visibleOrGone(View.GONE);
@@ -601,8 +594,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     }
 
                 } else {
-                    mTabLayout.setVisibility(View.VISIBLE);
-                    mTabLayout.setVisibility(View.VISIBLE);
+                    mMainBinding.tabLayout.setVisibility(View.VISIBLE);
+                    mMainBinding.tabLayout.setVisibility(View.VISIBLE);
                     mMusicDetailFragment.getNowPlayingBody().setVisibility(View.VISIBLE);
                     if (AlbumListFragment.VIEW_HAS_LOAD)
                         mAlbumListFragment.visibleOrGone(View.VISIBLE);
@@ -617,25 +610,25 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             @Override
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
                 if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
-                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                    mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                     getMusicDetailFragment().getHandler().sendEmptyMessage(MusicDetailFragment.UPDATE_TITLE);
                 } else if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED)
-                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                    mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
             }
         });
 
         //First no music no slide
         if (Data.sMusicBinder != null) {
             if (Values.HAS_PLAYED)
-                mSlidingUpPanelLayout.setTouchEnabled(true);
+                mMainBinding.slidingLayout.setTouchEnabled(true);
             else
-                mSlidingUpPanelLayout.setTouchEnabled(false);
+                mMainBinding.slidingLayout.setTouchEnabled(false);
         } else {
-            mSlidingUpPanelLayout.setTouchEnabled(false);
+            mMainBinding.slidingLayout.setTouchEnabled(false);
         }
 
 
-        mNavigationView.setNavigationItemSelectedListener(menuItem -> {
+        mMainBinding.navigationView.setNavigationItemSelectedListener(menuItem -> {
             switch (menuItem.getItemId()) {
                 case R.id.menu_nav_exit: {
                     exitApp();
@@ -659,7 +652,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         });
 
         // 实例代码
-        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        mMainBinding.viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 //                ArgbEvaluator evaluator = new ArgbEvaluator(); // ARGB求值器
@@ -688,13 +681,13 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     case 0: {
                         mMenu.findItem(R.id.menu_toolbar_layout).setVisible(false);
                         mMenu.findItem(R.id.menu_toolbar_search).setVisible(true);
-                        mToolbar.setSubtitle(Data.sMusicItems.size() + " Songs");
+                        mMainBinding.toolBar.setSubtitle(Data.sMusicItems.size() + " Songs");
                     }
                     break;
                     case 1: {
                         mMenu.findItem(R.id.menu_toolbar_layout).setVisible(true);
                         mMenu.findItem(R.id.menu_toolbar_search).setVisible(false);
-                        mToolbar.setSubtitle(Data.sAlbumItems.size() + " Albums");
+                        mMainBinding.toolBar.setSubtitle(Data.sAlbumItems.size() + " Albums");
                     }
                     break;
                     case 2: {
@@ -712,33 +705,18 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         });
 
         // 参数：开启抽屉的activity、DrawerLayout的对象、toolbar按钮打开关闭的对象、描述open drawer、描述close drawer
-        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.open, R.string.close);
+        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mMainBinding.drawerLayout, mMainBinding.toolBar, R.string.open, R.string.close);
         // 添加抽屉按钮，通过点击按钮实现打开和关闭功能; 如果不想要抽屉按钮，只允许在侧边边界拉出侧边栏，可以不写此行代码
         mDrawerToggle.syncState();
         // 设置按钮的动画效果; 如果不想要打开关闭抽屉时的箭头动画效果，可以不写此行代码
-        mDrawerLayout.addDrawerListener(mDrawerToggle);
-    }
-
-    /**
-     * findViewById
-     */
-    private void findView() {
-        mToolbar = findViewById(R.id.activity_main_tool_bar);
-        mDrawerLayout = findViewById(R.id.activity_main_drawer_layout);
-        mNavigationView = findViewById(R.id.activity_main_nav_view);
-        mTabLayout = findViewById(R.id.tab_layout);
-        mViewPager = findViewById(R.id.view_pager);
-        mAppBarLayout = findViewById(R.id.activity_main_appbar);
-        mSlidingUpPanelLayout = findViewById(R.id.activity_main_sliding_layout);
-        mMainBody = findViewById(R.id.activity_main_body);
-//        mBackgroundImage = findViewById(R.id.back_ground_image);
+        mMainBinding.drawerLayout.addDrawerListener(mDrawerToggle);
     }
 
     @Override
     public void initStyle() {
-        Utils.Ui.setAppBarColor(this, mAppBarLayout, mToolbar);
+        Utils.Ui.setAppBarColor(this, mMainBinding.appbar, mMainBinding.toolBar);
         int color = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577"));
-        mTabLayout.setBackgroundColor(color);
+        mMainBinding.tabLayout.setBackgroundColor(color);
     }
 
     public final class NotLeakHandler extends Handler {
@@ -765,12 +743,12 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 }
                 break;
                 case UP: {
-                    mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                    mMainBinding.slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
                 }
                 break;
 
                 case DOWN: {
-                    mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                    mMainBinding.slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
                 }
                 break;
                 default:

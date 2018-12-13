@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月07日 08:59:28
- * 上次修改时间：2018年12月07日 07:56:09
+ * 当前修改时间：2018年12月13日 13:55:33
+ * 上次修改时间：2018年12月13日 13:55:23
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -14,16 +14,12 @@ package top.geek_studio.chenlongcould.musicplayer.Activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
+import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -34,20 +30,18 @@ import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityAlbumDetailBinding;
 
+/**
+ * a activity that show Music Album Detail data
+ * <p>
+ * has dataBinding
+ */
 public final class AlbumDetailActivity extends Activity {
 
     public static final String TAG = "AlbumDetailActivity";
 
-    private Toolbar mToolbar;
-
-    private AppBarLayout mAppBarLayout;
-
-    private RecyclerView mRecyclerView;
-
-    private ImageView mImageView;
-
-    private CollapsingToolbarLayout mCollapsingToolbarLayout;
+    private ActivityAlbumDetailBinding mAlbumDetailBinding;
 
     /**
      * ------------- data ---------------
@@ -59,9 +53,7 @@ public final class AlbumDetailActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list);
-
-        initView();
+        mAlbumDetailBinding = DataBindingUtil.setContentView(this, R.layout.activity_album_detail);
 
         initData();
     }
@@ -70,7 +62,7 @@ public final class AlbumDetailActivity extends Activity {
         Intent intent = getIntent();
         if (intent != null) {
             String key = intent.getStringExtra("key");
-            mCollapsingToolbarLayout.setTitle(key);
+            mAlbumDetailBinding.collapsingToolbar.setTitle(key);
 
             //根据Album名称查music ID
             Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -142,11 +134,11 @@ public final class AlbumDetailActivity extends Activity {
                     if (img != null) {
                         File file = new File(img);
                         if (file.exists())
-                            GlideApp.with(AlbumDetailActivity.this).load(file).into(mImageView);
+                            GlideApp.with(AlbumDetailActivity.this).load(file).into(mAlbumDetailBinding.albumImage);
                         else
-                            GlideApp.with(AlbumDetailActivity.this).load(R.drawable.ic_audiotrack_24px).into(mImageView);
+                            GlideApp.with(AlbumDetailActivity.this).load(R.drawable.ic_audiotrack_24px).into(mAlbumDetailBinding.albumImage);
                     } else
-                        GlideApp.with(AlbumDetailActivity.this).load(R.drawable.ic_audiotrack_24px).into(mImageView);
+                        GlideApp.with(AlbumDetailActivity.this).load(R.drawable.ic_audiotrack_24px).into(mAlbumDetailBinding.albumImage);
                     cursor2.close();
                 } else {
                     return;
@@ -156,22 +148,12 @@ public final class AlbumDetailActivity extends Activity {
             }
 
             MyRecyclerAdapter adapter = new MyRecyclerAdapter(mSongs, this, TAG);
-            mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-            mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
-            mRecyclerView.setHasFixedSize(true);
-            mRecyclerView.setAdapter(adapter);
+            mAlbumDetailBinding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            mAlbumDetailBinding.recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+            mAlbumDetailBinding.recyclerView.setHasFixedSize(true);
+            mAlbumDetailBinding.recyclerView.setAdapter(adapter);
         }
 
     }
 
-    private void initView() {
-        mRecyclerView = findViewById(R.id.activity_list_recycler);
-        mToolbar = findViewById(R.id.activity_list_toolbar);
-        mAppBarLayout = findViewById(R.id.activity_list_app_bar);
-        mCollapsingToolbarLayout = findViewById(R.id.activity_list_collapsing_toolbar);
-        mImageView = findViewById(R.id.activity_list_head_pic);
-        mToolbar.inflateMenu(R.menu.menu_toolbar_album_detail);
-
-        mToolbar.setNavigationOnClickListener(v -> onBackPressed());
-    }
 }

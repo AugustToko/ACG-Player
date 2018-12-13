@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月06日 19:19:07
- * 上次修改时间：2018年12月06日 19:18:26
+ * 当前修改时间：2018年12月13日 13:55:33
+ * 上次修改时间：2018年12月13日 13:55:18
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -38,10 +38,10 @@ import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter2AlbumList;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
+import top.geek_studio.chenlongcould.musicplayer.Interface.VisibleOrGone;
 import top.geek_studio.chenlongcould.musicplayer.Models.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
-import top.geek_studio.chenlongcould.musicplayer.VisibleOrGone;
 
 public final class AlbumListFragment extends Fragment implements VisibleOrGone {
 
@@ -120,7 +120,7 @@ public final class AlbumListFragment extends Fragment implements VisibleOrGone {
 
                 //when current page is AlbumFragment (page 0), setSubTitle
                 if (Values.CurrentData.CURRENT_PAGE_INDEX == 1) {
-                    mMainActivity.runOnUiThread(() -> mMainActivity.getToolbar().setSubtitle(Data.sMusicItems.size() + " Songs"));
+                    mMainActivity.runOnUiThread(() -> mMainActivity.getMainBinding().toolBar.setSubtitle(Data.sMusicItems.size() + " Songs"));
                 }
 
                 return null;

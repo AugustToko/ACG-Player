@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月10日 14:49:08
- * 上次修改时间：2018年12月09日 16:47:55
+ * 当前修改时间：2018年12月13日 13:55:33
+ * 上次修改时间：2018年12月13日 12:52:20
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -29,7 +29,7 @@ import android.widget.Switch;
 import com.jrummyapps.android.colorpicker.ColorPickerDialog;
 import com.jrummyapps.android.colorpicker.ColorPickerDialogListener;
 
-import top.geek_studio.chenlongcould.musicplayer.IStyle;
+import top.geek_studio.chenlongcould.musicplayer.Interface.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 10:03:03
- * 上次修改时间：2018年12月13日 10:02:37
+ * 当前修改时间：2018年12月13日 13:55:33
+ * 上次修改时间：2018年12月13日 13:20:32
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -62,7 +62,7 @@ import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
-import top.geek_studio.chenlongcould.musicplayer.IStyle;
+import top.geek_studio.chenlongcould.musicplayer.Interface.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.PlayListItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
@@ -409,7 +409,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                     mMainActivity.getMusicDetailFragment().setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.sCurrentCover);
                     Utils.Ui.setPlayButtonNowPlaying();
 
-                    mMainActivity.getSlidingUpPanelLayout().setTouchEnabled(true);
+                    mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
                 }, Throwable::printStackTrace));
 
         view.setOnLongClickListener(v -> {

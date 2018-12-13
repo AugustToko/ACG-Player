@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyWaitListAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 10:03:03
- * 上次修改时间：2018年12月13日 08:35:53
+ * 当前修改时间：2018年12月13日 13:55:33
+ * 上次修改时间：2018年12月13日 13:19:46
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -39,7 +39,7 @@ import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.IStyle;
+import top.geek_studio.chenlongcould.musicplayer.Interface.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.PlayListsUtil;
@@ -112,7 +112,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
              * so this can fix this
              * */
             if (mMainActivity.getMusicDetailFragment().getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED)
-                mMainActivity.getSlidingUpPanelLayout().setTouchEnabled(false);
+                mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(false);
 
         }).start());
 

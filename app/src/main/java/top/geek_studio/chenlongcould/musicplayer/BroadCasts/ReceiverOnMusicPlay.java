@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 10:03:03
- * 上次修改时间：2018年12月13日 10:02:39
+ * 当前修改时间：2018年12月13日 13:55:33
+ * 上次修改时间：2018年12月13日 13:54:15
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -106,9 +106,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
         setSeekBarColor(cover, musicDetailFragment);
         musicDetailFragment.setSlideInfo(musicName, albumName, cover);
         musicDetailFragment.setCurrentInfo(musicName, albumName, cover);
-
-        if (cover != null) cover.recycle();
-
         reSetSeekBar();         //防止seekBar跳动到Max
         musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
         musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
@@ -316,8 +313,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                         musicDetailFragment.setCurrentInfoWithoutMainImage(musicName, albumName, Utils.Audio.getAlbumByteImage(path, context));
                         reSetSeekBar();         //防止seekBar跳动到Max
 
-                        if (cover != null) cover.recycle();
-
                         musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
                         musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
                     } else {
@@ -338,7 +333,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
         //after type set
         if (!Data.sActivities.isEmpty()) {
             ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
-            ((MainActivity) Data.sActivities.get(0)).getSlidingUpPanelLayout().setTouchEnabled(true);
+            ((MainActivity) Data.sActivities.get(0)).getMainBinding().slidingLayout.setTouchEnabled(true);
         }
 
     }

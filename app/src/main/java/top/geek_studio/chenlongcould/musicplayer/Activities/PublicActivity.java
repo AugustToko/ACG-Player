@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：PublicActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月12日 11:57:29
- * 上次修改时间：2018年12月12日 11:57:13
+ * 当前修改时间：2018年12月13日 13:55:33
+ * 上次修改时间：2018年12月13日 12:52:20
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -34,7 +34,7 @@ import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.IStyle;
+import top.geek_studio.chenlongcould.musicplayer.Interface.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;

@@ -1,15 +1,15 @@
 /*
  * ************************************************************
  * 文件：VisibleOrGone.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月12日 11:57:29
- * 上次修改时间：2018年12月12日 11:57:13
+ * 当前修改时间：2018年12月13日 13:55:33
+ * 上次修改时间：2018年12月13日 12:52:21
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
  * ************************************************************
  */
 
-package top.geek_studio.chenlongcould.musicplayer;
+package top.geek_studio.chenlongcould.musicplayer.Interface;
 
 public interface VisibleOrGone {
 

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 10:03:03
- * 上次修改时间：2018年12月13日 08:35:53
+ * 当前修改时间：2018年12月13日 13:55:33
+ * 上次修改时间：2018年12月13日 13:55:23
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -73,12 +73,12 @@ import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.CustomView.AlbumImageView;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
-import top.geek_studio.chenlongcould.musicplayer.IStyle;
+import top.geek_studio.chenlongcould.musicplayer.Interface.IStyle;
+import top.geek_studio.chenlongcould.musicplayer.Interface.VisibleOrGone;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
-import top.geek_studio.chenlongcould.musicplayer.VisibleOrGone;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -271,7 +271,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
             if (bitmap != null) bitmap.recycle();
 
-            mMainActivity.getSlidingUpPanelLayout().setTouchEnabled(true);
+            mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
         } else {
             mPlayButton.setImageResource(R.drawable.ic_play_arrow_black_24dp);
         }
@@ -1135,8 +1135,8 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
 
         mNowPlayingBody.setOnClickListener(v -> {
             if (Values.HAS_PLAYED) {
-                if (mMainActivity.getMusicListFragment().getRecyclerView() != null) {
-                    mMainActivity.getMusicListFragment().getRecyclerView().stopScroll();
+                if (mMainActivity.getMusicListFragment().getMusicListBinding().includeRecycler.recyclerView != null) {
+                    mMainActivity.getMusicListFragment().getMusicListBinding().includeRecycler.recyclerView.stopScroll();
                 }
                 if (mMainActivity.getAlbumListFragment().getRecyclerView() != null) {
                     mMainActivity.getAlbumListFragment().getRecyclerView().stopScroll();
@@ -1154,16 +1154,17 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
             public void onPanelSlide(View panel, float slideOffset) {
                 CURRENT_SLIDE_OFFSET = slideOffset;
                 mSlideUpGroup.setTranslationY(0 - slideOffset * 120);
-                if (slideOffset == 0) mMainActivity.getSlidingUpPanelLayout().setTouchEnabled(true);
+                if (slideOffset == 0)
+                    mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
             }
 
             @Override
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
                 if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
-                    mMainActivity.getSlidingUpPanelLayout().setTouchEnabled(true);
+                    mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
                     mHandler.sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
                 } else {
-                    mMainActivity.getSlidingUpPanelLayout().setTouchEnabled(false);
+                    mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(false);
                 }
             }
         });

@@ -1,245 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：activity_settings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月07日 11:08:31
-  ~ 上次修改时间：2018年12月07日 11:08:04
+  ~ 当前修改时间：2018年12月13日 13:55:33
+  ~ 上次修改时间：2018年12月13日 13:55:23
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
   ~ *************************************************************
   -->
 
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".Activities.SettingsActivity">
+<layout>
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/activity_settings_appbar"
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/toolbarColor"
-        android:paddingTop="@dimen/toolbar_padding_top">
+        android:layout_height="match_parent"
+        tools:context=".Activities.SettingsActivity">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/activity_settings_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:navigationIcon="@drawable/ic_arrow_back_white_24dp"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:title="Settings">
-
-        </android.support.v7.widget.Toolbar>
-
-    </android.support.design.widget.AppBarLayout>
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/activity_settings_appbar">
-
-        <android.support.constraint.ConstraintLayout
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/activity_settings_appbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="16dp">
+            android:background="@color/toolbarColor"
+            android:paddingTop="@dimen/toolbar_padding_top">
 
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:text="@string/app_color"
-                android:textColor="@color/colorAccent"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent" />
-
-            <android.support.constraint.ConstraintLayout
-                android:id="@+id/primer_color_option"
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/activity_settings_toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:layout_marginTop="8dp"
-                android:background="?android:attr/selectableItemBackground"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView">
+                android:layout_height="?actionBarSize"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                app:navigationIcon="@drawable/ic_arrow_back_white_24dp"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:title="Settings">
 
-                <TextView
-                    android:id="@+id/textView2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/color_primary"
-                    android:textColor="@color/notVeryBlack"
-                    android:textSize="18sp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+            </android.support.v7.widget.Toolbar>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginBottom="8dp"
-                    android:text="@string/this_is_body_color_like_toolbar"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView2" />
+        </android.support.design.widget.AppBarLayout>
 
-                <ImageView
-                    android:id="@+id/activity_settings_preview_primary"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginEnd="16dp"
-                    android:background="@color/colorPrimary"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    android:contentDescription="@string/app_name"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </android.support.constraint.ConstraintLayout>
-
-            <View
-                android:id="@+id/view2"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#cecece"
-                app:layout_constraintTop_toBottomOf="@+id/primer_color_option" />
-
-            <android.support.constraint.ConstraintLayout
-                android:id="@+id/primer_color_dark_option"
-                android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:background="?android:attr/selectableItemBackground"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/view2">
-
-                <TextView
-                    android:id="@+id/text_view_3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/colorprimarydark"
-                    android:textColor="@color/notVeryBlack"
-                    android:textSize="18sp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:text="@string/this_is_dark_color_like_status_bar"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/text_view_3" />
-
-                <ImageView
-                    android:id="@+id/activity_settings_preview_primary_dark"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginEnd="16dp"
-                    android:background="@color/colorPrimaryDark"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    android:contentDescription="@string/app_name"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </android.support.constraint.ConstraintLayout>
-
-            <View
-                android:id="@+id/view3"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#cecece"
-                app:layout_constraintTop_toBottomOf="@+id/primer_color_dark_option" />
-
-            <android.support.constraint.ConstraintLayout
-                android:id="@+id/accent_color_option"
-                android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:background="?android:attr/selectableItemBackground"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/view3">
-
-                <TextView
-                    android:id="@+id/text_view_4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/color_accent"
-                    android:textColor="@color/notVeryBlack"
-                    android:textSize="18sp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:text="@string/the_accent_color_like_button"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/text_view_4" />
-
-                <ImageView
-                    android:id="@+id/activity_settings_preview_acc"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginEnd="16dp"
-                    android:background="@color/colorAccent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    android:contentDescription="@string/app_name"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </android.support.constraint.ConstraintLayout>
-
-            <TextView
-                android:id="@+id/textView_2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:text="@string/style_settings"
-                android:textColor="@color/colorAccent"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/accent_color_option" />
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activity_settings_appbar">
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:visibility="visible"
-                app:layout_constraintTop_toBottomOf="@+id/textView_2">
+                android:paddingTop="16dp">
+
+                <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/app_color"
+                    android:textColor="@color/colorAccent"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent" />
 
                 <android.support.constraint.ConstraintLayout
-                    android:id="@+id/detail_background_style"
+                    android:id="@+id/primer_color_option"
                     android:layout_width="match_parent"
                     android:layout_height="70dp"
+                    android:layout_marginTop="8dp"
                     android:background="?android:attr/selectableItemBackground"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent">
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textView">
 
                     <TextView
-                        android:id="@+id/text_view_5"
+                        android:id="@+id/textView2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="8dp"
-                        android:text="@string/music_detail_background"
+                        android:text="@string/color_primary"
                         android:textColor="@color/notVeryBlack"
                         android:textSize="18sp"
                         app:layout_constraintStart_toStartOf="parent"
@@ -249,50 +86,48 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
-                        android:layout_marginTop="8dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/set_background_color_or_image_with_blur"
+                        android:text="@string/this_is_body_color_like_toolbar"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/text_view_5" />
+                        app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
-                    <Switch
-                        android:id="@+id/activity_settings_style_switch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                    <ImageView
+                        android:id="@+id/activity_settings_preview_primary"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:layout_marginEnd="16dp"
-                        android:layout_marginBottom="8dp"
+                        android:background="@color/colorPrimary"
+                        android:contentDescription="@string/app_name"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
-
                 </android.support.constraint.ConstraintLayout>
 
                 <View
-                    android:id="@+id/view4"
+                    android:id="@+id/view2"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="#cecece"
-                    app:layout_constraintTop_toBottomOf="@+id/detail_background_style" />
+                    app:layout_constraintTop_toBottomOf="@+id/primer_color_option" />
 
                 <android.support.constraint.ConstraintLayout
-                    android:id="@+id/main_tab_style"
+                    android:id="@+id/primer_color_dark_option"
                     android:layout_width="match_parent"
                     android:layout_height="70dp"
                     android:background="?android:attr/selectableItemBackground"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/view4">
+                    app:layout_constraintTop_toBottomOf="@+id/view2">
 
                     <TextView
-                        android:id="@+id/text_view_6"
+                        android:id="@+id/text_view_3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="8dp"
-                        android:text="@string/tablayout_auto_color_accent"
+                        android:text="@string/colorprimarydark"
                         android:textColor="@color/notVeryBlack"
                         android:textSize="18sp"
                         app:layout_constraintStart_toStartOf="parent"
@@ -304,49 +139,47 @@
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="8dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/set_tablayout_with_music_cover_accent_color"
+                        android:text="@string/this_is_dark_color_like_status_bar"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/text_view_6" />
+                        app:layout_constraintTop_toBottomOf="@+id/text_view_3" />
 
-                    <Switch
-                        android:id="@+id/switch2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                    <ImageView
+                        android:id="@+id/activity_settings_preview_primary_dark"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:layout_marginEnd="16dp"
-                        android:layout_marginBottom="8dp"
+                        android:background="@color/colorPrimaryDark"
+                        android:contentDescription="@string/app_name"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
-
                 </android.support.constraint.ConstraintLayout>
 
                 <View
-                    android:id="@+id/view5"
+                    android:id="@+id/view3"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="#cecece"
-                    app:layout_constraintTop_toBottomOf="@+id/main_tab_style" />
+                    app:layout_constraintTop_toBottomOf="@+id/primer_color_dark_option" />
 
                 <android.support.constraint.ConstraintLayout
-                    android:id="@+id/night_style"
+                    android:id="@+id/accent_color_option"
                     android:layout_width="match_parent"
                     android:layout_height="70dp"
                     android:background="?android:attr/selectableItemBackground"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="1.0"
+                    app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    android:visibility="gone"
-                    app:layout_constraintTop_toBottomOf="@+id/main_tab_style">
+                    app:layout_constraintTop_toBottomOf="@+id/view3">
 
                     <TextView
-                        android:id="@+id/text_view_7"
+                        android:id="@+id/text_view_4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="8dp"
-                        android:text="@string/auto_night_mode"
+                        android:text="@string/color_accent"
                         android:textColor="@color/notVeryBlack"
                         android:textSize="18sp"
                         app:layout_constraintStart_toStartOf="parent"
@@ -358,28 +191,198 @@
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="8dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/set_app_background_color_dark"
+                        android:text="@string/the_accent_color_like_button"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/text_view_7" />
+                        app:layout_constraintTop_toBottomOf="@+id/text_view_4" />
 
-                    <Switch
-                        android:id="@+id/activity_settings_night_switch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                    <ImageView
+                        android:id="@+id/activity_settings_preview_acc"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:layout_marginEnd="16dp"
-                        android:layout_marginBottom="8dp"
+                        android:background="@color/colorAccent"
+                        android:contentDescription="@string/app_name"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
+                </android.support.constraint.ConstraintLayout>
+
+                <TextView
+                    android:id="@+id/textView_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/style_settings"
+                    android:textColor="@color/colorAccent"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/accent_color_option" />
+
+                <android.support.constraint.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:visibility="visible"
+                    app:layout_constraintTop_toBottomOf="@+id/textView_2">
+
+                    <android.support.constraint.ConstraintLayout
+                        android:id="@+id/detail_background_style"
+                        android:layout_width="match_parent"
+                        android:layout_height="70dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent">
+
+                        <TextView
+                            android:id="@+id/text_view_5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/music_detail_background"
+                            android:textColor="@color/notVeryBlack"
+                            android:textSize="18sp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:text="@string/set_background_color_or_image_with_blur"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/text_view_5" />
+
+                        <Switch
+                            android:id="@+id/activity_settings_style_switch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginBottom="8dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </android.support.constraint.ConstraintLayout>
+
+                    <View
+                        android:id="@+id/view4"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#cecece"
+                        app:layout_constraintTop_toBottomOf="@+id/detail_background_style" />
+
+                    <android.support.constraint.ConstraintLayout
+                        android:id="@+id/main_tab_style"
+                        android:layout_width="match_parent"
+                        android:layout_height="70dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/view4">
+
+                        <TextView
+                            android:id="@+id/text_view_6"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/tablayout_auto_color_accent"
+                            android:textColor="@color/notVeryBlack"
+                            android:textSize="18sp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:text="@string/set_tablayout_with_music_cover_accent_color"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/text_view_6" />
+
+                        <Switch
+                            android:id="@+id/switch2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginBottom="8dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </android.support.constraint.ConstraintLayout>
+
+                    <View
+                        android:id="@+id/view5"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#cecece"
+                        app:layout_constraintTop_toBottomOf="@+id/main_tab_style" />
+
+                    <android.support.constraint.ConstraintLayout
+                        android:id="@+id/night_style"
+                        android:layout_width="match_parent"
+                        android:layout_height="70dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:visibility="gone"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="1.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/main_tab_style">
+
+                        <TextView
+                            android:id="@+id/text_view_7"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/auto_night_mode"
+                            android:textColor="@color/notVeryBlack"
+                            android:textSize="18sp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:text="@string/set_app_background_color_dark"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/text_view_7" />
+
+                        <Switch
+                            android:id="@+id/activity_settings_night_switch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginBottom="8dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </android.support.constraint.ConstraintLayout>
 
                 </android.support.constraint.ConstraintLayout>
 
             </android.support.constraint.ConstraintLayout>
 
-        </android.support.constraint.ConstraintLayout>
+        </ScrollView>
 
-    </ScrollView>
-
-</android.support.constraint.ConstraintLayout>
+    </android.support.constraint.ConstraintLayout>
+</layout>

@@ -1,218 +1,222 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：fragment_play_list.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月10日 14:49:08
-  ~ 上次修改时间：2018年12月10日 14:47:42
+  ~ 当前修改时间：2018年12月13日 13:55:33
+  ~ 上次修改时间：2018年12月13日 13:55:23
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
   ~ *************************************************************
   -->
 
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:elevation="5dp">
+<layout>
 
-    <ImageView
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:alpha="0.2"
-        android:src="@drawable/ramp_bg_dark"
-        android:clickable="false"
-        android:contentDescription="@string/shadow"
-        app:layout_constraintBottom_toTopOf="@+id/fragment_play_list_recycler" />
-
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/fragment_play_list_add_recent"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:background="@drawable/my_ripple_mask"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="match_parent"
+        android:elevation="5dp">
 
         <ImageView
-            android:id="@+id/fragment_play_list_add_recent_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:contentDescription="@string/app_name"
-            android:src="@drawable/ic_library_add_grey_600_24dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:alpha="0.2"
+            android:clickable="false"
+            android:contentDescription="@string/shadow"
+            android:src="@drawable/ramp_bg_dark"
+            app:layout_constraintBottom_toTopOf="@+id/recycler_view" />
 
         <android.support.constraint.ConstraintLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/fragment_play_list_add_recent_menu"
-            app:layout_constraintStart_toEndOf="@+id/fragment_play_list_add_recent_image"
+            android:id="@+id/add_recent"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:background="@drawable/my_ripple_mask"
             app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/fragment_play_list_add_recent_text_two"
+            <ImageView
+                android:id="@+id/recent_image"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/app_name"
-                android:textSize="12sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_play_list_add_recent_name" />
-
-            <TextView
-                android:id="@+id/fragment_play_list_add_recent_text_one"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_marginTop="4dp"
-                android:layout_marginEnd="8dp"
-                android:maxLines="1"
-                android:text="@string/app_name"
-                android:textSize="12sp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/ic_library_add_grey_600_24dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/fragment_play_list_add_recent_text_two"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_play_list_add_recent_name" />
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/fragment_play_list_add_recent_name"
+            <android.support.constraint.ConstraintLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="@string/add_recent"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/recent_menu"
+                app:layout_constraintStart_toEndOf="@+id/recent_image"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/recent_text_two"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/app_name"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/recent_name" />
+
+                <TextView
+                    android:id="@+id/recent_text_one"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="8dp"
+                    android:maxLines="1"
+                    android:text="@string/app_name"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/recent_text_two"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/recent_name" />
+
+                <TextView
+                    android:id="@+id/recent_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:text="@string/add_recent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </android.support.constraint.ConstraintLayout>
+
+            <ImageView
+                android:id="@+id/recent_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:contentDescription="@string/menu_button"
+                android:focusable="true"
+                android:src="@drawable/ic_more_vert_24px"
+                android:tint="#636363"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
         </android.support.constraint.ConstraintLayout>
 
-        <ImageView
-            android:id="@+id/fragment_play_list_add_recent_menu"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="8dp"
-            android:background="?android:attr/selectableItemBackground"
-            android:clickable="true"
-            android:contentDescription="@string/menu_button"
-            android:src="@drawable/ic_more_vert_24px"
-            android:tint="#636363"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:focusable="true"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </android.support.constraint.ConstraintLayout>
-
-    <View
-        android:id="@+id/view_line_one"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#e6e6e6"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_play_list_add_recent" />
-
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/fragment_play_list_play_favourite"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:background="@drawable/my_ripple_mask"
-        app:layout_constraintTop_toBottomOf="@+id/view_line_one">
-
-        <ImageView
-            android:id="@+id/fragment_play_list_play_history_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:contentDescription="@string/app_name"
-            android:src="@drawable/ic_trending_up_grey_600_24dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        <View
+            android:id="@+id/view_line_one"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#e6e6e6"
+            app:layout_constraintTop_toBottomOf="@+id/add_recent" />
 
         <android.support.constraint.ConstraintLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/fragment_play_list_play_history_menu"
-            app:layout_constraintStart_toEndOf="@+id/fragment_play_list_play_history_image"
-            app:layout_constraintTop_toTopOf="parent">
+            android:id="@+id/favourite"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:background="@drawable/my_ripple_mask"
+            app:layout_constraintTop_toBottomOf="@+id/view_line_one">
 
-            <TextView
-                android:id="@+id/fragment_play_list_play_history_text_two"
+            <ImageView
+                android:id="@+id/history_image"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/app_name"
-                android:textSize="12sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_play_list_play_favourite_name" />
-
-            <TextView
-                android:id="@+id/fragment_play_list_play_history_text_one"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_marginTop="4dp"
-                android:layout_marginEnd="8dp"
-                android:maxLines="1"
-                android:text="@string/app_name"
-                android:textSize="12sp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/ic_trending_up_grey_600_24dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/fragment_play_list_play_history_text_two"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_play_list_play_favourite_name" />
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/fragment_play_list_play_favourite_name"
+            <android.support.constraint.ConstraintLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="最喜爱的歌曲"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/fragment_play_list_play_history_menu"
+                app:layout_constraintStart_toEndOf="@+id/history_image"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/history_text_two"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/app_name"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/favourite_name" />
+
+                <TextView
+                    android:id="@+id/history_text_one"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="8dp"
+                    android:maxLines="1"
+                    android:text="@string/app_name"
+                    android:textSize="12sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/history_text_two"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/favourite_name" />
+
+                <TextView
+                    android:id="@+id/favourite_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:text="最喜爱的歌曲"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </android.support.constraint.ConstraintLayout>
+
+            <ImageView
+                android:id="@+id/fragment_play_list_play_history_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:contentDescription="@string/menu_button"
+                android:focusable="true"
+                android:src="@drawable/ic_more_vert_24px"
+                android:tint="#636363"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
         </android.support.constraint.ConstraintLayout>
 
-        <ImageView
-            android:id="@+id/fragment_play_list_play_history_menu"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="8dp"
-            android:background="?android:attr/selectableItemBackground"
-            android:clickable="true"
-            android:contentDescription="@string/menu_button"
-            android:src="@drawable/ic_more_vert_24px"
-            android:tint="#636363"
+
+        <com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:focusable="true"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/favourite">
+
+        </com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView>
 
     </android.support.constraint.ConstraintLayout>
 
-
-    <com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
-        android:id="@+id/fragment_play_list_recycler"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_play_list_play_favourite">
-
-    </com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView>
-
-</android.support.constraint.ConstraintLayout>
+</layout>
