@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：item_in_detail.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月02日 20:56:24
-  ~ 上次修改时间：2018年12月02日 20:55:56
+  ~ 当前修改时间：2018年12月19日 12:56:02
+  ~ 上次修改时间：2018年12月19日 09:15:58
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -39,8 +39,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                android:singleLine="true"
-                tools:text="0" />
+                android:singleLine="true" />
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="0dp"
@@ -61,7 +60,7 @@
                     android:layout_marginTop="4dp"
                     android:textSize="12sp"
                     android:ellipsize="end"
-                    android:maxLines="1"
+                    android:singleLine="true"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/item_main_text"
                     tools:text="@string/app_name" />
@@ -73,7 +72,7 @@
                     android:layout_alignParentBottom="true"
                     android:layout_marginTop="4dp"
                     android:layout_marginEnd="8dp"
-                    android:maxLines="1"
+                    android:singleLine="true"
                     android:ellipsize="end"
                     android:text="@string/album"
                     android:textSize="12sp"
@@ -88,7 +87,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
                     android:ellipsize="end"
-                    android:maxLines="1"
+                    android:singleLine="true"
                     android:text="@string/music"
                     android:textSize="18sp"
                     app:layout_constraintEnd_toEndOf="parent"

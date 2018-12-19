@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：AndroidManifest.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月13日 16:23:45
-  ~ 上次修改时间：2018年12月13日 16:23:35
+  ~ 当前修改时间：2018年12月19日 12:56:02
+  ~ 上次修改时间：2018年12月19日 12:46:15
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -40,7 +40,9 @@
             android:name=".Activities.MainActivity"
             android:launchMode="singleTask"
             android:theme="@style/GreenTheme"
-            android:windowSoftInputMode="stateHidden|adjustPan" />
+            android:windowSoftInputMode="stateHidden|adjustPan">
+
+        </activity>
 
         <service
             android:name=".MyMusicService"
@@ -118,7 +120,11 @@
                 android:resource="@xml/file_path" />
         </provider>
 
-
+        <activity
+            android:name=".Activities.CarViewActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_car_view"
+            android:theme="@style/FullscreenTheme"></activity>
     </application>
 
 </manifest>

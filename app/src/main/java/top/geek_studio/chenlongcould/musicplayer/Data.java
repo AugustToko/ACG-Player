@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Data.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 16:23:45
- * 上次修改时间：2018年12月13日 16:23:32
+ * 当前修改时间：2018年12月19日 12:56:02
+ * 上次修改时间：2018年12月19日 12:55:44
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import jp.wasabeef.glide.transformations.BlurTransformation;
+import top.geek_studio.chenlongcould.musicplayer.Activities.CarViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.MyHeadSetPlugReceiver;
 import top.geek_studio.chenlongcould.musicplayer.Models.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
@@ -32,12 +34,16 @@ public final class Data {
 
     public static List<Activity> sActivities = new ArrayList<>();
 
+    public static CarViewActivity sCarViewActivity = null;
+
     /**
      * data
      * */
     public static List<MusicItem> sMusicItems = new ArrayList<>();
 
     public static List<AlbumItem> sAlbumItems = new ArrayList<>();
+
+    public static List<AlbumItem> sAlbumItemsBackUp = new ArrayList<>();
 
     public static List<MusicItem> sMusicItemsBackUp = new ArrayList<>();
 
@@ -60,18 +66,28 @@ public final class Data {
      * sCurrent DATA
      */
     public static MusicItem sCurrentMusicItem = new MusicItem.Builder(-1, "null", "null").build();
-
+    public static BlurTransformation sBlurTransformation = new BlurTransformation(20, 30);
+    public static BlurTransformation sBlurTransformationCarView = new BlurTransformation(5, 10);
+    static MyHeadSetPlugReceiver mMyHeadSetPlugReceiver = new MyHeadSetPlugReceiver();
     /**
      * save temp bitmap
      */
-    public static Bitmap sCurrentCover = null;
+    private static Bitmap sCurrentCover = null;
+
+    public static Bitmap getCurrentCover() {
+        return sCurrentCover;
+    }
+
     /**
      * --------------------- Media Player ----------------------
      */
 //    public static MyMusicService.MusicBinder sMusicBinder;
     public static IMuiscService sMusicBinder;
 
-    public static MyHeadSetPlugReceiver mMyHeadSetPlugReceiver = new MyHeadSetPlugReceiver();
+    public static void setCurrentCover(Bitmap currentCover) {
+//        if (sCurrentCover != null) sCurrentCover.recycle();
+        sCurrentCover = currentCover;
+    }
 
     public final static SimpleDateFormat sSimpleDateFormat = new SimpleDateFormat("mm:ss", Locale.CHINESE);
 

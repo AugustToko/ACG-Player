@@ -1,0 +1,23 @@
+<!--
+  ~ *************************************************************
+  ~ 文件：attrs.xml  模块：app  项目：MusicPlayer
+  ~ 当前修改时间：2018年12月19日 12:56:02
+  ~ 上次修改时间：2018年12月16日 13:34:57
+  ~ 作者：chenlongcould
+  ~ Geek Studio
+  ~ Copyright (c) 2018
+  ~ *************************************************************
+  -->
+
+<resources>
+
+    <!-- Declare custom theme attributes that allow changing which styles are
+         used for button bars depending on the API level.
+         ?android:attr/buttonBarStyle is new as of API 11 so this is
+         necessary to support previous API levels. -->
+    <declare-styleable name="ButtonBarContainerTheme">
+        <attr name="metaButtonBarStyle" format="reference" />
+        <attr name="metaButtonBarButtonStyle" format="reference" />
+    </declare-styleable>
+
+</resources>

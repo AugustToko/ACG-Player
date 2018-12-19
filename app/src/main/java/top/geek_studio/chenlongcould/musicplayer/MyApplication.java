@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 10:03:03
- * 上次修改时间：2018年12月12日 17:04:01
+ * 当前修改时间：2018年12月19日 12:56:02
+ * 上次修改时间：2018年12月19日 12:46:13
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -17,16 +17,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.drawable.Icon;
 import android.media.AudioManager;
-import android.os.HandlerThread;
-import android.os.Looper;
+import android.net.Uri;
+import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -37,24 +42,27 @@ public class MyApplication extends Application {
 
     private static final String TAG = "MyApplication";
 
-    public static boolean FIRST_START = true;
-
     public static SharedPreferences mDefSharedPreferences;
 
-    private HandlerThread mHandlerThread;
+    public static final String SHORT_CUT_ID_1 = "id1";
+    public static final String SHORT_CUT_ID_2 = "id2";
+    public static final String SHORT_CUT_ID_3 = "id3";
+    private ShortcutManager mShortcutManager;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
         if (getProcessName(this).equals(getPackageName())) {
+
             //监听耳机(有线或无线)的插拔动作, 拔出暂停音乐
             IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
             intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
             registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
 
-            mHandlerThread = new HandlerThread("Handler Thread in MainActivity");
-            mHandlerThread.start();
+            Intent intent = new Intent(this, MyMusicService.class);
+            startService(intent);
+            bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
 
             //set language
             Resources resources = getResources();
@@ -78,14 +86,45 @@ public class MyApplication extends Application {
             Values.CurrentData.CURRENT_PLAY_TYPE = mDefSharedPreferences.getString(Values.SharedPrefsTag.PLAY_TYPE, Values.TYPE_COMMON);
 
             Utils.Ui.inDayNightSet(mDefSharedPreferences);
-        } else {
 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                mShortcutManager = getSystemService(ShortcutManager.class);
+                getNewShortcutInfo();
+            }
+
+        } else {
+            //action in MusicService Process
         }
 
     }
 
-    public final Looper getCustomLooper() {
-        return mHandlerThread.getLooper();
+    /**
+     * 动态添加三个
+     */
+    @RequiresApi(api = Build.VERSION_CODES.N_MR1)
+    private void getNewShortcutInfo() {
+        ShortcutInfo shortcut = new ShortcutInfo.Builder(this, SHORT_CUT_ID_1)
+                .setShortLabel("baidu")
+                .setLongLabel("第一个")
+                .setIcon(Icon.createWithResource(this, R.drawable.ic_play_arrow_black_24dp))
+                .setIntent(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("https://www.baidu.com/")))
+                .build();
+        ShortcutInfo shortcut2 = new ShortcutInfo.Builder(this, SHORT_CUT_ID_2)
+                .setShortLabel("csdn")
+                .setLongLabel("第二个")
+                .setIcon(Icon.createWithResource(this, R.drawable.ic_play_arrow_black_24dp))
+                .setIntent(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("https://www.csdn.com/")))
+                .build();
+        ShortcutInfo shortcut3 = new ShortcutInfo.Builder(this, SHORT_CUT_ID_3)
+                .setShortLabel("github")
+                .setLongLabel("第三个")
+                .setIcon(Icon.createWithResource(this, R.drawable.ic_play_arrow_black_24dp))
+                .setIntent(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("https://www.github.com/")))
+                .build();
+        mShortcutManager.setDynamicShortcuts(Arrays.asList(shortcut, shortcut2, shortcut3));
     }
 
     /**
@@ -115,7 +154,6 @@ public class MyApplication extends Application {
 
     @Override
     public void onTrimMemory(int level) {
-        Log.d(TAG, "onTrimMemory: do");
 
         if (getProcessName(this).equals(getPackageName())) {
             if (level == TRIM_MEMORY_MODERATE) {
@@ -123,7 +161,6 @@ public class MyApplication extends Application {
                     Data.sAlbumItems.clear();
                     Log.d(TAG, "onTrimMemory: AlbumFragment recycled");
                 }
-                Data.sCurrentMusicItem = null;
             }
         }
 

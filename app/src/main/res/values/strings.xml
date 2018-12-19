@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月13日 16:23:45
-  ~ 上次修改时间：2018年12月13日 16:05:25
+  ~ 当前修改时间：2018年12月19日 12:56:02
+  ~ 上次修改时间：2018年12月19日 12:50:56
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -55,43 +55,6 @@
     <string name="set_app_background_color_dark">Set app background color dark</string>
     <string name="title_activity_sets" translatable="false">Settings</string>
 
-    <!-- Strings related to Settings -->
-
-    <!-- Example General settings -->
-    <string name="pref_header_general" translatable="false">General</string>
-
-    <string name="pref_title_social_recommendations" translatable="false">Enable social recommendations</string>
-    <string name="pref_description_social_recommendations" translatable="false">Recommendations for people to contact
-        based on your message history
-    </string>
-
-    <string name="pref_title_display_name" translatable="false">Display name</string>
-    <string name="pref_default_display_name" translatable="false">John Smith</string>
-
-    <string name="pref_title_add_friends_to_messages" translatable="false">Add friends to messages</string>
-    <string-array name="pref_example_list_titles">
-        <item>Always</item>
-        <item>When possible</item>
-        <item>Never</item>
-    </string-array>
-    <string-array name="pref_example_list_values">
-        <item>1</item>
-        <item>0</item>
-        <item>-1</item>
-    </string-array>
-
-    <string-array name="multi_select_list_preference_default_value" />
-
-    <string name="pref_title_system_sync_settings" translatable="false">System sync settings</string>
-
-    <!-- Example settings for Notifications -->
-    <string name="pref_header_notifications" translatable="false">Notifications</string>
-
-    <string name="pref_title_new_message_notifications" translatable="false">New message notifications</string>
-
-    <string name="pref_title_ringtone" translatable="false">Ringtone</string>
-    <string name="pref_ringtone_silent" translatable="false">Silent</string>
-
     <string name="pref_title_vibrate" translatable="false">Vibrate</string>
     <string name="next_play">Next Play</string>
     <string name="album_layout">Album Layout</string>
@@ -114,6 +77,11 @@
     <string name="sure">Sure</string>
     <string name="eq">EQ</string>
     <string name="tab_file">File Viewer</string>
-    <string name="no_audio_ID">No Audio Id</string>
-    <string name="no_equalizer">No EQ</string>
+    <string name="no_audio_ID" translatable="false">No Audio Id</string>
+    <string name="no_equalizer" translatable="false">No EQ</string>
+
+    <string name="title_activity_car_view" translatable="false">CarViewActivity</string>
+    <string name="dummy_button" translatable="false">Dummy Button</string>
+    <string name="dummy_content" translatable="false">DUMMY\nCONTENT</string>
+    <string name="car_mode">Car Mode</string>
 </resources>

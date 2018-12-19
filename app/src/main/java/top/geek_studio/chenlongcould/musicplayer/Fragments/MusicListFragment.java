@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 16:23:45
- * 上次修改时间：2018年12月13日 14:07:34
+ * 当前修改时间：2018年12月19日 12:56:02
+ * 上次修改时间：2018年12月19日 12:46:08
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -15,7 +15,6 @@ import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -34,7 +33,6 @@ import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Interface.VisibleOrGone;
-import top.geek_studio.chenlongcould.musicplayer.MyApplication;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentMusicListLayoutBinding;
@@ -94,7 +92,7 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
         super.onAttach(context);
         mActivity = (MainActivity) getActivity();
 
-        mHandler = new NotLeakHandler(this, ((MyApplication) mActivity.getApplication()).getCustomLooper());
+        mHandler = new NotLeakHandler(this);
     }
 
     @Override
@@ -147,6 +145,12 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
         CREATE_VIEW_DONE = true;
     }
 
+    @Override
+    public void onDetach() {
+        mMusicListBinding = null;
+        super.onDetach();
+    }
+
     /**
      * 延迟循环确认是否已经createView
      */
@@ -180,8 +184,7 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
         @SuppressWarnings("unused")
         private WeakReference<MusicListFragment> mWeakReference;
 
-        NotLeakHandler(MusicListFragment fragment, Looper looper) {
-            super(looper);
+        NotLeakHandler(MusicListFragment fragment) {
             mWeakReference = new WeakReference<>(fragment);
         }
 

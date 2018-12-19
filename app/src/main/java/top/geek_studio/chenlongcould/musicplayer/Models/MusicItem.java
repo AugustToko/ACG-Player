@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicItem.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 10:03:03
- * 上次修改时间：2018年12月13日 10:02:37
+ * 当前修改时间：2018年12月19日 12:56:02
+ * 上次修改时间：2018年12月19日 12:46:13
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -13,6 +13,7 @@ package top.geek_studio.chenlongcould.musicplayer.Models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 public final class MusicItem implements Parcelable {
 
@@ -117,6 +118,12 @@ public final class MusicItem implements Parcelable {
         dest.writeString(this.mArtist);
         dest.writeInt(this.mAddTime);
         dest.writeInt(this.mAlbumId);
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return mMusicName + " @ " + mMusicAlbum + " @ " + getMusicPath();
     }
 
     public static class Builder {

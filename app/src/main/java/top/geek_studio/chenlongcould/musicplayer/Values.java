@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 10:03:03
- * 上次修改时间：2018年12月12日 12:12:10
+ * 当前修改时间：2018年12月19日 12:56:02
+ * 上次修改时间：2018年12月19日 12:46:15
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -90,6 +90,17 @@ public final class Values {
     public static final class CurrentData {
 
         /**
+         * same as
+         *
+         * @see UIMODE#MODE_CAR
+         * @see UIMODE#MODE_COMMON
+         */
+        public static final String MODE_COMMON = "common";
+        public static final String MODE_CAR = "car";
+
+        public static String UI_MODE = MODE_COMMON;
+
+        /**
          * TEMP DATA
          */
         //default value -1 or null
@@ -120,6 +131,11 @@ public final class Values {
          */
         public static String CURRENT_PLAY_LIST = "default";
 
+    }
+
+    public static final class UIMODE {
+        public static final String MODE_COMMON = "common";
+        public static final String MODE_CAR = "car";
     }
 
     /**

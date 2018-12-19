@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：build.gradle  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 10:03:03
- * 上次修改时间：2018年12月13日 10:01:14
+ * 当前修改时间：2018年12月19日 12:56:02
+ * 上次修改时间：2018年12月19日 12:43:51
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -25,7 +25,7 @@ android {
         applicationId "top.geek_studio.chenlongcould.musicplayer"
         minSdkVersion 21
         targetSdkVersion 28
-        versionName '2.5.9.5'
+        versionName '2.5.2.5'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config
 //        externalNativeBuild {
@@ -38,7 +38,7 @@ android {
 //            stl "stlport_static"
 //            ldLibs "log"
 //        }
-        versionCode 19
+        versionCode 25
     }
     buildTypes {
         release {
@@ -52,6 +52,20 @@ android {
             applicationIdSuffix '.Common'
         }
     }
+
+    android.applicationVariants.all { variant ->
+        variant.outputs.all {
+            //def date = new Date().format("yyyyMMdd" , TimeZone.getTimeZone("Asia/Shanghai"))
+            def date = new Date().format("yyyyMMdd", TimeZone.getTimeZone("GMT+08"))
+            if (variant.buildType.name == 'debug') {
+                outputFileName = "app-debug${date}_${versionName}_(${versionCode}).apk"
+            }
+            if (variant.buildType.name == 'release') {
+                outputFileName = "app-release_${date}_${versionName}_(${versionCode}).apk"
+            }
+        }
+    }
+
     buildToolsVersion '28.0.3'
 //    externalNativeBuild {
 //        cmake {
@@ -90,4 +104,8 @@ dependencies {
     implementation 'org.jetbrains:annotations:15.0'
     implementation 'io.reactivex.rxjava2:rxjava:2.2.4'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.2'
+    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.2'
+    // Optional, if you use support library fragments:
+    debugImplementation 'com.squareup.leakcanary:leakcanary-support-fragment:1.6.2'
 }

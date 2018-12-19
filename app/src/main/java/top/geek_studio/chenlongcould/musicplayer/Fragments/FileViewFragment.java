@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：FileViewFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 16:23:45
- * 上次修改时间：2018年12月13日 16:23:34
+ * 当前修改时间：2018年12月19日 12:56:02
+ * 上次修改时间：2018年12月14日 07:29:38
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -75,20 +75,25 @@ public class FileViewFragment extends Fragment {
         mFileViewerBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_file_viewer, container, false);
         mFileViewerBinding.includeRecyclerView.recyclerView.setLayoutManager(new LinearLayoutManager(mMainActivity));
         mFileViewerBinding.includeRecyclerView.recyclerView.addItemDecoration(new DividerItemDecoration(mMainActivity, DividerItemDecoration.VERTICAL));
+
+        if (!HAS_LOAD) {
+            final File file = Environment.getExternalStorageDirectory();
+            mFileItems.addAll(new ArrayList<>(Arrays.asList(file.listFiles())));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) mFileItems.sort(File::compareTo);
+            mCurrentFile = file;
+        }
+
+        mMyAdapter = new MyAdapter(mFileItems);
+        mFileViewerBinding.includeRecyclerView.recyclerView.setAdapter(mMyAdapter);
+        HAS_LOAD = true;
+
         return mFileViewerBinding.getRoot();
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        final File file = Environment.getExternalStorageDirectory();
-        mFileItems.addAll(new ArrayList<>(Arrays.asList(file.listFiles())));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            mFileItems.sort(File::compareTo);
-        }
-        mCurrentFile = file;
-        mMyAdapter = new MyAdapter(mFileItems);
-        mFileViewerBinding.includeRecyclerView.recyclerView.setAdapter(mMyAdapter);
-        HAS_LOAD = true;
+    public void onDetach() {
+        mFileItems.clear();
+        super.onDetach();
     }
 
     public File getCurrentFile() {

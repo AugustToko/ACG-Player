@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SplashActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月04日 17:59:25
- * 上次修改时间：2018年12月04日 17:59:12
+ * 当前修改时间：2018年12月19日 12:56:02
+ * 上次修改时间：2018年12月19日 12:49:27
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -56,7 +56,7 @@ public final class SplashActivity extends MyBaseActivity {
                 hasNavigationBar = true;
             }
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
         return hasNavigationBar;
 
@@ -116,6 +116,7 @@ public final class SplashActivity extends MyBaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_splash);
 
         try {
             @SuppressLint("PrivateApi") Class decorViewClazz = Class.forName("com.android.internal.policy.DecorView");
@@ -129,7 +130,6 @@ public final class SplashActivity extends MyBaseActivity {
 
         Values.PHONE_HAS_NAV = phoneHasNav(this);
 
-        setContentView(R.layout.activity_splash);
 
         initPermission();
     }

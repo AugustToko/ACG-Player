@@ -48,6 +48,11 @@
     java.lang.Object readResolve();
 }
 
+#保持所有实现 Parcelable 接口的类成员
+-keepclassmembers class * implements android.os.Parcelable {
+  public static final android.os.Parcelable$Creator CREATOR;
+}
+
 #Fragment不需要在AndroidManifest.xml中注册，需要额外保护下
 -keep public class * extends android.support.v4.app.Fragment
 -keep public class * extends android.app.Fragment
@@ -60,3 +65,4 @@
 -dontwarn org.junit.**
 -dontwarn com.simplecityapps.**
 -dontwarn com.sothree.slidinguppanel.**
+-dontwarn com.squareup.haha.**

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月13日 16:23:45
-  ~ 上次修改时间：2018年12月13日 15:30:03
+  ~ 当前修改时间：2018年12月19日 12:56:02
+  ~ 上次修改时间：2018年12月19日 12:50:56
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -61,4 +61,7 @@
     <string name="cancel">Cancel</string>
     <string name="sure">Sure</string>
     <string name="tab_file">File Viewer</string>
+    <string name="shadow">Shadow</string>
+    <string name="eq">Equalizer</string>
+    <string name="car_mode">Car Mode</string>
 </resources>

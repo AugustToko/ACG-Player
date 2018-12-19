@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 10:03:03
- * 上次修改时间：2018年12月13日 10:02:41
+ * 当前修改时间：2018年12月19日 12:56:02
+ * 上次修改时间：2018年12月19日 12:46:08
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -158,7 +158,7 @@ public final class MyMusicService extends Service {
     public void onCreate() {
         mMediaPlayer.setOnCompletionListener(mp -> {
             Utils.SendSomeThing.sendPlay(MyMusicService.this, 6, "next");
-//
+
 //            if (Values.BUTTON_PRESSED) {
 //                //来自用户的主动点击
 //                if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
@@ -232,28 +232,28 @@ public final class MyMusicService extends Service {
 
         //pi(s)
         Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
-        PendingIntent pi = PendingIntent.getActivity(context, 0, intent, 0);
+        PendingIntent pi = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Intent pause = new Intent();
         pause.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPause));
-        PendingIntent pauseIntent = PendingIntent.getBroadcast(context, REQUEST_PAUSE, pause, 0);
+        PendingIntent pauseIntent = PendingIntent.getBroadcast(context, REQUEST_PAUSE, pause, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Intent play = new Intent();
         play.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
         play.putExtra("play_type", 2);
-        PendingIntent playIntent = PendingIntent.getBroadcast(context, REQUEST_PLAY, play, 0);
+        PendingIntent playIntent = PendingIntent.getBroadcast(context, REQUEST_PLAY, play, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Intent next = new Intent();
         next.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
         next.putExtra("play_type", 6);
         next.putExtra("args", "next");
-        PendingIntent nextIntent = PendingIntent.getBroadcast(context, REQUEST_NEXT, next, 0);
+        PendingIntent nextIntent = PendingIntent.getBroadcast(context, REQUEST_NEXT, next, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Intent previous = new Intent();
         previous.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
         previous.putExtra("play_type", 6);
         previous.putExtra("args", "previous");
-        PendingIntent previousIntent = PendingIntent.getBroadcast(context, REQUEST_PRE, previous, 0);
+        PendingIntent previousIntent = PendingIntent.getBroadcast(context, REQUEST_PRE, previous, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Notification.MediaStyle mediaStyle = new Notification.MediaStyle();
         mediaStyle.setShowActionsInCompactView(0, 1, 2);
@@ -270,14 +270,16 @@ public final class MyMusicService extends Service {
                 .setOngoing(true);
 
         if (mMediaPlayer.isPlaying()) {
-            Notification.Action[] actions = {new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_previous_white_24dp), "previous", previousIntent).build()
-                    , new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_pause_white_24dp), "play", pauseIntent).build()
-                    , new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_next_white_24dp), "next", nextIntent).build()};
+            Notification.Action[] actions = {
+                    new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_previous_white_24dp), "previous", previousIntent).build(),
+                    new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_pause_white_24dp), "play", pauseIntent).build(),
+                    new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_next_white_24dp), "next", nextIntent).build()};
             builder.setActions(actions);
         } else {
-            Notification.Action[] actions = {new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_previous_white_24dp), "previous", previousIntent).build()
-                    , new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_play_arrow_black_24dp), "play", playIntent).build()
-                    , new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_next_white_24dp), "next", nextIntent).build()};
+            Notification.Action[] actions = {
+                    new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_previous_white_24dp), "previous", previousIntent).build(),
+                    new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_play_arrow_black_24dp), "play", playIntent).build(),
+                    new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_next_white_24dp), "next", nextIntent).build()};
             builder.setActions(actions);
         }
 

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 13:55:33
- * 上次修改时间：2018年12月13日 13:20:32
+ * 当前修改时间：2018年12月19日 12:56:02
+ * 上次修改时间：2018年12月18日 18:21:27
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -49,7 +49,6 @@ import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
@@ -78,8 +77,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
      * @see R.layout#recycler_music_list_item_mod
      */
     private static final int MOD_TYPE = -1;
-
-    private AtomicBoolean READY = new AtomicBoolean(true);
 
     private List<MusicItem> mMusicItems;
 
@@ -349,12 +346,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
     private void onMusicItemClick(View view, ViewHolder holder, String currentUiPosition) {
         view.setOnClickListener(v -> Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
 
-            if (!READY.get()) {
-                observableEmitter.onNext(-1);
-            } else {
-                READY.set(false);
-            }
-
             ReceiverOnMusicPlay.resetMusic();
 
             //使得当前播放列表成为"待播放列表"
@@ -378,10 +369,8 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             //set current data
             Data.setCurrentMusicItem(mMusicItems.get(holder.getAdapterPosition()));
 
-            if (Data.sCurrentCover != null) Data.sCurrentCover.recycle();
-
             //get & save data
-            Data.sCurrentCover = Utils.Audio.getMp3Cover(Data.sCurrentMusicItem.getMusicPath());
+            Data.setCurrentCover(Utils.Audio.getMp3Cover(Data.sCurrentMusicItem.getMusicPath()));
 
             ReceiverOnMusicPlay.setDataSource(Data.sCurrentMusicItem.getMusicPath());
             ReceiverOnMusicPlay.prepare();
@@ -399,25 +388,12 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(integer -> {
 
-                    if (integer == -1) {
-                        Toast.makeText(mMainActivity, "Wait...", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    READY.set(true);
-                    mMainActivity.getMusicDetailFragment().setSlideInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.sCurrentCover);
-                    mMainActivity.getMusicDetailFragment().setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.sCurrentCover);
+                    mMainActivity.getMusicDetailFragment().setSlideInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
+                    mMainActivity.getMusicDetailFragment().setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
                     Utils.Ui.setPlayButtonNowPlaying();
 
                     mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
                 }, Throwable::printStackTrace));
-
-        view.setOnLongClickListener(v -> {
-            if (ReceiverOnMusicPlay.isPlayingMusic()) {
-                Utils.SendSomeThing.sendPause(mContext);
-            }
-            return true;
-        });
     }
 
     @Override

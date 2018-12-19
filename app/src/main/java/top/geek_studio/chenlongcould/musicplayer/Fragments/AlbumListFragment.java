@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 13:55:33
- * 上次修改时间：2018年12月13日 13:55:18
+ * 当前修改时间：2018年12月19日 12:56:02
+ * 上次修改时间：2018年12月19日 10:26:45
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -55,6 +55,8 @@ public final class AlbumListFragment extends Fragment implements VisibleOrGone {
     private RecyclerView mRecyclerView;
 
     private MainActivity mMainActivity;
+
+    private MyRecyclerAdapter2AlbumList mAdapter2AlbumList;
 
     //实例化一个fragment
     public static AlbumListFragment newInstance() {
@@ -112,6 +114,7 @@ public final class AlbumListFragment extends Fragment implements VisibleOrGone {
                             String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM));
                             String albumId = cursor.getString(cursor.getColumnIndexOrThrow("_id"));
                             Data.sAlbumItems.add(new AlbumItem(albumName, Integer.parseInt(albumId)));
+                            Data.sAlbumItemsBackUp.add(new AlbumItem(albumName, Integer.parseInt(albumId)));
                         } while (cursor.moveToNext());
 
                         cursor.close();
@@ -151,12 +154,16 @@ public final class AlbumListFragment extends Fragment implements VisibleOrGone {
             break;
         }
 
-        final MyRecyclerAdapter2AlbumList myRecyclerAdapter2AlbumList = new MyRecyclerAdapter2AlbumList(mMainActivity, Data.sAlbumItems, type);
-        mRecyclerView.setAdapter(myRecyclerAdapter2AlbumList);
+        mAdapter2AlbumList = new MyRecyclerAdapter2AlbumList(mMainActivity, Data.sAlbumItems, type);
+        mRecyclerView.setAdapter(mAdapter2AlbumList);
     }
 
     public RecyclerView getRecyclerView() {
         return mRecyclerView;
+    }
+
+    public MyRecyclerAdapter2AlbumList getAdapter2AlbumList() {
+        return mAdapter2AlbumList;
     }
 
     @Override

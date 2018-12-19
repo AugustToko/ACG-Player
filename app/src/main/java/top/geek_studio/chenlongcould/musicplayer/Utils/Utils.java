@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 16:23:45
- * 上次修改时间：2018年12月13日 16:05:25
+ * 当前修改时间：2018年12月19日 12:56:02
+ * 上次修改时间：2018年12月19日 12:46:08
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -22,12 +22,9 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.media.audiofx.AudioEffect;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
@@ -56,7 +53,7 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 
-import jp.wasabeef.glide.transformations.BlurTransformation;
+import top.geek_studio.chenlongcould.musicplayer.Activities.CarViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
@@ -72,6 +69,7 @@ public final class Utils {
     }
 
     public static final class Audio {
+
         private final static MediaMetadataRetriever sMediaMetadataRetriever = new MediaMetadataRetriever();
 
         private static final String TAG = "Audio";
@@ -90,7 +88,6 @@ public final class Utils {
                 }
             }
         }
-
 
         /**
          * 获取封面
@@ -188,22 +185,8 @@ public final class Utils {
         @SuppressWarnings("SameParameterValue")
         @Nullable
         public static Bitmap getDrawableBitmap(@NonNull Context context, @DrawableRes int vectorDrawableId) {
-            Bitmap bitmap = null;
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-                Drawable vectorDrawable = context.getDrawable(vectorDrawableId);
-                if (vectorDrawable != null) {
-                    bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(),
-                            vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-                    Canvas canvas = new Canvas(bitmap);
-                    vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-                    vectorDrawable.draw(canvas);
-                }
-            } else {
-                bitmap = BitmapFactory.decodeResource(context.getResources(), vectorDrawableId);
-            }
-            return bitmap;
+            return BitmapFactory.decodeResource(context.getResources(), vectorDrawableId);
         }
-
     }
 
     public static final class Ui {
@@ -252,13 +235,24 @@ public final class Utils {
             if (!Data.sActivities.isEmpty()) {
                 MainActivity activity = (MainActivity) Data.sActivities.get(0);
                 activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.SET_BUTTON_PLAY);
+
+                if (Values.CurrentData.UI_MODE.equals(Values.CurrentData.MODE_CAR)) {
+                    ((CarViewActivity) Data.sActivities.get(1)).getFragmentLandSpace().setButtonType("pause");
+                }
             }
         }
 
+        /**
+         * by broadcast
+         */
         public static void setPlayButtonNowPause() {
             if (!Data.sActivities.isEmpty()) {
                 MainActivity activity = (MainActivity) Data.sActivities.get(0);
                 activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.SET_BUTTON_PAUSE);
+
+                if (Values.CurrentData.UI_MODE.equals(Values.CurrentData.MODE_CAR)) {
+                    Data.sCarViewActivity.getFragmentLandSpace().setButtonType("play");
+                }
             }
         }
 
@@ -306,8 +300,8 @@ public final class Utils {
          * @param activity if use fragment may case {@link java.lang.NullPointerException}, glide will call {@link Fragment#getActivity()}
          */
         public static void setBlurEffect(@NonNull final MainActivity activity, @NonNull final byte[] bitmap, @NonNull final ImageView primaryBackground, @NonNull final ImageView primaryBackgroundBef, final TextView nextText) {
-
             new Handler(Looper.getMainLooper()).post(() -> {
+
                 ANIMATION_IN_DETAIL_DONE = false;
                 primaryBackground.setVisibility(View.VISIBLE);
 
@@ -327,7 +321,7 @@ public final class Utils {
                     primaryBackgroundBef.post(() -> GlideApp.with(activity)
                             .load(bitmap)
                             .dontAnimate()
-                            .apply(bitmapTransform(new BlurTransformation(20, 30)))
+                            .apply(bitmapTransform(Data.sBlurTransformation))
                             .into(primaryBackgroundBef));
                 } else {
                     Palette.from(BitmapFactory.decodeByteArray(bitmap, 0, bitmap.length)).generate(p -> {
@@ -358,7 +352,7 @@ public final class Utils {
                             GlideApp.with(activity)
                                     .load(bitmap)
                                     .dontAnimate()
-                                    .apply(bitmapTransform(new BlurTransformation(20, 30)))
+                                    .apply(bitmapTransform(Data.sBlurTransformation))
                                     .into(primaryBackground);
                         } else {
                             Palette.from(BitmapFactory.decodeByteArray(bitmap, 0, bitmap.length)).generate(p -> {
@@ -387,7 +381,6 @@ public final class Utils {
         }
 
         public static void setBlurEffect(@NonNull final MainActivity activity, @NonNull final Bitmap bitmap, @NonNull final ImageView primaryBackground, @NonNull final ImageView primaryBackgroundBef, final TextView nextText) {
-
             new Handler(Looper.getMainLooper()).post(() -> {
                 ANIMATION_IN_DETAIL_DONE = false;
                 primaryBackground.setVisibility(View.VISIBLE);
@@ -408,7 +401,7 @@ public final class Utils {
                     primaryBackgroundBef.post(() -> GlideApp.with(activity)
                             .load(bitmap)
                             .dontAnimate()
-                            .apply(bitmapTransform(new BlurTransformation(20, 30)))
+                            .apply(bitmapTransform(Data.sBlurTransformation))
                             .into(primaryBackgroundBef));
                 } else {
                     Palette.from(bitmap).generate(p -> {
@@ -438,7 +431,7 @@ public final class Utils {
                             GlideApp.with(activity)
                                     .load(bitmap)
                                     .dontAnimate()
-                                    .apply(bitmapTransform(new BlurTransformation(20, 30)))
+                                    .apply(bitmapTransform(Data.sBlurTransformation))
                                     .into(primaryBackground);
                         } else {
                             Palette.from(bitmap).generate(p -> {
@@ -549,6 +542,9 @@ public final class Utils {
             context.sendBroadcast(intent, Values.Permission.BROAD_CAST);
         }
 
+        /**
+         * @param args play_type: previous, next, slide
+         */
         public static void sendPlay(final Context context, final int playType, final String args) {
             Intent intent = new Intent();
             intent.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));

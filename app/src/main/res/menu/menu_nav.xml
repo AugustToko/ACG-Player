@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：menu_nav.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月12日 11:57:29
-  ~ 上次修改时间：2018年12月12日 11:57:13
+  ~ 当前修改时间：2018年12月19日 12:56:02
+  ~ 上次修改时间：2018年12月19日 12:47:10
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -12,20 +12,35 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
-    <item
-        android:id="@+id/menu_nav_setting"
-        android:icon="@drawable/ic_settings_black_24dp"
-        android:title="@string/settings" />
-    <item
-        android:id="@+id/menu_nav_about"
-        android:icon="@drawable/ic_info_outline_white_24dp"
-        android:title="@string/about" />
-    <item android:id="@+id/menu_nav_exit"
-        android:icon="@drawable/ic_exit_to_app_black_24dp"
-        android:title="@string/exit" />
-    <item
-        android:id="@+id/debug"
-        android:icon="@drawable/ic_info_outline_white_24dp"
-        android:title="DEBUG"
-        android:visible="false" />
+    <group
+        android:id="@+id/group_1"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/car_mode"
+            android:icon="@drawable/ic_stay_current_landscape_black_24dp"
+            android:title="@string/car_mode" />
+    </group>
+    <group
+        android:id="@+id/group_2"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/menu_nav_about"
+            android:icon="@drawable/ic_info_outline_white_24dp"
+            android:title="@string/about" />
+        <item
+            android:id="@+id/menu_nav_setting"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="@string/settings" />
+        <item
+            android:id="@+id/menu_nav_exit"
+            android:icon="@drawable/ic_exit_to_app_black_24dp"
+            android:title="@string/exit" />
+
+        <item
+            android:id="@+id/debug"
+            android:icon="@drawable/ic_info_outline_white_24dp"
+            android:title="DEBUG"
+            android:visible="false" />
+    </group>
+
 </menu>
