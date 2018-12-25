@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月19日 12:56:02
- * 上次修改时间：2018年12月19日 12:46:15
+ * 当前修改时间：2018年12月25日 08:45:54
+ * 上次修改时间：2018年12月25日 08:31:18
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -517,7 +517,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         mFragmentList.clear();
 
-        Data.sHistoryPlayIndex.clear();
+        Data.sHistoryPlay.clear();
         Data.sMusicItemsBackUp.clear();
         Data.sMusicItems.clear();
         Data.sAlbumItems.clear();

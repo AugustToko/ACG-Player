@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：PublicActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 13:55:33
- * 上次修改时间：2018年12月13日 12:52:20
+ * 当前修改时间：2018年12月25日 08:45:54
+ * 上次修改时间：2018年12月25日 08:36:27
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -21,7 +21,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -104,13 +103,13 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
                 }
                 break;
 
+                //点击播放列表中的一项
                 case "play_list_item": {
 
                     mToolbar.setTitle(getIntent().getStringExtra("play_list_name"));
                     mToolbar.inflateMenu(R.menu.menu_in_play_list_activity);
                     mMusicItemList = new ArrayList<>();
                     currentListName = getIntent().getStringExtra("play_list_name");
-
 
                     Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
                         //data
@@ -165,7 +164,6 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
                                 mToolbar.setOnMenuItemClickListener(menuItem -> {
                                     switch (menuItem.getItemId()) {
                                         case R.id.menu_random_play: {
-                                            Log.d(TAG, "onCreate: clicked");
                                             Values.CurrentData.CURRENT_PLAY_LIST = getCurrentListName();
                                             Data.sPlayOrderList.clear();
                                             Data.sPlayOrderList.addAll(mMusicItemList);        //更新数据
@@ -179,6 +177,13 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
                                 });
 
                             });
+                }
+                break;
+
+                case "play history": {
+                    mToolbar.setTitle(getString(R.string.history));
+
+                    mRecyclerView.setAdapter(new MyRecyclerAdapter(Data.sHistoryPlay, PublicActivity.this, TAG));
                 }
                 default:
             }

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：menu_nav.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月19日 12:56:02
-  ~ 上次修改时间：2018年12月19日 12:47:10
+  ~ 当前修改时间：2018年12月25日 08:45:54
+  ~ 上次修改时间：2018年12月25日 08:45:37
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -12,17 +12,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
-    <group
-        android:id="@+id/group_1"
-        android:checkableBehavior="single">
+    <group android:id="@+id/group_1">
         <item
             android:id="@+id/car_mode"
             android:icon="@drawable/ic_stay_current_landscape_black_24dp"
             android:title="@string/car_mode" />
     </group>
-    <group
-        android:id="@+id/group_2"
-        android:checkableBehavior="single">
+    <group android:id="@+id/group_2">
         <item
             android:id="@+id/menu_nav_about"
             android:icon="@drawable/ic_info_outline_white_24dp"

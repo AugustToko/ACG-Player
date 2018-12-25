@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月19日 12:56:02
- * 上次修改时间：2018年12月19日 12:46:08
+ * 当前修改时间：2018年12月25日 08:45:54
+ * 上次修改时间：2018年12月25日 07:31:06
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -184,23 +184,6 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
     public static MusicDetailFragment newInstance() {
         return new MusicDetailFragment();
     }
-
-//    public static boolean isVisBottom(RecyclerView recyclerView) {
-//        LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-//        //屏幕中最后一个可见子项的position
-//        int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
-//        //当前屏幕所看到的子项个数
-//        int visibleItemCount = layoutManager.getChildCount();
-//        //当前RecyclerView的所有子项个数
-//        int totalItemCount = layoutManager.getItemCount();
-//        //RecyclerView的滑动状态
-//        int state = recyclerView.getScrollState();
-//        if (visibleItemCount > 0 && lastVisibleItemPosition == totalItemCount - 1 && state == recyclerView.SCROLL_STATE_IDLE) {
-//            return true;
-//        } else {
-//            return false;
-//        }
-//    }
 
     @Override
     public void onAttach(Context context) {
@@ -531,7 +514,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
         mMusicAlbumImageOth3.setVisibility(View.GONE);
 
         mMusicAlbumImage.setOnTouchListener((v, event) -> {
-            int action = event.getAction();
+            final int action = event.getAction();
 
             String befPath = null;
             String nexPath = null;
@@ -563,8 +546,6 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                     mLastX = event.getRawX();
                     mLastY = event.getRawY();
 
-//                    velocityTracker = VelocityTracker.obtain();
-
 //                    lc.set(true);
 
 //                    new Handler().postDelayed(() -> {
@@ -578,22 +559,15 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                     break;
                 case MotionEvent.ACTION_MOVE:
 
-                    if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED)
+                    if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED || CURRENT_SLIDE_OFFSET != 0)
                         break;
 
-                    //播放未准备好 禁止滑动
-//                    if (!ReceiverOnMusicPlay.READY) break;
-
                     //首尾禁止对应边缘滑动
-                    if (Values.CurrentData.CURRENT_MUSIC_INDEX == 0) {
+                    if (Values.CurrentData.CURRENT_MUSIC_INDEX == 0)
                         if (event.getRawX() > mLastX) break;
-                    }
-                    if (Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sPlayOrderList.size() - 1) {
-                        if (event.getRawX() < mLastX) break;
-                    }
 
-//                    velocityTracker.addMovement(event);
-//                    velocityTracker.computeCurrentVelocity(1000);
+                    if (Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sPlayOrderList.size() - 1)
+                        if (event.getRawX() < mLastX) break;
 
                     float val = mMusicAlbumImage.getX() + (event.getX() - moveX);
                     mMusicAlbumImage.setTranslationX(val);
@@ -1140,7 +1114,7 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                 mMainActivity.getHandler().sendEmptyMessage(MainActivity.UP);
 
             } else {
-//                Utils.Ui.fastToast(mMainActivity, "No music playing.");
+                Utils.Ui.fastToast(mMainActivity, "No music playing.");
             }
         });
 

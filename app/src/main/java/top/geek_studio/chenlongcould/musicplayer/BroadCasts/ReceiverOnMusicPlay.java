@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月19日 12:56:02
- * 上次修改时间：2018年12月19日 12:46:13
+ * 当前修改时间：2018年12月25日 08:45:54
+ * 上次修改时间：2018年12月25日 08:38:45
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -27,7 +27,6 @@ import android.widget.Toast;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import top.geek_studio.chenlongcould.musicplayer.Activities.CarViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicDetailFragment;
@@ -206,7 +205,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
     public static void sureCar() {
         //set data (image and name)
         if (Values.CurrentData.UI_MODE.equals(Values.CurrentData.MODE_CAR)) {
-            ((CarViewActivity) Data.sActivities.get(1)).getFragmentLandSpace().setData();
+            Data.sCarViewActivity.getFragmentLandSpace().setData();
         }
     }
 
@@ -250,11 +249,9 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
             }
             break;
 
-            case 5:
-
-                //by next button...(in detail or noti) (must ActivityList isn't empty)
-                //by auto-next(mediaPlayer OnCompletionListener) of next-play by user, at this time MainActivity is present
-                //by MusicDetailFragment preview imageButton (view history song list)
+            //by next button...(in detail or noti) (must ActivityList isn't empty)
+            //by auto-next(mediaPlayer OnCompletionListener) of next-play by user, at this time MainActivity is present
+            //by MusicDetailFragment preview imageButton (view history song list)
             case 6: {
                 Log.d(TAG, "onReceive: do 6");
 //                if (!READY) break;
@@ -269,12 +266,12 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 //检测前后播放
                 int targetIndex = 0;
                 if (intent.getStringExtra("args") != null) {
-                    if (intent.getStringExtra("args").equals("next")) {
+                    if (intent.getStringExtra("args").contains("next")) {
                         targetIndex = Values.CurrentData.CURRENT_MUSIC_INDEX + 1;
                         if (targetIndex > Data.sPlayOrderList.size() - 1) {            //超出范围自动跳转0
                             targetIndex = 0;
                         }
-                    } else if (intent.getStringExtra("args").equals("previous")) {
+                    } else if (intent.getStringExtra("args").contains("previous")) {
                         targetIndex = Values.CurrentData.CURRENT_MUSIC_INDEX - 1;
                         if (targetIndex < 0) {
                             targetIndex = Data.sPlayOrderList.size() - 1;      //超出范围超转最后
@@ -324,81 +321,12 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 //                READY = true;
             }
             break;
-//
-//            //next by noti
-//            case 7: {
-//
-//                //检测是否指定下一首播放
-//                if (Data.sNextWillPlayItem != null) {
-//                    new DoesHasNextPlay().execute();
-//                    break;
-//                }
-//
-//                //检测前后播放
-//                int targetIndex = Values.CurrentData.CURRENT_MUSIC_INDEX + 1;
-//                if (targetIndex > Data.sPlayOrderList.size() - 1) {            //超出范围自动跳转0
-//                    targetIndex = 0;
-//                }
-//                Values.CurrentData.CURRENT_MUSIC_INDEX = targetIndex;
-//
-//                Data.setCurrentMusicItem(Data.sPlayOrderList.get(targetIndex));
-//
-//                resetMusic();
-//                setDataSource(Data.sPlayOrderList.get(targetIndex).getMusicPath());
-//                prepare();
-//
-//                setFlags(targetIndex);
-//
-//                //load data
-//                if (!Data.sActivities.isEmpty()) {
-//                    final MusicDetailFragment musicDetailFragment = ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment();
-//                    uiSet(musicDetailFragment, targetIndex);
-//                    sureCar();
-//                }
-//
-//                playMusic();
-//
-//            }
-//            break;
-//
-//            //previous by noti
-//            case 8: {
-//                Log.d(TAG, "onReceive: do 8");
-//
-//                //检测是否指定下一首播放
-//                if (Data.sNextWillPlayItem != null) {
-//                    new DoesHasNextPlay().execute();
-//                    break;
-//                }
-//
-//                //检测前后播放
-//                int targetIndex = Values.CurrentData.CURRENT_MUSIC_INDEX - 1;
-//                if (targetIndex < 0) {            //超出范围自动跳转0
-//                    targetIndex = Data.sPlayOrderList.size() - 1;
-//                }
-//                Values.CurrentData.CURRENT_MUSIC_INDEX = targetIndex;
-//
-//                Data.setCurrentMusicItem(Data.sPlayOrderList.get(targetIndex));
-//
-//                resetMusic();
-//                setDataSource(Data.sPlayOrderList.get(targetIndex).getMusicPath());
-//                prepare();
-//
-//                setFlags(targetIndex);
-//
-//                //load data
-//                if (!Data.sActivities.isEmpty()) {
-//                    final MusicDetailFragment musicDetailFragment = ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment();
-//                    uiSet(musicDetailFragment, targetIndex);
-//                    sureCar();
-//                }
-//                playMusic();
-//
-//            }
-//            break;
+            default:
         }
 
         Values.HAS_PLAYED = true;
+        Data.sHistoryPlay.add(Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX));
+        Log.d(TAG, "onMusicItemClick: add: " + Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX).getMusicName());
 
         //after type set
         if (!Data.sActivities.isEmpty()) {

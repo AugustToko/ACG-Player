@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyWaitListAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月19日 12:56:02
- * 上次修改时间：2018年12月19日 12:46:08
+ * 当前修改时间：2018年12月25日 08:45:54
+ * 上次修改时间：2018年12月25日 08:38:45
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -19,6 +19,7 @@ import android.graphics.Color;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -141,6 +142,11 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
             return false;
         });
 
+        view.setOnLongClickListener(v -> {
+            holder.mPopupMenu.show();
+            return true;
+        });
+
         return holder;
     }
 
@@ -156,6 +162,9 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
             ReceiverOnMusicPlay.resetMusic();
 
             Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
+            Data.sHistoryPlay.add(Data.sPlayOrderList.get(holder.getAdapterPosition()));
+
+            Log.d(TAG, "onMusicItemClick: add: " + Data.sPlayOrderList.get(holder.getAdapterPosition()).getMusicName());
 
             //set current data
             Data.setCurrentMusicItem(mMusicItems.get(holder.getAdapterPosition()));

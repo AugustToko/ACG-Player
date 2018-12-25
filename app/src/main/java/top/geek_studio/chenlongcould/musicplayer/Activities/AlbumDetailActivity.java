@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 13:55:33
- * 上次修改时间：2018年12月13日 13:55:23
+ * 当前修改时间：2018年12月25日 08:45:54
+ * 上次修改时间：2018年12月25日 08:45:35
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -54,7 +54,7 @@ public final class AlbumDetailActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAlbumDetailBinding = DataBindingUtil.setContentView(this, R.layout.activity_album_detail);
-
+        mAlbumDetailBinding.toolbar.setNavigationOnClickListener(v -> finish());
         initData();
     }
 

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月19日 12:56:02
- * 上次修改时间：2018年12月19日 12:46:08
+ * 当前修改时间：2018年12月25日 08:45:54
+ * 上次修改时间：2018年12月24日 19:08:53
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -152,6 +152,7 @@ public final class MyMusicService extends Service {
             Log.d(TAG, "setCurrentMusicData: " + mMusicItem.get().getMusicPath() + " " + String.valueOf(mCurrentCover == null));
         }
     };
+
     private AtomicBoolean mIsServiceDestroyed = new AtomicBoolean(false);
 
     @Override
@@ -228,7 +229,7 @@ public final class MyMusicService extends Service {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @NonNull
-    private Notification.Builder getChannelNotification(String title, String content, @Nullable Bitmap cover, Context context) {
+    private Notification.Builder getChannelNotification(final String title, final String content, final @Nullable Bitmap cover, final Context context) {
 
         //pi(s)
         Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
@@ -294,7 +295,7 @@ public final class MyMusicService extends Service {
         return builder;
     }
 
-    private NotificationCompat.Builder getNotification_25(String title, String content, @Nullable Bitmap cover, Context context) {
+    private NotificationCompat.Builder getNotification_25(final String title, final String content, final @Nullable Bitmap cover, final Context context) {
         Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
         PendingIntent pi = PendingIntent.getActivity(context, 0, intent, 0);
 
@@ -310,7 +311,6 @@ public final class MyMusicService extends Service {
                 .setAutoCancel(false);
         return builder;
     }
-
 
     @Override
     public boolean onUnbind(Intent intent) {
@@ -332,55 +332,4 @@ public final class MyMusicService extends Service {
         super.onDestroy();
     }
 
-    //    public final class MusicBinder extends Binder {
-//
-//        public final void playMusic() {
-//            mMediaPlayer.start();
-//            startForeground(NotificationUtils.ID, Data.notificationUtils.getNot(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, BitmapFactory.decodeByteArray(mMusicItem.getMusicCover(), 0, mMusicItem.getMusicCover().length), MyMusicService.this));
-//        }
-//
-//        public final void stopMusic() {
-//            mMediaPlayer.stop();
-//            stopForeground(true);
-//        }
-//
-//        public final boolean isPlayingMusic() {
-//            return mMediaPlayer.isPlaying();
-//        }
-//
-//        public final void pauseMusic() {
-//            startForeground(NotificationUtils.ID, Data.notificationUtils
-//                    .getNot(Data.sCurrentMusicName, Data.sCurrentMusicAlbum, BitmapFactory.decodeByteArray(mMusicItem.getMusicCover(), 0, mMusicItem.getMusicCover().length), MyMusicService.this));
-//            mMediaPlayer.pause();
-//        }
-//
-//        public final void resetMusic() {
-//            mMediaPlayer.reset();
-//        }
-//
-//        public final void setDataSource(String path) throws IOException {
-//            mMediaPlayer.setDataSource(path);
-//        }
-//
-//        public final void prepare() throws IOException {
-//            mMediaPlayer.prepare();
-//        }
-//
-//        public final int getDuration() {
-//            return mMediaPlayer.getDuration();
-//        }
-//
-//        public final int getCurrentPosition() {
-//            return mMediaPlayer.getCurrentPosition();
-//        }
-//
-//        public final void seekTo(int position) {
-//            mMediaPlayer.seekTo(position);
-//        }
-//
-//        public final void release() {
-//            mMediaPlayer.release();
-//        }
-//
-//    }
 }

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragmentLandSpace.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月19日 12:56:02
- * 上次修改时间：2018年12月19日 12:46:13
+ * 当前修改时间：2018年12月25日 08:45:54
+ * 上次修改时间：2018年12月19日 13:09:51
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -400,9 +400,11 @@ public class MusicDetailFragmentLandSpace extends Fragment {
             ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mMusicDetail2Binding.waitPlayBodyUp.getLayoutParams();
             ValueAnimator animator = new ValueAnimator();
             if (SLIDED) {
+                GlideApp.with(this).load(R.drawable.ic_keyboard_arrow_up_white_24dp).into(mMusicDetail2Binding.waitPlayBodyUp);
                 animator.setFloatValues(getResources().getDimension(R.dimen.margin_car_list), getResources().getDimension(R.dimen.margin_8));
                 SLIDED = false;
             } else {
+                GlideApp.with(this).load(R.drawable.ic_keyboard_arrow_down_white_24dp).into(mMusicDetail2Binding.waitPlayBodyUp);
                 animator.setFloatValues(getResources().getDimension(R.dimen.margin_8), getResources().getDimension(R.dimen.margin_car_list));
                 SLIDED = true;
             }

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月19日 12:56:02
- * 上次修改时间：2018年12月18日 18:21:27
+ * 当前修改时间：2018年12月25日 08:45:54
+ * 上次修改时间：2018年12月25日 08:40:46
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -86,13 +86,14 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
     private ItemHolder currentBind;
 
+    //ui position, like: MainActivity or-> xxFragment...
     private String mCurrentUiPosition;
 
-    public MyRecyclerAdapter(List<MusicItem> musicItems, Context context, String calledFrag) {
+    public MyRecyclerAdapter(List<MusicItem> musicItems, Context context, String currentUiPosition) {
         mMusicItems = musicItems;
         mMainActivity = (MainActivity) Data.sActivities.get(0);
         mContext = context;
-        mCurrentUiPosition = calledFrag;
+        mCurrentUiPosition = currentUiPosition;
     }
 
     @NonNull
@@ -289,6 +290,8 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                                 PlayListsUtil.addToPlaylist(mMainActivity, mMusicItems.get(holder.getAdapterPosition()), result, false);
                             dialog.dismiss();
                             Data.sPlayListItems.add(0, new PlayListItem(result, et.getText().toString()));
+
+                            //update data
                             mMainActivity.getPlayListFragment().getPlayListAdapter().notifyItemInserted(0);
                         });
                         b2.show();
@@ -365,6 +368,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 }
             }
             Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
+            Data.sHistoryPlay.add(Data.sMusicItems.get(holder.getAdapterPosition()));
 
             //set current data
             Data.setCurrentMusicItem(mMusicItems.get(holder.getAdapterPosition()));
@@ -507,16 +511,17 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
             if (mImageViewWeakReference.get() == null || result == null) return;
 
-            if (result.equals("null")) {
-                Log.d(TAG, "onPostExecute: image is null");
+            File file = new File(result);
+            if (result.equals("null") || !file.exists() || file.isDirectory()) {
+                Log.d(TAG, "onPostExecute: load image error");
                 GlideApp.with(mContextWeakReference.get()).load(R.drawable.ic_audiotrack_24px).into(mImageViewWeakReference.get());
                 return;
             }
 
+
             GlideApp.with(mContextWeakReference.get()).load(result)
                     .transition(DrawableTransitionOptions.withCrossFade())
                     .override(Values.MAX_HEIGHT_AND_WIDTH, Values.MAX_HEIGHT_AND_WIDTH)
-                    .skipMemoryCache(true)
                     .into(mImageViewWeakReference.get());
         }
 

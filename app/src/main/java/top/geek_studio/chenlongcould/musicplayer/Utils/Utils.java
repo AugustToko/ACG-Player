@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月19日 12:56:02
- * 上次修改时间：2018年12月19日 12:46:08
+ * 当前修改时间：2018年12月25日 08:45:54
+ * 上次修改时间：2018年12月25日 08:45:35
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -53,7 +53,6 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 
-import top.geek_studio.chenlongcould.musicplayer.Activities.CarViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
@@ -237,7 +236,7 @@ public final class Utils {
                 activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.SET_BUTTON_PLAY);
 
                 if (Values.CurrentData.UI_MODE.equals(Values.CurrentData.MODE_CAR)) {
-                    ((CarViewActivity) Data.sActivities.get(1)).getFragmentLandSpace().setButtonType("pause");
+                    Data.sCarViewActivity.getFragmentLandSpace().setButtonType("pause");
                 }
             }
         }

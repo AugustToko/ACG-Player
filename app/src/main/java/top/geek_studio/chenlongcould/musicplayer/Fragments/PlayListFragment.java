@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：PlayListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 13:55:33
- * 上次修改时间：2018年12月13日 13:55:18
+ * 当前修改时间：2018年12月25日 08:45:54
+ * 上次修改时间：2018年12月25日 08:20:02
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -90,6 +90,12 @@ public final class PlayListFragment extends Fragment implements IStyle, VisibleO
             startActivity(intent);
         });
 
+        mPlayListBinding.history.setOnClickListener(v -> {
+            Intent intent = new Intent(mMainActivity, PublicActivity.class);
+            intent.putExtra("start_by", "play history");
+            startActivity(intent);
+        });
+
         initStyle();
 
         mPlayListBinding.recyclerView.setLayoutManager(new LinearLayoutManager(mMainActivity));
@@ -150,51 +156,10 @@ public final class PlayListFragment extends Fragment implements IStyle, VisibleO
         return mHandler;
     }
 
-//    /**
-//     * load playlist task
-//     */
-//    public static class MyLoadListTask extends AsyncTask<Void, Void, Void> {
-//
-//        private WeakReference<MainActivity> mWeakReference;
-//
-//        public MyLoadListTask(MainActivity activity) {
-//            mWeakReference = new WeakReference<>(activity);
-//        }
-//
-//        @Override
-//        protected Void doInBackground(Void... voids) {
-//            Data.sPlayListItems.clear();
-//            Cursor cursor = mWeakReference.get().getContentResolver()
-//                    .query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null);
-//            if (cursor != null && cursor.moveToFirst()) {
-//                do {
-//                    final String filePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATA));
-//                    final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists._ID));
-//                    final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.NAME));
-//                    final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATE_ADDED));
-//
-//                    // TODO: 2018/12/10 M3U FILE
-//                    final File file = new File(filePath + ".m3u");
-//
-//                    Data.sPlayListItems.add(new PlayListItem(id, name, filePath, addTime));
-//                } while (cursor.moveToNext());
-//                cursor.close();
-//            }
-//            return null;
-//        }
-//    }
-
     @Override
     public void initStyle() {
-        if (Values.Style.NIGHT_MODE) {
-            mPlayListBinding.viewLineOne.setBackgroundColor(Color.parseColor("#7c7c7c"));
-        } else {
-            mPlayListBinding.viewLineOne.setBackgroundColor(Color.parseColor("#e6e6e6"));
-        }
-
         mPlayListBinding.recentName.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
         mPlayListBinding.favouriteName.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
-
     }
 
     @Override

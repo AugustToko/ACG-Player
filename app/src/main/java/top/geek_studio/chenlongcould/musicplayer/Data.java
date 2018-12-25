@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Data.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月19日 12:56:02
- * 上次修改时间：2018年12月19日 12:55:44
+ * 当前修改时间：2018年12月25日 08:45:54
+ * 上次修改时间：2018年12月25日 08:31:18
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -39,17 +39,17 @@ public final class Data {
     /**
      * data
      * */
-    public static List<MusicItem> sMusicItems = new ArrayList<>();
+    public final static List<MusicItem> sMusicItems = new ArrayList<>();
 
-    public static List<AlbumItem> sAlbumItems = new ArrayList<>();
+    public final static List<AlbumItem> sAlbumItems = new ArrayList<>();
 
-    public static List<AlbumItem> sAlbumItemsBackUp = new ArrayList<>();
+    public final static List<AlbumItem> sAlbumItemsBackUp = new ArrayList<>();
 
-    public static List<MusicItem> sMusicItemsBackUp = new ArrayList<>();
+    public final static List<MusicItem> sMusicItemsBackUp = new ArrayList<>();
 
-    public static List<MusicItem> sPlayOrderList = new ArrayList<>();
+    public final static List<MusicItem> sPlayOrderList = new ArrayList<>();
 
-    public static List<PlayListItem> sPlayListItems = new ArrayList<>();
+    public final static List<PlayListItem> sPlayListItems = new ArrayList<>();
 
     /**
      * nextWillPlay
@@ -60,7 +60,7 @@ public final class Data {
     /**
      * 存储播放历史(序列) default...
      */
-    public static List<Integer> sHistoryPlayIndex = new ArrayList<>();
+    public final static List<MusicItem> sHistoryPlay = new ArrayList<>();
 
     /**
      * sCurrent DATA

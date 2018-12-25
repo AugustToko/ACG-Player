@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：CarViewActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月19日 12:56:02
- * 上次修改时间：2018年12月19日 12:46:15
+ * 当前修改时间：2018年12月25日 08:45:54
+ * 上次修改时间：2018年12月19日 13:42:47
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -18,6 +18,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -157,6 +158,9 @@ public class CarViewActivity extends AppCompatActivity {
         if (BACK_PRESSED) return;
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         show();
+        findViewById(R.id.frag_land_space).setVisibility(View.GONE);
+        mContentView.setVisibility(View.GONE);
+        getWindow().setBackgroundDrawable(null);
 
         BACK_PRESSED = true;
         Data.sCarViewActivity = null;
@@ -168,5 +172,17 @@ public class CarViewActivity extends AppCompatActivity {
 
     public boolean isVisible() {
         return mVisible;
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d(TAG, "onDestroy: ");
+        super.onDestroy();
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        Log.d(TAG, "finalize: ");
+        super.finalize();
     }
 }
