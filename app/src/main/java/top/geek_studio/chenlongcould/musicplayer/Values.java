@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月19日 12:56:02
- * 上次修改时间：2018年12月19日 12:46:15
+ * 当前修改时间：2018年12月25日 10:41:27
+ * 上次修改时间：2018年12月25日 09:12:16
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -151,6 +151,8 @@ public final class Values {
 
         public static final String ALBUM_LIST_DISPLAY_TYPE = "ALBUM_LIST_DISPLAY_TYPE";
         public static final String ALBUM_LIST_GRID_TYPE_COUNT = "ALBUM_LIST_GRID_TYPE_COUNT";
+
+        public static final String FAVOURITE_LIST_ID = "FAVOURITE_LIST_ID";
     }
 
     /**

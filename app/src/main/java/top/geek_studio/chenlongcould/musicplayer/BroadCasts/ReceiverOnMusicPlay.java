@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月25日 08:45:54
- * 上次修改时间：2018年12月25日 08:38:45
+ * 当前修改时间：2018年12月25日 10:41:27
+ * 上次修改时间：2018年12月25日 10:27:37
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -152,6 +152,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
     }
 
     public static void setDataSource(String path) {
+        Data.sHistoryPlay.add(Data.sCurrentMusicItem);
         try {
             Data.sMusicBinder.setDataSource(path);
         } catch (RemoteException e) {
@@ -183,7 +184,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-        return -1;
+        return 0;
     }
 
     public static void seekTo(int nowPosition) {
@@ -325,7 +326,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
         }
 
         Values.HAS_PLAYED = true;
-        Data.sHistoryPlay.add(Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX));
         Log.d(TAG, "onMusicItemClick: add: " + Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX).getMusicName());
 
         //after type set

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月19日 12:56:02
-  ~ 上次修改时间：2018年12月19日 12:50:56
+  ~ 当前修改时间：2018年12月25日 10:41:27
+  ~ 上次修改时间：2018年12月25日 08:54:54
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -62,4 +62,6 @@
     <string name="shadow">阴影</string>
     <string name="eq">均衡器</string>
     <string name="car_mode">车载模式</string>
+    <string name="history">历史(RAM)</string>
+    <string name="fav">最喜爱的歌曲</string>
 </resources>

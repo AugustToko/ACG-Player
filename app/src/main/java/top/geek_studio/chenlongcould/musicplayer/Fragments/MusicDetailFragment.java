@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月25日 08:45:54
- * 上次修改时间：2018年12月25日 07:31:06
+ * 当前修改时间：2018年12月25日 10:41:27
+ * 上次修改时间：2018年12月25日 10:25:32
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -734,6 +734,11 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
             switch (menuItem.getItemId()) {
                 case R.id.menu_toolbar_fast_play: {
                     Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE, PlayListFragment.TAG);
+                }
+                break;
+
+                case R.id.menu_toolbar_love: {
+                    Utils.DataSet.addToFavourite(mMainActivity, Data.sCurrentMusicItem);
                 }
                 break;
 

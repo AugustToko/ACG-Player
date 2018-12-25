@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月25日 08:45:54
-  ~ 上次修改时间：2018年12月25日 08:23:43
+  ~ 当前修改时间：2018年12月25日 10:41:27
+  ~ 上次修改时间：2018年12月25日 08:55:30
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -85,4 +85,5 @@
     <string name="dummy_content" translatable="false">DUMMY\nCONTENT</string>
     <string name="car_mode">Car Mode</string>
     <string name="history">History</string>
+    <string name="fav">Favourite</string>
 </resources>

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月25日 08:45:54
- * 上次修改时间：2018年12月25日 08:40:46
+ * 当前修改时间：2018年12月25日 10:41:27
+ * 上次修改时间：2018年12月25日 10:40:50
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -24,10 +24,8 @@ import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -36,7 +34,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.OvershootInterpolator;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,7 +43,6 @@ import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -63,9 +59,7 @@ import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Interface.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
-import top.geek_studio.chenlongcould.musicplayer.Models.PlayListItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
@@ -119,7 +113,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_list_item_mod, viewGroup, false);
             holder = new ModHolder(view);
 
-            onMusicItemClick(view, holder, mCurrentUiPosition);
+            onMusicItemClick(view, holder);
 
             ((ModHolder) holder).mRandomItem.setOnClickListener(v -> {
                 if (!Values.CurrentData.CURRENT_PLAY_LIST.equals("default")) {
@@ -132,7 +126,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         } else {
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_list_item, viewGroup, false);
             holder = new ItemHolder(view);
-            onMusicItemClick(view, holder, mCurrentUiPosition);
+            onMusicItemClick(view, holder);
         }
 
         //默认设置扩展button opacity 0, (default)
@@ -245,68 +239,23 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             switch (item.getItemId()) {
                 //noinspection PointlessArithmeticExpression
                 case Menu.FIRST + 0: {
-                    Data.sNextWillPlayItem = Data.sMusicItems.get(holder.getAdapterPosition());
+                    Data.sNextWillPlayItem = mMusicItems.get(holder.getAdapterPosition());
                 }
                 break;
 
                 case Menu.FIRST + 1: {
-                    // TODO: 2018/11/8 待完善(最喜爱歌曲列表)
-                    Toast.makeText(mContext, "Building...", Toast.LENGTH_SHORT).show();
-//                    SharedPreferences mPlayListSpf = mMainActivity.getSharedPreferences(Values.SharedPrefsTag.PLAY_LIST_SPF_NAME_MY_FAVOURITE, 0);
-//                    SharedPreferences.Editor editor = mPlayListSpf.edit();
-//                    editor.putString(Values.PLAY_LIST_SPF_KEY, mMusicItems.get(index).getMusicPath());
-//                    editor.apply();
-//
-//                    Utils.Ui.fastToast(Data.sActivities.get(0).getApplicationContext(), "Done!");
+                    Utils.DataSet.addToFavourite(mContext, mMusicItems.get(holder.getAdapterPosition()));
                 }
                 break;
 
                 //add to list
                 case Menu.FIRST + 2: {
+                    Utils.DataSet.addList(mMainActivity, mMusicItems.get(holder.getAdapterPosition()));
+                }
+                break;
 
-                    final Resources resources = mMainActivity.getResources();
-
-                    final AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
-                    builder.setTitle(resources.getString(R.string.add_to_playlist));
-
-                    builder.setNegativeButton(resources.getString(R.string.new_list), (dialog, which) -> {
-                        final AlertDialog.Builder b2 = new AlertDialog.Builder(mMainActivity);
-                        b2.setTitle(resources.getString(R.string.enter_name));
-
-                        final EditText et = new EditText(mMainActivity);
-                        b2.setView(et);
-
-                        et.setHint(resources.getString(R.string.enter_name));
-                        et.setSingleLine(true);
-                        b2.setNegativeButton(resources.getString(R.string.cancel), null);
-                        b2.setPositiveButton(resources.getString(R.string.sure), (dialog1, which1) -> {
-                            if (TextUtils.isEmpty(et.getText())) {
-                                Toast.makeText(mMainActivity, "name can not empty!", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-
-                            final int result = PlayListsUtil.createPlaylist(mMainActivity, et.getText().toString());
-                            if (result != -1)
-                                PlayListsUtil.addToPlaylist(mMainActivity, mMusicItems.get(holder.getAdapterPosition()), result, false);
-                            dialog.dismiss();
-                            Data.sPlayListItems.add(0, new PlayListItem(result, et.getText().toString()));
-
-                            //update data
-                            mMainActivity.getPlayListFragment().getPlayListAdapter().notifyItemInserted(0);
-                        });
-                        b2.show();
-                    });
-
-                    builder.setCancelable(true);
-
-                    builder.setSingleChoiceItems(mMainActivity.getContentResolver()
-                                    .query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null),
-                            -1, MediaStore.Audio.Playlists.NAME, (dialog, which) -> {
-                                PlayListsUtil.addToPlaylist(mMainActivity, mMusicItems.get(holder.getAdapterPosition()), Data.sPlayListItems.get(which).getId(), false);
-                                dialog.dismiss();
-                            });
-                    builder.show();
-
+                case Menu.FIRST + 3: {
+                    // TODO: 2018/12/25 del
                 }
                 break;
 
@@ -346,29 +295,28 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         return holder;
     }
 
-    private void onMusicItemClick(View view, ViewHolder holder, String currentUiPosition) {
+    private void onMusicItemClick(View view, ViewHolder holder) {
         view.setOnClickListener(v -> Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
 
             ReceiverOnMusicPlay.resetMusic();
 
-            //使得当前播放列表成为"待播放列表"
-            if (currentUiPosition.equals("PublicActivityPlayList") && Values.CurrentData.CURRENT_PLAY_LIST.equals("default")) {
-                PublicActivity activity = ((PublicActivity) mContext);
-                Values.CurrentData.CURRENT_PLAY_LIST = activity.getCurrentListName();
-                Data.sPlayOrderList.clear();
-                Data.sPlayOrderList.addAll(activity.getMusicItemList());        //更新数据
-            } else {
-                //恢复待播放列表为通常(ALL MUSIC)
-                if (!Values.CurrentData.CURRENT_PLAY_LIST.equals("default")) {
-                    Data.sPlayOrderList.clear();
-                    Data.sPlayOrderList.addAll(Data.sMusicItems);
-                    if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM))
-                        Collections.shuffle(Data.sPlayOrderList);
-                    Values.CurrentData.CURRENT_PLAY_LIST = "default";
-                }
-            }
+//            //使得当前播放列表成为"待播放列表"
+//            if (currentUiPosition.equals("PublicActivityPlayList")) {
+//                PublicActivity activity = ((PublicActivity) mContext);
+//                Values.CurrentData.CURRENT_PLAY_LIST = activity.getCurrentListName();
+//                Data.sPlayOrderList.clear();
+//                Data.sPlayOrderList.addAll(activity.getMusicItemList());        //更新数据
+//            } else
+//                //恢复待播放列表为通常(ALL MUSIC)
+//                if (!Values.CurrentData.CURRENT_PLAY_LIST.equals("default")) {
+//                    Data.sPlayOrderList.clear();
+//                    Data.sPlayOrderList.addAll(Data.sMusicItems);
+//                    if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM))
+//                        Collections.shuffle(Data.sPlayOrderList);
+//                    Values.CurrentData.CURRENT_PLAY_LIST = "default";
+//                }
+
             Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
-            Data.sHistoryPlay.add(Data.sMusicItems.get(holder.getAdapterPosition()));
 
             //set current data
             Data.setCurrentMusicItem(mMusicItems.get(holder.getAdapterPosition()));
@@ -614,12 +562,11 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             //Menu Load
             //noinspection PointlessArithmeticExpression
             mMenu.add(Menu.NONE, Menu.FIRST + 0, 0, resources.getString(R.string.next_play));
-            mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, resources.getString(R.string.add_to_playlist));
-            mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, resources.getString(R.string.more_info));
             mMenu.add(Menu.NONE, Menu.FIRST + 1, 0, resources.getString(R.string.love_music));
-            if (!mCurrentUiPosition.equals(AlbumDetailActivity.TAG)) {
-                mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, resources.getString(R.string.show_album));
-            }
+            mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, resources.getString(R.string.add_to_playlist));
+            mMenu.add(Menu.NONE, Menu.FIRST + 3, 0, "remove from favourite");
+            mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, resources.getString(R.string.show_album));
+            mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, resources.getString(R.string.more_info));
 
             MenuInflater menuInflater = mMainActivity.getMenuInflater();
             menuInflater.inflate(R.menu.recycler_song_item_menu, mMenu);

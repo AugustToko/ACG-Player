@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyWaitListAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月25日 08:45:54
- * 上次修改时间：2018年12月25日 08:38:45
+ * 当前修改时间：2018年12月25日 10:41:27
+ * 上次修改时间：2018年12月25日 10:25:32
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -13,7 +13,6 @@ package top.geek_studio.chenlongcould.musicplayer.Adapters;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.provider.MediaStore;
@@ -33,7 +32,6 @@ import android.widget.Toast;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.util.List;
-import java.util.Random;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
@@ -47,7 +45,6 @@ import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Interface.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
@@ -93,19 +90,12 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
                 break;
 
                 case Menu.FIRST + 1: {
-                    // TODO: 2018/11/8 待完善(最喜爱歌曲列表)
-                    final SharedPreferences mPlayListSpf = mActivity.getSharedPreferences(Values.SharedPrefsTag.PLAY_LIST_SPF_NAME_MY_FAVOURITE, 0);
-                    final SharedPreferences.Editor editor = mPlayListSpf.edit();
-                    editor.putString(Values.PLAY_LIST_SPF_KEY, mMusicItems.get(index).getMusicPath());
-                    editor.apply();
-
-                    Utils.Ui.fastToast(mActivity, "Done!");
+                    Utils.DataSet.addToFavourite(mActivity, mMusicItems.get(holder.getAdapterPosition()));
                 }
                 break;
 
                 case Menu.FIRST + 2: {
-                    // TODO: 2018/11/18 test play list
-                    PlayListsUtil.createPlaylist(mActivity, String.valueOf(new Random(1000)));
+                    Utils.DataSet.addList(mMainActivity, mMusicItems.get(holder.getAdapterPosition()));
                 }
                 break;
 

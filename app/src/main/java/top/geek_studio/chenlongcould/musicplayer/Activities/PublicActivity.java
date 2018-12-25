@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：PublicActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月25日 08:45:54
- * 上次修改时间：2018年12月25日 08:36:27
+ * 当前修改时间：2018年12月25日 10:41:27
+ * 上次修改时间：2018年12月25日 09:54:56
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -12,9 +12,11 @@
 package top.geek_studio.chenlongcould.musicplayer.Activities;
 
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -98,8 +100,79 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
                 }
                 break;
                 case "favourite music": {
-                    // TODO: 2018/11/11  favourite music
                     mToolbar.setTitle(getResources().getString(R.string.my_favourite));
+
+                    mMusicItemList = new ArrayList<>();
+
+                    SharedPreferences mDef = PreferenceManager.getDefaultSharedPreferences(this);
+                    int id = mDef.getInt(Values.SharedPrefsTag.FAVOURITE_LIST_ID, -1);
+                    if (id != -1) {
+                        Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
+                            //data
+
+                            //get musicId in PlayList
+                            Cursor cursor = getContentResolver().query(MediaStore.Audio.Playlists.Members.getContentUri("external", id)
+                                    , null, null, null, MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
+                            if (cursor != null && cursor.moveToFirst()) {
+                                cursor.moveToFirst();
+                                do {
+
+                                    //search music (with audioId)
+                                    int audioId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID));
+                                    Cursor cursor1 = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, MediaStore.MediaColumns._ID + " = ?", new String[]{String.valueOf(audioId)}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+                                    if (cursor1 != null && cursor1.moveToFirst()) {
+                                        do {
+                                            final String mimeType = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.MediaColumns.MIME_TYPE));
+                                            final String name = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.MediaColumns.TITLE));
+                                            final String albumName = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+                                            final int musicId = cursor1.getInt(cursor1.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+                                            final int size = (int) cursor1.getLong(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
+                                            final int duration = cursor1.getInt(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+                                            final String artist = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+                                            final long addTime = cursor1.getLong(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
+                                            final int albumId = cursor1.getInt(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+                                            final String path = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+
+                                            final MusicItem.Builder builder = new MusicItem.Builder(musicId, name, path)
+                                                    .musicAlbum(albumName)
+                                                    .addTime((int) addTime)
+                                                    .artist(artist)
+                                                    .duration(duration)
+                                                    .mimeName(mimeType)
+                                                    .size(size)
+                                                    .addAlbumId(albumId);
+                                            mMusicItemList.add(builder.build());
+                                        } while (cursor1.moveToNext());
+                                        cursor1.close();
+                                    }
+
+                                } while (cursor.moveToNext());
+                                cursor.close();
+                            }
+
+                            observableEmitter.onNext(0);
+                        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(i -> {
+                                    if (i != 0) return;
+                                    MyRecyclerAdapter adapter = new MyRecyclerAdapter(mMusicItemList, PublicActivity.this, TAG + "favourite");
+                                    mRecyclerView.setAdapter(adapter);
+
+                                    mToolbar.setOnMenuItemClickListener(menuItem -> {
+                                        switch (menuItem.getItemId()) {
+                                            case R.id.menu_random_play: {
+                                                Values.CurrentData.CURRENT_PLAY_LIST = getCurrentListName();
+                                                Data.sPlayOrderList.clear();
+                                                Data.sPlayOrderList.addAll(mMusicItemList);        //更新数据
+                                                Collections.shuffle(Data.sPlayOrderList);
+                                                Utils.SendSomeThing.sendPlay(PublicActivity.this, ReceiverOnMusicPlay.TYPE_SHUFFLE, TAG);
+                                            }
+                                            break;
+                                        }
+                                        return false;
+                                    });
+
+                                });
+                    }
                 }
                 break;
 

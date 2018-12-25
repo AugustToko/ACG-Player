@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：PlayListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月25日 08:45:54
- * 上次修改时间：2018年12月25日 08:20:02
+ * 当前修改时间：2018年12月25日 10:41:27
+ * 上次修改时间：2018年12月25日 10:08:04
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -119,9 +119,10 @@ public final class PlayListFragment extends Fragment implements IStyle, VisibleO
                     .query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
                 do {
+                    final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.NAME));
+
                     final String filePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATA));
                     final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists._ID));
-                    final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.NAME));
                     final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATE_ADDED));
 
                     // TODO: 2018/12/10 M3U FILE
@@ -160,6 +161,7 @@ public final class PlayListFragment extends Fragment implements IStyle, VisibleO
     public void initStyle() {
         mPlayListBinding.recentName.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
         mPlayListBinding.favouriteName.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
+        mPlayListBinding.historyName.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
     }
 
     @Override

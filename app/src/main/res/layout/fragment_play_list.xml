@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：fragment_play_list.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月25日 08:45:54
-  ~ 上次修改时间：2018年12月25日 08:45:37
+  ~ 当前修改时间：2018年12月25日 10:41:27
+  ~ 上次修改时间：2018年12月25日 08:54:54
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2018
@@ -172,7 +172,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:maxLines="1"
-                    android:text="最喜爱的歌曲"
+                    android:text="@string/fav"
                     app:layout_constraintTop_toTopOf="parent" />
 
             </android.support.constraint.ConstraintLayout>
@@ -264,7 +264,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:maxLines="1"
-                    android:text="History List"
+                    android:text="@string/history"
                     app:layout_constraintTop_toTopOf="parent" />
 
             </android.support.constraint.ConstraintLayout>

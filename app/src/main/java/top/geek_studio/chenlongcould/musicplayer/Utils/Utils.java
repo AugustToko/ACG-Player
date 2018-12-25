@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月25日 08:45:54
- * 上次修改时间：2018年12月25日 08:45:35
+ * 当前修改时间：2018年12月25日 10:41:27
+ * 上次修改时间：2018年12月25日 10:40:51
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -28,6 +29,7 @@ import android.media.audiofx.AudioEffect;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
@@ -41,10 +43,12 @@ import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.graphics.Palette;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateInterpolator;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,10 +56,13 @@ import android.widget.Toast;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
+import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
+import top.geek_studio.chenlongcould.musicplayer.Models.PlayListItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
@@ -291,7 +298,7 @@ public final class Utils {
             return bright / count;
         }
 
-        public static boolean ANIMATION_IN_DETAIL_DONE = true;
+        public static AtomicBoolean ANIMATION_IN_DETAIL_DONE = new AtomicBoolean(true);
 
         /**
          * 设置背景与动画 (blur style)
@@ -301,7 +308,7 @@ public final class Utils {
         public static void setBlurEffect(@NonNull final MainActivity activity, @NonNull final byte[] bitmap, @NonNull final ImageView primaryBackground, @NonNull final ImageView primaryBackgroundBef, final TextView nextText) {
             new Handler(Looper.getMainLooper()).post(() -> {
 
-                ANIMATION_IN_DETAIL_DONE = false;
+                ANIMATION_IN_DETAIL_DONE.set(false);
                 primaryBackground.setVisibility(View.VISIBLE);
 
                 Palette.from(BitmapFactory.decodeByteArray(bitmap, 0, bitmap.length)).generate(p -> {
@@ -362,7 +369,7 @@ public final class Utils {
                         }
 
                         primaryBackground.setVisibility(View.GONE);
-                        ANIMATION_IN_DETAIL_DONE = true;
+                        ANIMATION_IN_DETAIL_DONE.set(true);
                     }
 
                     @Override
@@ -381,7 +388,7 @@ public final class Utils {
 
         public static void setBlurEffect(@NonNull final MainActivity activity, @NonNull final Bitmap bitmap, @NonNull final ImageView primaryBackground, @NonNull final ImageView primaryBackgroundBef, final TextView nextText) {
             new Handler(Looper.getMainLooper()).post(() -> {
-                ANIMATION_IN_DETAIL_DONE = false;
+                ANIMATION_IN_DETAIL_DONE.set(false);
                 primaryBackground.setVisibility(View.VISIBLE);
 
                 Palette.from(bitmap).generate(p -> {
@@ -441,7 +448,7 @@ public final class Utils {
                         }
 
                         primaryBackground.setVisibility(View.GONE);
-                        ANIMATION_IN_DETAIL_DONE = true;
+                        ANIMATION_IN_DETAIL_DONE.set(true);
                     }
 
                     @Override
@@ -520,6 +527,124 @@ public final class Utils {
             Data.sPlayOrderList.clear();
             Data.sPlayOrderList.addAll(Data.sMusicItems);
             Collections.shuffle(Data.sPlayOrderList);
+        }
+
+        /**
+         * favourite music settings
+         * add or del
+         *
+         * @param context context
+         * @param item    MusicItem
+         */
+        public static void addToFavourite(Context context, MusicItem item) {
+            SharedPreferences mDef = PreferenceManager.getDefaultSharedPreferences(context);
+            int id = mDef.getInt(Values.SharedPrefsTag.FAVOURITE_LIST_ID, -1);
+            if (id != -1) {
+                if (isFav(context, item.getMusicID()) == 1)
+                    PlayListsUtil.addToPlaylist(context, item, id, false);
+                else Toast.makeText(context, "Already added!", Toast.LENGTH_SHORT).show();
+
+            } else {
+                id = PlayListsUtil.createPlaylist(context, "Favourite List");
+                SharedPreferences.Editor editor = mDef.edit();
+                editor.putInt(Values.SharedPrefsTag.FAVOURITE_LIST_ID, id);
+                editor.apply();
+                if (id != -1) {
+                    if (isFav(context, item.getMusicID()) != 0)
+                        PlayListsUtil.addToPlaylist(context, item, id, false);
+                    else Toast.makeText(context, "Already added!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+
+        /**
+         * add into music List
+         *
+         * @param activity MainActivity
+         * @param item     MusicItem
+         */
+        public static void addList(MainActivity activity, MusicItem item) {
+            final Resources resources = activity.getResources();
+
+            final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(activity);
+            builder.setTitle(resources.getString(R.string.add_to_playlist));
+
+            builder.setNegativeButton(resources.getString(R.string.new_list), (dialog, which) -> {
+                final android.support.v7.app.AlertDialog.Builder b2 = new android.support.v7.app.AlertDialog.Builder(activity);
+                b2.setTitle(resources.getString(R.string.enter_name));
+
+                final EditText et = new EditText(activity);
+                b2.setView(et);
+
+                et.setHint(resources.getString(R.string.enter_name));
+                et.setSingleLine(true);
+                b2.setNegativeButton(resources.getString(R.string.cancel), null);
+                b2.setPositiveButton(resources.getString(R.string.sure), (dialog1, which1) -> {
+                    if (TextUtils.isEmpty(et.getText())) {
+                        Toast.makeText(activity, "name can not empty!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    final int result = PlayListsUtil.createPlaylist(activity, et.getText().toString());
+                    if (result != -1)
+                        PlayListsUtil.addToPlaylist(activity, item, result, false);
+                    dialog.dismiss();
+                    Data.sPlayListItems.add(0, new PlayListItem(result, et.getText().toString()));
+
+                    //update data
+                    activity.getPlayListFragment().getPlayListAdapter().notifyItemInserted(0);
+                });
+                b2.show();
+            });
+
+            builder.setCancelable(true);
+
+            builder.setSingleChoiceItems(activity.getContentResolver()
+                            .query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null),
+                    -1, MediaStore.Audio.Playlists.NAME, (dialog, which) -> {
+                        PlayListsUtil.addToPlaylist(activity, item, Data.sPlayListItems.get(which).getId(), false);
+                        dialog.dismiss();
+                    });
+            builder.show();
+
+        }
+
+        /**
+         * isFav
+         *
+         * @return 0 == isFav, 1 == notFav, -1 == noList
+         */
+        public static int isFav(Context context, int idMusic) {
+            SharedPreferences mDef = PreferenceManager.getDefaultSharedPreferences(context);
+            int id = mDef.getInt(Values.SharedPrefsTag.FAVOURITE_LIST_ID, -1);
+
+            if (id == -1) {
+                Toast.makeText(context, "None Fav", Toast.LENGTH_SHORT).show();
+                return -1;
+            }
+
+            //get musicId in PlayList
+            Cursor cursor = context.getContentResolver().query(MediaStore.Audio.Playlists.Members.getContentUri("external", id)
+                    , null, null, null, MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
+            if (cursor != null && cursor.moveToFirst()) {
+                cursor.moveToFirst();
+                do {
+
+                    //search music (with audioId)
+                    int audioId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID));
+                    Cursor cursor1 = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, MediaStore.MediaColumns._ID + " = ?", new String[]{String.valueOf(audioId)}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+                    if (cursor1 != null && cursor1.moveToFirst()) {
+                        do {
+                            if (cursor1.getInt(cursor1.getColumnIndexOrThrow(MediaStore.Video.Media._ID)) == idMusic)
+                                return 0;
+                        } while (cursor1.moveToNext());
+                        cursor1.close();
+                    }
+
+                } while (cursor.moveToNext());
+                cursor.close();
+            }
+            return 1;
         }
     }
 
