@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月25日 12:33:11
- * 上次修改时间：2018年12月25日 10:43:28
+ * 当前修改时间：2018年12月26日 11:19:46
+ * 上次修改时间：2018年12月26日 07:48:21
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -109,7 +109,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
     /**
      * setFlags
-     *
      * @param targetIndex index
      */
     private static void setFlags(int targetIndex) {
@@ -117,14 +116,13 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
     }
 
     public static void playMusic() {
+        Values.HAS_PLAYED = true;
         try {
             Data.sMusicBinder.setCurrentMusicData(Data.sCurrentMusicItem);
             Data.sMusicBinder.playMusic();
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-
-//        READY.set(true);
     }
 
     public static void pauseMusic() {
@@ -325,9 +323,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
             default:
         }
 
-        Values.HAS_PLAYED = true;
-        Log.d(TAG, "onMusicItemClick: add: " + Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX).getMusicName());
-
         //after type set
         if (!Data.sActivities.isEmpty()) {
             ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
@@ -345,12 +340,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
         @Override
         protected Integer doInBackground(Void... voids) {
-
-//            if (!READY) {
-//                return -1;
-//            }
-
-//            READY = false;
 
             if (Data.sNextWillPlayItem != null) {
                 resetMusic();
@@ -402,7 +391,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
     }
 
     /**
-     * play_type: random, without history clear (by nextButton or auto-next)
+     * play_type: random (by nextButton or auto-next)
      * just make a random Index (data by {@link Data#sPlayOrderList})
      */
     public static class FastShufflePlayback extends AsyncTask<String, Void, Integer> {
