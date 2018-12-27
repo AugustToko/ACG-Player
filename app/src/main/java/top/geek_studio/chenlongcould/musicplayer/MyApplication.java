@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月19日 12:56:02
- * 上次修改时间：2018年12月19日 12:46:13
+ * 当前修改时间：2018年12月28日 07:49:20
+ * 上次修改时间：2018年12月28日 07:49:02
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -26,6 +26,7 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -137,7 +138,7 @@ public class MyApplication extends Application {
      * @param context 上下文环境对象
      * @return 获取此进程的进程名
      */
-    private String getProcessName(Context context) {
+    private String getProcessName(@NonNull Context context) {
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningAppProcessInfo> runningAppProcesses = am.getRunningAppProcesses();
         if (runningAppProcesses == null) {

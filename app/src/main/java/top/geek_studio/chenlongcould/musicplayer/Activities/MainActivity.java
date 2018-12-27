@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月25日 08:45:54
- * 上次修改时间：2018年12月25日 08:31:18
+ * 当前修改时间：2018年12月28日 07:49:20
+ * 上次修改时间：2018年12月26日 12:14:15
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -271,8 +271,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     @Override
     public void onAttachFragment(Fragment fragment) {
         super.onAttachFragment(fragment);
-        if (fragment instanceof MusicListFragment)
-            ((MusicListFragment) fragment).getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_MUSIC_LIST_DONE);
     }
 
     /**
@@ -529,12 +527,13 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             e.printStackTrace();
         }
 
-        stopService(new Intent(MainActivity.this, MyMusicService.class));
         try {
             unbindService(Data.sServiceConnection);
         } catch (Exception e) {
             Log.d(TAG, "exitApp: " + e);
         }
+        stopService(new Intent(MainActivity.this, MyMusicService.class));
+
         Data.sMusicBinder = null;
         Data.sServiceConnection = null;
 
@@ -797,8 +796,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         // 设置按钮的动画效果; 如果不想要打开关闭抽屉时的箭头动画效果，可以不写此行代码
         mMainBinding.drawerLayout.addDrawerListener(mDrawerToggle);
 
-//        setNavigationMenuLineStyle(mMainBinding.navigationView, Color.BLUE, 2);
-
     }
 
     public final class NotLeakHandler extends Handler {
@@ -820,7 +817,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                                 .load(cover == null ? R.drawable.ic_audiotrack_24px : cover)
                                 .transition(DrawableTransitionOptions.withCrossFade())
                                 .into(mNavHeaderImageView);
-                        if (cover != null) cover.recycle();
                     });
                 }
                 break;

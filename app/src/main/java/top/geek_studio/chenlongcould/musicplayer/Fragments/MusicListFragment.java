@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月19日 12:56:02
- * 上次修改时间：2018年12月19日 12:46:08
+ * 当前修改时间：2018年12月28日 07:49:20
+ * 上次修改时间：2018年12月28日 07:49:02
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2018
@@ -14,8 +14,6 @@ package top.geek_studio.chenlongcould.musicplayer.Fragments;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -25,9 +23,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
-
-import java.lang.ref.WeakReference;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
@@ -49,10 +44,6 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
     private MyRecyclerAdapter adapter;
 
     private MainActivity mActivity;
-
-    private Handler mHandler;
-
-    private boolean CREATE_VIEW_DONE = false;
 
     //实例化一个fragment
     public static MusicListFragment newInstance() {
@@ -91,8 +82,6 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
         Log.d(Values.LogTAG.LIFT_TAG, "onAttach: " + TAG);
         super.onAttach(context);
         mActivity = (MainActivity) getActivity();
-
-        mHandler = new NotLeakHandler(this);
     }
 
     @Override
@@ -141,33 +130,13 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        CREATE_VIEW_DONE = true;
-    }
-
-    @Override
     public void onDetach() {
         mMusicListBinding = null;
         super.onDetach();
     }
 
-    /**
-     * 延迟循环确认是否已经createView
-     */
-    private void sureCreateViewDone() {
-        if (CREATE_VIEW_DONE) {
-            adapter.notifyDataSetChanged();
-        } else {
-            new Handler().postDelayed(this::sureCreateViewDone, 500);      //循环一秒
-        }
-    }
-
     public final MyRecyclerAdapter getAdapter() {
         return adapter;
-    }
-
-    public Handler getHandler() {
-        return mHandler;
     }
 
     public FragmentMusicListLayoutBinding getMusicListBinding() {
@@ -179,31 +148,4 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
         if (mMusicListBinding.includeRecycler.recyclerView != null)
             mMusicListBinding.includeRecycler.recyclerView.setVisibility(status);
     }
-
-    final class NotLeakHandler extends Handler {
-        @SuppressWarnings("unused")
-        private WeakReference<MusicListFragment> mWeakReference;
-
-        NotLeakHandler(MusicListFragment fragment) {
-            mWeakReference = new WeakReference<>(fragment);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case Values.HandlerWhat.INIT_MUSIC_LIST_DONE: {
-                    mActivity.runOnUiThread(() -> {
-                        if (CREATE_VIEW_DONE) {
-                            sureCreateViewDone();
-                            Toast.makeText(mWeakReference.get().getActivity(), "Loading", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
-                }
-                default:
-                    break;
-            }
-        }
-    }
-
 }
