@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月04日 20:36:03
- * 上次修改时间：2019年01月04日 20:35:42
+ * 当前修改时间：2019年01月04日 21:49:12
+ * 上次修改时间：2019年01月04日 21:43:15
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -390,7 +390,6 @@ public final class Utils {
                             primaryBackgroundBef.setBackgroundColor(p.getVibrantColor(Color.TRANSPARENT));
                         }
                     });
-
                 }
 
                 Animator animator = ViewAnimationUtils.createCircularReveal(
@@ -822,11 +821,12 @@ public final class Utils {
 
         @Nullable
         public static ThemeActivity.Theme fileToTheme(final File f) {
+            if (!checkTheme(f.getAbsolutePath())) return null;
+
             try {
 
                 if (f.isDirectory()) {
                     final File detailText = new File(f.getPath() + File.separatorChar + ThemeStore.DETAIL_FILE_NAME);
-
 
                     String title = "null";
                     String date = "null";

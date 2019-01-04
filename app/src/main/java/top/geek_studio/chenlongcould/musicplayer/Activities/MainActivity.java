@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月04日 20:36:03
- * 上次修改时间：2019年01月04日 20:35:37
+ * 当前修改时间：2019年01月04日 21:49:12
+ * 上次修改时间：2019年01月04日 21:12:00
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -721,13 +721,11 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             int themeId = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.SharedPrefsTag.SELECT_THEME, -1);
             if (themeId != -1) {
                 final File themeFile = Utils.ThemeUtils.getThemeFile(this, themeId);
-                if (Utils.ThemeUtils.checkTheme(themeFile.getAbsolutePath())) {
-                    final ThemeActivity.Theme theme = Utils.ThemeUtils.fileToTheme(themeFile);
-                    if (theme != null) {
-                        Data.sTheme = theme;
-                        if (theme.support_area.contains(ThemeStore.SupportArea.NAV)) {
-                            emitter.onNext(theme);
-                        }
+                final ThemeActivity.Theme theme = Utils.ThemeUtils.fileToTheme(themeFile);
+                if (theme != null) {
+                    Data.sTheme = theme;
+                    if (theme.support_area.contains(ThemeStore.SupportArea.NAV)) {
+                        emitter.onNext(theme);
                     }
                 }
             } else {

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月04日 20:36:03
- * 上次修改时间：2019年01月04日 20:35:37
+ * 当前修改时间：2019年01月04日 21:49:12
+ * 上次修改时间：2019年01月04日 21:48:54
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -32,7 +32,6 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -55,6 +54,10 @@ public final class MyApplication extends Application {
 
     private ShortcutManager mShortcutManager;
 
+    public static final String VERSION_CODE = "ver_code";
+
+    public static final int TAGET_ACTION_CODE = -99;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -62,6 +65,16 @@ public final class MyApplication extends Application {
         mDefSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         if (getProcessName(this).equals(getPackageName())) {
+
+            //noinspection StatementWithEmptyBody
+            if (mDefSharedPreferences.getInt(VERSION_CODE, -1) == TAGET_ACTION_CODE) {
+                //do somethings
+            }
+
+            //add version code
+            SharedPreferences.Editor ver_edit = mDefSharedPreferences.edit();
+            ver_edit.putInt(VERSION_CODE, 29);
+            ver_edit.apply();
 
             int id = mDefSharedPreferences.getInt(Values.SharedPrefsTag.FAVOURITE_LIST_ID, -1);
             if (id == -1) {
@@ -146,7 +159,7 @@ public final class MyApplication extends Application {
                         Uri.parse("https://www.github.com/")))
                 .build();
 
-        mShortcutManager.setDynamicShortcuts(Arrays.asList(shortcut, shortcut2, shortcut3));
+//        mShortcutManager.setDynamicShortcuts(Arrays.asList(shortcut, shortcut2, shortcut3));
     }
 
     /**

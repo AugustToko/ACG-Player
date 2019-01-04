@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月04日 20:36:03
- * 上次修改时间：2019年01月04日 20:27:06
+ * 当前修改时间：2019年01月04日 21:49:12
+ * 上次修改时间：2019年01月04日 21:46:32
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -24,6 +24,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.Switch;
 
@@ -284,30 +285,32 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
 
             SharedPreferences.Editor editor = mDefPrefs.edit();
             if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
-                mStyleSwitch.setChecked(false);
-                editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_AUTO_COLOR);
                 Values.Style.DETAIL_BACKGROUND = Values.Style.STYLE_BACKGROUND_AUTO_COLOR;
-            } else {
-                mStyleSwitch.setChecked(true);
-                editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_BLUR);
-                Values.Style.DETAIL_BACKGROUND = Values.Style.STYLE_BACKGROUND_BLUR;
-            }
-            editor.apply();
-
-        });
-
-        mStyleSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            SharedPreferences.Editor editor = mDefPrefs.edit();
-            mStyleSwitch.setChecked(isChecked);
-            if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
                 mStyleSwitch.setChecked(false);
                 editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_AUTO_COLOR);
             } else {
+                Values.Style.DETAIL_BACKGROUND = Values.Style.STYLE_BACKGROUND_BLUR;
                 mStyleSwitch.setChecked(true);
                 editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_BLUR);
             }
             editor.apply();
+
         });
+
+        mStyleSwitch.setClickable(false);
+
+//        mStyleSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+//            SharedPreferences.Editor editor = mDefPrefs.edit();
+//            mStyleSwitch.setChecked(isChecked);
+//            if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
+//                mStyleSwitch.setChecked(false);
+//                editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_AUTO_COLOR);
+//            } else {
+//                mStyleSwitch.setChecked(true);
+//                editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_BLUR);
+//            }
+//            editor.apply();
+//        });
     }
 
     private void clearAnimation() {
@@ -343,12 +346,17 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
         mAccentImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.ACCENT_COLOR, Color.parseColor("#D81B60")));
         Utils.Ui.setTopBottomColor(this, mAppBarLayout, mToolbar);
 
+        final ImageView imageView = (ImageView) findViewById(R.id.theme_preview);
+
         //load theme
         if (Data.sTheme != null) {
+            imageView.setVisibility(View.VISIBLE);
             GlideApp.with(this)
                     .load(Data.sTheme.getThumbnail())
                     .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-                    .into((ImageView) findViewById(R.id.theme_preview));
+                    .into(imageView);
+        } else {
+            imageView.setVisibility(View.GONE);
         }
 
     }

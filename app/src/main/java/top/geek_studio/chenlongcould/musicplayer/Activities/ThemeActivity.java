@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ThemeActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月04日 20:36:03
- * 上次修改时间：2019年01月04日 20:35:41
+ * 当前修改时间：2019年01月04日 21:49:12
+ * 上次修改时间：2019年01月04日 21:48:54
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -14,9 +14,13 @@ package top.geek_studio.chenlongcould.musicplayer.Activities;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.databinding.DataBindingUtil;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -38,7 +42,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.ThemeAdapter;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Interface.IStyle;
@@ -53,7 +62,9 @@ public class ThemeActivity extends AppCompatActivity implements IStyle {
 
     public static final String TAG = "ThemeActivity";
 
-    public static final int SAVE_AS = 1;
+    private static final int REQUEST_ADD_THEME = 1;
+
+    private File themeDir;
 
     private MyThemeDBHelper mDBHelper;
 
@@ -85,11 +96,17 @@ public class ThemeActivity extends AppCompatActivity implements IStyle {
         super.onCreate(savedInstanceState);
         mThemeBinding = DataBindingUtil.setContentView(this, R.layout.activity_theme);
 
+        themeDir = getExternalFilesDir(ThemeStore.DIR_NAME);
+
         mThemeBinding.toolbar.inflateMenu(R.menu.menu_toolbar_theme);
         mThemeBinding.toolbar.setOnMenuItemClickListener(menuItem -> {
             switch (menuItem.getItemId()) {
                 case R.id.menu_toolbar_theme_add: {
-
+                    Log.d(TAG, "onCreate: add");
+                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                    intent.setType("application/zip");
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    startActivityForResult(intent, REQUEST_ADD_THEME);
                 }
                 break;
 
@@ -128,11 +145,43 @@ public class ThemeActivity extends AppCompatActivity implements IStyle {
         initStyle();
     }
 
+    @SuppressLint("CheckResult")
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         switch (requestCode) {
-            case SAVE_AS: {
+            case REQUEST_ADD_THEME: {
 
+                if (resultCode == RESULT_OK) {
+                    Uri uri = data.getData();
+                    if (uri != null) {
+                        Log.d(TAG, "onActivityResult: " + uri.toString());
+                        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+                        if (cursor != null) {
+                            cursor.moveToFirst();
+                            String documentId = cursor.getString(cursor.getColumnIndexOrThrow("document_id"));
+                            String path = Environment.getExternalStorageDirectory().getPath() + File.separatorChar + documentId.split(":")[1];
+
+                            Observable.create((ObservableOnSubscribe<Theme>) emitter -> {
+                                int name = themeDir.listFiles().length;
+                                Utils.IO.Unzip(path, themeDir.getAbsolutePath() + File.separatorChar + name + File.separatorChar);
+
+                                final File themeFile = new File(themeDir.getAbsolutePath() + File.separatorChar + name);
+                                final Theme theme = Utils.ThemeUtils.fileToTheme(themeFile);
+
+                                if (theme != null) {
+                                    emitter.onNext(theme);
+                                } else {
+                                    Utils.IO.delFolder(themeFile.getAbsolutePath());
+                                }
+                                cursor.close();
+                            }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(result -> {
+                                        mThemes.add(result);
+                                        mThemeAdapter.notifyItemInserted(mThemes.size() - 1);
+                                    });
+                        }
+                    }
+                }
             }
             break;
             default:
@@ -209,8 +258,13 @@ public class ThemeActivity extends AppCompatActivity implements IStyle {
                         finish();
                     }
 
+                    ArrayList<File> fileArrayList = new ArrayList<>(Arrays.asList(files));
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        fileArrayList.sort(File::compareTo);
+                    }
+
                     int themeId = -1;
-                    for (File f : files) {
+                    for (File f : fileArrayList) {
                         Log.d(TAG, "doInBackground: " + f.getPath());
                         if (f.isDirectory()) {
                             final File detailText = new File(f.getPath() + File.separatorChar + ThemeStore.DETAIL_FILE_NAME);

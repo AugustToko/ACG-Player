@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月04日 20:36:03
-  ~ 上次修改时间：2019年01月04日 20:34:09
+  ~ 当前修改时间：2019年01月04日 21:49:12
+  ~ 上次修改时间：2019年01月04日 21:43:14
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -47,8 +47,8 @@
     <string name="this_is_body_color_like_toolbar">This is body color like toolbar</string>
     <string name="the_accent_color_like_button">The accent color like button</string>
     <string name="licenses">Licenses</string>
-    <string name="music_detail_background">Music Detail Background</string>
-    <string name="set_background_color_or_image_with_blur">Set background color or image with blur</string>
+    <string name="music_detail_background">Set MusicDetailBackground With Blur</string>
+    <string name="set_background_color_or_image_with_blur">Set background auto-color or image with blur</string>
     <string name="tablayout_auto_color_accent">TabLayout Auto Color Accent</string>
     <string name="set_tablayout_with_music_cover_accent_color">Set TabLayout with music cover accent color</string>
     <string name="auto_night_mode">Night Mode</string>
