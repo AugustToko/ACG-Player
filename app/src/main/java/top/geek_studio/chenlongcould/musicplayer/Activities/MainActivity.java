@@ -1,11 +1,11 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月28日 07:49:20
- * 上次修改时间：2018年12月26日 12:14:15
+ * 当前修改时间：2019年01月04日 20:36:03
+ * 上次修改时间：2019年01月04日 20:35:37
  * 作者：chenlongcould
  * Geek Studio
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * ************************************************************
  */
 
@@ -27,11 +27,6 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.support.annotation.ColorInt;
-import android.support.annotation.NonNull;
-import android.support.design.internal.NavigationMenuPresenter;
-import android.support.design.internal.NavigationMenuView;
-import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -39,7 +34,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 import android.util.Log;
@@ -47,7 +41,6 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -56,7 +49,6 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -81,6 +73,7 @@ import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.MyApplication;
 import top.geek_studio.chenlongcould.musicplayer.MyMusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Utils.ThemeStore;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityMainBinding;
@@ -110,6 +103,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     private boolean TOOLBAR_CLICKED = false;
 
     private boolean BACK_PRESSED = false;
+
     /**
      * ALL FRAGMENTS
      */
@@ -137,41 +131,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     private FileViewFragment mFileViewFragment;
     private HandlerThread mHandlerThread;
 
-    public static void setNavigationMenuLineStyle(NavigationView navigationView, @ColorInt final int color, final int height) {
-        try {
-            Field fieldByPressenter = navigationView.getClass().getDeclaredField("presenter");
-            fieldByPressenter.setAccessible(true);
-            NavigationMenuPresenter menuPresenter = (NavigationMenuPresenter) fieldByPressenter.get(navigationView);
-            Field fieldByMenuView = menuPresenter.getClass().getDeclaredField("menuView");
-            fieldByMenuView.setAccessible(true);
-            final NavigationMenuView mMenuView = (NavigationMenuView) fieldByMenuView.get(menuPresenter);
-
-            mMenuView.addOnChildAttachStateChangeListener(new RecyclerView.OnChildAttachStateChangeListener() {
-                @Override
-                public void onChildViewAttachedToWindow(@NonNull View view) {
-
-                    RecyclerView.ViewHolder viewHolder = mMenuView.getChildViewHolder(view);
-                    if (viewHolder != null && "SeparatorViewHolder".equals(viewHolder.getClass().getSimpleName())) {
-                        if (viewHolder.itemView instanceof FrameLayout) {
-                            FrameLayout frameLayout = (FrameLayout) viewHolder.itemView;
-                            View line = frameLayout.getChildAt(0);
-                            line.setBackgroundColor(color);
-                            line.getLayoutParams().height = height;
-                            line.setLayoutParams(line.getLayoutParams());
-                        }
-                    }
-                }
-
-                @Override
-                public void onChildViewDetachedFromWindow(@NonNull View view) {
-
-                }
-            });
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-    }
-
     /**
      * onXXX
      * At Override
@@ -189,7 +148,13 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
 
+        Intent intent = new Intent(this, MyMusicService.class);
+        startService(intent);
+        bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
+
         initView();
+
+        initStyle();
 
         Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
             if (Data.sMusicItems.isEmpty()) {
@@ -269,6 +234,12 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        initStyle();
+    }
+
+    @Override
     public void onAttachFragment(Fragment fragment) {
         super.onAttachFragment(fragment);
     }
@@ -325,16 +296,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             new Handler().postDelayed(() -> BACK_PRESSED = false, 2000);
         }
 
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        GlideApp.with(this).resumeRequests();
-        if (Values.STYLE_CHANGED) {
-            initStyle();
-            Values.STYLE_CHANGED = false;
-        }
     }
 
     @Override
@@ -498,21 +459,9 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         });
     }
 
-    /**
-     * ---------------------- getter --------------------
-     */
-    public final List<Fragment> getFragmentList() {
-        return mFragmentList;
-    }
-
-    public final ImageView getNavHeaderImageView() {
-        return mNavHeaderImageView;
-    }
-
     public final void exitApp() {
         AlbumListFragment.VIEW_HAS_LOAD = false;
         mHandlerThread.quit();
-
         mFragmentList.clear();
 
         Data.sHistoryPlay.clear();
@@ -535,46 +484,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         stopService(new Intent(MainActivity.this, MyMusicService.class));
 
         Data.sMusicBinder = null;
-        Data.sServiceConnection = null;
-
-        Data.sActivities.remove(this);
-        runOnUiThread(() -> GlideApp.get(MainActivity.this).clearMemory());
+        Data.sActivities.clear();
         finish();
-    }
-
-    public final MusicListFragment getMusicListFragment() {
-        return mMusicListFragment;
-    }
-
-    public final MusicDetailFragment getMusicDetailFragment() {
-        return mMusicDetailFragment;
-    }
-
-    public final AlbumListFragment getAlbumListFragment() {
-        return mAlbumListFragment;
-    }
-
-    public final PlayListFragment getPlayListFragment() {
-        return mPlayListFragment;
-    }
-
-    public final NotLeakHandler getHandler() {
-        return mHandler;
-    }
-
-    public ActivityMainBinding getMainBinding() {
-        return mMainBinding;
-    }
-
-    public HandlerThread getHandlerThread() {
-        return mHandlerThread;
-    }
-
-    @Override
-    public void initStyle() {
-        Utils.Ui.setAppBarColor(this, mMainBinding.appbar, mMainBinding.toolBar);
-        int color = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577"));
-        mMainBinding.tabLayout.setBackgroundColor(color);
     }
 
     private void initView() {
@@ -690,7 +601,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
                 if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
                     mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                    getMusicDetailFragment().getHandler().sendEmptyMessage(MusicDetailFragment.UPDATE_TITLE);
                 } else if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED)
                     mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
             }
@@ -798,6 +708,48 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     }
 
+    @SuppressLint("CheckResult")
+    @Override
+    public void initStyle() {
+        Log.i(TAG, "initStyle: do it");
+
+        Utils.Ui.setTopBottomColor(this, mMainBinding.appbar, mMainBinding.toolBar);
+        final int color = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577"));
+        mMainBinding.tabLayout.setBackgroundColor(color);
+
+        Observable.create((ObservableOnSubscribe<ThemeActivity.Theme>) emitter -> {
+            int themeId = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.SharedPrefsTag.SELECT_THEME, -1);
+            if (themeId != -1) {
+                final File themeFile = Utils.ThemeUtils.getThemeFile(this, themeId);
+                if (Utils.ThemeUtils.checkTheme(themeFile.getAbsolutePath())) {
+                    final ThemeActivity.Theme theme = Utils.ThemeUtils.fileToTheme(themeFile);
+                    if (theme != null) {
+                        Data.sTheme = theme;
+                        if (theme.support_area.contains(ThemeStore.SupportArea.NAV)) {
+                            emitter.onNext(theme);
+                        }
+                    }
+                }
+            } else {
+                mMainBinding.styleNav.setVisibility(View.GONE);
+            }
+        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> {
+                    mMainBinding.styleNav.setVisibility(View.VISIBLE);
+                    mMainBinding.styleTextNavTitle.setText(result.getTitle());
+                    mMainBinding.styleTextNavName.setText(result.getNav_name());
+
+                    for (String nav : result.select.split(",")) {
+                        if (nav.contains(ThemeStore.SupportArea.NAV)) {
+                            GlideApp.with(this)
+                                    .load(result.getPath() + File.separatorChar + ThemeStore.DIR_IMG_NAV + File.separatorChar + nav + ".png")
+                                    .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                                    .into(mMainBinding.styleImgNav);
+                        }
+                    }
+                });
+    }
+
     public final class NotLeakHandler extends Handler {
         @SuppressWarnings("unused")
         private WeakReference<MainActivity> mWeakReference;
@@ -834,4 +786,37 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         }
 
     }
+
+    ////////////get///////////////////////get///////////////////////get/////////////////
+
+    public final ImageView getNavHeaderImageView() {
+        return mNavHeaderImageView;
+    }
+
+    public final MusicListFragment getMusicListFragment() {
+        return mMusicListFragment;
+    }
+
+    public final MusicDetailFragment getMusicDetailFragment() {
+        return mMusicDetailFragment;
+    }
+
+    public final AlbumListFragment getAlbumListFragment() {
+        return mAlbumListFragment;
+    }
+
+    public final PlayListFragment getPlayListFragment() {
+        return mPlayListFragment;
+    }
+
+    public final NotLeakHandler getHandler() {
+        return mHandler;
+    }
+
+    public ActivityMainBinding getMainBinding() {
+        return mMainBinding;
+    }
+
+    ////////////get///////////////////////get///////////////////////get/////////////////
+
 }

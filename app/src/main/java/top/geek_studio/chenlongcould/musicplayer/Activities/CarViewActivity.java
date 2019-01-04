@@ -1,11 +1,11 @@
 /*
  * ************************************************************
  * 文件：CarViewActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月25日 08:45:54
- * 上次修改时间：2018年12月19日 13:42:47
+ * 当前修改时间：2019年01月04日 20:36:03
+ * 上次修改时间：2018年12月28日 07:54:34
  * 作者：chenlongcould
  * Geek Studio
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * ************************************************************
  */
 
@@ -31,7 +31,7 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class CarViewActivity extends AppCompatActivity {
+public final class CarViewActivity extends AppCompatActivity {
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.

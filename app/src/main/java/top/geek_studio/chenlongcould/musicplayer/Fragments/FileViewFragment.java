@@ -1,11 +1,11 @@
 /*
  * ************************************************************
  * 文件：FileViewFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月19日 12:56:02
- * 上次修改时间：2018年12月14日 07:29:38
+ * 当前修改时间：2019年01月04日 20:36:03
+ * 上次修改时间：2018年12月28日 07:54:34
  * 作者：chenlongcould
  * Geek Studio
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * ************************************************************
  */
 
@@ -45,7 +45,7 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.OpenFile;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentFileViewerBinding;
 
-public class FileViewFragment extends Fragment {
+public final class FileViewFragment extends Fragment {
 
     private FragmentFileViewerBinding mFileViewerBinding;
 

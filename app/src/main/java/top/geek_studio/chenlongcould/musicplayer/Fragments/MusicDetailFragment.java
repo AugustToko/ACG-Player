@@ -1,11 +1,11 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月25日 10:41:27
- * 上次修改时间：2018年12月25日 10:25:32
+ * 当前修改时间：2019年01月04日 20:36:03
+ * 上次修改时间：2019年01月04日 19:03:18
  * 作者：chenlongcould
  * Geek Studio
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * ************************************************************
  */
 
@@ -81,7 +81,7 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
-public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGone {
+public final class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGone {
 
     /**
      * @see Message#what
@@ -92,8 +92,6 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
      * @see MainActivity#CURRENT_SLIDE_OFFSET
      */
     public static float CURRENT_SLIDE_OFFSET = 1;
-
-    public static final int UPDATE_TITLE = 9002;
 
     public static final String TAG = "MusicDetailFragment";
 
@@ -718,9 +716,9 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
             return true;
         });
 
-        if (Values.PHONE_HAS_NAV) {
-            mSlidingUpPanelLayout.setPanelHeight((int) (mSlidingUpPanelLayout.getPanelHeight() - getResources().getDimension(R.dimen.nav_height)));
-        }
+        if (Values.PHONE_HAS_NAV)
+            mSlidingUpPanelLayout
+                    .setPanelHeight((int) (mSlidingUpPanelLayout.getPanelHeight() - getResources().getDimension(R.dimen.nav_height)));
 
         initStyle();
 
@@ -1500,21 +1498,6 @@ public class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGo
                     });
                 }
                 break;
-
-//                case SET_SEEK_BAR_COLOR: {
-//                    mWeakReference.get().runOnUiThread(() -> {
-//                        @ColorInt final int color = msg.arg1;
-//                        mSeekBar.getThumb().setTint(color);
-//                        mSeekBar.getProgressDrawable().setTint(color);
-//                    });
-//                }
-//                break;
-
-                case UPDATE_TITLE: {
-                    mWeakReference.get().runOnUiThread(() -> mToolbar.setSubtitle(Values.CurrentData.CURRENT_PLAY_LIST));
-                }
-                break;
-
                 default:
             }
 

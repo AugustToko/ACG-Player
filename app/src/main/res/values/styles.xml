@@ -1,11 +1,11 @@
 <!--
   ~ *************************************************************
   ~ 文件：styles.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月19日 12:56:02
-  ~ 上次修改时间：2018年12月16日 13:34:40
+  ~ 当前修改时间：2019年01月04日 20:36:03
+  ~ 上次修改时间：2019年01月03日 11:25:10
   ~ 作者：chenlongcould
   ~ Geek Studio
-  ~ Copyright (c) 2018
+  ~ Copyright (c) 2019
   ~ *************************************************************
   -->
 
@@ -74,5 +74,9 @@
     <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
         <item name="android:background">@color/black_overlay</item>
     </style>
+
+    <style name="GreenTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="GreenTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 </resources>

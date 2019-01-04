@@ -1,11 +1,11 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月25日 10:41:27
- * 上次修改时间：2018年12月25日 10:40:50
+ * 当前修改时间：2019年01月04日 20:36:03
+ * 上次修改时间：2019年01月04日 19:03:18
  * 作者：chenlongcould
  * Geek Studio
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * ************************************************************
  */
 
@@ -105,25 +105,29 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
         ItemHolder holder;
 
+
         /*
-         * show ExpandView (more opt)...
+         * ModHolder: baseHolder + ModHolder
+         * baseHolder: common item
+         * ModHolder: common item + fastPlay item
          * */
-        // TODO: 2018/12/4 do
+        //在 MusicListFragment 的第一选项上面添加"快速随机播放项目"
         if (itemType == MOD_TYPE && mCurrentUiPosition.equals(MusicListFragment.TAG)) {
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_list_item_mod, viewGroup, false);
             holder = new ModHolder(view);
 
+            //when clicked baseHolder(common item)
             onMusicItemClick(view, holder);
 
+            //when clicked ModHolder(fastPlay item)
             ((ModHolder) holder).mRandomItem.setOnClickListener(v -> {
-                if (!Values.CurrentData.CURRENT_PLAY_LIST.equals("default")) {
-                    Values.CurrentData.CURRENT_PLAY_LIST = "default";
-                    Utils.DataSet.makeARandomList();
-                }
+                Utils.DataSet.makeARandomList();
                 Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE, TAG);
             });
 
         } else {
+
+            //all common
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_list_item, viewGroup, false);
             holder = new ItemHolder(view);
             onMusicItemClick(view, holder);
@@ -254,11 +258,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 }
                 break;
 
-                case Menu.FIRST + 3: {
-                    // TODO: 2018/12/25 del
-                }
-                break;
-
                 case Menu.FIRST + 4: {
                     String albumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
                     Cursor cursor = mContext.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
@@ -299,22 +298,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         view.setOnClickListener(v -> Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
 
             ReceiverOnMusicPlay.resetMusic();
-
-//            //使得当前播放列表成为"待播放列表"
-//            if (currentUiPosition.equals("PublicActivityPlayList")) {
-//                PublicActivity activity = ((PublicActivity) mContext);
-//                Values.CurrentData.CURRENT_PLAY_LIST = activity.getCurrentListName();
-//                Data.sPlayOrderList.clear();
-//                Data.sPlayOrderList.addAll(activity.getMusicItemList());        //更新数据
-//            } else
-//                //恢复待播放列表为通常(ALL MUSIC)
-//                if (!Values.CurrentData.CURRENT_PLAY_LIST.equals("default")) {
-//                    Data.sPlayOrderList.clear();
-//                    Data.sPlayOrderList.addAll(Data.sMusicItems);
-//                    if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM))
-//                        Collections.shuffle(Data.sPlayOrderList);
-//                    Values.CurrentData.CURRENT_PLAY_LIST = "default";
-//                }
 
             Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
 
@@ -564,7 +547,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             mMenu.add(Menu.NONE, Menu.FIRST + 0, 0, resources.getString(R.string.next_play));
             mMenu.add(Menu.NONE, Menu.FIRST + 1, 0, resources.getString(R.string.love_music));
             mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, resources.getString(R.string.add_to_playlist));
-            mMenu.add(Menu.NONE, Menu.FIRST + 3, 0, "remove from favourite");
             mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, resources.getString(R.string.show_album));
             mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, resources.getString(R.string.more_info));
 

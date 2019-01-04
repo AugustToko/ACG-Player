@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：colors.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月19日 12:56:02
-  ~ 上次修改时间：2018年12月16日 13:34:40
+  ~ 当前修改时间：2019年01月04日 20:36:03
+  ~ 上次修改时间：2019年01月04日 20:05:16
   ~ 作者：chenlongcould
   ~ Geek Studio
-  ~ Copyright (c) 2018
+  ~ Copyright (c) 2019
   ~ *************************************************************
   -->
 
@@ -37,5 +37,8 @@
     <color name="activityDefaultColor">#ffffff</color>
 
     <color name="black_overlay">#66000000</color>
+
+    <color name="line_color">#cecece</color>
+    <color name="png_image_background">#19000000</color>
 
 </resources>

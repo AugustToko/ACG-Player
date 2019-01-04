@@ -1,11 +1,11 @@
 /*
  * ************************************************************
  * 文件：PlayListAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月10日 14:49:08
- * 上次修改时间：2018年12月10日 11:13:38
+ * 当前修改时间：2019年01月04日 20:36:03
+ * 上次修改时间：2019年01月04日 18:50:04
  * 作者：chenlongcould
  * Geek Studio
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * ************************************************************
  */
 
@@ -62,11 +62,10 @@ public class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.ViewHo
 
         view.setOnClickListener(v -> {
             Intent intent = new Intent(mMainActivity, PublicActivity.class);
-            intent.putExtra("start_by", "play_list_item");
+            intent.putExtra("start_by", PublicActivity.PLAY_LIST_ITEM);
             intent.putExtra("play_list_name", mPlayListItems.get(holder.getAdapterPosition()).getName());
             intent.putExtra("play_list_id", mPlayListItems.get(holder.getAdapterPosition()).getId());
             mMainActivity.startActivity(intent);
-
         });
 
         holder.mItemMenu.setOnClickListener(v -> holder.mPopupMenu.show());

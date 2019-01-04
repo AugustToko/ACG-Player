@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：menu_nav.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月28日 07:49:20
-  ~ 上次修改时间：2018年12月27日 12:58:35
+  ~ 当前修改时间：2019年01月04日 20:36:03
+  ~ 上次修改时间：2019年01月04日 20:31:54
   ~ 作者：chenlongcould
   ~ Geek Studio
-  ~ Copyright (c) 2018
+  ~ Copyright (c) 2019
   ~ *************************************************************
   -->
 
@@ -18,7 +18,7 @@
             android:icon="@drawable/ic_stay_current_landscape_black_24dp"
             android:title="@string/car_mode" />
     </group>
-    <item android:title="Other">
+    <item android:title="@string/other">
         <menu>
             <item
                 android:id="@+id/menu_nav_about"

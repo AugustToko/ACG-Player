@@ -1,11 +1,11 @@
 /*
  * ************************************************************
  * 文件：PlayListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月25日 10:41:27
- * 上次修改时间：2018年12月25日 10:08:04
+ * 当前修改时间：2019年01月04日 20:36:03
+ * 上次修改时间：2019年01月04日 18:48:35
  * 作者：chenlongcould
  * Geek Studio
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * ************************************************************
  */
 
@@ -109,7 +109,6 @@ public final class PlayListFragment extends Fragment implements IStyle, VisibleO
     /**
      * load data
      */
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @SuppressLint("CheckResult")
     private void initData() {
 
@@ -120,6 +119,10 @@ public final class PlayListFragment extends Fragment implements IStyle, VisibleO
             if (cursor != null && cursor.moveToFirst()) {
                 do {
                     final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.NAME));
+
+                    if (name.equals("Favourite List")) {
+                        continue;
+                    }
 
                     final String filePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATA));
                     final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists._ID));
@@ -166,8 +169,8 @@ public final class PlayListFragment extends Fragment implements IStyle, VisibleO
 
     @Override
     public void visibleOrGone(int status) {
-        mPlayListBinding.favourite.setVisibility(status);
-        mPlayListBinding.addRecent.setVisibility(status);
+        if (mPlayListBinding.favourite != null) mPlayListBinding.favourite.setVisibility(status);
+        if (mPlayListBinding.addRecent != null) mPlayListBinding.addRecent.setVisibility(status);
     }
 
     static class NotLeakHandler extends Handler {

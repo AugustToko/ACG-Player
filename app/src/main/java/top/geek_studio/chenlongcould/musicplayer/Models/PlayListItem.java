@@ -1,17 +1,17 @@
 /*
  * ************************************************************
  * 文件：PlayListItem.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月10日 14:49:08
- * 上次修改时间：2018年12月10日 07:58:18
+ * 当前修改时间：2019年01月04日 20:36:03
+ * 上次修改时间：2018年12月28日 07:54:34
  * 作者：chenlongcould
  * Geek Studio
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * ************************************************************
  */
 
 package top.geek_studio.chenlongcould.musicplayer.Models;
 
-public class PlayListItem {
+public final class PlayListItem {
 
     private int mId;
 

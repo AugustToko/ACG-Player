@@ -1,11 +1,11 @@
 /*
  * ************************************************************
  * 文件：AlbumDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月25日 08:45:54
- * 上次修改时间：2018年12月25日 08:45:35
+ * 当前修改时间：2019年01月04日 20:36:03
+ * 上次修改时间：2019年01月04日 18:51:01
  * 作者：chenlongcould
  * Geek Studio
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * ************************************************************
  */
 
@@ -156,4 +156,8 @@ public final class AlbumDetailActivity extends Activity {
 
     }
 
+    @Override
+    public void onBackPressed() {
+        finish();
+    }
 }

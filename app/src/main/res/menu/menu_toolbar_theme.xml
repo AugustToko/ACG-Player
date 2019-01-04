@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ *************************************************************
+  ~ 文件：menu_toolbar_theme.xml  模块：app  项目：MusicPlayer
+  ~ 当前修改时间：2019年01月04日 20:36:03
+  ~ 上次修改时间：2019年01月04日 20:35:42
+  ~ 作者：chenlongcould
+  ~ Geek Studio
+  ~ Copyright (c) 2019
+  ~ *************************************************************
+  -->
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_toolbar_theme_add"
+        android:icon="@drawable/ic_add_white_24dp"
+        android:title="@string/add"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/menu_toolbar_theme_reset"
+        android:icon="@drawable/ic_layers_clear_white_24dp"
+        android:title="@string/reset"
+        app:showAsAction="always" />
+</menu>

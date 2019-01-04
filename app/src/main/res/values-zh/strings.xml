@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2018年12月25日 10:41:27
-  ~ 上次修改时间：2018年12月25日 08:54:54
+  ~ 当前修改时间：2019年01月04日 20:36:03
+  ~ 上次修改时间：2019年01月04日 20:34:09
   ~ 作者：chenlongcould
   ~ Geek Studio
-  ~ Copyright (c) 2018
+  ~ Copyright (c) 2019
   ~ *************************************************************
   -->
 
@@ -64,4 +64,19 @@
     <string name="car_mode">车载模式</string>
     <string name="history">历史(RAM)</string>
     <string name="fav">最喜爱的歌曲</string>
+    <string name="random_play">随机播放</string>
+    <string name="save_as">另存为</string>
+    <string name="title_notifications">通知</string>
+    <string name="title_activity_theme">主题</string>
+    <string name="theme_image">主题图片</string>
+    <string name="no_equalizer" translatable="false">没有找到EQ</string>
+    <string name="theme">主题</string>
+    <string name="set_theme">设置主题</string>
+    <string name="action_settings">设置</string>
+    <string name="title_home">主页</string>
+    <string name="title_dashboard">仪表板</string>
+    <string name="reset">重置</string>
+    <string name="sure_int">确认？</string>
+    <string name="sure_set_def_theme_int">设置默认主题？</string>
+    <string name="other">其他</string>
 </resources>

@@ -1,11 +1,11 @@
 /*
  * ************************************************************
  * 文件：MusicItem.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月19日 12:56:02
- * 上次修改时间：2018年12月19日 12:46:13
+ * 当前修改时间：2019年01月04日 20:36:03
+ * 上次修改时间：2019年01月04日 18:41:11
  * 作者：chenlongcould
  * Geek Studio
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * ************************************************************
  */
 
@@ -27,6 +27,7 @@ public final class MusicItem implements Parcelable {
     private int mSize;
     private String mArtist;
     private int mAddTime;
+    private boolean mIsFavourite;
 
     protected MusicItem(Parcel in) {
         this.mMimeName = in.readString();
@@ -39,6 +40,7 @@ public final class MusicItem implements Parcelable {
         this.mArtist = in.readString();
         this.mAddTime = in.readInt();
         this.mAlbumId = in.readInt();
+        this.mIsFavourite = in.readByte() != 0;
     }
 
     public String getMusicName() {

@@ -1,11 +1,11 @@
 /*
  * ************************************************************
  * 文件：Data.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月25日 08:45:54
- * 上次修改时间：2018年12月25日 08:31:18
+ * 当前修改时间：2019年01月04日 20:36:03
+ * 上次修改时间：2019年01月04日 20:35:37
  * 作者：chenlongcould
  * Geek Studio
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * ************************************************************
  */
 
@@ -25,6 +25,7 @@ import java.util.Locale;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.musicplayer.Activities.CarViewActivity;
+import top.geek_studio.chenlongcould.musicplayer.Activities.ThemeActivity;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.MyHeadSetPlugReceiver;
 import top.geek_studio.chenlongcould.musicplayer.Models.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
@@ -62,10 +63,13 @@ public final class Data {
      */
     public final static List<MusicItem> sHistoryPlay = new ArrayList<>();
 
+    public static ThemeActivity.Theme sTheme = null;
+
     /**
      * sCurrent DATA
      */
     public static MusicItem sCurrentMusicItem = new MusicItem.Builder(-1, "null", "null").build();
+
     public static BlurTransformation sBlurTransformation = new BlurTransformation(20, 30);
     public static BlurTransformation sBlurTransformationCarView = new BlurTransformation(5, 10);
     static MyHeadSetPlugReceiver mMyHeadSetPlugReceiver = new MyHeadSetPlugReceiver();

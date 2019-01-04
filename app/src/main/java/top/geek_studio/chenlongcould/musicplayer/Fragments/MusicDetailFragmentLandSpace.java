@@ -1,11 +1,11 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragmentLandSpace.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月25日 08:45:54
- * 上次修改时间：2018年12月19日 13:09:51
+ * 当前修改时间：2019年01月04日 20:36:03
+ * 上次修改时间：2018年12月28日 07:54:34
  * 作者：chenlongcould
  * Geek Studio
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * ************************************************************
  */
 
@@ -58,7 +58,7 @@ import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentMusicDetail
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
-public class MusicDetailFragmentLandSpace extends Fragment {
+public final class MusicDetailFragmentLandSpace extends Fragment {
 
     private static final String TAG = "DetailLandSpace";
     private static boolean HIDE_TOOLBAR = false;

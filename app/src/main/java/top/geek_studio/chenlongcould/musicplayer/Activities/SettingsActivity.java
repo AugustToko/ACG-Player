@@ -1,11 +1,11 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 13:55:33
- * 上次修改时间：2018年12月13日 12:52:20
+ * 当前修改时间：2019年01月04日 20:36:03
+ * 上次修改时间：2019年01月04日 20:27:06
  * 作者：chenlongcould
  * Geek Studio
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * ************************************************************
  */
 
@@ -13,6 +13,7 @@ package top.geek_studio.chenlongcould.musicplayer.Activities;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -26,9 +27,12 @@ import android.support.v7.widget.Toolbar;
 import android.widget.ImageView;
 import android.widget.Switch;
 
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.jrummyapps.android.colorpicker.ColorPickerDialog;
 import com.jrummyapps.android.colorpicker.ColorPickerDialogListener;
 
+import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Interface.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
@@ -64,7 +68,6 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
         @Override
         public void onColorSelected(int dialogId, @ColorInt int color) {
             SharedPreferences.Editor editor = mDefPrefs.edit();
-            Values.STYLE_CHANGED = true;
             switch (dialogId) {
 
                 /*
@@ -129,6 +132,7 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
 
         mDefPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
+        //find xx
         final ConstraintLayout primaryOpt = findViewById(R.id.primer_color_option);
         final ConstraintLayout primaryDarkOpt = findViewById(R.id.primer_color_dark_option);
         final ConstraintLayout accentOpt = findViewById(R.id.accent_color_option);
@@ -141,6 +145,9 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
         mNightSwitch = findViewById(R.id.activity_settings_night_switch);
         final ConstraintLayout styleOpt = findViewById(R.id.detail_background_style);
         mStyleSwitch = findViewById(R.id.activity_settings_style_switch);
+
+        ConstraintLayout constraintLayout = findViewById(R.id.theme_settings);
+        constraintLayout.setOnClickListener(v -> startActivity(new Intent(SettingsActivity.this, ThemeActivity.class)));
 
         mToolbar.inflateMenu(R.menu.menu_toolbar_settings);
 
@@ -254,24 +261,24 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
             Utils.Ui.inDayNightSet(mDefPrefs);
         });
 
-        //night opt
-        mNightSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-
-            SharedPreferences.Editor editor = mDefPrefs.edit();
-            if (isChecked) {
-                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, true);
-                Values.Style.NIGHT_MODE = true;
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            } else {
-                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false);
-                Values.Style.NIGHT_MODE = false;
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-            }
-            editor.apply();
-
-            Utils.Ui.inDayNightSet(mDefPrefs);
-
-        });
+//        //night opt
+//        mNightSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+//
+//            SharedPreferences.Editor editor = mDefPrefs.edit();
+//            if (isChecked) {
+//                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, true);
+//                Values.Style.NIGHT_MODE = true;
+//                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+//            } else {
+//                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false);
+//                Values.Style.NIGHT_MODE = false;
+//                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+//            }
+//            editor.apply();
+//
+//            Utils.Ui.inDayNightSet(mDefPrefs);
+//
+//        });
 
         styleOpt.setOnClickListener(v -> {
 
@@ -326,10 +333,7 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
     @Override
     protected void onResume() {
         super.onResume();
-        if (Values.STYLE_CHANGED) {
-            Utils.Ui.setAppBarColor(this, mAppBarLayout, mToolbar);
-            Values.STYLE_CHANGED = false;
-        }
+        initStyle();
     }
 
     @Override
@@ -337,8 +341,15 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
         mPrimaryImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")));
         mPrimaryDarkImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
         mAccentImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.ACCENT_COLOR, Color.parseColor("#D81B60")));
-        getWindow().setNavigationBarColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
-        Utils.Ui.setAppBarColor(this, mAppBarLayout, mToolbar);
+        Utils.Ui.setTopBottomColor(this, mAppBarLayout, mToolbar);
+
+        //load theme
+        if (Data.sTheme != null) {
+            GlideApp.with(this)
+                    .load(Data.sTheme.getThumbnail())
+                    .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                    .into((ImageView) findViewById(R.id.theme_preview));
+        }
 
     }
 

@@ -1,11 +1,11 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月26日 11:19:46
- * 上次修改时间：2018年12月26日 08:01:56
+ * 当前修改时间：2019年01月04日 20:36:03
+ * 上次修改时间：2019年01月04日 20:35:42
  * 作者：chenlongcould
  * Geek Studio
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * ************************************************************
  */
 
@@ -36,29 +36,47 @@ import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.design.internal.NavigationMenuPresenter;
+import android.support.design.internal.NavigationMenuView;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.graphics.Palette;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.Activities.ThemeActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
@@ -70,6 +88,8 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 @SuppressWarnings("WeakerAccess")
 public final class Utils {
+
+    public static final String TAG = "Utils";
 
     private Utils() {
     }
@@ -201,6 +221,41 @@ public final class Utils {
 
         public static int POSITION = 200;
 
+        public static void setNavigationMenuLineStyle(NavigationView navigationView, @ColorInt final int color, final int height) {
+            try {
+                Field fieldByPressenter = navigationView.getClass().getDeclaredField("presenter");
+                fieldByPressenter.setAccessible(true);
+                NavigationMenuPresenter menuPresenter = (NavigationMenuPresenter) fieldByPressenter.get(navigationView);
+                Field fieldByMenuView = menuPresenter.getClass().getDeclaredField("menuView");
+                fieldByMenuView.setAccessible(true);
+                final NavigationMenuView mMenuView = (NavigationMenuView) fieldByMenuView.get(menuPresenter);
+
+                mMenuView.addOnChildAttachStateChangeListener(new RecyclerView.OnChildAttachStateChangeListener() {
+                    @Override
+                    public void onChildViewAttachedToWindow(@NonNull View view) {
+
+                        RecyclerView.ViewHolder viewHolder = mMenuView.getChildViewHolder(view);
+                        if (viewHolder != null && "SeparatorViewHolder".equals(viewHolder.getClass().getSimpleName())) {
+                            if (viewHolder.itemView instanceof FrameLayout) {
+                                FrameLayout frameLayout = (FrameLayout) viewHolder.itemView;
+                                View line = frameLayout.getChildAt(0);
+                                line.setBackgroundColor(color);
+                                line.getLayoutParams().height = height;
+                                line.setLayoutParams(line.getLayoutParams());
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onChildViewDetachedFromWindow(@NonNull View view) {
+
+                    }
+                });
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
+
         public static void inDayNightSet(final SharedPreferences sharedPreferences) {
             if (sharedPreferences.getBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false)) {
                 Values.Color.TEXT_COLOR = Values.Color.TEXT_COLOR_IN_NIGHT;
@@ -226,15 +281,15 @@ public final class Utils {
         /**
          * set color (style)
          *
-         * @param context      context
-         * @param toolBarColor appBarLayout
+         * @param activity      context
+         * @param appBar appBarLayout
          * @param toolbar      toolbar
          */
-        public static void setAppBarColor(final Activity context, final AppBarLayout toolBarColor, final android.support.v7.widget.Toolbar toolbar) {
-            SharedPreferences mDefPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-            toolBarColor.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")));
+        public static void setTopBottomColor(final Activity activity, final AppBarLayout appBar, final android.support.v7.widget.Toolbar toolbar) {
+            SharedPreferences mDefPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
+            appBar.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")));
             toolbar.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")));
-            context.getWindow().setNavigationBarColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
+            activity.getWindow().setNavigationBarColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
         }
 
         public static void setPlayButtonNowPlaying() {
@@ -730,6 +785,258 @@ public final class Utils {
     public static final class Res {
         public static String getString(final Context context, @StringRes final int id) {
             return context.getResources().getString(id);
+        }
+    }
+
+    public static final class ThemeUtils {
+        public static boolean checkTheme(final String themePath) {
+            final File file = new File(themePath);
+            if (!file.exists() || file.isFile() || file.listFiles().length == 0) {
+                Log.e(TAG, "checkTheme: theme file error");
+                return false;
+            }
+
+            final File detailFile = new File(themePath + File.separatorChar + ThemeStore.DETAIL_FILE_NAME);
+            if (!detailFile.exists() || detailFile.isDirectory() || detailFile.length() == 0) {
+                Log.e(TAG, "checkTheme: detail file error");
+                return false;
+            }
+
+            final File imgDir = new File(themePath + File.separatorChar + ThemeStore.DIR_IMG);
+            if (!imgDir.exists() || imgDir.isFile() || imgDir.listFiles().length == 0) {
+                Log.e(TAG, "checkTheme: img dir error");
+                return false;
+            }
+
+            final File ico = new File(themePath + File.separatorChar + ThemeStore.ICO_FILE_NAME.toLowerCase());
+            if (!ico.exists() || ico.isDirectory()) {
+                Log.e(TAG, "checkTheme: ico error");
+                return false;
+            }
+            return true;
+        }
+
+        public static File getThemeFile(@NonNull final Context context, @IntRange(from = 0) final int themeId) {
+            return new File(context.getExternalFilesDir(ThemeStore.DIR_NAME).getAbsolutePath() + File.separatorChar + themeId);
+        }
+
+        @Nullable
+        public static ThemeActivity.Theme fileToTheme(final File f) {
+            try {
+
+                if (f.isDirectory()) {
+                    final File detailText = new File(f.getPath() + File.separatorChar + ThemeStore.DETAIL_FILE_NAME);
+
+
+                    String title = "null";
+                    String date = "null";
+                    String nav_name = "null";
+                    String author = "null";
+                    String support_area = "null";
+                    String primary_color = "null";
+                    String thumbnail = "null";
+                    String select = "null";
+                    String path = f.getPath();
+
+                    final BufferedReader bufferedReader = new BufferedReader(new FileReader(detailText));
+                    String line;
+
+                    int items = 0;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        if (line.contains(ThemeStore.ThemeColumns.AUTHOR)) {
+                            author = line.split(":")[1];
+                            Log.d(TAG, "doInBackground: " + author + " @ " + detailText.getPath());
+                            items++;
+                        }
+
+                        if (line.contains(ThemeStore.ThemeColumns.TITLE)) {
+                            title = line.split(":")[1];
+                            Log.d(TAG, "doInBackground: " + title + " @ " + detailText.getPath());
+                            items++;
+                        }
+
+                        if (line.contains(ThemeStore.ThemeColumns.NAV_NAME)) {
+                            nav_name = line.split(":")[1];
+                            Log.d(TAG, "doInBackground: " + nav_name + " @ " + detailText.getPath());
+                            items++;
+                        }
+
+                        if (line.contains(ThemeStore.ThemeColumns.THUMBNAIL)) {
+                            thumbnail = f.getPath() + File.separatorChar + line.split(":")[1];
+                            Log.d(TAG, "doInBackground: " + thumbnail + " @ " + detailText.getPath());
+                            items++;
+                        }
+
+                        if (line.contains(ThemeStore.ThemeColumns.SUPPORT_AREA)) {
+                            support_area = line.split(":")[1];
+                            Log.d(TAG, "doInBackground: " + support_area + " @ " + detailText.getPath());
+                            items++;
+                        }
+
+                        if (line.contains(ThemeStore.ThemeColumns.PRIMARY_COLOR)) {
+                            primary_color = line.split(":")[1];
+                            Log.d(TAG, "doInBackground: " + primary_color);
+                            items++;
+                        }
+
+                        if (line.contains(ThemeStore.ThemeColumns.DATE)) {
+                            date = line.split(":")[1];
+                            Log.d(TAG, "doInBackground: " + date);
+                            items++;
+                        }
+
+                        if (line.contains(ThemeStore.ThemeColumns.SELECT)) {
+                            select = line.split(":")[1];
+                            Log.d(TAG, "doInBackground: " + select);
+                            items++;
+                        }
+                    }
+
+                    if (items == 8) {
+                        return new ThemeActivity.Theme(Integer.parseInt(f.getName()), path, title, date, nav_name, author, support_area, primary_color, thumbnail, select);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
+    public static final class IO {
+
+        public static void Unzip(String zipFile, String targetDir) {
+            int BUFFER = 4096;          //这里缓冲区我们使用4KB，
+            String strEntry;            //保存每个zip的条目名称
+
+            try {
+                BufferedOutputStream dest;          //缓冲输出流
+                FileInputStream fis = new FileInputStream(zipFile);
+                ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis));
+                ZipEntry entry;         //每个zip条目的实例
+
+                while ((entry = zis.getNextEntry()) != null) {
+
+                    try {
+                        Log.i("Unzip: ", "=" + entry);
+
+                        int count;
+                        byte data[] = new byte[BUFFER];
+                        strEntry = entry.getName();
+
+                        File entryFile = new File(targetDir + strEntry);
+                        File entryDir = new File(entryFile.getParent());
+
+                        if (!entryDir.exists()) {
+                            entryDir.mkdirs();
+                        }
+
+                        if (!entry.isDirectory()) {
+                            FileOutputStream fos = new FileOutputStream(entryFile);
+
+                            dest = new BufferedOutputStream(fos, BUFFER);
+                            while ((count = zis.read(data, 0, BUFFER)) != -1) {
+                                dest.write(data, 0, count);
+                            }
+                            dest.flush();
+                            dest.close();
+                        } else {
+                            entryFile.mkdir();
+                        }
+
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                zis.close();
+            } catch (Exception cwj) {
+                cwj.printStackTrace();
+            }
+        }
+
+        @SuppressWarnings("ResultOfMethodCallIgnored")
+        public static void delFolder(String folderPath) {
+            try {
+                delAllFile(folderPath); //删除完里面所有内容
+                java.io.File myFilePath = new java.io.File(folderPath);
+                myFilePath.delete(); //删除空文件夹
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @SuppressWarnings({"UnusedReturnValue", "ConstantConditions", "ResultOfMethodCallIgnored"})
+        private static boolean delAllFile(String path) {
+            boolean flag = false;
+            File file = new File(path);
+            if (!file.exists()) {
+                return flag;
+            }
+            if (!file.isDirectory()) {
+                return flag;
+            }
+            String[] tempList = file.list();
+            File temp = null;
+            for (String aTempList : tempList) {
+                if (path.endsWith(File.separator)) {
+                    temp = new File(path + aTempList);
+                } else {
+                    temp = new File(path + File.separator + aTempList);
+                }
+                if (temp.isFile()) {
+                    temp.delete();
+                }
+                if (temp.isDirectory()) {
+                    delAllFile(path + "/" + aTempList);//先删除文件夹里面的文件
+                    delFolder(path + "/" + aTempList);//再删除空文件夹
+                    flag = true;
+                }
+            }
+            return flag;
+        }
+
+        /**
+         * 压缩一个文件夹
+         */
+        public static void zipDirectory(String path, String savePath) throws IOException {
+            File file = new File(path);
+            File zipFile = new File(savePath);
+            Log.d(TAG, "zipDirectory: " + zipFile.getAbsolutePath());
+            zipFile.createNewFile();
+            ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile));
+            zip(zos, file, file.getName());
+            zos.flush();
+            zos.close();
+        }
+
+        /**
+         * @param zos  压缩输出流
+         * @param file 当前需要压缩的文件
+         * @param path 当前文件相对于压缩文件夹的路径
+         */
+        private static void zip(ZipOutputStream zos, File file, String path) throws IOException {
+            // 首先判断是文件，还是文件夹，文件直接写入目录进入点，文件夹则遍历
+            if (file.isDirectory()) {
+                ZipEntry entry = new ZipEntry(path + File.separator);// 文件夹的目录进入点必须以名称分隔符结尾
+                zos.putNextEntry(entry);
+                File[] files = file.listFiles();
+                for (File x : files) {
+                    zip(zos, x, path + File.separator + x.getName());
+                }
+            } else {
+                FileInputStream fis = new FileInputStream(file);// 目录进入点的名字是文件在压缩文件中的路径
+                ZipEntry entry = new ZipEntry(path);
+                zos.putNextEntry(entry);// 建立一个目录进入点
+
+                int len = 0;
+                byte[] buf = new byte[1024];
+                while ((len = fis.read(buf)) != -1) {
+                    zos.write(buf, 0, len);
+                }
+                zos.flush();
+                fis.close();
+                zos.closeEntry();// 关闭当前目录进入点，将输入流移动下一个目录进入点
+            }
         }
     }
 }

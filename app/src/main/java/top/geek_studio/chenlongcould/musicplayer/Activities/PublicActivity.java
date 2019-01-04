@@ -1,17 +1,16 @@
 /*
  * ************************************************************
  * 文件：PublicActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月25日 10:41:27
- * 上次修改时间：2018年12月25日 09:54:56
+ * 当前修改时间：2019年01月04日 20:36:03
+ * 上次修改时间：2019年01月04日 19:14:30
  * 作者：chenlongcould
  * Geek Studio
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * ************************************************************
  */
 
 package top.geek_studio.chenlongcould.musicplayer.Activities;
 
-import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Build;
@@ -45,6 +44,8 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
 
     public static final String TAG = "PublicActivity";
 
+    public static final String PLAY_LIST_ITEM = "play_list_item";
+
     private AppBarLayout mAppBarLayout;
     private Toolbar mToolbar;
     private RecyclerView mRecyclerView;
@@ -64,7 +65,6 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
      */
     private String mType;
 
-    @SuppressLint({"StaticFieldLeak", "CheckResult"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -160,7 +160,6 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
                                     mToolbar.setOnMenuItemClickListener(menuItem -> {
                                         switch (menuItem.getItemId()) {
                                             case R.id.menu_random_play: {
-                                                Values.CurrentData.CURRENT_PLAY_LIST = getCurrentListName();
                                                 Data.sPlayOrderList.clear();
                                                 Data.sPlayOrderList.addAll(mMusicItemList);        //更新数据
                                                 Collections.shuffle(Data.sPlayOrderList);
@@ -177,7 +176,7 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
                 break;
 
                 //点击播放列表中的一项
-                case "play_list_item": {
+                case PLAY_LIST_ITEM: {
 
                     mToolbar.setTitle(getIntent().getStringExtra("play_list_name"));
                     mToolbar.inflateMenu(R.menu.menu_in_play_list_activity);
@@ -237,7 +236,6 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
                                 mToolbar.setOnMenuItemClickListener(menuItem -> {
                                     switch (menuItem.getItemId()) {
                                         case R.id.menu_random_play: {
-                                            Values.CurrentData.CURRENT_PLAY_LIST = getCurrentListName();
                                             Data.sPlayOrderList.clear();
                                             Data.sPlayOrderList.addAll(mMusicItemList);        //更新数据
                                             if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM))
@@ -255,7 +253,6 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
 
                 case "play history": {
                     mToolbar.setTitle(getString(R.string.history));
-
                     mRecyclerView.setAdapter(new MyRecyclerAdapter(Data.sHistoryPlay, PublicActivity.this, TAG));
                 }
                 default:
@@ -279,6 +276,6 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
 
     @Override
     public void initStyle() {
-        Utils.Ui.setAppBarColor(this, mAppBarLayout, mToolbar);
+        Utils.Ui.setTopBottomColor(this, mAppBarLayout, mToolbar);
     }
 }

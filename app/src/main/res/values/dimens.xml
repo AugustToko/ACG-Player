@@ -1,0 +1,21 @@
+<!--
+  ~ *************************************************************
+  ~ 文件：dimens.xml  模块：app  项目：MusicPlayer
+  ~ 当前修改时间：2019年01月04日 20:36:03
+  ~ 上次修改时间：2019年01月04日 20:11:13
+  ~ 作者：chenlongcould
+  ~ Geek Studio
+  ~ Copyright (c) 2019
+  ~ *************************************************************
+  -->
+
+<resources>
+    <dimen name="app_bar_height">180dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="nested_scroll_height">400dp</dimen>
+    <dimen name="mid_text_size">17sp</dimen>
+</resources>

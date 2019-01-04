@@ -1,11 +1,11 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月25日 08:45:54
- * 上次修改时间：2018年12月24日 19:08:53
+ * 当前修改时间：2019年01月04日 20:36:03
+ * 上次修改时间：2019年01月03日 16:42:00
  * 作者：chenlongcould
  * Geek Studio
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * ************************************************************
  */
 
@@ -327,6 +327,7 @@ public final class MyMusicService extends Service {
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy: ");
+        stopForeground(true);
         mIsServiceDestroyed.set(true);
         if (mCurrentCover != null) mCurrentCover.recycle();
         super.onDestroy();

@@ -1,11 +1,11 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月25日 10:41:27
- * 上次修改时间：2018年12月25日 09:12:16
+ * 当前修改时间：2019年01月04日 20:36:03
+ * 上次修改时间：2019年01月04日 20:35:41
  * 作者：chenlongcould
  * Geek Studio
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * ************************************************************
  */
 
@@ -14,7 +14,13 @@ package top.geek_studio.chenlongcould.musicplayer;
 @SuppressWarnings("WeakerAccess")
 public final class Values {
 
+    public static int DEF_CROSS_FATE_TIME = 500;
+
     public static boolean FIRST_USE = true;
+
+    public static final class FLAG {
+        public static boolean THEME_CHANGED = false;
+    }
 
     /**
      * final string(s), TAGs
@@ -100,6 +106,8 @@ public final class Values {
 
         public static String UI_MODE = MODE_COMMON;
 
+        public static int MY_THEME_ID = -1;
+
         /**
          * TEMP DATA
          */
@@ -153,12 +161,10 @@ public final class Values {
         public static final String ALBUM_LIST_GRID_TYPE_COUNT = "ALBUM_LIST_GRID_TYPE_COUNT";
 
         public static final String FAVOURITE_LIST_ID = "FAVOURITE_LIST_ID";
+
+        public static final String SELECT_THEME = "SELECT_THEME";
     }
 
-    /**
-     * sort(s)
-     */
-    public static int DEF_CROSS_FATE_TIME = 500;
 
     public static final class BroadCast {
         public static String ReceiverOnMusicPlay = "top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay";
@@ -187,8 +193,6 @@ public final class Values {
     public static final class Style {
         public static final String STYLE_BACKGROUND_BLUR = "BLUR";
         public static final String STYLE_BACKGROUND_AUTO_COLOR = "AUTO_COLOR";
-
-        public static boolean COLOR_CHANGED = false;
 
         public static boolean NIGHT_MODE = false;
 

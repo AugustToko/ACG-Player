@@ -1,11 +1,11 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月28日 07:49:20
- * 上次修改时间：2018年12月28日 07:49:02
+ * 当前修改时间：2019年01月04日 20:36:03
+ * 上次修改时间：2019年01月04日 20:35:37
  * 作者：chenlongcould
  * Geek Studio
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * ************************************************************
  */
 
@@ -36,10 +36,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.AlbumListFragment;
+import top.geek_studio.chenlongcould.musicplayer.Utils.MyThemeDBHelper;
+import top.geek_studio.chenlongcould.musicplayer.Utils.PlayListsUtil;
+import top.geek_studio.chenlongcould.musicplayer.Utils.ThemeStore;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 
-public class MyApplication extends Application {
+public final class MyApplication extends Application {
 
     private static final String TAG = "MyApplication";
 
@@ -48,22 +52,32 @@ public class MyApplication extends Application {
     public static final String SHORT_CUT_ID_1 = "id1";
     public static final String SHORT_CUT_ID_2 = "id2";
     public static final String SHORT_CUT_ID_3 = "id3";
+
     private ShortcutManager mShortcutManager;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
+        mDefSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
         if (getProcessName(this).equals(getPackageName())) {
+
+            int id = mDefSharedPreferences.getInt(Values.SharedPrefsTag.FAVOURITE_LIST_ID, -1);
+            if (id == -1) {
+                id = PlayListsUtil.createPlaylist(this, "Favourite List");
+                SharedPreferences.Editor editor = mDefSharedPreferences.edit();
+                editor.putInt(Values.SharedPrefsTag.FAVOURITE_LIST_ID, id);
+                editor.apply();
+            }
+
+            MyThemeDBHelper dbHelper = new MyThemeDBHelper(this, ThemeStore.DATA_BASE_NAME, null, 1);
+            dbHelper.getWritableDatabase();
 
             //监听耳机(有线或无线)的插拔动作, 拔出暂停音乐
             IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
             intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
             registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
-
-            Intent intent = new Intent(this, MyMusicService.class);
-            startService(intent);
-            bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
 
             //set language
             Resources resources = getResources();
@@ -72,7 +86,6 @@ public class MyApplication extends Application {
             config.locale = Locale.getDefault();
             resources.updateConfiguration(config, dm);
 
-            mDefSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
             //first or not
             Values.FIRST_USE = mDefSharedPreferences.getBoolean(Values.SharedPrefsTag.FIRST_USE, true);
@@ -85,6 +98,8 @@ public class MyApplication extends Application {
 
             //set play type
             Values.CurrentData.CURRENT_PLAY_TYPE = mDefSharedPreferences.getString(Values.SharedPrefsTag.PLAY_TYPE, Values.TYPE_COMMON);
+
+            Values.CurrentData.MY_THEME_ID = mDefSharedPreferences.getInt(Values.SharedPrefsTag.SELECT_THEME, -1);
 
             Utils.Ui.inDayNightSet(mDefSharedPreferences);
 
@@ -104,13 +119,17 @@ public class MyApplication extends Application {
      */
     @RequiresApi(api = Build.VERSION_CODES.N_MR1)
     private void getNewShortcutInfo() {
+
+        Intent randomPlay = new Intent(this, MainActivity.class);
+
         ShortcutInfo shortcut = new ShortcutInfo.Builder(this, SHORT_CUT_ID_1)
-                .setShortLabel("baidu")
-                .setLongLabel("第一个")
+                .setShortLabel(getString(R.string.random_play))
+                .setLongLabel(getString(R.string.random_play))
                 .setIcon(Icon.createWithResource(this, R.drawable.ic_play_arrow_black_24dp))
                 .setIntent(new Intent(Intent.ACTION_VIEW,
                         Uri.parse("https://www.baidu.com/")))
                 .build();
+
         ShortcutInfo shortcut2 = new ShortcutInfo.Builder(this, SHORT_CUT_ID_2)
                 .setShortLabel("csdn")
                 .setLongLabel("第二个")
@@ -118,6 +137,7 @@ public class MyApplication extends Application {
                 .setIntent(new Intent(Intent.ACTION_VIEW,
                         Uri.parse("https://www.csdn.com/")))
                 .build();
+
         ShortcutInfo shortcut3 = new ShortcutInfo.Builder(this, SHORT_CUT_ID_3)
                 .setShortLabel("github")
                 .setLongLabel("第三个")
@@ -125,6 +145,7 @@ public class MyApplication extends Application {
                 .setIntent(new Intent(Intent.ACTION_VIEW,
                         Uri.parse("https://www.github.com/")))
                 .build();
+
         mShortcutManager.setDynamicShortcuts(Arrays.asList(shortcut, shortcut2, shortcut3));
     }
 

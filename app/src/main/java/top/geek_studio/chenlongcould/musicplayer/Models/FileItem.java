@@ -1,11 +1,11 @@
 /*
  * ************************************************************
  * 文件：FileItem.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2018年12月13日 16:23:45
- * 上次修改时间：2018年12月13日 16:23:34
+ * 当前修改时间：2019年01月04日 20:36:03
+ * 上次修改时间：2018年12月28日 07:54:34
  * 作者：chenlongcould
  * Geek Studio
- * Copyright (c) 2018
+ * Copyright (c) 2019
  * ************************************************************
  */
 
@@ -16,7 +16,7 @@ import android.os.Parcelable;
 
 import java.io.File;
 
-public class FileItem implements Parcelable {
+public final class FileItem implements Parcelable {
     public static final Parcelable.Creator<FileItem> CREATOR = new Parcelable.Creator<FileItem>() {
         @Override
         public FileItem createFromParcel(Parcel source) {
