@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月04日 21:49:12
- * 上次修改时间：2019年01月04日 21:43:15
+ * 当前修改时间：2019年01月05日 09:52:36
+ * 上次修改时间：2019年01月05日 09:50:17
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -253,14 +253,6 @@ public final class Utils {
                 });
             } catch (Throwable e) {
                 e.printStackTrace();
-            }
-        }
-
-        public static void inDayNightSet(final SharedPreferences sharedPreferences) {
-            if (sharedPreferences.getBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false)) {
-                Values.Color.TEXT_COLOR = Values.Color.TEXT_COLOR_IN_NIGHT;
-            } else {
-                Values.Color.TEXT_COLOR = Values.Color.TEXT_COLOR_IN_DAY;
             }
         }
 

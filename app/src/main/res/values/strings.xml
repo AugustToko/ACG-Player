@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月04日 21:49:12
-  ~ 上次修改时间：2019年01月04日 21:43:14
+  ~ 当前修改时间：2019年01月05日 09:52:37
+  ~ 上次修改时间：2019年01月05日 09:49:39
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -20,7 +20,7 @@
     <string name="add">add</string>
     <string name="remove">remove</string>
     <string name="current_info_background" translatable="false">current_info_background</string>
-    <string name="todo" translatable="false">TODO</string>
+    <string name="todo">TODO</string>
     <string name="menu_button">Menu Button</string>
     <string name="random">random</string>
     <string name="repeat">repeat</string>
@@ -53,7 +53,7 @@
     <string name="set_tablayout_with_music_cover_accent_color">Set TabLayout with music cover accent color</string>
     <string name="auto_night_mode">Night Mode</string>
     <string name="set_app_background_color_dark">Set app background color dark</string>
-    <string name="title_activity_sets" translatable="false">Settings</string>
+    <string name="title_activity_sets">Settings</string>
 
     <string name="pref_title_vibrate" translatable="false">Vibrate</string>
     <string name="next_play">Next Play</string>
@@ -100,4 +100,5 @@
     <string name="sure_int">Sure?</string>
     <string name="sure_set_def_theme_int">Set Default Theme (NONE) ?</string>
     <string name="other">Other</string>
+    <string name="color_reset">Color Reset</string>
 </resources>

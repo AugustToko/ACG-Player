@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：colors.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月04日 20:36:03
-  ~ 上次修改时间：2019年01月04日 20:05:16
+  ~ 当前修改时间：2019年01月05日 09:52:37
+  ~ 上次修改时间：2019年01月05日 09:49:38
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -27,9 +27,10 @@
 
     <color name="mp3TypeColor">#d9d9d9</color>
 
+    <color name="item_title_text_color">#3c3c3c</color>
+
     <color name="LightSkyBlue">#87cefa</color>
     <color name="SpringGreen">#3CB371</color>
-    <color name="red">#B54B36</color>
 
     <color name="notVeryBlack">#1d1d1d</color>
     <color name="notVeryWhite">#dddddd</color>

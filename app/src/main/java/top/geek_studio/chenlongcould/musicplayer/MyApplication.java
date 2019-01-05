@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月04日 21:49:12
- * 上次修改时间：2019年01月04日 21:48:54
+ * 当前修改时间：2019年01月05日 09:52:36
+ * 上次修改时间：2019年01月05日 09:50:16
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -56,7 +56,9 @@ public final class MyApplication extends Application {
 
     public static final String VERSION_CODE = "ver_code";
 
-    public static final int TAGET_ACTION_CODE = -99;
+    public static final int CURRENT_VER_CODE = 30;
+
+    public static final int TARGET_ACTION_CODE = -99;
 
     @Override
     public void onCreate() {
@@ -67,13 +69,13 @@ public final class MyApplication extends Application {
         if (getProcessName(this).equals(getPackageName())) {
 
             //noinspection StatementWithEmptyBody
-            if (mDefSharedPreferences.getInt(VERSION_CODE, -1) == TAGET_ACTION_CODE) {
+            if (mDefSharedPreferences.getInt(VERSION_CODE, -1) == TARGET_ACTION_CODE) {
                 //do somethings
             }
 
             //add version code
             SharedPreferences.Editor ver_edit = mDefSharedPreferences.edit();
-            ver_edit.putInt(VERSION_CODE, 29);
+            ver_edit.putInt(VERSION_CODE, CURRENT_VER_CODE);
             ver_edit.apply();
 
             int id = mDefSharedPreferences.getInt(Values.SharedPrefsTag.FAVOURITE_LIST_ID, -1);
@@ -113,8 +115,6 @@ public final class MyApplication extends Application {
             Values.CurrentData.CURRENT_PLAY_TYPE = mDefSharedPreferences.getString(Values.SharedPrefsTag.PLAY_TYPE, Values.TYPE_COMMON);
 
             Values.CurrentData.MY_THEME_ID = mDefSharedPreferences.getInt(Values.SharedPrefsTag.SELECT_THEME, -1);
-
-            Utils.Ui.inDayNightSet(mDefSharedPreferences);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
                 mShortcutManager = getSystemService(ShortcutManager.class);

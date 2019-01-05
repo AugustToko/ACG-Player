@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月04日 20:36:03
- * 上次修改时间：2019年01月04日 19:03:18
+ * 当前修改时间：2019年01月05日 09:52:36
+ * 上次修改时间：2019年01月05日 09:50:17
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -557,7 +557,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
                     break;
                 case MotionEvent.ACTION_MOVE:
 
-                    if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED || CURRENT_SLIDE_OFFSET != 0)
+                    if (mSlidingUpPanelLayout.getPanelState() != SlidingUpPanelLayout.PanelState.EXPANDED || CURRENT_SLIDE_OFFSET != 0)
                         break;
 
                     //首尾禁止对应边缘滑动
@@ -1147,13 +1147,6 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
     public void initStyle() {
         mCurrentMusicNameText.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
         mCurrentAlbumNameText.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
-        if (Values.Style.NIGHT_MODE) {
-            mRecyclerMask.setImageResource(R.drawable.ramp_bg_dark);
-            mRecyclerMask.setAlpha(0.1f);
-        } else {
-            mRecyclerMask.setImageResource(R.drawable.ramp_bg_light);
-            mRecyclerMask.setAlpha(0.5f);
-        }
     }
 
     /**

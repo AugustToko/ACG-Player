@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月04日 20:36:03
- * 上次修改时间：2019年01月04日 20:35:41
+ * 当前修改时间：2019年01月05日 09:52:36
+ * 上次修改时间：2019年01月05日 09:51:09
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -174,11 +174,23 @@ public final class Values {
     }
 
     public static final class Color {
+
+        /**
+         * default
+         */
         public static final String PRIMARY = "#008577";
         public static final String PRIMARY_DARK = "#00574B";
         public static final String ACCENT = "#D81B60";
+
+        /**
+         * Ico color
+         */
         public static final String NOT_VERY_BLACK = "#1d1d1d";
         public static final String NOT_VERY_WHITE = "#dddddd";
+
+        /**
+         * item title color
+         */
         public static String TEXT_COLOR = "#3c3c3c";
 
         public static String TEXT_COLOR_IN_NIGHT = "#C6C6C6";

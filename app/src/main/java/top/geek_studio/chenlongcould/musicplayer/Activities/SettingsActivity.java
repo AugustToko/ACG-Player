@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月04日 21:49:12
- * 上次修改时间：2019年01月04日 21:46:32
+ * 当前修改时间：2019年01月05日 09:52:36
+ * 上次修改时间：2019年01月05日 09:50:45
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -22,7 +22,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.ColorInt;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
-import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
@@ -158,8 +157,6 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
             switch (menuItem.getItemId()) {
                 case R.id.menu_toolbar_settings_reset: {
 
-                    Values.STYLE_CHANGED = true;
-
                     SharedPreferences.Editor editor = mDefPrefs.edit();
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         editor.putInt(Values.ColorInt.ACCENT_COLOR, getResources().getColor(R.color.colorAccent, getTheme()));
@@ -243,24 +240,24 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
             colorPickerDialog.show(getFragmentManager(), "color-picker-dialog");
         });
 
-        setNightOpt.setOnClickListener(v -> {
-
-            SharedPreferences.Editor editor = mDefPrefs.edit();
-            if (Values.Style.NIGHT_MODE) {
-                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false);
-                mNightSwitch.setChecked(false);
-                Values.Style.NIGHT_MODE = false;
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-            } else {
-                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, true);
-                mNightSwitch.setChecked(true);
-                Values.Style.NIGHT_MODE = true;
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            }
-            editor.apply();
-
-            Utils.Ui.inDayNightSet(mDefPrefs);
-        });
+//        setNightOpt.setOnClickListener(v -> {
+//
+//            SharedPreferences.Editor editor = mDefPrefs.edit();
+//            if (Values.Style.NIGHT_MODE) {
+//                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false);
+//                mNightSwitch.setChecked(false);
+//                Values.Style.NIGHT_MODE = false;
+//                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+//            } else {
+//                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, true);
+//                mNightSwitch.setChecked(true);
+//                Values.Style.NIGHT_MODE = true;
+//                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+//            }
+//            editor.apply();
+//
+//            Utils.Ui.inDayNightSet(mDefPrefs);
+//        });
 
 //        //night opt
 //        mNightSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
