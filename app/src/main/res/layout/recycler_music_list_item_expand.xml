@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：recycler_music_list_item_expand.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月05日 09:52:37
-  ~ 上次修改时间：2019年01月05日 09:49:39
+  ~ 当前修改时间：2019年01月05日 20:52:07
+  ~ 上次修改时间：2019年01月05日 11:18:19
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -18,11 +18,15 @@
     app:layout_constraintTop_toTopOf="parent">
 
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
         android:gravity="center"
-        android:maxLines="1"
-        android:text="-------This is Expand View-------" />
+        android:singleLine="true"
+        android:text="- - - - - - - - - - - - This is Expand View - - - - - - - - - - - -"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <LinearLayout
         android:layout_width="match_parent"

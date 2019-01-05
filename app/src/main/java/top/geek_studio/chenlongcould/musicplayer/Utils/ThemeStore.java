@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ThemeStore.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:17
+ * 当前修改时间：2019年01月05日 20:52:07
+ * 上次修改时间：2019年01月05日 20:42:45
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -15,7 +15,7 @@ import java.io.File;
 
 public final class ThemeStore {
 
-    public static final int DEF_THEME_NUM = 2;
+    public static final int MIN_ITEM = 7;
 
     public static final String DATA_BASE_NAME = "ThemeStore.db";
 
@@ -56,7 +56,9 @@ public final class ThemeStore {
         String NAV_NAME = "nav_name";
         String THUMBNAIL = "thumbnail";
         String SUPPORT_AREA = "support_area";
-        String PRIMARY_COLOR = "primary_color";
+        String PRIMARY_COLOR = "primary_color";             //NN
+        String PRIMARY_COLOR_DARK = "primary_color_dark";   //NN
+        String ACCENT_COLOR = "accent_color";               //NN
         String DATE = "date";
         String SELECT = "select";
     }

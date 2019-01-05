@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:17
+ * 当前修改时间：2019年01月05日 20:52:07
+ * 上次修改时间：2019年01月05日 11:05:01
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -84,9 +84,11 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 public final class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGone {
 
     /**
-     * @see Message#what
-     */
-    public static final int SET_SEEK_BAR_COLOR = 9001;
+     * slide image: {@link MusicListFragment}
+     * */
+    byte fastView;
+
+    //////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * @see MainActivity#CURRENT_SLIDE_OFFSET
@@ -557,7 +559,8 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
                     break;
                 case MotionEvent.ACTION_MOVE:
 
-                    if (mSlidingUpPanelLayout.getPanelState() != SlidingUpPanelLayout.PanelState.EXPANDED || CURRENT_SLIDE_OFFSET != 0)
+//                    if (mSlidingUpPanelLayout.getPanelState() != SlidingUpPanelLayout.PanelState.EXPANDED || CURRENT_SLIDE_OFFSET != 0)
+                    if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED)
                         break;
 
                     //首尾禁止对应边缘滑动

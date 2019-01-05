@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：PublicActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:17
+ * 当前修改时间：2019年01月05日 20:52:07
+ * 上次修改时间：2019年01月05日 10:37:54
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -45,10 +45,12 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
     public static final String TAG = "PublicActivity";
 
     public static final String PLAY_LIST_ITEM = "play_list_item";
+    public static final String PLAY_LIST_FAVOURITE = "favourite music";
 
     private AppBarLayout mAppBarLayout;
     private Toolbar mToolbar;
     private RecyclerView mRecyclerView;
+    private MyRecyclerAdapter adapter;
 
     /**
      * 保存播放列表下的Music (如果当前type是play_list_item的话 {@link #mType} )
@@ -95,11 +97,12 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
                         // TODO: 2018/11/22 quickSort
                         System.exit(0);
                     }
-                    MyRecyclerAdapter adapter = new MyRecyclerAdapter(musicItems, this, TAG);
+                    adapter = new MyRecyclerAdapter(musicItems, this, TAG);
                     mRecyclerView.setAdapter(adapter);
                 }
                 break;
-                case "favourite music": {
+
+                case PLAY_LIST_FAVOURITE: {
                     mToolbar.setTitle(getResources().getString(R.string.my_favourite));
 
                     mMusicItemList = new ArrayList<>();
@@ -154,7 +157,7 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
                         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(i -> {
                                     if (i != 0) return;
-                                    MyRecyclerAdapter adapter = new MyRecyclerAdapter(mMusicItemList, PublicActivity.this, TAG + "favourite");
+                                    adapter = new MyRecyclerAdapter(mMusicItemList, PublicActivity.this, TAG + PLAY_LIST_FAVOURITE);
                                     mRecyclerView.setAdapter(adapter);
 
                                     mToolbar.setOnMenuItemClickListener(menuItem -> {
@@ -163,7 +166,7 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
                                                 Data.sPlayOrderList.clear();
                                                 Data.sPlayOrderList.addAll(mMusicItemList);        //更新数据
                                                 Collections.shuffle(Data.sPlayOrderList);
-                                                Utils.SendSomeThing.sendPlay(PublicActivity.this, ReceiverOnMusicPlay.TYPE_SHUFFLE, TAG);
+                                                Utils.SendSomeThing.sendPlay(PublicActivity.this, ReceiverOnMusicPlay.TYPE_SHUFFLE, TAG + PLAY_LIST_FAVOURITE);
                                             }
                                             break;
                                         }
@@ -230,7 +233,7 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
                     }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                             .subscribe(i -> {
                                 if (i != 0) return;
-                                MyRecyclerAdapter adapter = new MyRecyclerAdapter(mMusicItemList, PublicActivity.this, TAG + "PlayList");
+                                adapter = new MyRecyclerAdapter(mMusicItemList, PublicActivity.this, TAG + "PlayList");
                                 mRecyclerView.setAdapter(adapter);
 
                                 mToolbar.setOnMenuItemClickListener(menuItem -> {
@@ -270,8 +273,8 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
         return mMusicItemList;
     }
 
-    public String getCurrentListName() {
-        return currentListName;
+    public MyRecyclerAdapter getAdapter() {
+        return adapter;
     }
 
     @Override

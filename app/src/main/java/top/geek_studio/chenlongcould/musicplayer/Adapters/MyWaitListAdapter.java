@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyWaitListAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:17
+ * 当前修改时间：2019年01月05日 20:52:07
+ * 上次修改时间：2019年01月05日 10:37:54
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -95,7 +95,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
                 break;
 
                 case Menu.FIRST + 2: {
-                    Utils.DataSet.addList(mMainActivity, mMusicItems.get(holder.getAdapterPosition()));
+                    Utils.DataSet.addListDialog(mMainActivity, mMusicItems.get(holder.getAdapterPosition()));
                 }
                 break;
 

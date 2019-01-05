@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月05日 09:52:37
-  ~ 上次修改时间：2019年01月05日 09:50:17
+  ~ 当前修改时间：2019年01月05日 20:52:07
+  ~ 上次修改时间：2019年01月05日 20:32:07
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -79,7 +79,13 @@
     <string name="sure_int">确认？</string>
     <string name="sure_set_def_theme_int">设置默认主题？</string>
     <string name="other">其他</string>
-    <string name="todo" translatable="false">TODO</string>
     <string name="title_activity_sets">设置</string>
     <string name="color_reset">色彩重置</string>
+    <string name="theme_note">已安装主题均来自于用户，其中如有版权侵犯与本APP开发者毫无关联。请用户不要使用带版权资源。Thanks</string>
+    <string name="agree">同意</string>
+    <string name="refuse">拒绝</string>
+    <string name="theme_use_note">主题使用注意事项</string>
+    <string name="note">注意事项</string>
+    <string name="apply">应用</string>
+    <string name="theme_is_in_use">主题正在使用中</string>
 </resources>

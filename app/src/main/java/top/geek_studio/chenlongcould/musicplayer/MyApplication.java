@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:16
+ * 当前修改时间：2019年01月05日 20:52:07
+ * 上次修改时间：2019年01月05日 20:42:45
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -32,6 +32,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Locale;
 
@@ -43,6 +44,8 @@ import top.geek_studio.chenlongcould.musicplayer.Utils.ThemeStore;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 
 public final class MyApplication extends Application {
+
+    public static WeakReference<Context> mAppContext;
 
     private static final String TAG = "MyApplication";
 
@@ -64,12 +67,14 @@ public final class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        mAppContext = new WeakReference<>(this);
+
         mDefSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         if (getProcessName(this).equals(getPackageName())) {
 
             //noinspection StatementWithEmptyBody
-            if (mDefSharedPreferences.getInt(VERSION_CODE, -1) == TARGET_ACTION_CODE) {
+            if (mDefSharedPreferences.getInt(VERSION_CODE, -1) != CURRENT_VER_CODE) {
                 //do somethings
             }
 
@@ -113,8 +118,6 @@ public final class MyApplication extends Application {
 
             //set play type
             Values.CurrentData.CURRENT_PLAY_TYPE = mDefSharedPreferences.getString(Values.SharedPrefsTag.PLAY_TYPE, Values.TYPE_COMMON);
-
-            Values.CurrentData.MY_THEME_ID = mDefSharedPreferences.getInt(Values.SharedPrefsTag.SELECT_THEME, -1);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
                 mShortcutManager = getSystemService(ShortcutManager.class);

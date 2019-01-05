@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:17
+ * 当前修改时间：2019年01月05日 20:52:07
+ * 上次修改时间：2019年01月05日 19:39:37
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -220,6 +220,14 @@ public final class Utils {
         private static final String TAG = "Ui";
 
         public static int POSITION = 200;
+
+        public static android.support.v7.app.AlertDialog fastLoadingDialog(Context context, String title) {
+            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
+            builder.setView(R.layout.dialog_loading);
+            builder.setTitle(title);
+            builder.setCancelable(false);
+            return builder.create();
+        }
 
         public static void setNavigationMenuLineStyle(NavigationView navigationView, @ColorInt final int color, final int height) {
             try {
@@ -609,7 +617,7 @@ public final class Utils {
          * @param activity MainActivity
          * @param item     MusicItem
          */
-        public static void addList(MainActivity activity, MusicItem item) {
+        public static void addListDialog(MainActivity activity, MusicItem item) {
             final Resources resources = activity.getResources();
 
             final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(activity);
@@ -820,12 +828,15 @@ public final class Utils {
                 if (f.isDirectory()) {
                     final File detailText = new File(f.getPath() + File.separatorChar + ThemeStore.DETAIL_FILE_NAME);
 
+                    //temp
                     String title = "null";
                     String date = "null";
                     String nav_name = "null";
                     String author = "null";
                     String support_area = "null";
                     String primary_color = "null";
+                    String accent_color = "null";
+                    String primary_color_dark = "null";
                     String thumbnail = "null";
                     String select = "null";
                     String path = f.getPath();
@@ -871,6 +882,18 @@ public final class Utils {
                             items++;
                         }
 
+                        if (line.contains(ThemeStore.ThemeColumns.PRIMARY_COLOR_DARK)) {
+                            primary_color_dark = line.split(":")[1];
+                            Log.d(TAG, "doInBackground: " + select);
+                            items++;
+                        }
+
+                        if (line.contains(ThemeStore.ThemeColumns.ACCENT_COLOR)) {
+                            accent_color = line.split(":")[1];
+                            Log.d(TAG, "doInBackground: " + select);
+                            items++;
+                        }
+
                         if (line.contains(ThemeStore.ThemeColumns.DATE)) {
                             date = line.split(":")[1];
                             Log.d(TAG, "doInBackground: " + date);
@@ -884,8 +907,19 @@ public final class Utils {
                         }
                     }
 
-                    if (items == 8) {
-                        return new ThemeActivity.Theme(Integer.parseInt(f.getName()), path, title, date, nav_name, author, support_area, primary_color, thumbnail, select);
+                    if (items >= ThemeStore.MIN_ITEM) {
+                        return new ThemeActivity.Theme.Builder(Integer.parseInt(f.getName()))
+                                .setAccentColor(accent_color)
+                                .setAuthor(author)
+                                .setDate(date)
+                                .setNavName(nav_name)
+                                .setPath(path).setPrimaryColorDark(primary_color_dark)
+                                .setSupportArea(support_area)
+                                .setSelect(select)
+                                .setTitle(title)
+                                .setThumbnail(thumbnail)
+                                .setPrimaryColor(primary_color)
+                                .build();
                     }
                 }
             } catch (IOException e) {

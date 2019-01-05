@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:45
+ * 当前修改时间：2019年01月05日 20:52:07
+ * 上次修改时间：2019年01月05日 17:00:24
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -343,7 +343,7 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
         mAccentImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.ACCENT_COLOR, Color.parseColor("#D81B60")));
         Utils.Ui.setTopBottomColor(this, mAppBarLayout, mToolbar);
 
-        final ImageView imageView = (ImageView) findViewById(R.id.theme_preview);
+        final ImageView imageView = findViewById(R.id.theme_preview);
 
         //load theme
         if (Data.sTheme != null) {

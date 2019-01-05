@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Data.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:17
+ * 当前修改时间：2019年01月05日 20:52:07
+ * 上次修改时间：2019年01月05日 20:51:37
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -18,6 +18,7 @@ import android.graphics.Bitmap;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 
+import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.Locale;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.musicplayer.Activities.CarViewActivity;
+import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.ThemeActivity;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.MyHeadSetPlugReceiver;
 import top.geek_studio.chenlongcould.musicplayer.Models.AlbumItem;
@@ -33,24 +35,31 @@ import top.geek_studio.chenlongcould.musicplayer.Models.PlayListItem;
 
 public final class Data {
 
+    public static WeakReference<MainActivity> sMainRef;
+
+    /**
+     * old
+     */
     public static List<Activity> sActivities = new ArrayList<>();
-
-    public static CarViewActivity sCarViewActivity = null;
-
     /**
      * data
      * */
-    public final static List<MusicItem> sMusicItems = new ArrayList<>();
+    public static List<MusicItem> sMusicItems = new ArrayList<>();
 
-    public final static List<AlbumItem> sAlbumItems = new ArrayList<>();
+    public static CarViewActivity sCarViewActivity = null;
+    public static List<AlbumItem> sAlbumItems = new ArrayList<>();
+    public static List<AlbumItem> sAlbumItemsBackUp = new ArrayList<>();
+    public static List<MusicItem> sMusicItemsBackUp = new ArrayList<>();
+    public static List<MusicItem> sPlayOrderList = new ArrayList<>();
+    public static List<PlayListItem> sPlayListItems = new ArrayList<>();
 
-    public final static List<AlbumItem> sAlbumItemsBackUp = new ArrayList<>();
-
-    public final static List<MusicItem> sMusicItemsBackUp = new ArrayList<>();
-
-    public final static List<MusicItem> sPlayOrderList = new ArrayList<>();
-
-    public final static List<PlayListItem> sPlayListItems = new ArrayList<>();
+    /**
+     * init Data {@link MainActivity}
+     */
+    public static void init(final MainActivity activity) {
+        sMainRef = new WeakReference<>(activity);
+        sActivities.add(sMainRef.get());
+    }
 
     /**
      * nextWillPlay

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ThemeAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:17
+ * 当前修改时间：2019年01月05日 20:52:07
+ * 上次修改时间：2019年01月05日 20:35:28
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -18,6 +18,7 @@ import android.content.res.Resources;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -32,6 +33,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
@@ -93,6 +95,11 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
 
                 //del
                 case Menu.FIRST: {
+                    if (PreferenceManager.getDefaultSharedPreferences(mThemeActivity).getInt(Values.SharedPrefsTag.SELECT_THEME, -1) == mThemes.get(holder.getAdapterPosition()).getId()) {
+                        Toast.makeText(mThemeActivity, mThemeActivity.getString(R.string.theme_is_in_use), Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+
                     AlertDialog.Builder sure = new AlertDialog.Builder(mThemeActivity);
                     sure.setCancelable(true);
                     sure.setTitle("Are you sure?");
@@ -102,9 +109,9 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
                             Utils.IO.delFolder(mThemes.get(holder.getAdapterPosition()).getPath());
                         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(result -> {
-                                    mThemeActivity.getThemes().remove(holder.getAdapterPosition());
-                                    mThemeActivity.getThemeAdapter().notifyItemRemoved(holder.getAdapterPosition());
                                     dialog12.dismiss();
+                                    mThemeActivity.getThemes().clear();
+                                    mThemeActivity.reLoadDataUi();
                                 });
                         dialog12.cancel();
                     });
@@ -142,6 +149,10 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
     @SuppressLint("CheckResult")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
+        if (i == PreferenceManager.getDefaultSharedPreferences(mThemeActivity).getInt(Values.SharedPrefsTag.SELECT_THEME, -1)) {
+            viewHolder.itemView.setBackgroundColor(Color.parseColor(Values.Color.THEME_IN_USE));
+        }
+
         viewHolder.mTitle.setText(mThemes.get(i).getTitle());
         viewHolder.mAuthor.setText(mThemes.get(i).getAuthor());
         viewHolder.mId.setText(String.valueOf(mThemes.get(i).getId()));
@@ -171,22 +182,29 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(mThemeActivity);
         builder.setCancelable(true);
-        builder.setNeutralButton("DELETE", (dialog, which) -> {
 
-            AlertDialog.Builder sure = new AlertDialog.Builder(mThemeActivity);
+        //REMOVE THEME
+        builder.setNeutralButton(mThemeActivity.getString(R.string.del), (dialog, which) -> {
+
+            if (PreferenceManager.getDefaultSharedPreferences(mThemeActivity).getInt(Values.SharedPrefsTag.SELECT_THEME, -1) == mThemes.get(holder.getAdapterPosition()).getId()) {
+                Toast.makeText(mThemeActivity, mThemeActivity.getString(R.string.theme_is_in_use), Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            final AlertDialog.Builder sure = new AlertDialog.Builder(mThemeActivity);
             sure.setCancelable(true);
-            sure.setTitle("Are you sure?");
-            sure.setMessage("REMOVE?");
-            sure.setNeutralButton("Yes", (dialog12, which12) -> {
-                Observable.create((ObservableOnSubscribe<Integer>) emitter -> Utils.IO.delFolder(mThemes.get(holder.getAdapterPosition()).getPath())).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+            sure.setTitle(mThemeActivity.getString(R.string.are_u_sure));
+            sure.setMessage(mThemeActivity.getString(R.string.remove_int));
+            sure.setNeutralButton(mThemeActivity.getString(R.string.sure), (dialog12, which12) -> {
+                Observable.create((ObservableOnSubscribe<Integer>) emitter -> Utils.IO.delFolder(mThemes.get(holder.getAdapterPosition()).getPath()))
+                        .subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                         .subscribe(result -> {
-                            mThemeActivity.getThemes().remove(holder.getAdapterPosition());
-                            mThemeActivity.getThemeAdapter().notifyItemRemoved(holder.getAdapterPosition());
                             dialog12.dismiss();
+                            mThemeActivity.reLoadDataUi();
                         });
                 dialog12.cancel();
             });
-            sure.setNegativeButton("Cancel", (dialog1, which1) -> {
+            sure.setNegativeButton(mThemeActivity.getString(R.string.cancel), (dialog1, which1) -> {
                 dialog1.cancel();
                 createDetailDialog(holder);
             });
@@ -195,19 +213,23 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
         });
 
         //apply!!
-        builder.setNegativeButton("APPLY", (dialog, which) -> {
+        builder.setNegativeButton(mThemeActivity.getString(R.string.apply), (dialog, which) -> {
             Data.sTheme = mThemes.get(holder.getAdapterPosition());
             final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(mThemeActivity).edit();
             editor.putInt(Values.SharedPrefsTag.SELECT_THEME, holder.getAdapterPosition());
             editor.apply();
             dialog.dismiss();
+            mThemeActivity.getThemes().clear();
+            mThemeActivity.reLoadDataUi();
         });
 
+        //setData
         dialogThemeBinding.title.setText(mThemes.get(holder.getAdapterPosition()).getTitle());
         dialogThemeBinding.author.setText(mThemes.get(holder.getAdapterPosition()).getAuthor());
         dialogThemeBinding.date.setText(mThemes.get(holder.getAdapterPosition()).getDate());
         dialogThemeBinding.idText.setText(String.valueOf(mThemes.get(holder.getAdapterPosition()).getId()));
 
+        //load icon
         Observable.create((ObservableOnSubscribe<Bitmap>) emitter -> emitter.onNext(BitmapFactory.decodeFile(mThemes.get(holder.getAdapterPosition()).getThumbnail())))
                 .subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> GlideApp.with(mThemeActivity)

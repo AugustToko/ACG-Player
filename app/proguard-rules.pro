@@ -58,10 +58,10 @@
 -keep public class * extends android.app.Fragment
 
 # 保持测试相关的代码
--dontnote junit.framework.**
--dontnote junit.runner.**
--dontwarn android.test.**
--dontwarn android.support.test.**
+#-dontnote junit.framework.**
+#-dontnote junit.runner.**
+#-dontwarn android.test.**
+#-dontwarn android.support.test.**
 -dontwarn org.junit.**
 -dontwarn com.simplecityapps.**
 -dontwarn com.sothree.slidinguppanel.**

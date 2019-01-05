@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:51:09
+ * 当前修改时间：2019年01月05日 20:52:07
+ * 上次修改时间：2019年01月05日 20:35:28
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -106,8 +106,6 @@ public final class Values {
 
         public static String UI_MODE = MODE_COMMON;
 
-        public static int MY_THEME_ID = -1;
-
         /**
          * TEMP DATA
          */
@@ -163,6 +161,8 @@ public final class Values {
         public static final String FAVOURITE_LIST_ID = "FAVOURITE_LIST_ID";
 
         public static final String SELECT_THEME = "SELECT_THEME";
+
+        public static final String THEME_USE_NOTE = "THEME_USE_NOTE";
     }
 
 
@@ -195,6 +195,8 @@ public final class Values {
 
         public static String TEXT_COLOR_IN_NIGHT = "#C6C6C6";
         public static String TEXT_COLOR_IN_DAY = "#434343";
+
+        public static String THEME_IN_USE = "#7a00f2ff";
 
     }
 

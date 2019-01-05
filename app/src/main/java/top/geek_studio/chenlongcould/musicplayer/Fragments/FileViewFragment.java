@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：FileViewFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:17
+ * 当前修改时间：2019年01月05日 20:52:07
+ * 上次修改时间：2019年01月05日 16:39:57
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -171,7 +171,7 @@ public final class FileViewFragment extends Fragment {
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.file_item, parent, false);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_file_item, parent, false);
             ViewHolder holder = new ViewHolder(view);
 
             holder.itemView.setOnClickListener(v -> {

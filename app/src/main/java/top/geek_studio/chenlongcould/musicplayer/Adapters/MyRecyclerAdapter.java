@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:17
+ * 当前修改时间：2019年01月05日 20:52:07
+ * 上次修改时间：2019年01月05日 20:51:37
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -14,6 +14,7 @@ package top.geek_studio.chenlongcould.musicplayer.Adapters;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -21,6 +22,7 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
@@ -60,6 +62,7 @@ import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Interface.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
@@ -74,18 +77,22 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
     private List<MusicItem> mMusicItems;
 
+    /**
+     * MAIN
+     */
     private MainActivity mMainActivity;
 
-    private Context mContext;
+    private Activity mContext;
 
     private ItemHolder currentBind;
 
     //ui position, like: MainActivity or-> xxFragment...
     private String mCurrentUiPosition;
 
-    public MyRecyclerAdapter(List<MusicItem> musicItems, Context context, String currentUiPosition) {
-        mMusicItems = musicItems;
+    public MyRecyclerAdapter(List<MusicItem> musicItems, Activity context, String currentUiPosition) {
         mMainActivity = (MainActivity) Data.sActivities.get(0);
+
+        mMusicItems = musicItems;
         mContext = context;
         mCurrentUiPosition = currentUiPosition;
     }
@@ -104,7 +111,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         View view;
 
         ItemHolder holder;
-
 
         /*
          * ModHolder: baseHolder + ModHolder
@@ -254,9 +260,16 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
                 //add to list
                 case Menu.FIRST + 2: {
-                    Utils.DataSet.addList(mMainActivity, mMusicItems.get(holder.getAdapterPosition()));
+                    Utils.DataSet.addListDialog(mMainActivity, mMusicItems.get(holder.getAdapterPosition()));
                 }
                 break;
+
+                /* in PublicActivity */
+                case Menu.FIRST + 3: {
+                    PlayListsUtil.removeFromPlaylist(mContext, mMusicItems.get(holder.getAdapterPosition()), PreferenceManager.getDefaultSharedPreferences(mContext).getInt(Values.SharedPrefsTag.FAVOURITE_LIST_ID, -1));
+                    ((PublicActivity) mContext).getMusicItemList().remove(holder.getAdapterPosition());
+                    ((PublicActivity) mContext).getAdapter().notifyItemRemoved(holder.getAdapterPosition());
+                }
 
                 case Menu.FIRST + 4: {
                     String albumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
@@ -548,6 +561,9 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             mMenu.add(Menu.NONE, Menu.FIRST + 0, 0, resources.getString(R.string.next_play));
             mMenu.add(Menu.NONE, Menu.FIRST + 1, 0, resources.getString(R.string.love_music));
             mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, resources.getString(R.string.add_to_playlist));
+            if (mCurrentUiPosition.equals(PublicActivity.PLAY_LIST_FAVOURITE)) {
+                mMenu.add(Menu.NONE, Menu.FIRST + 3, 0, "Del from favourite");
+            }
             mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, resources.getString(R.string.show_album));
             mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, resources.getString(R.string.more_info));
 
