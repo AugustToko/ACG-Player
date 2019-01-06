@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 20:52:07
- * 上次修改时间：2019年01月05日 20:51:37
+ * 当前修改时间：2019年01月06日 10:05:15
+ * 上次修改时间：2019年01月06日 09:59:15
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -456,13 +456,12 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
             if (mImageViewWeakReference.get() == null || result == null) return;
 
-            File file = new File(result);
+            final File file = new File(result);
             if (result.equals("null") || !file.exists() || file.isDirectory()) {
                 Log.d(TAG, "onPostExecute: load image error");
                 GlideApp.with(mContextWeakReference.get()).load(R.drawable.ic_audiotrack_24px).into(mImageViewWeakReference.get());
                 return;
             }
-
 
             GlideApp.with(mContextWeakReference.get()).load(result)
                     .transition(DrawableTransitionOptions.withCrossFade())

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ThemeActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 20:52:07
- * 上次修改时间：2019年01月05日 20:51:37
+ * 当前修改时间：2019年01月06日 10:05:15
+ * 上次修改时间：2019年01月06日 09:21:00
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -124,6 +124,8 @@ public class ThemeActivity extends AppCompatActivity implements IStyle {
                         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(ThemeActivity.this).edit();
                         editor.putInt(Values.SharedPrefsTag.SELECT_THEME, -1);
                         editor.apply();
+
+                        reLoadDataUi();
                     });
                     builder.setPositiveButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
                     builder.show();
@@ -159,6 +161,7 @@ public class ThemeActivity extends AppCompatActivity implements IStyle {
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (!preferences.getBoolean(Values.SharedPrefsTag.THEME_USE_NOTE, false)) {
             final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setCancelable(false);
             builder.setTitle(getString(R.string.theme_use_note));
             builder.setMessage(getString(R.string.theme_note));
             builder.setNeutralButton(getString(R.string.agree), (dialog, which) -> {
@@ -184,16 +187,18 @@ public class ThemeActivity extends AppCompatActivity implements IStyle {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         switch (requestCode) {
             case REQUEST_ADD_THEME: {
-
                 if (resultCode == RESULT_OK) {
                     Uri uri = data.getData();
                     if (uri != null) {
-                        Log.d(TAG, "onActivityResult: " + uri.toString());
-                        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+                        final Cursor cursor = getContentResolver().query(uri, null, null, null, null);
                         if (cursor != null) {
                             cursor.moveToFirst();
-                            String documentId = cursor.getString(cursor.getColumnIndexOrThrow("document_id"));
-                            String path = Environment.getExternalStorageDirectory().getPath() + File.separatorChar + documentId.split(":")[1];
+
+                            final String documentId = cursor.getString(cursor.getColumnIndexOrThrow("document_id"));
+                            final String path = Environment.getExternalStorageDirectory().getPath() + File.separatorChar + documentId.split(":")[1];
+
+                            final AlertDialog load = Utils.Ui.fastLoadingDialog(ThemeActivity.this, "Loading...");
+                            load.show();
 
                             Observable.create((ObservableOnSubscribe<Theme>) emitter -> {
                                 final int name = themeDir.listFiles().length;
@@ -202,16 +207,17 @@ public class ThemeActivity extends AppCompatActivity implements IStyle {
                                 final File themeFile = new File(themeDir.getAbsolutePath() + File.separatorChar + name);
                                 final Theme theme = Utils.ThemeUtils.fileToTheme(themeFile);
 
-                                if (theme != null) {
+                                if (theme != null)
                                     emitter.onNext(theme);
-                                } else {
+                                else
                                     Utils.IO.delFolder(themeFile.getAbsolutePath());
-                                }
+
                                 cursor.close();
                             }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                                     .subscribe(result -> {
                                         mThemes.add(result);
                                         mThemeAdapter.notifyItemInserted(mThemes.size() - 1);
+                                        load.dismiss();
                                     });
                         }
                     }

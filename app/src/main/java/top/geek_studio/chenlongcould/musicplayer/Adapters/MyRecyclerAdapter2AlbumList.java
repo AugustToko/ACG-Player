@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter2AlbumList.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:17
+ * 当前修改时间：2019年01月06日 10:05:15
+ * 上次修改时间：2019年01月06日 10:04:51
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -14,7 +14,6 @@ package top.geek_studio.chenlongcould.musicplayer.Adapters;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -187,9 +186,9 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
                 return;
             }
 
-            File file = new File(albumArt);
+            final File file = new File(albumArt);
             if (file.exists()) {
-                Bitmap bitmap = BitmapFactory.decodeFile(albumArt);
+                final Bitmap bitmap = Utils.Ui.readBitmapFromFile(albumArt, 100, 100);
 
                 //...mode set
                 switch (mType) {
@@ -205,6 +204,10 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
                                     mViewHolderWeakReference.get().mAlbumText.setTextColor(Color.parseColor(Values.Color.NOT_VERY_WHITE));
                                 }
                                 mViewHolderWeakReference.get().mView.setBackgroundColor(color);
+
+                                bitmap.recycle();
+                            } else {
+                                mViewHolderWeakReference.get().mView.setBackgroundColor(Color.BLACK);
                             }
                         });
                     }
@@ -212,7 +215,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
                 }
 
                 GlideApp.with(mContextWeakReference.get())
-                        .load(bitmap)
+                        .load(albumArt)
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                         .centerCrop()
                         .into(mViewHolderWeakReference.get().mAlbumImage);
@@ -234,7 +237,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
                 return "null";
             }
 
-            ImageView imageView = mViewHolderWeakReference.get().mAlbumImage;
+            final ImageView imageView = mViewHolderWeakReference.get().mAlbumImage;
 
             if (imageView == null || imageView.getTag(R.string.key_id_1) == null) {
                 Log.e(TAG, "doInBackground: key null------------------skip");

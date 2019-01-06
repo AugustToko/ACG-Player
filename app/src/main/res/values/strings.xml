@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月05日 20:52:07
-  ~ 上次修改时间：2019年01月05日 20:51:37
+  ~ 当前修改时间：2019年01月06日 10:05:15
+  ~ 上次修改时间：2019年01月06日 10:04:54
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -15,6 +15,7 @@
     <string name="close">close</string>
     <string name="play_status">Play Status</string>
     <string name="key_id_1" translatable="false">the_key_one</string>
+    <string name="key_id_2" translatable="false">the_key_two</string>
     <string name="activity_music_detail_album_image" translatable="false">activity_music_detail_album_image</string>
     <string name="activity_music_detail_primary_background" translatable="false">activity_music_detail_primary_background</string>
     <string name="add">add</string>
@@ -111,4 +112,5 @@
     <string name="are_u_sure">Are you sure?</string>
     <string name="remove_int">REMOVE?</string>
     <string name="sync">Sync</string>
+    <string name="saved_to_doc">Saved to Documents!</string>
 </resources>

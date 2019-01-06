@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 20:52:07
- * 上次修改时间：2019年01月05日 20:51:37
+ * 当前修改时间：2019年01月06日 10:05:15
+ * 上次修改时间：2019年01月06日 09:55:59
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -520,6 +520,10 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         Data.sMusicBinder = null;
         Data.sActivities.clear();
         Data.sMainRef.clear();
+
+        if (Data.getCurrentCover() != null)
+            Data.getCurrentCover().recycle();
+
         finish();
     }
 

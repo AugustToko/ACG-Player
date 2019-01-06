@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 20:52:07
- * 上次修改时间：2019年01月05日 19:39:37
+ * 当前修改时间：2019年01月06日 10:05:15
+ * 上次修改时间：2019年01月06日 09:53:46
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -221,6 +221,29 @@ public final class Utils {
 
         public static int POSITION = 200;
 
+        public static Bitmap readBitmapFromFile(String filePath, int width, int height) {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(filePath, options);
+            float srcWidth = options.outWidth;
+            float srcHeight = options.outHeight;
+            int inSampleSize = 1;
+
+            if (srcWidth > height && srcWidth > width) {
+                inSampleSize = (int) (srcWidth / width);
+            } else if (srcWidth < height && srcHeight > height) {
+                inSampleSize = (int) (srcHeight / height);
+            }
+
+            if (inSampleSize <= 0) {
+                inSampleSize = 1;
+            }
+            options.inJustDecodeBounds = false;
+            options.inSampleSize = inSampleSize;
+
+            return BitmapFactory.decodeFile(filePath, options);
+        }
+
         public static android.support.v7.app.AlertDialog fastLoadingDialog(Context context, String title) {
             android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
             builder.setView(R.layout.dialog_loading);
@@ -281,9 +304,9 @@ public final class Utils {
         /**
          * set color (style)
          *
-         * @param activity      context
-         * @param appBar appBarLayout
-         * @param toolbar      toolbar
+         * @param activity context
+         * @param appBar   appBarLayout
+         * @param toolbar  toolbar
          */
         public static void setTopBottomColor(final Activity activity, final AppBarLayout appBar, final android.support.v7.widget.Toolbar toolbar) {
             SharedPreferences mDefPrefs = PreferenceManager.getDefaultSharedPreferences(activity);

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 20:52:07
- * 上次修改时间：2019年01月05日 20:35:28
+ * 当前修改时间：2019年01月06日 10:05:15
+ * 上次修改时间：2019年01月06日 10:04:53
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -175,6 +175,8 @@ public final class Values {
 
     public static final class Color {
 
+        public static final String TEXT_COLOR_IN_NIGHT = "#C6C6C6";
+
         /**
          * default
          */
@@ -187,16 +189,13 @@ public final class Values {
          */
         public static final String NOT_VERY_BLACK = "#1d1d1d";
         public static final String NOT_VERY_WHITE = "#dddddd";
-
+        public static final String TEXT_COLOR_IN_DAY = "#434343";
+        public static final String THEME_IN_USE = "#7a00f2ff";
+        public static final String WIN_BACKGROUND_COLOR = "#fafafa";
         /**
-         * item title color
+         * item title color (dym)
          */
         public static String TEXT_COLOR = "#3c3c3c";
-
-        public static String TEXT_COLOR_IN_NIGHT = "#C6C6C6";
-        public static String TEXT_COLOR_IN_DAY = "#434343";
-
-        public static String THEME_IN_USE = "#7a00f2ff";
 
     }
 

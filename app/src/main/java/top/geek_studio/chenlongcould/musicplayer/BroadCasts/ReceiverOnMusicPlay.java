@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:17
+ * 当前修改时间：2019年01月06日 10:05:15
+ * 上次修改时间：2019年01月06日 08:58:43
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -253,12 +253,17 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
             //by MusicDetailFragment preview imageButton (view history song list)
             case 6: {
                 Log.d(TAG, "onReceive: do 6");
-//                if (!READY) break;
-//                READY = false;
 
                 //检测是否指定下一首播放
                 if (Data.sNextWillPlayItem != null) {
                     new DoesHasNextPlay().execute();
+                    break;
+                }
+
+                if (Values.CurrentData.CURRENT_AUTO_NEXT_TYPE.equals(Values.TYPE_REPEAT_ONE)) {
+                    Log.d(TAG, "onReceive: repeat one");
+                    seekTo(0);
+                    playMusic();
                     break;
                 }
 
@@ -317,7 +322,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
                 playMusic();
 
-//                READY = true;
             }
             break;
             default:

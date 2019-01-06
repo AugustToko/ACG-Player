@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ThemeAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 20:52:07
- * 上次修改时间：2019年01月05日 20:35:28
+ * 当前修改时间：2019年01月06日 10:05:15
+ * 上次修改时间：2019年01月06日 09:39:45
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -26,6 +26,7 @@ import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -135,6 +136,7 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
                     }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                             .subscribe(result -> {
                                 //...
+                                Toast.makeText(mThemeActivity, mThemeActivity.getString(R.string.saved_to_doc), Toast.LENGTH_SHORT).show();
                             });
                 }
                 break;
@@ -151,18 +153,35 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
         if (i == PreferenceManager.getDefaultSharedPreferences(mThemeActivity).getInt(Values.SharedPrefsTag.SELECT_THEME, -1)) {
             viewHolder.itemView.setBackgroundColor(Color.parseColor(Values.Color.THEME_IN_USE));
+        } else {
+            viewHolder.itemView.setBackgroundColor(Color.parseColor(Values.Color.WIN_BACKGROUND_COLOR));
         }
 
         viewHolder.mTitle.setText(mThemes.get(i).getTitle());
         viewHolder.mAuthor.setText(mThemes.get(i).getAuthor());
         viewHolder.mId.setText(String.valueOf(mThemes.get(i).getId()));
 
-        Observable.create((ObservableOnSubscribe<Bitmap>) emitter -> emitter.onNext(BitmapFactory.decodeFile(mThemes.get(i).getThumbnail())))
-                .subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(result -> GlideApp.with(mThemeActivity)
-                        .load(result)
-                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-                        .into(viewHolder.mIco));
+        viewHolder.mIco.setTag(R.string.key_id_2, i);
+
+        Observable.create((ObservableOnSubscribe<String>) emitter -> {
+            if (viewHolder.mIco.getTag(R.string.key_id_2) == null)
+                Log.e(TAG, "onBindViewHolder: tag null");
+
+            if (((int) viewHolder.mIco.getTag(R.string.key_id_2)) != i) {
+                Log.e(TAG, "onBindViewHolder: not much");
+                emitter.onNext(null);
+            }
+            emitter.onNext(mThemes.get(i).getThumbnail());
+        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> {
+                    if (result == null) return;
+
+                    GlideApp.with(mThemeActivity)
+                            .load(result)
+                            .override(Values.MAX_HEIGHT_AND_WIDTH, Values.MAX_HEIGHT_AND_WIDTH)
+                            .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                            .into(viewHolder.mIco);
+                });
 
     }
 

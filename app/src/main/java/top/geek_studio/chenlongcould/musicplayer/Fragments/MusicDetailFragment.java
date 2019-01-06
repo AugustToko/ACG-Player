@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 20:52:07
- * 上次修改时间：2019年01月05日 11:05:01
+ * 当前修改时间：2019年01月06日 10:05:15
+ * 上次修改时间：2019年01月06日 08:34:11
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -720,8 +720,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
         });
 
         if (Values.PHONE_HAS_NAV)
-            mSlidingUpPanelLayout
-                    .setPanelHeight((int) (mSlidingUpPanelLayout.getPanelHeight() - getResources().getDimension(R.dimen.nav_height)));
+            mSlidingUpPanelLayout.setPanelHeight((int) (mSlidingUpPanelLayout.getPanelHeight() - getResources().getDimension(R.dimen.nav_height)));
 
         initStyle();
 
@@ -805,8 +804,8 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
                     break;
                 }
                 case Values.TYPE_REPEAT: {
-                    Values.CurrentData.CURRENT_AUTO_NEXT_TYPE = Values.TYPE_REPEAT_ONE;
                     mRepeatButton.setImageResource(R.drawable.ic_repeat_one_white_24dp);
+                    Values.CurrentData.CURRENT_AUTO_NEXT_TYPE = Values.TYPE_REPEAT_ONE;
                 }
                 break;
                 case Values.TYPE_REPEAT_ONE: {

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月05日 20:52:07
-  ~ 上次修改时间：2019年01月05日 20:32:07
+  ~ 当前修改时间：2019年01月06日 10:05:15
+  ~ 上次修改时间：2019年01月06日 09:01:16
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -90,4 +90,5 @@
     <string name="note">Note</string>
     <string name="apply">Apply</string>
     <string name="theme_is_in_use">Theme is in use</string>
+    <string name="saved_to_doc">Saved to Documents!</string>
 </resources>
