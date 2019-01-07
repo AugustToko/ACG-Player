@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月06日 10:05:15
- * 上次修改时间：2019年01月06日 09:55:59
+ * 当前修改时间：2019年01月07日 16:30:28
+ * 上次修改时间：2019年01月07日 15:24:13
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -121,6 +121,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     private final ArrayList<String> mTitles = new ArrayList<>();
     private ImageView mNavHeaderImageView;
     private Menu mMenu;
+
+    @SuppressWarnings("FieldCanBeLocal")
     private SearchView mSearchView;
 
     /**
@@ -161,7 +163,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         initStyle();
 
-        load = Utils.Ui.fastLoadingDialog(this, "Loading...");
+        load = Utils.Ui.getLoadingDialog(this, "Loading...");
         load.show();
 
         Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
@@ -172,8 +174,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     //没有歌曲直接退出app
                     if (cursor.getCount() == 0) {
                         emitter.onNext(-2);
-                        emitter.onError(new Throwable("cannot find any songs"));
                     }
+
                     do {
                         final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
                         final File file = new File(path);
@@ -206,6 +208,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                         Data.sPlayOrderList.add(builder.build());
 
                     } while (cursor.moveToNext());
+                    Log.i(Values.TAG_UNIVERSAL_ONE, "onCreate: The MusicData load done.");
                     cursor.close();
 
                     if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM))
@@ -216,7 +219,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 } else {
                     //cursor null or getCount == 0
                     emitter.onNext(-1);
-                    emitter.onError(new Throwable("cursor null or getCount == 0"));
                 }
             } else {
                 //already has data -> initFragment
@@ -233,11 +235,13 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             @Override
             public void onNext(Integer result) {
                 if (result == -1) {
+                    load.dismiss();
                     Utils.Ui.fastToast(MainActivity.this, "cursor is null or moveToFirst Fail");
                     mHandler.postDelayed(MainActivity.this::exitApp, 1000);
                     return;
                 }
                 if (result == -2) {
+                    load.dismiss();
                     Utils.Ui.fastToast(MainActivity.this, "Can not find any music!");
                     mHandler.postDelayed(MainActivity.this::exitApp, 1000);
                     return;
@@ -251,7 +255,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             @Override
             public void onError(Throwable throwable) {
                 load.dismiss();
-                finish();
+                exitApp();
             }
 
             @Override
@@ -763,8 +767,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mMainBinding.tabLayout.setBackgroundColor(color);
 
         Observable.create((ObservableOnSubscribe<ThemeActivity.Theme>) emitter -> {
-            int themeId = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.SharedPrefsTag.SELECT_THEME, -1);
-            if (themeId != -1) {
+            final String themeId = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.SELECT_THEME, "null");
+            if (!themeId.equals("null")) {
                 final File themeFile = Utils.ThemeUtils.getThemeFile(this, themeId);
                 final ThemeActivity.Theme theme = Utils.ThemeUtils.fileToTheme(themeFile);
                 if (theme != null) {

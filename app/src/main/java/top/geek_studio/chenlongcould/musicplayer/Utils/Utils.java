@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月06日 10:05:15
- * 上次修改时间：2019年01月06日 09:53:46
+ * 当前修改时间：2019年01月07日 16:30:28
+ * 上次修改时间：2019年01月07日 16:29:51
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -36,7 +37,6 @@ import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
-import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -50,6 +50,7 @@ import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateInterpolator;
@@ -83,6 +84,7 @@ import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.PlayListItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.databinding.DialogLoadingBinding;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -244,10 +246,19 @@ public final class Utils {
             return BitmapFactory.decodeFile(filePath, options);
         }
 
-        public static android.support.v7.app.AlertDialog fastLoadingDialog(Context context, String title) {
+        /**
+         * @param context context
+         * @param aTitle  theTitle
+         * @return {@link AlertDialog.Builder}
+         */
+        public static android.support.v7.app.AlertDialog getLoadingDialog(Context context, String... aTitle) {
+
             android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
-            builder.setView(R.layout.dialog_loading);
-            builder.setTitle(title);
+            final View loadView = LayoutInflater.from(context).inflate(R.layout.dialog_loading, null);
+            // TODO: 2019/1/7 custom Theme loading animation
+            final DialogLoadingBinding binding = DataBindingUtil.inflate(LayoutInflater.from(context), R.layout.dialog_loading, null, false);
+            builder.setView(loadView);
+            builder.setTitle(aTitle.length == 0 ? "Loading..." : aTitle[0]);
             builder.setCancelable(false);
             return builder.create();
         }
@@ -320,7 +331,7 @@ public final class Utils {
                 MainActivity activity = (MainActivity) Data.sActivities.get(0);
                 activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.SET_BUTTON_PLAY);
 
-                if (Values.CurrentData.UI_MODE.equals(Values.CurrentData.MODE_CAR)) {
+                if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.CurrentData.MODE_CAR)) {
                     Data.sCarViewActivity.getFragmentLandSpace().setButtonType("pause");
                 }
             }
@@ -334,7 +345,7 @@ public final class Utils {
                 MainActivity activity = (MainActivity) Data.sActivities.get(0);
                 activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.SET_BUTTON_PAUSE);
 
-                if (Values.CurrentData.UI_MODE.equals(Values.CurrentData.MODE_CAR)) {
+                if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.CurrentData.MODE_CAR)) {
                     Data.sCarViewActivity.getFragmentLandSpace().setButtonType("play");
                 }
             }
@@ -838,7 +849,7 @@ public final class Utils {
             return true;
         }
 
-        public static File getThemeFile(@NonNull final Context context, @IntRange(from = 0) final int themeId) {
+        public static File getThemeFile(@NonNull final Context context, final String themeId) {
             return new File(context.getExternalFilesDir(ThemeStore.DIR_NAME).getAbsolutePath() + File.separatorChar + themeId);
         }
 
@@ -931,7 +942,8 @@ public final class Utils {
                     }
 
                     if (items >= ThemeStore.MIN_ITEM) {
-                        return new ThemeActivity.Theme.Builder(Integer.parseInt(f.getName()))
+                        Log.d(TAG, "fileToTheme: theme id is: " + f.getName());
+                        return new ThemeActivity.Theme.Builder(f.getName())
                                 .setAccentColor(accent_color)
                                 .setAuthor(author)
                                 .setDate(date)

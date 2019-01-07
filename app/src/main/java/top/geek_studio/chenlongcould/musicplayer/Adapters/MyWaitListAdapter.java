@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyWaitListAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 20:52:07
- * 上次修改时间：2019年01月05日 10:37:54
+ * 当前修改时间：2019年01月07日 16:30:28
+ * 上次修改时间：2019年01月06日 16:18:09
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -177,7 +177,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
                         return;
                     }
 
-                    if (Values.CurrentData.UI_MODE.equals(Values.UIMODE.MODE_CAR)) {
+                    if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.UIMODE.MODE_CAR)) {
                         Data.sCarViewActivity.getFragmentLandSpace().setData();
                     }
                     mMainActivity.getMusicDetailFragment().setSlideInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
@@ -218,7 +218,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 //            }
 //        }
 
-        if (Values.CurrentData.UI_MODE.equals(Values.UIMODE.MODE_CAR)) {
+        if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.UIMODE.MODE_CAR)) {
             currentBind.mMusicNameText.setTextColor(Color.WHITE);
             currentBind.mAlbumText.setTextColor(Color.WHITE);
             currentBind.mIndexText.setTextColor(Color.WHITE);

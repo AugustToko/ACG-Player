@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：dialog_theme.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月05日 09:52:37
-  ~ 上次修改时间：2019年01月05日 09:49:37
+  ~ 当前修改时间：2019年01月07日 16:30:28
+  ~ 上次修改时间：2019年01月07日 16:29:50
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -60,8 +60,13 @@
                 android:id="@+id/id_text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:layout_marginEnd="24dp"
+                android:ellipsize="start"
+                android:gravity="end"
+                android:singleLine="true"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/title"
                 app:layout_constraintTop_toTopOf="@+id/title"
                 tools:text="0" />
 

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AboutLic.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:17
+ * 当前修改时间：2019年01月07日 16:30:28
+ * 上次修改时间：2019年01月07日 13:45:36
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -11,18 +11,24 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Activities;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.AlertDialog;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 
 public final class AboutLic extends Activity {
 
@@ -30,7 +36,6 @@ public final class AboutLic extends Activity {
 
     private Button close;
 
-    @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,39 +47,47 @@ public final class AboutLic extends Activity {
         close.setClickable(true);
         close.setOnClickListener(v -> finish());
 
-        TextView textView = findViewById(R.id.show_lic_activity_lic);
-        new AsyncTask<Void, Void, String>() {
+        final TextView textView = findViewById(R.id.show_lic_activity_lic);
 
-            @Override
-            protected String doInBackground(Void... voids) {
-                try {
-                    InputStream inputStream = getAssets().open("Licenses");
-                    byte[] b = new byte[inputStream.available()];
-                    if (inputStream.read(b) != -1) {
-                        String s = new String(b);
-                        return s;
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+        final AlertDialog load = Utils.Ui.getLoadingDialog(this, "Loading...");
+        load.show();
+
+        Observable.create((ObservableOnSubscribe<String>) observableEmitter -> {
+            try {
+                InputStream inputStream = getAssets().open("Licenses");
+                byte[] b = new byte[inputStream.available()];
+                if (inputStream.read(b) != -1) {
+                    observableEmitter.onNext(new String(b));
+                    observableEmitter.onComplete();
                 }
-                return null;
+            } catch (IOException e) {
+                e.printStackTrace();
+                observableEmitter.onError(new Throwable("Load Licence Error"));
+            }
+        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<String>() {
+            @Override
+            public void onSubscribe(Disposable disposable) {
+
             }
 
             @Override
-            protected void onPostExecute(String s) {
-                if (s != null) textView.setText(s);
+            public void onNext(String data) {
+                textView.setText(data);
+                load.dismiss();
             }
-        }.execute();
+
+            @Override
+            public void onError(Throwable throwable) {
+                load.dismiss();
+                throwable.printStackTrace();
+                Toast.makeText(AboutLic.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        });
     }
 
-    @Override
-    protected void onDestroy() {
-        Log.d(TAG, "onDestroy: done");
-        super.onDestroy();
-    }
-
-    protected void finalize() throws Throwable {
-        Log.d(TAG, "finalize: done!!!!");
-        super.finalize();
-    }
 }

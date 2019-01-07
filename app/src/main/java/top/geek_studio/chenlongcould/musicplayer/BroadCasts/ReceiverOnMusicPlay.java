@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月06日 10:05:15
- * 上次修改时间：2019年01月06日 08:58:43
+ * 当前修改时间：2019年01月07日 16:30:28
+ * 上次修改时间：2019年01月06日 16:18:09
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -203,7 +203,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
     public static void sureCar() {
         //set data (image and name)
-        if (Values.CurrentData.UI_MODE.equals(Values.CurrentData.MODE_CAR)) {
+        if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.CurrentData.MODE_CAR)) {
             Data.sCarViewActivity.getFragmentLandSpace().setData();
         }
     }
@@ -211,7 +211,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        if (!Utils.Ui.ANIMATION_IN_DETAIL_DONE.get() && Values.CurrentData.UI_MODE.equals(Values.CurrentData.MODE_COMMON)) {
+        if (!Utils.Ui.ANIMATION_IN_DETAIL_DONE.get() && Values.CurrentData.CURRENT_UI_MODE.equals(Values.CurrentData.MODE_COMMON)) {
             Toast.makeText(context, "Wait...", Toast.LENGTH_SHORT).show();
             return;
         }

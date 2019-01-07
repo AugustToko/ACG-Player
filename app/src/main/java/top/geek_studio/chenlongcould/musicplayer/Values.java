@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月06日 10:05:15
- * 上次修改时间：2019年01月06日 10:04:53
+ * 当前修改时间：2019年01月07日 16:30:28
+ * 上次修改时间：2019年01月07日 16:29:51
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -80,6 +80,11 @@ public final class Values {
 
     }
 
+    /**
+     * @deprecated use {@link SharedPrefsTag#PRIMARY_COLOR}
+     * {@link SharedPrefsTag#PRIMARY_DARK_COLOR}
+     * {@link SharedPrefsTag#ACCENT_COLOR}
+     */
     public static final class ColorInt {
         public static final String PRIMARY_COLOR = "mPrimaryColor";
 
@@ -100,11 +105,16 @@ public final class Values {
          *
          * @see UIMODE#MODE_CAR
          * @see UIMODE#MODE_COMMON
+         *
+         * @deprecated use {@link UIMODE#MODE_COMMON}, {@link UIMODE#MODE_CAR}
          */
-        public static final String MODE_COMMON = "common";
-        public static final String MODE_CAR = "car";
+        public static final String MODE_COMMON = UIMODE.MODE_COMMON;
+        /**
+         * @deprecated
+         */
+        public static final String MODE_CAR = UIMODE.MODE_CAR;
 
-        public static String UI_MODE = MODE_COMMON;
+        public static String CURRENT_UI_MODE = UIMODE.MODE_COMMON;
 
         /**
          * TEMP DATA
@@ -148,8 +158,12 @@ public final class Values {
      * sharedPrefs tag
      */
     public static final class SharedPrefsTag {
-        public static final String PLAY_LIST_NUM = "PLAY_LIST_NUM";
-        public static final String PLAY_LIST_SPF_NAME_MY_FAVOURITE = "PLAY_LIST_SPF_NAME_MY_FAVOURITE";
+
+        //color
+        public static final String PRIMARY_COLOR = "mPrimaryColor";
+        public static final String PRIMARY_DARK_COLOR = "mPrimaryDarkColor";
+        public static final String ACCENT_COLOR = "mAccentColor";
+
         public static final String DETAIL_BG_STYLE = "DETAIL_BG_STYLE";
         public static final String AUTO_NIGHT_MODE = "NIGHT_MODE";
         public static String PLAY_TYPE = Values.TYPE_COMMON;
@@ -160,11 +174,10 @@ public final class Values {
 
         public static final String FAVOURITE_LIST_ID = "FAVOURITE_LIST_ID";
 
+        //theme
         public static final String SELECT_THEME = "SELECT_THEME";
-
         public static final String THEME_USE_NOTE = "THEME_USE_NOTE";
     }
-
 
     public static final class BroadCast {
         public static String ReceiverOnMusicPlay = "top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay";

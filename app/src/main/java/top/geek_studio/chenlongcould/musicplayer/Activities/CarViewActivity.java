@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：CarViewActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:17
+ * 当前修改时间：2019年01月07日 16:30:28
+ * 上次修改时间：2019年01月06日 16:35:44
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -37,11 +37,13 @@ public final class CarViewActivity extends AppCompatActivity {
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
      */
     private static final boolean AUTO_HIDE = true;
+
     /**
      * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
      * user interaction before hiding the system UI.
      */
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
+
     /**
      * Some older devices needs a small delay between UI widget updates
      * and a change of the status and navigation bar.
@@ -81,7 +83,7 @@ public final class CarViewActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Values.CurrentData.UI_MODE = Values.CurrentData.MODE_CAR;
+        Values.CurrentData.CURRENT_UI_MODE = Values.CurrentData.MODE_CAR;
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         super.onCreate(savedInstanceState);
 
@@ -123,19 +125,17 @@ public final class CarViewActivity extends AppCompatActivity {
     }
 
     private void toggle() {
-        if (mVisible) {
+        if (mVisible)
             hide();
-        } else {
+        else
             show();
-        }
     }
 
     public void hide() {
         // Hide UI first
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
-        }
+        final ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) actionBar.hide();
+
         mVisible = false;
 
         // Schedule a runnable to remove the status and navigation bar after a delay
@@ -165,7 +165,7 @@ public final class CarViewActivity extends AppCompatActivity {
         BACK_PRESSED = true;
         Data.sCarViewActivity = null;
         Toast.makeText(this, "Exiting", Toast.LENGTH_SHORT).show();
-        Values.CurrentData.UI_MODE = Values.CurrentData.MODE_COMMON;
+        Values.CurrentData.CURRENT_UI_MODE = Values.UIMODE.MODE_COMMON;
 
         new Handler().postDelayed(this::finish, 1000);
     }

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ThemeAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月06日 10:05:15
- * 上次修改时间：2019年01月06日 09:39:45
+ * 当前修改时间：2019年01月07日 16:30:28
+ * 上次修改时间：2019年01月06日 16:01:06
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -25,6 +25,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -96,7 +97,7 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
 
                 //del
                 case Menu.FIRST: {
-                    if (PreferenceManager.getDefaultSharedPreferences(mThemeActivity).getInt(Values.SharedPrefsTag.SELECT_THEME, -1) == mThemes.get(holder.getAdapterPosition()).getId()) {
+                    if (PreferenceManager.getDefaultSharedPreferences(mThemeActivity).getString(Values.SharedPrefsTag.SELECT_THEME, "null").equals(mThemes.get(holder.getAdapterPosition()).getId())) {
                         Toast.makeText(mThemeActivity, mThemeActivity.getString(R.string.theme_is_in_use), Toast.LENGTH_SHORT).show();
                         break;
                     }
@@ -151,10 +152,11 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
     @SuppressLint("CheckResult")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-        if (i == PreferenceManager.getDefaultSharedPreferences(mThemeActivity).getInt(Values.SharedPrefsTag.SELECT_THEME, -1)) {
-            viewHolder.itemView.setBackgroundColor(Color.parseColor(Values.Color.THEME_IN_USE));
+
+        if (mThemes.get(i).getId().equals(PreferenceManager.getDefaultSharedPreferences(mThemeActivity).getString(Values.SharedPrefsTag.SELECT_THEME, "null"))) {
+            ((CardView) viewHolder.itemView).setCardBackgroundColor(Color.parseColor(Values.Color.THEME_IN_USE));
         } else {
-            viewHolder.itemView.setBackgroundColor(Color.parseColor(Values.Color.WIN_BACKGROUND_COLOR));
+            ((CardView) viewHolder.itemView).setCardBackgroundColor(Color.parseColor(Values.Color.WIN_BACKGROUND_COLOR));
         }
 
         viewHolder.mTitle.setText(mThemes.get(i).getTitle());
@@ -205,7 +207,7 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
         //REMOVE THEME
         builder.setNeutralButton(mThemeActivity.getString(R.string.del), (dialog, which) -> {
 
-            if (PreferenceManager.getDefaultSharedPreferences(mThemeActivity).getInt(Values.SharedPrefsTag.SELECT_THEME, -1) == mThemes.get(holder.getAdapterPosition()).getId()) {
+            if (PreferenceManager.getDefaultSharedPreferences(mThemeActivity).getString(Values.SharedPrefsTag.SELECT_THEME, "null").equals(mThemes.get(holder.getAdapterPosition()).getId())) {
                 Toast.makeText(mThemeActivity, mThemeActivity.getString(R.string.theme_is_in_use), Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -235,7 +237,7 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
         builder.setNegativeButton(mThemeActivity.getString(R.string.apply), (dialog, which) -> {
             Data.sTheme = mThemes.get(holder.getAdapterPosition());
             final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(mThemeActivity).edit();
-            editor.putInt(Values.SharedPrefsTag.SELECT_THEME, holder.getAdapterPosition());
+            editor.putString(Values.SharedPrefsTag.SELECT_THEME, mThemes.get(holder.getAdapterPosition()).getId());
             editor.apply();
             dialog.dismiss();
             mThemeActivity.getThemes().clear();

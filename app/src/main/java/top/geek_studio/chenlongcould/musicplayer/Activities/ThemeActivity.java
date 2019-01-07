@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ThemeActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月06日 10:05:15
- * 上次修改时间：2019年01月06日 09:21:00
+ * 当前修改时间：2019年01月07日 16:30:28
+ * 上次修改时间：2019年01月07日 16:29:50
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -122,7 +122,7 @@ public class ThemeActivity extends AppCompatActivity implements IStyle {
                     builder.setNegativeButton(getString(R.string.sure), (dialog, which) -> {
                         Data.sTheme = null;
                         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(ThemeActivity.this).edit();
-                        editor.putInt(Values.SharedPrefsTag.SELECT_THEME, -1);
+                        editor.putString(Values.SharedPrefsTag.SELECT_THEME, "null");
                         editor.apply();
 
                         reLoadDataUi();
@@ -197,11 +197,11 @@ public class ThemeActivity extends AppCompatActivity implements IStyle {
                             final String documentId = cursor.getString(cursor.getColumnIndexOrThrow("document_id"));
                             final String path = Environment.getExternalStorageDirectory().getPath() + File.separatorChar + documentId.split(":")[1];
 
-                            final AlertDialog load = Utils.Ui.fastLoadingDialog(ThemeActivity.this, "Loading...");
+                            final AlertDialog load = Utils.Ui.getLoadingDialog(ThemeActivity.this, "Loading...");
                             load.show();
 
                             Observable.create((ObservableOnSubscribe<Theme>) emitter -> {
-                                final int name = themeDir.listFiles().length;
+                                final long name = System.currentTimeMillis();
                                 Utils.IO.Unzip(path, themeDir.getAbsolutePath() + File.separatorChar + name + File.separatorChar);
 
                                 final File themeFile = new File(themeDir.getAbsolutePath() + File.separatorChar + name);
@@ -236,18 +236,19 @@ public class ThemeActivity extends AppCompatActivity implements IStyle {
 
             @Override
             protected void onPreExecute() {
-                mDialog = Utils.Ui.fastLoadingDialog(ThemeActivity.this, "loading...");
+                mDialog = Utils.Ui.getLoadingDialog(ThemeActivity.this, "Loading...");
                 mDialog.show();
             }
 
             @Override
             protected Void doInBackground(Void... voids) {
-//                SQLiteDatabase database = mDBHelper.getWritableDatabase();
-//                final ContentValues values = new ContentValues();
 
                 final File themeDir = getExternalFilesDir(ThemeStore.DIR_NAME);
-                final File defTheme1 = new File(getExternalFilesDir(ThemeStore.DIR_NAME).getAbsolutePath() + File.separatorChar + "0");
-                final File defTheme2 = new File(getExternalFilesDir(ThemeStore.DIR_NAME).getAbsolutePath() + File.separatorChar + "1");
+
+                if (themeDir == null) return null;
+
+                final File defTheme1 = new File(getExternalFilesDir(ThemeStore.DIR_NAME).getAbsolutePath() + File.separatorChar + "0_def");
+                final File defTheme2 = new File(getExternalFilesDir(ThemeStore.DIR_NAME).getAbsolutePath() + File.separatorChar + "01_def");
 
                 //load default themes
                 if (!defTheme1.exists() || defTheme1.isFile() || !defTheme2.exists() || defTheme2.isFile()) {
@@ -274,8 +275,9 @@ public class ThemeActivity extends AppCompatActivity implements IStyle {
                             bufferedOutput.write(b2);
                         }
 
-                        Utils.IO.Unzip(defFile1.getAbsolutePath(), themeDir.getAbsolutePath() + File.separatorChar + 0 + File.separatorChar);
-                        Utils.IO.Unzip(defFile2.getAbsolutePath(), themeDir.getAbsolutePath() + File.separatorChar + 1 + File.separatorChar);
+                        Utils.IO.Unzip(defFile1.getAbsolutePath(), themeDir.getAbsolutePath() + File.separatorChar + "0_def" + File.separatorChar);
+                        Utils.IO.Unzip(defFile2.getAbsolutePath(), themeDir.getAbsolutePath() + File.separatorChar + "01_def" + File.separatorChar);
+
                         defFile1.delete();
                         defFile2.delete();
                     } catch (IOException e) {
@@ -283,18 +285,17 @@ public class ThemeActivity extends AppCompatActivity implements IStyle {
                     }
                 }
 
-                final File[] files = themeDir.listFiles();
-                if (files.length > 500) {
+                final File[] themeFiles = themeDir.listFiles();
+                if (themeFiles.length > 500) {
                     Toast.makeText(ThemeActivity.this, "Themes > 500, too more!", Toast.LENGTH_SHORT).show();
                     finish();
                 }
 
-                final ArrayList<File> fileArrayList = new ArrayList<>(Arrays.asList(files));
+                final ArrayList<File> fileArrayList = new ArrayList<>(Arrays.asList(themeFiles));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     fileArrayList.sort(File::compareTo);
                 }
 
-//                int themeId = -1;
                 for (File f : fileArrayList) {
                     mThemes.add(Utils.ThemeUtils.fileToTheme(f));
 //                        Log.d(TAG, "doInBackground: " + f.getPath());
@@ -446,8 +447,9 @@ public class ThemeActivity extends AppCompatActivity implements IStyle {
         loadDataUI();
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static class Theme {
-        int id;
+        String id;
         String path;
         String title;
         String date;
@@ -460,7 +462,7 @@ public class ThemeActivity extends AppCompatActivity implements IStyle {
         String thumbnail;
         String select;
 
-        public Theme(int id, String path, String title, String date, String nav_name, String author, String support_area, String primary_color, String primary_color_dark, String accent_color, String thumbnail, String select) {
+        public Theme(String id, String path, String title, String date, String nav_name, String author, String support_area, String primary_color, String primary_color_dark, String accent_color, String thumbnail, String select) {
             this.id = id;
             this.path = path;
             this.title = title;
@@ -490,8 +492,40 @@ public class ThemeActivity extends AppCompatActivity implements IStyle {
             select = builder.select;//12
         }
 
+        public String getId() {
+            return id;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getDate() {
+            return date;
+        }
+
+        public String getNav_name() {
+            return nav_name;
+        }
+
+        public String getAuthor() {
+            return author;
+        }
+
+        public String getSupport_area() {
+            return support_area;
+        }
+
+        public String getPrimary_color() {
+            return primary_color;
+        }
+
+        public String getThumbnail() {
+            return thumbnail;
+        }
+
         public static class Builder {
-            private int id;
+            private String id;
             private String path;
             private String title;
             private String date;
@@ -504,7 +538,7 @@ public class ThemeActivity extends AppCompatActivity implements IStyle {
             private String thumbnail;
             private String select;
 
-            public Builder(int id) {
+            public Builder(String id) {
                 this.id = id;
             }
 
@@ -566,38 +600,6 @@ public class ThemeActivity extends AppCompatActivity implements IStyle {
             public Theme build() {
                 return new Theme(this);
             }
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public String getDate() {
-            return date;
-        }
-
-        public String getNav_name() {
-            return nav_name;
-        }
-
-        public String getAuthor() {
-            return author;
-        }
-
-        public String getSupport_area() {
-            return support_area;
-        }
-
-        public String getPrimary_color() {
-            return primary_color;
-        }
-
-        public String getThumbnail() {
-            return thumbnail;
-        }
-
-        public int getId() {
-            return id;
         }
 
         public String getPath() {

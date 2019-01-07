@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:17
+ * 当前修改时间：2019年01月07日 16:30:28
+ * 上次修改时间：2019年01月07日 16:29:49
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -50,33 +50,6 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
         return new MusicListFragment();
     }
 
-//    /**
-//     * old version
-//     *
-//     * @param dir music dir
-//     */
-//    private void findMp3(File dir) {
-//        Log.d(TAG, "findMp3: doing");
-//        if (!dir.isDirectory()) {
-//            return;
-//        }
-//
-//        for (File f : dir.listFiles()) {
-//            if (!f.isDirectory()) {
-//                mMusicPathList.add(f.getPath());
-//
-//                String fileName = f.getName();
-//                String prefix = fileName.substring(fileName.lastIndexOf(".") + 1);//如果想获得不带点的后缀，变为fileName.lastIndexOf(".")+1
-//
-//                String fileOtherName = fileName.substring(0, fileName.length() - prefix.length());//得到文件名。去掉了后缀
-//                mSongNameList.add(fileOtherName);
-//
-//            } else {
-//                findMp3(f);
-//            }
-//        }
-//    }
-
     @Override
     public void onAttach(Context context) {
         Log.d(Values.LogTAG.LIFT_TAG, "onAttach: " + TAG);
@@ -92,11 +65,11 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Log.d(Values.LogTAG.LIFT_TAG, "onCreateView: " + TAG);
         mMusicListBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_list_layout, container, false);
         mMusicListBinding.includeRecycler.recyclerView.addItemDecoration(new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL));
         mMusicListBinding.includeRecycler.recyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
         mMusicListBinding.includeRecycler.recyclerView.setHasFixedSize(true);
+        Log.d(Values.TAG_UNIVERSAL_ONE, "onCreateView: loading adapter");
         adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity, TAG);
         mMusicListBinding.includeRecycler.recyclerView.setAdapter(adapter);
 

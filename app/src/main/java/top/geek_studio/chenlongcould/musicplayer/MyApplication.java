@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 20:52:07
- * 上次修改时间：2019年01月05日 20:42:45
+ * 当前修改时间：2019年01月07日 16:30:28
+ * 上次修改时间：2019年01月06日 16:18:09
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -59,7 +59,7 @@ public final class MyApplication extends Application {
 
     public static final String VERSION_CODE = "ver_code";
 
-    public static final int CURRENT_VER_CODE = 30;
+    public static final int CURRENT_VER_CODE = 32;
 
     public static final int TARGET_ACTION_CODE = -99;
 
@@ -73,9 +73,20 @@ public final class MyApplication extends Application {
 
         if (getProcessName(this).equals(getPackageName())) {
 
+            // TODO: 2019/1/6 ver
             //noinspection StatementWithEmptyBody
             if (mDefSharedPreferences.getInt(VERSION_CODE, -1) != CURRENT_VER_CODE) {
+                SharedPreferences.Editor editor = mDefSharedPreferences.edit();
+
+                editor.remove(Values.SharedPrefsTag.SELECT_THEME);
+                editor.remove(Values.SharedPrefsTag.THEME_USE_NOTE);
+
                 //do somethings
+                new Thread(() -> {
+                    Utils.IO.delFolder(getExternalFilesDir(ThemeStore.DIR_NAME).getAbsolutePath());
+                    editor.putInt(VERSION_CODE, CURRENT_VER_CODE);
+                    editor.apply();
+                }).start();
             }
 
             //add version code
