@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月07日 16:30:28
- * 上次修改时间：2019年01月07日 16:29:51
+ * 当前修改时间：2019年01月08日 10:05:13
+ * 上次修改时间：2019年01月08日 10:05:09
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -102,16 +102,14 @@ public final class Values {
 
         /**
          * same as
-         *
          * @see UIMODE#MODE_CAR
          * @see UIMODE#MODE_COMMON
          *
          * @deprecated use {@link UIMODE#MODE_COMMON}, {@link UIMODE#MODE_CAR}
          */
+        @Deprecated
         public static final String MODE_COMMON = UIMODE.MODE_COMMON;
-        /**
-         * @deprecated
-         */
+        @Deprecated
         public static final String MODE_CAR = UIMODE.MODE_CAR;
 
         public static String CURRENT_UI_MODE = UIMODE.MODE_COMMON;
