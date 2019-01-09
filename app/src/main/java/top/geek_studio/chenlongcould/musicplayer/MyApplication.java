@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月07日 16:30:28
- * 上次修改时间：2019年01月06日 16:18:09
+ * 当前修改时间：2019年01月09日 12:52:27
+ * 上次修改时间：2019年01月08日 19:12:01
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -23,7 +23,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Icon;
 import android.media.AudioManager;
-import android.net.Uri;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -33,6 +32,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -141,6 +141,8 @@ public final class MyApplication extends Application {
 
     }
 
+    public static final String SHORTCUT_RANDOM = "SHORTCUT_RANDOM";
+
     /**
      * 动态添加三个
      */
@@ -148,32 +150,34 @@ public final class MyApplication extends Application {
     private void getNewShortcutInfo() {
 
         Intent randomPlay = new Intent(this, MainActivity.class);
+        randomPlay.setAction(Intent.ACTION_MAIN);
+        randomPlay.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        randomPlay.putExtra("shortcut_type", SHORTCUT_RANDOM);
 
         ShortcutInfo shortcut = new ShortcutInfo.Builder(this, SHORT_CUT_ID_1)
                 .setShortLabel(getString(R.string.random_play))
                 .setLongLabel(getString(R.string.random_play))
-                .setIcon(Icon.createWithResource(this, R.drawable.ic_play_arrow_black_24dp))
-                .setIntent(new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("https://www.baidu.com/")))
+                .setIcon(Icon.createWithResource(this, R.drawable.ic_shuffle_blue_24dp))
+                .setIntent(randomPlay)
                 .build();
 
-        ShortcutInfo shortcut2 = new ShortcutInfo.Builder(this, SHORT_CUT_ID_2)
-                .setShortLabel("csdn")
-                .setLongLabel("第二个")
-                .setIcon(Icon.createWithResource(this, R.drawable.ic_play_arrow_black_24dp))
-                .setIntent(new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("https://www.csdn.com/")))
-                .build();
+//        ShortcutInfo shortcut2 = new ShortcutInfo.Builder(this, SHORT_CUT_ID_2)
+//                .setShortLabel("csdn")
+//                .setLongLabel("第二个")
+//                .setIcon(Icon.createWithResource(this, R.drawable.ic_play_arrow_black_24dp))
+//                .setIntent(new Intent(Intent.ACTION_VIEW,
+//                        Uri.parse("https://www.csdn.com/")))
+//                .build();
+//
+//        ShortcutInfo shortcut3 = new ShortcutInfo.Builder(this, SHORT_CUT_ID_3)
+//                .setShortLabel("github")
+//                .setLongLabel("第三个")
+//                .setIcon(Icon.createWithResource(this, R.drawable.ic_play_arrow_black_24dp))
+//                .setIntent(new Intent(Intent.ACTION_VIEW,
+//                        Uri.parse("https://www.github.com/")))
+//                .build();
 
-        ShortcutInfo shortcut3 = new ShortcutInfo.Builder(this, SHORT_CUT_ID_3)
-                .setShortLabel("github")
-                .setLongLabel("第三个")
-                .setIcon(Icon.createWithResource(this, R.drawable.ic_play_arrow_black_24dp))
-                .setIntent(new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("https://www.github.com/")))
-                .build();
-
-//        mShortcutManager.setDynamicShortcuts(Arrays.asList(shortcut, shortcut2, shortcut3));
+        mShortcutManager.setDynamicShortcuts(Arrays.asList(shortcut));
     }
 
     /**

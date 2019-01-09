@@ -9,11 +9,11 @@
       "versionCode": 32,
       "versionName": "2.5.4.6",
       "enabled": true,
-      "outputFile": "app-release_20190106_2.5.4.6_(32).apk",
+      "outputFile": "app-release_20190108_2.5.4.6_(32).apk",
       "fullName": "release",
       "baseName": "release"
     },
-    "path": "app-release_20190106_2.5.4.6_(32).apk",
+    "path": "app-release_20190108_2.5.4.6_(32).apk",
     "properties": {}
   }
 ]

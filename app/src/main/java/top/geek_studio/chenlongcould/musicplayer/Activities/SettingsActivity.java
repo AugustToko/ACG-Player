@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 20:52:07
- * 上次修改时间：2019年01月05日 17:00:24
+ * 当前修改时间：2019年01月09日 12:52:27
+ * 上次修改时间：2019年01月09日 12:29:09
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -16,12 +16,12 @@ import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.ColorInt;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
@@ -158,19 +158,13 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
                 case R.id.menu_toolbar_settings_reset: {
 
                     SharedPreferences.Editor editor = mDefPrefs.edit();
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        editor.putInt(Values.ColorInt.ACCENT_COLOR, getResources().getColor(R.color.colorAccent, getTheme()));
-                        editor.putInt(Values.ColorInt.PRIMARY_COLOR, getResources().getColor(R.color.colorPrimary, getTheme()));
-                        editor.putInt(Values.ColorInt.PRIMARY_DARK_COLOR, getResources().getColor(R.color.colorPrimaryDark, getTheme()));
-                    } else {
-                        editor.putInt(Values.ColorInt.ACCENT_COLOR, Color.parseColor(Values.Color.ACCENT));
-                        editor.putInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor(Values.Color.PRIMARY));
-                        editor.putInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor(Values.Color.PRIMARY_DARK));
-                    }
+                    editor.putInt(Values.SharedPrefsTag.ACCENT_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorAccent));
+                    editor.putInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimary));
+                    editor.putInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark));
                     editor.apply();
 
                     clearAnimation();
-                    ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor(Values.Color.PRIMARY)), Color.parseColor(Values.Color.PRIMARY));
+                    ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimary)), ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimary));
                     animator.setDuration(300);
                     animator.addUpdateListener(animation -> {
                         mPrimaryImage.setBackgroundColor((Integer) animation.getAnimatedValue());
@@ -178,14 +172,14 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
                         mToolbar.setBackgroundColor((Integer) animation.getAnimatedValue());
                     });
 
-                    ValueAnimator animator2 = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor(Values.Color.PRIMARY_DARK)), Color.parseColor(Values.Color.PRIMARY_DARK));
+                    ValueAnimator animator2 = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark)), ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark));
                     animator2.setDuration(300);
                     animator2.addUpdateListener(animation -> {
                         mPrimaryDarkImage.setBackgroundColor((Integer) animator2.getAnimatedValue());
                         getWindow().setNavigationBarColor((Integer) animator2.getAnimatedValue());
                     });
 
-                    ValueAnimator animator3 = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.ColorInt.ACCENT_COLOR, Color.parseColor(Values.Color.ACCENT)), Color.parseColor(Values.Color.ACCENT));
+                    ValueAnimator animator3 = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.SharedPrefsTag.ACCENT_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorAccent)), ContextCompat.getColor(SettingsActivity.this, R.color.colorAccent));
                     animator3.setDuration(300);
                     animator3.addUpdateListener(animation -> mAccentImage.setBackgroundColor((Integer) animator3.getAnimatedValue()));
 

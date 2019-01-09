@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月06日 10:05:15
- * 上次修改时间：2019年01月06日 08:34:11
+ * 当前修改时间：2019年01月09日 12:52:27
+ * 上次修改时间：2019年01月08日 21:27:14
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -38,6 +38,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -1339,7 +1340,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
         //InfoBar background color AND text color balance
         final int currentBright = Utils.Ui.getBright(bitmap);
         if (currentBright > (255 / 2)) {
-            @ColorInt final int target = Color.parseColor(Values.Color.NOT_VERY_BLACK);
+            @ColorInt final int target = ContextCompat.getColor(mMainActivity, R.color.notVeryBlack);
             mNowPlayingSongText.setTextColor(target);
             mNowPlayingSongAlbumText.setTextColor(target);
             mNowPlayingStatusImage.setColorFilter(target);
@@ -1351,7 +1352,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
             mLeftTime.setTextColor(target);
             mRightTime.setTextColor(target);
         } else {
-            @ColorInt final int target = Color.parseColor(Values.Color.NOT_VERY_WHITE);
+            @ColorInt final int target = ContextCompat.getColor(mMainActivity, R.color.notVeryWhite);
             mNowPlayingSongText.setTextColor(target);
             mNowPlayingSongAlbumText.setTextColor(target);
             mNowPlayingStatusImage.setColorFilter(target);

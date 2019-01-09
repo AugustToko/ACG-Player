@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter2AlbumList.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月06日 10:05:15
- * 上次修改时间：2019年01月06日 10:04:51
+ * 当前修改时间：2019年01月09日 12:52:27
+ * 上次修改时间：2019年01月08日 21:27:14
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -22,6 +22,7 @@ import android.provider.MediaStore;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -197,17 +198,17 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
                         //color set (album tag)
                         Palette.from(bitmap).generate(p -> {
                             if (p != null) {
-                                @ColorInt int color = p.getVibrantColor(Color.parseColor(Values.Color.NOT_VERY_BLACK));
+                                @ColorInt int color = p.getVibrantColor(ContextCompat.getColor(mContextWeakReference.get(), R.color.notVeryBlack));
                                 if (Utils.Ui.isColorLight(color)) {
-                                    mViewHolderWeakReference.get().mAlbumText.setTextColor(Color.parseColor(Values.Color.NOT_VERY_BLACK));
+                                    mViewHolderWeakReference.get().mAlbumText.setTextColor(ContextCompat.getColor(mContextWeakReference.get(), R.color.notVeryBlack));
                                 } else {
-                                    mViewHolderWeakReference.get().mAlbumText.setTextColor(Color.parseColor(Values.Color.NOT_VERY_WHITE));
+                                    mViewHolderWeakReference.get().mAlbumText.setTextColor(ContextCompat.getColor(mContextWeakReference.get(), R.color.notVeryWhite));
                                 }
                                 mViewHolderWeakReference.get().mView.setBackgroundColor(color);
 
                                 bitmap.recycle();
                             } else {
-                                mViewHolderWeakReference.get().mView.setBackgroundColor(Color.BLACK);
+                                mViewHolderWeakReference.get().mView.setBackgroundColor(ContextCompat.getColor(mContextWeakReference.get(), R.color.notVeryBlack));
                             }
                         });
                     }

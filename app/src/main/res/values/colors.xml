@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：colors.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月06日 10:05:15
-  ~ 上次修改时间：2019年01月06日 09:22:51
+  ~ 当前修改时间：2019年01月09日 12:52:27
+  ~ 上次修改时间：2019年01月08日 19:11:18
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -17,9 +17,9 @@
     <color name="colorAccent">#D81B60</color>
 
     <!--Blue-->
-    <!--<color name="colorPrimary">#3F51B5</color>-->
-    <!--<color name="colorPrimaryDark">#303F9F</color>-->
-    <!--<color name="colorAccent">#FF4081</color>-->
+    <color name="blue">#3F51B5</color>
+    <color name="blue_dark">#303F9F</color>
+    <color name="pink_light">#ff4081</color>
 
     <color name="toolbarColor">@color/colorPrimary</color>
     <color name="tabLayoutColor">@color/colorPrimary</color>
