@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月10日 12:58:52
- * 上次修改时间：2019年01月10日 12:54:41
+ * 当前修改时间：2019年01月10日 13:02:26
+ * 上次修改时间：2019年01月10日 13:01:56
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -11,6 +11,7 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Activities;
 
+import android.animation.ArgbEvaluator;
 import android.annotation.SuppressLint;
 import android.app.Instrumentation;
 import android.content.Intent;
@@ -49,7 +50,6 @@ import android.widget.Toast;
 
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
-import com.tencent.bugly.crashreport.CrashReport;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -571,18 +571,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         Log.i(TAG, "initStyle: do it");
 
         Utils.Ui.setTopBottomColor(this, mMainBinding.appbar, mMainBinding.toolBar);
-        final int color = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.SharedPrefsTag.PRIMARY_COLOR, Color.parseColor("#008577"));
+        final int color = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577"));
         mMainBinding.tabLayout.setBackgroundColor(color);
-        mMainBinding.tabLayout.setSelectedTabIndicatorColor(PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.SharedPrefsTag.ACCENT_COLOR, ContextCompat.getColor(this, R.color.colorAccent)));
-
-        if (mMusicDetailFragment != null) {
-            mMusicDetailFragment.initStyle();
-        }
-
-        if (mMusicListFragment != null) {
-            mMusicListFragment.initStyle();
-        }
-
 
         Observable.create((ObservableOnSubscribe<ThemeActivity.Theme>) emitter -> {
             final String themeId = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.SELECT_THEME, "null");
@@ -856,7 +846,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 }
                 break;
                 case R.id.debug: {
-                    CrashReport.testJavaCrash();
+                    startActivity(new Intent(MainActivity.this, CarViewActivity.class));
                 }
             }
             return true;
@@ -866,23 +856,23 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mMainBinding.viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-//                ArgbEvaluator evaluator = new ArgbEvaluator(); // ARGB求值器
-//
-//                final int green = 0xFF43CD80, blue = 0xFF11A0F8, yellow = 0xFFFFBB43, red = 0xFFB54B36;
-//
-//                int evaluate; // 初始默认颜色
-//                if (position == 0) {
-//                    evaluate = (Integer) evaluator.evaluate(positionOffset, green, blue); // 根据positionOffset和第0页~第1页的颜色转换范围取颜色值
-//                } else if (position == 1) {
-//                    evaluate = (Integer) evaluator.evaluate(positionOffset, blue, yellow); // 根据positionOffset和第1页~第2页的颜色转换范围取颜色值
-//                } else if (position == 2) {
-//                    evaluate = (Integer) evaluator.evaluate(positionOffset, yellow, red); // 根据positionOffset和第2页~第3页的颜色转换范围取颜色值
-//                } else {
-//                    evaluate = red; // 最终第3页的颜色
-//                }
-//
-//                mMainBinding.toolBar.setBackgroundColor(evaluate);
-//                mMainBinding.tabLayout.setBackgroundColor(evaluate);
+                ArgbEvaluator evaluator = new ArgbEvaluator(); // ARGB求值器
+
+                final int green = 0xFF43CD80, blue = 0xFF11A0F8, yellow = 0xFFFFBB43, red = 0xFFB54B36;
+
+                int evaluate; // 初始默认颜色
+                if (position == 0) {
+                    evaluate = (Integer) evaluator.evaluate(positionOffset, green, blue); // 根据positionOffset和第0页~第1页的颜色转换范围取颜色值
+                } else if (position == 1) {
+                    evaluate = (Integer) evaluator.evaluate(positionOffset, blue, yellow); // 根据positionOffset和第1页~第2页的颜色转换范围取颜色值
+                } else if (position == 2) {
+                    evaluate = (Integer) evaluator.evaluate(positionOffset, yellow, red); // 根据positionOffset和第2页~第3页的颜色转换范围取颜色值
+                } else {
+                    evaluate = red; // 最终第3页的颜色
+                }
+
+                mMainBinding.toolBar.setBackgroundColor(evaluate);
+                mMainBinding.tabLayout.setBackgroundColor(evaluate);
             }
 
             @Override
@@ -923,6 +913,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mDrawerToggle.syncState();
         // 设置按钮的动画效果; 如果不想要打开关闭抽屉时的箭头动画效果，可以不写此行代码
         mMainBinding.drawerLayout.addDrawerListener(mDrawerToggle);
+
     }
 
 }

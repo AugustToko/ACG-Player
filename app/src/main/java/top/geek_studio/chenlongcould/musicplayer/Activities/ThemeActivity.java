@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ThemeActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月10日 12:58:52
- * 上次修改时间：2019年01月10日 12:58:35
+ * 当前修改时间：2019年01月10日 13:02:26
+ * 上次修改时间：2019年01月10日 13:01:56
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -147,8 +147,6 @@ public class ThemeActivity extends AppCompatActivity implements IStyle {
             }
             return true;
         });
-
-        mThemeBinding.toolbar.setNavigationOnClickListener(v -> finish());
 
         mDBHelper = new MyThemeDBHelper(this, ThemeStore.DATA_BASE_NAME, null, 1);
         mThemeBinding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
