@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月10日 16:43:31
- * 上次修改时间：2019年01月10日 16:42:09
+ * 当前修改时间：2019年01月10日 21:12:43
+ * 上次修改时间：2019年01月10日 21:12:37
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -31,7 +31,6 @@ import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -160,8 +159,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
 
         Intent intent = new Intent(this, MyMusicService.class);
-//        startService(intent);
-        ContextCompat.startForegroundService(this, intent);
+        startService(intent);
         bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
 
         initView();
@@ -313,14 +311,14 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
      * without clear data...
      */
     private void goToBackground() {
-        Log.d(TAG, "goToBackground: ");
-        AlbumListFragment.VIEW_HAS_LOAD = false;
         try {
             unbindService(Data.sServiceConnection);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Data.sActivities.remove(this);
+        Data.sActivities.clear();
+        Data.sMainRef.clear();
+        Data.sMainRef = null;
         GlideApp.get(this).clearMemory();
         finish();
     }
@@ -519,12 +517,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mMainBinding.viewPager.setAdapter(mPagerAdapter);
 
         Values.CurrentData.CURRENT_PAGE_INDEX = 0;
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     public final void exitApp() {

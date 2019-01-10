@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月10日 16:43:31
- * 上次修改时间：2019年01月10日 14:46:14
+ * 当前修改时间：2019年01月10日 21:12:43
+ * 上次修改时间：2019年01月10日 21:06:48
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -264,7 +264,7 @@ public final class MyMusicService extends Service {
         PendingIntent previousIntent = PendingIntent.getBroadcast(context, REQUEST_PRE, previous, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Notification.MediaStyle mediaStyle = new Notification.MediaStyle();
-        mediaStyle.setShowActionsInCompactView(0, 1, 2);
+        mediaStyle.setShowActionsInCompactView(0, 1, 2);        //小型化通知的按钮布局
 
         Notification.Builder builder = new Notification.Builder(getApplicationContext(), mId)
                 .setContentTitle(title)
@@ -339,6 +339,7 @@ public final class MyMusicService extends Service {
         mIsServiceDestroyed.set(true);
         if (mCurrentCover != null) mCurrentCover.recycle();
         super.onDestroy();
+        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
 }
