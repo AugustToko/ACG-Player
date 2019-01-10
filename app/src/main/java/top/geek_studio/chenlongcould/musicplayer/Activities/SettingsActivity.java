@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月10日 13:02:26
- * 上次修改时间：2019年01月10日 13:01:56
+ * 当前修改时间：2019年01月10日 16:43:31
+ * 上次修改时间：2019年01月10日 16:42:12
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -15,8 +15,10 @@ import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.annotation.ColorInt;
 import android.support.constraint.ConstraintLayout;
@@ -26,6 +28,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.jrummyapps.android.colorpicker.ColorPickerDialog;
@@ -34,9 +37,13 @@ import com.jrummyapps.android.colorpicker.ColorPickerDialogListener;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Interface.IStyle;
+import top.geek_studio.chenlongcould.musicplayer.MyMusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.databinding.ActivitySettingsBinding;
+
+import static top.geek_studio.chenlongcould.musicplayer.Values.SharedPrefsTag.NOTIFICATION_COLORIZED;
 
 public final class SettingsActivity extends MyBaseActivity implements IStyle {
 
@@ -47,6 +54,8 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
     public static final int PRIMARY_DARK = 1;
 
     public static final int ACCENT = 2;
+
+    private ActivitySettingsBinding mSettingsBinding;
 
     private Switch mNightSwitch;
 
@@ -128,7 +137,7 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
+        mSettingsBinding = DataBindingUtil.setContentView(this, R.layout.activity_settings);
 
         mDefPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -302,6 +311,40 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
 //            }
 //            editor.apply();
 //        });
+
+        mSettingsBinding.colorNoti.setOnClickListener(v -> {
+            final SharedPreferences.Editor editor = mDefPrefs.edit();
+            final Intent intent = new Intent(this, MyMusicService.class);
+            if (mDefPrefs.getBoolean(NOTIFICATION_COLORIZED, true)) {
+                editor.putBoolean(NOTIFICATION_COLORIZED, false);
+                if (editor.commit()) {
+                    mSettingsBinding.colorNotiSwitch.setChecked(false);
+                    intent.putExtra(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, false);
+                } else
+                    Toast.makeText(SettingsActivity.this, "Set Colorized Error...", Toast.LENGTH_SHORT).show();
+            } else {
+                editor.putBoolean(NOTIFICATION_COLORIZED, true);
+                if (editor.commit()) {
+                    mSettingsBinding.colorNotiSwitch.setChecked(true);
+                    intent.putExtra(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true);
+                } else
+                    Toast.makeText(SettingsActivity.this, "Set Colorized Error...", Toast.LENGTH_SHORT).show();
+            }
+
+            startService(intent);
+
+            if (Values.HAS_PLAYED) {
+                try {
+                    if (Data.sMusicBinder.isPlayingMusic()) {
+                        Data.sMusicBinder.playMusic();
+                    } else {
+                        Data.sMusicBinder.pauseMusic();
+                    }
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     private void clearAnimation() {
@@ -321,6 +364,12 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
             mStyleSwitch.setChecked(false);
         } else {
             mStyleSwitch.setChecked(true);
+        }
+
+        if (mDefPrefs.getBoolean(NOTIFICATION_COLORIZED, true)) {
+            mSettingsBinding.colorNotiSwitch.setChecked(true);
+        } else {
+            mSettingsBinding.colorNotiSwitch.setChecked(false);
         }
     }
 

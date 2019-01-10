@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月10日 13:02:26
- * 上次修改时间：2019年01月10日 13:01:56
+ * 当前修改时间：2019年01月10日 16:43:31
+ * 上次修改时间：2019年01月10日 16:42:09
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -11,7 +11,6 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Activities;
 
-import android.animation.ArgbEvaluator;
 import android.annotation.SuppressLint;
 import android.app.Instrumentation;
 import android.content.Intent;
@@ -49,6 +48,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.crashlytics.android.Crashlytics;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.io.File;
@@ -139,6 +139,153 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     private HandlerThread mHandlerThread;
 
     private AlertDialog load;
+
+    /**
+     * onXXX
+     * At Override
+     */
+    @SuppressLint("CheckResult")
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+//        if (Data.sActivities.isEmpty()) Data.sActivities.add(this);
+        Data.init(this);
+
+        super.onCreate(savedInstanceState);
+
+        mHandlerThread = new HandlerThread("Handler Thread in MainActivity");
+        mHandlerThread.start();
+
+        mMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+
+        mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
+
+        Intent intent = new Intent(this, MyMusicService.class);
+//        startService(intent);
+        ContextCompat.startForegroundService(this, intent);
+        bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
+
+        initView();
+
+        initStyle();
+
+        load = Utils.Ui.getLoadingDialog(this, "Loading...");
+        load.show();
+
+        Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+            if (Data.sMusicItems.isEmpty()) {
+                /*---------------------- init Data!!!! -------------------*/
+                final Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+                if (cursor != null && cursor.moveToFirst()) {
+                    //没有歌曲直接退出app
+                    if (cursor.getCount() == 0) {
+                        emitter.onNext(-2);
+                    } else {
+
+                        do {
+                            final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+                            final File file = new File(path);
+                            if (!file.exists()) {
+                                Log.e(TAG, "onAttach: song file: " + path + " does not exits, skip this!!!");
+                                break;
+                            }
+
+                            final String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+                            final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+                            final String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+                            final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+                            final int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
+                            final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+                            final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+                            final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
+                            final int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+
+                            final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
+                                    .musicAlbum(albumName)
+                                    .addTime((int) addTime)
+                                    .artist(artist)
+                                    .duration(duration)
+                                    .mimeName(mimeType)
+                                    .size(size)
+                                    .addAlbumId(albumId);
+
+                            Data.sMusicItems.add(builder.build());
+                            Data.sMusicItemsBackUp.add(builder.build());
+                            Data.sPlayOrderList.add(builder.build());
+
+                        } while (cursor.moveToNext());
+                        Log.i(Values.TAG_UNIVERSAL_ONE, "onCreate: The MusicData load done.");
+                        cursor.close();
+
+                        if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM))
+                            Collections.shuffle(Data.sPlayOrderList);
+
+                        emitter.onNext(0);
+                    }
+                } else {
+                    //cursor null or getCount == 0
+                    emitter.onNext(-1);
+                }
+            } else {
+                //already has data -> initFragment
+                emitter.onNext(0);
+            }
+
+        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Integer>() {
+            @Override
+            public void onSubscribe(Disposable disposable) {
+
+            }
+
+            @Override
+            public void onNext(Integer result) {
+                if (result == -1) {
+                    load.dismiss();
+                    Utils.Ui.fastToast(MainActivity.this, "cursor is null or moveToFirst Fail");
+                    mHandler.postDelayed(MainActivity.this::exitApp, 1000);
+                    return;
+                }
+                if (result == -2) {
+                    load.dismiss();
+                    Utils.Ui.fastToast(MainActivity.this, "Can not find any music!");
+                    mHandler.postDelayed(MainActivity.this::exitApp, 1000);
+                    return;
+                }
+
+                load.dismiss();
+
+                Values.MUSIC_DATA_INIT_DONE = true;
+                initFragmentData();
+
+                if (getIntent().getStringExtra("shortcut_type") != null) {
+                    switch (getIntent().getStringExtra("shortcut_type")) {
+                        case MyApplication.SHORTCUT_RANDOM: {
+                            Utils.SendSomeThing.sendPlay(MainActivity.this, ReceiverOnMusicPlay.TYPE_SHUFFLE, null);
+                        }
+                        break;
+                        default:
+                            break;
+                    }
+                }
+
+                mMainBinding.toolBar.setSubtitle(Data.sPlayOrderList.size() + " Songs");
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                load.dismiss();
+                Toast.makeText(MainActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                exitApp();
+            }
+
+            @Override
+            public void onComplete() {
+                load.dismiss();
+            }
+        });
+        if (savedInstanceState != null)
+            mMainBinding.viewPager.setCurrentItem(savedInstanceState.getInt("viewpage", 0), true);
+
+    }
 
     public static void sendKeyEvent(final int KeyCode) {
         new Thread() {     //不可在主线程中调用
@@ -323,152 +470,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         } else if (Values.CurrentData.CURRENT_PAGE_INDEX == 2) {
 
         }
-    }
-
-    /**
-     * onXXX
-     * At Override
-     */
-    @SuppressLint("CheckResult")
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-//        if (Data.sActivities.isEmpty()) Data.sActivities.add(this);
-        Data.init(this);
-
-        super.onCreate(savedInstanceState);
-        mHandlerThread = new HandlerThread("Handler Thread in MainActivity");
-        mHandlerThread.start();
-
-        mMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-
-        mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
-
-        Intent intent = new Intent(this, MyMusicService.class);
-//        startService(intent);
-        ContextCompat.startForegroundService(this, intent);
-        bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
-
-        initView();
-
-        initStyle();
-
-        load = Utils.Ui.getLoadingDialog(this, "Loading...");
-        load.show();
-
-        Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
-            if (Data.sMusicItems.isEmpty()) {
-                /*---------------------- init Data!!!! -------------------*/
-                final Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-                if (cursor != null && cursor.moveToFirst()) {
-                    //没有歌曲直接退出app
-                    if (cursor.getCount() == 0) {
-                        emitter.onNext(-2);
-                    } else {
-
-                        do {
-                            final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-                            final File file = new File(path);
-                            if (!file.exists()) {
-                                Log.e(TAG, "onAttach: song file: " + path + " does not exits, skip this!!!");
-                                break;
-                            }
-
-                            final String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
-                            final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-                            final String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
-                            final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
-                            final int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-                            final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-                            final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-                            final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
-                            final int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
-
-                            final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
-                                    .musicAlbum(albumName)
-                                    .addTime((int) addTime)
-                                    .artist(artist)
-                                    .duration(duration)
-                                    .mimeName(mimeType)
-                                    .size(size)
-                                    .addAlbumId(albumId);
-
-                            Data.sMusicItems.add(builder.build());
-                            Data.sMusicItemsBackUp.add(builder.build());
-                            Data.sPlayOrderList.add(builder.build());
-
-                        } while (cursor.moveToNext());
-                        Log.i(Values.TAG_UNIVERSAL_ONE, "onCreate: The MusicData load done.");
-                        cursor.close();
-
-                        if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM))
-                            Collections.shuffle(Data.sPlayOrderList);
-
-                        emitter.onNext(0);
-                    }
-                } else {
-                    //cursor null or getCount == 0
-                    emitter.onNext(-1);
-                }
-            } else {
-                //already has data -> initFragment
-                emitter.onNext(0);
-            }
-
-        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Integer>() {
-            @Override
-            public void onSubscribe(Disposable disposable) {
-
-            }
-
-            @Override
-            public void onNext(Integer result) {
-                if (result == -1) {
-                    load.dismiss();
-                    Utils.Ui.fastToast(MainActivity.this, "cursor is null or moveToFirst Fail");
-                    mHandler.postDelayed(MainActivity.this::exitApp, 1000);
-                    return;
-                }
-                if (result == -2) {
-                    load.dismiss();
-                    Utils.Ui.fastToast(MainActivity.this, "Can not find any music!");
-                    mHandler.postDelayed(MainActivity.this::exitApp, 1000);
-                    return;
-                }
-
-                load.dismiss();
-
-                Values.MUSIC_DATA_INIT_DONE = true;
-                initFragmentData();
-
-                if (getIntent().getStringExtra("shortcut_type") != null) {
-                    switch (getIntent().getStringExtra("shortcut_type")) {
-                        case MyApplication.SHORTCUT_RANDOM: {
-                            Utils.SendSomeThing.sendPlay(MainActivity.this, ReceiverOnMusicPlay.TYPE_SHUFFLE, null);
-                        }
-                        break;
-                        default:
-                            break;
-                    }
-                }
-
-                mMainBinding.toolBar.setSubtitle(Data.sPlayOrderList.size() + " Songs");
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                load.dismiss();
-                Toast.makeText(MainActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                exitApp();
-            }
-
-            @Override
-            public void onComplete() {
-                load.dismiss();
-            }
-        });
-        if (savedInstanceState != null)
-            mMainBinding.viewPager.setCurrentItem(savedInstanceState.getInt("viewpage", 0), true);
-
     }
 
     /**
@@ -846,7 +847,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 }
                 break;
                 case R.id.debug: {
-                    startActivity(new Intent(MainActivity.this, CarViewActivity.class));
+                    Crashlytics.getInstance().crash();
                 }
             }
             return true;
@@ -856,23 +857,23 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mMainBinding.viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                ArgbEvaluator evaluator = new ArgbEvaluator(); // ARGB求值器
-
-                final int green = 0xFF43CD80, blue = 0xFF11A0F8, yellow = 0xFFFFBB43, red = 0xFFB54B36;
-
-                int evaluate; // 初始默认颜色
-                if (position == 0) {
-                    evaluate = (Integer) evaluator.evaluate(positionOffset, green, blue); // 根据positionOffset和第0页~第1页的颜色转换范围取颜色值
-                } else if (position == 1) {
-                    evaluate = (Integer) evaluator.evaluate(positionOffset, blue, yellow); // 根据positionOffset和第1页~第2页的颜色转换范围取颜色值
-                } else if (position == 2) {
-                    evaluate = (Integer) evaluator.evaluate(positionOffset, yellow, red); // 根据positionOffset和第2页~第3页的颜色转换范围取颜色值
-                } else {
-                    evaluate = red; // 最终第3页的颜色
-                }
-
-                mMainBinding.toolBar.setBackgroundColor(evaluate);
-                mMainBinding.tabLayout.setBackgroundColor(evaluate);
+//                ArgbEvaluator evaluator = new ArgbEvaluator(); // ARGB求值器
+//
+//                final int green = 0xFF43CD80, blue = 0xFF11A0F8, yellow = 0xFFFFBB43, red = 0xFFB54B36;
+//
+//                int evaluate; // 初始默认颜色
+//                if (position == 0) {
+//                    evaluate = (Integer) evaluator.evaluate(positionOffset, green, blue); // 根据positionOffset和第0页~第1页的颜色转换范围取颜色值
+//                } else if (position == 1) {
+//                    evaluate = (Integer) evaluator.evaluate(positionOffset, blue, yellow); // 根据positionOffset和第1页~第2页的颜色转换范围取颜色值
+//                } else if (position == 2) {
+//                    evaluate = (Integer) evaluator.evaluate(positionOffset, yellow, red); // 根据positionOffset和第2页~第3页的颜色转换范围取颜色值
+//                } else {
+//                    evaluate = red; // 最终第3页的颜色
+//                }
+//
+//                mMainBinding.toolBar.setBackgroundColor(evaluate);
+//                mMainBinding.tabLayout.setBackgroundColor(evaluate);
             }
 
             @Override

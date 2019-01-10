@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月06日 10:05:15
- * 上次修改时间：2019年01月06日 09:59:15
+ * 当前修改时间：2019年01月10日 16:43:31
+ * 上次修改时间：2019年01月10日 15:29:06
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -560,10 +560,10 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             mMenu.add(Menu.NONE, Menu.FIRST + 0, 0, resources.getString(R.string.next_play));
             mMenu.add(Menu.NONE, Menu.FIRST + 1, 0, resources.getString(R.string.love_music));
             mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, resources.getString(R.string.add_to_playlist));
-            if (mCurrentUiPosition.equals(PublicActivity.PLAY_LIST_FAVOURITE)) {
+            if (mCurrentUiPosition.equals(PublicActivity.PLAY_LIST_FAVOURITE))
                 mMenu.add(Menu.NONE, Menu.FIRST + 3, 0, "Del from favourite");
-            }
-            mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, resources.getString(R.string.show_album));
+            if (!mCurrentUiPosition.equals(AlbumDetailActivity.TAG))
+                mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, resources.getString(R.string.show_album));
             mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, resources.getString(R.string.more_info));
 
             MenuInflater menuInflater = mMainActivity.getMenuInflater();

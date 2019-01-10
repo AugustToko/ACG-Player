@@ -6,14 +6,14 @@
     "apkInfo": {
       "type": "MAIN",
       "splits": [],
-      "versionCode": 32,
-      "versionName": "2.5.4.6",
+      "versionCode": 34,
+      "versionName": "2.5.4.9",
       "enabled": true,
-      "outputFile": "app-release_20190108_2.5.4.6_(32).apk",
+      "outputFile": "app-release_20190110_2.5.4.9_(34).apk",
       "fullName": "release",
       "baseName": "release"
     },
-    "path": "app-release_20190108_2.5.4.6_(32).apk",
+    "path": "app-release_20190110_2.5.4.9_(34).apk",
     "properties": {}
   }
 ]

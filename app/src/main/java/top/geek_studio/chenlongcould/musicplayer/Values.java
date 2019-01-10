@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月10日 13:02:26
- * 上次修改时间：2019年01月10日 13:01:56
+ * 当前修改时间：2019年01月10日 16:43:31
+ * 上次修改时间：2019年01月10日 14:07:31
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -13,6 +13,8 @@ package top.geek_studio.chenlongcould.musicplayer;
 
 @SuppressWarnings("WeakerAccess")
 public final class Values {
+
+    public static final String DEF_PREFS_NAME = "top.geek_studio.chenlongcould.musicplayer_preferences";
 
     public static int DEF_CROSS_FATE_TIME = 500;
 
@@ -175,6 +177,8 @@ public final class Values {
         //theme
         public static final String SELECT_THEME = "SELECT_THEME";
         public static final String THEME_USE_NOTE = "THEME_USE_NOTE";
+
+        public static final String NOTIFICATION_COLORIZED = "NOTIFICATION_COLORIZED";
     }
 
     public static final class BroadCast {

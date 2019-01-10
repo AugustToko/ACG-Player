@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月10日 13:02:26
- * 上次修改时间：2019年01月10日 13:01:56
+ * 当前修改时间：2019年01月10日 16:43:31
+ * 上次修改时间：2019年01月10日 13:36:12
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -30,6 +30,9 @@ import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
@@ -44,6 +47,8 @@ import top.geek_studio.chenlongcould.musicplayer.Utils.ThemeStore;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 
 public final class MyApplication extends Application {
+
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     public static WeakReference<Context> mAppContext;
 
@@ -69,6 +74,8 @@ public final class MyApplication extends Application {
 
         mAppContext = new WeakReference<>(this);
 
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
         mDefSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         if (getProcessName(this).equals(getPackageName())) {
@@ -76,17 +83,18 @@ public final class MyApplication extends Application {
             // TODO: 2019/1/6 ver
             //noinspection StatementWithEmptyBody
             if (mDefSharedPreferences.getInt(VERSION_CODE, -1) != CURRENT_VER_CODE) {
-                SharedPreferences.Editor editor = mDefSharedPreferences.edit();
-
-                editor.remove(Values.SharedPrefsTag.SELECT_THEME);
-                editor.remove(Values.SharedPrefsTag.THEME_USE_NOTE);
-
-                //do somethings
-                new Thread(() -> {
-                    Utils.IO.delFolder(getExternalFilesDir(ThemeStore.DIR_NAME).getAbsolutePath());
-                    editor.putInt(VERSION_CODE, CURRENT_VER_CODE);
-                    editor.apply();
-                }).start();
+                Toast.makeText(this, "建议手动清除该应用程序数据...", Toast.LENGTH_SHORT).show();
+//                SharedPreferences.Editor editor = mDefSharedPreferences.edit();
+//
+//                editor.remove(Values.SharedPrefsTag.SELECT_THEME);
+//                editor.remove(Values.SharedPrefsTag.THEME_USE_NOTE);
+//
+//                //do somethings
+//                new Thread(() -> {
+//                    Utils.IO.delFolder(getExternalFilesDir(ThemeStore.DIR_NAME).getAbsolutePath());
+//                    editor.putInt(VERSION_CODE, CURRENT_VER_CODE);
+//                    editor.apply();
+//                }).start();
             }
 
             //add version code

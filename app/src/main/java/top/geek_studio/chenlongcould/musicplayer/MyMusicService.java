@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:17
+ * 当前修改时间：2019年01月10日 16:43:31
+ * 上次修改时间：2019年01月10日 14:46:14
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -27,6 +27,7 @@ import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -57,7 +58,16 @@ public final class MyMusicService extends Service {
     private String mId = "Player";
     private int mStartNotiId = 1;
 
+    private boolean mColorized = true;
+
     public MyMusicService() {
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        mColorized = intent.getBooleanExtra(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true);
+        Log.d(TAG, "onStartCommand: do it" + mColorized);
+        return START_STICKY;
     }
 
     private AtomicReference<MusicItem> mMusicItem = new AtomicReference<>(new MusicItem.Builder(-1, "null", "null").build());
@@ -65,6 +75,8 @@ public final class MyMusicService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        mColorized = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true);
+        Log.d(TAG, "onBind: onBind" + mColorized);
         return mMusicBinder;
     }
 
@@ -157,6 +169,7 @@ public final class MyMusicService extends Service {
 
     @Override
     public void onCreate() {
+        Log.d(TAG, "onCreate: do it");
         mMediaPlayer.setOnCompletionListener(mp -> {
             Utils.SendSomeThing.sendPlay(MyMusicService.this, 6, "next");
 
@@ -214,11 +227,6 @@ public final class MyMusicService extends Service {
         }
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        return START_STICKY;
-    }
-
     private void startFN() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForeground(mStartNotiId, getChannelNotification(mMusicItem.get().getMusicName(), mMusicItem.get().getMusicAlbum(), mCurrentCover, this).build());
@@ -230,7 +238,6 @@ public final class MyMusicService extends Service {
     @RequiresApi(api = Build.VERSION_CODES.O)
     @NonNull
     private Notification.Builder getChannelNotification(final String title, final String content, final @Nullable Bitmap cover, final Context context) {
-
         //pi(s)
         Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
         PendingIntent pi = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -290,7 +297,8 @@ public final class MyMusicService extends Service {
         } else {
             builder.setColor(Color.WHITE);
         }
-        builder.setColorized(true);
+
+        builder.setColorized(mColorized);
 
         return builder;
     }
