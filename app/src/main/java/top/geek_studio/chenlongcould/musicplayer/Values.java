@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月09日 12:52:27
- * 上次修改时间：2019年01月08日 21:27:31
+ * 当前修改时间：2019年01月10日 12:58:52
+ * 上次修改时间：2019年01月10日 12:58:36
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -11,8 +11,19 @@
 
 package top.geek_studio.chenlongcould.musicplayer;
 
+import android.content.Context;
+import android.preference.PreferenceManager;
+import android.support.annotation.ColorInt;
+import android.support.v4.content.ContextCompat;
+
 @SuppressWarnings("WeakerAccess")
 public final class Values {
+
+    public static void init(Context context) {
+        Color.PRIMARY_COLOR = PreferenceManager.getDefaultSharedPreferences(context).getInt(SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(context, R.color.colorPrimary));
+        Color.PRIMARY_COLOR_DARK = PreferenceManager.getDefaultSharedPreferences(context).getInt(SharedPrefsTag.PRIMARY_COLOR_DARK, ContextCompat.getColor(context, R.color.colorPrimaryDark));
+        Color.ACCENT_COLOR = PreferenceManager.getDefaultSharedPreferences(context).getInt(SharedPrefsTag.ACCENT_COLOR, ContextCompat.getColor(context, R.color.colorAccent));
+    }
 
     public static int DEF_CROSS_FATE_TIME = 500;
 
@@ -82,10 +93,10 @@ public final class Values {
 
     /**
      * @deprecated use {@link SharedPrefsTag#PRIMARY_COLOR}
-     * {@link SharedPrefsTag#PRIMARY_DARK_COLOR}
+     * {@link SharedPrefsTag#PRIMARY_COLOR_DARK}
      * {@link SharedPrefsTag#ACCENT_COLOR}
      */
-    public static final class ColorInt {
+    public static final class ColorResInt {
         public static final String PRIMARY_COLOR = "mPrimaryColor";
 
         public static final String PRIMARY_DARK_COLOR = "mPrimaryDarkColor";
@@ -159,7 +170,7 @@ public final class Values {
 
         //color
         public static final String PRIMARY_COLOR = "mPrimaryColor";
-        public static final String PRIMARY_DARK_COLOR = "mPrimaryDarkColor";
+        public static final String PRIMARY_COLOR_DARK = "mPrimaryColorDark";
         public static final String ACCENT_COLOR = "mAccentColor";
 
         public static final String DETAIL_BG_STYLE = "DETAIL_BG_STYLE";
@@ -190,6 +201,13 @@ public final class Values {
          * Ico color
          */
         public static final String WIN_BACKGROUND_COLOR = "#fafafa";
+
+        @ColorInt
+        public static int PRIMARY_COLOR;
+        @ColorInt
+        public static int PRIMARY_COLOR_DARK;
+        @ColorInt
+        public static int ACCENT_COLOR;
 
         /**
          * item title color (dynamic)

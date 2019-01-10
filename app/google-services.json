@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "231605382629",
+    "firebase_url": "https://project-1001876957245444253.firebaseio.com",
+    "project_id": "project-1001876957245444253",
+    "storage_bucket": "project-1001876957245444253.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:231605382629:android:f202fadb07042a1c",
+        "android_client_info": {
+          "package_name": "top.geek_studio.chenlongcould.musicplayer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "231605382629-b7vk3kfhsfnen7c362q47nbi8t6o6sp0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "top.geek_studio.chenlongcould.musicplayer",
+            "certificate_hash": "b3256889590e146006073ed49805d6eb85261e38"
+          }
+        },
+        {
+          "client_id": "231605382629-qrre3s0l1lrd6n27dc4q2op1onliqhnr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcuX0gYBMMR_FxkKroU6inFEL47a3Vi50"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "231605382629-qrre3s0l1lrd6n27dc4q2op1onliqhnr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

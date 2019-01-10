@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月09日 12:52:27
- * 上次修改时间：2019年01月09日 12:29:09
+ * 当前修改时间：2019年01月10日 12:58:52
+ * 上次修改时间：2019年01月09日 13:20:52
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -75,7 +75,8 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
                  * */
                 case PRIMARY: {
                     mPrimaryImage.clearAnimation();
-                    ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, R.color.colorPrimary), color);
+                    ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator()
+                            , mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimary)), color);
                     animator.setDuration(300);
                     animator.addUpdateListener(animation -> {
                         mPrimaryImage.setBackgroundColor((Integer) animation.getAnimatedValue());
@@ -83,7 +84,7 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
                         mToolbar.setBackgroundColor((Integer) animation.getAnimatedValue());
                     });
                     animator.start();
-                    editor.putInt(Values.ColorInt.PRIMARY_COLOR, color);
+                    editor.putInt(Values.SharedPrefsTag.PRIMARY_COLOR, color);
                     editor.apply();
                     mPrimaryImage.clearAnimation();
                 }
@@ -94,14 +95,15 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
                  * */
                 case PRIMARY_DARK: {
                     mPrimaryDarkImage.clearAnimation();
-                    ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, R.color.colorPrimaryDark), color);
+                    ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator()
+                            , mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_COLOR_DARK, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark)), color);
                     animator.setDuration(300);
                     animator.addUpdateListener(animation -> {
                         mPrimaryDarkImage.setBackgroundColor((Integer) animation.getAnimatedValue());
                         getWindow().setNavigationBarColor((Integer) animation.getAnimatedValue());
                     });
                     animator.start();
-                    editor.putInt(Values.ColorInt.PRIMARY_DARK_COLOR, color);
+                    editor.putInt(Values.SharedPrefsTag.PRIMARY_COLOR_DARK, color);
                     editor.apply();
                     mPrimaryDarkImage.clearAnimation();
                 }
@@ -112,7 +114,7 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
                  * */
                 case ACCENT: {
                     mAccentImage.setBackgroundColor(color);
-                    editor.putInt(Values.ColorInt.ACCENT_COLOR, color);
+                    editor.putInt(Values.SharedPrefsTag.ACCENT_COLOR, color);
                     editor.apply();
                 }
                 break;
@@ -160,7 +162,7 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
                     SharedPreferences.Editor editor = mDefPrefs.edit();
                     editor.putInt(Values.SharedPrefsTag.ACCENT_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorAccent));
                     editor.putInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimary));
-                    editor.putInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark));
+                    editor.putInt(Values.SharedPrefsTag.PRIMARY_COLOR_DARK, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark));
                     editor.apply();
 
                     clearAnimation();
@@ -172,7 +174,7 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
                         mToolbar.setBackgroundColor((Integer) animation.getAnimatedValue());
                     });
 
-                    ValueAnimator animator2 = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark)), ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark));
+                    ValueAnimator animator2 = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_COLOR_DARK, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark)), ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark));
                     animator2.setDuration(300);
                     animator2.addUpdateListener(animation -> {
                         mPrimaryDarkImage.setBackgroundColor((Integer) animator2.getAnimatedValue());
@@ -196,7 +198,7 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
         mToolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         primaryOpt.setOnClickListener(v -> {
-            ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")))
+            ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorResInt.PRIMARY_COLOR, Color.parseColor("#008577")))
                     .setDialogTitle(R.string.color_picker)
                     .setDialogType(ColorPickerDialog.TYPE_PRESETS)
                     .setShowAlphaSlider(true)
@@ -209,7 +211,7 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
         });
 
         primaryDarkOpt.setOnClickListener(v -> {
-            ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")))
+            ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorResInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")))
                     .setDialogTitle(R.string.color_picker)
                     .setDialogType(ColorPickerDialog.TYPE_PRESETS)
                     .setShowAlphaSlider(true)
@@ -222,7 +224,7 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
         });
 
         accentOpt.setOnClickListener(v -> {
-            ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorInt.ACCENT_COLOR, Color.parseColor("#D81B60")))
+            ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorResInt.ACCENT_COLOR, Color.parseColor("#D81B60")))
                     .setDialogTitle(R.string.color_picker)
                     .setDialogType(ColorPickerDialog.TYPE_PRESETS)
                     .setShowAlphaSlider(true)
@@ -332,9 +334,9 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
 
     @Override
     public void initStyle() {
-        mPrimaryImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")));
-        mPrimaryDarkImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
-        mAccentImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.ACCENT_COLOR, Color.parseColor("#D81B60")));
+        mPrimaryImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorResInt.PRIMARY_COLOR, Color.parseColor("#008577")));
+        mPrimaryDarkImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorResInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
+        mAccentImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorResInt.ACCENT_COLOR, Color.parseColor("#D81B60")));
         Utils.Ui.setTopBottomColor(this, mAppBarLayout, mToolbar);
 
         final ImageView imageView = findViewById(R.id.theme_preview);

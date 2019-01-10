@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月09日 12:52:27
- * 上次修改时间：2019年01月08日 19:12:01
+ * 当前修改时间：2019年01月10日 12:58:52
+ * 上次修改时间：2019年01月10日 12:41:35
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -31,6 +31,9 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
+import com.tencent.bugly.crashreport.CrashReport;
+
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.List;
@@ -44,6 +47,8 @@ import top.geek_studio.chenlongcould.musicplayer.Utils.ThemeStore;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 
 public final class MyApplication extends Application {
+
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     public static WeakReference<Context> mAppContext;
 
@@ -66,6 +71,12 @@ public final class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
+        CrashReport.initCrashReport(this, "40ccefccf2", false);
+
+        Values.init(this);
 
         mAppContext = new WeakReference<>(this);
 

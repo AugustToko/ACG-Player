@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月07日 16:30:28
- * 上次修改时间：2019年01月07日 16:29:49
+ * 当前修改时间：2019年01月10日 12:58:52
+ * 上次修改时间：2019年01月09日 19:05:24
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -14,9 +14,11 @@ package top.geek_studio.chenlongcould.musicplayer.Fragments;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
@@ -27,12 +29,13 @@ import android.view.ViewGroup;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.Interface.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Interface.VisibleOrGone;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentMusicListLayoutBinding;
 
-public final class MusicListFragment extends Fragment implements VisibleOrGone {
+public final class MusicListFragment extends Fragment implements VisibleOrGone, IStyle {
 
     public static final String TAG = "MusicListFragment";
 
@@ -72,6 +75,8 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
         Log.d(Values.TAG_UNIVERSAL_ONE, "onCreateView: loading adapter");
         adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity, TAG);
         mMusicListBinding.includeRecycler.recyclerView.setAdapter(adapter);
+
+        initStyle();
 
 //        mRecyclerView.setRecyclerListener(holder -> {
 //            MyRecyclerAdapter.ViewHolder myViewHolder = (MyRecyclerAdapter.ViewHolder) holder;
@@ -120,5 +125,13 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
     public void visibleOrGone(int status) {
         if (mMusicListBinding.includeRecycler.recyclerView != null)
             mMusicListBinding.includeRecycler.recyclerView.setVisibility(status);
+    }
+
+    @Override
+    public void initStyle() {
+        mMusicListBinding.includeRecycler.recyclerView.setThumbColor(PreferenceManager.getDefaultSharedPreferences(getContext()).getInt(Values.SharedPrefsTag.ACCENT_COLOR, ContextCompat.getColor(mActivity, R.color.colorAccent)));
+        mMusicListBinding.includeRecycler.recyclerView.setThumbInactiveColor(PreferenceManager.getDefaultSharedPreferences(getContext()).getInt(Values.SharedPrefsTag.ACCENT_COLOR, ContextCompat.getColor(mActivity, R.color.colorAccent)));
+        //滑动条背景色
+//        mMusicListBinding.includeRecycler.recyclerView.setTrackColor(PreferenceManager.getDefaultSharedPreferences(getContext()).getInt(Values.SharedPrefsTag.ACCENT_COLOR, ContextCompat.getColor(mActivity, R.color.colorAccent)));
     }
 }

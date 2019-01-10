@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：build.gradle  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月08日 10:05:13
- * 上次修改时间：2019年01月08日 09:55:58
+ * 当前修改时间：2019年01月10日 12:58:52
+ * 上次修改时间：2019年01月10日 12:39:10
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -10,6 +10,7 @@
  */
 
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     signingConfigs {
@@ -29,6 +30,11 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config
         versionCode 32
+
+        ndk {
+            // 设置支持的SO库架构
+            abiFilters 'armeabi', 'x86', 'armeabi-v7a', 'x86_64', 'arm64-v8a'
+        }
     }
     buildTypes {
         release {
@@ -98,4 +104,12 @@ dependencies {
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.2'
     // Optional, if you use support library fragments:
     debugImplementation 'com.squareup.leakcanary:leakcanary-support-fragment:1.6.2'
+
+    implementation 'com.tencent.bugly:crashreport:latest.release'
+    //其中latest.release指代最新Bugly SDK版本号，也可以指定明确的版本号，例如2.2.0
+    implementation 'com.tencent.bugly:nativecrashreport:latest.release'
+    //其中latest.release指代最新Bugly NDK版本号，也可以指定明确的版本号，例如3.0
+
+    implementation 'com.google.firebase:firebase-core:16.0.6'
+
 }

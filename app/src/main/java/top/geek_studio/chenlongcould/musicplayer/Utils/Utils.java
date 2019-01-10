@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月07日 16:30:28
- * 上次修改时间：2019年01月07日 16:29:51
+ * 当前修改时间：2019年01月10日 12:58:52
+ * 上次修改时间：2019年01月09日 13:06:37
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -321,9 +321,9 @@ public final class Utils {
          */
         public static void setTopBottomColor(final Activity activity, final AppBarLayout appBar, final android.support.v7.widget.Toolbar toolbar) {
             SharedPreferences mDefPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
-            appBar.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")));
-            toolbar.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")));
-            activity.getWindow().setNavigationBarColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
+            appBar.setBackgroundColor(mDefPrefs.getInt(Values.ColorResInt.PRIMARY_COLOR, Color.parseColor("#008577")));
+            toolbar.setBackgroundColor(mDefPrefs.getInt(Values.ColorResInt.PRIMARY_COLOR, Color.parseColor("#008577")));
+            activity.getWindow().setNavigationBarColor(mDefPrefs.getInt(Values.ColorResInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
         }
 
         public static void setPlayButtonNowPlaying() {

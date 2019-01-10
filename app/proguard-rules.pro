@@ -66,3 +66,7 @@
 -dontwarn com.simplecityapps.**
 -dontwarn com.sothree.slidinguppanel.**
 -dontwarn com.squareup.haha.**
+
+#bugly
+-dontwarn com.tencent.bugly.**
+-keep public class com.tencent.bugly.**{*;}
