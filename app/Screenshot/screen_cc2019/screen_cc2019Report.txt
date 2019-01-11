@@ -1,0 +1,44 @@
+Report created: 
+	2019/1/11	15:55:07
+
+Project name: screen_cc2019.aep
+
+Source files collected to: 
+	C:\Users\chenlongcould\Desktop\screen_cc2019
+
+Source files collected: All
+
+Collected comps:  
+	main_activity
+	bg
+	album_activity
+	setting_activity
+	theme_activity
+	TOTAL
+	show_main
+	show_album
+	show_settings
+	show_theme
+	frag_detail
+	show_frag_detail
+	
+Number of collected files:  7
+
+Size of collected files:  2.6 MB
+
+Collected source files: 
+	C:\Users\chenlongcould\AndroidStudioProjects\MusicPlayer\app\Screenshot\screen folder\(Footage)\ss\album_activity.png
+	C:\Users\chenlongcould\AndroidStudioProjects\MusicPlayer\app\Screenshot\screen folder\(Footage)\ss\main_activity.png
+	C:\Users\chenlongcould\AndroidStudioProjects\MusicPlayer\app\Screenshot\screen folder\(Footage)\ss\setting_activity.png
+	C:\Users\chenlongcould\AndroidStudioProjects\MusicPlayer\app\Screenshot\screen folder\(Footage)\ss\settings_dialog.png
+	C:\Users\chenlongcould\AndroidStudioProjects\MusicPlayer\app\Screenshot\screen folder\(Footage)\ss\theme_activity.png
+	C:\Users\chenlongcould\AndroidStudioProjects\MusicPlayer\app\Screenshot\screen folder\(Footage)\ss\theme_detail.png
+	C:\Users\chenlongcould\Desktop\enframe_2019-01-11-15-38-24.png
+	
+Rendering plug-ins:
+	Classic 3D
+	
+Layer:  Text Layer
+	External dependencies:  
+		Font family: “STXihei”, Font style: “Regular”
+
