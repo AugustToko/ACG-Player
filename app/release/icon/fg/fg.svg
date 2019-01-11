@@ -1,0 +1,13 @@
+<svg viewBox="0 0 23.9 23.9" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <style>.cls-1{fill:none;}.cls-2{fill:#ffd400;}</style>
+    </defs>
+    <title>1资源 4</title>
+    <g data-name="图层 2" id="图层_2">
+        <g data-name="图层 1" id="图层_1-2">
+            <path class="cls-1" d="M0,0H23.9V23.9H0Z" />
+            <path class="cls-2"
+                d="M13,2.52V9.11a3.2,3.2,0,1,0-1.07,6.21,3.23,3.23,0,0,0,3.2-2.85h0V4.65l2.84-1V2.52Z" />
+        </g>
+    </g>
+</svg>

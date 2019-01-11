@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月11日 15:32:19
- * 上次修改时间：2019年01月11日 15:31:23
+ * 当前修改时间：2019年01月11日 18:09:44
+ * 上次修改时间：2019年01月11日 18:09:37
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -142,6 +142,16 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
 
+    public static void sendKeyEvent(final int KeyCode) {
+        new Thread() {     //不可在主线程中调用
+            public void run() {
+                Instrumentation inst = new Instrumentation();
+                inst.sendKeyDownUpSync(KeyCode);
+            }
+
+        }.start();
+    }
+
     /**
      * onXXX
      * At Override
@@ -192,6 +202,14 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         load = Utils.Ui.getLoadingDialog(this, "Loading...");
         load.show();
 
+        loadData();
+
+        if (savedInstanceState != null)
+            mMainBinding.viewPager.setCurrentItem(savedInstanceState.getInt("viewpage", 0), true);
+
+    }
+
+    public void loadData() {
         Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
             if (Data.sMusicItems.isEmpty()) {
                 /*---------------------- init Data!!!! -------------------*/
@@ -309,19 +327,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 load.dismiss();
             }
         });
-        if (savedInstanceState != null)
-            mMainBinding.viewPager.setCurrentItem(savedInstanceState.getInt("viewpage", 0), true);
 
-    }
-
-    public static void sendKeyEvent(final int KeyCode) {
-        new Thread() {     //不可在主线程中调用
-            public void run() {
-                Instrumentation inst = new Instrumentation();
-                inst.sendKeyDownUpSync(KeyCode);
-            }
-
-        }.start();
     }
 
     @Override
@@ -425,6 +431,19 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 editor.apply();
                 mPagerAdapter.notifyDataSetChanged();
                 mAlbumListFragment.setRecyclerViewData();
+            }
+            break;
+
+            case R.id.menu_toolbar_reload: {
+                if (!load.isShowing()) load.show();
+                mFragmentList.clear();
+                mTitles.clear();
+                Data.sMusicItems.clear();
+                Data.sPlayOrderList.clear();
+                Data.sMusicItemsBackUp.clear();
+                Data.sAlbumItemsBackUp.clear();
+                Data.sAlbumItems.clear();
+                loadData();
             }
             break;
         }
@@ -748,6 +767,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             TOOLBAR_CLICKED = true;
             new Handler().postDelayed(() -> TOOLBAR_CLICKED = false, 1000);         //双击机制
         });
+
         setSupportActionBar(mMainBinding.toolBar);
 
         ActionBar actionBar = getSupportActionBar();

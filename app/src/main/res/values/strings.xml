@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月10日 16:43:31
-  ~ 上次修改时间：2019年01月10日 13:42:48
+  ~ 当前修改时间：2019年01月11日 18:09:44
+  ~ 上次修改时间：2019年01月11日 16:24:27
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -115,4 +115,5 @@
     <string name="saved_to_doc">Saved to Documents!</string>
     <string name="color_noti">Colorized (for Android 7.0 up) </string>
     <string name="set_noti_background_colorized">Set Notification Background Colorized</string>
+    <string name="reload">ReLoad</string>
 </resources>
