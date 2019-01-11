@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：build.gradle  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月10日 21:12:43
- * 上次修改时间：2019年01月10日 21:10:40
+ * 当前修改时间：2019年01月11日 15:32:19
+ * 上次修改时间：2019年01月11日 10:16:49
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -10,6 +10,7 @@
  */
 
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.firebase.firebase-perf'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'io.fabric'
 
@@ -41,6 +42,13 @@ android {
             renderscriptOptimLevel 5
             pseudoLocalesEnabled false
             applicationIdSuffix '.Common'
+        }
+        debug {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            renderscriptOptimLevel 5
+            pseudoLocalesEnabled false
         }
     }
 
@@ -98,4 +106,5 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth:16.1.0'
     //crash
     implementation 'com.crashlytics.sdk.android:crashlytics:2.9.8'
+    implementation 'com.google.firebase:firebase-perf:16.2.3'
 }

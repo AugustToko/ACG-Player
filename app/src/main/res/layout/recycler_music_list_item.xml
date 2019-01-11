@@ -1,14 +1,15 @@
 <!--
   ~ *************************************************************
   ~ 文件：recycler_music_list_item.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月05日 20:52:07
-  ~ 上次修改时间：2019年01月05日 11:16:23
+  ~ 当前修改时间：2019年01月11日 15:32:19
+  ~ 上次修改时间：2019年01月11日 10:11:34
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
   ~ *************************************************************
   -->
 
+<!--in MyRecyclerAdapter-->
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -83,10 +84,10 @@
                 android:id="@+id/recycler_item_music_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="0dp"
                 android:layout_marginEnd="8dp"
                 android:ellipsize="end"
                 android:singleLine="true"
+                android:textColor="?android:textColorPrimary"
                 android:text="Music Text"
                 android:textSize="18sp"
                 app:layout_constraintEnd_toEndOf="parent"

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：build.gradle  模块：MusicPlayer  项目：MusicPlayer
- * 当前修改时间：2019年01月10日 16:43:31
- * 上次修改时间：2019年01月10日 15:21:19
+ * 当前修改时间：2019年01月11日 15:32:19
+ * 上次修改时间：2019年01月11日 07:35:08
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -22,6 +22,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath 'com.google.firebase:firebase-plugins:1.1.5'
         classpath 'com.google.gms:google-services:4.2.0'
         classpath 'io.fabric.tools:gradle:1.27.0'
 

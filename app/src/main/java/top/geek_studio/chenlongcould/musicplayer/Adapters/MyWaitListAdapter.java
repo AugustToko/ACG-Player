@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyWaitListAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月07日 16:30:28
- * 上次修改时间：2019年01月06日 16:18:09
+ * 当前修改时间：2019年01月11日 15:32:19
+ * 上次修改时间：2019年01月11日 13:19:55
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -206,28 +206,13 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
     @Override
     public void initStyle() {
-
-//        //type_background
-//        if (Values.Style.NIGHT_MODE) {
-//            currentBind.mExtName.setBackgroundColor(Color.GRAY);
-//        } else {
-//            if (currentBind.mExtName.getText().equals("mp3")) {
-//                currentBind.mExtName.setBackgroundResource(R.color.mp3TypeColor);
-//            } else {
-//                currentBind.mExtName.setBackgroundColor(Color.CYAN);
-//            }
-//        }
-
         if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.UIMODE.MODE_CAR)) {
+            // TODO: 2019/1/11 if bg is light
             currentBind.mMusicNameText.setTextColor(Color.WHITE);
             currentBind.mAlbumText.setTextColor(Color.WHITE);
             currentBind.mIndexText.setTextColor(Color.WHITE);
             currentBind.mExtName.setTextColor(Color.WHITE);
             currentBind.mItemMenuButton.setColorFilter(Color.WHITE);
-        } else {
-            //style
-            currentBind.mMusicNameText.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
-            currentBind.mAlbumText.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
         }
     }
 

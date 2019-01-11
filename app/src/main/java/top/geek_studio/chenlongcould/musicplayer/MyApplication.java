@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月10日 16:43:31
- * 上次修改时间：2019年01月10日 13:36:12
+ * 当前修改时间：2019年01月11日 15:32:19
+ * 上次修改时间：2019年01月11日 15:31:23
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -35,7 +35,7 @@ import android.widget.Toast;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.lang.ref.WeakReference;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -74,11 +74,11 @@ public final class MyApplication extends Application {
 
         mAppContext = new WeakReference<>(this);
 
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
-
-        mDefSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
         if (getProcessName(this).equals(getPackageName())) {
+
+            mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+            mDefSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
 
             // TODO: 2019/1/6 ver
             //noinspection StatementWithEmptyBody
@@ -185,7 +185,7 @@ public final class MyApplication extends Application {
 //                        Uri.parse("https://www.github.com/")))
 //                .build();
 
-        mShortcutManager.setDynamicShortcuts(Arrays.asList(shortcut));
+        mShortcutManager.setDynamicShortcuts(Collections.singletonList(shortcut));
     }
 
     /**
@@ -229,5 +229,4 @@ public final class MyApplication extends Application {
 
         super.onTrimMemory(level);
     }
-
 }

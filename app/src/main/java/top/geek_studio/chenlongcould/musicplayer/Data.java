@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Data.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 20:52:07
- * 上次修改时间：2019年01月05日 20:51:37
+ * 当前修改时间：2019年01月11日 15:32:19
+ * 上次修改时间：2019年01月11日 15:31:27
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -16,6 +16,7 @@ import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.os.IBinder;
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 
 import java.lang.ref.WeakReference;
@@ -81,7 +82,8 @@ public final class Data {
 
     public static BlurTransformation sBlurTransformation = new BlurTransformation(20, 30);
     public static BlurTransformation sBlurTransformationCarView = new BlurTransformation(5, 10);
-    static MyHeadSetPlugReceiver mMyHeadSetPlugReceiver = new MyHeadSetPlugReceiver();
+    public static MyHeadSetPlugReceiver mMyHeadSetPlugReceiver = new MyHeadSetPlugReceiver();
+
     /**
      * save temp bitmap
      */
@@ -90,6 +92,9 @@ public final class Data {
     public static Bitmap getCurrentCover() {
         return sCurrentCover;
     }
+
+    @ColorInt
+    public static int sVibrantColor;
 
     /**
      * --------------------- Media Player ----------------------

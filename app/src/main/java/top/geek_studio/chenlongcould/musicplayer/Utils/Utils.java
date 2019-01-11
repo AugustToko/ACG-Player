@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月10日 16:43:31
- * 上次修改时间：2019年01月10日 13:26:12
+ * 当前修改时间：2019年01月11日 15:32:19
+ * 上次修改时间：2019年01月11日 15:31:27
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -27,8 +27,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.MediaMetadataRetriever;
 import android.media.audiofx.AudioEffect;
-import android.os.Handler;
-import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.renderscript.Allocation;
@@ -44,7 +42,6 @@ import android.support.design.internal.NavigationMenuPresenter;
 import android.support.design.internal.NavigationMenuView;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.graphics.Palette;
@@ -224,6 +221,33 @@ public final class Utils {
 
         public static int POSITION = 200;
 
+        /**
+         * getAccentColor from {@link SharedPreferences}, default: {@link R.color#colorAccent}
+         *
+         * @return color (int)
+         */
+        public static int getAccentColor(Context context) {
+            return PreferenceManager.getDefaultSharedPreferences(context).getInt(Values.SharedPrefsTag.ACCENT_COLOR, ContextCompat.getColor(context, R.color.colorAccent));
+        }
+
+        /**
+         * getPrimaryColor from {@link SharedPreferences}, default: {@link R.color#colorPrimary}
+         *
+         * @return color (int)
+         */
+        public static int getPrimaryColor(Context context) {
+            return PreferenceManager.getDefaultSharedPreferences(context).getInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(context, R.color.colorPrimary));
+        }
+
+        /**
+         * getPrimaryDarkColor from {@link SharedPreferences}, default: {@link R.color#colorPrimaryDark}
+         *
+         * @return color (int)
+         */
+        public static int getPrimaryDarkColor(Context context) {
+            return PreferenceManager.getDefaultSharedPreferences(context).getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, ContextCompat.getColor(context, R.color.colorPrimaryDark));
+        }
+
         public static Bitmap readBitmapFromFile(String filePath, int width, int height) {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
@@ -246,6 +270,30 @@ public final class Utils {
 
             return BitmapFactory.decodeFile(filePath, options);
         }
+
+        public static Bitmap readBitmapFromArray(byte[] data, int width, int height) {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeByteArray(data, 0, data.length, options);
+            float srcWidth = options.outWidth;
+            float srcHeight = options.outHeight;
+            int inSampleSize = 1;
+
+            if (srcWidth > height && srcWidth > width) {
+                inSampleSize = (int) (srcWidth / width);
+            } else if (srcWidth < height && srcHeight > height) {
+                inSampleSize = (int) (srcHeight / height);
+            }
+
+            if (inSampleSize <= 0) {
+                inSampleSize = 1;
+            }
+            options.inJustDecodeBounds = false;
+            options.inSampleSize = inSampleSize;
+
+            return BitmapFactory.decodeByteArray(data, 0, data.length, options);
+        }
+
 
         /**
          * @param context context
@@ -390,168 +438,172 @@ public final class Utils {
 
         public static AtomicBoolean ANIMATION_IN_DETAIL_DONE = new AtomicBoolean(true);
 
-        /**
-         * 设置背景与动画 (blur style)
-         *
-         * @param activity if use fragment may case {@link java.lang.NullPointerException}, glide will call {@link Fragment#getActivity()}
-         */
-        public static void setBlurEffect(@NonNull final MainActivity activity, @NonNull final byte[] bitmap, @NonNull final ImageView primaryBackground, @NonNull final ImageView primaryBackgroundBef, final TextView nextText) {
-            new Handler(Looper.getMainLooper()).post(() -> {
+//        /**
+//         * 设置背景与动画 (blur style)
+//         *
+//         * @param activity if use fragment may case {@link java.lang.NullPointerException}, glide will call {@link Fragment#getActivity()}
+//         */
+//        public static void setBlurEffect(@NonNull final MainActivity activity
+//                , @NonNull final byte[] bitmap, @NonNull final ImageView primaryBackgroundBef
+//                , @NonNull final ImageView primaryBackground, final TextView nextText) {
+//
+//            ANIMATION_IN_DETAIL_DONE.set(false);
+//            primaryBackground.setVisibility(View.VISIBLE);
+//
+//            final Bitmap data = readBitmapFromArray(bitmap, 100, 100);
+//            final AtomicInteger vibrantColor = new AtomicInteger(ContextCompat.getColor(activity, R.color.colorPrimary));
+//
+//            Palette.from(data).generate(p -> {
+//                if (p != null) {
+////                        nextText.clearAnimation();
+////                        ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), Color.BLACK, p.getVibrantColor(Color.parseColor(Values.Color.NOT_VERY_BLACK)));
+////                        animator.setDuration(300);
+////                        animator.addUpdateListener(animation -> nextText.setTextColor((Integer) animation.getAnimatedValue()));
+//                    vibrantColor.set(p.getVibrantColor(vibrantColor.get()));
+//                    nextText.setTextColor(vibrantColor.get());
+//                } else {
+//                    nextText.setTextColor(vibrantColor.get());
+//                }
+//            });
+//
+//            //clear
+//            GlideApp.with(activity).clear(primaryBackgroundBef);
+//            if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
+//                primaryBackgroundBef.post(() -> GlideApp.with(activity)
+//                        .load(bitmap)
+//                        .dontAnimate()
+//                        .apply(bitmapTransform(Data.sBlurTransformation))
+//                        .into(primaryBackgroundBef));
+//            } else {
+//                primaryBackgroundBef.setBackgroundColor(vibrantColor.get());
+//            }
+//
+//            Animator animator = ViewAnimationUtils.createCircularReveal(
+//                    primaryBackgroundBef, primaryBackgroundBef.getWidth() / 2, POSITION,
+//                    0,
+//                    (float) Math.hypot(primaryBackgroundBef.getWidth(), primaryBackgroundBef.getHeight()));
+//
+//            animator.setInterpolator(new AccelerateInterpolator());
+//            animator.setDuration(700);
+//            animator.addListener(new Animator.AnimatorListener() {
+//                @Override
+//                public void onAnimationStart(Animator animation) {
+//
+//                }
+//
+//                @Override
+//                public void onAnimationEnd(Animator animation) {
+//                    GlideApp.with(activity).clear(primaryBackground);
+//                    if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
+//                        GlideApp.with(activity)
+//                                .load(bitmap)
+//                                .dontAnimate()
+//                                .apply(bitmapTransform(Data.sBlurTransformation))
+//                                .into(primaryBackground);
+//                    } else {
+//                        primaryBackground.setBackgroundColor(vibrantColor.get());
+//                    }
+//
+//                    primaryBackground.setVisibility(View.GONE);
+//                    ANIMATION_IN_DETAIL_DONE.set(true);
+//                }
+//
+//                @Override
+//                public void onAnimationCancel(Animator animation) {
+//
+//                }
+//
+//                @Override
+//                public void onAnimationRepeat(Animator animation) {
+//
+//                }
+//            });
+//            animator.start();
+//        }
 
-                ANIMATION_IN_DETAIL_DONE.set(false);
-                primaryBackground.setVisibility(View.VISIBLE);
+        public static void setBlurEffect(@NonNull final MainActivity activity
+                , @Nullable final Bitmap bitmap, @NonNull final ImageView bgUp
+                , @NonNull final ImageView bgDown, final TextView nextText) {
 
-                Palette.from(BitmapFactory.decodeByteArray(bitmap, 0, bitmap.length)).generate(p -> {
-                    if (p != null) {
-//                        ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), Color.BLACK, p.getVibrantColor(Color.parseColor(Values.Color.NOT_VERY_BLACK)));
-//                        animator.setDuration(300);
-//                        animator.addUpdateListener(animation -> nextText.setTextColor((Integer) animation.getAnimatedValue()));
-//                        animator.start();
-                        nextText.setTextColor(p.getVibrantColor(Color.parseColor(Values.Color.TEXT_COLOR)));
-                    }
+            ANIMATION_IN_DETAIL_DONE.set(false);
+            bgDown.setVisibility(View.VISIBLE);
+
+            @ColorInt final int defColor = ContextCompat.getColor(activity, R.color.colorPrimary);
+
+            if (bitmap != null) {
+                Palette.from(bitmap).generate(palette -> {
+                    if (palette != null) nextText.setTextColor(palette.getVibrantColor(defColor));
                 });
+            } else {
+                nextText.setTextColor(defColor);
+            }
 
-                //clear
-                GlideApp.with(activity).clear(primaryBackgroundBef);
-                if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
-                    primaryBackgroundBef.post(() -> GlideApp.with(activity)
-                            .load(bitmap)
-                            .dontAnimate()
-                            .apply(bitmapTransform(Data.sBlurTransformation))
-                            .into(primaryBackgroundBef));
-                } else {
-                    Palette.from(BitmapFactory.decodeByteArray(bitmap, 0, bitmap.length)).generate(p -> {
-                        if (p != null) {
-                            primaryBackgroundBef.setBackgroundColor(p.getVibrantColor(Color.TRANSPARENT));
-                        }
+            //clear
+            GlideApp.with(activity).clear(bgUp);
+
+            if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
+                bgUp.post(() -> GlideApp.with(activity)
+                        .load(bitmap)
+                        .dontAnimate()
+                        .apply(bitmapTransform(Data.sBlurTransformation))
+                        .into(bgUp));
+            } else {
+                if (bitmap != null) {
+                    Palette.from(bitmap).generate(palette -> {
+                        if (palette != null)
+                            bgUp.setBackgroundColor(palette.getVibrantColor(defColor));
                     });
+                } else {
+                    bgUp.setBackgroundColor(defColor);
+                }
+            }
+
+            final Animator animator = ViewAnimationUtils.createCircularReveal(
+                    bgUp, bgUp.getWidth() / 2, POSITION, 0, (float) Math.hypot(bgUp.getWidth(), bgUp.getHeight()));
+
+            animator.setInterpolator(new AccelerateInterpolator());
+            animator.setDuration(700);
+            animator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+
                 }
 
-                Animator animator = ViewAnimationUtils.createCircularReveal(
-                        primaryBackgroundBef, primaryBackgroundBef.getWidth() / 2, POSITION,
-                        0,
-                        (float) Math.hypot(primaryBackgroundBef.getWidth(), primaryBackgroundBef.getHeight()));
-
-                animator.setInterpolator(new AccelerateInterpolator());
-                animator.setDuration(700);
-                animator.addListener(new Animator.AnimatorListener() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        GlideApp.with(activity).clear(primaryBackground);
-                        if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
-                            GlideApp.with(activity)
-                                    .load(bitmap)
-                                    .dontAnimate()
-                                    .apply(bitmapTransform(Data.sBlurTransformation))
-                                    .into(primaryBackground);
-                        } else {
-                            Palette.from(BitmapFactory.decodeByteArray(bitmap, 0, bitmap.length)).generate(p -> {
-                                if (p != null) {
-                                    primaryBackground.setBackgroundColor(p.getVibrantColor(Color.TRANSPARENT));
-                                }
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    GlideApp.with(activity).clear(bgDown);
+                    if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
+                        GlideApp.with(activity)
+                                .load(bitmap)
+                                .dontAnimate()
+                                .apply(bitmapTransform(Data.sBlurTransformation))
+                                .into(bgDown);
+                    } else {
+                        if (bitmap != null) {
+                            Palette.from(bitmap).generate(palette -> {
+                                if (palette != null)
+                                    bgDown.setBackgroundColor(palette.getVibrantColor(defColor));
                             });
+                        } else {
+                            bgDown.setBackgroundColor(defColor);
                         }
-
-                        primaryBackground.setVisibility(View.GONE);
-                        ANIMATION_IN_DETAIL_DONE.set(true);
                     }
 
-                    @Override
-                    public void onAnimationCancel(Animator animation) {
-
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animator animation) {
-
-                    }
-                });
-                animator.start();
-            });
-        }
-
-        public static void setBlurEffect(@NonNull final MainActivity activity, @NonNull final Bitmap bitmap, @NonNull final ImageView primaryBackground, @NonNull final ImageView primaryBackgroundBef, final TextView nextText) {
-            new Handler(Looper.getMainLooper()).post(() -> {
-                ANIMATION_IN_DETAIL_DONE.set(false);
-                primaryBackground.setVisibility(View.VISIBLE);
-
-                Palette.from(bitmap).generate(p -> {
-                    if (p != null) {
-//                        nextText.clearAnimation();
-//                        ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), Color.BLACK, p.getVibrantColor(Color.parseColor(Values.Color.NOT_VERY_BLACK)));
-//                        animator.setDuration(300);
-//                        animator.addUpdateListener(animation -> nextText.setTextColor((Integer) animation.getAnimatedValue()));
-                        nextText.setTextColor(p.getVibrantColor(Color.parseColor(Values.Color.TEXT_COLOR)));
-                    }
-                });
-
-                //clear
-                GlideApp.with(activity).clear(primaryBackgroundBef);
-                if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
-                    primaryBackgroundBef.post(() -> GlideApp.with(activity)
-                            .load(bitmap)
-                            .dontAnimate()
-                            .apply(bitmapTransform(Data.sBlurTransformation))
-                            .into(primaryBackgroundBef));
-                } else {
-                    Palette.from(bitmap).generate(p -> {
-                        if (p != null) {
-                            primaryBackgroundBef.setBackgroundColor(p.getVibrantColor(Color.TRANSPARENT));
-                        }
-                    });
+                    bgDown.setVisibility(View.GONE);
+                    ANIMATION_IN_DETAIL_DONE.set(true);
                 }
 
-                Animator animator = ViewAnimationUtils.createCircularReveal(
-                        primaryBackgroundBef, primaryBackgroundBef.getWidth() / 2, POSITION,
-                        0,
-                        (float) Math.hypot(primaryBackgroundBef.getWidth(), primaryBackgroundBef.getHeight()));
+                @Override
+                public void onAnimationCancel(Animator animation) {
 
-                animator.setInterpolator(new AccelerateInterpolator());
-                animator.setDuration(700);
-                animator.addListener(new Animator.AnimatorListener() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
+                }
 
-                    }
+                @Override
+                public void onAnimationRepeat(Animator animation) {
 
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        GlideApp.with(activity).clear(primaryBackground);
-                        if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
-                            GlideApp.with(activity)
-                                    .load(bitmap)
-                                    .dontAnimate()
-                                    .apply(bitmapTransform(Data.sBlurTransformation))
-                                    .into(primaryBackground);
-                        } else {
-                            Palette.from(bitmap).generate(p -> {
-                                if (p != null) {
-                                    primaryBackground.setBackgroundColor(p.getVibrantColor(Color.TRANSPARENT));
-                                }
-                            });
-                        }
-
-                        primaryBackground.setVisibility(View.GONE);
-                        ANIMATION_IN_DETAIL_DONE.set(true);
-                    }
-
-                    @Override
-                    public void onAnimationCancel(Animator animation) {
-
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animator animation) {
-
-                    }
-                });
-                animator.start();
+                }
             });
+            animator.start();
         }
 
         public static boolean isColorLight(@ColorInt final int color) {

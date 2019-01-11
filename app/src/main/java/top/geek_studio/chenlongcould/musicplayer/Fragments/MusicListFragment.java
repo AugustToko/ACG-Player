@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月10日 13:02:26
- * 上次修改时间：2019年01月10日 13:01:56
+ * 当前修改时间：2019年01月11日 15:32:19
+ * 上次修改时间：2019年01月11日 15:31:23
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -27,12 +27,13 @@ import android.view.ViewGroup;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.Interface.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Interface.VisibleOrGone;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentMusicListLayoutBinding;
 
-public final class MusicListFragment extends Fragment implements VisibleOrGone {
+public final class MusicListFragment extends Fragment implements VisibleOrGone, IStyle {
 
     public static final String TAG = "MusicListFragment";
 
@@ -120,5 +121,9 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone {
     public void visibleOrGone(int status) {
         if (mMusicListBinding.includeRecycler.recyclerView != null)
             mMusicListBinding.includeRecycler.recyclerView.setVisibility(status);
+    }
+
+    @Override
+    public void initStyle() {
     }
 }

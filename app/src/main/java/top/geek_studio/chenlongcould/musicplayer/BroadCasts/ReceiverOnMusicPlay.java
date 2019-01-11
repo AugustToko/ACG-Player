@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月07日 16:30:28
- * 上次修改时间：2019年01月06日 16:18:09
+ * 当前修改时间：2019年01月11日 15:32:19
+ * 上次修改时间：2019年01月11日 15:31:23
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -15,12 +15,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Message;
 import android.os.RemoteException;
-import android.support.v7.graphics.Palette;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -54,20 +52,21 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
      * @param cover               AlbumImage
      * @param musicDetailFragment Fragment
      */
+    // TODO: 2019/1/11 reset this
     private static void setSeekBarColor(Bitmap cover, MusicDetailFragment musicDetailFragment) {
-        if (cover != null) {
-            Palette.from(cover).generate(palette -> {
-
-                if (palette != null) {
-                    musicDetailFragment.getSeekBar().getProgressDrawable().setTint(palette.getVibrantColor(Color.WHITE));
-                    musicDetailFragment.getSeekBar().getThumb().setTint(palette.getVibrantColor(Color.WHITE));
-                } else {
-                    musicDetailFragment.getSeekBar().getProgressDrawable().setTint(Color.WHITE);
-                    musicDetailFragment.getSeekBar().getThumb().setTint(Color.WHITE);
-                }
-
-            });
-        }
+//        if (cover != null) {
+//            Palette.from(cover).generate(palette -> {
+//
+//                if (palette != null) {
+//                    musicDetailFragment.getSeekBar().getProgressDrawable().setTint(palette.getVibrantColor(Color.WHITE));
+//                    musicDetailFragment.getSeekBar().getThumb().setTint(palette.getVibrantColor(Color.WHITE));
+//                } else {
+//                    musicDetailFragment.getSeekBar().getProgressDrawable().setTint(Color.WHITE);
+//                    musicDetailFragment.getSeekBar().getThumb().setTint(Color.WHITE);
+//                }
+//
+//            });
+//        }
     }
 
     /**
@@ -99,9 +98,9 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
         Data.setCurrentCover(cover);
 
         Utils.Ui.setPlayButtonNowPlaying();
-        setSeekBarColor(cover, musicDetailFragment);
         musicDetailFragment.setSlideInfo(musicName, albumName, cover);
         musicDetailFragment.setCurrentInfo(musicName, albumName, cover);
+
         reSetSeekBar();         //防止seekBar跳动到Max
         musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
         musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
@@ -292,8 +291,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
                 setFlags(targetIndex);
 
-                Log.d(TAG, "onReceive: " + Data.sCurrentMusicItem.toString());
-
                 //load data
                 if (!Data.sActivities.isEmpty()) {
                     final MusicDetailFragment musicDetailFragment = ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment();
@@ -306,7 +303,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                         final Bitmap cover = Utils.Audio.getMp3Cover(path, musicDetailFragment.getContext());
                         Data.setCurrentCover(cover);
                         Utils.Ui.setPlayButtonNowPlaying();
-                        setSeekBarColor(cover, musicDetailFragment);
                         musicDetailFragment.setSlideInfo(musicName, albumName, cover);
                         musicDetailFragment.setCurrentInfoWithoutMainImage(musicName, albumName, Utils.Audio.getAlbumByteImage(path, context));
                         reSetSeekBar();         //防止seekBar跳动到Max
@@ -316,7 +312,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                     } else {
                         uiSet(musicDetailFragment, targetIndex);
                     }
-
                     sureCar();
                 }
 
@@ -377,7 +372,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 sureCar();
 
                 Utils.Ui.setPlayButtonNowPlaying();
-                setSeekBarColor(cover, musicDetailFragment);
                 musicDetailFragment.setSlideInfo(Data.sNextWillPlayItem.getMusicName(), Data.sNextWillPlayItem.getMusicAlbum(), cover);
                 musicDetailFragment.setCurrentInfo(Data.sNextWillPlayItem.getMusicName(), Data.sNextWillPlayItem.getMusicAlbum(), cover);
 

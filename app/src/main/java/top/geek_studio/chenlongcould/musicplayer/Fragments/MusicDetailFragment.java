@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月10日 13:02:26
- * 上次修改时间：2019年01月10日 13:01:56
+ * 当前修改时间：2019年01月11日 15:32:19
+ * 上次修改时间：2019年01月11日 15:31:23
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -22,7 +22,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -86,7 +85,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
 
     /**
      * slide image: {@link MusicListFragment}
-     * */
+     */
     byte fastView;
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -111,9 +110,9 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
     private float defXScale;
     private float defYScale;
 
-    private ImageView mPrimaryBackground;
+    private ImageView mBGup;
 
-    private ImageView mPrimaryBackground_down;
+    private ImageView mBGdown;
 
     private SeekBar mSeekBar;
 
@@ -235,11 +234,11 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
                 bitmap = BitmapFactory.decodeByteArray(cover, 0, cover.length);
             }
 
-            //set SeekBar color
-            if (bitmap != null) {
-                final int temp = bitmap.getPixel(bitmap.getWidth() / 2, bitmap.getHeight() / 2);
-                mSeekBar.getThumb().setColorFilter(temp, PorterDuff.Mode.SRC_ATOP);
-            }
+//            //set SeekBar color
+//            if (bitmap != null) {
+//                final int temp = bitmap.getPixel(bitmap.getWidth() / 2, bitmap.getHeight() / 2);
+//                mSeekBar.getThumb().setColorFilter(temp, PorterDuff.Mode.SRC_ATOP);
+//            }
 
             //nullable
             setIcoLightOrDark(bitmap);
@@ -275,8 +274,8 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
 
     private void findView(View view) {
         mMusicAlbumImage = view.findViewById(R.id.activity_music_detail_album_image);
-        mPrimaryBackground = view.findViewById(R.id.activity_music_detail_primary_background);
-        mPrimaryBackground_down = view.findViewById(R.id.activity_music_detail_primary_background_down);
+        mBGup = view.findViewById(R.id.activity_music_detail_primary_background_up);
+        mBGdown = view.findViewById(R.id.activity_music_detail_primary_background_down);
         mSeekBar = view.findViewById(R.id.seekBar);
         mCurrentInfoSeek = view.findViewById(R.id.info_bar_seek);
         mNextButton = view.findViewById(R.id.next_button);
@@ -1148,8 +1147,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
 
     @Override
     public void initStyle() {
-        mCurrentMusicNameText.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
-        mCurrentAlbumNameText.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
+        mCurrentInfoSeek.setBackgroundColor(Utils.Ui.getAccentColor(mMainActivity));
     }
 
     /**
@@ -1199,40 +1197,42 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
         mAppBarLayout.startAnimation(temp);
     }
 
-    //set infoBar set AlbumImage set PrimaryBackground
-    public final void setCurrentInfo(@NonNull String name, @NonNull String albumName, byte[] cover) {
-        mMainActivity.runOnUiThread(() -> {
-            mCurrentMusicNameText.setText(name);
-            mCurrentAlbumNameText.setText(albumName);
-
-            if (cover != null) {
-                GlideApp.with(this).clear(mMusicAlbumImage);
-                GlideApp.with(this)
-                        .load(cover)
-                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-                        .centerCrop()
-                        .into(mMusicAlbumImage);
-                Utils.Ui.setBlurEffect(mMainActivity, cover, mPrimaryBackground, mPrimaryBackground_down, mNextWillText);
-            } else {
-                GlideApp.with(this)
-                        .load(R.drawable.ic_audiotrack_24px)
-                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-                        .centerCrop()
-                        .into(mMusicAlbumImage);
-                mPrimaryBackground.setImageDrawable(null);
-                mPrimaryBackground.setBackgroundColor(Color.GRAY);
-                mPrimaryBackground_down.setImageDrawable(null);
-                mPrimaryBackground_down.setBackgroundColor(Color.GRAY);
-            }
-        });
-    }
+//    //set infoBar set AlbumImage set PrimaryBackground
+//    public final void setCurrentInfo(@NonNull String name, @NonNull String albumName, byte[] cover) {
+//        mMainActivity.runOnUiThread(() -> {
+//            mCurrentMusicNameText.setText(name);
+//            mCurrentAlbumNameText.setText(albumName);
+//
+//            if (cover != null) {
+//                GlideApp.with(this).clear(mMusicAlbumImage);
+//                GlideApp.with(this)
+//                        .load(cover)
+//                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+//                        .centerCrop()
+//                        .into(mMusicAlbumImage);
+//                Utils.Ui.setBlurEffect(mMainActivity, cover, mBGup, mBGdown, mNextWillText);
+//            } else {
+//                GlideApp.with(this)
+//                        .load(R.drawable.ic_audiotrack_24px)
+//                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+//                        .centerCrop()
+//                        .into(mMusicAlbumImage);
+//                mBGup.setImageDrawable(null);
+//                mBGup.setBackgroundColor(Color.GRAY);
+//                mBGdown.setImageDrawable(null);
+//                mBGdown.setBackgroundColor(Color.GRAY);
+//            }
+//        });
+//    }
 
     public final void setCurrentInfoWithoutMainImage(@NonNull final String name, @NonNull final String albumName, final byte[] cover) {
         mMainActivity.runOnUiThread(() -> {
             mCurrentMusicNameText.setText(name);
             mCurrentAlbumNameText.setText(albumName);
-            if (cover != null)
-                Utils.Ui.setBlurEffect(mMainActivity, cover, mPrimaryBackground, mPrimaryBackground_down, mNextWillText);
+            if (cover != null) {
+                final Bitmap data = Utils.Ui.readBitmapFromArray(cover, 100, 100);
+                Utils.Ui.setBlurEffect(mMainActivity, data, mBGup, mBGdown, mNextWillText);
+            }
         });
     }
 
@@ -1247,7 +1247,6 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                         .centerCrop()
                         .into(mMusicAlbumImage);
-                Utils.Ui.setBlurEffect(mMainActivity, cover, mPrimaryBackground, mPrimaryBackground_down, mNextWillText);
 
             } else {
                 GlideApp.with(this)
@@ -1255,12 +1254,9 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                         .centerCrop()
                         .into(mMusicAlbumImage);
-                mPrimaryBackground.setImageDrawable(null);
-                mPrimaryBackground.setBackgroundColor(Color.GRAY);
-                mPrimaryBackground_down.setImageDrawable(null);
-                mPrimaryBackground_down.setBackgroundColor(Color.GRAY);
             }
 
+            Utils.Ui.setBlurEffect(mMainActivity, cover, mBGup, mBGdown, mNextWillText);
         });
     }
 
@@ -1351,6 +1347,10 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
             mPreviousButton.setColorFilter(target);
             mLeftTime.setTextColor(target);
             mRightTime.setTextColor(target);
+
+            mSeekBar.getProgressDrawable().setTint(target);
+            mSeekBar.getThumb().setTint(target);
+
         } else {
             @ColorInt final int target = ContextCompat.getColor(mMainActivity, R.color.notVeryWhite);
             mNowPlayingSongText.setTextColor(target);
@@ -1363,6 +1363,9 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
             mPreviousButton.setColorFilter(target);
             mLeftTime.setTextColor(target);
             mRightTime.setTextColor(target);
+
+            mSeekBar.getProgressDrawable().setTint(target);
+            mSeekBar.getThumb().setTint(target);
         }
 
     }

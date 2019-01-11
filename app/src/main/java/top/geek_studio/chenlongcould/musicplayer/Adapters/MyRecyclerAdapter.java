@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月10日 16:43:31
- * 上次修改时间：2019年01月10日 15:29:06
+ * 当前修改时间：2019年01月11日 15:32:19
+ * 上次修改时间：2019年01月11日 10:16:49
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -420,18 +420,10 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
     @Override
     public void initStyle() {
 
-        // TODO: 2019/1/5 type set
-        //type_background
-        if (Values.Style.NIGHT_MODE) currentBind.mMusicExtName.setBackgroundColor(Color.GRAY);
-        else {
-            if (currentBind.mMusicExtName.getText().equals("mp3"))
-                currentBind.mMusicExtName.setBackgroundResource(R.color.mp3TypeColor);
-            else
-                currentBind.mMusicExtName.setBackgroundColor(Color.CYAN);
-        }
-
-        //style
-        currentBind.mMusicText.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
+        if (currentBind.mMusicExtName.getText().equals("mp3"))
+            currentBind.mMusicExtName.setBackgroundResource(R.color.mp3TypeColor);
+        else
+            currentBind.mMusicExtName.setBackgroundColor(Color.CYAN);
     }
 
     static class MyTask extends AsyncTask<Void, Void, String> {

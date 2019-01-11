@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月10日 21:12:43
- * 上次修改时间：2019年01月10日 21:12:37
+ * 当前修改时间：2019年01月11日 15:32:19
+ * 上次修改时间：2019年01月11日 15:31:23
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -18,14 +18,12 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
@@ -47,7 +45,8 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.crashlytics.android.Crashlytics;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.io.File;
@@ -55,6 +54,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
@@ -65,6 +65,7 @@ import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyPagerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter2AlbumList;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
+import top.geek_studio.chenlongcould.musicplayer.BuildConfig;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.AlbumListFragment;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.FileViewFragment;
@@ -139,6 +140,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     private AlertDialog load;
 
+    private FirebaseRemoteConfig mFirebaseRemoteConfig;
+
     /**
      * onXXX
      * At Override
@@ -146,10 +149,30 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     @SuppressLint("CheckResult")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-//        if (Data.sActivities.isEmpty()) Data.sActivities.add(this);
         Data.init(this);
 
         super.onCreate(savedInstanceState);
+
+        //config
+        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+                .setDeveloperModeEnabled(BuildConfig.DEBUG)
+                .build();
+        mFirebaseRemoteConfig.setConfigSettings(configSettings);
+        mFirebaseRemoteConfig.setDefaults(R.xml.remote_config_deaults);
+        mFirebaseRemoteConfig.fetch(5000)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        Log.i(TAG, "initView: Fetch Succeeded");
+
+                        // After config data is successfully fetched, it must be activated before newly fetched
+                        // values are returned.
+                        mFirebaseRemoteConfig.activateFetched();
+                    } else {
+                        Log.e(TAG, "initView: Fetch Failed", new Throwable("Fetch Failed"));
+                    }
+                    displayWelcomeMessage();
+                });
 
         mHandlerThread = new HandlerThread("Handler Thread in MainActivity");
         mHandlerThread.start();
@@ -184,7 +207,14 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                             final File file = new File(path);
                             if (!file.exists()) {
                                 Log.e(TAG, "onAttach: song file: " + path + " does not exits, skip this!!!");
-                                break;
+                                continue;
+                            }
+
+                            final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+                            // TODO: 2019/1/11 CUSTOM SETTINGS
+                            if (duration <= 0 || duration < 10) {
+                                Log.d(TAG, "onCreate: the music-file duration is " + duration + ", skip...");
+                                continue;
                             }
 
                             final String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
@@ -192,7 +222,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                             final String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
                             final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
                             final int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-                            final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
                             final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
                             final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
                             final int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
@@ -299,6 +328,12 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     protected void onResume() {
         super.onResume();
         initStyle();
+        if (mMusicDetailFragment != null) {
+            mMusicDetailFragment.initStyle();
+        }
+        if (mMusicListFragment != null) {
+            mMusicListFragment.initStyle();
+        }
     }
 
     @Override
@@ -527,12 +562,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mFragmentList.clear();
 
         try {
-            Data.sMusicBinder.release();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-
-        try {
             unbindService(Data.sServiceConnection);
         } catch (Exception e) {
             Log.d(TAG, "exitApp: " + e);
@@ -555,6 +584,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         if (Data.getCurrentCover() != null)
             Data.getCurrentCover().recycle();
 
+        Values.HAS_PLAYED = false;
         finish();
     }
 
@@ -564,8 +594,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         Log.i(TAG, "initStyle: do it");
 
         Utils.Ui.setTopBottomColor(this, mMainBinding.appbar, mMainBinding.toolBar);
-        final int color = PreferenceManager.getDefaultSharedPreferences(this).getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577"));
-        mMainBinding.tabLayout.setBackgroundColor(color);
+        mMainBinding.tabLayout.setBackgroundColor(Utils.Ui.getPrimaryColor(this));
+        mMainBinding.tabLayout.setSelectedTabIndicatorColor(Utils.Ui.getAccentColor(this));
 
         Observable.create((ObservableOnSubscribe<ThemeActivity.Theme>) emitter -> {
             final String themeId = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.SELECT_THEME, "null");
@@ -839,7 +869,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 }
                 break;
                 case R.id.debug: {
-                    Crashlytics.getInstance().crash();
+
                 }
             }
             return true;
@@ -907,6 +937,17 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         // 设置按钮的动画效果; 如果不想要打开关闭抽屉时的箭头动画效果，可以不写此行代码
         mMainBinding.drawerLayout.addDrawerListener(mDrawerToggle);
 
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private void displayWelcomeMessage() {
+        String welcomeMessage = mFirebaseRemoteConfig.getString("welcome_message");
+        if (mFirebaseRemoteConfig.getBoolean("welcome_message_caps")) {
+            welcomeMessage.toUpperCase(Locale.CHINESE);
+        } else {
+            welcomeMessage.toLowerCase(Locale.CHINESE);
+        }
+        Toast.makeText(this, welcomeMessage, Toast.LENGTH_SHORT).show();
     }
 
 }
