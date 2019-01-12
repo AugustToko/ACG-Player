@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月11日 18:09:44
-  ~ 上次修改时间：2019年01月11日 16:24:27
+  ~ 当前修改时间：2019年01月12日 20:26:06
+  ~ 上次修改时间：2019年01月12日 16:14:35
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -10,7 +10,7 @@
   -->
 
 <resources>
-    <string name="app_name" translatable="false">MusicPlayer</string>
+    <string name="app_name" translatable="false">ACG player</string>
     <string name="open">open</string>
     <string name="close">close</string>
     <string name="play_status">Play Status</string>
@@ -116,4 +116,9 @@
     <string name="color_noti">Colorized (for Android 7.0 up) </string>
     <string name="set_noti_background_colorized">Set Notification Background Colorized</string>
     <string name="reload">ReLoad</string>
+    <string name="author">Author</string>
+    <string name="thanks">Thanks</string>
+    <string name="set_status_bar_translucent">Set status bar translucent</string>
+    <string name="set_status_bar_translucent_no_black_square_mask">Set status bar translucent no black square mask</string>
+    <string name="donate">Donate</string>
 </resources>

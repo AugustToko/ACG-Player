@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月07日 16:30:28
- * 上次修改时间：2019年01月07日 16:29:51
+ * 当前修改时间：2019年01月12日 20:26:06
+ * 上次修改时间：2019年01月12日 17:05:21
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -148,6 +148,7 @@ public final class AlbumListFragment extends Fragment implements VisibleOrGone {
                     public void onComplete() {
                         setRecyclerViewData();
                         load.dismiss();
+                        mMainActivity.getMainBinding().toolBar.setSubtitle(Data.sAlbumItems.size() + " Album");
                     }
                 });
         

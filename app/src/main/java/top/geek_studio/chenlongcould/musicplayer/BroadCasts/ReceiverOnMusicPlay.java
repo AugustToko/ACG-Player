@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月11日 15:32:19
- * 上次修改时间：2019年01月11日 15:31:23
+ * 当前修改时间：2019年01月12日 20:26:06
+ * 上次修改时间：2019年01月12日 08:23:20
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -232,7 +232,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
             //Type Random (play)
             case TYPE_SHUFFLE: {
-//                if (!READY) break;
+                if (!READY.get()) break;
                 new FastShufflePlayback().execute();
             }
             break;
@@ -400,10 +400,10 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
         @Override
         protected Integer doInBackground(String... strings) {
-//            READY = false;
-            resetMusic();
-
             if (Data.sPlayOrderList.isEmpty()) return -1;
+
+            READY.set(false);
+            resetMusic();
 
             //get data
             final Random random = new Random();
@@ -418,7 +418,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
             setDataSource(path);
             prepare();
-
             playMusic();
 
             return 0;
@@ -433,7 +432,13 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 sureCar();
             }
 
-//            READY = true;
+            READY.set(true);
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+            READY.set(true);
         }
     }
 

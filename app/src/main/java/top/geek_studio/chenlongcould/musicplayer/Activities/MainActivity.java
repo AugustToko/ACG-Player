@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月11日 18:09:44
- * 上次修改时间：2019年01月11日 18:09:37
+ * 当前修改时间：2019年01月12日 20:26:06
+ * 上次修改时间：2019年01月12日 20:25:45
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -18,6 +18,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -45,6 +46,11 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.reward.RewardItem;
+import com.google.android.gms.ads.reward.RewardedVideoAd;
+import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -142,6 +148,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
 
+    private RewardedVideoAd mRewardedVideoAd;
+
     public static void sendKeyEvent(final int KeyCode) {
         new Thread() {     //不可在主线程中调用
             public void run() {
@@ -163,6 +171,59 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         super.onCreate(savedInstanceState);
 
+        MobileAds.initialize(this, MyApplication.APP_ID);
+
+        AdRequest.Builder builder = new AdRequest.Builder();
+        builder.addTestDevice("DE4E3A8921F2AD09E80B39C3EEC25B19");
+
+        // Use an activity context to get the rewarded video instance.
+        mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
+        mRewardedVideoAd.setRewardedVideoAdListener(new RewardedVideoAdListener() {
+            @Override
+            public void onRewardedVideoAdLoaded() {
+                Log.d(TAG, "onRewardedVideoAdLoaded: ");
+            }
+
+            @Override
+            public void onRewardedVideoAdOpened() {
+                Log.d(TAG, "onRewardedVideoAdOpened: ");
+            }
+
+            @Override
+            public void onRewardedVideoStarted() {
+                Log.d(TAG, "onRewardedVideoStarted: ");
+            }
+
+            @Override
+            public void onRewardedVideoAdClosed() {
+                loadRewardedVideoAd();
+                Log.d(TAG, "onRewardedVideoAdClosed: ");
+            }
+
+            @Override
+            public void onRewarded(RewardItem rewardItem) {
+                Log.d(TAG, "onRewarded: ");
+            }
+
+            @Override
+            public void onRewardedVideoAdLeftApplication() {
+                Log.d(TAG, "onRewardedVideoAdLeftApplication: ");
+            }
+
+            @Override
+            public void onRewardedVideoAdFailedToLoad(int i) {
+                Log.d(TAG, "onRewardedVideoAdFailedToLoad: " + i);
+                mMainBinding.getRoot().postDelayed(() -> loadRewardedVideoAd(), 2000);
+            }
+
+            @Override
+            public void onRewardedVideoCompleted() {
+                Log.d(TAG, "onRewardedVideoCompleted: ");
+            }
+        });
+
+        loadRewardedVideoAd();
+
         //config
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
         FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
@@ -179,7 +240,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                         // values are returned.
                         mFirebaseRemoteConfig.activateFetched();
                     } else {
-                        Log.e(TAG, "initView: Fetch Failed", new Throwable("Fetch Failed"));
+                        Log.i(TAG, "initView: Fetch Failed", new Throwable("Fetch Failed"));
                     }
                     displayWelcomeMessage();
                 });
@@ -207,6 +268,11 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         if (savedInstanceState != null)
             mMainBinding.viewPager.setCurrentItem(savedInstanceState.getInt("viewpage", 0), true);
 
+    }
+
+    private void loadRewardedVideoAd() {
+        mRewardedVideoAd.loadAd(MyApplication.AD_ID,
+                new AdRequest.Builder().build());
     }
 
     public void loadData() {
@@ -332,7 +398,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     @Override
     protected void onResume() {
-        super.onResume();
+        mRewardedVideoAd.resume(this);
         initStyle();
         if (mMusicDetailFragment != null) {
             mMusicDetailFragment.initStyle();
@@ -340,6 +406,19 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         if (mMusicListFragment != null) {
             mMusicListFragment.initStyle();
         }
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        mRewardedVideoAd.pause(this);
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        mRewardedVideoAd.destroy(this);
+        super.onDestroy();
     }
 
     @Override
@@ -587,6 +666,11 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         }
         stopService(new Intent(MainActivity.this, MyMusicService.class));
 
+        //stop tile
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            stopService(new Intent(this, MyTile.class));
+        }
+
         Data.sPlayOrderList.clear();
         Data.sTheme = null;
         Data.sAlbumItems.clear();
@@ -597,8 +681,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         Data.sMusicBinder = null;
         Data.sActivities.clear();
         Data.sMainRef.clear();
-
-        stopService(new Intent(this, MyTile.class));
 
         if (Data.getCurrentCover() != null)
             Data.getCurrentCover().recycle();
@@ -615,7 +697,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         Utils.Ui.setTopBottomColor(this, mMainBinding.appbar, mMainBinding.toolBar);
         mMainBinding.tabLayout.setBackgroundColor(Utils.Ui.getPrimaryColor(this));
         mMainBinding.tabLayout.setSelectedTabIndicatorColor(Utils.Ui.getAccentColor(this));
-
         Observable.create((ObservableOnSubscribe<ThemeActivity.Theme>) emitter -> {
             final String themeId = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.SELECT_THEME, "null");
             if (!themeId.equals("null")) {
@@ -880,7 +961,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 }
                 break;
                 case R.id.menu_nav_about: {
-                    Intent intent = new Intent(MainActivity.this, AboutLic.class);
+                    Intent intent = new Intent(MainActivity.this, AboutActivity.class);
                     startActivity(intent);
                 }
                 break;
@@ -888,9 +969,19 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     startActivity(new Intent(MainActivity.this, CarViewActivity.class));
                 }
                 break;
+                case R.id.menu_nav_ad: {
+                    if (mRewardedVideoAd.isLoaded()) {
+                        Toast.makeText(this, "AD showing...", Toast.LENGTH_SHORT).show();
+                        mRewardedVideoAd.show();
+                    } else {
+                        Toast.makeText(this, "AD not loaded try again...", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                break;
                 case R.id.debug: {
 
                 }
+                break;
             }
             return true;
         });

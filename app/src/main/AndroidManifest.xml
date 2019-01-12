@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：AndroidManifest.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月10日 13:02:26
-  ~ 上次修改时间：2019年01月10日 13:01:56
+  ~ 当前修改时间：2019年01月12日 20:26:06
+  ~ 上次修改时间：2019年01月12日 20:25:45
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -20,6 +20,8 @@
         android:name="top.geek_studio.chenlongcould.musicplayer.MyMusicService"
         android:protectionLevel="signature" />
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts" />
@@ -36,11 +38,12 @@
         android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:screenOrientation="portrait"
-        android:theme="@style/GreenTheme">
+        android:theme="@style/LightTheme"
+        tools:replace="android:allowBackup">
         <activity
             android:name=".Activities.MainActivity"
             android:launchMode="singleTask"
-            android:theme="@style/GreenTheme"
+            android:theme="@style/LightTheme"
             android:windowSoftInputMode="stateHidden|adjustPan" />
 
         <service
@@ -105,8 +108,7 @@
         <activity
             android:name=".Activities.AboutLic"
             android:exported="false"
-            android:launchMode="singleTask"
-            android:theme="@style/CommonActivityTheme" />
+            android:launchMode="singleTask" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -138,6 +140,13 @@
             </intent-filter>
         </service>
 
+        <activity android:name=".Activities.AboutActivity">
+
+        </activity>
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-1302949087387063~1079129255" />
     </application>
 
 </manifest>

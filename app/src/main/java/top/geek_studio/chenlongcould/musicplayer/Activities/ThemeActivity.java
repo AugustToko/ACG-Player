@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ThemeActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月10日 13:02:26
- * 上次修改时间：2019年01月10日 13:01:56
+ * 当前修改时间：2019年01月12日 20:26:06
+ * 上次修改时间：2019年01月12日 20:25:40
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -26,7 +26,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.MenuItem;
@@ -56,7 +55,7 @@ import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityThemeBinding;
 
-public class ThemeActivity extends AppCompatActivity implements IStyle {
+public class ThemeActivity extends MyBaseCompatActivity implements IStyle {
 
     public static final String TAG = "ThemeActivity";
 
@@ -155,6 +154,12 @@ public class ThemeActivity extends AppCompatActivity implements IStyle {
 
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+    }
+
+    @Override
+    protected void onDestroy() {
+        mDBHelper.close();
+        super.onDestroy();
     }
 
     private void noteCheck() {

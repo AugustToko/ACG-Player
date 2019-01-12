@@ -1,0 +1,61 @@
+Report created: 
+	2019/1/11	22:44:53
+
+Project name: screen_cc2019.aep
+
+Source files collected to: 
+	C:\Users\chenlongcould\Desktop\screen_shots
+
+Source files collected: All
+
+Collected comps:  
+	main_activity
+	bg
+	album_activity
+	setting_activity
+	theme_activity
+	TOTAL
+	show_main
+	show_album
+	show_settings
+	show_theme
+	frag_detail
+	show_frag_detail
+	Promotional picture
+	par
+	
+Number of collected files:  11
+
+Size of collected files:  13.5 MB
+
+Collected source files: 
+	C:\ProgramData\Red Giant\Trapcode Packs\TC14\Sprites\Common\3D Geometric Shapes\Rounded Cube.mov
+	C:\Users\chenlongcould\Desktop\ic_launcher_round.png
+	C:\Users\chenlongcould\Desktop\new\source common\enframe_2019-01-11-21-52-00.png
+	C:\Users\chenlongcould\Desktop\new\source common\enframe_2019-01-11-21-52-22.png
+	C:\Users\chenlongcould\Desktop\new\source common\enframe_2019-01-11-21-52-37.png
+	C:\Users\chenlongcould\Desktop\new\source common\enframe_2019-01-11-21-52-48.png
+	C:\Users\chenlongcould\Desktop\new\xiaomi5\frag.png
+	C:\Users\chenlongcould\Desktop\new\xiaomi5\settings.png
+	C:\Users\chenlongcould\Desktop\new\xiaomi5\theme.png
+	C:\Users\chenlongcould\Desktop\new\xiaomi5\xiaomi5_album.png
+	C:\Users\chenlongcould\Desktop\new\xiaomi5\xiaomi5_screen.png
+	
+Rendering plug-ins:
+	Classic 3D
+	
+Effects used:  4
+
+Effect:  Drop Shadow
+	
+Effect:  Fast Box Blur
+	
+Effect:  Particular
+	
+Effect:  Tint
+	
+
+Layer:  Text Layer
+	External dependencies:  
+		Font family: “Microsoft YaHei”, Font style: “Bold”
+

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月11日 18:09:44
-  ~ 上次修改时间：2019年01月11日 16:27:36
+  ~ 当前修改时间：2019年01月12日 20:26:06
+  ~ 上次修改时间：2019年01月12日 16:17:54
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -95,4 +95,9 @@
     <string name="sync">同步</string>
     <string name="remove_int">删除？</string>
     <string name="are_u_sure">你确定吗？</string>
+    <string name="author">作者</string>
+    <string name="thanks">感谢</string>
+    <string name="set_status_bar_translucent">设置状态栏透明</string>
+    <string name="set_status_bar_translucent_no_black_square_mask">设置状态栏半透明没有黑色方形遮罩</string>
+    <string name="donate">捐赠</string>
 </resources>

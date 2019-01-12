@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：activity_main.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月05日 09:52:37
-  ~ 上次修改时间：2019年01月05日 09:49:39
+  ~ 当前修改时间：2019年01月12日 20:26:06
+  ~ 上次修改时间：2019年01月12日 20:21:23
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -31,7 +31,7 @@
             app:umanoPanelHeight="@dimen/current_info_bar_height"
             app:umanoShadowHeight="2dp"
             sothree:umanoDragView="@id/touch_view"
-            sothree:umanoScrollableView="@+id/activity_music_detail_card_view">
+            sothree:umanoScrollableView="@id/activity_music_detail_include_recycler">
 
             <android.support.constraint.ConstraintLayout
                 android:id="@+id/main_body"

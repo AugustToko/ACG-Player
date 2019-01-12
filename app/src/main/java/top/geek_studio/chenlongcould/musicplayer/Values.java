@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月10日 16:43:31
- * 上次修改时间：2019年01月10日 14:07:31
+ * 当前修改时间：2019年01月12日 20:26:06
+ * 上次修改时间：2019年01月12日 10:59:23
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -179,6 +179,8 @@ public final class Values {
         public static final String THEME_USE_NOTE = "THEME_USE_NOTE";
 
         public static final String NOTIFICATION_COLORIZED = "NOTIFICATION_COLORIZED";
+
+        public static final String TRANSPORT_STATUS = "TRANSPORT_STATUS";
     }
 
     public static final class BroadCast {

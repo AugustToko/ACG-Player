@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：styles.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月11日 15:32:19
-  ~ 上次修改时间：2019年01月11日 10:03:47
+  ~ 当前修改时间：2019年01月12日 20:26:06
+  ~ 上次修改时间：2019年01月12日 17:39:32
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -17,6 +17,7 @@
         <item name="android:windowAllowReturnTransitionOverlap">true</item>
         <item name="android:windowContentTransitions">true</item>
         <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:fontFamily">@font/roboto</item>
     </style>
 
     <style name="MyBaseThemeWithAlpha" parent="MyBaseTheme">
@@ -39,7 +40,7 @@
         <item name="android:windowTranslucentNavigation">true</item>
     </style>
 
-    <style name="GreenTheme" parent="CommonActivityTheme">
+    <style name="LightTheme" parent="CommonActivityTheme">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -49,8 +50,6 @@
         <item name="colorAccent">#FF4081</item>
         <item name="colorPrimary">#3F51B5</item>
         <item name="colorPrimaryDark">#303F9F</item>
-        <!--<item name="android:navigationBarColor">#3F51B5</item>-->
-        <!--<item name="android:statusBarColor">#303F9F</item>-->
     </style>
 
     <style name="TipDialog" parent="Theme.AppCompat.Dialog">
@@ -62,7 +61,7 @@
 
     <style name="Theme.Phonograph.Notification.Title" parent="@android:style/TextAppearance.StatusBar.EventContent.Title" />
 
-    <style name="FullscreenTheme" parent="GreenTheme">
+    <style name="FullscreenTheme" parent="LightTheme">
         <item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>
         <item name="android:windowActionBarOverlay">true</item>
         <item name="android:windowBackground">@null</item>

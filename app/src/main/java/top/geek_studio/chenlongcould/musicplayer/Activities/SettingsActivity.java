@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月10日 16:43:31
- * 上次修改时间：2019年01月10日 16:42:12
+ * 当前修改时间：2019年01月12日 20:26:06
+ * 上次修改时间：2019年01月12日 14:04:33
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -45,7 +45,7 @@ import top.geek_studio.chenlongcould.musicplayer.databinding.ActivitySettingsBin
 
 import static top.geek_studio.chenlongcould.musicplayer.Values.SharedPrefsTag.NOTIFICATION_COLORIZED;
 
-public final class SettingsActivity extends MyBaseActivity implements IStyle {
+public final class SettingsActivity extends MyBaseCompatActivity implements IStyle {
 
     public static final String TAG = "SettingsActivity";
 
@@ -345,6 +345,21 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
                 }
             }
         });
+
+        mSettingsBinding.statusColor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final SharedPreferences.Editor editor = mDefPrefs.edit();
+                if (mDefPrefs.getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false)) {
+                    editor.putBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false);
+                    mSettingsBinding.colorStatusSwitch.setChecked(false);
+                } else {
+                    editor.putBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, true);
+                    mSettingsBinding.colorStatusSwitch.setChecked(true);
+                }
+                editor.apply();
+            }
+        });
     }
 
     private void clearAnimation() {
@@ -371,6 +386,12 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
         } else {
             mSettingsBinding.colorNotiSwitch.setChecked(false);
         }
+
+        if (mDefPrefs.getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false)) {
+            mSettingsBinding.colorStatusSwitch.setChecked(true);
+        } else {
+            mSettingsBinding.colorStatusSwitch.setChecked(false);
+        }
     }
 
     @Override
@@ -381,9 +402,9 @@ public final class SettingsActivity extends MyBaseActivity implements IStyle {
 
     @Override
     public void initStyle() {
-        mPrimaryImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")));
-        mPrimaryDarkImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")));
-        mAccentImage.setBackgroundColor(mDefPrefs.getInt(Values.ColorInt.ACCENT_COLOR, Color.parseColor("#D81B60")));
+        mPrimaryImage.setBackgroundColor(Utils.Ui.getPrimaryColor(this));
+        mPrimaryDarkImage.setBackgroundColor(Utils.Ui.getPrimaryDarkColor(this));
+        mAccentImage.setBackgroundColor(Utils.Ui.getAccentColor(this));
         Utils.Ui.setTopBottomColor(this, mAppBarLayout, mToolbar);
 
         final ImageView imageView = findViewById(R.id.theme_preview);

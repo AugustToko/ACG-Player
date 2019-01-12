@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月11日 15:32:19
- * 上次修改时间：2019年01月11日 15:31:23
+ * 当前修改时间：2019年01月12日 20:26:06
+ * 上次修改时间：2019年01月12日 18:30:28
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -49,6 +49,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -82,11 +83,6 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public final class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGone {
-
-    /**
-     * slide image: {@link MusicListFragment}
-     */
-    byte fastView;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -502,6 +498,18 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
 
     private void initView(View view) {
         findView(view);
+
+        FrameLayout layout = view.findViewById(R.id.frame_ctrl);
+
+        mSlidingUpPanelLayout.post(() -> {
+            int val0 = (int) (view.getHeight() - layout.getBottom()
+//                    - getResources().getDimension(R.dimen.toolbar_padding_top)
+            );
+//                    + getResources().getDimension(R.dimen.current_info_bar_height));
+
+            Log.d(TAG, "initView: upSlide the val is:" + val0);
+            mSlidingUpPanelLayout.setPanelHeight(val0);
+        });
 
         //get Default values
         mScaleType = mPlayButton.getScaleType();

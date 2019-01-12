@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：colors.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月11日 15:32:19
-  ~ 上次修改时间：2019年01月11日 13:15:27
+  ~ 当前修改时间：2019年01月12日 20:26:06
+  ~ 上次修改时间：2019年01月12日 17:52:10
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -38,7 +38,7 @@
 
     <color name="black_overlay">#66000000</color>
 
-    <color name="line_color">#cecece</color>
+    <color name="line_color">#c1c1c1</color>
 
     <color name="png_image_background">#19000000</color>
     <color name="win_background_color">#fafafa</color>
