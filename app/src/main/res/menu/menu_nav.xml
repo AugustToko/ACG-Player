@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：menu_nav.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月12日 20:26:06
-  ~ 上次修改时间：2019年01月12日 20:25:45
+  ~ 当前修改时间：2019年01月14日 18:52:52
+  ~ 上次修改时间：2019年01月14日 15:03:14
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -21,21 +21,21 @@
     <item android:title="@string/other">
         <menu>
             <item
-                android:id="@+id/menu_nav_about"
-                android:icon="@drawable/ic_info_outline_white_24dp"
-                android:title="@string/about" />
-            <item
                 android:id="@+id/menu_nav_setting"
                 android:icon="@drawable/ic_settings_black_24dp"
                 android:title="@string/settings" />
             <item
-                android:id="@+id/menu_nav_exit"
-                android:icon="@drawable/ic_exit_to_app_black_24dp"
-                android:title="@string/exit" />
-            <item
                 android:id="@+id/menu_nav_ad"
                 android:icon="@drawable/ic_attach_money_black_24dp"
                 android:title="@string/donate" />
+            <item
+                android:id="@+id/menu_nav_about"
+                android:icon="@drawable/ic_info_outline_white_24dp"
+                android:title="@string/about" />
+            <item
+                android:id="@+id/menu_nav_exit"
+                android:icon="@drawable/ic_exit_to_app_black_24dp"
+                android:title="@string/exit" />
             <item
                 android:id="@+id/debug"
                 android:icon="@drawable/ic_info_outline_white_24dp"

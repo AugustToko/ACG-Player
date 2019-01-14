@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：fragment_play_list.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月11日 15:32:19
-  ~ 上次修改时间：2019年01月11日 15:31:26
+  ~ 当前修改时间：2019年01月14日 18:52:52
+  ~ 上次修改时间：2019年01月14日 18:17:39
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -58,6 +58,7 @@
                     android:layout_marginTop="4dp"
                     android:text="@string/app_name"
                     android:textSize="12sp"
+                    android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/recent_name" />
 
@@ -71,6 +72,7 @@
                     android:maxLines="1"
                     android:text="@string/app_name"
                     android:textSize="12sp"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/recent_text_two"
                     app:layout_constraintStart_toStartOf="parent"
@@ -101,6 +103,7 @@
                 android:focusable="true"
                 android:src="@drawable/ic_more_vert_24px"
                 android:tint="#636363"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -152,6 +155,7 @@
                     android:layout_marginTop="4dp"
                     android:text="@string/app_name"
                     android:textSize="12sp"
+                    android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/favourite_name" />
 
@@ -165,6 +169,7 @@
                     android:maxLines="1"
                     android:text="@string/app_name"
                     android:textSize="12sp"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/favourite_name" />
@@ -194,6 +199,7 @@
                 android:focusable="true"
                 android:src="@drawable/ic_more_vert_24px"
                 android:tint="#636363"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -245,6 +251,7 @@
                     android:layout_marginTop="4dp"
                     android:text="@string/app_name"
                     android:textSize="12sp"
+                    android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/history_name" />
 
@@ -258,6 +265,7 @@
                     android:maxLines="1"
                     android:text="@string/app_name"
                     android:textSize="12sp"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/history_text_two"
                     app:layout_constraintStart_toStartOf="parent"
@@ -288,6 +296,7 @@
                 android:focusable="true"
                 android:src="@drawable/ic_more_vert_24px"
                 android:tint="#636363"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

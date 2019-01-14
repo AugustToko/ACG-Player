@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：fragment_music_detail.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月12日 20:26:06
-  ~ 上次修改时间：2019年01月12日 18:51:12
+  ~ 当前修改时间：2019年01月14日 18:52:52
+  ~ 上次修改时间：2019年01月14日 18:27:43
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -39,7 +39,7 @@
             android:scaleType="centerCrop"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/out_slide"
-            tools:background="@color/colorPrimaryDark" />
+            android:src="@color/colorPrimary" />
 
         <ImageView
             android:id="@+id/activity_music_detail_primary_background_up"
@@ -48,8 +48,7 @@
             android:contentDescription="@string/activity_music_detail_primary_background"
             android:scaleType="centerCrop"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/out_slide"
-            tools:background="#000" />
+            app:layout_constraintTop_toBottomOf="@+id/out_slide" />
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -93,6 +92,7 @@
                     android:contentDescription="@string/activity_music_detail_album_image"
                     android:scaleType="centerCrop"
                     android:transitionName="@string/image_trans_album"
+                    android:src="@mipmap/ic_launcher_round"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />

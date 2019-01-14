@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：activity_settings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月12日 20:26:06
-  ~ 上次修改时间：2019年01月12日 20:25:43
+  ~ 当前修改时间：2019年01月14日 18:52:52
+  ~ 上次修改时间：2019年01月14日 16:13:32
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
   ~ *************************************************************
   -->
 
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <android.support.constraint.ConstraintLayout xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".Activities.SettingsActivity">
@@ -108,7 +107,7 @@
                     android:id="@+id/view2"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="#cecece"
+                    android:background="@color/line_color"
                     app:layout_constraintTop_toBottomOf="@+id/primer_color_option" />
 
                 <android.support.constraint.ConstraintLayout
@@ -160,7 +159,7 @@
                     android:id="@+id/view3"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="#cecece"
+                    android:background="@color/line_color"
                     app:layout_constraintTop_toBottomOf="@+id/primer_color_dark_option" />
 
                 <android.support.constraint.ConstraintLayout
@@ -221,11 +220,12 @@
                     app:layout_constraintTop_toBottomOf="@+id/accent_color_option" />
 
                 <LinearLayout
+                    android:id="@+id/part2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:visibility="visible"
                     android:orientation="vertical"
+                    android:visibility="visible"
                     app:layout_constraintTop_toBottomOf="@+id/textView_2">
 
                     <android.support.constraint.ConstraintLayout
@@ -259,12 +259,12 @@
 
                         <Switch
                             android:id="@+id/activity_settings_style_switch"
-                            android:clickable="false"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
                             android:layout_marginEnd="16dp"
                             android:layout_marginBottom="8dp"
+                            android:clickable="false"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />
@@ -274,7 +274,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#cecece"
+                        android:background="@color/line_color"
                         android:visibility="gone" />
 
                     <android.support.constraint.ConstraintLayout
@@ -323,7 +323,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#cecece"
+                        android:background="@color/line_color"
                         android:visibility="gone" />
 
                     <android.support.constraint.ConstraintLayout
@@ -376,7 +376,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#cecece" />
+                        android:background="@color/line_color" />
 
                     <android.support.constraint.ConstraintLayout
                         android:id="@+id/theme_settings"
@@ -419,18 +419,18 @@
                             android:contentDescription="@string/app_name"
                             android:scaleType="centerCrop"
                             android:visibility="gone"
-                            tools:visibility="visible"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
-                            tools:background="@color/colorAccent" />
+                            tools:background="@color/colorAccent"
+                            tools:visibility="visible" />
 
                     </android.support.constraint.ConstraintLayout>
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#cecece" />
+                        android:background="@color/line_color" />
 
                     <android.support.constraint.ConstraintLayout
                         android:id="@+id/color_noti"
@@ -478,7 +478,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#cecece" />
+                        android:background="@color/line_color" />
 
                     <android.support.constraint.ConstraintLayout
                         android:id="@+id/status_color"
@@ -511,12 +511,92 @@
 
                         <Switch
                             android:id="@+id/color_status_switch"
-                            android:clickable="false"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
                             android:layout_marginEnd="16dp"
                             android:layout_marginBottom="8dp"
+                            android:clickable="false"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </android.support.constraint.ConstraintLayout>
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="Filter"
+                    android:textColor="@color/colorAccent"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/part2" />
+
+                <LinearLayout
+                    android:id="@+id/part3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="vertical"
+                    android:visibility="visible"
+                    app:layout_constraintTop_toBottomOf="@+id/filter">
+
+                    <android.support.constraint.ConstraintLayout
+                        android:id="@+id/hide_short"
+                        android:layout_width="match_parent"
+                        android:layout_height="70dp"
+                        android:background="?android:attr/selectableItemBackground">
+
+                        <TextView
+                            android:id="@+id/text_view_11"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="8dp"
+                            android:text="Mini Time"
+                            android:textColor="@color/notVeryBlack"
+                            android:textSize="18sp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:text="Skip the short time of the song"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/text_view_11" />
+
+                        <!--<EditText-->
+                        <!--android:id="@+id/editText"-->
+                        <!--android:layout_width="50dp"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_marginTop="8dp"-->
+                        <!--android:layout_marginEnd="8dp"-->
+                        <!--android:layout_marginBottom="8dp"-->
+                        <!--app:layout_constraintBottom_toBottomOf="parent"-->
+                        <!--app:layout_constraintEnd_toEndOf="parent"-->
+                        <!--app:layout_constraintTop_toTopOf="parent"-->
+                        <!--android:inputType="number"-->
+                        <!--android:hint="Number"-->
+                        <!--app:autofillHints="Number" />-->
+
+                        <Switch
+                            android:id="@+id/filter_switch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginBottom="8dp"
+                            android:clickable="false"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />

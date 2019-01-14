@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月14日 14:45:09
- * 上次修改时间：2019年01月14日 11:26:24
+ * 当前修改时间：2019年01月14日 18:52:52
+ * 上次修改时间：2019年01月14日 18:52:43
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -43,6 +43,7 @@ import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivitySettingsBinding;
 
+import static top.geek_studio.chenlongcould.musicplayer.Values.SharedPrefsTag.HIDE_SHORT_SONG;
 import static top.geek_studio.chenlongcould.musicplayer.Values.SharedPrefsTag.NOTIFICATION_COLORIZED;
 
 public final class SettingsActivity extends MyBaseCompatActivity implements IStyle {
@@ -84,7 +85,7 @@ public final class SettingsActivity extends MyBaseCompatActivity implements ISty
                  * */
                 case PRIMARY: {
                     mPrimaryImage.clearAnimation();
-                    ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, R.color.colorPrimary), color);
+                    ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, R.color.colorPrimary), color);
                     animator.setDuration(300);
                     animator.addUpdateListener(animation -> {
                         mPrimaryImage.setBackgroundColor((Integer) animation.getAnimatedValue());
@@ -106,14 +107,14 @@ public final class SettingsActivity extends MyBaseCompatActivity implements ISty
                  * */
                 case PRIMARY_DARK: {
                     mPrimaryDarkImage.clearAnimation();
-                    ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, R.color.colorPrimaryDark), color);
+                    ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, R.color.colorPrimaryDark), color);
                     animator.setDuration(300);
                     animator.addUpdateListener(animation -> {
                         mPrimaryDarkImage.setBackgroundColor((Integer) animation.getAnimatedValue());
                         getWindow().setNavigationBarColor((Integer) animation.getAnimatedValue());
                     });
                     animator.start();
-                    editor.putInt(Values.ColorInt.PRIMARY_DARK_COLOR, color);
+                    editor.putInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, color);
                     editor.apply();
                     mPrimaryDarkImage.clearAnimation();
                 }
@@ -124,7 +125,7 @@ public final class SettingsActivity extends MyBaseCompatActivity implements ISty
                  * */
                 case ACCENT: {
                     mAccentImage.setBackgroundColor(color);
-                    editor.putInt(Values.ColorInt.ACCENT_COLOR, color);
+                    editor.putInt(Values.SharedPrefsTag.ACCENT_COLOR, color);
                     editor.apply();
                 }
                 break;
@@ -208,10 +209,10 @@ public final class SettingsActivity extends MyBaseCompatActivity implements ISty
         mToolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         primaryOpt.setOnClickListener(v -> {
-            ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_COLOR, Color.parseColor("#008577")))
+            ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, Color.parseColor("#008577")))
                     .setDialogTitle(R.string.color_picker)
                     .setDialogType(ColorPickerDialog.TYPE_PRESETS)
-                    .setShowAlphaSlider(true)
+                    .setShowAlphaSlider(false)
                     .setDialogId(PRIMARY)
                     .setAllowPresets(false)
                     .create();
@@ -221,7 +222,7 @@ public final class SettingsActivity extends MyBaseCompatActivity implements ISty
         });
 
         primaryDarkOpt.setOnClickListener(v -> {
-            ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorInt.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")))
+            ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")))
                     .setDialogTitle(R.string.color_picker)
                     .setDialogType(ColorPickerDialog.TYPE_PRESETS)
                     .setShowAlphaSlider(true)
@@ -234,7 +235,7 @@ public final class SettingsActivity extends MyBaseCompatActivity implements ISty
         });
 
         accentOpt.setOnClickListener(v -> {
-            ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.ColorInt.ACCENT_COLOR, Color.parseColor("#D81B60")))
+            ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.SharedPrefsTag.ACCENT_COLOR, Color.parseColor("#D81B60")))
                     .setDialogTitle(R.string.color_picker)
                     .setDialogType(ColorPickerDialog.TYPE_PRESETS)
                     .setShowAlphaSlider(true)
@@ -349,19 +350,28 @@ public final class SettingsActivity extends MyBaseCompatActivity implements ISty
             }
         });
 
-        mSettingsBinding.statusColor.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final SharedPreferences.Editor editor = mDefPrefs.edit();
-                if (mDefPrefs.getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false)) {
-                    editor.putBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false);
-                    mSettingsBinding.colorStatusSwitch.setChecked(false);
-                } else {
-                    editor.putBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, true);
-                    mSettingsBinding.colorStatusSwitch.setChecked(true);
-                }
-                editor.apply();
+        mSettingsBinding.statusColor.setOnClickListener(v -> {
+            final SharedPreferences.Editor editor = mDefPrefs.edit();
+            if (mDefPrefs.getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false)) {
+                editor.putBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false);
+                mSettingsBinding.colorStatusSwitch.setChecked(false);
+            } else {
+                editor.putBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, true);
+                mSettingsBinding.colorStatusSwitch.setChecked(true);
             }
+            editor.apply();
+        });
+
+        mSettingsBinding.hideShort.setOnClickListener(v -> {
+            final SharedPreferences.Editor editor = mDefPrefs.edit();
+            if (mDefPrefs.getBoolean(HIDE_SHORT_SONG, true)) {
+                editor.putBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, false);
+                mSettingsBinding.filterSwitch.setChecked(false);
+            } else {
+                editor.putBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
+                mSettingsBinding.filterSwitch.setChecked(true);
+            }
+            editor.apply();
         });
     }
 
@@ -394,6 +404,12 @@ public final class SettingsActivity extends MyBaseCompatActivity implements ISty
             mSettingsBinding.colorStatusSwitch.setChecked(true);
         } else {
             mSettingsBinding.colorStatusSwitch.setChecked(false);
+        }
+
+        if (mDefPrefs.getBoolean(HIDE_SHORT_SONG, true)) {
+            mSettingsBinding.filterSwitch.setChecked(true);
+        } else {
+            mSettingsBinding.filterSwitch.setChecked(false);
         }
     }
 

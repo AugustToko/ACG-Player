@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：include_wait_play_body.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月11日 15:32:19
-  ~ 上次修改时间：2019年01月11日 10:16:49
+  ~ 当前修改时间：2019年01月14日 18:52:52
+  ~ 上次修改时间：2019年01月14日 18:30:08
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -104,9 +104,9 @@
                 android:layout_height="wrap_content"
                 android:maxLines="1"
                 android:text="Music Text"
+                android:textColor="?android:textColorPrimary"
                 android:textSize="18sp"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:textColor="?android:textColorPrimary" />
+                app:layout_constraintTop_toTopOf="parent" />
 
         </android.support.constraint.ConstraintLayout>
 

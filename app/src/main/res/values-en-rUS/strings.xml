@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月14日 14:45:09
-  ~ 上次修改时间：2019年01月14日 10:17:17
+  ~ 当前修改时间：2019年01月14日 18:52:52
+  ~ 上次修改时间：2019年01月14日 18:21:59
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -40,8 +40,6 @@
     <string name="licenses">Licenses</string>
     <string name="music_detail_background">Music Detail Background</string>
     <string name="set_background_color_or_image_with_blur">Set background color or image with blur</string>
-    <string name="tablayout_auto_color_accent">TabLayout Auto Color Accent</string>
-    <string name="set_tablayout_with_music_cover_accent_color">Set TabLayout with music cover accent color</string>
     <string name="auto_night_mode">Night Mode</string>
     <string name="set_app_background_color_dark">Set app background color dark</string>
     <string name="next_play">Next Play</string>
@@ -71,7 +69,6 @@
     <string name="title_notifications">Notifications</string>
     <string name="title_activity_theme">ThemeActivity</string>
     <string name="theme_image">Theme Image</string>
-    <string name="no_equalizer" translatable="false">No EQ</string>
     <string name="set_theme">Set Theme</string>
     <string name="theme">Theme</string>
     <string name="sure_set_def_theme_int">Set Default Theme (NONE) ?</string>
@@ -107,4 +104,6 @@
     <string name="share">Share</string>
     <string name="send_a_email">Send a E-Mail</string>
     <string name="open_blog">Open my blog</string>
+    <string name="play">Play</string>
+    <string name="no_equalizer">No EQ</string>
 </resources>

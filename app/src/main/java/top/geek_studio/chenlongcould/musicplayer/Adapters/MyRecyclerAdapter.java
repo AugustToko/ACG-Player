@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月11日 15:32:19
- * 上次修改时间：2019年01月11日 10:16:49
+ * 当前修改时间：2019年01月14日 18:52:52
+ * 上次修改时间：2019年01月14日 18:08:12
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -83,8 +83,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
     private MainActivity mMainActivity;
 
     private Activity mContext;
-
-    private ItemHolder currentBind;
 
     //ui position, like: MainActivity or-> xxFragment...
     private String mCurrentUiPosition;
@@ -356,8 +354,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 GlideApp.with(mMainActivity).clear(holder.mMusicCoverImage);
             }
 
-            currentBind = holder;
-
             /* show song name, use songNameList */
             Values.CurrentData.CURRENT_BIND_INDEX_MUSIC_LIST = viewHolder.getAdapterPosition();
 
@@ -366,8 +362,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             String prefix = mMusicItems.get(i).getMusicPath().substring(mMusicItems.get(i).getMusicPath().lastIndexOf(".") + 1);
             holder.mMusicExtName.setText(prefix);
             holder.mTime.setText(Data.sSimpleDateFormat.format(new Date(mMusicItems.get(i).getDuration())));
-
-            initStyle();
 
             /*--- 添加标记以便避免ImageView因为ViewHolder的复用而出现混乱 ---*/
             holder.mMusicCoverImage.setTag(R.string.key_id_1, i);
@@ -420,10 +414,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
     @Override
     public void initStyle() {
 
-        if (currentBind.mMusicExtName.getText().equals("mp3"))
-            currentBind.mMusicExtName.setBackgroundResource(R.color.mp3TypeColor);
-        else
-            currentBind.mMusicExtName.setBackgroundColor(Color.CYAN);
+
     }
 
     static class MyTask extends AsyncTask<Void, Void, String> {

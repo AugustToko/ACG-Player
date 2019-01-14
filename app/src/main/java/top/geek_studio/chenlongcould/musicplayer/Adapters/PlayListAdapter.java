@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：PlayListAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:17
+ * 当前修改时间：2019年01月14日 18:52:52
+ * 上次修改时间：2019年01月14日 18:15:10
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
@@ -95,6 +96,16 @@ public class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.ViewHo
                     }
                 }
                 break;
+
+                case Menu.FIRST + 1: {
+                    Toast.makeText(mMainActivity, "Building...", Toast.LENGTH_SHORT).show();
+                }
+                break;
+
+                case Menu.FIRST + 2: {
+                    Toast.makeText(mMainActivity, "Building...", Toast.LENGTH_SHORT).show();
+                }
+                break;
             }
             return true;
         });
@@ -133,10 +144,10 @@ public class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.ViewHo
 
             Resources resources = mMainActivity.getResources();
 
-            // TODO: 2018/12/10 translation
+            // TODO: 2018/12/10 building
             mMenu.add(Menu.NONE, Menu.FIRST, 0, resources.getString(R.string.del));
-            mMenu.add(Menu.NONE, Menu.FIRST + 1, 0, "Save As");
-            mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, "Play");
+            mMenu.add(Menu.NONE, Menu.FIRST + 1, 0, resources.getString(R.string.save_as));
+            mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, resources.getString(R.string.play));
         }
     }
 }

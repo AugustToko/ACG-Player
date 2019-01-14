@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月14日 14:45:09
- * 上次修改时间：2019年01月14日 14:44:29
+ * 当前修改时间：2019年01月14日 18:52:52
+ * 上次修改时间：2019年01月14日 16:15:47
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -266,7 +266,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     }
 
     private void loadRewardedVideoAd() {
-        mRewardedVideoAd.loadAd(MyApplication.AD_ID,
+        mRewardedVideoAd.loadAd(MyApplication.AD_ID_TEST,
                 new AdRequest.Builder().build());
     }
 
@@ -281,6 +281,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                         emitter.onNext(-2);
                     } else {
 
+                        final boolean skipShort = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
+
                         do {
                             final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
                             final File file = new File(path);
@@ -290,9 +292,11 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                             }
 
                             final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-                            // TODO: 2019/1/11 CUSTOM SETTINGS
-                            if (duration <= 0 || duration < 10) {
+                            if (duration <= 0) {
                                 Log.d(TAG, "onCreate: the music-file duration is " + duration + ", skip...");
+                                continue;
+                            }
+                            if (skipShort && duration < 10) {
                                 continue;
                             }
 
@@ -962,7 +966,10 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 }
                 break;
                 case R.id.car_mode: {
-                    startActivity(new Intent(MainActivity.this, CarViewActivity.class));
+                    if (Values.HAS_PLAYED)
+                        startActivity(new Intent(MainActivity.this, CarViewActivity.class));
+                    else
+                        Toast.makeText(this, "No music playing...", Toast.LENGTH_SHORT).show();
                 }
                 break;
                 case R.id.menu_nav_ad: {
