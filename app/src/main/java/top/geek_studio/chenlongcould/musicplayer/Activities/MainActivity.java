@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月12日 20:26:06
- * 上次修改时间：2019年01月12日 20:25:45
+ * 当前修改时间：2019年01月14日 14:45:09
+ * 上次修改时间：2019年01月14日 14:44:29
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -168,14 +168,9 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Data.init(this);
-
         super.onCreate(savedInstanceState);
 
         MobileAds.initialize(this, MyApplication.APP_ID);
-
-        AdRequest.Builder builder = new AdRequest.Builder();
-        builder.addTestDevice("DE4E3A8921F2AD09E80B39C3EEC25B19");
-
         // Use an activity context to get the rewarded video instance.
         mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
         mRewardedVideoAd.setRewardedVideoAdListener(new RewardedVideoAdListener() {
@@ -417,6 +412,12 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     @Override
     protected void onDestroy() {
+        try {
+            unbindService(Data.sServiceConnection);
+        } catch (Exception e) {
+            Log.d(TAG, "exitApp: " + e);
+        }
+        GlideApp.with(this).pauseAllRequests();
         mRewardedVideoAd.destroy(this);
         super.onDestroy();
     }
@@ -659,11 +660,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mHandlerThread.quit();
         mFragmentList.clear();
 
-        try {
-            unbindService(Data.sServiceConnection);
-        } catch (Exception e) {
-            Log.d(TAG, "exitApp: " + e);
-        }
         stopService(new Intent(MainActivity.this, MyMusicService.class));
 
         //stop tile

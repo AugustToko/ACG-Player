@@ -1,0 +1,12 @@
+<!--
+  ~ *************************************************************
+  ~ 文件：AndroidManifest.xml  模块：geeklibrary  项目：MusicPlayer
+  ~ 当前修改时间：2019年01月14日 14:45:09
+  ~ 上次修改时间：2019年01月14日 14:44:29
+  ~ 作者：chenlongcould
+  ~ Geek Studio
+  ~ Copyright (c) 2019
+  ~ *************************************************************
+  -->
+
+<manifest package="top.geek_stusio.chenlongcould.geeklibrary" />

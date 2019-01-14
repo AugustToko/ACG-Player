@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月12日 20:26:06
- * 上次修改时间：2019年01月12日 18:30:28
+ * 当前修改时间：2019年01月14日 14:45:09
+ * 上次修改时间：2019年01月12日 20:37:06
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -526,10 +526,10 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
 
             String befPath = null;
             String nexPath = null;
-            if (Values.CurrentData.CURRENT_MUSIC_INDEX != 0) {
+            if (Values.CurrentData.CURRENT_MUSIC_INDEX > 0) {
                 befPath = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX - 1).getMusicPath();
             }
-            if (Values.CurrentData.CURRENT_MUSIC_INDEX != Data.sPlayOrderList.size() - 1) {
+            if (Values.CurrentData.CURRENT_MUSIC_INDEX < Data.sPlayOrderList.size() - 1) {
                 nexPath = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX + 1).getMusicPath();
             }
 

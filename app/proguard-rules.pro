@@ -66,3 +66,8 @@
 -dontwarn com.simplecityapps.**
 -dontwarn com.sothree.slidinguppanel.**
 -dontwarn com.squareup.haha.**
+#okhttp
+-dontnote org.codehaus.**
+-dontnote org.conscrypt.**
+-dontwarn org.codehaus.**
+-dontwarn org.conscrypt.**

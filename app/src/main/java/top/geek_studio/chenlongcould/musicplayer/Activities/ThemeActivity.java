@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ThemeActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月12日 20:26:06
- * 上次修改时间：2019年01月12日 20:25:40
+ * 当前修改时间：2019年01月14日 14:45:09
+ * 上次修改时间：2019年01月14日 14:44:29
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -114,7 +114,7 @@ public class ThemeActivity extends MyBaseCompatActivity implements IStyle {
                     preferences.putBoolean(Values.SharedPrefsTag.THEME_USE_NOTE, false);
                     preferences.apply();
 
-                    AlertDialog.Builder builder = new AlertDialog.Builder(ThemeActivity.this);
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(ThemeActivity.this);
                     builder.setTitle(getString(R.string.sure_int));
                     builder.setMessage(getString(R.string.sure_set_def_theme_int));
                     builder.setCancelable(true);

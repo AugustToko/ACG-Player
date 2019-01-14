@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyBaseCompatActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月12日 20:26:06
- * 上次修改时间：2019年01月12日 14:04:33
+ * 当前修改时间：2019年01月14日 14:45:09
+ * 上次修改时间：2019年01月14日 14:44:29
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -12,16 +12,19 @@
 package top.geek_studio.chenlongcould.musicplayer.Activities;
 
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
 @SuppressLint("Registered")
@@ -43,6 +46,20 @@ public class MyBaseCompatActivity extends AppCompatActivity {
             }
         }
 
+        //noinspection deprecation
+        setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, Utils.Ui.getPrimaryColor(this)));
+
     }
 
+    protected void setUpTaskCardColor(@ColorInt int color) {
+        //noinspection deprecation
+        setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, color));
+    }
+
+    @Override
+    protected void onResume() {
+        //noinspection deprecation
+        setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, Utils.Ui.getPrimaryColor(this)));
+        super.onResume();
+    }
 }

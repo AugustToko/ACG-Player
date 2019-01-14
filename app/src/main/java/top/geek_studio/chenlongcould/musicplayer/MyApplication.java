@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月12日 20:26:06
- * 上次修改时间：2019年01月12日 18:53:41
+ * 当前修改时间：2019年01月14日 14:45:09
+ * 上次修改时间：2019年01月14日 14:44:29
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -17,6 +17,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.res.Configuration;
@@ -41,9 +43,7 @@ import java.util.Locale;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.AlbumListFragment;
-import top.geek_studio.chenlongcould.musicplayer.Utils.MyThemeDBHelper;
 import top.geek_studio.chenlongcould.musicplayer.Utils.PlayListsUtil;
-import top.geek_studio.chenlongcould.musicplayer.Utils.ThemeStore;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 
 public final class MyApplication extends Application {
@@ -62,17 +62,21 @@ public final class MyApplication extends Application {
 
     private ShortcutManager mShortcutManager;
 
-    public static final String VERSION_CODE = "ver_code";
+    public static final String MY_WEB_SITE = "https://blog.geek-studio.top/";
 
-    public static final int CURRENT_VER_CODE = 32;
+    public static final String VERSION_CODE = "ver_code";
 
     public static final int TARGET_ACTION_CODE = -99;
 
-    public static final String AD_ID = "ca-app-pub-1302949087387063/3066110293";
+    public static final String AD_ID = "ca-app-pub-1563796422813816/1120998454";
 
     public static final String AD_ID_TEST = "ca-app-pub-3940256099942544/5224354917";
 
-    public static final String APP_ID = "ca-app-pub-1302949087387063~1079129255";
+    public static final String APP_ID = "ca-app-pub-1563796422813816~9980509600";
+
+    public static final int VER_CODE = 46;
+
+    public static PackageInfo sPackageInfo;
 
     @Override
     public void onCreate() {
@@ -80,32 +84,26 @@ public final class MyApplication extends Application {
 
         mAppContext = new WeakReference<>(this);
 
+        try {
+            sPackageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
         if (getProcessName(this).equals(getPackageName())) {
 
             mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
             mDefSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-
             // TODO: 2019/1/6 ver
             //noinspection StatementWithEmptyBody
-            if (mDefSharedPreferences.getInt(VERSION_CODE, -1) != CURRENT_VER_CODE) {
+            if (mDefSharedPreferences.getLong(VERSION_CODE, -1) != VER_CODE) {
                 Toast.makeText(this, "建议手动清除该应用程序数据...", Toast.LENGTH_SHORT).show();
-//                SharedPreferences.Editor editor = mDefSharedPreferences.edit();
-//
-//                editor.remove(Values.SharedPrefsTag.SELECT_THEME);
-//                editor.remove(Values.SharedPrefsTag.THEME_USE_NOTE);
-//
-//                //do somethings
-//                new Thread(() -> {
-//                    Utils.IO.delFolder(getExternalFilesDir(ThemeStore.DIR_NAME).getAbsolutePath());
-//                    editor.putInt(VERSION_CODE, CURRENT_VER_CODE);
-//                    editor.apply();
-//                }).start();
             }
 
             //add version code
             SharedPreferences.Editor ver_edit = mDefSharedPreferences.edit();
-            ver_edit.putInt(VERSION_CODE, CURRENT_VER_CODE);
+            ver_edit.putLong(VERSION_CODE, VER_CODE);
             ver_edit.apply();
 
             int id = mDefSharedPreferences.getInt(Values.SharedPrefsTag.FAVOURITE_LIST_ID, -1);
@@ -115,9 +113,6 @@ public final class MyApplication extends Application {
                 editor.putInt(Values.SharedPrefsTag.FAVOURITE_LIST_ID, id);
                 editor.apply();
             }
-
-            MyThemeDBHelper dbHelper = new MyThemeDBHelper(this, ThemeStore.DATA_BASE_NAME, null, 1);
-            dbHelper.getWritableDatabase();
 
             //监听耳机(有线或无线)的插拔动作, 拔出暂停音乐
             IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
@@ -130,7 +125,6 @@ public final class MyApplication extends Application {
             Configuration config = resources.getConfiguration();
             config.locale = Locale.getDefault();
             resources.updateConfiguration(config, dm);
-
 
             //first or not
             Values.FIRST_USE = mDefSharedPreferences.getBoolean(Values.SharedPrefsTag.FIRST_USE, true);

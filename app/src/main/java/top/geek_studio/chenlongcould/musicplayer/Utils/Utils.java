@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月11日 15:32:19
- * 上次修改时间：2019年01月11日 15:31:27
+ * 当前修改时间：2019年01月14日 14:45:09
+ * 上次修改时间：2019年01月12日 20:32:27
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -558,52 +558,55 @@ public final class Utils {
                 }
             }
 
-            final Animator animator = ViewAnimationUtils.createCircularReveal(
-                    bgUp, bgUp.getWidth() / 2, POSITION, 0, (float) Math.hypot(bgUp.getWidth(), bgUp.getHeight()));
+            bgUp.post(() -> {
+                final Animator animator = ViewAnimationUtils.createCircularReveal(
+                        bgUp, bgUp.getWidth() / 2, POSITION, 0, (float) Math.hypot(bgUp.getWidth(), bgUp.getHeight()));
 
-            animator.setInterpolator(new AccelerateInterpolator());
-            animator.setDuration(700);
-            animator.addListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationStart(Animator animation) {
+                animator.setInterpolator(new AccelerateInterpolator());
+                animator.setDuration(700);
+                animator.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
 
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    GlideApp.with(activity).clear(bgDown);
-                    if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
-                        GlideApp.with(activity)
-                                .load(bitmap)
-                                .dontAnimate()
-                                .apply(bitmapTransform(Data.sBlurTransformation))
-                                .into(bgDown);
-                    } else {
-                        if (bitmap != null) {
-                            Palette.from(bitmap).generate(palette -> {
-                                if (palette != null)
-                                    bgDown.setBackgroundColor(palette.getVibrantColor(defColor));
-                            });
-                        } else {
-                            bgDown.setBackgroundColor(defColor);
-                        }
                     }
 
-                    bgDown.setVisibility(View.GONE);
-                    ANIMATION_IN_DETAIL_DONE.set(true);
-                }
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        GlideApp.with(activity).clear(bgDown);
+                        if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
+                            GlideApp.with(activity)
+                                    .load(bitmap)
+                                    .dontAnimate()
+                                    .apply(bitmapTransform(Data.sBlurTransformation))
+                                    .into(bgDown);
+                        } else {
+                            if (bitmap != null) {
+                                Palette.from(bitmap).generate(palette -> {
+                                    if (palette != null)
+                                        bgDown.setBackgroundColor(palette.getVibrantColor(defColor));
+                                });
+                            } else {
+                                bgDown.setBackgroundColor(defColor);
+                            }
+                        }
 
-                @Override
-                public void onAnimationCancel(Animator animation) {
+                        bgDown.setVisibility(View.GONE);
+                        ANIMATION_IN_DETAIL_DONE.set(true);
+                    }
 
-                }
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
 
-                @Override
-                public void onAnimationRepeat(Animator animation) {
+                    }
 
-                }
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                });
+                animator.start();
             });
-            animator.start();
+
         }
 
         public static boolean isColorLight(@ColorInt final int color) {

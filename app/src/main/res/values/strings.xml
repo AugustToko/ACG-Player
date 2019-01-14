@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月12日 20:26:06
-  ~ 上次修改时间：2019年01月12日 16:14:35
+  ~ 当前修改时间：2019年01月14日 14:45:09
+  ~ 上次修改时间：2019年01月14日 10:17:17
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -121,4 +121,11 @@
     <string name="set_status_bar_translucent">Set status bar translucent</string>
     <string name="set_status_bar_translucent_no_black_square_mask">Set status bar translucent no black square mask</string>
     <string name="donate">Donate</string>
+    <string name="update_log">Update Log</string>
+    <string name="version">Version</string>
+    <string name="share">Share</string>
+    <string name="geek_aug" translatable="false">Geek_Aug</string>
+    <string name="jiangsu" translatable="false">Jiangsu China</string>
+    <string name="send_a_email">Send a E-Mail</string>
+    <string name="open_blog">Open my blog</string>
 </resources>

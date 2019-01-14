@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月12日 20:26:06
- * 上次修改时间：2019年01月12日 14:04:33
+ * 当前修改时间：2019年01月14日 14:45:09
+ * 上次修改时间：2019年01月14日 11:26:24
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -92,9 +92,12 @@ public final class SettingsActivity extends MyBaseCompatActivity implements ISty
                         mToolbar.setBackgroundColor((Integer) animation.getAnimatedValue());
                     });
                     animator.start();
-                    editor.putInt(Values.ColorInt.PRIMARY_COLOR, color);
+                    editor.putInt(Values.SharedPrefsTag.PRIMARY_COLOR, color);
                     editor.apply();
                     mPrimaryImage.clearAnimation();
+
+                    //set cardColor
+                    SettingsActivity.super.setUpTaskCardColor(color);
                 }
                 break;
 
