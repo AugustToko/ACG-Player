@@ -1,0 +1,15 @@
+<!--
+  ~ *************************************************************
+  ~ 文件：dimens.xml  模块：geeklibrary  项目：MusicPlayer
+  ~ 当前修改时间：2019年01月16日 20:44:58
+  ~ 上次修改时间：2019年01月15日 14:32:34
+  ~ 作者：chenlongcould
+  ~ Geek Studio
+  ~ Copyright (c) 2019
+  ~ *************************************************************
+  -->
+
+<resources>
+    <dimen name="status_add_toolbar_height">80dp</dimen>
+    <dimen name="toolbar_padding">25dp</dimen>
+</resources>
