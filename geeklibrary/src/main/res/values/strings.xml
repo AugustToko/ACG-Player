@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：geeklibrary  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月14日 14:45:09
-  ~ 上次修改时间：2019年01月14日 08:09:30
+  ~ 当前修改时间：2019年01月16日 20:43:13
+  ~ 上次修改时间：2019年01月16日 08:56:30
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -10,5 +10,6 @@
   -->
 
 <resources>
-    <string name="app_name">Geek Library</string>
+    <string name="app_name">GeekLibrary</string>
+    <string name="title">Title</string>
 </resources>

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：PlayListsUtil.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:17
+ * 当前修改时间：2019年01月16日 20:43:13
+ * 上次修改时间：2019年01月16日 20:42:23
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -30,6 +30,11 @@ import top.geek_studio.chenlongcould.musicplayer.Models.PlayListItem;
 
 import static android.provider.MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI;
 
+/**
+ * modify by chenlongcould
+ *
+ * @author Karim Abou Zeid (kabouzeid)
+ */
 public final class PlayListsUtil {
 
     public static final String DEFAULT_LIST = "Default";

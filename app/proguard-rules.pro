@@ -56,6 +56,7 @@
 #Fragment不需要在AndroidManifest.xml中注册，需要额外保护下
 -keep public class * extends android.support.v4.app.Fragment
 -keep public class * extends android.app.Fragment
+-keep class top.geek_studio.chenlongcould.geeklibrary.** { *;}
 
 # 保持测试相关的代码
 #-dontnote junit.framework.**
@@ -71,3 +72,4 @@
 -dontnote org.conscrypt.**
 -dontwarn org.codehaus.**
 -dontwarn org.conscrypt.**
+-dontwarn top.geek_studio.chenlongcould.geeklibrary.**

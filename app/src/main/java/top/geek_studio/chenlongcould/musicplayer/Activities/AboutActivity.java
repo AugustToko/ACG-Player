@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AboutActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月14日 14:45:09
- * 上次修改时间：2019年01月14日 14:44:29
+ * 当前修改时间：2019年01月16日 20:43:13
+ * 上次修改时间：2019年01月16日 20:42:17
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -30,6 +30,7 @@ import java.io.IOException;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+import top.geek_studio.chenlongcould.geeklibrary.HttpUtil;
 import top.geek_studio.chenlongcould.musicplayer.MyApplication;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
@@ -37,7 +38,6 @@ import top.geek_studio.chenlongcould.musicplayer.databinding.AboutTemplateDulTex
 import top.geek_studio.chenlongcould.musicplayer.databinding.AboutTemplateSingleTextBinding;
 import top.geek_studio.chenlongcould.musicplayer.databinding.AboutTemplateThanksBinding;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityAboutAppBinding;
-import top.geek_stusio.chenlongcould.geeklibrary.HttpUtil;
 
 public class AboutActivity extends MyBaseCompatActivity {
 

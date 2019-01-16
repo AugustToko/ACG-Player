@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ *************************************************************
+  ~ 文件：ramp_bg.xml  模块：geeklibrary  项目：MusicPlayer
+  ~ 当前修改时间：2019年01月16日 20:43:13
+  ~ 上次修改时间：2019年01月12日 20:26:07
+  ~ 作者：chenlongcould
+  ~ Geek Studio
+  ~ Copyright (c) 2019
+  ~ *************************************************************
+  -->
+
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <gradient
+        android:angle="225"
+        android:endColor="@color/colorPrimary"
+        android:startColor="#ff8055" />
+
+</shape>

@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：recycler_music_list_item_expand.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月05日 20:52:07
-  ~ 上次修改时间：2019年01月05日 11:18:19
+  ~ 当前修改时间：2019年01月16日 20:43:13
+  ~ 上次修改时间：2019年01月16日 20:42:21
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -41,7 +41,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="BUTTON 1" />
+            android:text="BUTTON 1"
+            android:textSize="12sp" />
 
         <Button
             android:id="@+id/expand_button_2"
@@ -49,7 +50,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="BUTTON 2" />
+            android:text="BUTTON 2"
+            android:textSize="12sp" />
 
         <Button
             android:id="@+id/expand_button_3"
@@ -57,15 +59,17 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="BUTTON 3" />
+            android:text="set Ringtone"
+            android:textSize="12.5sp" />
 
         <Button
-            android:id="@+id/expand_button_4"
+            android:id="@+id/expand_button_share"
             style="?android:buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="BUTTON 4" />
+            android:text="Share"
+            android:textSize="12sp" />
 
     </LinearLayout>
 

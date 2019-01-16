@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月14日 18:52:52
- * 上次修改时间：2019年01月14日 18:52:43
+ * 当前修改时间：2019年01月16日 20:43:13
+ * 上次修改时间：2019年01月16日 08:34:52
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -34,9 +34,9 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.jrummyapps.android.colorpicker.ColorPickerDialog;
 import com.jrummyapps.android.colorpicker.ColorPickerDialogListener;
 
+import top.geek_studio.chenlongcould.geeklibrary.Theme.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
-import top.geek_studio.chenlongcould.musicplayer.Interface.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.MyMusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;

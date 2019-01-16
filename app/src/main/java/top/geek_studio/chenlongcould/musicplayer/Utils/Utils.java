@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月14日 14:45:09
- * 上次修改时间：2019年01月12日 20:32:27
+ * 当前修改时间：2019年01月16日 20:43:13
+ * 上次修改时间：2019年01月16日 20:42:23
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -16,6 +16,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -27,8 +30,11 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.MediaMetadataRetriever;
 import android.media.audiofx.AudioEffect;
+import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.provider.BaseColumns;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
@@ -43,6 +49,7 @@ import android.support.design.internal.NavigationMenuView;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
@@ -60,11 +67,9 @@ import android.widget.Toast;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
@@ -75,7 +80,6 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.Activities.ThemeActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
@@ -213,6 +217,70 @@ public final class Utils {
         public static Bitmap getDrawableBitmap(@NonNull Context context, @DrawableRes int vectorDrawableId) {
             return BitmapFactory.decodeResource(context.getResources(), vectorDrawableId);
         }
+
+        /**
+         * @author Karim Abou Zeid (kabouzeid)
+         */
+        @NonNull
+        public static Intent createShareSongFileIntent(@NonNull final MusicItem song, Context context) {
+            try {
+                return new Intent()
+                        .setAction(Intent.ACTION_SEND)
+                        .putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(context, context.getPackageName(), new File(song.getMusicPath())))
+                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        .setType("audio/*");
+            } catch (IllegalArgumentException e) {
+                // TODO the path is most likely not like /storage/emulated/0/... but something like /storage/28C7-75B0/...
+                e.printStackTrace();
+                Toast.makeText(context, "Could not share this file, I'm aware of the issue.", Toast.LENGTH_SHORT).show();
+                return new Intent();
+            }
+        }
+
+        /**
+         * @author Karim Abou Zeid (kabouzeid)
+         */
+        public static Uri getSongFileUri(int songId) {
+            return ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId);
+        }
+
+        /**
+         * @author Karim Abou Zeid (kabouzeid)
+         */
+        public static void setRingtone(@NonNull final Context context, final int id) {
+            final ContentResolver resolver = context.getContentResolver();
+            final Uri uri = getSongFileUri(id);
+            try {
+                final ContentValues values = new ContentValues(2);
+                values.put(MediaStore.Audio.AudioColumns.IS_RINGTONE, "1");
+                values.put(MediaStore.Audio.AudioColumns.IS_ALARM, "1");
+                resolver.update(uri, values, null, null);
+            } catch (@NonNull final UnsupportedOperationException ignored) {
+                return;
+            }
+
+            try {
+                Cursor cursor = resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                        new String[]{MediaStore.MediaColumns.TITLE},
+                        BaseColumns._ID + "=?",
+                        new String[]{String.valueOf(id)},
+                        null);
+                try {
+                    if (cursor != null && cursor.getCount() == 1) {
+                        cursor.moveToFirst();
+                        Settings.System.putString(resolver, Settings.System.RINGTONE, uri.toString());
+                        final String message = context.getString(R.string.x_has_been_set_as_ringtone, cursor.getString(0));
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                    }
+                } finally {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
+                }
+            } catch (SecurityException ignored) {
+            }
+        }
+
     }
 
     public static final class Ui {
@@ -301,7 +369,6 @@ public final class Utils {
          * @return {@link AlertDialog.Builder}
          */
         public static android.support.v7.app.AlertDialog getLoadingDialog(Context context, String... aTitle) {
-
             android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
             final View loadView = LayoutInflater.from(context).inflate(R.layout.dialog_loading, null);
             // TODO: 2019/1/7 custom Theme loading animation
@@ -874,149 +941,6 @@ public final class Utils {
     public static final class Res {
         public static String getString(final Context context, @StringRes final int id) {
             return context.getResources().getString(id);
-        }
-    }
-
-    public static final class ThemeUtils {
-        public static boolean checkTheme(final String themePath) {
-            final File file = new File(themePath);
-            if (!file.exists() || file.isFile() || file.listFiles().length == 0) {
-                Log.e(TAG, "checkTheme: theme file error");
-                return false;
-            }
-
-            final File detailFile = new File(themePath + File.separatorChar + ThemeStore.DETAIL_FILE_NAME);
-            if (!detailFile.exists() || detailFile.isDirectory() || detailFile.length() == 0) {
-                Log.e(TAG, "checkTheme: detail file error");
-                return false;
-            }
-
-            final File imgDir = new File(themePath + File.separatorChar + ThemeStore.DIR_IMG);
-            if (!imgDir.exists() || imgDir.isFile() || imgDir.listFiles().length == 0) {
-                Log.e(TAG, "checkTheme: img dir error");
-                return false;
-            }
-
-            final File ico = new File(themePath + File.separatorChar + ThemeStore.ICO_FILE_NAME.toLowerCase());
-            if (!ico.exists() || ico.isDirectory()) {
-                Log.e(TAG, "checkTheme: ico error");
-                return false;
-            }
-            return true;
-        }
-
-        public static File getThemeFile(@NonNull final Context context, final String themeId) {
-            return new File(context.getExternalFilesDir(ThemeStore.DIR_NAME).getAbsolutePath() + File.separatorChar + themeId);
-        }
-
-        @Nullable
-        public static ThemeActivity.Theme fileToTheme(final File f) {
-            if (!checkTheme(f.getAbsolutePath())) return null;
-
-            try {
-
-                if (f.isDirectory()) {
-                    final File detailText = new File(f.getPath() + File.separatorChar + ThemeStore.DETAIL_FILE_NAME);
-
-                    //temp
-                    String title = "null";
-                    String date = "null";
-                    String nav_name = "null";
-                    String author = "null";
-                    String support_area = "null";
-                    String primary_color = "null";
-                    String accent_color = "null";
-                    String primary_color_dark = "null";
-                    String thumbnail = "null";
-                    String select = "null";
-                    String path = f.getPath();
-
-                    final BufferedReader bufferedReader = new BufferedReader(new FileReader(detailText));
-                    String line;
-
-                    int items = 0;
-                    while ((line = bufferedReader.readLine()) != null) {
-                        if (line.contains(ThemeStore.ThemeColumns.AUTHOR)) {
-                            author = line.split(":")[1];
-                            Log.d(TAG, "doInBackground: " + author + " @ " + detailText.getPath());
-                            items++;
-                        }
-
-                        if (line.contains(ThemeStore.ThemeColumns.TITLE)) {
-                            title = line.split(":")[1];
-                            Log.d(TAG, "doInBackground: " + title + " @ " + detailText.getPath());
-                            items++;
-                        }
-
-                        if (line.contains(ThemeStore.ThemeColumns.NAV_NAME)) {
-                            nav_name = line.split(":")[1];
-                            Log.d(TAG, "doInBackground: " + nav_name + " @ " + detailText.getPath());
-                            items++;
-                        }
-
-                        if (line.contains(ThemeStore.ThemeColumns.THUMBNAIL)) {
-                            thumbnail = f.getPath() + File.separatorChar + line.split(":")[1];
-                            Log.d(TAG, "doInBackground: " + thumbnail + " @ " + detailText.getPath());
-                            items++;
-                        }
-
-                        if (line.contains(ThemeStore.ThemeColumns.SUPPORT_AREA)) {
-                            support_area = line.split(":")[1];
-                            Log.d(TAG, "doInBackground: " + support_area + " @ " + detailText.getPath());
-                            items++;
-                        }
-
-                        if (line.contains(ThemeStore.ThemeColumns.PRIMARY_COLOR)) {
-                            primary_color = line.split(":")[1];
-                            Log.d(TAG, "doInBackground: " + primary_color);
-                            items++;
-                        }
-
-                        if (line.contains(ThemeStore.ThemeColumns.PRIMARY_COLOR_DARK)) {
-                            primary_color_dark = line.split(":")[1];
-                            Log.d(TAG, "doInBackground: " + select);
-                            items++;
-                        }
-
-                        if (line.contains(ThemeStore.ThemeColumns.ACCENT_COLOR)) {
-                            accent_color = line.split(":")[1];
-                            Log.d(TAG, "doInBackground: " + select);
-                            items++;
-                        }
-
-                        if (line.contains(ThemeStore.ThemeColumns.DATE)) {
-                            date = line.split(":")[1];
-                            Log.d(TAG, "doInBackground: " + date);
-                            items++;
-                        }
-
-                        if (line.contains(ThemeStore.ThemeColumns.SELECT)) {
-                            select = line.split(":")[1];
-                            Log.d(TAG, "doInBackground: " + select);
-                            items++;
-                        }
-                    }
-
-                    if (items >= ThemeStore.MIN_ITEM) {
-                        Log.d(TAG, "fileToTheme: theme id is: " + f.getName());
-                        return new ThemeActivity.Theme.Builder(f.getName())
-                                .setAccentColor(accent_color)
-                                .setAuthor(author)
-                                .setDate(date)
-                                .setNavName(nav_name)
-                                .setPath(path).setPrimaryColorDark(primary_color_dark)
-                                .setSupportArea(support_area)
-                                .setSelect(select)
-                                .setTitle(title)
-                                .setThumbnail(thumbnail)
-                                .setPrimaryColor(primary_color)
-                                .build();
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
         }
     }
 

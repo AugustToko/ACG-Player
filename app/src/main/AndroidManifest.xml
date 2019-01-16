@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：AndroidManifest.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月12日 20:26:06
-  ~ 上次修改时间：2019年01月12日 20:25:45
+  ~ 当前修改时间：2019年01月16日 20:43:13
+  ~ 上次修改时间：2019年01月16日 19:55:29
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -112,7 +112,7 @@
 
         <provider
             android:name="android.support.v4.content.FileProvider"
-            android:authorities="top.geek_studio.chenlongcould.musicplayer.fileprovider"
+            android:authorities="${applicationId}"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
@@ -140,13 +140,13 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".Activities.AboutActivity">
-
-        </activity>
+        <activity android:name=".Activities.AboutActivity" />
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-1302949087387063~1079129255" />
+
+        <activity android:name=".Activities.TestActivity" />
     </application>
 
 </manifest>

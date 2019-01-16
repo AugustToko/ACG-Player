@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyPagerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:17
+ * 当前修改时间：2019年01月16日 20:43:13
+ * 上次修改时间：2019年01月14日 18:53:12
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -45,7 +45,6 @@ public final class MyPagerAdapter extends FragmentStatePagerAdapter {
     public int getItemPosition(@NonNull Object object) {
         return PagerAdapter.POSITION_NONE;
     }
-
 
     public CharSequence getPageTitle(int position) {
         Log.d(TAG, "getPageTitle: " + position);

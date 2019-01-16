@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月14日 18:52:52
- * 上次修改时间：2019年01月14日 18:08:12
+ * 当前修改时间：2019年01月16日 20:43:13
+ * 上次修改时间：2019年01月16日 08:34:31
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -52,6 +52,7 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import top.geek_studio.chenlongcould.geeklibrary.Theme.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Activities.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.PublicActivity;
@@ -59,7 +60,6 @@ import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
-import top.geek_studio.chenlongcould.musicplayer.Interface.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.PlayListsUtil;
@@ -226,10 +226,10 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         });
 
         // TODO: 2018/12/5 button
-        holder.mButton1.setOnClickListener(v -> Toast.makeText(mMainActivity, holder.mButton1.getText(), Toast.LENGTH_SHORT).show());
-        holder.mButton2.setOnClickListener(v -> Toast.makeText(mMainActivity, holder.mButton2.getText(), Toast.LENGTH_SHORT).show());
-        holder.mButton3.setOnClickListener(v -> Toast.makeText(mMainActivity, holder.mButton3.getText(), Toast.LENGTH_SHORT).show());
-        holder.mButton4.setOnClickListener(v -> Toast.makeText(mMainActivity, holder.mButton4.getText(), Toast.LENGTH_SHORT).show());
+        holder.mButton1.setOnClickListener(v -> Toast.makeText(mMainActivity, "1", Toast.LENGTH_SHORT).show());
+        holder.mButton2.setOnClickListener(v -> Toast.makeText(mMainActivity, "2", Toast.LENGTH_SHORT).show());
+        holder.mButton3.setOnClickListener(v -> Utils.Audio.setRingtone(mMainActivity, mMusicItems.get(holder.getAdapterPosition()).getMusicID()));
+        holder.mButton4.setOnClickListener(v -> mContext.startActivity(Intent.createChooser(Utils.Audio.createShareSongFileIntent(mMusicItems.get(holder.getAdapterPosition()), mContext), null)));
 
         holder.mItemMenuButton.setOnClickListener(v -> holder.mPopupMenu.show());
 
@@ -531,12 +531,12 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             mButton1 = itemView.findViewById(R.id.expand_button_1);
             mButton2 = itemView.findViewById(R.id.expand_button_2);
             mButton3 = itemView.findViewById(R.id.expand_button_3);
-            mButton4 = itemView.findViewById(R.id.expand_button_4);
+            mButton4 = itemView.findViewById(R.id.expand_button_share);
 
             mPopupMenu = new PopupMenu(mMainActivity, mItemMenuButton);
             mMenu = mPopupMenu.getMenu();
 
-            Resources resources = mMainActivity.getResources();
+            final Resources resources = mMainActivity.getResources();
 
             //Menu Load
             //noinspection PointlessArithmeticExpression

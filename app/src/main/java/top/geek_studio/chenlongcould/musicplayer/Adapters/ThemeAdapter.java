@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ThemeAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月09日 12:52:27
- * 上次修改时间：2019年01月08日 21:17:44
+ * 当前修改时间：2019年01月16日 20:43:13
+ * 上次修改时间：2019年01月16日 08:33:01
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -50,11 +50,12 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import top.geek_studio.chenlongcould.geeklibrary.Theme.Theme;
+import top.geek_studio.chenlongcould.geeklibrary.Theme.ThemeStore;
 import top.geek_studio.chenlongcould.musicplayer.Activities.ThemeActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Utils.ThemeStore;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.databinding.DialogThemeBinding;
@@ -63,11 +64,11 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
 
     public static final String TAG = "ThemeAdapter";
 
-    private List<ThemeActivity.Theme> mThemes;
+    private List<Theme> mThemes;
 
     private ThemeActivity mThemeActivity;
 
-    public ThemeAdapter(ThemeActivity themeActivity, List<ThemeActivity.Theme> themes) {
+    public ThemeAdapter(ThemeActivity themeActivity, List<Theme> themes) {
         mThemes = themes;
         mThemeActivity = themeActivity;
     }

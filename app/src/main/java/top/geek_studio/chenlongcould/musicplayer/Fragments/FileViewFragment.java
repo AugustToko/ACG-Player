@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：FileViewFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月14日 14:45:09
- * 上次修改时间：2019年01月14日 14:44:29
+ * 当前修改时间：2019年01月16日 20:43:13
+ * 上次修改时间：2019年01月16日 08:17:35
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -38,12 +38,12 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import top.geek_studio.chenlongcould.geeklibrary.OpenFile;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentFileViewerBinding;
-import top.geek_stusio.chenlongcould.geeklibrary.OpenFile;
 
 public final class FileViewFragment extends Fragment {
 
@@ -180,7 +180,7 @@ public final class FileViewFragment extends Fragment {
 
                     Intent intent;
 
-                    OpenFile.init("top.geek_studio.chenlongcould.musicplayer.fileprovider");
+                    OpenFile.init(mMainActivity.getPackageName());
                     if ((intent = OpenFile.openFile(mMainActivity, mFileItems.get(holder.getAdapterPosition()).getPath())) != null) {
                         startActivity(intent);
                     } else {

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Data.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月11日 15:32:19
- * 上次修改时间：2019年01月11日 15:31:27
+ * 当前修改时间：2019年01月16日 20:43:13
+ * 上次修改时间：2019年01月16日 20:42:17
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Locale;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
+import top.geek_studio.chenlongcould.geeklibrary.Theme.Theme;
 import top.geek_studio.chenlongcould.musicplayer.Activities.CarViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.Activities.ThemeActivity;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.MyHeadSetPlugReceiver;
 import top.geek_studio.chenlongcould.musicplayer.Models.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
@@ -73,7 +73,7 @@ public final class Data {
      */
     public final static List<MusicItem> sHistoryPlay = new ArrayList<>();
 
-    public static ThemeActivity.Theme sTheme = null;
+    public static Theme sTheme = null;
 
     /**
      * sCurrent DATA

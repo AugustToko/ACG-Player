@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：build.gradle  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月14日 14:45:09
- * 上次修改时间：2019年01月14日 14:40:39
+ * 当前修改时间：2019年01月16日 20:43:13
+ * 上次修改时间：2019年01月16日 19:55:29
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -28,10 +28,10 @@ android {
         applicationId "top.geek_studio.chenlongcould.musicplayer"
         minSdkVersion 21
         targetSdkVersion 28
-        versionName '2.5.5.2(201901121440)'
+        versionName '2.5.5.3(201901161955)'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config
-        versionCode 48
+        versionCode 52
         flavorDimensions "default"
     }
     buildTypes {
@@ -43,6 +43,7 @@ android {
             renderscriptOptimLevel 5
             pseudoLocalesEnabled false
             applicationIdSuffix '.Common'
+            proguardFile 'C:/Users/chenlongcould/AndroidStudioProjects/MusicPlayer/app/proguard-rules.pro'
         }
     }
     android.applicationVariants.all { variant ->
@@ -79,11 +80,13 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    implementation 'com.github.bumptech.glide:glide:4.8.0'
     implementation 'com.simplecityapps:recyclerview-fastscroll:1.0.18'
+    //glide
+    implementation 'com.github.bumptech.glide:glide:4.8.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
     implementation 'jp.co.cyberagent.android.gpuimage:gpuimage-library:1.4.1'
     implementation 'jp.wasabeef:glide-transformations:3.3.0'
+    //
     implementation 'com.jrummyapps:colorpicker:2.1.7'
     implementation 'com.sothree.slidinguppanel:library:3.4.0'
     implementation 'com.github.bumptech.glide:recyclerview-integration:4.8.0'

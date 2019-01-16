@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月14日 18:52:52
- * 上次修改时间：2019年01月14日 16:15:47
+ * 当前修改时间：2019年01月16日 20:43:13
+ * 上次修改时间：2019年01月16日 20:42:22
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -27,6 +27,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -68,6 +69,10 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import top.geek_studio.chenlongcould.geeklibrary.Theme.IStyle;
+import top.geek_studio.chenlongcould.geeklibrary.Theme.Theme;
+import top.geek_studio.chenlongcould.geeklibrary.Theme.ThemeStore;
+import top.geek_studio.chenlongcould.geeklibrary.Theme.ThemeUtils;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyPagerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter2AlbumList;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
@@ -79,14 +84,12 @@ import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
-import top.geek_studio.chenlongcould.musicplayer.Interface.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Models.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.MyApplication;
 import top.geek_studio.chenlongcould.musicplayer.MyMusicService;
 import top.geek_studio.chenlongcould.musicplayer.MyTile;
 import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Utils.ThemeStore;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityMainBinding;
@@ -191,8 +194,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
             @Override
             public void onRewardedVideoAdClosed() {
-                loadRewardedVideoAd();
                 Log.d(TAG, "onRewardedVideoAdClosed: ");
+                loadRewardedVideoAd();
             }
 
             @Override
@@ -265,8 +268,11 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     }
 
+    /**
+     * show AD
+     */
     private void loadRewardedVideoAd() {
-        mRewardedVideoAd.loadAd(MyApplication.AD_ID_TEST,
+        mRewardedVideoAd.loadAd(MyApplication.AD_ID,
                 new AdRequest.Builder().build());
     }
 
@@ -421,7 +427,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         } catch (Exception e) {
             Log.d(TAG, "exitApp: " + e);
         }
-        GlideApp.with(this).pauseAllRequests();
         mRewardedVideoAd.destroy(this);
         super.onDestroy();
     }
@@ -658,7 +663,10 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     }
 
     public final void exitApp() {
-        ReceiverOnMusicPlay.stopMusic();
+
+        if (Values.HAS_PLAYED) {
+            ReceiverOnMusicPlay.resetMusic();
+        }
 
         AlbumListFragment.VIEW_HAS_LOAD = false;
         mHandlerThread.quit();
@@ -697,14 +705,14 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         Utils.Ui.setTopBottomColor(this, mMainBinding.appbar, mMainBinding.toolBar);
         mMainBinding.tabLayout.setBackgroundColor(Utils.Ui.getPrimaryColor(this));
         mMainBinding.tabLayout.setSelectedTabIndicatorColor(Utils.Ui.getAccentColor(this));
-        Observable.create((ObservableOnSubscribe<ThemeActivity.Theme>) emitter -> {
+        Observable.create((ObservableOnSubscribe<Theme>) emitter -> {
             final String themeId = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.SELECT_THEME, "null");
             if (!themeId.equals("null")) {
-                final File themeFile = Utils.ThemeUtils.getThemeFile(this, themeId);
-                final ThemeActivity.Theme theme = Utils.ThemeUtils.fileToTheme(themeFile);
+                final File themeFile = ThemeUtils.getThemeFile(this, themeId);
+                final Theme theme = ThemeUtils.fileToTheme(themeFile);
                 if (theme != null) {
                     Data.sTheme = theme;
-                    if (theme.support_area.contains(ThemeStore.SupportArea.NAV))
+                    if (theme.getSupport_area().contains(ThemeStore.SupportArea.NAV))
                         emitter.onNext(theme);
                 } else {
                     emitter.onError(null);
@@ -712,20 +720,20 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             } else {
                 emitter.onError(null);
             }
-        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<ThemeActivity.Theme>() {
+        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<Theme>() {
             @Override
             public void onSubscribe(Disposable disposable) {
 
             }
 
             @Override
-            public void onNext(ThemeActivity.Theme theme) {
+            public void onNext(Theme theme) {
                 if (theme != null) {
                     mMainBinding.styleNav.setVisibility(View.VISIBLE);
                     mMainBinding.styleTextNavTitle.setText(theme.getTitle());
                     mMainBinding.styleTextNavName.setText(theme.getNav_name());
 
-                    for (String nav : theme.select.split(",")) {
+                    for (String nav : theme.getSelect().split(",")) {
                         if (nav.contains(ThemeStore.SupportArea.NAV)) {
                             GlideApp.with(MainActivity.this)
                                     .load(theme.getPath() + File.separatorChar + ThemeStore.DIR_IMG_NAV + File.separatorChar + nav + ".png")
@@ -797,6 +805,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         return mMusicListFragment;
     }
 
+    @Nullable
     public final MusicDetailFragment getMusicDetailFragment() {
         return mMusicDetailFragment;
     }
@@ -860,7 +869,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mNavHeaderImageView = mMainBinding.navigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
 
         mNavHeaderImageView.setOnClickListener(v -> {
-            if (getMusicDetailFragment().getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+            if (getMusicDetailFragment() != null && getMusicDetailFragment().getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
                 getMusicDetailFragment().getSlidingUpPanelLayout().setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
                 return;
             }
@@ -982,7 +991,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 }
                 break;
                 case R.id.debug: {
-
+                    startActivity(new Intent(this, TestActivity.class));
                 }
                 break;
             }

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月14日 14:45:09
- * 上次修改时间：2019年01月14日 14:44:29
+ * 当前修改时间：2019年01月16日 20:43:13
+ * 上次修改时间：2019年01月16日 19:54:24
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -68,11 +68,11 @@ public final class MyApplication extends Application {
 
     public static final int TARGET_ACTION_CODE = -99;
 
-    public static final String AD_ID = "ca-app-pub-1563796422813816/1120998454";
+    public static final String AD_ID = "ca-app-pub-1302949087387063/3066110293";
 
     public static final String AD_ID_TEST = "ca-app-pub-3940256099942544/5224354917";
 
-    public static final String APP_ID = "ca-app-pub-1563796422813816~9980509600";
+    public static final String APP_ID = "ca-app-pub-1302949087387063~1079129255";
 
     public static final int VER_CODE = 46;
 
