@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月12日 20:26:06
- * 上次修改时间：2019年01月12日 08:23:20
+ * 当前修改时间：2019年01月17日 17:31:46
+ * 上次修改时间：2019年01月17日 17:29:00
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -263,6 +263,11 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                     Log.d(TAG, "onReceive: repeat one");
                     seekTo(0);
                     playMusic();
+                    break;
+                }
+
+                if (Data.sPlayOrderList.size() <= 0) {
+                    Toast.makeText(context, "Data.sPlayOrderList.size() <= 0", Toast.LENGTH_SHORT).show();
                     break;
                 }
 

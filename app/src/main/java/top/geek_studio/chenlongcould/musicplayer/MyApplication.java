@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月16日 20:43:13
- * 上次修改时间：2019年01月16日 19:54:24
+ * 当前修改时间：2019年01月17日 17:31:46
+ * 上次修改时间：2019年01月17日 17:29:00
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -102,7 +102,7 @@ public final class MyApplication extends Application {
             }
 
             //add version code
-            SharedPreferences.Editor ver_edit = mDefSharedPreferences.edit();
+            final SharedPreferences.Editor ver_edit = mDefSharedPreferences.edit();
             ver_edit.putLong(VERSION_CODE, VER_CODE);
             ver_edit.apply();
 
@@ -199,7 +199,7 @@ public final class MyApplication extends Application {
      * @return 获取此进程的进程名
      */
     private String getProcessName(@NonNull Context context) {
-        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        final ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningAppProcessInfo> runningAppProcesses = am.getRunningAppProcesses();
         if (runningAppProcesses == null) {
             return "";

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:17
+ * 当前修改时间：2019年01月17日 17:31:46
+ * 上次修改时间：2019年01月17日 17:29:00
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -59,13 +59,13 @@ public final class AlbumDetailActivity extends Activity {
     }
 
     private void initData() {
-        Intent intent = getIntent();
+        final Intent intent = getIntent();
         if (intent != null) {
             String key = intent.getStringExtra("key");
             mAlbumDetailBinding.collapsingToolbar.setTitle(key);
 
             //根据Album名称查music ID
-            Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            final Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     new String[]{MediaStore.Audio.Media._ID}, MediaStore.Audio.Media.ALBUM + " = ?", new String[]{key}, null);
             if (cursor != null) {
                 cursor.moveToFirst();
@@ -87,7 +87,7 @@ public final class AlbumDetailActivity extends Activity {
                 }
                 selection.append(")");
 
-                Cursor cursor2 = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null,
+                final Cursor cursor2 = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null,
                         selection.toString(), mMusicIds.toArray(new String[0]), MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
 
                 //获取数据(该专辑下歌曲)
@@ -108,7 +108,7 @@ public final class AlbumDetailActivity extends Activity {
                         final long addTime = cursor2.getLong(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
                         final int albumId = cursor2.getInt(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
 
-                        MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
+                        final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
                                 .musicAlbum(albumName)
                                 .addTime((int) addTime)
                                 .artist(artist)
@@ -147,11 +147,12 @@ public final class AlbumDetailActivity extends Activity {
                 Toast.makeText(this, "Get Image error (-1)", Toast.LENGTH_SHORT).show();
             }
 
-            MyRecyclerAdapter adapter = new MyRecyclerAdapter(mSongs, this, TAG);
+            final MyRecyclerAdapter adapter = new MyRecyclerAdapter(mSongs, this, TAG);
             mAlbumDetailBinding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
             mAlbumDetailBinding.recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
             mAlbumDetailBinding.recyclerView.setHasFixedSize(true);
             mAlbumDetailBinding.recyclerView.setAdapter(adapter);
+
         }
 
     }

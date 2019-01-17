@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月16日 20:43:13
- * 上次修改时间：2019年01月16日 20:42:22
+ * 当前修改时间：2019年01月17日 17:31:46
+ * 上次修改时间：2019年01月17日 17:29:00
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -463,7 +463,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         }
 
         //2
-        if (getMusicDetailFragment().getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+        if (getMusicDetailFragment() != null && getMusicDetailFragment().getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
             getMusicDetailFragment().getSlidingUpPanelLayout().setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
             return;
         }
@@ -860,7 +860,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         setSupportActionBar(mMainBinding.toolBar);
 
-        ActionBar actionBar = getSupportActionBar();
+        final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24px);

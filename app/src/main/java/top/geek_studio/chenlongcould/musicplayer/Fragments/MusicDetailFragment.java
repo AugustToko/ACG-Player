@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月16日 20:43:13
- * 上次修改时间：2019年01月16日 08:34:31
+ * 当前修改时间：2019年01月17日 17:31:46
+ * 上次修改时间：2019年01月17日 17:29:00
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -526,10 +526,10 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
 
             String befPath = null;
             String nexPath = null;
-            if (Values.CurrentData.CURRENT_MUSIC_INDEX > 0) {
+            if (Values.CurrentData.CURRENT_MUSIC_INDEX > 0 && Values.CurrentData.CURRENT_MUSIC_INDEX < Data.sPlayOrderList.size() - 1) {
                 befPath = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX - 1).getMusicPath();
             }
-            if (Values.CurrentData.CURRENT_MUSIC_INDEX < Data.sPlayOrderList.size() - 1) {
+            if (Values.CurrentData.CURRENT_MUSIC_INDEX < Data.sPlayOrderList.size() - 1 && Values.CurrentData.CURRENT_MUSIC_INDEX > 0) {
                 nexPath = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX + 1).getMusicPath();
             }
 
@@ -1110,22 +1110,13 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
                     Utils.SendSomeThing.sendPlay(mMainActivity, 3, null);
                 }
             } else {
-//                Toast.makeText(mMainActivity, "Shuffle Playback!", Toast.LENGTH_SHORT).show();
                 Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE, TAG);
             }
         });
 
         mNowPlayingBody.setOnClickListener(v -> {
             if (Values.HAS_PLAYED) {
-                if (mMainActivity.getMusicListFragment().getMusicListBinding().includeRecycler.recyclerView != null) {
-                    mMainActivity.getMusicListFragment().getMusicListBinding().includeRecycler.recyclerView.stopScroll();
-                }
-                if (mMainActivity.getAlbumListFragment().getRecyclerView() != null) {
-                    mMainActivity.getAlbumListFragment().getRecyclerView().stopScroll();
-                }
-
                 mMainActivity.getHandler().sendEmptyMessage(MainActivity.UP);
-
             } else {
                 Utils.Ui.fastToast(mMainActivity, "No music playing.");
             }

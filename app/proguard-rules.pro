@@ -67,9 +67,21 @@
 -dontwarn com.simplecityapps.**
 -dontwarn com.sothree.slidinguppanel.**
 -dontwarn com.squareup.haha.**
-#okhttp
--dontnote org.codehaus.**
--dontnote org.conscrypt.**
--dontwarn org.codehaus.**
--dontwarn org.conscrypt.**
 -dontwarn top.geek_studio.chenlongcould.geeklibrary.**
+
+#------------------okhttp
+-dontwarn com.squareup.okhttp.**
+-keep class com.squareup.okhttp.**{*;}
+
+# okhttp
+-keep class okhttp3.** { *; }
+-keep interface okhttp3.** { *; }
+-dontwarn okhttp3.**
+
+# okio
+-keep class sun.misc.Unsafe { *; }
+-dontwarn java.nio.file.*
+-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+-keep class okio.**{*;}
+-dontwarn okio.**
+#------------------okhttp

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragmentLandSpace.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月05日 09:52:36
- * 上次修改时间：2019年01月05日 09:50:18
+ * 当前修改时间：2019年01月17日 17:31:46
+ * 上次修改时间：2019年01月17日 17:28:59
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -46,6 +46,7 @@ import java.util.Collections;
 import java.util.Date;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.CarViewActivity;
+import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyWaitListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;
@@ -82,7 +83,6 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
         mHandler = new NotLeakHandler(mCarViewActivity);
     }
 
-    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mMusicDetail2Binding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_detail_2, container, false);
@@ -91,7 +91,7 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
 
         mLinearLayoutManager = new LinearLayoutManager(mCarViewActivity);
         mRecyclerView = mMusicDetail2Binding.getRoot().findViewById(R.id.recycler_view);
-        mWaitListAdapter = new MyWaitListAdapter(mCarViewActivity, Data.sPlayOrderList);
+        mWaitListAdapter = new MyWaitListAdapter((MainActivity) Data.sActivities.get(0), Data.sPlayOrderList);
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(mCarViewActivity, DividerItemDecoration.VERTICAL));
         mRecyclerView.setAdapter(mWaitListAdapter);
@@ -535,19 +535,13 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
 
     public static final class NotLeakHandler extends Handler {
         private WeakReference<CarViewActivity> mWeakReference;
-        private FragmentMusicDetail2Binding mMusicDetail2Binding;
 
         NotLeakHandler(CarViewActivity activity) {
             mWeakReference = new WeakReference<>(activity);
-            mMusicDetail2Binding = mWeakReference.get().getFragmentLandSpace().getMusicDetail2Binding();
         }
 
         @Override
         public void handleMessage(Message msg) {
-
-            switch (msg.what) {
-
-            }
 
         }
     }

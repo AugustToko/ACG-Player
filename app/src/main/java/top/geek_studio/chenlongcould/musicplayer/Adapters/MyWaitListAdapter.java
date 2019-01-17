@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyWaitListAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月16日 20:43:13
- * 上次修改时间：2019年01月16日 08:34:31
+ * 当前修改时间：2019年01月17日 17:31:46
+ * 上次修改时间：2019年01月17日 17:29:00
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -11,7 +11,6 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Adapters;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -54,16 +53,13 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
     private List<MusicItem> mMusicItems;
 
-    private Activity mActivity;
-
     private MainActivity mMainActivity;
 
     private ViewHolder currentBind;
 
-    public MyWaitListAdapter(Activity activity, List<MusicItem> musicItems) {
+    public MyWaitListAdapter(MainActivity mainActivity, List<MusicItem> musicItems) {
         mMusicItems = musicItems;
-        mActivity = activity;
-        mMainActivity = (MainActivity) Data.sActivities.get(0);
+        mMainActivity = mainActivity;
     }
 
     @NonNull
@@ -90,7 +86,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
                 break;
 
                 case Menu.FIRST + 1: {
-                    Utils.DataSet.addToFavourite(mActivity, mMusicItems.get(holder.getAdapterPosition()));
+                    Utils.DataSet.addToFavourite(mMainActivity, mMusicItems.get(holder.getAdapterPosition()));
                 }
                 break;
 
@@ -102,7 +98,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
                 // TODO: 2018/11/30 to new
                 case Menu.FIRST + 4: {
                     final String albumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
-                    final Cursor cursor = mActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
+                    final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
                             MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum()}, null);
                     //int MainActivity
                     final MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
@@ -114,15 +110,15 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
                         intent.putExtra("_id", id);
                         cursor.close();
                     }
-                    mActivity.startActivity(intent);
+                    mMainActivity.startActivity(intent);
 
                 }
                 break;
 
                 case Menu.FIRST + 5: {
-                    final Intent intent = new Intent(mActivity, PublicActivity.class);
+                    final Intent intent = new Intent(mMainActivity, PublicActivity.class);
                     intent.putExtra("start_by", "detail");
-                    mActivity.startActivity(intent);
+                    mMainActivity.startActivity(intent);
                 }
                 break;
             }
@@ -173,7 +169,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
                 .subscribe(integer -> {
 
                     if (integer == -1) {
-                        Toast.makeText(mActivity, "Wait...", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mMainActivity, "Wait...", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -252,7 +248,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
             mExtName = itemView.findViewById(R.id.item_in_detail_ext);
             mItemMenuButton = itemView.findViewById(R.id.item_menu);
 
-            mPopupMenu = new PopupMenu(mActivity, mItemMenuButton);
+            mPopupMenu = new PopupMenu(mMainActivity, mItemMenuButton);
             mMenu = mPopupMenu.getMenu();
 
             //noinspection PointlessArithmeticExpression

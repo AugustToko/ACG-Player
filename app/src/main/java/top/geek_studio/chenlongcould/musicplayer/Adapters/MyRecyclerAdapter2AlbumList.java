@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter2AlbumList.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月16日 20:43:13
- * 上次修改时间：2019年01月16日 08:37:34
+ * 当前修改时间：2019年01月17日 17:31:46
+ * 上次修改时间：2019年01月17日 17:30:11
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -42,7 +42,6 @@ import java.util.List;
 import top.geek_studio.chenlongcould.geeklibrary.Theme.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Activities.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
@@ -74,7 +73,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View view = null;
+        View view;
         switch (mType) {
             case LINEAR_TYPE: {
                 view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_album_list_item, viewGroup, false);
@@ -83,16 +82,16 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
             case GRID_TYPE: {
                 view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_item_album_grid, viewGroup, false);
             }
+            default:
+                view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_item_album_grid, viewGroup, false);
         }
-        assert view != null;
-        ViewHolder holder = new ViewHolder(view);
+        final ViewHolder holder = new ViewHolder(view);
 
         view.setOnClickListener(v -> {
             String keyWords = mAlbumNameList.get(holder.getAdapterPosition()).getAlbumName();
 
-            MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
-            ActivityOptionsCompat compat = ActivityOptionsCompat.makeSceneTransitionAnimation(mainActivity, holder.mAlbumImage, mMainActivity.getString(R.string.image_trans_album));
-            Intent intent = new Intent(mainActivity, AlbumDetailActivity.class);
+            final ActivityOptionsCompat compat = ActivityOptionsCompat.makeSceneTransitionAnimation(mMainActivity, holder.mAlbumImage, mMainActivity.getString(R.string.image_trans_album));
+            Intent intent = new Intent(mMainActivity, AlbumDetailActivity.class);
             intent.putExtra("key", keyWords);
             intent.putExtra("_id", mAlbumNameList.get(holder.getAdapterPosition()).getAlbumId());
             mMainActivity.startActivity(intent, compat.toBundle());
