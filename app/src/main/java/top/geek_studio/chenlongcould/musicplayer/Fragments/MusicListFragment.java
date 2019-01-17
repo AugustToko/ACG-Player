@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:29:00
+ * 当前修改时间：2019年01月17日 20:49:24
+ * 上次修改时间：2019年01月17日 20:48:49
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -17,7 +17,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -67,7 +66,9 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone, 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mMusicListBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_list_layout, container, false);
-        mMusicListBinding.includeRecycler.recyclerView.addItemDecoration(new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL));
+//        mMusicListBinding.includeRecycler.recyclerView.addItemDecoration(new DividerItemDecoration(mActivity, DividerItemDecoration.VERTICAL));
+        mMusicListBinding.includeRecycler.recyclerView.addItemDecoration(Data.getItemDecoration(mActivity));
+
         mMusicListBinding.includeRecycler.recyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
         mMusicListBinding.includeRecycler.recyclerView.setHasFixedSize(true);
         Log.d(Values.TAG_UNIVERSAL_ONE, "onCreateView: loading adapter");

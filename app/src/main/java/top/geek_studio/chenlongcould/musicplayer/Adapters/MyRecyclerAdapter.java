@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:28:59
+ * 当前修改时间：2019年01月17日 20:49:24
+ * 上次修改时间：2019年01月17日 20:48:49
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -22,12 +22,14 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -52,7 +54,7 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import top.geek_studio.chenlongcould.geeklibrary.Theme.IStyle;
+import top.geek_studio.chenlongcould.geeklibrary.ViewTools;
 import top.geek_studio.chenlongcould.musicplayer.Activities.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.PublicActivity;
@@ -66,7 +68,7 @@ import top.geek_studio.chenlongcould.musicplayer.Utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
-public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter, IStyle {
+public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
 
     private static final String TAG = "MyRecyclerAdapter";
 
@@ -129,9 +131,13 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE, TAG);
             });
 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                ((ModHolder) holder).mRandomItem.setForeground(ViewTools.getRippe(mContext).getDrawable(0));
+            }
+
         } else {
 
-            //all common
+            //common list item
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_list_item, viewGroup, false);
             holder = new ItemHolder(view);
             onMusicItemClick(view, holder);
@@ -411,12 +417,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         return 0;
     }
 
-    @Override
-    public void initStyle() {
-
-
-    }
-
     static class MyTask extends AsyncTask<Void, Void, String> {
 
         private WeakReference<ImageView> mImageViewWeakReference;
@@ -440,8 +440,8 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             if (mImageViewWeakReference.get() == null || result == null) return;
 
             final File file = new File(result);
-            if (result.equals("null") || !file.exists() || file.isDirectory()) {
-                Log.d(TAG, "onPostExecute: load image error");
+            if (result.equals("null") || !file.exists() || file.isDirectory() || TextUtils.isEmpty(result)) {
+                Log.d(TAG, "onPostExecute: load image error" + result);
                 GlideApp.with(mContextWeakReference.get()).load(R.drawable.ic_audiotrack_24px).into(mImageViewWeakReference.get());
                 return;
             }

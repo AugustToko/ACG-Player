@@ -6,14 +6,14 @@
     "apkInfo": {
       "type": "MAIN",
       "splits": [],
-      "versionCode": 52,
-      "versionName": "2.5.5.3(201901161955)",
+      "versionCode": 53,
+      "versionName": "2.5.5.3(201901171716)",
       "enabled": true,
-      "outputFile": "app-release_20190116_2.5.5.3(201901161955)_(52).apk",
+      "outputFile": "app-release_20190117_2.5.5.3(201901171716)_(53).apk",
       "fullName": "release",
       "baseName": "release"
     },
-    "path": "app-release_20190116_2.5.5.3(201901161955)_(52).apk",
+    "path": "app-release_20190117_2.5.5.3(201901171716)_(53).apk",
     "properties": {}
   }
 ]

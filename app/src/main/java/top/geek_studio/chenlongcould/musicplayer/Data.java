@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Data.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:28:59
+ * 当前修改时间：2019年01月17日 20:49:24
+ * 上次修改时间：2019年01月17日 18:07:41
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -13,11 +13,15 @@ package top.geek_studio.chenlongcould.musicplayer;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.os.IBinder;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
@@ -26,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
+import top.geek_studio.chenlongcould.geeklibrary.RecyclerViewTools.RecycleViewDivider;
 import top.geek_studio.chenlongcould.geeklibrary.Theme.Theme;
 import top.geek_studio.chenlongcould.musicplayer.Activities.CarViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
@@ -37,6 +42,16 @@ import top.geek_studio.chenlongcould.musicplayer.Models.PlayListItem;
 public final class Data {
 
     public static WeakReference<MainActivity> sMainRef;
+
+    private static RecyclerView.ItemDecoration mItemDecoration;
+
+    public static RecyclerView.ItemDecoration getItemDecoration(Context context) {
+        if (mItemDecoration == null) {
+            mItemDecoration = new RecycleViewDivider(
+                    context, LinearLayoutManager.VERTICAL, 1, ContextCompat.getColor(context, R.color.line_color));
+        }
+        return mItemDecoration;
+    }
 
     /**
      * old
