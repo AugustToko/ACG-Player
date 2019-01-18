@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:28:53
+ * 当前修改时间：2019年01月18日 18:58:29
+ * 上次修改时间：2019年01月18日 09:20:54
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -157,11 +157,6 @@ public final class Utils {
          * @param mediaUri mp3 path
          */
         public static Bitmap getMp3Cover(final String mediaUri, Context context) {
-
-//            //检测不支持封面的音乐类型
-//            if (mediaUri.contains("ogg") || mediaUri.contains("flac")) {
-//                return BitmapFactory.decodeResource(Resources.getSystem(), R.drawable.ic_audiotrack_24px);
-//            }
 
             if (mediaUri == null)
                 return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);

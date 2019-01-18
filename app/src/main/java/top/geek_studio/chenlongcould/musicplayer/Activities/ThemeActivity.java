@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ThemeActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:29:00
+ * 当前修改时间：2019年01月18日 18:58:29
+ * 上次修改时间：2019年01月18日 12:25:42
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -44,6 +44,7 @@ import java.util.Arrays;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.geeklibrary.Theme.IStyle;
 import top.geek_studio.chenlongcould.geeklibrary.Theme.Theme;
@@ -89,6 +90,8 @@ public class ThemeActivity extends MyBaseCompatActivity implements IStyle {
             return false;
         }
     };
+
+    private Disposable mDisposable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -161,6 +164,14 @@ public class ThemeActivity extends MyBaseCompatActivity implements IStyle {
     @Override
     protected void onDestroy() {
         mDBHelper.close();
+        if (mDisposable != null && !mDisposable.isDisposed()) {
+            mDisposable.dispose();
+        }
+        for (Disposable disposable : mThemeAdapter.getDisposables()) {
+            if (disposable != null && !disposable.isDisposed()) {
+                disposable.dispose();
+            }
+        }
         super.onDestroy();
     }
 
@@ -207,7 +218,7 @@ public class ThemeActivity extends MyBaseCompatActivity implements IStyle {
                             final AlertDialog load = Utils.Ui.getLoadingDialog(ThemeActivity.this, "Loading...");
                             load.show();
 
-                            Observable.create((ObservableOnSubscribe<Theme>) emitter -> {
+                            mDisposable = Observable.create((ObservableOnSubscribe<Theme>) emitter -> {
                                 final long name = System.currentTimeMillis();
                                 Utils.IO.Unzip(path, themeDir.getAbsolutePath() + File.separatorChar + name + File.separatorChar);
 
@@ -421,7 +432,6 @@ public class ThemeActivity extends MyBaseCompatActivity implements IStyle {
         }.execute();
 
     }
-
 
     @Override
     public void initStyle() {

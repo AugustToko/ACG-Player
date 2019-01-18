@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyWaitListAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:29:00
+ * 当前修改时间：2019年01月18日 18:58:29
+ * 上次修改时间：2019年01月18日 12:11:18
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -35,6 +35,7 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.geeklibrary.Theme.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Activities.AlbumDetailActivity;
@@ -137,51 +138,54 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
     }
 
     private void onMusicItemClick(View view, ViewHolder holder) {
-        view.setOnClickListener(v -> Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
+        view.setOnClickListener(v -> {
+            final Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
 
-            if (!ReceiverOnMusicPlay.READY.get()) {
-                observableEmitter.onNext(-1);
-            }
+                if (!ReceiverOnMusicPlay.READY.get()) {
+                    observableEmitter.onNext(-1);
+                }
 
-            ReceiverOnMusicPlay.READY.set(false);
+                ReceiverOnMusicPlay.READY.set(false);
 
-            ReceiverOnMusicPlay.resetMusic();
+                ReceiverOnMusicPlay.resetMusic();
 
-            Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
-            Data.sHistoryPlay.add(Data.sPlayOrderList.get(holder.getAdapterPosition()));
+                Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
+                Data.sHistoryPlay.add(Data.sPlayOrderList.get(holder.getAdapterPosition()));
 
-            Log.d(TAG, "onMusicItemClick: add: " + Data.sPlayOrderList.get(holder.getAdapterPosition()).getMusicName());
+                Log.d(TAG, "onMusicItemClick: add: " + Data.sPlayOrderList.get(holder.getAdapterPosition()).getMusicName());
 
-            //set current data
-            Data.setCurrentMusicItem(mMusicItems.get(holder.getAdapterPosition()));
+                //set current data
+                Data.setCurrentMusicItem(mMusicItems.get(holder.getAdapterPosition()));
 
-            //get & save data
-            Data.setCurrentCover(Utils.Audio.getMp3Cover(Data.sCurrentMusicItem.getMusicPath()));
+                //get & save data
+                Data.setCurrentCover(Utils.Audio.getMp3Cover(Data.sCurrentMusicItem.getMusicPath()));
 
-            ReceiverOnMusicPlay.setDataSource(Data.sCurrentMusicItem.getMusicPath());
-            ReceiverOnMusicPlay.prepare();
-            ReceiverOnMusicPlay.playMusic();
-            Values.HAS_PLAYED = true;
-            ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);         //update seek
+                ReceiverOnMusicPlay.setDataSource(Data.sCurrentMusicItem.getMusicPath());
+                ReceiverOnMusicPlay.prepare();
+                ReceiverOnMusicPlay.playMusic();
+                Values.HAS_PLAYED = true;
+                ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);         //update seek
 
-            observableEmitter.onNext(0);
-        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(integer -> {
+                observableEmitter.onNext(0);
+            }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(integer -> {
 
-                    if (integer == -1) {
-                        Toast.makeText(mMainActivity, "Wait...", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+                        if (integer == -1) {
+                            Toast.makeText(mMainActivity, "Wait...", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
 
-                    if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.UIMODE.MODE_CAR)) {
-                        Data.sCarViewActivity.getFragmentLandSpace().setData();
-                    }
-                    mMainActivity.getMusicDetailFragment().setSlideInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
-                    mMainActivity.getMusicDetailFragment().setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
+                        if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.UIMODE.MODE_CAR)) {
+                            Data.sCarViewActivity.getFragmentLandSpace().setData();
+                        }
+                        mMainActivity.getMusicDetailFragment().setSlideInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
+                        mMainActivity.getMusicDetailFragment().setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
 
-                    Utils.Ui.setPlayButtonNowPlaying();
+                        Utils.Ui.setPlayButtonNowPlaying();
 
-                }, Throwable::printStackTrace));
+                    }, Throwable::printStackTrace);
+            Data.sDisposables.add(disposable);
+        });
     }
 
     @Override

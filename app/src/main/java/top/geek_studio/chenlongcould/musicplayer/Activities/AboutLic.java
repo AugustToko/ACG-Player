@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AboutLic.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:28:59
+ * 当前修改时间：2019年01月18日 18:58:29
+ * 上次修改时间：2019年01月18日 18:57:39
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -36,6 +36,8 @@ public final class AboutLic extends Activity {
 
     private Button close;
 
+    private Disposable mDisposable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,7 +69,7 @@ public final class AboutLic extends Activity {
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<String>() {
             @Override
             public void onSubscribe(Disposable disposable) {
-
+                mDisposable = disposable;
             }
 
             @Override
@@ -90,4 +92,9 @@ public final class AboutLic extends Activity {
         });
     }
 
+    @Override
+    protected void onStop() {
+        mDisposable.dispose();
+        super.onStop();
+    }
 }

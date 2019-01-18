@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SplashActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:28:59
+ * 当前修改时间：2019年01月18日 18:58:29
+ * 上次修改时间：2019年01月18日 18:57:37
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -19,7 +19,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -66,7 +65,7 @@ public final class SplashActivity extends AppCompatActivity {
                     initDone();
                 } else {
                     Utils.Ui.fastToast(this, "Failed to get permission, again!");
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle("Failed to get permission");
                     builder.setMessage("Try again?");
                     builder.setCancelable(false);
@@ -82,11 +81,8 @@ public final class SplashActivity extends AppCompatActivity {
     }
 
     private void initDone() {
-        Handler handler = new Handler();
-        handler.postDelayed(() -> {
-            startActivity(new Intent(SplashActivity.this, MainActivity.class));
-            finish();
-        }, 500);
+        startActivity(new Intent(SplashActivity.this, MainActivity.class));
+        finish();
     }
 
     @Override

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:29:00
+ * 当前修改时间：2019年01月18日 18:58:29
+ * 上次修改时间：2019年01月18日 11:15:25
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -67,7 +67,7 @@ public final class AlbumDetailActivity extends Activity {
             //根据Album名称查music ID
             final Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     new String[]{MediaStore.Audio.Media._ID}, MediaStore.Audio.Media.ALBUM + " = ?", new String[]{key}, null);
-            if (cursor != null) {
+            if (cursor != null && cursor.getCount() > 0) {
                 cursor.moveToFirst();
                 do {
                     String id = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));     //get music _id
@@ -126,7 +126,7 @@ public final class AlbumDetailActivity extends Activity {
             //获取MainAlbum图像
             int id = intent.getIntExtra("_id", -1);
             if (id != -1) {
-                Cursor cursor2 = getContentResolver().query(Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + id), new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
+                final Cursor cursor2 = getContentResolver().query(Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + id), new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
 
                 if (cursor2 != null) {
                     cursor2.moveToFirst();

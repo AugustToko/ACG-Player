@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:29:00
+ * 当前修改时间：2019年01月18日 18:58:29
+ * 上次修改时间：2019年01月18日 18:57:39
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -18,7 +18,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -27,7 +26,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -88,13 +86,10 @@ import top.geek_studio.chenlongcould.musicplayer.Models.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.MyApplication;
 import top.geek_studio.chenlongcould.musicplayer.MyMusicService;
-import top.geek_studio.chenlongcould.musicplayer.MyTile;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityMainBinding;
-
-//import android.widget.Toast;
 
 public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
@@ -164,6 +159,43 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     }
 
     /**
+     * clear data
+     */
+    public static void clear() {
+        Data.sActivities.clear();
+        if (Data.sMainRef != null) {
+            Data.sMainRef.clear();
+        }
+
+        Data.sPlayOrderList.clear();
+        Data.sTheme = null;
+        Data.sAlbumItems.clear();
+        Data.sHistoryPlay.clear();
+        Data.sMusicItemsBackUp.clear();
+        Data.sMusicItems.clear();
+        Data.sAlbumItems.clear();
+
+        AlbumListFragment.VIEW_HAS_LOAD = false;
+
+        for (Disposable disposable : Data.sDisposables) {
+            if (disposable != null && !disposable.isDisposed()) {
+                disposable.dispose();
+            }
+        }
+
+        if (Data.getCurrentCover() != null)
+            Data.getCurrentCover().recycle();
+    }
+
+    /**
+     * show AD
+     */
+    private void loadRewardedVideoAd() {
+        mRewardedVideoAd.loadAd(MyApplication.AD_ID,
+                new AdRequest.Builder().build());
+    }
+
+    /**
      * onXXX
      * At Override
      */
@@ -172,6 +204,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     protected void onCreate(Bundle savedInstanceState) {
         Data.init(this);
         super.onCreate(savedInstanceState);
+
 
         MobileAds.initialize(this, MyApplication.APP_ID);
         // Use an activity context to get the rewarded video instance.
@@ -252,7 +285,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         Intent intent = new Intent(this, MyMusicService.class);
         startService(intent);
-        bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
+        Data.HAS_BIND = bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
 
         initView();
 
@@ -265,15 +298,25 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         if (savedInstanceState != null)
             mMainBinding.viewPager.setCurrentItem(savedInstanceState.getInt("viewpage", 0), true);
-
     }
 
-    /**
-     * show AD
-     */
-    private void loadRewardedVideoAd() {
-        mRewardedVideoAd.loadAd(MyApplication.AD_ID,
-                new AdRequest.Builder().build());
+    @Override
+    protected void onResume() {
+        mRewardedVideoAd.resume(this);
+        initStyle();
+        if (mMusicDetailFragment != null) {
+            mMusicDetailFragment.initStyle();
+        }
+        if (mMusicListFragment != null) {
+            mMusicListFragment.initStyle();
+        }
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        mRewardedVideoAd.pause(this);
+        super.onPause();
     }
 
     public void loadData() {
@@ -349,7 +392,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Integer>() {
             @Override
             public void onSubscribe(Disposable disposable) {
-
+                Data.sDisposables.add(disposable);
             }
 
             @Override
@@ -402,32 +445,19 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     }
 
     @Override
-    protected void onResume() {
-        mRewardedVideoAd.resume(this);
-        initStyle();
-        if (mMusicDetailFragment != null) {
-            mMusicDetailFragment.initStyle();
-        }
-        if (mMusicListFragment != null) {
-            mMusicListFragment.initStyle();
-        }
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        mRewardedVideoAd.pause(this);
-        super.onPause();
-    }
-
-    @Override
     protected void onDestroy() {
+        clear();
+
         try {
             unbindService(Data.sServiceConnection);
         } catch (Exception e) {
-            Log.d(TAG, "exitApp: " + e);
+            Log.d(TAG, "onDestroy: " + e);
         }
         mRewardedVideoAd.destroy(this);
+
+        mHandlerThread.quit();
+        mFragmentList.clear();
+
         super.onDestroy();
     }
 
@@ -668,36 +698,26 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             ReceiverOnMusicPlay.resetMusic();
         }
 
-        AlbumListFragment.VIEW_HAS_LOAD = false;
-        mHandlerThread.quit();
-        mFragmentList.clear();
-
         stopService(new Intent(MainActivity.this, MyMusicService.class));
 
-        //stop tile
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            stopService(new Intent(this, MyTile.class));
+        try {
+            unregisterReceiver(Data.mMyHeadSetPlugReceiver);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
         }
 
-        Data.sPlayOrderList.clear();
-        Data.sTheme = null;
-        Data.sAlbumItems.clear();
-        Data.sHistoryPlay.clear();
-        Data.sMusicItemsBackUp.clear();
-        Data.sMusicItems.clear();
-        Data.sAlbumItems.clear();
-        Data.sMusicBinder = null;
-        Data.sActivities.clear();
-        Data.sMainRef.clear();
+//        //stop tile
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//            stopService(new Intent(this, MyTile.class));
+//        }
 
-        if (Data.getCurrentCover() != null)
-            Data.getCurrentCover().recycle();
+        Data.sMusicBinder = null;
 
         Values.HAS_PLAYED = false;
         finish();
+        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
-    @SuppressLint("CheckResult")
     @Override
     public void initStyle() {
         Log.i(TAG, "initStyle: do it");
@@ -707,7 +727,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mMainBinding.tabLayout.setSelectedTabIndicatorColor(Utils.Ui.getAccentColor(this));
         Observable.create((ObservableOnSubscribe<Theme>) emitter -> {
             final String themeId = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.SELECT_THEME, "null");
-            if (!themeId.equals("null")) {
+            if (themeId != null && !themeId.equals("null")) {
                 final File themeFile = ThemeUtils.getThemeFile(this, themeId);
                 final Theme theme = ThemeUtils.fileToTheme(themeFile);
                 if (theme != null) {
@@ -805,7 +825,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         return mMusicListFragment;
     }
 
-    @Nullable
     public final MusicDetailFragment getMusicDetailFragment() {
         return mMusicDetailFragment;
     }

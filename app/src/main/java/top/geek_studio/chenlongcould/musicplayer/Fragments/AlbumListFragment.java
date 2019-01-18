@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:28:59
+ * 当前修改时间：2019年01月18日 18:58:29
+ * 上次修改时间：2019年01月18日 18:57:37
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -132,7 +132,7 @@ public final class AlbumListFragment extends Fragment implements VisibleOrGone {
                 .safeSubscribe(new Observer<Integer>() {
                     @Override
                     public void onSubscribe(Disposable disposable) {
-
+                        Data.sDisposables.add(disposable);
                     }
 
                     @Override

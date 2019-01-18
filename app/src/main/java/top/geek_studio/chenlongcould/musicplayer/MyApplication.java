@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyApplication.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:29:00
+ * 当前修改时间：2019年01月18日 18:58:29
+ * 上次修改时间：2019年01月18日 18:57:37
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -66,8 +66,6 @@ public final class MyApplication extends Application {
 
     public static final String VERSION_CODE = "ver_code";
 
-    public static final int TARGET_ACTION_CODE = -99;
-
     public static final String AD_ID = "ca-app-pub-1302949087387063/3066110293";
 
     public static final String AD_ID_TEST = "ca-app-pub-3940256099942544/5224354917";
@@ -80,6 +78,7 @@ public final class MyApplication extends Application {
 
     @Override
     public void onCreate() {
+        Log.d(TAG, "onCreate: ");
         super.onCreate();
 
         mAppContext = new WeakReference<>(this);

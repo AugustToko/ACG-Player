@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：styles.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月17日 17:31:47
-  ~ 上次修改时间：2019年01月17日 17:28:52
+  ~ 当前修改时间：2019年01月18日 18:58:29
+  ~ 上次修改时间：2019年01月18日 15:04:42
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -38,6 +38,7 @@
     <style name="SplashActivityTheme" parent="MyBaseTheme">
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowBackground">@drawable/ramp_bg</item>
     </style>
 
     <style name="LightTheme" parent="CommonActivityTheme">

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:29:00
+ * 当前修改时间：2019年01月18日 18:58:29
+ * 上次修改时间：2019年01月18日 11:35:32
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -210,7 +210,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        if (!Utils.Ui.ANIMATION_IN_DETAIL_DONE.get() && Values.CurrentData.CURRENT_UI_MODE.equals(Values.CurrentData.MODE_COMMON)) {
+        if (!Utils.Ui.ANIMATION_IN_DETAIL_DONE.get() && Values.CurrentData.CURRENT_UI_MODE.equals(Values.UIMODE.MODE_COMMON)) {
             Toast.makeText(context, "Wait...", Toast.LENGTH_SHORT).show();
             return;
         }

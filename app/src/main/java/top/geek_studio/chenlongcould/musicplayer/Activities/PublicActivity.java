@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：PublicActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:29:00
+ * 当前修改时间：2019年01月18日 18:58:29
+ * 上次修改时间：2019年01月18日 12:28:25
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -30,6 +30,7 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.geeklibrary.Theme.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
@@ -66,6 +67,8 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
      * different type enter different UI(Activity)
      */
     private String mType;
+
+    private Disposable mDisposable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,7 +113,7 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
                     SharedPreferences mDef = PreferenceManager.getDefaultSharedPreferences(this);
                     int id = mDef.getInt(Values.SharedPrefsTag.FAVOURITE_LIST_ID, -1);
                     if (id != -1) {
-                        Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
+                        mDisposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
                             //data
 
                             //get musicId in PlayList
@@ -186,7 +189,7 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
                     mMusicItemList = new ArrayList<>();
                     currentListName = getIntent().getStringExtra("play_list_name");
 
-                    Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
+                    mDisposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
                         //data
 
                         //get musicId in PlayList
@@ -262,6 +265,12 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
             }
         }
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mDisposable != null && !mDisposable.isDisposed()) mDisposable.dispose();
+        super.onDestroy();
     }
 
     @Override

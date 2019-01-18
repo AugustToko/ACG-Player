@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Data.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 20:49:24
- * 上次修改时间：2019年01月17日 18:07:41
+ * 当前修改时间：2019年01月18日 18:58:29
+ * 上次修改时间：2019年01月18日 18:57:37
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -17,7 +17,6 @@ import android.content.Context;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.os.IBinder;
-import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -29,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import io.reactivex.disposables.Disposable;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.geeklibrary.RecyclerViewTools.RecycleViewDivider;
 import top.geek_studio.chenlongcould.geeklibrary.Theme.Theme;
@@ -40,6 +40,10 @@ import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.PlayListItem;
 
 public final class Data {
+
+    public volatile static boolean HAS_BIND = false;
+
+    public static ArrayList<Disposable> sDisposables = new ArrayList<>();
 
     public static WeakReference<MainActivity> sMainRef;
 
@@ -107,9 +111,6 @@ public final class Data {
     public static Bitmap getCurrentCover() {
         return sCurrentCover;
     }
-
-    @ColorInt
-    public static int sVibrantColor;
 
     /**
      * --------------------- Media Player ----------------------

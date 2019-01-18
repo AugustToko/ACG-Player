@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 20:49:24
- * 上次修改时间：2019年01月17日 20:48:49
+ * 当前修改时间：2019年01月18日 18:58:29
+ * 上次修改时间：2019年01月18日 18:57:39
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -26,6 +26,7 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -53,6 +54,7 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.geeklibrary.ViewTools;
 import top.geek_studio.chenlongcould.musicplayer.Activities.AlbumDetailActivity;
@@ -82,6 +84,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
     /**
      * MAIN
      */
+    @Nullable
     private MainActivity mMainActivity;
 
     private Activity mContext;
@@ -89,9 +92,11 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
     //ui position, like: MainActivity or-> xxFragment...
     private String mCurrentUiPosition;
 
+    /**
+     * @param currentUiPosition current activity showed
+     */
     public MyRecyclerAdapter(List<MusicItem> musicItems, Activity context, String currentUiPosition) {
         mMainActivity = (MainActivity) Data.sActivities.get(0);
-
         mMusicItems = musicItems;
         mContext = context;
         mCurrentUiPosition = currentUiPosition;
@@ -128,7 +133,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             //when clicked ModHolder(fastPlay item)
             ((ModHolder) holder).mRandomItem.setOnClickListener(v -> {
                 Utils.DataSet.makeARandomList();
-                Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE, TAG);
+                Utils.SendSomeThing.sendPlay(mContext, ReceiverOnMusicPlay.TYPE_SHUFFLE, TAG);
             });
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -162,7 +167,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             animator.setDuration(300);
 
             if (((ConstraintLayout.LayoutParams) holder.mExpandView.getLayoutParams()).topMargin == 0) {
-                animator.setIntValues(0, (int) mMainActivity.getResources().getDimension(R.dimen.recycler_expand_view));
+                animator.setIntValues(0, (int) mContext.getResources().getDimension(R.dimen.recycler_expand_view));
                 holder.setIsRecyclable(false);
                 holder.mExpandView.setVisibility(View.VISIBLE);
                 animator.setInterpolator(new OvershootInterpolator());
@@ -182,7 +187,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
             } else {
 
-                animator.setIntValues((int) mMainActivity.getResources().getDimension(R.dimen.recycler_expand_view), 0);
+                animator.setIntValues((int) mContext.getResources().getDimension(R.dimen.recycler_expand_view), 0);
                 holder.setIsRecyclable(true);
                 animator.addListener(new Animator.AnimatorListener() {
                     @Override
@@ -232,9 +237,9 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         });
 
         // TODO: 2018/12/5 button
-        holder.mButton1.setOnClickListener(v -> Toast.makeText(mMainActivity, "1", Toast.LENGTH_SHORT).show());
-        holder.mButton2.setOnClickListener(v -> Toast.makeText(mMainActivity, "2", Toast.LENGTH_SHORT).show());
-        holder.mButton3.setOnClickListener(v -> Utils.Audio.setRingtone(mMainActivity, mMusicItems.get(holder.getAdapterPosition()).getMusicID()));
+        holder.mButton1.setOnClickListener(v -> Toast.makeText(mContext, "1", Toast.LENGTH_SHORT).show());
+        holder.mButton2.setOnClickListener(v -> Toast.makeText(mContext, "2", Toast.LENGTH_SHORT).show());
+        holder.mButton3.setOnClickListener(v -> Utils.Audio.setRingtone(mContext, mMusicItems.get(holder.getAdapterPosition()).getMusicID()));
         holder.mButton4.setOnClickListener(v -> mContext.startActivity(Intent.createChooser(Utils.Audio.createShareSongFileIntent(mMusicItems.get(holder.getAdapterPosition()), mContext), null)));
 
         holder.mItemMenuButton.setOnClickListener(v -> holder.mPopupMenu.show());
@@ -312,40 +317,43 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
     }
 
     private void onMusicItemClick(View view, ViewHolder holder) {
-        view.setOnClickListener(v -> Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
+        view.setOnClickListener(v -> {
+            final Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
 
-            ReceiverOnMusicPlay.resetMusic();
+                ReceiverOnMusicPlay.resetMusic();
 
-            Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
+                Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
 
-            //set current data
-            Data.setCurrentMusicItem(mMusicItems.get(holder.getAdapterPosition()));
+                //set current data
+                Data.setCurrentMusicItem(mMusicItems.get(holder.getAdapterPosition()));
 
-            //get & save data
-            Data.setCurrentCover(Utils.Audio.getMp3Cover(Data.sCurrentMusicItem.getMusicPath()));
+                //get & save data
+                Data.setCurrentCover(Utils.Audio.getMp3Cover(Data.sCurrentMusicItem.getMusicPath()));
 
-            ReceiverOnMusicPlay.setDataSource(Data.sCurrentMusicItem.getMusicPath());
-            ReceiverOnMusicPlay.prepare();
-            ReceiverOnMusicPlay.playMusic();
-            Values.HAS_PLAYED = true;
-            mMainActivity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);         //update seek
+                ReceiverOnMusicPlay.setDataSource(Data.sCurrentMusicItem.getMusicPath());
+                ReceiverOnMusicPlay.prepare();
+                ReceiverOnMusicPlay.playMusic();
+                Values.HAS_PLAYED = true;
+                mMainActivity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);         //update seek
 
-            for (int i = 0; i < Data.sPlayOrderList.size(); i++) {
-                if (Data.sPlayOrderList.get(i).getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
-                    Values.CurrentData.CURRENT_MUSIC_INDEX = i;
+                for (int i = 0; i < Data.sPlayOrderList.size(); i++) {
+                    if (Data.sPlayOrderList.get(i).getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
+                        Values.CurrentData.CURRENT_MUSIC_INDEX = i;
+                    }
                 }
-            }
 
-            observableEmitter.onNext(0);
-        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(integer -> {
+                observableEmitter.onNext(0);
+            }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(integer -> {
 
-                    mMainActivity.getMusicDetailFragment().setSlideInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
-                    mMainActivity.getMusicDetailFragment().setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
-                    Utils.Ui.setPlayButtonNowPlaying();
+                        mMainActivity.getMusicDetailFragment().setSlideInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
+                        mMainActivity.getMusicDetailFragment().setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
+                        Utils.Ui.setPlayButtonNowPlaying();
 
-                    mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
-                }, Throwable::printStackTrace));
+                        mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
+                    }, Throwable::printStackTrace);
+            Data.sDisposables.add(disposable);
+        });
     }
 
     @Override
@@ -357,7 +365,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
             Object tag = holder.mMusicCoverImage.getTag(R.string.key_id_1);
             if (tag != null && (int) tag != i) {
-                GlideApp.with(mMainActivity).clear(holder.mMusicCoverImage);
+                GlideApp.with(mContext).clear(holder.mMusicCoverImage);
             }
 
             /* show song name, use songNameList */
@@ -387,7 +395,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
     @Override
     public void onViewRecycled(@NonNull ViewHolder holder) {
         if (holder instanceof ItemHolder) {
-            GlideApp.with(mMainActivity).clear(((ItemHolder) holder).mMusicCoverImage);
+            GlideApp.with(mContext).clear(((ItemHolder) holder).mMusicCoverImage);
         }
 
         super.onViewRecycled(holder);
@@ -396,8 +404,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
     @Override
     public boolean onFailedToRecycleView(@NonNull ViewHolder holder) {
         if (holder instanceof ItemHolder) {
-            Log.d(TAG, "onFailedToRecycleView: " + ((ItemHolder) holder).mMusicText);
-            GlideApp.with(mMainActivity).clear(((ItemHolder) holder).mMusicCoverImage);
+            GlideApp.with(mContext).clear(((ItemHolder) holder).mMusicCoverImage);
             holder.itemView.setBackgroundColor(Color.RED);
             ((ItemHolder) holder).mMusicText.setText("This item recycler failed...");
         }
@@ -533,10 +540,10 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             mButton3 = itemView.findViewById(R.id.expand_button_3);
             mButton4 = itemView.findViewById(R.id.expand_button_share);
 
-            mPopupMenu = new PopupMenu(mMainActivity, mItemMenuButton);
+            mPopupMenu = new PopupMenu(mContext, mItemMenuButton);
             mMenu = mPopupMenu.getMenu();
 
-            final Resources resources = mMainActivity.getResources();
+            final Resources resources = mContext.getResources();
 
             //Menu Load
             //noinspection PointlessArithmeticExpression
@@ -549,7 +556,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, resources.getString(R.string.show_album));
             mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, resources.getString(R.string.more_info));
 
-            MenuInflater menuInflater = mMainActivity.getMenuInflater();
+            MenuInflater menuInflater = mContext.getMenuInflater();
             menuInflater.inflate(R.menu.recycler_song_item_menu, mMenu);
         }
     }

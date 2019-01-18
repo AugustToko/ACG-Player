@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ThemeAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:29:00
+ * 当前修改时间：2019年01月18日 18:58:29
+ * 上次修改时间：2019年01月18日 12:12:48
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -12,7 +12,6 @@
 package top.geek_studio.chenlongcould.musicplayer.Adapters;
 
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.databinding.DataBindingUtil;
@@ -43,12 +42,14 @@ import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.geeklibrary.Theme.Theme;
 import top.geek_studio.chenlongcould.geeklibrary.Theme.ThemeStore;
@@ -67,6 +68,8 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
     private List<Theme> mThemes;
 
     private ThemeActivity mThemeActivity;
+
+    private ArrayList<Disposable> mDisposables = new ArrayList<>();
 
     public ThemeAdapter(ThemeActivity themeActivity, List<Theme> themes) {
         mThemes = themes;
@@ -109,7 +112,7 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
                     sure.setTitle("Are you sure?");
                     sure.setMessage("REMOVE?");
                     sure.setNeutralButton("Yes", (dialog12, which12) -> {
-                        Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+                        Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
                             Utils.IO.delFolder(mThemes.get(holder.getAdapterPosition()).getPath());
                         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(result -> {
@@ -117,6 +120,7 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
                                     mThemeActivity.getThemes().clear();
                                     mThemeActivity.reLoadDataUi();
                                 });
+                        disposable.dispose();
                         dialog12.cancel();
                     });
                     sure.setNegativeButton("Cancel", (dialog1, which1) -> dialog1.cancel());
@@ -126,10 +130,12 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
 
                 //save as
                 case Menu.FIRST + 1: {
-                    Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+                    final Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
                         try {
-                            if (!Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).exists())
-                                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).mkdirs();
+                            if (!Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).exists()) {
+                                boolean mkdirs = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).mkdirs();
+                                Log.d(TAG, "onCreateViewHolder: makedirs " + mkdirs);
+                            }
                             Utils.IO.zipDirectory(mThemes.get(holder.getAdapterPosition()).getPath()
                                     , Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getAbsolutePath() + File.separatorChar + new Date(System.currentTimeMillis()).toString() + ".zip");
 
@@ -141,6 +147,7 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
                                 //...
                                 Toast.makeText(mThemeActivity, mThemeActivity.getString(R.string.saved_to_doc), Toast.LENGTH_SHORT).show();
                             });
+                    mDisposables.add(disposable);
                 }
                 break;
             }
@@ -151,7 +158,6 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    @SuppressLint("CheckResult")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 
@@ -167,7 +173,7 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
 
         viewHolder.mIco.setTag(R.string.key_id_2, i);
 
-        Observable.create((ObservableOnSubscribe<String>) emitter -> {
+        final Disposable disposable = Observable.create((ObservableOnSubscribe<String>) emitter -> {
             if (viewHolder.mIco.getTag(R.string.key_id_2) == null)
                 Log.e(TAG, "onBindViewHolder: tag null");
 
@@ -186,6 +192,7 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
                             .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                             .into(viewHolder.mIco);
                 });
+        mDisposables.add(disposable);
 
     }
 
@@ -194,8 +201,6 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
         return mThemes.size();
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    @SuppressLint("CheckResult")
     private void createDetailDialog(ViewHolder holder) {
         final DialogThemeBinding dialogThemeBinding = DataBindingUtil.inflate(mThemeActivity.getLayoutInflater(), R.layout.dialog_theme, null, false);
         final ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) dialogThemeBinding.nestedScrollView.getLayoutParams();
@@ -209,7 +214,10 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
         //REMOVE THEME
         builder.setNeutralButton(mThemeActivity.getString(R.string.del), (dialog, which) -> {
 
-            if (PreferenceManager.getDefaultSharedPreferences(mThemeActivity).getString(Values.SharedPrefsTag.SELECT_THEME, "null").equals(mThemes.get(holder.getAdapterPosition()).getId())) {
+            final String r1 = PreferenceManager.getDefaultSharedPreferences(mThemeActivity).getString(Values.SharedPrefsTag.SELECT_THEME, "null");
+            final String r2 = mThemes.get(holder.getAdapterPosition()).getId();
+
+            if (r1 != null && r1.equals(r2)) {
                 Toast.makeText(mThemeActivity, mThemeActivity.getString(R.string.theme_is_in_use), Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -219,12 +227,13 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
             sure.setTitle(mThemeActivity.getString(R.string.are_u_sure));
             sure.setMessage(mThemeActivity.getString(R.string.remove_int));
             sure.setNeutralButton(mThemeActivity.getString(R.string.sure), (dialog12, which12) -> {
-                Observable.create((ObservableOnSubscribe<Integer>) emitter -> Utils.IO.delFolder(mThemes.get(holder.getAdapterPosition()).getPath()))
+                final Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) emitter -> Utils.IO.delFolder(mThemes.get(holder.getAdapterPosition()).getPath()))
                         .subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                         .subscribe(result -> {
                             dialog12.dismiss();
                             mThemeActivity.reLoadDataUi();
                         });
+                mDisposables.add(disposable);
                 dialog12.cancel();
             });
             sure.setNegativeButton(mThemeActivity.getString(R.string.cancel), (dialog1, which1) -> {
@@ -253,17 +262,17 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
         dialogThemeBinding.idText.setText(String.valueOf(mThemes.get(holder.getAdapterPosition()).getId()));
 
         //load icon
-        Observable.create((ObservableOnSubscribe<Bitmap>) emitter -> emitter.onNext(BitmapFactory.decodeFile(mThemes.get(holder.getAdapterPosition()).getThumbnail())))
+        final Disposable disposableIcon = Observable.create((ObservableOnSubscribe<Bitmap>) emitter -> emitter.onNext(BitmapFactory.decodeFile(mThemes.get(holder.getAdapterPosition()).getThumbnail())))
                 .subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> GlideApp.with(mThemeActivity)
                         .load(result)
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                         .into(dialogThemeBinding.ico));
+        mDisposables.add(disposableIcon);
 
         //load nav preview
         if (mThemes.get(holder.getAdapterPosition()).getSupport_area().contains(ThemeStore.SupportArea.NAV)) {
-            //noinspection ResultOfMethodCallIgnored
-            Observable.create((ObservableOnSubscribe<Bitmap>) emitter -> {
+            final Disposable disposable1 = Observable.create((ObservableOnSubscribe<Bitmap>) emitter -> {
                 File[] imgs = new File(mThemes.get(holder.getAdapterPosition()).getPath() + File.separatorChar + ThemeStore.DIR_IMG_NAV).listFiles();
                 emitter.onNext(BitmapFactory.decodeFile(imgs[0].getAbsolutePath()));
             }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
@@ -271,13 +280,14 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
                             .load(result)
                             .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                             .into(dialogThemeBinding.includeDialogContent.navImage));
+            mDisposables.add(disposable1);
         }
 
         //load bg preview
         if (mThemes.get(holder.getAdapterPosition()).getSupport_area().contains(ThemeStore.SupportArea.BG)) {
 
-            Observable.create((ObservableOnSubscribe<Bitmap>) emitter -> {
-                File[] imgs = new File(mThemes.get(holder.getAdapterPosition()).getPath() + File.separatorChar + ThemeStore.DIR_IMG_BG).listFiles();
+            final Disposable disposableImgs = Observable.create((ObservableOnSubscribe<Bitmap>) emitter -> {
+                final File[] imgs = new File(mThemes.get(holder.getAdapterPosition()).getPath() + File.separatorChar + ThemeStore.DIR_IMG_BG).listFiles();
                 emitter.onNext(BitmapFactory.decodeFile(imgs[0].getAbsolutePath()));
             }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                     .subscribe(result -> GlideApp.with(mThemeActivity)
@@ -285,26 +295,28 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
                             .override(1280, 720)
                             .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                             .into(dialogThemeBinding.includeDialogContent.bgImage));
+            mDisposables.add(disposableImgs);
         }
 
         //load slide preview
         if (mThemes.get(holder.getAdapterPosition()).getSupport_area().contains(ThemeStore.SupportArea.SLIDE)) {
 
-            Observable.create((ObservableOnSubscribe<Bitmap>) emitter -> {
-                File[] imgs = new File(mThemes.get(holder.getAdapterPosition()).getPath() + File.separatorChar + ThemeStore.DIR_IMG_SLIDE).listFiles();
+            final Disposable disposable = Observable.create((ObservableOnSubscribe<Bitmap>) emitter -> {
+                final File[] imgs = new File(mThemes.get(holder.getAdapterPosition()).getPath() + File.separatorChar + ThemeStore.DIR_IMG_SLIDE).listFiles();
                 emitter.onNext(BitmapFactory.decodeFile(imgs[0].getAbsolutePath()));
             }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                     .subscribe(result -> GlideApp.with(mThemeActivity)
                             .load(result)
                             .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                             .into(dialogThemeBinding.includeDialogContent.slideImage));
+            mDisposables.add(disposable);
         }
         builder.setView(dialogThemeBinding.getRoot());
 
         builder.show();
 
         new Handler().postDelayed(() -> {
-            ValueAnimator animator = new ValueAnimator();
+            final ValueAnimator animator = new ValueAnimator();
             animator.setIntValues(0, (int) mThemeActivity.getResources().getDimension(R.dimen.nested_scroll_height));
             animator.addUpdateListener(animation -> {
                 params.height = (int) animation.getAnimatedValue();
@@ -351,5 +363,7 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
         }
     }
 
-
+    public ArrayList<Disposable> getDisposables() {
+        return mDisposables;
+    }
 }

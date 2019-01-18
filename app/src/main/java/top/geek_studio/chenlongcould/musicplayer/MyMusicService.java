@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:29:00
+ * 当前修改时间：2019年01月18日 18:58:29
+ * 上次修改时间：2019年01月18日 16:39:06
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -96,7 +96,7 @@ public final class MyMusicService extends Service {
         @Override
         public void stopMusic() {
             mMediaPlayer.stop();
-            startFN();
+            stopForeground(true);
         }
 
         @Override
@@ -321,18 +321,6 @@ public final class MyMusicService extends Service {
     }
 
     @Override
-    public boolean onUnbind(Intent intent) {
-        Log.d(TAG, "onUnbind: ");
-        return super.onUnbind(intent);
-    }
-
-    @Override
-    public void onRebind(Intent intent) {
-        Log.d(TAG, "onRebind: ");
-        super.onRebind(intent);
-    }
-
-    @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy: ");
         mMediaPlayer.release();
@@ -340,7 +328,6 @@ public final class MyMusicService extends Service {
         mIsServiceDestroyed.set(true);
         if (mCurrentCover != null) mCurrentCover.recycle();
         super.onDestroy();
-        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
 }
