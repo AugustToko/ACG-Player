@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月18日 18:58:29
- * 上次修改时间：2019年01月18日 18:57:39
+ * 当前修改时间：2019年01月27日 13:11:38
+ * 上次修改时间：2019年01月27日 13:08:48
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -11,13 +11,13 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Activities;
 
-import android.annotation.SuppressLint;
-import android.app.Instrumentation;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -50,6 +50,7 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.google.android.gms.ads.reward.RewardedVideoAdListener;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -73,6 +74,7 @@ import top.geek_studio.chenlongcould.geeklibrary.Theme.ThemeStore;
 import top.geek_studio.chenlongcould.geeklibrary.Theme.ThemeUtils;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyPagerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter2AlbumList;
+import top.geek_studio.chenlongcould.musicplayer.AlbumThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.BuildConfig;
 import top.geek_studio.chenlongcould.musicplayer.Data;
@@ -82,6 +84,7 @@ import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
+import top.geek_studio.chenlongcould.musicplayer.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.Models.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.MyApplication;
@@ -94,6 +97,8 @@ import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityMainBinding
 public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     public static final String TAG = "MainActivity";
+
+    private SharedPreferences mSharedPreferences;
 
     /**
      * @see Message#what
@@ -148,15 +153,17 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     private RewardedVideoAd mRewardedVideoAd;
 
-    public static void sendKeyEvent(final int KeyCode) {
-        new Thread() {     //不可在主线程中调用
-            public void run() {
-                Instrumentation inst = new Instrumentation();
-                inst.sendKeyDownUpSync(KeyCode);
-            }
+    private FirebaseAnalytics mFirebaseAnalytics;
 
-        }.start();
-    }
+//    public static void sendKeyEvent(final int KeyCode) {
+//        new Thread() {     //不可在主线程中调用
+//            public void run() {
+//                Instrumentation inst = new Instrumentation();
+//                inst.sendKeyDownUpSync(KeyCode);
+//            }
+//
+//        }.start();
+//    }
 
     /**
      * clear data
@@ -199,13 +206,16 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
      * onXXX
      * At Override
      */
-    @SuppressLint("CheckResult")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Data.init(this);
         super.onCreate(savedInstanceState);
 
+        mMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
+        initFragmentData();
+
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         MobileAds.initialize(this, MyApplication.APP_ID);
         // Use an activity context to get the rewarded video instance.
         mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
@@ -252,7 +262,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 Log.d(TAG, "onRewardedVideoCompleted: ");
             }
         });
-
         loadRewardedVideoAd();
 
         //config
@@ -278,30 +287,34 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         mHandlerThread = new HandlerThread("Handler Thread in MainActivity");
         mHandlerThread.start();
-
-        mMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-
         mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
 
+        //监听耳机(有线或无线)的插拔动作, 拔出暂停音乐
+        IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+        intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
+        registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
+
+        //service
         Intent intent = new Intent(this, MyMusicService.class);
         startService(intent);
         Data.HAS_BIND = bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
 
         initView();
 
-        initStyle();
-
-        load = Utils.Ui.getLoadingDialog(this, "Loading...");
-        load.show();
+        Data.init(this);
 
         loadData();
 
         if (savedInstanceState != null)
             mMainBinding.viewPager.setCurrentItem(savedInstanceState.getInt("viewpage", 0), true);
+
+        //set play type
+        Values.CurrentData.CURRENT_PLAY_TYPE = mSharedPreferences.getString(Values.SharedPrefsTag.PLAY_TYPE, Values.TYPE_COMMON);
     }
 
     @Override
     protected void onResume() {
+        super.onResume();
         mRewardedVideoAd.resume(this);
         initStyle();
         if (mMusicDetailFragment != null) {
@@ -310,7 +323,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         if (mMusicListFragment != null) {
             mMusicListFragment.initStyle();
         }
-        super.onResume();
     }
 
     @Override
@@ -319,7 +331,10 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         super.onPause();
     }
 
-    public void loadData() {
+    private void loadData() {
+        load = Utils.Ui.getLoadingDialog(this, "Loading...");
+        load.show();
+
         Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
             if (Data.sMusicItems.isEmpty()) {
                 /*---------------------- init Data!!!! -------------------*/
@@ -391,29 +406,24 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Integer>() {
             @Override
-            public void onSubscribe(Disposable disposable) {
+            public final void onSubscribe(Disposable disposable) {
                 Data.sDisposables.add(disposable);
             }
 
             @Override
-            public void onNext(Integer result) {
+            public final void onNext(Integer result) {
+                load.dismiss();
+
                 if (result == -1) {
-                    load.dismiss();
                     Utils.Ui.fastToast(MainActivity.this, "cursor is null or moveToFirst Fail");
                     mHandler.postDelayed(MainActivity.this::exitApp, 1000);
                     return;
                 }
                 if (result == -2) {
-                    load.dismiss();
                     Utils.Ui.fastToast(MainActivity.this, "Can not find any music!");
                     mHandler.postDelayed(MainActivity.this::exitApp, 1000);
                     return;
                 }
-
-                load.dismiss();
-
-                Values.MUSIC_DATA_INIT_DONE = true;
-                initFragmentData();
 
                 if (getIntent().getStringExtra("shortcut_type") != null) {
                     switch (getIntent().getStringExtra("shortcut_type")) {
@@ -430,14 +440,14 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             }
 
             @Override
-            public void onError(Throwable throwable) {
+            public final void onError(Throwable throwable) {
                 load.dismiss();
                 Toast.makeText(MainActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
                 exitApp();
             }
 
             @Override
-            public void onComplete() {
+            public final void onComplete() {
                 load.dismiss();
             }
         });
@@ -446,23 +456,24 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     @Override
     protected void onDestroy() {
-        clear();
 
         try {
             unbindService(Data.sServiceConnection);
         } catch (Exception e) {
             Log.d(TAG, "onDestroy: " + e);
         }
+        unregisterReceiver(Data.mMyHeadSetPlugReceiver);
         mRewardedVideoAd.destroy(this);
 
         mHandlerThread.quit();
         mFragmentList.clear();
-
+        AlbumThreadPool.finish();
+        ItemCoverThreadPool.finish();
         super.onDestroy();
     }
 
     @Override
-    public void onAttachFragment(Fragment fragment) {
+    public final void onAttachFragment(Fragment fragment) {
         super.onAttachFragment(fragment);
     }
 
@@ -484,7 +495,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     }
 
     @Override
-    public void onBackPressed() {
+    public final void onBackPressed() {
 
         //1
         if (mMainBinding.drawerLayout.isDrawerOpen(Gravity.START)) {
@@ -521,7 +532,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public final boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_toolbar_exit: {
                 exitApp();
@@ -536,7 +547,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             break;
 
             case R.id.menu_toolbar_linear: {
-                SharedPreferences.Editor editor = MyApplication.mDefSharedPreferences.edit();
+                SharedPreferences.Editor editor = mSharedPreferences.edit();
                 editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.LINEAR_TYPE);
                 editor.apply();
                 mPagerAdapter.notifyDataSetChanged();
@@ -545,7 +556,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             break;
 
             case R.id.menu_toolbar_grid: {
-                SharedPreferences.Editor editor = MyApplication.mDefSharedPreferences.edit();
+                SharedPreferences.Editor editor = mSharedPreferences.edit();
                 editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
                 editor.apply();
                 mPagerAdapter.notifyDataSetChanged();
@@ -554,7 +565,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             break;
 
             case R.id.menu_toolbar_reload: {
-                if (!load.isShowing()) load.show();
                 mFragmentList.clear();
                 mTitles.clear();
                 Data.sMusicItems.clear();
@@ -562,6 +572,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 Data.sMusicItemsBackUp.clear();
                 Data.sAlbumItemsBackUp.clear();
                 Data.sAlbumItems.clear();
+
                 loadData();
             }
             break;
@@ -570,7 +581,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public final boolean onCreateOptionsMenu(Menu menu) {
         mMenu = menu;
         getMenuInflater().inflate(R.menu.menu_toolbar, mMenu);
 
@@ -582,13 +593,13 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mSearchView.setQueryHint("Enter Name...");
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
+            public final boolean onQueryTextSubmit(String query) {
                 mMusicListFragment.getMusicListBinding().includeRecycler.recyclerView.stopScroll();
                 return false;
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
+            public final boolean onQueryTextChange(String newText) {
                 filterData(newText);
                 return true;
             }
@@ -647,6 +658,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
      * init fragments
      */
     private void initFragmentData() {
+
         final String tab_1 = getResources().getString(R.string.music);
         mTitles.add(tab_1);
         mMusicListFragment = MusicListFragment.newInstance();
@@ -673,23 +685,18 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mFileViewFragment = FileViewFragment.newInstance();
         mFragmentList.add(mFileViewFragment);
 
-        final ArrayList<String> titles = new ArrayList<>();
-        titles.add(tab_1);
-        titles.add(tab_2);
-        titles.add(tab_3);
-        titles.add(tab_4);
+        Values.CurrentData.CURRENT_PAGE_INDEX = 0;
 
-        mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(titles.get(0)));
-        mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(titles.get(1)));
-        mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(titles.get(2)));
-        mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(titles.get(3)));
+        mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(mTitles.get(0)));
+        mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(mTitles.get(1)));
+        mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(mTitles.get(2)));
+        mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(mTitles.get(3)));
 
         mPagerAdapter = new MyPagerAdapter(getSupportFragmentManager(), mFragmentList, mTitles);
         mMainBinding.viewPager.setOffscreenPageLimit(3);
         mMainBinding.tabLayout.setupWithViewPager(mMainBinding.viewPager);
         mMainBinding.viewPager.setAdapter(mPagerAdapter);
 
-        Values.CurrentData.CURRENT_PAGE_INDEX = 0;
     }
 
     public final void exitApp() {
@@ -714,13 +721,14 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         Data.sMusicBinder = null;
 
         Values.HAS_PLAYED = false;
+
+        clear();
         finish();
         android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     @Override
-    public void initStyle() {
-        Log.i(TAG, "initStyle: do it");
+    public final void initStyle() {
 
         Utils.Ui.setTopBottomColor(this, mMainBinding.appbar, mMainBinding.toolBar);
         mMainBinding.tabLayout.setBackgroundColor(Utils.Ui.getPrimaryColor(this));
@@ -742,12 +750,12 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             }
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<Theme>() {
             @Override
-            public void onSubscribe(Disposable disposable) {
+            public final void onSubscribe(Disposable disposable) {
 
             }
 
             @Override
-            public void onNext(Theme theme) {
+            public final void onNext(Theme theme) {
                 if (theme != null) {
                     mMainBinding.styleNav.setVisibility(View.VISIBLE);
                     mMainBinding.styleTextNavTitle.setText(theme.getTitle());
@@ -767,89 +775,18 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             }
 
             @Override
-            public void onError(Throwable throwable) {
+            public final void onError(Throwable throwable) {
                 mMainBinding.styleNav.setVisibility(View.GONE);
             }
 
             @Override
-            public void onComplete() {
+            public final void onComplete() {
 
             }
         });
     }
 
-    public final class NotLeakHandler extends Handler {
-        @SuppressWarnings("unused")
-        private WeakReference<MainActivity> mWeakReference;
-
-        NotLeakHandler(MainActivity activity, Looper looper) {
-            super(looper);
-            mWeakReference = new WeakReference<>(activity);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case Values.HandlerWhat.LOAD_INTO_NAV_IMAGE: {
-                    mWeakReference.get().runOnUiThread(() -> {
-                        final Bitmap cover = (Bitmap) msg.obj;
-                        GlideApp.with(mWeakReference.get())
-                                .load(cover == null ? R.drawable.ic_audiotrack_24px : cover)
-                                .transition(DrawableTransitionOptions.withCrossFade())
-                                .into(mNavHeaderImageView);
-                    });
-                }
-                break;
-                case UP: {
-                    mMainBinding.slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
-                }
-                break;
-
-                case DOWN: {
-                    mMainBinding.slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-                }
-                break;
-                default:
-            }
-        }
-
-    }
-
-    ////////////get///////////////////////get///////////////////////get/////////////////
-
-    public final ImageView getNavHeaderImageView() {
-        return mNavHeaderImageView;
-    }
-
-    public final MusicListFragment getMusicListFragment() {
-        return mMusicListFragment;
-    }
-
-    public final MusicDetailFragment getMusicDetailFragment() {
-        return mMusicDetailFragment;
-    }
-
-    public final AlbumListFragment getAlbumListFragment() {
-        return mAlbumListFragment;
-    }
-
-    public final PlayListFragment getPlayListFragment() {
-        return mPlayListFragment;
-    }
-
-    public final NotLeakHandler getHandler() {
-        return mHandler;
-    }
-
-    public ActivityMainBinding getMainBinding() {
-        return mMainBinding;
-    }
-
-    ////////////get///////////////////////get///////////////////////get/////////////////
-
     private void initView() {
-
-        initStyle();
 
         //根据recycler view的滚动程度, 来判断如何返回顶部
         mMainBinding.toolBar.setOnClickListener(v -> {
@@ -958,7 +895,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             }
 
             @Override
-            public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+            public final void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
                 if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
                     mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                 } else if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED)
@@ -975,7 +912,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         } else {
             mMainBinding.slidingLayout.setTouchEnabled(false);
         }
-
 
         mMainBinding.navigationView.setNavigationItemSelectedListener(menuItem -> {
             switch (menuItem.getItemId()) {
@@ -1020,7 +956,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         // 实例代码
         mMainBinding.viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            public final void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 //                ArgbEvaluator evaluator = new ArgbEvaluator(); // ARGB求值器
 //
 //                final int green = 0xFF43CD80, blue = 0xFF11A0F8, yellow = 0xFFFFBB43, red = 0xFFB54B36;
@@ -1041,7 +977,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             }
 
             @Override
-            public void onPageSelected(int position) {
+            public final void onPageSelected(int position) {
                 Values.CurrentData.CURRENT_PAGE_INDEX = position;
                 switch (position) {
                     case 0: {
@@ -1067,7 +1003,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {
+            public final void onPageScrollStateChanged(int state) {
 
             }
         });
@@ -1081,6 +1017,75 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     }
 
+    ////////////get///////////////////////get///////////////////////get/////////////////
+
+    public final ImageView getNavHeaderImageView() {
+        return mNavHeaderImageView;
+    }
+
+    public final MusicListFragment getMusicListFragment() {
+        return mMusicListFragment;
+    }
+
+    public final MusicDetailFragment getMusicDetailFragment() {
+        return mMusicDetailFragment;
+    }
+
+    public final AlbumListFragment getAlbumListFragment() {
+        return mAlbumListFragment;
+    }
+
+    public final PlayListFragment getPlayListFragment() {
+        return mPlayListFragment;
+    }
+
+    public final NotLeakHandler getHandler() {
+        return mHandler;
+    }
+
+    public ActivityMainBinding getMainBinding() {
+        return mMainBinding;
+    }
+
+    ////////////get///////////////////////get///////////////////////get/////////////////
+
+    public final class NotLeakHandler extends Handler {
+        @SuppressWarnings("unused")
+        private WeakReference<MainActivity> mWeakReference;
+
+        NotLeakHandler(MainActivity activity, Looper looper) {
+            super(looper);
+            mWeakReference = new WeakReference<>(activity);
+        }
+
+        @Override
+        public final void handleMessage(Message msg) {
+            switch (msg.what) {
+                case Values.HandlerWhat.LOAD_INTO_NAV_IMAGE: {
+                    mWeakReference.get().runOnUiThread(() -> {
+                        final Bitmap cover = (Bitmap) msg.obj;
+                        GlideApp.with(mWeakReference.get())
+                                .load(cover == null ? R.drawable.ic_audiotrack_24px : cover)
+                                .transition(DrawableTransitionOptions.withCrossFade())
+                                .into(mNavHeaderImageView);
+                    });
+                }
+                break;
+                case UP: {
+                    mMainBinding.slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                }
+                break;
+
+                case DOWN: {
+                    mMainBinding.slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                }
+                break;
+                default:
+            }
+        }
+
+    }
+
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private void displayWelcomeMessage() {
         String welcomeMessage = mFirebaseRemoteConfig.getString("welcome_message");
@@ -1091,5 +1096,4 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         }
         Toast.makeText(this, welcomeMessage, Toast.LENGTH_SHORT).show();
     }
-
 }

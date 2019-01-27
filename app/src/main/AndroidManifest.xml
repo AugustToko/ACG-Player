@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：AndroidManifest.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月17日 17:31:47
-  ~ 上次修改时间：2019年01月17日 17:29:00
+  ~ 当前修改时间：2019年01月27日 13:11:38
+  ~ 上次修改时间：2019年01月19日 11:59:10
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -16,6 +16,7 @@
     <permission
         android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts"
         android:protectionLevel="signature" />
+
     <permission
         android:name="top.geek_studio.chenlongcould.musicplayer.MyMusicService"
         android:protectionLevel="signature" />
@@ -46,12 +47,6 @@
             android:theme="@style/LightTheme"
             android:windowSoftInputMode="stateHidden|adjustPan" />
 
-        <service
-            android:name=".MyMusicService"
-            android:enabled="true"
-            android:exported="false"
-            android:process=":musicService" />
-
         <activity
             android:name=".Activities.SplashActivity"
             android:exported="true"
@@ -66,49 +61,39 @@
             </intent-filter>
         </activity>
 
-        <receiver
-            android:name=".BroadCasts.ReceiverOnMusicPlay"
-            android:enabled="true"
-            android:exported="true"
-            android:permission="top.geek_studio.chenlongcould.musicplayer.BroadCasts">
-            <intent-filter>
-                <action android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name=".BroadCasts.ReceiverOnMusicPause"
-            android:enabled="true"
-            android:exported="true"
-            android:permission="top.geek_studio.chenlongcould.musicplayer.BroadCasts">
-            <intent-filter>
-                <action android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPause" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name=".BroadCasts.MyHeadSetPlugReceiver"
-            android:enabled="true"
-            android:exported="true"
-            android:permission="top.geek_studio.chenlongcould.musicplayer.BroadCasts">
-            <intent-filter>
-                <action android:name="android.intent.action.HEADSET_PLUG" />
-            </intent-filter>
-        </receiver>
-
         <activity
             android:name=".Activities.PublicActivity"
             android:exported="false" />
+
         <activity
             android:name=".Activities.AlbumDetailActivity"
             android:exported="false"
             android:launchMode="singleTask" />
+
         <activity
             android:name=".Activities.SettingsActivity"
             android:exported="false"
             android:launchMode="singleTask" />
+
         <activity
             android:name=".Activities.AboutLic"
             android:exported="false"
             android:launchMode="singleTask" />
+
+        <activity
+            android:name=".Activities.CarViewActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_car_view"
+            android:theme="@style/FullscreenTheme" />
+
+        <activity
+            android:name=".Activities.ThemeActivity"
+            android:label="@string/title_activity_theme"
+            android:launchMode="singleTask" />
+
+        <activity android:name=".Activities.TestActivity" />
+
+        <activity android:name=".Activities.AboutActivity" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -120,16 +105,6 @@
                 android:resource="@xml/file_path" />
         </provider>
 
-        <activity
-            android:name=".Activities.CarViewActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/title_activity_car_view"
-            android:theme="@style/FullscreenTheme" />
-        <activity
-            android:name=".Activities.ThemeActivity"
-            android:label="@string/title_activity_theme"
-            android:launchMode="singleTask" />
-
         <service
             android:name=".MyTile"
             android:icon="@drawable/ic_audiotrack_24px"
@@ -140,13 +115,46 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".Activities.AboutActivity" />
+        <service
+            android:name=".MyMusicService"
+            android:enabled="true"
+            android:exported="false"
+            android:process=":musicService" />
+
+        <receiver
+            android:name=".BroadCasts.ReceiverOnMusicPlay"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="top.geek_studio.chenlongcould.musicplayer.BroadCasts">
+            <intent-filter>
+                <action android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".BroadCasts.ReceiverOnMusicPause"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="top.geek_studio.chenlongcould.musicplayer.BroadCasts">
+            <intent-filter>
+                <action android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPause" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".BroadCasts.MyHeadSetPlugReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="top.geek_studio.chenlongcould.musicplayer.BroadCasts">
+            <intent-filter>
+                <action android:name="android.intent.action.HEADSET_PLUG" />
+            </intent-filter>
+        </receiver>
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-1302949087387063~1079129255" />
 
-        <activity android:name=".Activities.TestActivity" />
     </application>
 
 </manifest>

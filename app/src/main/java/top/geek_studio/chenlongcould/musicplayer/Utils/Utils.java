@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Utils.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月18日 18:58:29
- * 上次修改时间：2019年01月18日 09:20:54
+ * 当前修改时间：2019年01月27日 13:11:38
+ * 上次修改时间：2019年01月21日 19:32:58
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -101,8 +101,6 @@ public final class Utils {
     public static final class Audio {
 
         private final static MediaMetadataRetriever sMediaMetadataRetriever = new MediaMetadataRetriever();
-
-        private static final String TAG = "Audio";
 
         public static void openEqualizer(@NonNull final Activity activity, int id) {
             if (id == AudioEffect.ERROR_BAD_VALUE) {
@@ -600,16 +598,15 @@ public final class Utils {
                 nextText.setTextColor(defColor);
             }
 
-            //clear
-            GlideApp.with(activity).clear(bgUp);
-
             if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
+                Log.d(TAG, "setBlurEffect: blur" + Values.Style.DETAIL_BACKGROUND);
                 bgUp.post(() -> GlideApp.with(activity)
                         .load(bitmap)
                         .dontAnimate()
                         .apply(bitmapTransform(Data.sBlurTransformation))
                         .into(bgUp));
             } else {
+                Log.d(TAG, "setBlurEffect: not blur" + Values.Style.DETAIL_BACKGROUND);
                 if (bitmap != null) {
                     Palette.from(bitmap).generate(palette -> {
                         if (palette != null)
@@ -636,12 +633,14 @@ public final class Utils {
                     public void onAnimationEnd(Animator animation) {
                         GlideApp.with(activity).clear(bgDown);
                         if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
+                            Log.d(TAG, "onAnimationEnd: blur" + Values.Style.DETAIL_BACKGROUND);
                             GlideApp.with(activity)
                                     .load(bitmap)
                                     .dontAnimate()
                                     .apply(bitmapTransform(Data.sBlurTransformation))
                                     .into(bgDown);
                         } else {
+                            Log.d(TAG, "onAnimationEnd: not blur" + Values.Style.DETAIL_BACKGROUND);
                             if (bitmap != null) {
                                 Palette.from(bitmap).generate(palette -> {
                                     if (palette != null)

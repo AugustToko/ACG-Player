@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：PublicActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月18日 18:58:29
- * 上次修改时间：2019年01月18日 12:28:25
+ * 当前修改时间：2019年01月27日 13:11:38
+ * 上次修改时间：2019年01月27日 13:08:44
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -36,6 +36,7 @@ import top.geek_studio.chenlongcould.geeklibrary.Theme.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.Fragments.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
@@ -45,8 +46,7 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
 
     public static final String TAG = "PublicActivity";
 
-    public static final String PLAY_LIST_ITEM = "play_list_item";
-    public static final String PLAY_LIST_FAVOURITE = "favourite music";
+    public static final String INTENT_START_BY = "start_by";
 
     private AppBarLayout mAppBarLayout;
     private Toolbar mToolbar;
@@ -82,11 +82,11 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
 
         initStyle();
 
-        mType = getIntent().getStringExtra("start_by");
+        mType = getIntent().getStringExtra(INTENT_START_BY);
 
         if (mType != null) {
             switch (mType) {
-                case "add recent": {
+                case PlayListFragment.ACTION_ADD_RECENT: {
                     mToolbar.setTitle(getResources().getString(R.string.add_recent));
                     ArrayList<MusicItem> musicItems = new ArrayList<>(Data.sMusicItems);
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -105,7 +105,7 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
                 }
                 break;
 
-                case PLAY_LIST_FAVOURITE: {
+                case PlayListFragment.ACTION_FAVOURITE: {
                     mToolbar.setTitle(getResources().getString(R.string.my_favourite));
 
                     mMusicItemList = new ArrayList<>();
@@ -117,7 +117,7 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
                             //data
 
                             //get musicId in PlayList
-                            Cursor cursor = getContentResolver().query(MediaStore.Audio.Playlists.Members.getContentUri("external", id)
+                            final Cursor cursor = getContentResolver().query(MediaStore.Audio.Playlists.Members.getContentUri("external", id)
                                     , null, null, null, MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
                             if (cursor != null && cursor.moveToFirst()) {
                                 cursor.moveToFirst();
@@ -160,7 +160,7 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
                         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(i -> {
                                     if (i != 0) return;
-                                    adapter = new MyRecyclerAdapter(mMusicItemList, PublicActivity.this, TAG + PLAY_LIST_FAVOURITE);
+                                    adapter = new MyRecyclerAdapter(mMusicItemList, PublicActivity.this, TAG + PlayListFragment.ACTION_FAVOURITE);
                                     mRecyclerView.setAdapter(adapter);
 
                                     mToolbar.setOnMenuItemClickListener(menuItem -> {
@@ -169,7 +169,7 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
                                                 Data.sPlayOrderList.clear();
                                                 Data.sPlayOrderList.addAll(mMusicItemList);        //更新数据
                                                 Collections.shuffle(Data.sPlayOrderList);
-                                                Utils.SendSomeThing.sendPlay(PublicActivity.this, ReceiverOnMusicPlay.TYPE_SHUFFLE, TAG + PLAY_LIST_FAVOURITE);
+                                                Utils.SendSomeThing.sendPlay(PublicActivity.this, ReceiverOnMusicPlay.TYPE_SHUFFLE, TAG + PlayListFragment.ACTION_FAVOURITE);
                                             }
                                             break;
                                         }
@@ -182,7 +182,7 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
                 break;
 
                 //点击播放列表中的一项
-                case PLAY_LIST_ITEM: {
+                case PlayListFragment.ACTION_PLAY_LIST_ITEM: {
 
                     mToolbar.setTitle(getIntent().getStringExtra("play_list_name"));
                     mToolbar.inflateMenu(R.menu.menu_in_play_list_activity);
@@ -257,10 +257,19 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
                 }
                 break;
 
-                case "play history": {
+                case PlayListFragment.ACTION_HISTORY: {
                     mToolbar.setTitle(getString(R.string.history));
+                    mToolbar.inflateMenu(R.menu.menu_public_trash_can);
                     mRecyclerView.setAdapter(new MyRecyclerAdapter(Data.sHistoryPlay, PublicActivity.this, TAG));
                 }
+                break;
+
+                case PlayListFragment.ACTION_TRASH_CAN: {
+                    mToolbar.setTitle(getString(R.string.trash_can));
+                    mToolbar.inflateMenu(R.menu.menu_public_trash_can);
+                    mRecyclerView.setAdapter(new MyRecyclerAdapter(Data.sTrashCanList, PublicActivity.this, TAG));
+                }
+                break;
                 default:
             }
         }

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月17日 17:31:47
-  ~ 上次修改时间：2019年01月17日 17:28:52
+  ~ 当前修改时间：2019年01月27日 13:11:38
+  ~ 上次修改时间：2019年01月21日 20:25:51
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -106,4 +106,5 @@
     <string name="open_blog">打开博客</string>
     <string name="play">播放</string>
     <string name="no_equalizer">No EQ</string>
+    <string name="trash_can">垃圾箱</string>
 </resources>

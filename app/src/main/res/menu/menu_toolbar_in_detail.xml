@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：menu_toolbar_in_detail.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月17日 17:31:46
-  ~ 上次修改时间：2019年01月17日 17:28:53
+  ~ 当前修改时间：2019年01月27日 13:11:38
+  ~ 上次修改时间：2019年01月21日 20:29:09
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -20,9 +20,16 @@
     <item
         android:id="@+id/menu_toolbar_love"
         android:icon="@drawable/ic_star_border_black_24dp"
+        android:title="Love"
         app:iconTint="#fff"
-        app:showAsAction="always"
-        android:title="Love" />
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/menu_toolbar_trash_can"
+        android:icon="@drawable/ic_move_to_inbox_grey_600_24dp"
+        android:title="Drop to trash can"
+        app:iconTint="#fff"
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/menu_toolbar_eq"
@@ -34,7 +41,7 @@
         android:icon="@drawable/ic_playlist_add_white_24dp"
         android:title="Fast Add List"
         android:visible="true"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/menu_toolbar_debug"

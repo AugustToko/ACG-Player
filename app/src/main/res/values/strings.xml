@@ -1,8 +1,8 @@
 <!--
   ~ *************************************************************
   ~ 文件：strings.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月17日 17:31:47
-  ~ 上次修改时间：2019年01月17日 17:28:52
+  ~ 当前修改时间：2019年01月27日 13:11:38
+  ~ 上次修改时间：2019年01月21日 19:45:36
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -130,4 +130,5 @@
     <string name="open_blog">Open my blog</string>
     <string name="play">Play</string>
     <string name="x_has_been_set_as_ringtone" translatable="false">Set %1$s as your ringtone.</string>
+    <string name="trash_can">Trash can</string>
 </resources>

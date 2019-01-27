@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MusicDetailFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 20:49:24
- * 上次修改时间：2019年01月17日 20:48:49
+ * 当前修改时间：2019年01月27日 13:11:38
+ * 上次修改时间：2019年01月27日 13:08:44
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -49,12 +49,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.widget.FrameLayout;
+import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -66,7 +67,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.geeklibrary.Theme.IStyle;
-import top.geek_studio.chenlongcould.geeklibrary.VisibleOrGone;
 import top.geek_studio.chenlongcould.musicplayer.Activities.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.PublicActivity;
@@ -82,7 +82,7 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
-public final class MusicDetailFragment extends Fragment implements IStyle, VisibleOrGone {
+public final class MusicDetailFragment extends Fragment implements IStyle {
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -183,7 +183,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
 
     @Override
     public void onAttach(Context context) {
-        Log.d(Values.LogTAG.LIFT_TAG, "onAttach: MusicDetailFragment");
+        Log.d(Values.LogTAG.LAG_TAG, "onAttach: MusicDetailFragment");
         super.onAttach(context);
         mMainActivity = (MainActivity) context;
 
@@ -192,22 +192,11 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
         mHandler = new MusicDetailFragment.NotLeakHandler(mMainActivity, mHandlerThread.getLooper());
     }
 
-    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Log.d(Values.LogTAG.LIFT_TAG, "onCreateView: MusicDetailFragment");
         View view = inflater.inflate(R.layout.fragment_music_detail, container, false);
 
         initView(view);
-
-        initData();
-
-        return view;
-    }
-
-    private void initData() {
-        setDefAnimation();
-        clearAnimations();
 
         //init view data
         mHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);        //init seekBar
@@ -230,12 +219,6 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
                 bitmap = BitmapFactory.decodeByteArray(cover, 0, cover.length);
             }
 
-//            //set SeekBar color
-//            if (bitmap != null) {
-//                final int temp = bitmap.getPixel(bitmap.getWidth() / 2, bitmap.getHeight() / 2);
-//                mSeekBar.getThumb().setColorFilter(temp, PorterDuff.Mode.SRC_ATOP);
-//            }
-
             //nullable
             setIcoLightOrDark(bitmap);
             setSlideInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), bitmap);
@@ -246,7 +229,10 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
             mPlayButton.setImageResource(R.drawable.ic_play_arrow_black_24dp);
         }
 
+
+        return view;
     }
+
 
     private AlbumImageView mMusicAlbumImage;
 
@@ -269,38 +255,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
     private MyWaitListAdapter mMyWaitListAdapter;
 
     private void findView(View view) {
-        mMusicAlbumImage = view.findViewById(R.id.activity_music_detail_album_image);
-        mBGup = view.findViewById(R.id.activity_music_detail_primary_background_up);
-        mBGdown = view.findViewById(R.id.activity_music_detail_primary_background_down);
-        mSeekBar = view.findViewById(R.id.seekBar);
-        mCurrentInfoSeek = view.findViewById(R.id.info_bar_seek);
-        mNextButton = view.findViewById(R.id.next_button);
-        mPreviousButton = view.findViewById(R.id.previous_button);
-        mPlayButton = view.findViewById(R.id.play_button);
-        mRecyclerView = view.findViewById(R.id.recycler_view);
-        mCurrentInfoBody = view.findViewById(R.id.item_layout);
-        mCurrentAlbumNameText = view.findViewById(R.id.item_text_one);
-        mCurrentMusicNameText = view.findViewById(R.id.item_main_text);
-        mMenuButton = view.findViewById(R.id.item_menu);
-        mRandomButton = view.findViewById(R.id.random_button);
-        mRepeatButton = view.findViewById(R.id.repeat_button);
-        mToolbar = view.findViewById(R.id.activity_music_detail_toolbar);
-        mAppBarLayout = view.findViewById(R.id.activity_music_detail_appbar);
-        mLeftTime = view.findViewById(R.id.left_text);
-        mRightTime = view.findViewById(R.id.right_text);
-        mRecyclerMask = view.findViewById(R.id.recycler_mask);
-        mSlidingUpPanelLayout = view.findViewById(R.id.activity_detail_sliding_layout);
-        mNextWillText = view.findViewById(R.id.next_will_text);
-        mMusicAlbumImageOth2 = view.findViewById(R.id.activity_music_detail_album_image_2);
-        mMusicAlbumImageOth3 = view.findViewById(R.id.activity_music_detail_album_image_3);
 
-        mNowPlayingSongAlbumText = view.findViewById(R.id.activity_main_now_playing_album_name);
-        mNowPlayingBody = view.findViewById(R.id.current_info);
-        mNowPlayingStatusImage = view.findViewById(R.id.activity_main_info_bar_status_image);
-        mNowPlayingBackgroundImage = view.findViewById(R.id.current_info_background);
-        mNowPlayingSongText = view.findViewById(R.id.activity_main_now_playing_name);
-        mNowPlayingSongImage = view.findViewById(R.id.recycler_item_clover_image);
-        mSlideUpGroup = view.findViewById(R.id.detail_body);
     }
 
     public final void setDefAnimation() {
@@ -497,16 +452,40 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
     private volatile AtomicBoolean lc = new AtomicBoolean(false);
 
     private void initView(View view) {
-        findView(view);
-
-        FrameLayout layout = view.findViewById(R.id.frame_ctrl);
+        mMusicAlbumImage = view.findViewById(R.id.activity_music_detail_album_image);
+        mBGup = view.findViewById(R.id.activity_music_detail_primary_background_up);
+        mBGdown = view.findViewById(R.id.activity_music_detail_primary_background_down);
+        mSeekBar = view.findViewById(R.id.seekBar);
+        mCurrentInfoSeek = view.findViewById(R.id.info_bar_seek);
+        mNextButton = view.findViewById(R.id.next_button);
+        mPreviousButton = view.findViewById(R.id.previous_button);
+        mPlayButton = view.findViewById(R.id.play_button);
+        mRecyclerView = view.findViewById(R.id.recycler_view);
+        mCurrentInfoBody = view.findViewById(R.id.item_layout);
+        mCurrentAlbumNameText = view.findViewById(R.id.item_text_one);
+        mCurrentMusicNameText = view.findViewById(R.id.item_main_text);
+        mMenuButton = view.findViewById(R.id.item_menu);
+        mRandomButton = view.findViewById(R.id.random_button);
+        mRepeatButton = view.findViewById(R.id.repeat_button);
+        mToolbar = view.findViewById(R.id.activity_music_detail_toolbar);
+        mAppBarLayout = view.findViewById(R.id.activity_music_detail_appbar);
+        mLeftTime = view.findViewById(R.id.left_text);
+        mRightTime = view.findViewById(R.id.right_text);
+        mRecyclerMask = view.findViewById(R.id.recycler_mask);
+        mSlidingUpPanelLayout = view.findViewById(R.id.activity_detail_sliding_layout);
+        mNextWillText = view.findViewById(R.id.next_will_text);
+        mMusicAlbumImageOth2 = view.findViewById(R.id.activity_music_detail_album_image_2);
+        mMusicAlbumImageOth3 = view.findViewById(R.id.activity_music_detail_album_image_3);
+        mNowPlayingSongAlbumText = view.findViewById(R.id.activity_main_now_playing_album_name);
+        mNowPlayingBody = view.findViewById(R.id.current_info);
+        mNowPlayingStatusImage = view.findViewById(R.id.activity_main_info_bar_status_image);
+        mNowPlayingBackgroundImage = view.findViewById(R.id.current_info_background);
+        mNowPlayingSongText = view.findViewById(R.id.activity_main_now_playing_name);
+        mNowPlayingSongImage = view.findViewById(R.id.recycler_item_clover_image);
+        mSlideUpGroup = view.findViewById(R.id.detail_body);
 
         mSlidingUpPanelLayout.post(() -> {
-            int val0 = (int) (view.getHeight() - layout.getBottom()
-//                    - getResources().getDimension(R.dimen.toolbar_padding_top)
-            );
-//                    + getResources().getDimension(R.dimen.current_info_bar_height));
-
+            int val0 = view.getHeight() - view.findViewById(R.id.frame_ctrl).getBottom();
             Log.d(TAG, "initView: upSlide the val is:" + val0);
             mSlidingUpPanelLayout.setPanelHeight(val0);
         });
@@ -727,9 +706,6 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
             return true;
         });
 
-        if (Values.PHONE_HAS_NAV)
-            mSlidingUpPanelLayout.setPanelHeight((int) (mSlidingUpPanelLayout.getPanelHeight() - getResources().getDimension(R.dimen.nav_height)));
-
         initStyle();
 
         setDefAnimation();
@@ -747,6 +723,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
 
                 case R.id.menu_toolbar_love: {
                     Utils.DataSet.addToFavourite(mMainActivity, Data.sCurrentMusicItem);
+                    Toast.makeText(mMainActivity, "Done!", Toast.LENGTH_SHORT).show();
                 }
                 break;
 
@@ -761,6 +738,10 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
 //                        //点击右侧的按钮之后的操作
 //                        Utils.SendSomeThing.sendPause(mMainActivity);
 //                    }).show();
+                }
+                break;
+                case R.id.menu_toolbar_trash_can: {
+                    dropToTrash();
                 }
                 break;
             }
@@ -967,22 +948,21 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
 
         final Menu menu = mPopupMenu.getMenu();
 
+        //noinspection PointlessArithmeticExpression
+        menu.add(Menu.NONE, Menu.FIRST + 1, 0, "查看专辑");
+        menu.add(Menu.NONE, Menu.FIRST + 2, 0, "详细信息");
+
         mMenuButton.setOnClickListener(v -> mPopupMenu.show());
 
         mPopupMenu.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
-                //noinspection PointlessArithmeticExpression
-                case Menu.FIRST + 0: {
-
-                }
-                break;
                 case Menu.FIRST + 1: {
-                    String albumName = Data.sCurrentMusicItem.getMusicAlbum();
-                    Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
+                    final String albumName = Data.sCurrentMusicItem.getMusicAlbum();
+                    final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
                             MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{albumName}, null);
 
                     //int MusicDetailActivity
-                    Intent intent = new Intent(mMainActivity, AlbumDetailActivity.class);
+                    final Intent intent = new Intent(mMainActivity, AlbumDetailActivity.class);
                     intent.putExtra("key", albumName);
                     if (cursor != null) {
                         cursor.moveToFirst();
@@ -1002,11 +982,6 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
             return false;
         });
 
-        //noinspection PointlessArithmeticExpression
-        menu.add(Menu.NONE, Menu.FIRST + 0, 0, getResources().getString(R.string.next_play));
-        menu.add(Menu.NONE, Menu.FIRST + 1, 0, "查看专辑");
-        menu.add(Menu.NONE, Menu.FIRST + 2, 0, "详细信息");
-
         /*--------------------new panel----------------------*/
         mCurrentInfoBody.setOnClickListener(v -> {
 
@@ -1018,6 +993,10 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
 
             mHandler.sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
 
+        });
+        mCurrentInfoBody.setOnLongClickListener(v -> {
+            dropToTrash();
+            return true;
         });
 
         mLinearLayoutManager = new LinearLayoutManager(mMainActivity);
@@ -1144,6 +1123,29 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
 
     }
 
+    private void dropToTrash() {
+        if (PreferenceManager.getDefaultSharedPreferences(mMainActivity).getBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, true)) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
+            builder.setTitle(getString(R.string.sure_int));
+            builder.setMessage("Drop to trash can?");
+            CheckBox checkBox = new CheckBox(mMainActivity);
+            checkBox.setText("Don not show again");
+            builder.setView(checkBox);
+            builder.setCancelable(true);
+            builder.setNegativeButton("Sure", (dialog, which) -> {
+                if (checkBox.isChecked()) {
+                    PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit().putBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, false).apply();
+                }
+                Data.sTrashCanList.add(Data.sCurrentMusicItem);
+                dialog.dismiss();
+            });
+            builder.setPositiveButton("NO", (dialog, which) -> dialog.dismiss());
+            builder.show();
+        } else {
+            Data.sTrashCanList.add(Data.sCurrentMusicItem);
+        }
+    }
+
     @Override
     public void initStyle() {
         mCurrentInfoSeek.setBackgroundColor(Utils.Ui.getAccentColor(mMainActivity));
@@ -1263,10 +1265,6 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
         return mHandler;
     }
 
-    public MyWaitListAdapter getMyWaitListAdapter() {
-        return mMyWaitListAdapter;
-    }
-
     /**
      * set Info (auto put in data.)
      *
@@ -1381,11 +1379,6 @@ public final class MusicDetailFragment extends Fragment implements IStyle, Visib
     public void onDestroyView() {
         mHandlerThread.quitSafely();
         super.onDestroyView();
-    }
-
-    @Override
-    public void visibleOrGone(int status) {
-
     }
 
     public final class NotLeakHandler extends Handler {

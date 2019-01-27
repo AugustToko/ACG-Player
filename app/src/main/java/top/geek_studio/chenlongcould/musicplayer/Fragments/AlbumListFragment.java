@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AlbumListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月18日 18:58:29
- * 上次修改时间：2019年01月18日 18:57:37
+ * 当前修改时间：2019年01月27日 13:11:38
+ * 上次修改时间：2019年01月27日 13:08:44
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -77,15 +77,7 @@ public final class AlbumListFragment extends Fragment implements VisibleOrGone {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_album_list, container, false);
-        mRecyclerView = view.findViewById(R.id.recycler_view);
-//        final ViewPreloadSizeProvider<AlbumItem> preloadSizeProvider = new ViewPreloadSizeProvider<>();
-//        final AlbumListFragment.MyPreloadModelProvider preloadModelProvider = new AlbumListFragment.MyPreloadModelProvider();
-//        final RecyclerViewPreloader<AlbumItem> preLoader = new RecyclerViewPreloader<>(this, preloadModelProvider, preloadSizeProvider, 2);
-
-        mRecyclerView.setHasFixedSize(true);
-//        mRecyclerView.addOnScrollListener(preLoader);
-        return view;
+        return inflater.inflate(R.layout.fragment_album_list, container, false);
     }
 
     @Override
@@ -95,7 +87,6 @@ public final class AlbumListFragment extends Fragment implements VisibleOrGone {
                 initAlbumData();          //getData
                 VIEW_HAS_LOAD = true;
             }
-            //...
         }
     }
 
@@ -158,22 +149,28 @@ public final class AlbumListFragment extends Fragment implements VisibleOrGone {
      * by firstStartApp, change Layout...
      */
     public void setRecyclerViewData() {
-        //get type
-        final SharedPreferences mDef = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        int type = mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
-        switch (type) {
-            case MyRecyclerAdapter2AlbumList.LINEAR_TYPE: {
-                mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-            }
-            break;
-            case MyRecyclerAdapter2AlbumList.GRID_TYPE: {
-                mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2)));
-            }
-            break;
-        }
 
-        mAdapter2AlbumList = new MyRecyclerAdapter2AlbumList(mMainActivity, Data.sAlbumItems, type);
-        mRecyclerView.setAdapter(mAdapter2AlbumList);
+        if (getView() != null) {
+            mRecyclerView = getView().findViewById(R.id.recycler_view);
+            mRecyclerView.setHasFixedSize(true);
+
+            //get type
+            final SharedPreferences mDef = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            int type = mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
+            switch (type) {
+                case MyRecyclerAdapter2AlbumList.LINEAR_TYPE: {
+                    mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                }
+                break;
+                case MyRecyclerAdapter2AlbumList.GRID_TYPE: {
+                    mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2)));
+                }
+                break;
+            }
+
+            mAdapter2AlbumList = new MyRecyclerAdapter2AlbumList(mMainActivity, Data.sAlbumItems, type);
+            mRecyclerView.setAdapter(mAdapter2AlbumList);
+        }
     }
 
     public RecyclerView getRecyclerView() {

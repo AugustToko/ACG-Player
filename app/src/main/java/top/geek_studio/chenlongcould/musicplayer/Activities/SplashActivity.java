@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：SplashActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月18日 18:58:29
- * 上次修改时间：2019年01月18日 18:57:37
+ * 当前修改时间：2019年01月27日 13:11:38
+ * 上次修改时间：2019年01月27日 13:08:44
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -14,12 +14,10 @@ package top.geek_studio.chenlongcould.musicplayer.Activities;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -52,16 +50,6 @@ public final class SplashActivity extends AppCompatActivity {
             case Values.REQUEST_WRITE_EXTERNAL_STORAGE: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.d(TAG, "onRequestPermissionsResult: grant");
-
-                    //检测是否得到过权限
-                    if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Values.SURE_GET_PERMISSION, false)) {
-                        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
-                        editor.putBoolean(Values.SURE_GET_PERMISSION, true);
-                        editor.apply();
-
-                        Utils.Ui.fastToast(this, "Succeed to get permission!");
-                    }
-
                     initDone();
                 } else {
                     Utils.Ui.fastToast(this, "Failed to get permission, again!");
@@ -87,6 +75,7 @@ public final class SplashActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+//        Debug.startMethodTracing();
         super.onCreate(savedInstanceState);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -109,14 +98,4 @@ public final class SplashActivity extends AppCompatActivity {
         initPermission();
     }
 
-    @Override
-    protected void onDestroy() {
-        Log.d(TAG, "onDestroy: done");
-        super.onDestroy();
-    }
-
-    protected void finalize() throws Throwable {
-        Log.d(TAG, "finalize: done!!!!");
-        super.finalize();
-    }
 }

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Data.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月18日 18:58:29
- * 上次修改时间：2019年01月18日 18:57:37
+ * 当前修改时间：2019年01月27日 13:11:38
+ * 上次修改时间：2019年01月27日 13:08:50
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -91,6 +91,11 @@ public final class Data {
      * 存储播放历史(序列) default...
      */
     public final static List<MusicItem> sHistoryPlay = new ArrayList<>();
+
+    /**
+     * 垃圾箱(dislike)
+     */
+    public final static List<MusicItem> sTrashCanList = new ArrayList<>();
 
     public static Theme sTheme = null;
 

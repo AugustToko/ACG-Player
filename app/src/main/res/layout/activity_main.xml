@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：activity_main.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月17日 17:31:46
-  ~ 上次修改时间：2019年01月17日 17:28:53
+  ~ 当前修改时间：2019年01月27日 13:11:38
+  ~ 上次修改时间：2019年01月19日 10:49:32
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".Activities.MainActivity"
-        tools:openDrawer="start">
+        tools:openDrawer="end">
 
         <com.sothree.slidinguppanel.SlidingUpPanelLayout
             android:id="@+id/sliding_layout"
@@ -88,21 +88,15 @@
             </android.support.constraint.ConstraintLayout>
 
             <FrameLayout
+                android:id="@+id/frame_wait"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <!--for main slide touch-->
+                <!--400dp is albumHeight-->
                 <View
                     android:id="@+id/touch_view"
                     android:layout_width="match_parent"
                     android:layout_height="400dp" />
-
-                <FrameLayout
-                    android:id="@+id/frame_wait"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                </FrameLayout>
 
             </FrameLayout>
 

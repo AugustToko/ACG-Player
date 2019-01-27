@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月18日 18:58:29
- * 上次修改时间：2019年01月18日 11:35:32
+ * 当前修改时间：2019年01月27日 13:11:38
+ * 上次修改时间：2019年01月27日 13:08:44
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -216,8 +216,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
         }
 
         int type = intent.getIntExtra("play_type", 0);
-
-        Log.d(TAG, "onReceive: type: " + type);
 
         switch (type) {
             case 0:

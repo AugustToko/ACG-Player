@@ -1,15 +1,15 @@
 <!--
   ~ *************************************************************
   ~ 文件：recycler_music_list_item_mod.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月17日 20:49:24
-  ~ 上次修改时间：2019年01月17日 18:15:43
+  ~ 当前修改时间：2019年01月27日 13:11:38
+  ~ 上次修改时间：2019年01月19日 11:14:13
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
   ~ *************************************************************
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -18,7 +18,8 @@
     <android.support.constraint.ConstraintLayout
         android:id="@+id/random_play_item"
         android:layout_width="match_parent"
-        android:layout_height="65dp">
+        android:layout_height="75dp"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/imageView"
@@ -49,8 +50,16 @@
         android:id="@+id/view2"
         android:layout_width="match_parent"
         android:layout_height="1px"
-        android:background="@color/line_color" />
+        android:layout_marginBottom="0dp"
+        android:background="@color/line_color"
+        app:layout_constraintBottom_toTopOf="@+id/include" />
 
-    <include layout="@layout/recycler_music_list_item" />
+    <include
+        android:id="@+id/include"
+        layout="@layout/recycler_music_list_item"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:layout_marginTop="65dp"
+        app:layout_constraintTop_toTopOf="parent" />
 
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>

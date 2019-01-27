@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：LicTools.java  模块：geeklibrary  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:47
- * 上次修改时间：2019年01月17日 17:29:00
+ * 当前修改时间：2019年01月27日 13:11:38
+ * 上次修改时间：2019年01月19日 12:17:57
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -50,7 +50,7 @@ public class LicTools {
 
         mRoot.findViewById(R.id.close_button).setOnClickListener(v -> mActivity.onBackPressed());
 
-        final AlertDialog load = DialogUtil.getLoadingDialog(mActivity, "Loading...");
+        final AlertDialog load = new DialogUtil().getLoadingDialog(mActivity, "Loading...");
         load.show();
 
         final TextView textView = mRoot.findViewById(R.id.license_content);

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：include_wait_play_body.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月17日 20:49:24
-  ~ 上次修改时间：2019年01月17日 18:15:43
+  ~ 当前修改时间：2019年01月27日 13:11:38
+  ~ 上次修改时间：2019年01月19日 10:56:30
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -61,63 +61,44 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <android.support.constraint.ConstraintLayout
-            android:id="@+id/constraintLayout3"
+
+        <TextView
+            android:id="@+id/item_text_two"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="16dp"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toStartOf="@+id/item_menu"
+            app:layout_constraintTop_toBottomOf="@+id/item_main_text"
+            tools:text="@string/app_name" />
+
+        <TextView
+            android:id="@+id/item_text_one"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:maxLines="1"
+            android:text="Clover Text"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toStartOf="@+id/item_text_two"
+            app:layout_constraintStart_toStartOf="@+id/item_main_text"
+            app:layout_constraintTop_toBottomOf="@+id/item_main_text" />
+
+        <TextView
+            android:id="@+id/item_main_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/item_menu"
+            android:layout_marginTop="16dp"
+            android:maxLines="1"
+            android:text="Music Text"
+            android:textColor="?android:textColorPrimary"
+            android:textSize="18sp"
             app:layout_constraintStart_toEndOf="@+id/imageView2"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <TextView
-                android:id="@+id/item_text_two"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textSize="12sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/item_main_text"
-                tools:text="@string/app_name" />
-
-            <TextView
-                android:id="@+id/item_text_one"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_marginTop="4dp"
-                android:layout_marginEnd="8dp"
-                android:maxLines="1"
-                android:text="Clover Text"
-                android:textSize="12sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/item_text_two"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/item_main_text" />
-
-            <TextView
-                android:id="@+id/item_main_text"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="0dp"
-                android:maxLines="1"
-                android:text="Music Text"
-                android:textColor="?android:textColorPrimary"
-                android:textSize="18sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        </android.support.constraint.ConstraintLayout>
-
-        <!--        <View
-                    android:id="@+id/view_line_one"
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#e6e6e6" />-->
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
             android:id="@+id/item_menu"
@@ -130,11 +111,17 @@
             android:contentDescription="@string/menu_button"
             android:src="@drawable/ic_more_vert_24px"
             android:tint="#636363"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/item_layout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
     </android.support.constraint.ConstraintLayout>
+
+    <!--        <View
+                    android:id="@+id/view_line_one"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#e6e6e6" />-->
 
     <View
         android:id="@+id/view6"

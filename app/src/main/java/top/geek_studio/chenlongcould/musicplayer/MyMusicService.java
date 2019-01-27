@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月18日 18:58:29
- * 上次修改时间：2019年01月18日 16:39:06
+ * 当前修改时间：2019年01月27日 13:11:38
+ * 上次修改时间：2019年01月19日 14:07:05
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -27,6 +27,7 @@ import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -59,6 +60,8 @@ public final class MyMusicService extends Service {
     private int mStartNotiId = 1;
 
     private boolean mColorized = true;
+
+    private PowerManager.WakeLock wakeLock;
 
     public MyMusicService() {
     }
@@ -170,45 +173,11 @@ public final class MyMusicService extends Service {
     @Override
     public void onCreate() {
         Log.d(TAG, "onCreate: do it");
-        mMediaPlayer.setOnCompletionListener(mp -> {
-            Utils.SendSomeThing.sendPlay(MyMusicService.this, 6, "next");
+        final PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
+        wakeLock.setReferenceCounted(false);
 
-//            if (Values.BUTTON_PRESSED) {
-//                //来自用户的主动点击
-//                if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
-//                    Utils.SendSomeThing.sendPlay(this, ReceiverOnMusicPlay.TYPE_SHUFFLE);
-//                } else if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_COMMON)) {
-//                    Utils.SendSomeThing.sendPlay(MyMusicService.this, 4);
-//                }
-//            } else {
-//                switch (Values.CurrentData.CURRENT_AUTO_NEXT_TYPE) {
-//                    case Values.TYPE_COMMON:
-//                        Utils.SendSomeThing.sendPlay(MyMusicService.this, 4);
-//                        break;
-//                    case Values.TYPE_REPEAT:
-//                        if (Values.CurrentData.CURRENT_PLAY_LIST != null && !Values.CurrentData.CURRENT_PLAY_LIST.equals("default") && Data.sCurrentMusicList.size() != 0) {
-//                            if (Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sCurrentMusicList.size() - 1) {
-//                                Values.CurrentData.CURRENT_MUSIC_INDEX = 0;
-//                                mMediaPlayer.reset();
-//                                try {
-//                                    mMediaPlayer.setDataSource(Data.sCurrentMusicList.get(0));
-//                                    mMediaPlayer.prepare();
-//                                    mMediaPlayer.start();
-//                                } catch (IOException e) {
-//                                    e.printStackTrace();
-//                                }
-//                            }
-//                        } else {
-//                            Utils.SendSomeThing.sendPlay(MyMusicService.this, 4);
-//                        }
-//                        break;
-//                    case Values.TYPE_REPEAT_ONE:
-//                        mMediaPlayer.start();
-//                        break;
-//                }
-//            }
-//            Values.BUTTON_PRESSED = false;
-        });
+        mMediaPlayer.setOnCompletionListener(mp -> Utils.SendSomeThing.sendPlay(MyMusicService.this, 6, "next"));
 
         mMediaPlayer.setOnErrorListener((mp, what, extra) -> {
             mp.reset();
@@ -327,6 +296,7 @@ public final class MyMusicService extends Service {
         stopForeground(true);
         mIsServiceDestroyed.set(true);
         if (mCurrentCover != null) mCurrentCover.recycle();
+        wakeLock.release();
         super.onDestroy();
     }
 

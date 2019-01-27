@@ -1,27 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
   ~ 文件：fragment_play_list.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月17日 17:31:46
-  ~ 上次修改时间：2019年01月17日 17:28:52
+  ~ 当前修改时间：2019年01月27日 13:11:38
+  ~ 上次修改时间：2019年01月21日 19:46:17
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
   ~ *************************************************************
   -->
 
-<layout>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-
         <android.support.constraint.ConstraintLayout
             android:id="@+id/add_recent"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
+            android:layout_height="60dp"
             android:background="@drawable/my_ripple_mask"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -82,10 +80,14 @@
                     android:id="@+id/recent_name"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginBottom="0dp"
                     android:maxLines="1"
                     android:text="@string/add_recent"
                     android:textColor="?android:textColorPrimary"
                     android:textSize="18sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
             </android.support.constraint.ConstraintLayout>
@@ -113,13 +115,13 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#e6e6e6"
+            android:background="@color/line_color"
             app:layout_constraintTop_toBottomOf="@+id/add_recent" />
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/favourite"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
+            android:layout_height="60dp"
             android:background="@drawable/my_ripple_mask">
 
             <ImageView
@@ -178,10 +180,14 @@
                     android:id="@+id/favourite_name"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginBottom="0dp"
                     android:maxLines="1"
                     android:text="@string/fav"
                     android:textColor="?android:textColorPrimary"
                     android:textSize="18sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
             </android.support.constraint.ConstraintLayout>
@@ -209,13 +215,13 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#e6e6e6"
+            android:background="@color/line_color"
             app:layout_constraintTop_toBottomOf="@+id/add_recent" />
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/history"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
+            android:layout_height="60dp"
             android:background="@drawable/my_ripple_mask">
 
             <ImageView
@@ -275,10 +281,12 @@
                     android:id="@+id/history_name"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
                     android:maxLines="1"
                     android:text="@string/history"
                     android:textColor="?android:textColorPrimary"
                     android:textSize="18sp"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
             </android.support.constraint.ConstraintLayout>
@@ -303,6 +311,104 @@
 
         </android.support.constraint.ConstraintLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/line_color"
+            app:layout_constraintTop_toBottomOf="@+id/history" />
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/trash_can"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@drawable/my_ripple_mask">
+
+            <ImageView
+                android:id="@+id/trash_can_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/ic_move_to_inbox_grey_600_24dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/trash_can_menu"
+                app:layout_constraintStart_toEndOf="@+id/trash_can_image"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/trash_can_text_two"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/app_name"
+                    android:textSize="12sp"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/trash_can_name" />
+
+                <TextView
+                    android:id="@+id/trash_can_text_one"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="8dp"
+                    android:maxLines="1"
+                    android:text="@string/app_name"
+                    android:textSize="12sp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/trash_can_text_two"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/trash_can_name" />
+
+                <TextView
+                    android:id="@+id/trash_can_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:maxLines="1"
+                    android:text="@string/trash_can"
+                    android:textColor="?android:textColorPrimary"
+                    android:textSize="18sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </android.support.constraint.ConstraintLayout>
+
+            <ImageView
+                android:id="@+id/trash_can_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:contentDescription="@string/menu_button"
+                android:focusable="true"
+                android:src="@drawable/ic_more_vert_24px"
+                android:tint="#636363"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </android.support.constraint.ConstraintLayout>
 
         <ImageView
             android:layout_width="match_parent"

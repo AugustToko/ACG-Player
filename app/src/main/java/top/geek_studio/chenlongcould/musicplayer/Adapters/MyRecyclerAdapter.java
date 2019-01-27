@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月18日 18:58:29
- * 上次修改时间：2019年01月18日 18:57:39
+ * 当前修改时间：2019年01月27日 13:11:38
+ * 上次修改时间：2019年01月27日 13:08:44
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -13,24 +13,20 @@ package top.geek_studio.chenlongcould.musicplayer.Adapters;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -47,7 +43,6 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.io.File;
-import java.lang.ref.WeakReference;
 import java.util.Date;
 import java.util.List;
 
@@ -63,7 +58,9 @@ import top.geek_studio.chenlongcould.musicplayer.Activities.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
+import top.geek_studio.chenlongcould.musicplayer.Fragments.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
+import top.geek_studio.chenlongcould.musicplayer.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.PlayListsUtil;
@@ -84,7 +81,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
     /**
      * MAIN
      */
-    @Nullable
     private MainActivity mMainActivity;
 
     private Activity mContext;
@@ -108,7 +104,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         return String.valueOf(mMusicItems.get(position).getMusicName().charAt(0));
     }
 
-    @SuppressLint("CheckResult")
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int itemType) {
@@ -137,7 +132,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             });
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                ((ModHolder) holder).mRandomItem.setForeground(ViewTools.getRippe(mContext).getDrawable(0));
+                ((ModHolder) holder).mRandomItem.setForeground(new ViewTools().getRippe(mContext).getDrawable(0));
             }
 
         } else {
@@ -327,8 +322,22 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 //set current data
                 Data.setCurrentMusicItem(mMusicItems.get(holder.getAdapterPosition()));
 
-                //get & save data
-                Data.setCurrentCover(Utils.Audio.getMp3Cover(Data.sCurrentMusicItem.getMusicPath()));
+                String img = "null";
+                final Cursor cursor = mContext.getContentResolver().query(
+                        Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + mMusicItems.get(holder.getAdapterPosition()).getAlbumId())
+                        , new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
+
+                if (cursor != null && cursor.getCount() != 0) {
+                    cursor.moveToFirst();
+                    img = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART));
+                    cursor.close();
+                }
+
+                if (!img.equals("null")) {
+                    Data.setCurrentCover(BitmapFactory.decodeFile(img));
+                } else {
+                    Data.setCurrentCover(Utils.Audio.getDrawableBitmap(mContext, R.drawable.ic_audiotrack_24px));
+                }
 
                 ReceiverOnMusicPlay.setDataSource(Data.sCurrentMusicItem.getMusicPath());
                 ReceiverOnMusicPlay.prepare();
@@ -380,7 +389,37 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             /*--- 添加标记以便避免ImageView因为ViewHolder的复用而出现混乱 ---*/
             holder.mMusicCoverImage.setTag(R.string.key_id_1, i);
 
-            new MyTask(holder.mMusicCoverImage, mMusicItems, mContext, i).execute();
+            ItemCoverThreadPool.post(() -> {
+                if (holder.mMusicCoverImage == null || holder.mMusicCoverImage.getTag(R.string.key_id_1) == null) {
+                    GlideApp.with(mMainActivity).clear(holder.mMusicCoverImage);
+                    Log.e(TAG, "doInBackground: key null------------------skip");
+                    return;
+                }
+
+                //根据position判断是否为复用ViewHolder
+                if (((int) ((ItemHolder) viewHolder).mMusicCoverImage.getTag(R.string.key_id_1)) != i) {
+                    Log.e(TAG, "doInBackground: key error------------------skip");
+                    GlideApp.with(mMainActivity).clear(holder.mMusicCoverImage);
+                    return;
+                }
+
+                final Cursor cursor = mContext.getContentResolver().query(
+                        Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + mMusicItems.get(i).getAlbumId())
+                        , new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
+
+                if (cursor != null && cursor.getCount() != 0) {
+                    cursor.moveToFirst();
+                    holder.mMusicCoverImage.post(() -> {
+                        GlideApp.with(mMainActivity)
+                                .load(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART)))
+                                .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                                .centerCrop()
+                                .into(holder.mMusicCoverImage);
+                        holder.mMusicCoverImage.setTag(null);
+                    });
+//                    if (!cursor.isClosed()) cursor.close();
+                }
+            });
 
         }
 
@@ -424,71 +463,69 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         return 0;
     }
 
-    static class MyTask extends AsyncTask<Void, Void, String> {
-
-        private WeakReference<ImageView> mImageViewWeakReference;
-
-        private WeakReference<Context> mContextWeakReference;
-
-        private WeakReference<List<MusicItem>> mListWeakReference;
-
-        private int mPosition;
-
-        MyTask(ImageView imageView, List<MusicItem> musicItems, Context context, int position) {
-            mImageViewWeakReference = new WeakReference<>(imageView);
-            mContextWeakReference = new WeakReference<>(context);
-            mPosition = position;
-            mListWeakReference = new WeakReference<>(musicItems);
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-
-            if (mImageViewWeakReference.get() == null || result == null) return;
-
-            final File file = new File(result);
-            if (result.equals("null") || !file.exists() || file.isDirectory() || TextUtils.isEmpty(result)) {
-                Log.d(TAG, "onPostExecute: load image error" + result);
-                GlideApp.with(mContextWeakReference.get()).load(R.drawable.ic_audiotrack_24px).into(mImageViewWeakReference.get());
-                return;
-            }
-
-            GlideApp.with(mContextWeakReference.get()).load(result)
-                    .transition(DrawableTransitionOptions.withCrossFade())
-                    .override(Values.MAX_HEIGHT_AND_WIDTH, Values.MAX_HEIGHT_AND_WIDTH)
-                    .into(mImageViewWeakReference.get());
-        }
-
-        @Override
-        protected String doInBackground(Void... voids) {
-
-            if (mImageViewWeakReference.get() == null || mImageViewWeakReference.get().getTag(R.string.key_id_1) == null) {
-                Log.e(TAG, "doInBackground: key null------------------skip");
-                return null;
-            }
-
-            //根据position判断是否为复用ViewHolder
-            if (((int) mImageViewWeakReference.get().getTag(R.string.key_id_1)) != mPosition) {
-                Log.e(TAG, "doInBackground: key error------------------skip");
-                GlideApp.with(mContextWeakReference.get()).clear(mImageViewWeakReference.get());
-                return null;
-            }
-
-            String img;
-            Cursor cursor = mContextWeakReference.get().getContentResolver().query(
-                    Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + mListWeakReference.get().get(mPosition).getAlbumId())
-                    , new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
-
-            if (cursor != null && cursor.getCount() != 0) {
-                cursor.moveToFirst();
-                img = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART));
-                cursor.close();
-                return img;
-            } else {
-                return "null";
-            }
-        }
-    }
+//    static class MyTask extends AsyncTask<Void, Void, String> {
+//
+//        private WeakReference<ImageView> mImageViewWeakReference;
+//
+//        private WeakReference<Context> mContextWeakReference;
+//
+//        private WeakReference<List<MusicItem>> mListWeakReference;
+//
+//        private int mPosition;
+//
+//        MyTask(ImageView imageView, List<MusicItem> musicItems, Context context, int position) {
+//            mImageViewWeakReference = new WeakReference<>(imageView);
+//            mContextWeakReference = new WeakReference<>(context);
+//            mPosition = position;
+//            mListWeakReference = new WeakReference<>(musicItems);
+//        }
+//
+//        @Override
+//        protected void onPostExecute(String result) {
+//
+//            if (mImageViewWeakReference.get() == null || result == null) {
+//                Log.d(TAG, "onPostExecute: mImageViewWeakReference.get() == null, result: " + result);
+//                return;
+//            }
+//
+//            GlideApp.with(mContextWeakReference.get()).load(result)
+//                    .transition(DrawableTransitionOptions.withCrossFade())
+//                    .override(Values.MAX_HEIGHT_AND_WIDTH, Values.MAX_HEIGHT_AND_WIDTH)
+//                    .into(mImageViewWeakReference.get());
+//
+//            cancel(true);
+//        }
+//
+//        @Override
+//        protected String doInBackground(Void... voids) {
+//
+//            if (mImageViewWeakReference.get() == null || mImageViewWeakReference.get().getTag(R.string.key_id_1) == null) {
+//                Log.e(TAG, "doInBackground: key null------------------skip");
+//                return null;
+//            }
+//
+//            //根据position判断是否为复用ViewHolder
+//            if (((int) mImageViewWeakReference.get().getTag(R.string.key_id_1)) != mPosition) {
+//                Log.e(TAG, "doInBackground: key error------------------skip");
+//                GlideApp.with(mContextWeakReference.get()).clear(mImageViewWeakReference.get());
+//                return null;
+//            }
+//
+//            String img;
+//            Cursor cursor = mContextWeakReference.get().getContentResolver().query(
+//                    Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + mListWeakReference.get().get(mPosition).getAlbumId())
+//                    , new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
+//
+//            if (cursor != null && cursor.getCount() != 0) {
+//                cursor.moveToFirst();
+//                img = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART));
+//                cursor.close();
+//                return img;
+//            } else {
+//                return "null";
+//            }
+//        }
+//    }
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -550,7 +587,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             mMenu.add(Menu.NONE, Menu.FIRST + 0, 0, resources.getString(R.string.next_play));
             mMenu.add(Menu.NONE, Menu.FIRST + 1, 0, resources.getString(R.string.love_music));
             mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, resources.getString(R.string.add_to_playlist));
-            if (mCurrentUiPosition.equals(PublicActivity.PLAY_LIST_FAVOURITE))
+            if (mCurrentUiPosition.equals(PlayListFragment.ACTION_FAVOURITE))
                 mMenu.add(Menu.NONE, Menu.FIRST + 3, 0, "Del from favourite");
             if (!mCurrentUiPosition.equals(AlbumDetailActivity.TAG))
                 mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, resources.getString(R.string.show_album));

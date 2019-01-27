@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：PlayListAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:28:59
+ * 当前修改时间：2019年01月27日 13:11:38
+ * 上次修改时间：2019年01月21日 20:08:09
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -33,6 +33,7 @@ import java.util.List;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.Fragments.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.Models.PlayListItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.PlayListsUtil;
@@ -63,7 +64,7 @@ public class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.ViewHo
 
         view.setOnClickListener(v -> {
             Intent intent = new Intent(mMainActivity, PublicActivity.class);
-            intent.putExtra("start_by", PublicActivity.PLAY_LIST_ITEM);
+            intent.putExtra("start_by", PlayListFragment.ACTION_PLAY_LIST_ITEM);
             intent.putExtra("play_list_name", mPlayListItems.get(holder.getAdapterPosition()).getName());
             intent.putExtra("play_list_id", mPlayListItems.get(holder.getAdapterPosition()).getId());
             mMainActivity.startActivity(intent);

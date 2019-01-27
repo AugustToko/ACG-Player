@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：Values.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:28:59
+ * 当前修改时间：2019年01月27日 13:11:38
+ * 上次修改时间：2019年01月27日 13:08:50
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -38,10 +38,10 @@ public final class Values {
 
     public static boolean HAS_PLAYED = false;           //检测app打开后, 是否播放过音乐 (如果没, 默认点击播放按钮为快速随机播放)
 
-    public static boolean PHONE_HAS_NAV = false;        //phone has navBar?
-
     public static final class LogTAG {
         public static final String LIFT_TAG = "THE_TAG_OF_LIFE";
+
+        public static final String LAG_TAG = "LAG_TAG";
     }
 
     /**
@@ -167,7 +167,6 @@ public final class Values {
         public static final String DETAIL_BG_STYLE = "DETAIL_BG_STYLE";
         public static final String AUTO_NIGHT_MODE = "NIGHT_MODE";
         public static String PLAY_TYPE = Values.TYPE_COMMON;
-        public static final String FIRST_USE = "FIRST_USE";
 
         public static final String ALBUM_LIST_DISPLAY_TYPE = "ALBUM_LIST_DISPLAY_TYPE";
         public static final String ALBUM_LIST_GRID_TYPE_COUNT = "ALBUM_LIST_GRID_TYPE_COUNT";
@@ -183,6 +182,12 @@ public final class Values {
         public static final String TRANSPORT_STATUS = "TRANSPORT_STATUS";
 
         public static final String HIDE_SHORT_SONG = "HIDE_SHORT_SONG";
+
+        //tips
+        /**
+         * 提示是否扔进垃圾桶的警告
+         */
+        public static final String TIP_NOTICE_DROP_TRASH = "TIP_NOTICE_DROP_TRASH";
     }
 
     public static final class BroadCast {
@@ -217,7 +222,7 @@ public final class Values {
         public static boolean NIGHT_MODE = false;
 
         //background style model
-        public static String DETAIL_BACKGROUND = "AUTO_COLOR";
+        public static String DETAIL_BACKGROUND = STYLE_BACKGROUND_BLUR;
     }
 
 }

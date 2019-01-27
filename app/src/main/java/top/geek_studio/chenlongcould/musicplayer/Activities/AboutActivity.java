@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：AboutActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:29:00
+ * 当前修改时间：2019年01月27日 13:11:38
+ * 上次修改时间：2019年01月19日 12:17:57
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -80,7 +80,9 @@ public class AboutActivity extends MyBaseCompatActivity {
             builder.setTitle(getString(R.string.update_log));
             builder.setPositiveButton(getString(R.string.close), (dialog, which) -> dialog.cancel());
 
-            HttpUtil.sedOkHttpRequest("https://www.coolapk.com/apk/top.geek_studio.chenlongcould.musicplayer.Common", new Callback() {
+            final HttpUtil httpUtil = new HttpUtil();
+
+            httpUtil.sedOkHttpRequest("https://www.coolapk.com/apk/top.geek_studio.chenlongcould.musicplayer.Common", new Callback() {
                 @Override
                 public void onFailure(@NonNull Call call, @NonNull IOException e) {
                     runOnUiThread(() -> Toast.makeText(AboutActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show());

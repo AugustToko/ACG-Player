@@ -2,7 +2,7 @@
   ~ *************************************************************
   ~ 文件：recycler_music_list_item.xml  模块：app  项目：MusicPlayer
   ~ 当前修改时间：2019年01月27日 13:11:38
-  ~ 上次修改时间：2019年01月19日 11:09:58
+  ~ 上次修改时间：2019年01月19日 11:03:51
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
@@ -15,7 +15,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/music_item_layout"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:foreground="@drawable/my_ripple_mask">
 
     <include layout="@layout/recycler_music_list_item_expand" />
 

@@ -1,8 +1,8 @@
 /*
  * ************************************************************
  * 文件：PlayListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 20:49:24
- * 上次修改时间：2019年01月17日 20:48:49
+ * 当前修改时间：2019年01月27日 13:11:38
+ * 上次修改时间：2019年01月27日 13:08:50
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -51,6 +51,15 @@ public final class PlayListFragment extends Fragment implements IStyle, VisibleO
 
     public static final String TAG = "PlayListFragment";
 
+    public static final String ACTION_ADD_RECENT = "add recent";
+    public static final String ACTION_FAVOURITE = "favourite music";
+    public static final String ACTION_HISTORY = "play history";
+    public static final String ACTION_TRASH_CAN = "trash can";
+    public static final String ACTION_PLAY_LIST_ITEM = "play_list_item";
+    /**
+     * by playlist item clicked
+     */
+
     public static final int RE_LOAD_PLAY_LIST = 80001;
 
     private FragmentPlayListBinding mPlayListBinding;
@@ -79,19 +88,25 @@ public final class PlayListFragment extends Fragment implements IStyle, VisibleO
 
         mPlayListBinding.addRecent.setOnClickListener(v -> {
             Intent intent = new Intent(mMainActivity, PublicActivity.class);
-            intent.putExtra("start_by", "add recent");
+            intent.putExtra(PublicActivity.INTENT_START_BY, ACTION_ADD_RECENT);
             startActivity(intent);
         });
 
         mPlayListBinding.favourite.setOnClickListener(v -> {
             Intent intent = new Intent(mMainActivity, PublicActivity.class);
-            intent.putExtra("start_by", "favourite music");
+            intent.putExtra(PublicActivity.INTENT_START_BY, ACTION_FAVOURITE);
             startActivity(intent);
         });
 
         mPlayListBinding.history.setOnClickListener(v -> {
             Intent intent = new Intent(mMainActivity, PublicActivity.class);
-            intent.putExtra("start_by", "play history");
+            intent.putExtra(PublicActivity.INTENT_START_BY, ACTION_HISTORY);
+            startActivity(intent);
+        });
+
+        mPlayListBinding.trashCan.setOnClickListener(v -> {
+            Intent intent = new Intent(mMainActivity, PublicActivity.class);
+            intent.putExtra(PublicActivity.INTENT_START_BY, ACTION_TRASH_CAN);
             startActivity(intent);
         });
 
