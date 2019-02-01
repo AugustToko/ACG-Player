@@ -28,10 +28,10 @@ android {
         applicationId "top.geek_studio.chenlongcould.musicplayer"
         minSdkVersion 21
         targetSdkVersion 28
-        versionName '2.5.5.3(201901191538)'
+        versionName '2.5.5.3(201902011106)'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config
-        versionCode 56
+        versionCode 57
         flavorDimensions "default"
     }
     buildTypes {
