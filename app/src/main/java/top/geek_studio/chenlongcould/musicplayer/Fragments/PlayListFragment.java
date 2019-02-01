@@ -37,7 +37,6 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.geeklibrary.Theme.IStyle;
-import top.geek_studio.chenlongcould.geeklibrary.VisibleOrGone;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.PlayListAdapter;
@@ -47,7 +46,7 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentPlayListBinding;
 
-public final class PlayListFragment extends Fragment implements IStyle, VisibleOrGone {
+public final class PlayListFragment extends Fragment implements IStyle {
 
     public static final String TAG = "PlayListFragment";
 
@@ -178,11 +177,11 @@ public final class PlayListFragment extends Fragment implements IStyle, VisibleO
         mPlayListBinding.historyName.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
     }
 
-    @Override
-    public void visibleOrGone(int status) {
-        if (mPlayListBinding.favourite != null) mPlayListBinding.favourite.setVisibility(status);
-        if (mPlayListBinding.addRecent != null) mPlayListBinding.addRecent.setVisibility(status);
-    }
+//    @Override
+//    public void visibleOrGone(int status) {
+//        if (mPlayListBinding.favourite != null) mPlayListBinding.favourite.setVisibility(status);
+//        if (mPlayListBinding.addRecent != null) mPlayListBinding.addRecent.setVisibility(status);
+//    }
 
     static class NotLeakHandler extends Handler {
         @SuppressWarnings("unused")

@@ -18,6 +18,14 @@
             android:icon="@drawable/ic_stay_current_landscape_black_24dp"
             android:title="@string/car_mode" />
     </group>
+    <item android:title="@string/more_info">
+        <menu>
+            <item
+                android:id="@+id/menu_nav_detail_info"
+                android:icon="@drawable/ic_data_usage_black_24dp"
+                android:title="数据概览" />
+        </menu>
+    </item>
     <item android:title="@string/other">
         <menu>
             <item

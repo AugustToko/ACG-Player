@@ -244,7 +244,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 //            if (albumArt == null) {
 //                GlideApp.with(mContextWeakReference.get())
 //                        .load(R.drawable.ic_audiotrack_24px)
-//                        .into(mViewHolderWeakReference.get().mAlbumImage);
+//                        .into(mViewHolderWeakReference.get().mArtistImage);
 //                return;
 //            }
 //
@@ -261,9 +261,9 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 //                            if (p != null) {
 //                                @ColorInt int color = p.getVibrantColor(ContextCompat.getColor(mContextWeakReference.get(), R.color.notVeryBlack));
 //                                if (Utils.Ui.isColorLight(color)) {
-//                                    mViewHolderWeakReference.get().mAlbumText.setTextColor(ContextCompat.getColor(mContextWeakReference.get(), R.color.notVeryBlack));
+//                                    mViewHolderWeakReference.get().mArtistText.setTextColor(ContextCompat.getColor(mContextWeakReference.get(), R.color.notVeryBlack));
 //                                } else {
-//                                    mViewHolderWeakReference.get().mAlbumText.setTextColor(ContextCompat.getColor(mContextWeakReference.get(), R.color.notVeryWhite));
+//                                    mViewHolderWeakReference.get().mArtistText.setTextColor(ContextCompat.getColor(mContextWeakReference.get(), R.color.notVeryWhite));
 //                                }
 //                                mViewHolderWeakReference.get().mView.setBackgroundColor(color);
 //
@@ -280,15 +280,15 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 //                        .load(albumArt)
 //                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
 //                        .centerCrop()
-//                        .into(mViewHolderWeakReference.get().mAlbumImage);
+//                        .into(mViewHolderWeakReference.get().mArtistImage);
 //            } else {
 //                GlideApp.with(mContextWeakReference.get())
 //                        .load(R.drawable.ic_audiotrack_24px)
-//                        .into(mViewHolderWeakReference.get().mAlbumImage);
+//                        .into(mViewHolderWeakReference.get().mArtistImage);
 //                Log.e(TAG, "onPostExecute: file not exits");
 //            }
 //
-//            mViewHolderWeakReference.get().mAlbumImage.setTag(R.string.key_id_1, null);
+//            mViewHolderWeakReference.get().mArtistImage.setTag(R.string.key_id_1, null);
 //
 //            cancel(true);
 //        }
@@ -301,7 +301,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 //                return "null";
 //            }
 //
-//            final ImageView imageView = mViewHolderWeakReference.get().mAlbumImage;
+//            final ImageView imageView = mViewHolderWeakReference.get().mArtistImage;
 //
 //            if (imageView == null || imageView.getTag(R.string.key_id_1) == null) {
 //                Log.e(TAG, "doInBackground: key null------------------skip");

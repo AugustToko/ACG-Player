@@ -41,7 +41,6 @@ public class PlaylistLoader {
         ));
     }
 
-    @NonNull
     public static PlayListItem getPlaylist(@NonNull final Context context, final String playlistName) {
         return getPlaylist(makePlaylistCursor(
                 context,

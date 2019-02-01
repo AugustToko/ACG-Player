@@ -11,11 +11,9 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Activities;
 
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -39,6 +37,7 @@ import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
@@ -110,8 +109,7 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
 
                     mMusicItemList = new ArrayList<>();
 
-                    SharedPreferences mDef = PreferenceManager.getDefaultSharedPreferences(this);
-                    int id = mDef.getInt(Values.SharedPrefsTag.FAVOURITE_LIST_ID, -1);
+                    int id = MusicUtil.getFavoritesPlaylist(this).getId();
                     if (id != -1) {
                         mDisposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
                             //data

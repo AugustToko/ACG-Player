@@ -73,6 +73,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.ZipEntry;
@@ -144,6 +145,21 @@ public final class Utils {
                 return BitmapFactory.decodeByteArray(picture, 0, picture.length);
             else
                 return BitmapFactory.decodeResource(Data.sActivities.get(0).getResources(), R.drawable.ic_audiotrack_24px);
+        }
+
+        @Nullable
+        public static String getCoverPathByDB(Context context, int albumId) {
+            String img = null;
+            final Cursor cursor = context.getContentResolver().query(
+                    Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + albumId)
+                    , new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
+
+            if (cursor != null && cursor.getCount() != 0) {
+                cursor.moveToFirst();
+                img = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART));
+                cursor.close();
+            }
+            return img;
         }
 
         /**
@@ -287,6 +303,7 @@ public final class Utils {
          *
          * @return color (int)
          */
+        @ColorInt
         public static int getAccentColor(Context context) {
             return PreferenceManager.getDefaultSharedPreferences(context).getInt(Values.SharedPrefsTag.ACCENT_COLOR, ContextCompat.getColor(context, R.color.colorAccent));
         }
@@ -296,6 +313,7 @@ public final class Utils {
          *
          * @return color (int)
          */
+        @ColorInt
         public static int getPrimaryColor(Context context) {
             return PreferenceManager.getDefaultSharedPreferences(context).getInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(context, R.color.colorPrimary));
         }
@@ -305,6 +323,7 @@ public final class Utils {
          *
          * @return color (int)
          */
+        @ColorInt
         public static int getPrimaryDarkColor(Context context) {
             return PreferenceManager.getDefaultSharedPreferences(context).getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, ContextCompat.getColor(context, R.color.colorPrimaryDark));
         }
@@ -735,40 +754,65 @@ public final class Utils {
         }
 
         /**
-         * favourite music settings
-         * add or del
+         * add into music List
          *
-         * @param context context
-         * @param item    MusicItem
+         * @param context MainActivity
+         * @param item     MusicItem
          */
-        public static void addToFavourite(Context context, MusicItem item) {
-            SharedPreferences mDef = PreferenceManager.getDefaultSharedPreferences(context);
-            int id = mDef.getInt(Values.SharedPrefsTag.FAVOURITE_LIST_ID, -1);
-            if (id != -1) {
-                if (isFav(context, item.getMusicID()) == 1)
-                    PlayListsUtil.addToPlaylist(context, item, id, false);
-                else Toast.makeText(context, "Already added!", Toast.LENGTH_SHORT).show();
+        public static void addListDialog(Context context, MusicItem item) {
+            final Resources resources = context.getResources();
 
-            } else {
-                id = PlayListsUtil.createPlaylist(context, "Favourite List");
-                SharedPreferences.Editor editor = mDef.edit();
-                editor.putInt(Values.SharedPrefsTag.FAVOURITE_LIST_ID, id);
-                editor.apply();
-                if (id != -1) {
-                    if (isFav(context, item.getMusicID()) != 0)
-                        PlayListsUtil.addToPlaylist(context, item, id, false);
-                    else Toast.makeText(context, "Already added!", Toast.LENGTH_SHORT).show();
-                }
-            }
+            final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
+            builder.setTitle(resources.getString(R.string.add_to_playlist));
+
+            builder.setNegativeButton(resources.getString(R.string.new_list), (dialog, which) -> {
+                final android.support.v7.app.AlertDialog.Builder b2 = new android.support.v7.app.AlertDialog.Builder(context);
+                b2.setTitle(resources.getString(R.string.enter_name));
+
+                final EditText et = new EditText(context);
+                b2.setView(et);
+
+                et.setHint(resources.getString(R.string.enter_name));
+                et.setSingleLine(true);
+                b2.setNegativeButton(resources.getString(R.string.cancel), null);
+                b2.setPositiveButton(resources.getString(R.string.sure), (dialog1, which1) -> {
+                    if (TextUtils.isEmpty(et.getText())) {
+                        Toast.makeText(context, "name can not empty!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    final int result = PlayListsUtil.createPlaylist(context, et.getText().toString());
+                    if (result != -1)
+                        PlayListsUtil.addToPlaylist(context, item, result, false);
+                    dialog.dismiss();
+                    Data.sPlayListItems.add(0, new PlayListItem(result, et.getText().toString()));
+
+                    //update data
+                    // TODO: 2019/2/2 让PlayListFragment被动加载，而非主动去刷新
+                    ((MainActivity) Data.sActivities.get(0)).getPlayListFragment().getPlayListAdapter().notifyItemInserted(0);
+                });
+                b2.show();
+            });
+
+            builder.setCancelable(true);
+
+            builder.setSingleChoiceItems(context.getContentResolver()
+                            .query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null),
+                    -1, MediaStore.Audio.Playlists.NAME, (dialog, which) -> {
+                        PlayListsUtil.addToPlaylist(context, item, Data.sPlayListItems.get(which).getId(), false);
+                        dialog.dismiss();
+                    });
+            builder.show();
+
         }
 
         /**
          * add into music List
          *
          * @param activity MainActivity
-         * @param item     MusicItem
+         * @param items     MusicItems
          */
-        public static void addListDialog(MainActivity activity, MusicItem item) {
+        public static void addListDialog(MainActivity activity, ArrayList<MusicItem> items) {
             final Resources resources = activity.getResources();
 
             final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(activity);
@@ -792,7 +836,7 @@ public final class Utils {
 
                     final int result = PlayListsUtil.createPlaylist(activity, et.getText().toString());
                     if (result != -1)
-                        PlayListsUtil.addToPlaylist(activity, item, result, false);
+                        PlayListsUtil.addToPlaylist(activity, items, result, false);
                     dialog.dismiss();
                     Data.sPlayListItems.add(0, new PlayListItem(result, et.getText().toString()));
 
@@ -807,50 +851,13 @@ public final class Utils {
             builder.setSingleChoiceItems(activity.getContentResolver()
                             .query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null),
                     -1, MediaStore.Audio.Playlists.NAME, (dialog, which) -> {
-                        PlayListsUtil.addToPlaylist(activity, item, Data.sPlayListItems.get(which).getId(), false);
+                        PlayListsUtil.addToPlaylist(activity, items, Data.sPlayListItems.get(which).getId(), false);
                         dialog.dismiss();
                     });
             builder.show();
 
         }
 
-        /**
-         * isFav
-         *
-         * @return 0 == isFav, 1 == notFav, -1 == noList
-         */
-        public static int isFav(Context context, int idMusic) {
-            SharedPreferences mDef = PreferenceManager.getDefaultSharedPreferences(context);
-            int id = mDef.getInt(Values.SharedPrefsTag.FAVOURITE_LIST_ID, -1);
-
-            if (id == -1) {
-                Toast.makeText(context, "None Fav", Toast.LENGTH_SHORT).show();
-                return -1;
-            }
-
-            //get musicId in PlayList
-            Cursor cursor = context.getContentResolver().query(MediaStore.Audio.Playlists.Members.getContentUri("external", id)
-                    , null, null, null, MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
-            if (cursor != null && cursor.moveToFirst()) {
-                cursor.moveToFirst();
-                do {
-
-                    //search music (with audioId)
-                    int audioId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID));
-                    Cursor cursor1 = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, MediaStore.MediaColumns._ID + " = ?", new String[]{String.valueOf(audioId)}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-                    if (cursor1 != null && cursor1.moveToFirst()) {
-                        do {
-                            if (cursor1.getInt(cursor1.getColumnIndexOrThrow(MediaStore.Video.Media._ID)) == idMusic)
-                                return 0;
-                        } while (cursor1.moveToNext());
-                        cursor1.close();
-                    }
-
-                } while (cursor.moveToNext());
-                cursor.close();
-            }
-            return 1;
-        }
     }
 
     /**
@@ -874,7 +881,7 @@ public final class Utils {
         /**
          * @param args play_type: previous, next, slide
          */
-        public static void sendPlay(final Context context, final int playType, final String args) {
+        public static void sendPlay(final Context context, final int playType, final String args, final String... other) {
             Intent intent = new Intent();
             intent.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
             intent.putExtra("play_type", playType);

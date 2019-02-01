@@ -97,4 +97,25 @@
 	<string name="open_blog">Open my blog</string>
 	<string name="play">Play</string>
 	<string name="trash_can">Trash can</string>
+    <string name="minimum_time_play">"Minimum time play: "</string>
+    <string name="play_for_the_longest_time">"Play for the longest time: "</string>
+    <string name="play_most_times">"Play most times: "</string>
+    <string name="brief_information">Brief information</string>
+    <string name="data_overview">Data overview</string>
+    <string name="statistics">Statistics</string>
+    <string name="total_plays">Total Plays:</string>
+    <string name="total_playback_time">Total playback time:</string>
+    <string name="artist">Artist</string>
+    <string name="song">Song</string>
+    <string name="albums">Albums</string>
+    <string name="favorites">Favorites</string>
+    <string name="black_list">Black List</string>
+    <string name="skip_the_directory_that_in_the_blacklist">Skip the directory that in the blacklist</string>
+    <string name="shortest_time">Shortest Time</string>
+    <string name="skip_songs_that_are_less_than_the_minimum_duration">Skip songs that are less than the minimum duration</string>
+    <string name="filter">Filter</string>
+    <string name="remove_frome_black_list">Remove from the blacklist</string>
+    <string name="clear">Clear</string>
+    <string name="done">Done</string>
+    <string name="confirm">Confirm</string>
 </resources>

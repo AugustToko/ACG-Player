@@ -53,6 +53,15 @@
   public static final android.os.Parcelable$Creator CREATOR;
 }
 
+#litepal
+-keep class org.litepal.** {
+    *;
+}
+
+-keep class * extends org.litepal.crud.LitePalSupport{
+    *;
+}
+
 #Fragment不需要在AndroidManifest.xml中注册，需要额外保护下
 -keep public class * extends android.support.v4.app.Fragment
 -keep public class * extends android.app.Fragment

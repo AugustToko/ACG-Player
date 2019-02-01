@@ -1,1 +1,19 @@
-[{"outputType":{"type":"APK"},"apkInfo":{"type":"MAIN","splits":[],"versionCode":57,"versionName":"2.5.5.3(201902011106)","enabled":true,"outputFile":"app-release_20190201_2.5.5.3(201902011106)_(57).apk","fullName":"release","baseName":"release"},"path":"app-release_20190201_2.5.5.3(201902011106)_(57).apk","properties":{}}]
+[
+  {
+    "outputType": {
+      "type": "APK"
+    },
+    "apkInfo": {
+      "type": "MAIN",
+      "splits": [],
+      "versionCode": 60,
+      "versionName": "2.5.5.3(201902022236)",
+      "enabled": true,
+      "outputFile": "app-release_20190202_2.5.5.3(201902022236)_(60).apk",
+      "fullName": "release",
+      "baseName": "release"
+    },
+    "path": "app-release_20190202_2.5.5.3(201902022236)_(60).apk",
+    "properties": {}
+  }
+]

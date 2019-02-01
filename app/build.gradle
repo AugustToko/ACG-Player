@@ -28,10 +28,10 @@ android {
         applicationId "top.geek_studio.chenlongcould.musicplayer"
         minSdkVersion 21
         targetSdkVersion 28
-        versionName '2.5.5.3(201902011106)'
+        versionName '2.5.5.3(201902022236)'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config
-        versionCode 57
+        versionCode 60
         flavorDimensions "default"
     }
     buildTypes {
@@ -67,6 +67,13 @@ android {
         enabled = true
     }
     productFlavors {
+    }
+    dependencies {
+        def nav_version = "1.0.0-alpha11"
+
+        implementation "android.arch.navigation:navigation-fragment:$nav_version"
+        // use -ktx for Kotlin
+        implementation "android.arch.navigation:navigation-ui:$nav_version" // use -ktx for Kotlin
     }
 }
 
@@ -105,4 +112,8 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.12.1'
     implementation 'org.jsoup:jsoup:1.11.3'
     implementation project(path: ':geeklibrary')
+    implementation 'android.arch.navigation:navigation-fragment:1.0.0-alpha11'
+    implementation 'org.litepal.android:java:3.0.0'
+    //litepal
+    implementation 'org.litepal.android:java:3.0.0'
 }

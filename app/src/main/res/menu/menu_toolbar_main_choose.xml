@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_toolbar_main_choose_addlist"
+        android:icon="@drawable/ic_playlist_add_white_24dp"
+        android:title="@string/add_to_playlist"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_toolbar_main_choose_remove"
+        android:title="@string/del" />
+    <item
+        android:id="@+id/menu_toolbar_main_choose_waitplay"
+        android:title="@string/next_will_play" />
+    <item
+        android:id="@+id/menu_toolbar_main_choose_share"
+        android:title="@string/share" />
+</menu>

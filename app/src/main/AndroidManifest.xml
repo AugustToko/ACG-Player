@@ -1,13 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-  ~ *************************************************************
-  ~ 文件：AndroidManifest.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月27日 13:11:38
-  ~ 上次修改时间：2019年01月19日 11:59:10
-  ~ 作者：chenlongcould
-  ~ Geek Studio
-  ~ Copyright (c) 2019
-  ~ *************************************************************
-  -->
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="top.geek_studio.chenlongcould.musicplayer"
@@ -16,7 +7,6 @@
     <permission
         android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts"
         android:protectionLevel="signature" />
-
     <permission
         android:name="top.geek_studio.chenlongcould.musicplayer.MyMusicService"
         android:protectionLevel="signature" />
@@ -42,11 +32,14 @@
         android:theme="@style/LightTheme"
         tools:replace="android:allowBackup">
         <activity
+            android:name=".Activities.DetailActivity"
+            android:label="@string/title_activity_detail"
+            android:theme="@style/LightTheme.NoActionBar"></activity>
+        <activity
             android:name=".Activities.MainActivity"
             android:launchMode="singleTask"
             android:theme="@style/LightTheme"
             android:windowSoftInputMode="stateHidden|adjustPan" />
-
         <activity
             android:name=".Activities.SplashActivity"
             android:exported="true"
@@ -60,39 +53,31 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".Activities.PublicActivity"
             android:exported="false" />
-
         <activity
             android:name=".Activities.AlbumDetailActivity"
             android:exported="false"
             android:launchMode="singleTask" />
-
         <activity
             android:name=".Activities.SettingsActivity"
             android:exported="false"
             android:launchMode="singleTask" />
-
         <activity
             android:name=".Activities.AboutLic"
             android:exported="false"
             android:launchMode="singleTask" />
-
         <activity
             android:name=".Activities.CarViewActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_car_view"
             android:theme="@style/FullscreenTheme" />
-
         <activity
             android:name=".Activities.ThemeActivity"
             android:label="@string/title_activity_theme"
             android:launchMode="singleTask" />
-
         <activity android:name=".Activities.TestActivity" />
-
         <activity android:name=".Activities.AboutActivity" />
 
         <provider
@@ -114,7 +99,6 @@
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
-
         <service
             android:name=".MyMusicService"
             android:enabled="true"
@@ -130,7 +114,6 @@
                 <action android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay" />
             </intent-filter>
         </receiver>
-
         <receiver
             android:name=".BroadCasts.ReceiverOnMusicPause"
             android:enabled="true"
@@ -140,7 +123,6 @@
                 <action android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPause" />
             </intent-filter>
         </receiver>
-
         <receiver
             android:name=".BroadCasts.MyHeadSetPlugReceiver"
             android:enabled="true"
@@ -154,7 +136,6 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-1302949087387063~1079129255" />
-
     </application>
 
 </manifest>

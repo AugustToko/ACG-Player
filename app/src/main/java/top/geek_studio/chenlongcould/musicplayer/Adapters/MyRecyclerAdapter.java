@@ -21,10 +21,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -43,6 +43,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -58,12 +59,10 @@ import top.geek_studio.chenlongcould.musicplayer.Activities.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicListFragment;
-import top.geek_studio.chenlongcould.musicplayer.Fragments.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
@@ -76,7 +75,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
      */
     private static final int MOD_TYPE = -1;
 
-    private List<MusicItem> mMusicItems;
+    public boolean IS_CHOOSE = false;
 
     /**
      * MAIN
@@ -87,6 +86,11 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
     //ui position, like: MainActivity or-> xxFragment...
     private String mCurrentUiPosition;
+    /**
+     * 媒体库，默认顺序排序
+     */
+    private List<MusicItem> mMusicItems;
+    private ArrayList<ItemHolder> mViewHolders = new ArrayList<>();
 
     /**
      * @param currentUiPosition current activity showed
@@ -142,6 +146,8 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             holder = new ItemHolder(view);
             onMusicItemClick(view, holder);
         }
+
+        mViewHolders.add(holder);
 
         //默认设置扩展button opacity 0, (default)
         holder.mButton1.setAlpha(0);
@@ -237,10 +243,31 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         holder.mButton3.setOnClickListener(v -> Utils.Audio.setRingtone(mContext, mMusicItems.get(holder.getAdapterPosition()).getMusicID()));
         holder.mButton4.setOnClickListener(v -> mContext.startActivity(Intent.createChooser(Utils.Audio.createShareSongFileIntent(mMusicItems.get(holder.getAdapterPosition()), mContext), null)));
 
-        holder.mItemMenuButton.setOnClickListener(v -> holder.mPopupMenu.show());
+        holder.mItemMenuButton.setOnClickListener(v -> {
+            holder.mPopupMenu.show();
+        });
 
         holder.itemView.setOnLongClickListener(v -> {
-            holder.mPopupMenu.show();
+            for (int id : Data.sSelections) {
+                if (id == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
+                    holder.mBody.setBackgroundColor(ContextCompat.getColor(mContext, R.color.item_default_bg));
+                    Data.sSelections.remove((Integer) mMusicItems.get(holder.getAdapterPosition()).getMusicID());
+                    if (Data.sSelections.size() == 0) {
+                        mMainActivity.inflateCommonMenu(mMainActivity.getMainBinding().toolBar);
+                        IS_CHOOSE = false;
+                    }
+                    return true;
+                }
+            }
+
+            IS_CHOOSE = true;
+
+            Data.sSelections.add(mMusicItems.get(holder.getAdapterPosition()).getMusicID());
+            holder.mBody.setBackgroundColor(Utils.Ui.getAccentColor(mContext));
+
+            if (MainActivity.CURRENT_MENU.equals(MainActivity.MENU_COMMON)) {
+                mMainActivity.inflateChooseMenu(mMainActivity.getMainBinding().toolBar);
+            }
             return true;
         });
 
@@ -257,11 +284,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 }
                 break;
 
-                case Menu.FIRST + 1: {
-                    Utils.DataSet.addToFavourite(mContext, mMusicItems.get(holder.getAdapterPosition()));
-                }
-                break;
-
                 //add to list
                 case Menu.FIRST + 2: {
                     Utils.DataSet.addListDialog(mMainActivity, mMusicItems.get(holder.getAdapterPosition()));
@@ -270,10 +292,9 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
                 /* in PublicActivity */
                 case Menu.FIRST + 3: {
-                    PlayListsUtil.removeFromPlaylist(mContext, mMusicItems.get(holder.getAdapterPosition()), PreferenceManager.getDefaultSharedPreferences(mContext).getInt(Values.SharedPrefsTag.FAVOURITE_LIST_ID, -1));
-                    ((PublicActivity) mContext).getMusicItemList().remove(holder.getAdapterPosition());
-                    ((PublicActivity) mContext).getAdapter().notifyItemRemoved(holder.getAdapterPosition());
+
                 }
+                break;
 
                 case Menu.FIRST + 4: {
                     String albumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
@@ -313,54 +334,52 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
     private void onMusicItemClick(View view, ViewHolder holder) {
         view.setOnClickListener(v -> {
+
+            //在多选模式下
+            if (IS_CHOOSE) {
+
+                for (int id : Data.sSelections) {
+                    if (id == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
+                        ((ItemHolder) holder).mBody.setBackgroundColor(ContextCompat.getColor(mContext, R.color.item_default_bg));
+                        Data.sSelections.remove((Integer) mMusicItems.get(holder.getAdapterPosition()).getMusicID());
+                        if (Data.sSelections.size() == 0) {
+                            mMainActivity.inflateCommonMenu(mMainActivity.getMainBinding().toolBar);
+                            IS_CHOOSE = false;
+                        }
+                        return;
+                    }
+                }
+
+                Data.sSelections.add(mMusicItems.get(holder.getAdapterPosition()).getMusicID());
+                ((ItemHolder) holder).mBody.setBackgroundColor(Utils.Ui.getAccentColor(mContext));
+                return;
+            }
+
+            //在通常模式（非多选）下
             final Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
 
-                ReceiverOnMusicPlay.resetMusic();
-
-                Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
-
-                //set current data
-                Data.setCurrentMusicItem(mMusicItems.get(holder.getAdapterPosition()));
-
-                String img = "null";
-                final Cursor cursor = mContext.getContentResolver().query(
-                        Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + mMusicItems.get(holder.getAdapterPosition()).getAlbumId())
-                        , new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
-
-                if (cursor != null && cursor.getCount() != 0) {
-                    cursor.moveToFirst();
-                    img = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART));
-                    cursor.close();
-                }
-
-                if (!img.equals("null")) {
-                    Data.setCurrentCover(BitmapFactory.decodeFile(img));
-                } else {
-                    Data.setCurrentCover(Utils.Audio.getDrawableBitmap(mContext, R.drawable.ic_audiotrack_24px));
-                }
-
-                ReceiverOnMusicPlay.setDataSource(Data.sCurrentMusicItem.getMusicPath());
-                ReceiverOnMusicPlay.prepare();
-                ReceiverOnMusicPlay.playMusic();
-                Values.HAS_PLAYED = true;
-                mMainActivity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);         //update seek
-
+                //因为mMusicItems 与 Data.sPlayOrderList 不同步, 所以需要转换index
+                //MUSIC INDEX
                 for (int i = 0; i < Data.sPlayOrderList.size(); i++) {
                     if (Data.sPlayOrderList.get(i).getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
                         Values.CurrentData.CURRENT_MUSIC_INDEX = i;
                     }
                 }
 
+                //设置全局ITEM
+                Data.sCurrentMusicItem = mMusicItems.get(holder.getAdapterPosition());
+
+                //cover set
+                String img = Utils.Audio.getCoverPathByDB(mContext, mMusicItems.get(holder.getAdapterPosition()).getAlbumId());
+                if (img != null) {
+                    Data.setCurrentCover(BitmapFactory.decodeFile(img));
+                } else {
+                    Data.setCurrentCover(Utils.Audio.getDrawableBitmap(mContext, R.drawable.ic_audiotrack_24px));
+                }
+
                 observableEmitter.onNext(0);
             }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(integer -> {
-
-                        mMainActivity.getMusicDetailFragment().setSlideInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
-                        mMainActivity.getMusicDetailFragment().setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
-                        Utils.Ui.setPlayButtonNowPlaying();
-
-                        mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
-                    }, Throwable::printStackTrace);
+                    .subscribe(integer -> Utils.SendSomeThing.sendPlay(mContext, ReceiverOnMusicPlay.TYPE_ITEM_CLICK, String.valueOf(holder.getAdapterPosition())), Throwable::printStackTrace);
             Data.sDisposables.add(disposable);
         });
     }
@@ -370,7 +389,14 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
         if (viewHolder instanceof ItemHolder) {
 
-            ItemHolder holder = ((ItemHolder) viewHolder);
+            final ItemHolder holder = ((ItemHolder) viewHolder);
+
+            //判断id是否相同
+            if (Data.sSelections.contains(mMusicItems.get(holder.getAdapterPosition()).getMusicID())) {
+                holder.mBody.setBackgroundColor(Utils.Ui.getAccentColor(mContext));
+            } else {
+                holder.mBody.setBackgroundColor(ContextCompat.getColor(mContext, R.color.item_default_bg));
+            }
 
             Object tag = holder.mMusicCoverImage.getTag(R.string.key_id_1);
             if (tag != null && (int) tag != i) {
@@ -378,7 +404,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             }
 
             /* show song name, use songNameList */
-            Values.CurrentData.CURRENT_BIND_INDEX_MUSIC_LIST = viewHolder.getAdapterPosition();
+            Values.CurrentData.CURRENT_BIND_INDEX_MUSIC_LIST = holder.getAdapterPosition();
 
             holder.mMusicText.setText(mMusicItems.get(i).getMusicName());
             holder.mMusicAlbumName.setText(mMusicItems.get(i).getMusicAlbum());
@@ -397,7 +423,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 }
 
                 //根据position判断是否为复用ViewHolder
-                if (((int) ((ItemHolder) viewHolder).mMusicCoverImage.getTag(R.string.key_id_1)) != i) {
+                if (((int) holder.mMusicCoverImage.getTag(R.string.key_id_1)) != i) {
                     Log.e(TAG, "doInBackground: key error------------------skip");
                     GlideApp.with(mMainActivity).clear(holder.mMusicCoverImage);
                     return;
@@ -410,7 +436,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 if (cursor != null && cursor.getCount() != 0) {
                     cursor.moveToFirst();
                     holder.mMusicCoverImage.post(() -> {
-                        GlideApp.with(mMainActivity)
+                        GlideApp.with(mContext)
                                 .load(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART)))
                                 .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                                 .centerCrop()
@@ -463,70 +489,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         return 0;
     }
 
-//    static class MyTask extends AsyncTask<Void, Void, String> {
-//
-//        private WeakReference<ImageView> mImageViewWeakReference;
-//
-//        private WeakReference<Context> mContextWeakReference;
-//
-//        private WeakReference<List<MusicItem>> mListWeakReference;
-//
-//        private int mPosition;
-//
-//        MyTask(ImageView imageView, List<MusicItem> musicItems, Context context, int position) {
-//            mImageViewWeakReference = new WeakReference<>(imageView);
-//            mContextWeakReference = new WeakReference<>(context);
-//            mPosition = position;
-//            mListWeakReference = new WeakReference<>(musicItems);
-//        }
-//
-//        @Override
-//        protected void onPostExecute(String result) {
-//
-//            if (mImageViewWeakReference.get() == null || result == null) {
-//                Log.d(TAG, "onPostExecute: mImageViewWeakReference.get() == null, result: " + result);
-//                return;
-//            }
-//
-//            GlideApp.with(mContextWeakReference.get()).load(result)
-//                    .transition(DrawableTransitionOptions.withCrossFade())
-//                    .override(Values.MAX_HEIGHT_AND_WIDTH, Values.MAX_HEIGHT_AND_WIDTH)
-//                    .into(mImageViewWeakReference.get());
-//
-//            cancel(true);
-//        }
-//
-//        @Override
-//        protected String doInBackground(Void... voids) {
-//
-//            if (mImageViewWeakReference.get() == null || mImageViewWeakReference.get().getTag(R.string.key_id_1) == null) {
-//                Log.e(TAG, "doInBackground: key null------------------skip");
-//                return null;
-//            }
-//
-//            //根据position判断是否为复用ViewHolder
-//            if (((int) mImageViewWeakReference.get().getTag(R.string.key_id_1)) != mPosition) {
-//                Log.e(TAG, "doInBackground: key error------------------skip");
-//                GlideApp.with(mContextWeakReference.get()).clear(mImageViewWeakReference.get());
-//                return null;
-//            }
-//
-//            String img;
-//            Cursor cursor = mContextWeakReference.get().getContentResolver().query(
-//                    Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + mListWeakReference.get().get(mPosition).getAlbumId())
-//                    , new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
-//
-//            if (cursor != null && cursor.getCount() != 0) {
-//                cursor.moveToFirst();
-//                img = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART));
-//                cursor.close();
-//                return img;
-//            } else {
-//                return "null";
-//            }
-//        }
-//    }
-
     class ViewHolder extends RecyclerView.ViewHolder {
 
         ViewHolder(@NonNull View itemView) {
@@ -534,7 +496,27 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         }
     }
 
+    public void clearSelection() {
+        for (ItemHolder holder : mViewHolders) {
+            holder.mBody.setBackgroundColor(ContextCompat.getColor(mContext, R.color.item_default_bg));
+        }
+        Data.sSelections.clear();
+        mMainActivity.inflateCommonMenu(mMainActivity.getMainBinding().toolBar);
+    }
+
+    class ModHolder extends ItemHolder {
+
+        ConstraintLayout mRandomItem;
+
+        ModHolder(@NonNull View itemView) {
+            super(itemView);
+            mRandomItem = itemView.findViewById(R.id.random_play_item);
+        }
+    }
+
     class ItemHolder extends ViewHolder {
+
+        ConstraintLayout mBody;
 
         ImageView mMusicCoverImage;
 
@@ -569,8 +551,9 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             mMusicText = itemView.findViewById(R.id.recycler_item_music_name);
             mItemMenuButton = itemView.findViewById(R.id.recycler_item_menu);
             mMusicExtName = itemView.findViewById(R.id.recycler_item_music_type_name);
-            mTime = itemView.findViewById(R.id.recycler_item_time);
+            mTime = itemView.findViewById(R.id.recycler_item_music_duration);
             mExpandView = itemView.findViewById(R.id.music_item_expand_view);
+            mBody = itemView.findViewById(R.id.recycler_music_item_view);
 
             mButton1 = itemView.findViewById(R.id.expand_button_1);
             mButton2 = itemView.findViewById(R.id.expand_button_2);
@@ -585,27 +568,14 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             //Menu Load
             //noinspection PointlessArithmeticExpression
             mMenu.add(Menu.NONE, Menu.FIRST + 0, 0, resources.getString(R.string.next_play));
-            mMenu.add(Menu.NONE, Menu.FIRST + 1, 0, resources.getString(R.string.love_music));
             mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, resources.getString(R.string.add_to_playlist));
-            if (mCurrentUiPosition.equals(PlayListFragment.ACTION_FAVOURITE))
-                mMenu.add(Menu.NONE, Menu.FIRST + 3, 0, "Del from favourite");
             if (!mCurrentUiPosition.equals(AlbumDetailActivity.TAG))
                 mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, resources.getString(R.string.show_album));
             mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, resources.getString(R.string.more_info));
+            mMenu.add(Menu.NONE, Menu.FIRST + 6, 0, resources.getString(R.string.share));
 
             MenuInflater menuInflater = mContext.getMenuInflater();
             menuInflater.inflate(R.menu.recycler_song_item_menu, mMenu);
         }
     }
-
-    class ModHolder extends ItemHolder {
-
-        ConstraintLayout mRandomItem;
-
-        ModHolder(@NonNull View itemView) {
-            super(itemView);
-            mRandomItem = itemView.findViewById(R.id.random_play_item);
-        }
-    }
-
 }

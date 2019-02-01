@@ -25,11 +25,15 @@ import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.Log;
 
+import org.litepal.LitePal;
+
 import java.util.Collections;
 import java.util.List;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.AlbumListFragment;
+import top.geek_studio.chenlongcould.musicplayer.Utils.MusicUtil;
+import top.geek_studio.chenlongcould.musicplayer.Utils.PlayListsUtil;
 
 public final class MyApplication extends Application {
 
@@ -56,6 +60,8 @@ public final class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        LitePal.initialize(this);
 
         if (getProcessName(this).equals(getPackageName())) {
 
@@ -87,6 +93,10 @@ public final class MyApplication extends Application {
 
             Values.Style.DETAIL_BACKGROUND = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_BLUR);
 
+            //init favourite
+            if (MusicUtil.getFavoritesPlaylist(this) == null)
+                PlayListsUtil.createPlaylist(this, getString(R.string.favorites));
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
                 mShortcutManager = getSystemService(ShortcutManager.class);
                 getNewShortcutInfo();
@@ -101,7 +111,7 @@ public final class MyApplication extends Application {
     public static final String SHORTCUT_RANDOM = "SHORTCUT_RANDOM";
 
     /**
-     * 动态添加三个
+     * 动态添加
      */
     @RequiresApi(api = Build.VERSION_CODES.N_MR1)
     private void getNewShortcutInfo() {

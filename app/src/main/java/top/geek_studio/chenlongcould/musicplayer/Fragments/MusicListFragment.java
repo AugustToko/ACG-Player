@@ -23,14 +23,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import top.geek_studio.chenlongcould.geeklibrary.Theme.IStyle;
-import top.geek_studio.chenlongcould.geeklibrary.VisibleOrGone;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentMusicListLayoutBinding;
 
-public final class MusicListFragment extends Fragment implements VisibleOrGone, IStyle {
+public final class MusicListFragment extends Fragment implements IStyle {
 
     public static final String TAG = "MusicListFragment";
 
@@ -71,6 +70,7 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone, 
         return mMusicListBinding.getRoot();
     }
 
+
     public final MyRecyclerAdapter getAdapter() {
         return adapter;
     }
@@ -79,11 +79,11 @@ public final class MusicListFragment extends Fragment implements VisibleOrGone, 
         return mMusicListBinding;
     }
 
-    @Override
-    public void visibleOrGone(int status) {
-        if (mMusicListBinding.includeRecycler.recyclerView != null)
-            mMusicListBinding.includeRecycler.recyclerView.setVisibility(status);
-    }
+//    @Override
+//    public void visibleOrGone(int status) {
+//        if (mMusicListBinding.includeRecycler.recyclerView != null)
+//            mMusicListBinding.includeRecycler.recyclerView.setVisibility(status);
+//    }
 
     @Override
     public void initStyle() {

@@ -42,6 +42,9 @@ public class ItemCoverThreadPool {
     }
 
     public static void finish() {
-        if (mInstance != null) mInstance.mThreadPoolExec.shutdown();
+        if (mInstance != null) {
+            mInstance.mThreadPoolExec.shutdown();
+            mInstance = null;
+        }
     }
 }

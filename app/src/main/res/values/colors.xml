@@ -44,4 +44,6 @@
     <color name="win_background_color">#fafafa</color>
     <color name="theme_in_use_item_bg_color">#7a00f2ff</color>
 
+    <color name="item_default_bg">#fafafafa</color>
+
 </resources>

@@ -27,7 +27,8 @@ public final class MusicItem implements Parcelable {
     private int mSize;
     private String mArtist;
     private int mAddTime;
-    private boolean mIsFavourite;
+    transient private boolean mIsFavourite;
+    private int mArtistId;
 
     protected MusicItem(Parcel in) {
         this.mMimeName = in.readString();
@@ -40,7 +41,7 @@ public final class MusicItem implements Parcelable {
         this.mArtist = in.readString();
         this.mAddTime = in.readInt();
         this.mAlbumId = in.readInt();
-        this.mIsFavourite = in.readByte() != 0;
+        this.mArtistId = in.readInt();
     }
 
     public String getMusicName() {
@@ -75,6 +76,28 @@ public final class MusicItem implements Parcelable {
         return mAddTime;
     }
 
+    private MusicItem(Builder builder) {
+        mMusicID = builder.mMusicID;
+        mMusicAlbum = builder.mMusicAlbum;
+        mMusicName = builder.mMusicName;
+        mAddTime = builder.mAddTime;
+        mDuration = builder.mDuration;
+        mSize = builder.mSize;
+        mMusicPath = builder.mMusicPath;
+        mArtist = builder.mArtist;
+        mAlbumId = builder.mAlbumId;
+        mArtistId = builder.mArtistId;
+        mIsFavourite = builder.mIsFav;
+    }
+
+    public int getArtistId() {
+        return mArtistId;
+    }
+
+    public String getMimeName() {
+        return mMimeName;
+    }
+
     public static final Parcelable.Creator<MusicItem> CREATOR = new Parcelable.Creator<MusicItem>() {
         @Override
         public MusicItem createFromParcel(Parcel source) {
@@ -87,16 +110,8 @@ public final class MusicItem implements Parcelable {
         }
     };
 
-    private MusicItem(Builder builder) {
-        mMusicID = builder.mMusicID;
-        mMusicAlbum = builder.mMusicAlbum;
-        mMusicName = builder.mMusicName;
-        mAddTime = builder.mAddTime;
-        mDuration = builder.mDuration;
-        mSize = builder.mSize;
-        mMusicPath = builder.mMusicPath;
-        mArtist = builder.mArtist;
-        mAlbumId = builder.mAlbumId;
+    public boolean isFavourite() {
+        return mIsFavourite;
     }
 
     @Override
@@ -120,6 +135,7 @@ public final class MusicItem implements Parcelable {
         dest.writeString(this.mArtist);
         dest.writeInt(this.mAddTime);
         dest.writeInt(this.mAlbumId);
+        dest.writeInt(this.mArtistId);
     }
 
     @NonNull
@@ -140,6 +156,8 @@ public final class MusicItem implements Parcelable {
         private String mArtist = "null";
         private int mAddTime = -1;
         private int mAlbumId;
+        private int mArtistId;
+        private boolean mIsFav;
 
         public Builder(int musicID, String musicName, String musicPath) {
             mMusicID = musicID;
@@ -179,6 +197,16 @@ public final class MusicItem implements Parcelable {
 
         public Builder addAlbumId(int id) {
             mAlbumId = id;
+            return this;
+        }
+
+        public Builder addArtistId(int id) {
+            mArtistId = id;
+            return this;
+        }
+
+        public Builder isFavourite(boolean b) {
+            mIsFav = b;
             return this;
         }
 

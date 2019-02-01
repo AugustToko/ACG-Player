@@ -77,6 +77,7 @@ import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
@@ -722,7 +723,9 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                 break;
 
                 case R.id.menu_toolbar_love: {
-                    Utils.DataSet.addToFavourite(mMainActivity, Data.sCurrentMusicItem);
+                    MusicUtil.toggleFavorite(mMainActivity, Data.sCurrentMusicItem);
+                    mToolbar.getMenu().findItem(R.id.menu_toolbar_love).setIcon(MusicUtil.isFavorite(mMainActivity, Data.sCurrentMusicItem) ?
+                            R.drawable.ic_favorite_white_24dp : R.drawable.ic_favorite_border_white_24dp);
                     Toast.makeText(mMainActivity, "Done!", Toast.LENGTH_SHORT).show();
                 }
                 break;
@@ -1257,12 +1260,19 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                         .into(mMusicAlbumImage);
             }
 
+            updateFav();
+
             Utils.Ui.setBlurEffect(mMainActivity, cover, mBGup, mBGdown, mNextWillText);
         });
     }
 
     public final NotLeakHandler getHandler() {
         return mHandler;
+    }
+
+    public final void updateFav() {
+        mToolbar.getMenu().findItem(R.id.menu_toolbar_love).setIcon(MusicUtil.isFavorite(mMainActivity, Data.sCurrentMusicItem) ?
+                R.drawable.ic_favorite_white_24dp : R.drawable.ic_favorite_border_white_24dp);
     }
 
     /**

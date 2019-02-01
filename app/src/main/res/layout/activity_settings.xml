@@ -21,8 +21,11 @@
             android:id="@+id/activity_settings_appbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
             android:background="@color/toolbarColor"
-            android:paddingTop="@dimen/toolbar_padding_top">
+            android:elevation="2dp"
+            android:paddingTop="@dimen/toolbar_padding_top"
+            app:layout_constraintTop_toTopOf="parent">
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/activity_settings_toolbar"
@@ -53,11 +56,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="4dp"
                     android:text="@string/app_color"
                     android:textColor="@color/colorAccent"
                     android:textStyle="bold"
-                    app:layout_constraintStart_toStartOf="parent" />
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <android.support.constraint.ConstraintLayout
                     android:id="@+id/primer_color_option"
@@ -225,8 +229,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:orientation="vertical"
-                    android:visibility="visible"
-                    app:layout_constraintTop_toBottomOf="@+id/textView_2">
+                    app:layout_constraintTop_toBottomOf="@+id/textView_2"
+                    tools:visibility="gone">
 
                     <android.support.constraint.ConstraintLayout
                         android:id="@+id/detail_background_style"
@@ -531,79 +535,109 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
-                    android:text="Filter"
+                    android:text="@string/filter"
                     android:textColor="@color/colorAccent"
                     android:textStyle="bold"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/part2" />
 
-                <LinearLayout
-                    android:id="@+id/part3"
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/hide_short"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:orientation="vertical"
-                    android:visibility="visible"
+                    android:layout_height="70dp"
+                    android:background="?android:attr/selectableItemBackground"
                     app:layout_constraintTop_toBottomOf="@+id/filter">
 
-                    <android.support.constraint.ConstraintLayout
-                        android:id="@+id/hide_short"
-                        android:layout_width="match_parent"
-                        android:layout_height="70dp"
-                        android:background="?android:attr/selectableItemBackground">
+                    <TextView
+                        android:id="@+id/text_view_11"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/shortest_time"
+                        android:textColor="@color/notVeryBlack"
+                        android:textSize="18sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                        <TextView
-                            android:id="@+id/text_view_11"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:layout_marginTop="8dp"
-                            android:text="Mini Time"
-                            android:textColor="@color/notVeryBlack"
-                            android:textSize="18sp"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/skip_songs_that_are_less_than_the_minimum_duration"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/text_view_11" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:layout_marginTop="8dp"
-                            android:layout_marginBottom="8dp"
-                            android:text="Skip the short time of the song"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@+id/text_view_11" />
+                    <!--<EditText-->
+                    <!--android:id="@+id/editText"-->
+                    <!--android:layout_width="50dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_marginTop="8dp"-->
+                    <!--android:layout_marginEnd="8dp"-->
+                    <!--android:layout_marginBottom="8dp"-->
+                    <!--app:layout_constraintBottom_toBottomOf="parent"-->
+                    <!--app:layout_constraintEnd_toEndOf="parent"-->
+                    <!--app:layout_constraintTop_toTopOf="parent"-->
+                    <!--android:inputType="number"-->
+                    <!--android:hint="Number"-->
+                    <!--app:autofillHints="Number" />-->
 
-                        <!--<EditText-->
-                        <!--android:id="@+id/editText"-->
-                        <!--android:layout_width="50dp"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_marginTop="8dp"-->
-                        <!--android:layout_marginEnd="8dp"-->
-                        <!--android:layout_marginBottom="8dp"-->
-                        <!--app:layout_constraintBottom_toBottomOf="parent"-->
-                        <!--app:layout_constraintEnd_toEndOf="parent"-->
-                        <!--app:layout_constraintTop_toTopOf="parent"-->
-                        <!--android:inputType="number"-->
-                        <!--android:hint="Number"-->
-                        <!--app:autofillHints="Number" />-->
+                    <Switch
+                        android:id="@+id/filter_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginBottom="8dp"
+                        android:clickable="false"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                        <Switch
-                            android:id="@+id/filter_switch"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:layout_marginEnd="16dp"
-                            android:layout_marginBottom="8dp"
-                            android:clickable="false"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                </android.support.constraint.ConstraintLayout>
 
-                    </android.support.constraint.ConstraintLayout>
 
-                </LinearLayout>
+                <View
+                    android:id="@+id/view"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/line_color"
+                    app:layout_constraintTop_toBottomOf="@+id/hide_short" />
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/item_blacklist"
+                    android:layout_width="match_parent"
+                    android:layout_height="70dp"
+                    android:background="?android:attr/selectableItemBackground"
+                    app:layout_constraintTop_toBottomOf="@+id/view">
+
+                    <TextView
+                        android:id="@+id/text_view_12"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/black_list"
+                        android:textColor="@color/notVeryBlack"
+                        android:textSize="18sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/skip_the_directory_that_in_the_blacklist"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/text_view_12" />
+
+                </android.support.constraint.ConstraintLayout>
 
             </android.support.constraint.ConstraintLayout>
 

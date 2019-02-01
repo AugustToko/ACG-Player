@@ -22,11 +22,15 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.litepal.LitePal;
+
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.Database.Detail;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
@@ -36,10 +40,16 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
     @SuppressWarnings("unused")
     private static final String TAG = "ReceiverOnMusicPlay";
 
+    public static final String PLAY_TYPE = "play_type";
+
+    //最短播放时间为3000毫秒
+    public static final int MINIMUM_PLAY_TIME = 3000;
+
     /**
      * @see Message#what
      */
     public static final int TYPE_SHUFFLE = 90;
+    public static final int TYPE_ITEM_CLICK = 15;
 
     /**
      * the mediaPlayer is Ready?
@@ -104,10 +114,12 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
         reSetSeekBar();         //防止seekBar跳动到Max
         musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
         musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
+        ((MainActivity) Data.sActivities.get(0)).getMainBinding().slidingLayout.setTouchEnabled(true);
     }
 
     /**
      * setFlags
+     *
      * @param targetIndex index
      */
     private static void setFlags(int targetIndex) {
@@ -115,7 +127,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
     }
 
     public static void playMusic() {
-        Values.HAS_PLAYED = true;
         try {
             Data.sMusicBinder.setCurrentMusicData(Data.sCurrentMusicItem);
             Data.sMusicBinder.playMusic();
@@ -210,12 +221,28 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        if (!Utils.Ui.ANIMATION_IN_DETAIL_DONE.get() && Values.CurrentData.CURRENT_UI_MODE.equals(Values.UIMODE.MODE_COMMON)) {
-            Toast.makeText(context, "Wait...", Toast.LENGTH_SHORT).show();
-            return;
+//        if (!Utils.Ui.ANIMATION_IN_DETAIL_DONE.get() && Values.CurrentData.CURRENT_UI_MODE.equals(Values.UIMODE.MODE_COMMON)) {
+//            Toast.makeText(context, "Wait...", Toast.LENGTH_SHORT).show();
+//            return;
+//        }
+
+        final int type = intent.getIntExtra(PLAY_TYPE, 0);
+
+        if (Values.HAS_PLAYED) {
+            final List<Detail> infos = LitePal.where("MusicId = ?", String.valueOf(Data.sCurrentMusicItem.getMusicID())).find(Detail.class);
+            if (infos.size() > 0) {
+                Detail detail = infos.get(0);
+                detail.setPlayDuration(detail.getPlayDuration() + ReceiverOnMusicPlay.getCurrentPosition());
+                if (ReceiverOnMusicPlay.getCurrentPosition() < MINIMUM_PLAY_TIME) {
+                    detail.setMinimumPlayTimes(detail.getMinimumPlayTimes() + 1);
+                }
+                detail.save();
+            }
         }
 
-        int type = intent.getIntExtra("play_type", 0);
+        ///////////////////////////BEFORE PLAYER SET/////////////////////////////////////////
+
+        Values.HAS_PLAYED = true;
 
         switch (type) {
             case 0:
@@ -322,7 +349,44 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
             }
             break;
+
+            //by MusicListFragment item click
+            case TYPE_ITEM_CLICK: {
+                //set current data
+                Data.setCurrentMusicItem(Data.sMusicItems.get(Integer.parseInt(intent.getStringExtra("args"))));
+
+                ReceiverOnMusicPlay.resetMusic();
+                ReceiverOnMusicPlay.setDataSource(Data.sCurrentMusicItem.getMusicPath());
+                ReceiverOnMusicPlay.prepare();
+                ReceiverOnMusicPlay.playMusic();
+
+                sureCar();
+
+                Utils.Ui.setPlayButtonNowPlaying();
+                MusicDetailFragment fragment = ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment();
+                fragment.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);         //update seek
+                fragment.setSlideInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
+                fragment.setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
+                ((MainActivity) Data.sActivities.get(0)).getMainBinding().slidingLayout.setTouchEnabled(true);
+            }
+            break;
             default:
+        }
+
+        ///////////////////////////AFTER PLAYER SET/////////////////////////////////////////
+
+        Log.d(TAG, "onReceive: after all");
+
+        List<Detail> infos = LitePal.where("MusicId = ?", String.valueOf(Data.sCurrentMusicItem.getMusicID())).find(Detail.class);
+        if (infos.size() == 0) {
+            Detail detail = new Detail();
+            detail.setMusicId(Data.sCurrentMusicItem.getMusicID());
+            detail.setPlayTimes(1);
+            Log.d(TAG, "onReceive create: " + detail.save());
+        } else {
+            Detail info = infos.get(0);
+            info.setPlayTimes(info.getPlayTimes() + 1);
+            Log.d(TAG, "onReceive create: " + info.save());
         }
 
         //after type set

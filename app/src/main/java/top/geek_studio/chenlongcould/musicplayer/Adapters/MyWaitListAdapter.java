@@ -13,11 +13,11 @@ package top.geek_studio.chenlongcould.musicplayer.Adapters;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,7 +26,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
@@ -82,12 +81,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
             switch (item.getItemId()) {
                 //noinspection PointlessArithmeticExpression
                 case Menu.FIRST + 0: {
-                    Data.sNextWillPlayItem = Data.sPlayOrderList.get(holder.getAdapterPosition());
-                }
-                break;
-
-                case Menu.FIRST + 1: {
-                    Utils.DataSet.addToFavourite(mMainActivity, mMusicItems.get(holder.getAdapterPosition()));
+                    Data.sNextWillPlayItem = mMusicItems.get(holder.getAdapterPosition());
                 }
                 break;
 
@@ -141,49 +135,27 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
         view.setOnClickListener(v -> {
             final Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
 
-                if (!ReceiverOnMusicPlay.READY.get()) {
-                    observableEmitter.onNext(-1);
-                }
-
-                ReceiverOnMusicPlay.READY.set(false);
+                //因为mMusicItems 与 Data.sPlayOrderList 同步, 所以无需转换index
+//                for (int i = 0; i < Data.sPlayOrderList.size(); i++) {
+//                    if (Data.sPlayOrderList.get(i).getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
+//                        Values.CurrentData.CURRENT_MUSIC_INDEX = i;
+//                    }
+//                }
+                Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
 
                 ReceiverOnMusicPlay.resetMusic();
 
-                Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
-                Data.sHistoryPlay.add(Data.sPlayOrderList.get(holder.getAdapterPosition()));
-
-                Log.d(TAG, "onMusicItemClick: add: " + Data.sPlayOrderList.get(holder.getAdapterPosition()).getMusicName());
-
-                //set current data
-                Data.setCurrentMusicItem(mMusicItems.get(holder.getAdapterPosition()));
-
-                //get & save data
-                Data.setCurrentCover(Utils.Audio.getMp3Cover(Data.sCurrentMusicItem.getMusicPath()));
-
-                ReceiverOnMusicPlay.setDataSource(Data.sCurrentMusicItem.getMusicPath());
-                ReceiverOnMusicPlay.prepare();
-                ReceiverOnMusicPlay.playMusic();
-                Values.HAS_PLAYED = true;
-                ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);         //update seek
+                //cover set
+                String img = Utils.Audio.getCoverPathByDB(mMainActivity, mMusicItems.get(holder.getAdapterPosition()).getAlbumId());
+                if (img != null) {
+                    Data.setCurrentCover(BitmapFactory.decodeFile(img));
+                } else {
+                    Data.setCurrentCover(Utils.Audio.getDrawableBitmap(mMainActivity, R.drawable.ic_audiotrack_24px));
+                }
 
                 observableEmitter.onNext(0);
             }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(integer -> {
-
-                        if (integer == -1) {
-                            Toast.makeText(mMainActivity, "Wait...", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-
-                        if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.UIMODE.MODE_CAR)) {
-                            Data.sCarViewActivity.getFragmentLandSpace().setData();
-                        }
-                        mMainActivity.getMusicDetailFragment().setSlideInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
-                        mMainActivity.getMusicDetailFragment().setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
-
-                        Utils.Ui.setPlayButtonNowPlaying();
-
-                    }, Throwable::printStackTrace);
+                    .subscribe(integer -> Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_ITEM_CLICK, String.valueOf(holder.getAdapterPosition())), Throwable::printStackTrace);
             Data.sDisposables.add(disposable);
         });
     }
@@ -257,7 +229,6 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
             //noinspection PointlessArithmeticExpression
             mMenu.add(Menu.NONE, Menu.FIRST + 0, 0, "下一首播放");
-            mMenu.add(Menu.NONE, Menu.FIRST + 1, 0, "喜欢");
             mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, "加入播放列表");
             mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, "查看专辑");
             mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, "详细信息");

@@ -38,6 +38,7 @@ import static android.provider.MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI;
 public final class PlayListsUtil {
 
     public static final String DEFAULT_LIST = "Default";
+    private static final String TAG = "PlayListsUtil";
 
     /**
      * doesPlaylistExist, search by id
@@ -177,6 +178,24 @@ public final class PlayListsUtil {
             }
         } catch (SecurityException ignored) {
         }
+    }
+
+    public static boolean doPlaylistContains(@NonNull final Context context, final long playlistId, final int songId) {
+        if (playlistId != -1) {
+            try {
+                Cursor c = context.getContentResolver().query(
+                        MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId),
+                        new String[]{MediaStore.Audio.Playlists.Members.AUDIO_ID}, MediaStore.Audio.Playlists.Members.AUDIO_ID + "=?", new String[]{String.valueOf(songId)}, null);
+                int count = 0;
+                if (c != null) {
+                    count = c.getCount();
+                    c.close();
+                }
+                return count > 0;
+            } catch (SecurityException ignored) {
+            }
+        }
+        return false;
     }
 
     @NonNull

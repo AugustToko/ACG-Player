@@ -124,6 +124,10 @@ public final class Values {
         public static int CURRENT_BIND_INDEX_ALBUM_LIST = -1;
         public static int CURRENT_PAGE_INDEX = -1;
         public static int CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = -1;            //存储使浮动菜单弹出的item,def = -1
+
+        /**
+         * 当前序列指针, 指向 {@link Data#sPlayOrderList} 的位置
+         */
         public static int CURRENT_MUSIC_INDEX = -1;
 
         /**
@@ -170,8 +174,6 @@ public final class Values {
 
         public static final String ALBUM_LIST_DISPLAY_TYPE = "ALBUM_LIST_DISPLAY_TYPE";
         public static final String ALBUM_LIST_GRID_TYPE_COUNT = "ALBUM_LIST_GRID_TYPE_COUNT";
-
-        public static final String FAVOURITE_LIST_ID = "FAVOURITE_LIST_ID";
 
         //theme
         public static final String SELECT_THEME = "SELECT_THEME";

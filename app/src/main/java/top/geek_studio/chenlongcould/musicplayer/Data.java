@@ -36,6 +36,7 @@ import top.geek_studio.chenlongcould.musicplayer.Activities.CarViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.MyHeadSetPlugReceiver;
 import top.geek_studio.chenlongcould.musicplayer.Models.AlbumItem;
+import top.geek_studio.chenlongcould.musicplayer.Models.ArtistItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.PlayListItem;
 
@@ -68,10 +69,12 @@ public final class Data {
 
     public static CarViewActivity sCarViewActivity = null;
     public static List<AlbumItem> sAlbumItems = new ArrayList<>();
+    public final static SimpleDateFormat sSimpleDateFormat2 = new SimpleDateFormat("mm:ss", Locale.CHINESE);
     public static List<AlbumItem> sAlbumItemsBackUp = new ArrayList<>();
     public static List<MusicItem> sMusicItemsBackUp = new ArrayList<>();
     public static List<MusicItem> sPlayOrderList = new ArrayList<>();
     public static List<PlayListItem> sPlayListItems = new ArrayList<>();
+    public static List<ArtistItem> sArtistItems = new ArrayList<>();
 
     /**
      * init Data {@link MainActivity}
@@ -129,6 +132,8 @@ public final class Data {
     }
 
     public final static SimpleDateFormat sSimpleDateFormat = new SimpleDateFormat("mm:ss", Locale.CHINESE);
+    //多选存储, 存储MusicItem id
+    public static ArrayList<Integer> sSelections = new ArrayList<>();
 
     public final static SimpleDateFormat sSimpleDateFormatFile = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINESE);
 
