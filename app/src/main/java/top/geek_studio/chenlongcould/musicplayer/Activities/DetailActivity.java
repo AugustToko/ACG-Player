@@ -4,9 +4,10 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Toast;
+
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import org.litepal.LitePal;
 
@@ -22,7 +23,7 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityDetailBinding;
 
-public class DetailActivity extends AppCompatActivity {
+public class DetailActivity extends MyBaseCompatActivity {
 
     private ActivityDetailBinding mDetailBinding;
 
@@ -31,6 +32,8 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         mDetailBinding = DataBindingUtil.setContentView(this, R.layout.activity_detail);
+        super.initView(mDetailBinding.toolbar, mDetailBinding.appbar);
+
         setSupportActionBar(mDetailBinding.toolbar);
         mDetailBinding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
@@ -111,7 +114,9 @@ public class DetailActivity extends AppCompatActivity {
                 mDetailBinding.includeContent.includeItemPlayDuration.recyclerItemMusicDuration.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(itemDuration.getDuration()))));
                 final String prefix = itemDuration.getMusicPath().substring(itemDuration.getMusicPath().lastIndexOf(".") + 1);
                 mDetailBinding.includeContent.includeItemPlayDuration.recyclerItemMusicTypeName.setText(prefix);
-                GlideApp.with(this).load(Utils.Audio.getCoverPathByDB(this, itemDuration.getAlbumId())).into(mDetailBinding.includeContent.includeItemPlayDuration.recyclerItemAlbumImage);
+                GlideApp.with(this).load(Utils.Audio.getCoverBitmap(this, itemDuration.getAlbumId()))
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .into(mDetailBinding.includeContent.includeItemPlayDuration.recyclerItemAlbumImage);
 
                 mDetailBinding.includeContent.includeItemPlayDuration.recyclerItemMenu.setVisibility(View.GONE);
             }
@@ -122,7 +127,9 @@ public class DetailActivity extends AppCompatActivity {
                 mDetailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMusicDuration.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(itemMinimum.getDuration()))));
                 final String prefix = itemMinimum.getMusicPath().substring(itemMinimum.getMusicPath().lastIndexOf(".") + 1);
                 mDetailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMusicTypeName.setText(prefix);
-                GlideApp.with(this).load(Utils.Audio.getCoverPathByDB(this, itemMinimum.getAlbumId())).into(mDetailBinding.includeContent.includeItemPlayMinitimes.recyclerItemAlbumImage);
+                GlideApp.with(this).load(Utils.Audio.getCoverBitmap(this, itemMinimum.getAlbumId()))
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .into(mDetailBinding.includeContent.includeItemPlayMinitimes.recyclerItemAlbumImage);
 
                 mDetailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMenu.setVisibility(View.GONE);
             }
@@ -133,7 +140,9 @@ public class DetailActivity extends AppCompatActivity {
                 mDetailBinding.includeContent.includeItemPlaytimes.recyclerItemMusicDuration.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(itemTimes.getDuration()))));
                 final String prefix = itemTimes.getMusicPath().substring(itemTimes.getMusicPath().lastIndexOf(".") + 1);
                 mDetailBinding.includeContent.includeItemPlaytimes.recyclerItemMusicTypeName.setText(prefix);
-                GlideApp.with(this).load(Utils.Audio.getCoverPathByDB(this, itemTimes.getAlbumId())).into(mDetailBinding.includeContent.includeItemPlaytimes.recyclerItemAlbumImage);
+                GlideApp.with(this).load(Utils.Audio.getCoverBitmap(this, itemTimes.getAlbumId()))
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .into(mDetailBinding.includeContent.includeItemPlaytimes.recyclerItemAlbumImage);
 
                 mDetailBinding.includeContent.includeItemPlaytimes.recyclerItemMenu.setVisibility(View.GONE);
             }
@@ -147,4 +156,8 @@ public class DetailActivity extends AppCompatActivity {
                 .setAction(getString(R.string.sure), v -> LitePal.deleteAll(Detail.class)).show());
     }
 
+    @Override
+    public void initStyle() {
+        super.initStyle();
+    }
 }

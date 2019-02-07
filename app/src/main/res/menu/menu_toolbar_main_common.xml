@@ -14,6 +14,7 @@
     <item
         android:id="@+id/menu_toolbar_fast_play"
         android:icon="@drawable/ic_flash_on_white_24dp"
+        android:orderInCategory="100"
         android:title="@string/fast_play"
         app:showAsAction="ifRoom" />
 
@@ -21,21 +22,34 @@
         android:id="@+id/menu_toolbar_search"
         android:icon="@drawable/ic_search_white_24dp"
         android:title="@string/search"
-        app:actionViewClass="android.support.v7.widget.SearchView"
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/menu_toolbar_layout"
+        android:id="@+id/menu_toolbar_album_layout"
         android:title="@string/album_layout">
         <menu>
             <item
-                android:id="@+id/menu_toolbar_linear"
+                android:id="@+id/menu_toolbar_album_linear"
                 android:title="@string/linear" />
             <item
-                android:id="@+id/menu_toolbar_grid"
+                android:id="@+id/menu_toolbar_album_grid"
                 android:title="@string/grid" />
         </menu>
     </item>
+
+    <item
+        android:id="@+id/menu_toolbar_artist_layout"
+        android:title="Artist layout">
+        <menu>
+            <item
+                android:id="@+id/menu_toolbar_artist_linear"
+                android:title="@string/linear" />
+            <item
+                android:id="@+id/menu_toolbar_artist_grid"
+                android:title="@string/grid" />
+        </menu>
+    </item>
+
 
     <item
         android:id="@+id/menu_toolbar_reload"

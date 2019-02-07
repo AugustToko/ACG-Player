@@ -130,7 +130,7 @@ public class MyTile extends TileService {
                         Log.i(Values.TAG_UNIVERSAL_ONE, "onCreate: The MusicData load done.");
                         cursor.close();
 
-                        if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM))
+                        if (PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM))
                             Collections.shuffle(Data.sPlayOrderList);
 
                         emitter.onNext(0);
@@ -219,7 +219,11 @@ public class MyTile extends TileService {
 
         if (mDisposable != null && !mDisposable.isDisposed()) mDisposable.dispose();
         if (Data.HAS_BIND) {
-            unbindService(Data.sServiceConnection);
+            try {
+                unbindService(Data.sServiceConnection);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         if (Data.sActivities.size() == 0) {

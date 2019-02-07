@@ -35,6 +35,7 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.jrummyapps.android.colorpicker.ColorPickerDialog;
 import com.jrummyapps.android.colorpicker.ColorPickerDialogListener;
@@ -46,7 +47,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import top.geek_studio.chenlongcould.geeklibrary.Theme.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Database.MyBlackPath;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
@@ -58,8 +58,9 @@ import top.geek_studio.chenlongcould.musicplayer.databinding.ActivitySettingsBin
 
 import static top.geek_studio.chenlongcould.musicplayer.Values.SharedPrefsTag.HIDE_SHORT_SONG;
 import static top.geek_studio.chenlongcould.musicplayer.Values.SharedPrefsTag.NOTIFICATION_COLORIZED;
+import static top.geek_studio.chenlongcould.musicplayer.Values.SharedPrefsTag.USE_NET_WORK_ALBUM;
 
-public final class SettingsActivity extends MyBaseCompatActivity implements IStyle {
+public final class SettingsActivity extends MyBaseCompatActivity {
 
     public static final String TAG = "SettingsActivity";
 
@@ -68,6 +69,8 @@ public final class SettingsActivity extends MyBaseCompatActivity implements ISty
     public static final int PRIMARY_DARK = 1;
 
     public static final int ACCENT = 2;
+
+    public static final int TITLE = 3;
 
     private ActivitySettingsBinding mSettingsBinding;
 
@@ -80,6 +83,8 @@ public final class SettingsActivity extends MyBaseCompatActivity implements ISty
     private ImageView mPrimaryDarkImage;
 
     private ImageView mAccentImage;
+
+    private ImageView mTitleImage;
 
     private Toolbar mToolbar;
 
@@ -142,6 +147,20 @@ public final class SettingsActivity extends MyBaseCompatActivity implements ISty
                     editor.apply();
                 }
                 break;
+
+                case TITLE: {
+                    mTitleImage.clearAnimation();
+                    ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.SharedPrefsTag.TITLE_COLOR, R.color.def_title_color), color);
+                    animator.setDuration(300);
+                    animator.addUpdateListener(animation -> {
+                        mTitleImage.setBackgroundColor((Integer) animation.getAnimatedValue());
+                        Utils.Ui.setOverToolbarColor(mToolbar, color);
+                    });
+                    animator.start();
+                    editor.putInt(Values.SharedPrefsTag.TITLE_COLOR, color);
+                    editor.apply();
+                    mPrimaryDarkImage.clearAnimation();
+                }
             }
         }
 
@@ -162,9 +181,11 @@ public final class SettingsActivity extends MyBaseCompatActivity implements ISty
         final ConstraintLayout primaryOpt = findViewById(R.id.primer_color_option);
         final ConstraintLayout primaryDarkOpt = findViewById(R.id.primer_color_dark_option);
         final ConstraintLayout accentOpt = findViewById(R.id.accent_color_option);
+        final ConstraintLayout titleOpt = findViewById(R.id.title_color);
         mPrimaryImage = findViewById(R.id.activity_settings_preview_primary);
         mPrimaryDarkImage = findViewById(R.id.activity_settings_preview_primary_dark);
         mAccentImage = findViewById(R.id.activity_settings_preview_acc);
+        mTitleImage = findViewById(R.id.activity_settings_preview_title);
         mToolbar = findViewById(R.id.activity_settings_toolbar);
         mAppBarLayout = findViewById(R.id.activity_settings_appbar);
         final ConstraintLayout setNightOpt = findViewById(R.id.night_style);
@@ -177,6 +198,7 @@ public final class SettingsActivity extends MyBaseCompatActivity implements ISty
 
         mToolbar.inflateMenu(R.menu.menu_toolbar_settings);
 
+        super.initView(mToolbar, mAppBarLayout);
         initPreView();
 
         mToolbar.setOnMenuItemClickListener(menuItem -> {
@@ -259,6 +281,21 @@ public final class SettingsActivity extends MyBaseCompatActivity implements ISty
             //noinspection deprecation
             colorPickerDialog.show(getFragmentManager(), "color-picker-dialog");
         });
+
+
+        titleOpt.setOnClickListener(v -> {
+            ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.SharedPrefsTag.TITLE_COLOR, Color.parseColor("#FFFFFF")))
+                    .setDialogTitle(R.string.color_picker)
+                    .setDialogType(ColorPickerDialog.TYPE_PRESETS)
+                    .setShowAlphaSlider(true)
+                    .setDialogId(TITLE)
+                    .setAllowPresets(false)
+                    .create();
+            colorPickerDialog.setColorPickerDialogListener(pickerDialogListener);
+            //noinspection deprecation
+            colorPickerDialog.show(getFragmentManager(), "color-picker-dialog");
+        });
+
 
 //        setNightOpt.setOnClickListener(v -> {
 //
@@ -387,133 +424,142 @@ public final class SettingsActivity extends MyBaseCompatActivity implements ISty
             editor.apply();
         });
 
-        mSettingsBinding.itemBlacklist.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LitePalDB blackList = new LitePalDB("BlackList", 1);
-                blackList.addClassName(MyBlackPath.class.getName());
-                LitePal.use(blackList);
+        mSettingsBinding.itemBlacklist.setOnClickListener(v -> {
+            LitePalDB blackList = new LitePalDB("BlackList", 1);
+            blackList.addClassName(MyBlackPath.class.getName());
+            LitePal.use(blackList);
 
-                ArrayList<String> data = new ArrayList<>();
-                List<MyBlackPath> lists = LitePal.findAll(MyBlackPath.class);
-                for (MyBlackPath path : lists) {
-                    data.add(path.getDirPath());
+            ArrayList<String> data = new ArrayList<>();
+            List<MyBlackPath> lists = LitePal.findAll(MyBlackPath.class);
+            for (MyBlackPath path : lists) {
+                data.add(path.getDirPath());
+            }
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
+            builder.setTitle(getString(R.string.black_list));
+            builder.setCancelable(false);
+            ArrayAdapter<String> blackPathAdapter = new ArrayAdapter<>(SettingsActivity.this, android.R.layout.simple_list_item_1, data);
+            //item on click
+            builder.setAdapter(blackPathAdapter, (dialog, index) -> {
+                AlertDialog.Builder rmBuilder = new AlertDialog.Builder(SettingsActivity.this);
+                rmBuilder.setTitle(getString(R.string.remove_frome_black_list));
+                rmBuilder.setMessage("Remove " + blackPathAdapter.getItem(index) + " from blacklist?");
+                rmBuilder.setPositiveButton(getString(R.string.remove), (dialog16, which) -> {
+                    data.remove(index);
+                    blackPathAdapter.notifyDataSetChanged();
+                    dialog16.dismiss();
+                    builder.show();
+                });
+                rmBuilder.setNeutralButton(getString(R.string.cancel), (dialog15, which) -> {
+                    data.clear();
+                    blackPathAdapter.notifyDataSetChanged();
+                    dialog15.dismiss();
+                    builder.show();
+                });
+                rmBuilder.show();
+            });
+
+            builder.setNeutralButton(getString(R.string.clear), (dialog, which) -> {
+                AlertDialog.Builder sureBuilder = new AlertDialog.Builder(SettingsActivity.this);
+                sureBuilder.setTitle(getString(R.string.are_u_sure));
+                sureBuilder.setCancelable(false);
+                sureBuilder.setNegativeButton(getString(R.string.sure), (dialog14, which13) -> {
+                    data.clear();
+                    blackPathAdapter.notifyDataSetChanged();
+                    dialog14.dismiss();
+                    builder.show();
+                });
+                sureBuilder.setPositiveButton(getString(R.string.cancel), (dialog13, which12) -> {
+                    dialog13.dismiss();
+                    builder.show();
+                });
+                sureBuilder.show();
+            });
+            builder.setPositiveButton(getString(R.string.add), (dialog, which) -> {
+                AlertDialog.Builder dirBuilder = new AlertDialog.Builder(SettingsActivity.this);
+                dirBuilder.setCancelable(false);
+                File sdcard = Environment.getExternalStorageDirectory();
+                final File[] currentDir = {sdcard};
+                dirBuilder.setTitle(sdcard.getPath());
+
+                List<String> pathList = new ArrayList<>();
+
+                //sort
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    pathList.sort(String::compareTo);
                 }
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
-                builder.setTitle(getString(R.string.black_list));
-                builder.setCancelable(false);
-                ArrayAdapter<String> blackPathAdapter = new ArrayAdapter<>(SettingsActivity.this, android.R.layout.simple_list_item_1, data);
-                //item on click
-                builder.setAdapter(blackPathAdapter, (dialog, index) -> {
-                    AlertDialog.Builder rmBuilder = new AlertDialog.Builder(SettingsActivity.this);
-                    rmBuilder.setTitle(getString(R.string.remove_frome_black_list));
-                    rmBuilder.setMessage("Remove " + blackPathAdapter.getItem(index) + " from blacklist?");
-                    rmBuilder.setPositiveButton(getString(R.string.remove), (dialog16, which) -> {
-                        data.remove(index);
-                        blackPathAdapter.notifyDataSetChanged();
-                        dialog16.dismiss();
-                        builder.show();
-                    });
-                    rmBuilder.setNeutralButton(getString(R.string.cancel), (dialog15, which) -> {
-                        data.clear();
-                        blackPathAdapter.notifyDataSetChanged();
-                        dialog15.dismiss();
-                        builder.show();
-                    });
-                    rmBuilder.show();
-                });
+                for (File file : sdcard.listFiles()) {
+                    if (file.isFile()) continue;
+                    pathList.add(file.getName());
+                }
 
-                builder.setNeutralButton(getString(R.string.clear), (dialog, which) -> {
-                    AlertDialog.Builder sureBuilder = new AlertDialog.Builder(SettingsActivity.this);
-                    sureBuilder.setTitle(getString(R.string.are_u_sure));
-                    sureBuilder.setCancelable(false);
-                    sureBuilder.setNegativeButton(getString(R.string.sure), (dialog14, which13) -> {
-                        data.clear();
-                        blackPathAdapter.notifyDataSetChanged();
-                        dialog14.dismiss();
-                        builder.show();
-                    });
-                    sureBuilder.setPositiveButton(getString(R.string.cancel), (dialog13, which12) -> {
-                        dialog13.dismiss();
-                        builder.show();
-                    });
-                    sureBuilder.show();
-                });
-                builder.setPositiveButton(getString(R.string.add), (dialog, which) -> {
-                    AlertDialog.Builder dirBuilder = new AlertDialog.Builder(SettingsActivity.this);
-                    dirBuilder.setCancelable(false);
-                    File sdcard = Environment.getExternalStorageDirectory();
-                    final File[] currentDir = {sdcard};
-                    dirBuilder.setTitle(sdcard.getPath());
+                ArrayAdapter<String> pathAdapter = new ArrayAdapter<>(SettingsActivity.this, android.R.layout.simple_list_item_1, pathList);
+                dirBuilder.setAdapter(pathAdapter, (dialog1, index) -> {
+                    if (!currentDir[0].getAbsolutePath().equals(sdcard.getAbsolutePath()) && index == 0) {
+                        if (currentDir[0].getParentFile() != null) {
+                            currentDir[0] = currentDir[0].getParentFile();
 
-                    List<String> pathList = new ArrayList<>();
+                        }
+                    } else {
+                        currentDir[0] = new File(currentDir[0].getAbsolutePath() + "/" + pathList.get(index));
+                    }
+                    Log.d(TAG, "onClick: " + currentDir[0].getAbsolutePath());
+                    pathList.clear();
+
+                    if (!currentDir[0].getAbsolutePath().equals(sdcard.getAbsolutePath())) {
+                        pathList.add("...");
+                    }
+
+                    for (File f : currentDir[0].listFiles()) {
+                        if (f.isFile()) continue;
+                        pathList.add(f.getName());
+                    }
 
                     //sort
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         pathList.sort(String::compareTo);
                     }
-
-                    for (File file : sdcard.listFiles()) {
-                        if (file.isFile()) continue;
-                        pathList.add(file.getName());
-                    }
-
-                    ArrayAdapter<String> pathAdapter = new ArrayAdapter<>(SettingsActivity.this, android.R.layout.simple_list_item_1, pathList);
-                    dirBuilder.setAdapter(pathAdapter, (dialog1, index) -> {
-                        if (!currentDir[0].getAbsolutePath().equals(sdcard.getAbsolutePath()) && index == 0) {
-                            if (currentDir[0].getParentFile() != null) {
-                                currentDir[0] = currentDir[0].getParentFile();
-
-                            }
-                        } else {
-                            currentDir[0] = new File(currentDir[0].getAbsolutePath() + "/" + pathList.get(index));
-                        }
-                        Log.d(TAG, "onClick: " + currentDir[0].getAbsolutePath());
-                        pathList.clear();
-
-                        if (!currentDir[0].getAbsolutePath().equals(sdcard.getAbsolutePath())) {
-                            pathList.add("...");
-                        }
-
-                        for (File f : currentDir[0].listFiles()) {
-                            if (f.isFile()) continue;
-                            pathList.add(f.getName());
-                        }
-
-                        //sort
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            pathList.sort(String::compareTo);
-                        }
-                        pathAdapter.notifyDataSetChanged();
-                        dirBuilder.show();
-                    });
-                    dirBuilder.setPositiveButton(getString(R.string.confirm), (dialog12, which1) -> {
-                        data.add(currentDir[0].getAbsolutePath());
-
-                        blackPathAdapter.notifyDataSetChanged();
-                        dialog12.dismiss();
-                        builder.show();
-                    });
+                    pathAdapter.notifyDataSetChanged();
                     dirBuilder.show();
                 });
+                dirBuilder.setPositiveButton(getString(R.string.confirm), (dialog12, which1) -> {
+                    data.add(currentDir[0].getAbsolutePath());
 
-                builder.setNegativeButton(getString(R.string.done), (dialog, which) -> {
-                    MainActivity.NEED_RELOAD = true;
-                    LitePal.deleteAll(MyBlackPath.class);
-
-                    //add to db
-                    for (String path : data) {
-                        MyBlackPath blackPath = new MyBlackPath();
-                        blackPath.setDirPath(path);
-                        blackPath.save();
-                    }
-                    LitePal.useDefault();
-                    dialog.dismiss();
+                    blackPathAdapter.notifyDataSetChanged();
+                    dialog12.dismiss();
+                    builder.show();
                 });
+                dirBuilder.show();
+            });
 
-                builder.show();
+            builder.setNegativeButton(getString(R.string.done), (dialog, which) -> {
+                MainActivity.NEED_RELOAD = true;
+                LitePal.deleteAll(MyBlackPath.class);
+
+                //add to db
+                for (String path : data) {
+                    MyBlackPath blackPath = new MyBlackPath();
+                    blackPath.setDirPath(path);
+                    blackPath.save();
+                }
+                LitePal.useDefault();
+                dialog.dismiss();
+            });
+
+            builder.show();
+        });
+
+        mSettingsBinding.itemAlbumData.setOnClickListener(v -> {
+            final SharedPreferences.Editor editor = mDefPrefs.edit();
+            if (mDefPrefs.getBoolean(USE_NET_WORK_ALBUM, false)) {
+                editor.putBoolean(Values.SharedPrefsTag.USE_NET_WORK_ALBUM, false);
+                mSettingsBinding.albumSwitch.setChecked(false);
+            } else {
+                editor.putBoolean(Values.SharedPrefsTag.USE_NET_WORK_ALBUM, true);
+                mSettingsBinding.albumSwitch.setChecked(true);
             }
+            editor.apply();
         });
     }
 
@@ -526,7 +572,6 @@ public final class SettingsActivity extends MyBaseCompatActivity implements ISty
     }
 
     private void initPreView() {
-        initStyle();
         mNightSwitch.setChecked(Values.Style.NIGHT_MODE);
 
         //noinspection ConstantConditions
@@ -553,6 +598,12 @@ public final class SettingsActivity extends MyBaseCompatActivity implements ISty
         } else {
             mSettingsBinding.filterSwitch.setChecked(false);
         }
+
+        if (mDefPrefs.getBoolean(USE_NET_WORK_ALBUM, false)) {
+            mSettingsBinding.albumSwitch.setChecked(true);
+        } else {
+            mSettingsBinding.albumSwitch.setChecked(false);
+        }
     }
 
     @Override
@@ -563,10 +614,11 @@ public final class SettingsActivity extends MyBaseCompatActivity implements ISty
 
     @Override
     public void initStyle() {
+        super.initStyle();
         mPrimaryImage.setBackgroundColor(Utils.Ui.getPrimaryColor(this));
         mPrimaryDarkImage.setBackgroundColor(Utils.Ui.getPrimaryDarkColor(this));
         mAccentImage.setBackgroundColor(Utils.Ui.getAccentColor(this));
-        Utils.Ui.setTopBottomColor(this, mAppBarLayout, mToolbar);
+        mTitleImage.setBackgroundColor(Utils.Ui.getTitleColor(this));
 
         final ImageView imageView = findViewById(R.id.theme_preview);
 
@@ -576,6 +628,7 @@ public final class SettingsActivity extends MyBaseCompatActivity implements ISty
             GlideApp.with(this)
                     .load(Data.sTheme.getThumbnail())
                     .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .into(imageView);
         } else {
             imageView.setVisibility(View.GONE);

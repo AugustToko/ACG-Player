@@ -48,7 +48,7 @@
     <View
         android:id="@+id/view2"
         android:layout_width="match_parent"
-        android:layout_height="1px"
+        android:layout_height="2dp"
         android:background="@color/line_color" />
 
     <include layout="@layout/recycler_music_list_item" />

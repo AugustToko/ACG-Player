@@ -20,10 +20,10 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,12 +36,10 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.geeklibrary.VisibleOrGone;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter2AlbumList;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter2ArtistList;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Models.ArtistItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
 public final class ArtistListFragment extends Fragment implements VisibleOrGone {
@@ -92,21 +90,21 @@ public final class ArtistListFragment extends Fragment implements VisibleOrGone 
     }
 
     private void initArtistData() {
+        Log.d(TAG, "initArtistData: log");
 
-        final AlertDialog load = Utils.Ui.getLoadingDialog(mMainActivity, "Loading");
-        load.show();
+//        final AlertDialog load = Utils.Ui.getLoadingDialog(mMainActivity, "Loading");
+//        load.show();
 
         Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
             if (Data.sArtistItems.size() == 0) {
-                Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null, null, null, null);
+                Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, null, null, null, null);
                 if (cursor != null) {
                     cursor.moveToFirst();
 
                     do {
-                        String artistName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
-                        String artistId = cursor.getString(cursor.getColumnIndexOrThrow("artist_id"));
-                        Data.sArtistItems.add(new ArtistItem(artistName, Integer.parseInt(artistId)));
-//                        Data.sAlbumItemsBackUp.add(new AlbumItem(artistName, Integer.parseInt(artistId)));
+                        String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
+                        String albumId = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID));
+                        Data.sArtistItems.add(new ArtistItem(albumName, Integer.parseInt(albumId)));
                     } while (cursor.moveToNext());
 
                     cursor.close();
@@ -133,11 +131,9 @@ public final class ArtistListFragment extends Fragment implements VisibleOrGone 
                     @Override
                     public void onComplete() {
                         setRecyclerViewData();
-                        load.dismiss();
                         mMainActivity.getMainBinding().toolBar.setSubtitle(Data.sArtistItems.size() + " Artists");
                     }
                 });
-
     }
 
     /**
@@ -151,13 +147,13 @@ public final class ArtistListFragment extends Fragment implements VisibleOrGone 
 
             //get type
             final SharedPreferences mDef = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            int type = mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
+            int type = mDef.getInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.GRID_TYPE);
             switch (type) {
-                case MyRecyclerAdapter2AlbumList.LINEAR_TYPE: {
+                case MyRecyclerAdapter2ArtistList.LINEAR_TYPE: {
                     mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
                 }
                 break;
-                case MyRecyclerAdapter2AlbumList.GRID_TYPE: {
+                case MyRecyclerAdapter2ArtistList.GRID_TYPE: {
                     mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2)));
                 }
                 break;

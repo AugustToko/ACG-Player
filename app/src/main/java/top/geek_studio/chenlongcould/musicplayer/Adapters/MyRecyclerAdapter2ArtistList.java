@@ -30,6 +30,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
@@ -139,7 +140,7 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
                 return;
             }
 
-            final Cursor cursor = mMainActivity.getContentResolver().query(Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + String.valueOf(i + 1)),
+            final Cursor cursor = mMainActivity.getContentResolver().query(Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + String.valueOf(i)),
                     new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
             if (cursor != null) {
                 cursor.moveToFirst();
@@ -182,6 +183,7 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
                             .load(path)
                             .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                             .centerCrop()
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
                             .into(viewHolder.mArtistImage);
                     viewHolder.mArtistImage.setTag(R.string.key_id_1, null);
                 });

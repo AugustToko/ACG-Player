@@ -18,19 +18,21 @@
         android:orientation="vertical">
 
         <android.support.design.widget.AppBarLayout
+            android:id="@+id/appbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/colorPrimary"
+            android:elevation="2dp"
             android:paddingTop="@dimen/toolbar_padding_top">
 
-            <android.widget.Toolbar
+            <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="?android:actionBarSize"
-                android:navigationIcon="@drawable/ic_arrow_back_white_24dp"
-                android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                android:layout_height="?actionBarSize"
                 android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-                android:title="@string/about" />
+                app:navigationIcon="@drawable/ic_arrow_back_white_24dp"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:title="@string/about" />
 
         </android.support.design.widget.AppBarLayout>
 

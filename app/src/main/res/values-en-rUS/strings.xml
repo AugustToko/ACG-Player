@@ -128,4 +128,16 @@
     <string name="clear">Clear</string>
     <string name="done">Done</string>
     <string name="confirm">Confirm</string>
+    <string name="next_will_play_x">Next Will play %1$s</string>
+    <string name="skip">Skip</string>
+    <string name="already_exsits">Already Exists!</string>
+    <string name="press_again_to_exit">Press again to exit!</string>
+    <string name="tab_music">Music Tab</string>
+    <string name="tab_album">Album Tab</string>
+    <string name="tab_artist">Artist Tab</string>
+    <string name="tab_playlist">Playlist Tab</string>
+    <string name="tab_fileviewer">FileViewer Tab</string>
+    <string name="close_the_tab_x_int">Close the tab %1$s ?</string>
+    <string name="type_somthing">TYPE SOMETHING</string>
+    <string name="force_use_net_album">Force use Net-Album</string>
 </resources>

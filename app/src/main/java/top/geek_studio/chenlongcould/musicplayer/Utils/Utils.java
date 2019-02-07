@@ -41,6 +41,7 @@ import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -53,6 +54,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -65,6 +67,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+
+import org.litepal.LitePal;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -75,6 +81,7 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -82,6 +89,7 @@ import java.util.zip.ZipOutputStream;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.Database.CustomAlbumPath;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.PlayListItem;
@@ -118,13 +126,15 @@ public final class Utils {
             }
         }
 
+        public static final String NONE = "NONE";
+
         /**
          * 获取封面
          *
          * @param mediaUri mp3 path
          */
         @NonNull
-        public static Bitmap getMp3Cover(final String mediaUri) {
+        private static Bitmap getMp3CoverByMeta(final String mediaUri) {
 
 //            //检测不支持封面的音乐类型
 //            if (mediaUri.contains("ogg") || mediaUri.contains("flac")) {
@@ -147,9 +157,13 @@ public final class Utils {
                 return BitmapFactory.decodeResource(Data.sActivities.get(0).getResources(), R.drawable.ic_audiotrack_24px);
         }
 
-        @Nullable
-        public static String getCoverPathByDB(Context context, int albumId) {
-            String img = null;
+        public static Bitmap getCoverBitmap(Context context, int albumId) {
+            return path2CoverByDB(context, getCoverPath(context, albumId));
+        }
+
+        @NonNull
+        private static String getCoverPathByDefDB(final Context context, final int albumId) {
+            String img;
             final Cursor cursor = context.getContentResolver().query(
                     Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + albumId)
                     , new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
@@ -158,21 +172,89 @@ public final class Utils {
                 cursor.moveToFirst();
                 img = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART));
                 cursor.close();
+            } else {
+                return NONE;
             }
             return img;
         }
 
         /**
+         * use this
+         */
+        @NonNull
+        public static String getCoverPath(final Context context, final int albumId) {
+            final String[] albumPath = {null};
+
+            final Cursor cursor = context.getContentResolver().query(
+                    Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + albumId)
+                    , new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
+            if (cursor != null && cursor.getCount() != 0) {
+                cursor.moveToFirst();
+                albumPath[0] = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART));
+                cursor.close();
+            }
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(Values.SharedPrefsTag.USE_NET_WORK_ALBUM, false)) {
+                List<CustomAlbumPath> customs = LitePal.findAll(CustomAlbumPath.class);
+                if (customs.size() != 0) {
+                    final CustomAlbumPath custom = customs.get(0);
+                    if (TextUtils.isEmpty(albumPath[0]) || custom.isForceUse()) {
+                        File file = new File(custom.getAlbumArt());
+                        if (custom.getAlbumArt().equals("null") && !file.exists()) {
+                            return NONE;
+                        } else {
+                            albumPath[0] = custom.getAlbumArt();
+                        }
+                    } else {
+                        albumPath[0] = getCoverPathByDefDB(context, albumId);
+                    }
+                } else {
+                    albumPath[0] = getCoverPathByDefDB(context, albumId);
+                }
+            } else {
+                albumPath[0] = getCoverPathByDefDB(context, albumId);
+            }
+            return albumPath[0];
+        }
+
+        private static Bitmap path2CoverByDB(Context context, String path) {
+            if (TextUtils.isEmpty(path)) {
+                return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
+            }
+
+            if (path.equals("null")) {
+                return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
+            }
+
+            if (path.equals(NONE)) {
+                return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
+            }
+
+            File file = new File(path);
+            if (!file.exists()) {
+                return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
+            } else {
+                if (file.isDirectory()) {
+                    return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
+                }
+            }
+
+            return BitmapFactory.decodeFile(path);
+        }
+
+        /**
          * 获取封面
          * <p>
-         * same as {@link Audio#getMp3Cover(String)}
+         * same as {@link Audio#getMp3CoverByMeta(String)}
          * may call from {@link top.geek_studio.chenlongcould.musicplayer.MyMusicService}
          *
          * @param mediaUri mp3 path
          */
-        public static Bitmap getMp3Cover(final String mediaUri, Context context) {
+        private static Bitmap path2CoverByMeta(final String mediaUri, Context context) {
 
             if (mediaUri == null)
+                return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
+
+            if (mediaUri.equals(NONE))
                 return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
 
             final File file = new File(mediaUri);
@@ -186,14 +268,13 @@ public final class Utils {
                 return BitmapFactory.decodeByteArray(picture, 0, picture.length);
             else
                 return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
-
         }
 
         /**
          * may call from {@link top.geek_studio.chenlongcould.musicplayer.MyMusicService}
          */
         @Nullable
-        public static byte[] getAlbumByteImage(final String path, Context context) {
+        private static byte[] path2CoverByteByMeta(final String path, Context context) {
             final Bitmap bitmap = getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
             final File file = new File(path);
 
@@ -222,8 +303,7 @@ public final class Utils {
         }
 
         @SuppressWarnings("SameParameterValue")
-        @Nullable
-        public static Bitmap getDrawableBitmap(@NonNull Context context, @DrawableRes int vectorDrawableId) {
+        private static Bitmap getDrawableBitmap(@NonNull Context context, @DrawableRes int vectorDrawableId) {
             return BitmapFactory.decodeResource(context.getResources(), vectorDrawableId);
         }
 
@@ -326,6 +406,16 @@ public final class Utils {
         @ColorInt
         public static int getPrimaryDarkColor(Context context) {
             return PreferenceManager.getDefaultSharedPreferences(context).getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, ContextCompat.getColor(context, R.color.colorPrimaryDark));
+        }
+
+        /**
+         * getTitleColor from {@link SharedPreferences}, default: {@link R.color#def_title_color}
+         *
+         * @return color (int)
+         */
+        @ColorInt
+        public static int getTitleColor(Context context) {
+            return PreferenceManager.getDefaultSharedPreferences(context).getInt(Values.SharedPrefsTag.TITLE_COLOR, ContextCompat.getColor(context, R.color.def_title_color));
         }
 
         public static Bitmap readBitmapFromFile(String filePath, int width, int height) {
@@ -623,6 +713,7 @@ public final class Utils {
                         .load(bitmap)
                         .dontAnimate()
                         .apply(bitmapTransform(Data.sBlurTransformation))
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
                         .into(bgUp));
             } else {
                 Log.d(TAG, "setBlurEffect: not blur" + Values.Style.DETAIL_BACKGROUND);
@@ -657,6 +748,7 @@ public final class Utils {
                                     .load(bitmap)
                                     .dontAnimate()
                                     .apply(bitmapTransform(Data.sBlurTransformation))
+                                    .diskCacheStrategy(DiskCacheStrategy.NONE)
                                     .into(bgDown);
                         } else {
                             Log.d(TAG, "onAnimationEnd: not blur" + Values.Style.DETAIL_BACKGROUND);
@@ -692,6 +784,29 @@ public final class Utils {
         public static boolean isColorLight(@ColorInt final int color) {
             double darkness = 1.0D - (0.299D * (double) Color.red(color) + 0.587D * (double) Color.green(color) + 0.114D * (double) Color.blue(color)) / 255.0D;
             return darkness < 0.4D;
+        }
+
+        /**
+         * 设置toolbar上的文字、导航、菜单的图标颜色
+         *
+         * @param toolbar toolbar
+         * @param color   color -> {@link ColorInt}
+         */
+        public static void setOverToolbarColor(Toolbar toolbar, @ColorInt int color) {
+            if (toolbar.getNavigationIcon() != null) toolbar.getNavigationIcon().setTint(color);
+            toolbar.setTitleTextColor(color);
+            if (toolbar.getSubtitle() != null) {
+                toolbar.setSubtitleTextColor(color);
+            }
+            if (toolbar.getMenu().size() != 0) {
+                if (toolbar.getOverflowIcon() != null) toolbar.getOverflowIcon().setTint(color);
+                for (int i = 0; i < toolbar.getMenu().size(); i++) {
+                    if (toolbar.getMenu().getItem(i).getIcon() != null) {
+                        toolbar.getMenu().getItem(i).getIcon().clearColorFilter();
+                        toolbar.getMenu().getItem(i).getIcon().setTint(color);
+                    }
+                }
+            }
         }
 
         public static void upDateStyle(final SharedPreferences mDefSharedPreferences) {
@@ -740,6 +855,16 @@ public final class Utils {
             return outBitmap;
 
         }
+
+        /**
+         * by kabouzeid
+         */
+        @ColorInt
+        public static int withAlpha(@ColorInt int baseColor, @FloatRange(from = 0.0D, to = 1.0D) float alpha) {
+            int a = Math.min(255, Math.max(0, (int) (alpha * 255.0F))) << 24;
+            int rgb = 16777215 & baseColor;
+            return a + rgb;
+        }
     }
 
     public static final class DataSet {
@@ -757,7 +882,7 @@ public final class Utils {
          * add into music List
          *
          * @param context MainActivity
-         * @param item     MusicItem
+         * @param item    MusicItem
          */
         public static void addListDialog(Context context, MusicItem item) {
             final Resources resources = context.getResources();
@@ -810,7 +935,7 @@ public final class Utils {
          * add into music List
          *
          * @param activity MainActivity
-         * @param items     MusicItems
+         * @param items    MusicItems
          */
         public static void addListDialog(MainActivity activity, ArrayList<MusicItem> items) {
             final Resources resources = activity.getResources();

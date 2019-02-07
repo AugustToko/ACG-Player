@@ -53,7 +53,7 @@ public final class Data {
     public static RecyclerView.ItemDecoration getItemDecoration(Context context) {
         if (mItemDecoration == null) {
             mItemDecoration = new RecycleViewDivider(
-                    context, LinearLayoutManager.VERTICAL, 1, ContextCompat.getColor(context, R.color.line_color));
+                    context, LinearLayoutManager.VERTICAL, 2, ContextCompat.getColor(context, R.color.line_color));
         }
         return mItemDecoration;
     }

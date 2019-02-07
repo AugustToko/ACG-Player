@@ -20,7 +20,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -36,6 +35,7 @@ import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -57,6 +57,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -101,6 +102,8 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
     public NotLeakHandler mHandler;
 
     private boolean HIDE_TOOLBAR = false;
+
+    private boolean SNACK_NOTICE = false;
 
     float moveY = 0;
     private ImageView.ScaleType mScaleType;
@@ -214,11 +217,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                 mPlayButton.setImageResource(R.drawable.ic_pause_black_24dp);
             }
 
-            final byte[] cover = Utils.Audio.getAlbumByteImage(Data.sCurrentMusicItem.getMusicPath(), mMainActivity);
-            Bitmap bitmap = null;
-            if (cover != null) {
-                bitmap = BitmapFactory.decodeByteArray(cover, 0, cover.length);
-            }
+            Bitmap bitmap = Utils.Audio.getCoverBitmap(getActivity(), Data.sCurrentMusicItem.getAlbumId());
 
             //nullable
             setIcoLightOrDark(bitmap);
@@ -233,7 +232,6 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
 
         return view;
     }
-
 
     private AlbumImageView mMusicAlbumImage;
 
@@ -255,10 +253,6 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
 
     private MyWaitListAdapter mMyWaitListAdapter;
 
-    private void findView(View view) {
-
-    }
-
     public final void setDefAnimation() {
         mRandomButton.setAlpha(0f);
         mRepeatButton.setAlpha(0f);
@@ -273,7 +267,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
          * */
         //default type is common, but the random button alpha is 1f(it means this button is on), so set animate
 //        animator.setStartDelay(500);
-        if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
+        if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM)) {
             final ValueAnimator animator = new ValueAnimator();
             animator.setDuration(300);
             animator.setFloatValues(0f, 1f);
@@ -333,7 +327,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
 
         final ValueAnimator animator = new ValueAnimator();
         animator.setDuration(300);
-        switch (Values.CurrentData.CURRENT_AUTO_NEXT_TYPE) {
+        switch (Values.CurrentData.CURRENT_PLAY_TYPE) {
             case Values.TYPE_COMMON: {
                 mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
                 animator.setFloatValues(0f, 0.3f);
@@ -421,6 +415,34 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                 animator.start();
                 break;
             }
+            default: {
+                mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
+                animator.setFloatValues(0f, 0.3f);
+                animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));
+                animator.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mRepeatButton.setAlpha(0.3f);
+                        mRepeatButton.clearAnimation();
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                });
+                animator.start();
+            }
         }
 
         final ValueAnimator mPlayButtonRotationAnimation = new ValueAnimator();
@@ -504,13 +526,13 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
         mMusicAlbumImage.setOnTouchListener((v, event) -> {
             final int action = event.getAction();
 
-            String befPath = null;
-            String nexPath = null;
+            MusicItem befItem = null;
+            MusicItem nexItem = null;
             if (Values.CurrentData.CURRENT_MUSIC_INDEX > 0 && Values.CurrentData.CURRENT_MUSIC_INDEX < Data.sPlayOrderList.size() - 1) {
-                befPath = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX - 1).getMusicPath();
+                befItem = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX - 1);
             }
             if (Values.CurrentData.CURRENT_MUSIC_INDEX < Data.sPlayOrderList.size() - 1 && Values.CurrentData.CURRENT_MUSIC_INDEX > 0) {
-                nexPath = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX + 1).getMusicPath();
+                nexItem = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX + 1);
             }
 
             mMusicAlbumImageOth2.setVisibility(View.VISIBLE);
@@ -520,13 +542,15 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                 case MotionEvent.ACTION_DOWN:
                     //预加载
                     GlideApp.with(this)
-                            .load(Utils.Audio.getMp3Cover(befPath))
+                            .load(befItem == null ? R.drawable.ic_audiotrack_24px : Utils.Audio.getCoverPath(mMainActivity, befItem.getAlbumId()))
                             .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
                             .into(mMusicAlbumImageOth3);
 
                     GlideApp.with(this)
-                            .load(Utils.Audio.getMp3Cover(nexPath))
+                            .load(nexItem == null ? R.drawable.ic_audiotrack_24px : Utils.Audio.getCoverPath(mMainActivity, nexItem.getAlbumId()))
                             .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
                             .into(mMusicAlbumImageOth2);
 
                     moveX = event.getX();
@@ -593,7 +617,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                     //左滑一半 滑过去
                     if (mMusicAlbumImage.getX() < 0 && Math.abs(mMusicAlbumImage.getX()) >= mMusicAlbumImage.getWidth() / 2) {
                         animatorMain.setFloatValues(mMusicAlbumImage.getX(), 0 - mMusicAlbumImage.getWidth());
-                        String finalNexPath = nexPath;
+                        MusicItem finalNexItem = nexItem;
                         animatorMain.addListener(new Animator.AnimatorListener() {
                             @Override
                             public void onAnimationStart(Animator animation) {
@@ -604,7 +628,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                             public void onAnimationEnd(Animator animation) {
                                 Utils.SendSomeThing.sendPlay(mMainActivity, 6, "next_slide");
                                 GlideApp.with(MusicDetailFragment.this)
-                                        .load(Utils.Audio.getMp3Cover(finalNexPath))
+                                        .load(finalNexItem == null ? R.drawable.ic_audiotrack_24px : Utils.Audio.getCoverPath(mMainActivity, finalNexItem.getAlbumId()))
                                         .into(mMusicAlbumImage);
                                 mMusicAlbumImage.setTranslationX(0);
                                 mMusicAlbumImageOth2.setTranslationX(mMusicAlbumImage.getWidth() * 2);
@@ -626,7 +650,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                         /*右滑一半 滑过去*/
                     } else if (mMusicAlbumImage.getX() > 0 && Math.abs(mMusicAlbumImage.getX()) >= mMusicAlbumImage.getWidth() / 2) {
                         animatorMain.setFloatValues(mMusicAlbumImage.getX(), mMusicAlbumImage.getWidth());
-                        String finalBefPath = befPath;
+                        MusicItem finalBefItem = befItem;
                         animatorMain.addListener(new Animator.AnimatorListener() {
                             @Override
                             public void onAnimationStart(Animator animation) {
@@ -637,7 +661,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                             public void onAnimationEnd(Animator animation) {
                                 Utils.SendSomeThing.sendPlay(mMainActivity, 6, "previous_slide");
                                 GlideApp.with(MusicDetailFragment.this)
-                                        .load(Utils.Audio.getMp3Cover(finalBefPath))
+                                        .load(finalBefItem == null ? R.drawable.ic_audiotrack_24px : Utils.Audio.getCoverPath(mMainActivity, finalBefItem.getAlbumId()))
                                         .into(mMusicAlbumImage);
                                 mMusicAlbumImage.setTranslationX(0);
                                 mMusicAlbumImageOth3.setVisibility(View.GONE);
@@ -764,9 +788,9 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
             final ValueAnimator animator = new ValueAnimator();
             animator.setDuration(300);
             mRepeatButton.clearAnimation();
-            switch (Values.CurrentData.CURRENT_AUTO_NEXT_TYPE) {
+            switch (Values.CurrentData.CURRENT_PLAY_TYPE) {
                 case Values.TYPE_COMMON: {
-                    Values.CurrentData.CURRENT_AUTO_NEXT_TYPE = Values.TYPE_REPEAT;
+                    Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_REPEAT;
                     mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
                     animator.setFloatValues(0.3f, 1f);
                     animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));
@@ -797,11 +821,11 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                 }
                 case Values.TYPE_REPEAT: {
                     mRepeatButton.setImageResource(R.drawable.ic_repeat_one_white_24dp);
-                    Values.CurrentData.CURRENT_AUTO_NEXT_TYPE = Values.TYPE_REPEAT_ONE;
+                    Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_REPEAT_ONE;
                 }
                 break;
                 case Values.TYPE_REPEAT_ONE: {
-                    Values.CurrentData.CURRENT_AUTO_NEXT_TYPE = Values.TYPE_COMMON;
+                    Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_COMMON;
                     mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
                     animator.setFloatValues(1f, 0.3f);
                     animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));
@@ -836,7 +860,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
         mRepeatButton.setOnLongClickListener(v -> {
             final AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
             builder.setTitle("Repeater");
-            builder.setMessage("Building...");
+            builder.setMessage("I am a Repeater...");
             builder.setCancelable(true);
             builder.show();
             return false;
@@ -845,8 +869,8 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
         mRandomButton.setOnClickListener(v -> {
             mRandomButton.clearAnimation();
             final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit();
-            if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
-                Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_COMMON;
+            if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM)) {
+                editor.putString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).apply();
                 final ValueAnimator animator = new ValueAnimator();
                 animator.setFloatValues(1f, 0.3f);
                 animator.setDuration(300);
@@ -861,8 +885,6 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                     public void onAnimationEnd(Animator animation) {
                         mRandomButton.setAlpha(0.3f);
                         mRandomButton.clearAnimation();
-                        editor.putString(Values.SharedPrefsTag.PLAY_TYPE, Values.TYPE_COMMON);
-                        editor.apply();
                     }
 
                     @Override
@@ -891,7 +913,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                 mMyWaitListAdapter.notifyDataSetChanged();
 
             } else {
-                Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_RANDOM;
+                editor.putString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_RANDOM).apply();
                 final ValueAnimator animator = new ValueAnimator();
                 animator.setFloatValues(0.3f, 1f);
                 animator.setDuration(300);
@@ -906,8 +928,6 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                     public void onAnimationEnd(Animator animation) {
                         mRandomButton.setAlpha(1f);
                         mRandomButton.clearAnimation();
-                        editor.putString(Values.SharedPrefsTag.PLAY_TYPE, Values.TYPE_RANDOM);
-                        editor.apply();
                     }
 
                     @Override
@@ -1005,7 +1025,6 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
         mLinearLayoutManager = new LinearLayoutManager(mMainActivity);
 
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
-        mRecyclerView.addItemDecoration(Data.getItemDecoration(mMainActivity));
         mMyWaitListAdapter = new MyWaitListAdapter(mMainActivity, Data.sPlayOrderList);
         mRecyclerView.setAdapter(mMyWaitListAdapter);
 
@@ -1040,10 +1059,9 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
             }
         });
 
-        mNextButton.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mMainActivity, 6, "next"));
+        mNextButton.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mMainActivity, 6, ReceiverOnMusicPlay.TYPE_NEXT));
 
         mNextButton.setOnLongClickListener(v -> {
-            Values.BUTTON_PRESSED = true;
             int nowPosition = mSeekBar.getProgress() + ReceiverOnMusicPlay.getDuration() / 20;
             if (nowPosition >= mSeekBar.getMax()) {
                 nowPosition = mSeekBar.getMax();
@@ -1054,7 +1072,6 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                 mSeekBar.setProgress(nowPosition);
             }
             ReceiverOnMusicPlay.seekTo(nowPosition);
-            Values.BUTTON_PRESSED = false;
             return true;
         });
 
@@ -1229,14 +1246,11 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
 //        });
 //    }
 
-    public final void setCurrentInfoWithoutMainImage(@NonNull final String name, @NonNull final String albumName, final byte[] cover) {
+    public final void setCurrentInfoWithoutMainImage(@NonNull final String name, @NonNull final String albumName, final Bitmap cover) {
         mMainActivity.runOnUiThread(() -> {
             mCurrentMusicNameText.setText(name);
             mCurrentAlbumNameText.setText(albumName);
-            if (cover != null) {
-                final Bitmap data = Utils.Ui.readBitmapFromArray(cover, 100, 100);
-                Utils.Ui.setBlurEffect(mMainActivity, data, mBGup, mBGdown, mNextWillText);
-            }
+            Utils.Ui.setBlurEffect(mMainActivity, cover, mBGup, mBGdown, mNextWillText);
         });
     }
 
@@ -1250,6 +1264,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                         .load(cover)
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                         .centerCrop()
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
                         .into(mMusicAlbumImage);
 
             } else {
@@ -1257,6 +1272,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                         .load(R.drawable.ic_audiotrack_24px)
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                         .centerCrop()
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
                         .into(mMusicAlbumImage);
             }
 
@@ -1302,8 +1318,9 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
 //                    }
 //                });
             if (cover != null) {
-                GlideApp.with(mMainActivity).load(cover).transition(DrawableTransitionOptions.withCrossFade()).into(mNowPlayingSongImage);
-                GlideApp.with(mMainActivity).load(cover).transition(DrawableTransitionOptions.withCrossFade()).centerCrop().into(mMainActivity.getNavHeaderImageView());
+                GlideApp.with(mMainActivity).load(cover).transition(DrawableTransitionOptions.withCrossFade()).diskCacheStrategy(DiskCacheStrategy.NONE).into(mNowPlayingSongImage);
+                GlideApp.with(mMainActivity).load(cover).transition(DrawableTransitionOptions.withCrossFade()).centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .into(mMainActivity.getNavHeaderImageView());
 
                 setIcoLightOrDark(cover);
 
@@ -1311,6 +1328,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                         .apply(bitmapTransform(new BlurTransformation(30, 20)))
                         .override(100, 100)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
                         .into(mNowPlayingBackgroundImage);
 
             } else {
@@ -1440,27 +1458,31 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                             mCurrentInfoSeek.requestLayout();
                             mLeftTime.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(ReceiverOnMusicPlay.getCurrentPosition()))));
 
-//                            Log.d(TAG, "handleMessage: current position " + ReceiverOnMusicPlay.getCurrentPosition() + " ------------ " + ReceiverOnMusicPlay.getDuration());
-                            // FIXME: 2018/12/5 snack break the layout
-//                            if (Data.sMusicBinder.getCurrentPosition() / 1000 == Data.sMusicBinder.getDuration() / 1000 - 5 && !SNACK_NOTICE) {
-//                                SNACK_NOTICE = true;
-//
-//                                Snackbar snackbar = Snackbar.make(mSlidingUpPanelLayout,
-//                                        "Next Will play " + Data.sMusicItems.get(Values.CurrentData.CURRENT_MUSIC_INDEX != Data.sMusicItems.size() ? Values.CurrentData.CURRENT_MUSIC_INDEX : 0).getMusicName()
-//                                        , Snackbar.LENGTH_LONG).setAction("按钮", v -> {
-//                                    //点击右侧的按钮之后的操作
-//                                    Utils.SendSomeThing.sendPause(mMainActivity);
-//                                });
-//                                snackbar.addCallback(new Snackbar.Callback() {
-//                                    @Override
-//                                    public void onDismissed(Snackbar transientBottomBar, int event) {
-//                                        SNACK_NOTICE = false;
-//                                        Log.d(TAG, "onDismissed: dismissed...");
-//                                    }
-//                                });
-//
-//                                snackbar.show();
-//                            }
+                            Log.i(TAG, "handleMessage: current position " + ReceiverOnMusicPlay.getCurrentPosition() + " ------------ " + ReceiverOnMusicPlay.getDuration());
+
+                            //播放模式不为循环单曲时，跳出提示
+                            if (!Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_REPEAT_ONE)) {
+                                if (ReceiverOnMusicPlay.getCurrentPosition() / 1000 == ReceiverOnMusicPlay.getDuration() / 1000 - 5 && !SNACK_NOTICE) {
+                                    SNACK_NOTICE = true;
+
+                                    Snackbar snackbar = Snackbar.make(mSlidingUpPanelLayout,
+                                            getString(R.string.next_will_play_x, Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX + 1 != Data.sPlayOrderList.size() ? Values.CurrentData.CURRENT_MUSIC_INDEX + 1 : 0).getMusicName())
+                                            , Snackbar.LENGTH_LONG).setAction(getString(R.string.skip), v -> {
+                                        //点击右侧的按钮之后的操作
+                                        Values.CurrentData.CURRENT_MUSIC_INDEX += 1;
+                                        Utils.SendSomeThing.sendPlay(mMainActivity, 6, ReceiverOnMusicPlay.TYPE_NEXT);
+                                    });
+                                    snackbar.addCallback(new Snackbar.Callback() {
+                                        @Override
+                                        public void onDismissed(Snackbar transientBottomBar, int event) {
+                                            SNACK_NOTICE = false;
+                                        }
+                                    });
+
+                                    snackbar.show();
+                                }
+
+                            }
 
                         }
                     });

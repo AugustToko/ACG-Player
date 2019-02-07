@@ -19,21 +19,31 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import top.geek_studio.chenlongcould.geeklibrary.Theme.IStyle;
+import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
 @SuppressLint("Registered")
-public class MyBaseCompatActivity extends AppCompatActivity {
+public class MyBaseCompatActivity extends AppCompatActivity implements IStyle {
+
+    private static final String TAG = "MyBaseCompatActivity";
+
+    private Toolbar mToolbar;
+    private AppBarLayout mAppBarLayout;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //设置状态栏是否全透明
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 Window window = getWindow();
@@ -46,20 +56,32 @@ public class MyBaseCompatActivity extends AppCompatActivity {
             }
         }
 
-        //noinspection deprecation
-        setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, Utils.Ui.getPrimaryColor(this)));
-
     }
 
     protected void setUpTaskCardColor(@ColorInt int color) {
-        //noinspection deprecation
         setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, color));
     }
 
+    protected void initView(Toolbar toolbar, AppBarLayout appBarLayout) {
+        mToolbar = toolbar;
+        mAppBarLayout = appBarLayout;
+    }
+
     @Override
-    protected void onResume() {
-        //noinspection deprecation
+    public void initStyle() {
         setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, Utils.Ui.getPrimaryColor(this)));
-        super.onResume();
+        Utils.Ui.setTopBottomColor(this, mAppBarLayout, mToolbar);
+        Utils.Ui.setOverToolbarColor(mToolbar, Utils.Ui.getTitleColor(this));
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onPause() {
+        Data.sSelections.clear();
+        super.onPause();
     }
 }

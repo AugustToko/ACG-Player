@@ -23,7 +23,7 @@
 	<string name="search">搜索</string>
 	<string name="app_color">應用顏色</string>
     <string name="color_primary">主要颜色</string>
-	<string name="this_is_dark_color_like_status_bar">這是狀態欄的深色</string>
+    <string name="this_is_dark_color_like_status_bar">更改導航欄顏色</string>
     <string name="style_settings">風格設置</string>
 	<string name="this_is_body_color_like_toolbar">這是像工具欄一樣的車身顏色</string>
     <string name="the_accent_color_like_button">強調色</string>
@@ -118,4 +118,16 @@
     <string name="clear">清楚</string>
     <string name="done">完成</string>
     <string name="confirm">確認</string>
+    <string name="next_will_play_x">接下來將播放 %1$s</string>
+    <string name="skip">跳過</string>
+    <string name="already_exsits">已經存在！</string>
+    <string name="press_again_to_exit">再按一次退出！</string>
+    <string name="tab_music">音樂標籤</string>
+    <string name="tab_album">專輯標籤</string>
+    <string name="tab_artist">藝術家標籤</string>
+    <string name="tab_playlist">播放列表標籤</string>
+    <string name="tab_fileviewer">FileViewer選項卡</string>
+    <string name="close_the_tab_x_int">關閉標籤 %1$s ？</string>
+    <string name="type_somthing">輸入一些東西</string>
+    <string name="force_use_net_album">強制使用網絡封面</string>
 </resources>

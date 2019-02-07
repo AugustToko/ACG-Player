@@ -20,9 +20,16 @@ public final class AlbumItem implements Parcelable {
 
     private int mAlbumId;
 
-    public AlbumItem(String albumName, int albumId) {
+    private String mArtist;
+
+    public AlbumItem(String albumName, int albumId, String artist) {
         mAlbumName = albumName;
         mAlbumId = albumId;
+        mArtist = artist;
+    }
+
+    public String getArtist() {
+        return mArtist;
     }
 
     public int getAlbumId() {

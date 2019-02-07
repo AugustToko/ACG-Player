@@ -40,16 +40,17 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
     @SuppressWarnings("unused")
     private static final String TAG = "ReceiverOnMusicPlay";
 
-    public static final String PLAY_TYPE = "play_type";
-
     //最短播放时间为3000毫秒
-    public static final int MINIMUM_PLAY_TIME = 3000;
 
     /**
      * @see Message#what
      */
     public static final int TYPE_SHUFFLE = 90;
     public static final int TYPE_ITEM_CLICK = 15;
+    public static final String PLAY_TYPE = "play_type";
+    public static final String TYPE_NEXT = "next";
+    public static final String TYPE_PREVIOUS = "previous";
+    public static final String TYPE_SLIDE = "slide";
 
     /**
      * the mediaPlayer is Ready?
@@ -101,10 +102,9 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
      * @param targetIndex         index
      */
     private static void uiSet(final MusicDetailFragment musicDetailFragment, final int targetIndex) {
-        final String path = Data.sPlayOrderList.get(targetIndex).getMusicPath();
         final String musicName = Data.sPlayOrderList.get(targetIndex).getMusicName();
         final String albumName = Data.sPlayOrderList.get(targetIndex).getMusicAlbum();
-        final Bitmap cover = Utils.Audio.getMp3Cover(path, musicDetailFragment.getContext());
+        final Bitmap cover = Utils.Audio.getCoverBitmap(musicDetailFragment.getActivity(), Data.sPlayOrderList.get(targetIndex).getAlbumId());
         Data.setCurrentCover(cover);
 
         Utils.Ui.setPlayButtonNowPlaying();
@@ -221,24 +221,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-//        if (!Utils.Ui.ANIMATION_IN_DETAIL_DONE.get() && Values.CurrentData.CURRENT_UI_MODE.equals(Values.UIMODE.MODE_COMMON)) {
-//            Toast.makeText(context, "Wait...", Toast.LENGTH_SHORT).show();
-//            return;
-//        }
-
         final int type = intent.getIntExtra(PLAY_TYPE, 0);
-
-        if (Values.HAS_PLAYED) {
-            final List<Detail> infos = LitePal.where("MusicId = ?", String.valueOf(Data.sCurrentMusicItem.getMusicID())).find(Detail.class);
-            if (infos.size() > 0) {
-                Detail detail = infos.get(0);
-                detail.setPlayDuration(detail.getPlayDuration() + ReceiverOnMusicPlay.getCurrentPosition());
-                if (ReceiverOnMusicPlay.getCurrentPosition() < MINIMUM_PLAY_TIME) {
-                    detail.setMinimumPlayTimes(detail.getMinimumPlayTimes() + 1);
-                }
-                detail.save();
-            }
-        }
 
         ///////////////////////////BEFORE PLAYER SET/////////////////////////////////////////
 
@@ -276,7 +259,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
             //by auto-next(mediaPlayer OnCompletionListener) of next-play by user, at this time MainActivity is present
             //by MusicDetailFragment preview imageButton (view history song list)
             case 6: {
-                Log.d(TAG, "onReceive: do 6");
 
                 //检测是否指定下一首播放
                 if (Data.sNextWillPlayItem != null) {
@@ -284,8 +266,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                     break;
                 }
 
-                if (Values.CurrentData.CURRENT_AUTO_NEXT_TYPE.equals(Values.TYPE_REPEAT_ONE)) {
-                    Log.d(TAG, "onReceive: repeat one");
+                if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_REPEAT_ONE)) {
                     seekTo(0);
                     playMusic();
                     break;
@@ -299,12 +280,12 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 //检测前后播放
                 int targetIndex = 0;
                 if (intent.getStringExtra("args") != null) {
-                    if (intent.getStringExtra("args").contains("next")) {
+                    if (intent.getStringExtra("args").contains(TYPE_NEXT)) {
                         targetIndex = Values.CurrentData.CURRENT_MUSIC_INDEX + 1;
                         if (targetIndex > Data.sPlayOrderList.size() - 1) {            //超出范围自动跳转0
                             targetIndex = 0;
                         }
-                    } else if (intent.getStringExtra("args").contains("previous")) {
+                    } else if (intent.getStringExtra("args").contains(TYPE_PREVIOUS)) {
                         targetIndex = Values.CurrentData.CURRENT_MUSIC_INDEX - 1;
                         if (targetIndex < 0) {
                             targetIndex = Data.sPlayOrderList.size() - 1;      //超出范围超转最后
@@ -313,7 +294,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 }
                 Values.CurrentData.CURRENT_MUSIC_INDEX = targetIndex;
 
-                Data.setCurrentMusicItem(Data.sPlayOrderList.get(targetIndex));
+                Data.sCurrentMusicItem = Data.sPlayOrderList.get(targetIndex);
 
                 resetMusic();
                 setDataSource(Data.sPlayOrderList.get(targetIndex).getMusicPath());
@@ -326,15 +307,14 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                     final MusicDetailFragment musicDetailFragment = ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment();
 
                     //slide 滑动切歌无需再次加载albumCover
-                    if (intent.getStringExtra("args") != null && intent.getStringExtra("args").contains("slide")) {
-                        final String path = Data.sPlayOrderList.get(targetIndex).getMusicPath();
+                    if (intent.getStringExtra("args") != null && intent.getStringExtra("args").contains(TYPE_SLIDE)) {
                         final String musicName = Data.sPlayOrderList.get(targetIndex).getMusicName();
                         final String albumName = Data.sPlayOrderList.get(targetIndex).getMusicAlbum();
-                        final Bitmap cover = Utils.Audio.getMp3Cover(path, musicDetailFragment.getContext());
+                        final Bitmap cover = Utils.Audio.getCoverBitmap(context, Data.sPlayOrderList.get(targetIndex).getAlbumId());
                         Data.setCurrentCover(cover);
                         Utils.Ui.setPlayButtonNowPlaying();
                         musicDetailFragment.setSlideInfo(musicName, albumName, cover);
-                        musicDetailFragment.setCurrentInfoWithoutMainImage(musicName, albumName, Utils.Audio.getAlbumByteImage(path, context));
+                        musicDetailFragment.setCurrentInfoWithoutMainImage(musicName, albumName, cover);
                         reSetSeekBar();         //防止seekBar跳动到Max
 
                         musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
@@ -353,11 +333,18 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
             //by MusicListFragment item click
             case TYPE_ITEM_CLICK: {
                 //set current data
-                Data.setCurrentMusicItem(Data.sMusicItems.get(Integer.parseInt(intent.getStringExtra("args"))));
+                Data.sCurrentMusicItem = Data.sMusicItems.get(Integer.parseInt(intent.getStringExtra("args")));
+                Log.d(TAG, "onReceive: " + Data.sCurrentMusicItem.getMusicName());
 
                 ReceiverOnMusicPlay.resetMusic();
                 ReceiverOnMusicPlay.setDataSource(Data.sCurrentMusicItem.getMusicPath());
-                ReceiverOnMusicPlay.prepare();
+                try {
+                    ReceiverOnMusicPlay.prepare();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    ReceiverOnMusicPlay.resetMusic();
+                    return;
+                }
                 ReceiverOnMusicPlay.playMusic();
 
                 sureCar();
@@ -402,23 +389,14 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
      */
     public static class DoesHasNextPlay extends AsyncTask<Void, Void, Integer> {
 
-        Bitmap cover;
-
         @Override
         protected Integer doInBackground(Void... voids) {
 
             if (Data.sNextWillPlayItem != null) {
                 resetMusic();
-
-                cover = Utils.Audio.getMp3Cover(Data.sNextWillPlayItem.getMusicPath());
-
-                Utils.Ui.setPlayButtonNowPlaying();
-
                 ReceiverOnMusicPlay.setDataSource(Data.sNextWillPlayItem.getMusicPath());
                 prepare();
-
                 playMusic();
-
             } else {
                 return -1;
             }
@@ -427,14 +405,14 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
         @Override
         protected void onPostExecute(Integer status) {
-
+            //error
             if (status != 0) return;
 
             if (!Data.sActivities.isEmpty()) {
 
                 MusicDetailFragment musicDetailFragment = ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment();
 
-                final Bitmap cover = Utils.Audio.getMp3Cover(Data.sNextWillPlayItem.getMusicPath(), musicDetailFragment.getContext());
+                final Bitmap cover = Utils.Audio.getCoverBitmap(Data.sActivities.get(0), Data.sNextWillPlayItem.getAlbumId());
                 Data.setCurrentCover(cover);
                 sureCar();
 
@@ -442,16 +420,12 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 musicDetailFragment.setSlideInfo(Data.sNextWillPlayItem.getMusicName(), Data.sNextWillPlayItem.getMusicAlbum(), cover);
                 musicDetailFragment.setCurrentInfo(Data.sNextWillPlayItem.getMusicName(), Data.sNextWillPlayItem.getMusicAlbum(), cover);
 
-                if (cover != null) cover.recycle();
-
                 reSetSeekBar();         //防止seekBar跳动到Max
                 musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
                 musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
             }
 
             Data.sNextWillPlayItem = null;
-
-//            READY = true;
         }
     }
 
@@ -477,7 +451,8 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
             final int index = random.nextInt(Data.sPlayOrderList.size());
             this.index = index;
             Values.CurrentData.CURRENT_MUSIC_INDEX = index;
-            Data.setCurrentMusicItem(Data.sPlayOrderList.get(index));
+
+            Data.sCurrentMusicItem = Data.sPlayOrderList.get(index);
 
             path = Data.sPlayOrderList.get(index).getMusicPath();
 

@@ -11,7 +11,6 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Activities;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.widget.Button;
@@ -30,7 +29,7 @@ import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 
-public final class AboutLic extends Activity {
+public final class AboutLic extends MyBaseCompatActivity {
 
     private static final String TAG = "AboutLic";
 

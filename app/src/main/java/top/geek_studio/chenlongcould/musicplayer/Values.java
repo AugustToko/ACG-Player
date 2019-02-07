@@ -54,8 +54,6 @@ public final class Values {
 
     public static boolean STYLE_CHANGED = false;
 
-    public static boolean BUTTON_PRESSED = false;
-
     /**
      * result(s), status
      */
@@ -134,17 +132,14 @@ public final class Values {
          * 用户手动切歌的播放模式
          * 1. random
          * 2. common
-         */
-        public static String CURRENT_PLAY_TYPE = "COMMON";
-
-        /**
+         *
          * auto switch
          * 1. common
          * 2. repeat one
          * 3. repeat list
          * 4. random
          */
-        public static String CURRENT_AUTO_NEXT_TYPE = "COMMON";
+        public static String CURRENT_PLAY_TYPE = "COMMON";
 
         /**
          * current play order (default = all music)
@@ -167,12 +162,15 @@ public final class Values {
         public static final String PRIMARY_COLOR = "mPrimaryColor";
         public static final String PRIMARY_DARK_COLOR = "mPrimaryDarkColor";
         public static final String ACCENT_COLOR = "mAccentColor";
+        public static final String TITLE_COLOR = "mTitleColor";
 
         public static final String DETAIL_BG_STYLE = "DETAIL_BG_STYLE";
         public static final String AUTO_NIGHT_MODE = "NIGHT_MODE";
+        public static final String ORDER_TYPE = "ORDER_TYPE";
         public static String PLAY_TYPE = Values.TYPE_COMMON;
 
         public static final String ALBUM_LIST_DISPLAY_TYPE = "ALBUM_LIST_DISPLAY_TYPE";
+        public static final String ARTIST_LIST_DISPLAY_TYPE = "ARTIST_LIST_DISPLAY_TYPE";
         public static final String ALBUM_LIST_GRID_TYPE_COUNT = "ALBUM_LIST_GRID_TYPE_COUNT";
 
         //theme
@@ -184,6 +182,19 @@ public final class Values {
         public static final String TRANSPORT_STATUS = "TRANSPORT_STATUS";
 
         public static final String HIDE_SHORT_SONG = "HIDE_SHORT_SONG";
+
+        public static final String USE_NET_WORK_ALBUM = "USE_NET_WORK_ALBUM";
+
+        /**
+         * 1 is MUSIC TAB
+         * 2 is ALBUM TAB
+         * 3 is ARTIST TAB
+         * 4 is PLAYLIST TAB
+         * 5 is FILE MANAGER TAB
+         * <p>
+         * default tab order is: 12345
+         */
+        public static final String CUSTOM_TAB_LAYOUT = "CUSTOM_TAB_LAYOUT";
 
         //tips
         /**

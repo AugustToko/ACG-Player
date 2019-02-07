@@ -46,7 +46,6 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import top.geek_studio.chenlongcould.geeklibrary.Theme.IStyle;
 import top.geek_studio.chenlongcould.geeklibrary.Theme.Theme;
 import top.geek_studio.chenlongcould.geeklibrary.Theme.ThemeStore;
 import top.geek_studio.chenlongcould.geeklibrary.Theme.ThemeUtils;
@@ -58,7 +57,7 @@ import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityThemeBinding;
 
-public class ThemeActivity extends MyBaseCompatActivity implements IStyle {
+public class ThemeActivity extends MyBaseCompatActivity {
 
     public static final String TAG = "ThemeActivity";
 
@@ -97,6 +96,7 @@ public class ThemeActivity extends MyBaseCompatActivity implements IStyle {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mThemeBinding = DataBindingUtil.setContentView(this, R.layout.activity_theme);
+        super.initView(mThemeBinding.toolbar, mThemeBinding.appBarLayout);
 
         noteCheck();
 
@@ -246,7 +246,6 @@ public class ThemeActivity extends MyBaseCompatActivity implements IStyle {
         }
     }
 
-    @SuppressLint("StaticFieldLeak")
     private void loadDataUI() {
         new AsyncTask<Void, Void, Void>() {
 
@@ -435,7 +434,7 @@ public class ThemeActivity extends MyBaseCompatActivity implements IStyle {
 
     @Override
     public void initStyle() {
-        Utils.Ui.setTopBottomColor(this, mThemeBinding.appBarLayout, mThemeBinding.toolbar);
+        super.initStyle();
     }
 
     public ViewGroup getRoot() {

@@ -10,6 +10,7 @@
   -->
 
 <paths>
+    <!--<external-path path="Android/data/top.geek_studio.chenlongcould.musicplayer/" name="files_root"/>-->
     <external-path
         name="external_files"
         path="." />

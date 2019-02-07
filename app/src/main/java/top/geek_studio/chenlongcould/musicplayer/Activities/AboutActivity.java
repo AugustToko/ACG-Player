@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
@@ -49,6 +50,7 @@ public class AboutActivity extends MyBaseCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAppBinding = DataBindingUtil.setContentView(this, R.layout.activity_about_app);
+        super.initView(mAppBinding.toolbar, mAppBinding.appbar);
 
         mAppBinding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
@@ -94,7 +96,9 @@ public class AboutActivity extends MyBaseCompatActivity {
                     if (response.body() != null) {
                         responseText = new StringBuilder(response.body().string());
                         final Document document = Jsoup.parse(responseText.toString());
-                        final Elements elements = document.getElementsByClass("apk_left_title_info");
+                        final Elements elements = document.getAllElements();
+                        String status = elements.attr("status");
+                        Log.d(TAG, "onResponse: " + status);
                         builder.setMessage(elements.get(0).text());
 
                         runOnUiThread(() -> {
@@ -151,5 +155,10 @@ public class AboutActivity extends MyBaseCompatActivity {
         mAppBinding.card2.addView(mail.getRoot());
         mAppBinding.card2.addView(web.getRoot());
 
+    }
+
+    @Override
+    public void initStyle() {
+        super.initStyle();
     }
 }

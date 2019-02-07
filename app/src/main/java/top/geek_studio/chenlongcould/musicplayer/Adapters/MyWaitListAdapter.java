@@ -13,7 +13,7 @@ package top.geek_studio.chenlongcould.musicplayer.Adapters;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -51,6 +51,9 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
     private static final String TAG = "MyWaitListAdapter";
 
+    /**
+     * 与 {@link Data#sPlayOrderList} 完全同步
+     */
     private List<MusicItem> mMusicItems;
 
     private MainActivity mMainActivity;
@@ -146,16 +149,18 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
                 ReceiverOnMusicPlay.resetMusic();
 
                 //cover set
-                String img = Utils.Audio.getCoverPathByDB(mMainActivity, mMusicItems.get(holder.getAdapterPosition()).getAlbumId());
-                if (img != null) {
-                    Data.setCurrentCover(BitmapFactory.decodeFile(img));
-                } else {
-                    Data.setCurrentCover(Utils.Audio.getDrawableBitmap(mMainActivity, R.drawable.ic_audiotrack_24px));
+                Bitmap img = Utils.Audio.getCoverBitmap(mMainActivity, mMusicItems.get(holder.getAdapterPosition()).getAlbumId());
+                Data.setCurrentCover(img);
+
+                for (int i = 0; i < Data.sMusicItems.size(); i++) {
+                    MusicItem item = Data.sMusicItems.get(i);
+                    if (item.getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
+                        observableEmitter.onNext(i);
+                    }
                 }
 
-                observableEmitter.onNext(0);
             }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(integer -> Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_ITEM_CLICK, String.valueOf(holder.getAdapterPosition())), Throwable::printStackTrace);
+                    .subscribe(integer -> Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_ITEM_CLICK, integer.toString()), Throwable::printStackTrace);
             Data.sDisposables.add(disposable);
         });
     }

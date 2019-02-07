@@ -28,7 +28,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -93,7 +92,6 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
         mRecyclerView = mMusicDetail2Binding.getRoot().findViewById(R.id.recycler_view);
         mWaitListAdapter = new MyWaitListAdapter((MainActivity) Data.sActivities.get(0), Data.sPlayOrderList);
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(mCarViewActivity, DividerItemDecoration.VERTICAL));
         mRecyclerView.setAdapter(mWaitListAdapter);
 
         mMusicDetail2Binding.toolbar.inflateMenu(R.menu.menu_toolbar_in_detail);
@@ -142,7 +140,6 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
         mMusicDetail2Binding.includePlayerControlCar.nextButton.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mCarViewActivity, 6, "next"));
 
         mMusicDetail2Binding.includePlayerControlCar.nextButton.setOnLongClickListener(v -> {
-            Values.BUTTON_PRESSED = true;
             int nowPosition = mMusicDetail2Binding.includeSeekBarCar.seekBar.getProgress() + ReceiverOnMusicPlay.getDuration() / 20;
             if (nowPosition >= mMusicDetail2Binding.includeSeekBarCar.seekBar.getMax()) {
                 nowPosition = mMusicDetail2Binding.includeSeekBarCar.seekBar.getMax();
@@ -153,7 +150,6 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
                 mMusicDetail2Binding.includeSeekBarCar.seekBar.setProgress(nowPosition);
             }
             ReceiverOnMusicPlay.seekTo(nowPosition);
-            Values.BUTTON_PRESSED = false;
             return true;
         });
 
@@ -191,9 +187,9 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
             final ValueAnimator animator = new ValueAnimator();
             animator.setDuration(300);
             mMusicDetail2Binding.includePlayerControlCar.repeatButton.clearAnimation();
-            switch (Values.CurrentData.CURRENT_AUTO_NEXT_TYPE) {
+            switch (Values.CurrentData.CURRENT_PLAY_TYPE) {
                 case Values.TYPE_COMMON: {
-                    Values.CurrentData.CURRENT_AUTO_NEXT_TYPE = Values.TYPE_REPEAT;
+                    Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_REPEAT;
                     mMusicDetail2Binding.includePlayerControlCar.repeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
                     animator.setFloatValues(0.3f, 1f);
                     animator.addUpdateListener(animation -> mMusicDetail2Binding.includePlayerControlCar.repeatButton.setAlpha((Float) animation.getAnimatedValue()));
@@ -223,12 +219,12 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
                     break;
                 }
                 case Values.TYPE_REPEAT: {
-                    Values.CurrentData.CURRENT_AUTO_NEXT_TYPE = Values.TYPE_REPEAT_ONE;
+                    Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_REPEAT_ONE;
                     mMusicDetail2Binding.includePlayerControlCar.repeatButton.setImageResource(R.drawable.ic_repeat_one_white_24dp);
                 }
                 break;
                 case Values.TYPE_REPEAT_ONE: {
-                    Values.CurrentData.CURRENT_AUTO_NEXT_TYPE = Values.TYPE_COMMON;
+                    Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_COMMON;
                     mMusicDetail2Binding.includePlayerControlCar.repeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
                     animator.setFloatValues(1f, 0.3f);
                     animator.addUpdateListener(animation -> mMusicDetail2Binding.includePlayerControlCar.repeatButton.setAlpha((Float) animation.getAnimatedValue()));
@@ -263,7 +259,7 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
         mMusicDetail2Binding.includePlayerControlCar.randomButton.setOnClickListener(v -> {
             mMusicDetail2Binding.includePlayerControlCar.randomButton.clearAnimation();
             final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(mCarViewActivity).edit();
-            if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM)) {
+            if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM)) {
                 Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_COMMON;
                 final ValueAnimator animator = new ValueAnimator();
                 animator.setFloatValues(1f, 0.3f);
@@ -309,7 +305,7 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
                 mWaitListAdapter.notifyDataSetChanged();
 
             } else {
-                Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_RANDOM;
+                editor.putString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_RANDOM).apply();
                 final ValueAnimator animator = new ValueAnimator();
                 animator.setFloatValues(0.3f, 1f);
                 animator.setDuration(300);
@@ -324,7 +320,7 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
                     public void onAnimationEnd(Animator animation) {
                         mMusicDetail2Binding.includePlayerControlCar.randomButton.setAlpha(1f);
                         mMusicDetail2Binding.includePlayerControlCar.randomButton.clearAnimation();
-                        editor.putString(Values.SharedPrefsTag.PLAY_TYPE, Values.TYPE_RANDOM);
+                        editor.putString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_RANDOM);
                         editor.apply();
                     }
 

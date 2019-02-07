@@ -36,17 +36,25 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
 
+import org.litepal.LitePal;
+
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
+import top.geek_studio.chenlongcould.musicplayer.Database.Detail;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 
 public final class MyMusicService extends Service {
 
     private static final String TAG = "MyMusicService";
+
+    public static final int MINIMUM_PLAY_TIME = 3000;
+    private boolean HAS_PLAYED = false;
 
     //PI requests
     public static final int REQUEST_PAUSE = 1;
@@ -62,6 +70,9 @@ public final class MyMusicService extends Service {
     private boolean mColorized = true;
 
     private PowerManager.WakeLock wakeLock;
+    private AtomicReference<MusicItem> mMusicItem = new AtomicReference<>(new MusicItem.Builder(-1, "null", "null").build());
+
+    private Bitmap mCurrentCover = null;
 
     public MyMusicService() {
     }
@@ -73,19 +84,16 @@ public final class MyMusicService extends Service {
         return START_STICKY;
     }
 
-    private AtomicReference<MusicItem> mMusicItem = new AtomicReference<>(new MusicItem.Builder(-1, "null", "null").build());
-    private Bitmap mCurrentCover = null;
-
     @Override
     public IBinder onBind(Intent intent) {
         mColorized = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true);
-        Log.d(TAG, "onBind: onBind" + mColorized);
         return mMusicBinder;
     }
 
     private final Binder mMusicBinder = new IMuiscService.Stub() {
         @Override
         public void playMusic() {
+            HAS_PLAYED = true;
             mMediaPlayer.start();
             startFN();
         }
@@ -109,6 +117,27 @@ public final class MyMusicService extends Service {
 
         @Override
         public void resetMusic() {
+            if (HAS_PLAYED) {
+                final List<Detail> infos = LitePal.where("MusicId = ?", String.valueOf(mMusicItem.get().getMusicID())).find(Detail.class);
+                if (infos.size() > 0) {
+                    Detail detail = infos.get(0);
+                    detail.setPlayDuration(detail.getPlayDuration() + mMediaPlayer.getCurrentPosition());
+                    if (mMediaPlayer.getCurrentPosition() < MINIMUM_PLAY_TIME) {
+                        detail.setMinimumPlayTimes(detail.getMinimumPlayTimes() + 1);
+                    }
+                    detail.save();
+                } else {
+                    Detail detail = new Detail();
+                    detail.setMusicId(mMusicItem.get().getMusicID());
+                    if (mMediaPlayer.getCurrentPosition() < MINIMUM_PLAY_TIME) {
+                        detail.setMinimumPlayTimes(detail.getMinimumPlayTimes() + 1);
+                    }
+                    detail.setPlayTimes(getCurrentPosition());
+                    detail.setPlayDuration(detail.getPlayDuration() + mMediaPlayer.getCurrentPosition());
+                    detail.save();
+                }
+            }
+
             mMediaPlayer.reset();
         }
 
@@ -152,19 +181,13 @@ public final class MyMusicService extends Service {
 
         @Override
         public void setCurrentMusicData(MusicItem item) {
-            Log.d(TAG, "setCurrentMusicData: do it");
             if (item == null) {
                 mMusicItem = new AtomicReference<>(new MusicItem.Builder(-1, "null", "null").build());
-                Log.d(TAG, "setCurrentMusicData: null");
-            } else
+            } else {
                 mMusicItem = new AtomicReference<>(item);
+            }
 
-            mCurrentCover = Utils.Audio.getMp3Cover(mMusicItem.get().getMusicPath(), MyMusicService.this);
-
-            if (mCurrentCover == null)
-                mCurrentCover = Utils.Audio.getDrawableBitmap(MyMusicService.this, R.drawable.ic_audiotrack_24px);
-
-            Log.d(TAG, "setCurrentMusicData: " + mMusicItem.get().getMusicPath() + " " + String.valueOf(mCurrentCover == null));
+            mCurrentCover = Utils.Audio.getCoverBitmap(MyMusicService.this, mMusicItem.get().getAlbumId());
         }
     };
 
@@ -177,7 +200,7 @@ public final class MyMusicService extends Service {
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
         wakeLock.setReferenceCounted(false);
 
-        mMediaPlayer.setOnCompletionListener(mp -> Utils.SendSomeThing.sendPlay(MyMusicService.this, 6, "next"));
+        mMediaPlayer.setOnCompletionListener(mp -> Utils.SendSomeThing.sendPlay(MyMusicService.this, 6, ReceiverOnMusicPlay.TYPE_NEXT));
 
         mMediaPlayer.setOnErrorListener((mp, what, extra) -> {
             mp.reset();

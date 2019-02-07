@@ -37,6 +37,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
@@ -190,6 +191,7 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
                             .load(result)
                             .override(Values.MAX_HEIGHT_AND_WIDTH, Values.MAX_HEIGHT_AND_WIDTH)
                             .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+//                            .diskCacheStrategy(DiskCacheStrategy.NONE)
                             .into(viewHolder.mIco);
                 });
         mDisposables.add(disposable);
@@ -267,6 +269,7 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
                 .subscribe(result -> GlideApp.with(mThemeActivity)
                         .load(result)
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+//                        .diskCacheStrategy(DiskCacheStrategy.NONE)
                         .into(dialogThemeBinding.ico));
         mDisposables.add(disposableIcon);
 
@@ -279,6 +282,7 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
                     .subscribe(result -> GlideApp.with(mThemeActivity)
                             .load(result)
                             .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
                             .into(dialogThemeBinding.includeDialogContent.navImage));
             mDisposables.add(disposable1);
         }
@@ -294,6 +298,7 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
                             .load(result)
                             .override(1280, 720)
                             .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+//                            .diskCacheStrategy(DiskCacheStrategy.NONE)
                             .into(dialogThemeBinding.includeDialogContent.bgImage));
             mDisposables.add(disposableImgs);
         }
@@ -308,6 +313,7 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
                     .subscribe(result -> GlideApp.with(mThemeActivity)
                             .load(result)
                             .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+//                            .diskCacheStrategy(DiskCacheStrategy.NONE)
                             .into(dialogThemeBinding.includeDialogContent.slideImage));
             mDisposables.add(disposable);
         }

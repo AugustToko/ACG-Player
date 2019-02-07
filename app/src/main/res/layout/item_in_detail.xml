@@ -99,4 +99,15 @@
 
     </android.support.constraint.ConstraintLayout>
 
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <include layout="@layout/item_line" />
+
+    </FrameLayout>
+
 </android.support.constraint.ConstraintLayout>

@@ -110,8 +110,8 @@ public final class AlbumListFragment extends Fragment implements VisibleOrGone {
                     do {
                         String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM));
                         String albumId = cursor.getString(cursor.getColumnIndexOrThrow("_id"));
-                        Data.sAlbumItems.add(new AlbumItem(albumName, Integer.parseInt(albumId)));
-                        Data.sAlbumItemsBackUp.add(new AlbumItem(albumName, Integer.parseInt(albumId)));
+                        String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
+                        Data.sAlbumItems.add(new AlbumItem(albumName, Integer.parseInt(albumId), artist));
                     } while (cursor.moveToNext());
 
                     cursor.close();

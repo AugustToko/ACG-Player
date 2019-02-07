@@ -70,7 +70,7 @@ public final class PlayListFragment extends Fragment implements IStyle {
     private PlayListAdapter mPlayListAdapter;
 
     //实例化一个fragment
-    public static PlayListFragment newInstance(int index) {
+    public static PlayListFragment newInstance() {
         return new PlayListFragment();
     }
 

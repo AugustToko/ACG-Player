@@ -45,6 +45,8 @@ public final class MyApplication extends Application {
 
     private ShortcutManager mShortcutManager;
 
+    public static final String LAST_FM_KEY = "726e129841377374f2c8c804facb6d11";
+
     public static final String MY_WEB_SITE = "https://blog.geek-studio.top/";
 
     public static final String VERSION_CODE = "ver_code";

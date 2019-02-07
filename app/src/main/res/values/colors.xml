@@ -10,10 +10,13 @@
   -->
 
 <resources>
+    <color name="grey_600">#757575</color>
 
     <color name="colorPrimary">#f44336</color>
     <color name="colorPrimaryDark">#d32f2f</color>
     <color name="colorAccent">#FF5252</color>
+
+    <color name="def_title_color">#fff</color>
 
     <!--Blue-->
     <color name="blue">#3F51B5</color>
@@ -38,7 +41,7 @@
 
     <color name="black_overlay">#66000000</color>
 
-    <color name="line_color">#17000000</color>
+    <color name="line_color">#0A000000</color>
 
     <color name="png_image_background">#19000000</color>
     <color name="win_background_color">#fafafa</color>

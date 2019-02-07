@@ -61,7 +61,7 @@ public final class MusicListFragment extends Fragment implements IStyle {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mMusicListBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_list_layout, container, false);
-        mMusicListBinding.includeRecycler.recyclerView.addItemDecoration(Data.getItemDecoration(mActivity));
+//        mMusicListBinding.includeRecycler.recyclerView.addItemDecoration(Data.getItemDecoration(mActivity));
         mMusicListBinding.includeRecycler.recyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
         mMusicListBinding.includeRecycler.recyclerView.setHasFixedSize(true);
         adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity, TAG);

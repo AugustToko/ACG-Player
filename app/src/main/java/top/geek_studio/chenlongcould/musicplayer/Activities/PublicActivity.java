@@ -14,9 +14,9 @@ package top.geek_studio.chenlongcould.musicplayer.Activities;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.design.widget.AppBarLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -30,7 +30,6 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import top.geek_studio.chenlongcould.geeklibrary.Theme.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Data;
@@ -41,7 +40,7 @@ import top.geek_studio.chenlongcould.musicplayer.Utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
-public class PublicActivity extends AppCompatActivity implements IStyle {
+public class PublicActivity extends MyBaseCompatActivity {
 
     public static final String TAG = "PublicActivity";
 
@@ -76,6 +75,7 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
         mRecyclerView = findViewById(R.id.activity_add_recent_recycler);
         mAppBarLayout = findViewById(R.id.app_bar_layout);
         mToolbar = findViewById(R.id.toolbar);
+        super.initView(mToolbar, mAppBarLayout);
         mToolbar.setNavigationOnClickListener(v -> onBackPressed());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -242,7 +242,7 @@ public class PublicActivity extends AppCompatActivity implements IStyle {
                                         case R.id.menu_random_play: {
                                             Data.sPlayOrderList.clear();
                                             Data.sPlayOrderList.addAll(mMusicItemList);        //更新数据
-                                            if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_RANDOM))
+                                            if (PreferenceManager.getDefaultSharedPreferences(PublicActivity.this).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM))
                                                 Collections.shuffle(Data.sPlayOrderList);
                                             Utils.SendSomeThing.sendPlay(PublicActivity.this, ReceiverOnMusicPlay.TYPE_SHUFFLE, TAG);
                                         }

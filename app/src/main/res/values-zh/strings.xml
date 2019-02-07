@@ -27,7 +27,7 @@
     <string name="settings">设置</string>
     <string name="app_color">应用颜色</string>
     <string name="color_primary">主要颜色</string>
-    <string name="this_is_dark_color_like_status_bar">类似于状态栏颜色的暗部主要颜色</string>
+    <string name="this_is_dark_color_like_status_bar">更改导航栏颜色</string>
     <string name="style_settings">风格设置</string>
     <string name="this_is_body_color_like_toolbar">这是像Toolbar的颜色</string>
     <string name="the_accent_color_like_button">强调色</string>
@@ -128,4 +128,16 @@
     <string name="clear">清楚</string>
     <string name="done">完成</string>
     <string name="confirm">确认</string>
+    <string name="next_will_play_x">接下來將播放 %1$s</string>
+    <string name="skip">跳过</string>
+    <string name="already_exsits">已经存在！</string>
+    <string name="press_again_to_exit">再按一次退出！</string>
+    <string name="tab_music">音乐标签</string>
+    <string name="tab_album">专辑标签</string>
+    <string name="tab_artist">艺术家标签</string>
+    <string name="tab_playlist">播放列表标签</string>
+    <string name="tab_fileviewer">FileViewer选项卡</string>
+    <string name="close_the_tab_x_int">关闭标签 %1$s ？</string>
+    <string name="type_somthing">输入一些东西</string>
+    <string name="force_use_net_album">强制使用网络封面</string>
 </resources>

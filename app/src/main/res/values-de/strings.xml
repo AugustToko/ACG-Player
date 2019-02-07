@@ -23,8 +23,7 @@
 	<string name="search">Suche</string>
 	<string name="app_color">App-Farbe</string>
 	<string name="color_primary">Farbe primär</string>
-	<string name="this_is_dark_color_like_status_bar">Dies ist eine dunkle Farbe wie die Statusleiste</string>
-	<string name="style_settings">Stileinstellungen</string>
+    <string name="style_settings">Stileinstellungen</string>
 	<string name="this_is_body_color_like_toolbar">Dies ist Körperfarbe wie Symbolleiste</string>
 	<string name="the_accent_color_like_button">Die Akzentfarbe wie der Knopf</string>
 	<string name="licenses">Lizenzen</string>

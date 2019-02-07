@@ -232,7 +232,7 @@ package top.geek_studio.chenlongcould.musicplayer.unUsed;
 //            animator.start();
 //        }
 //
-//        switch (Values.CurrentData.CURRENT_AUTO_NEXT_TYPE) {
+//        switch (Values.CurrentData.CURRENT_PLAY_TYPE) {
 //            case Values.TYPE_COMMON: {
 //                mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
 //                animator.setFloatValues(0f, 0.3f);
@@ -482,9 +482,9 @@ package top.geek_studio.chenlongcould.musicplayer.unUsed;
 //            ValueAnimator animator = new ValueAnimator();
 //            animator.setDuration(300);
 //            mRepeatButton.clearAnimation();
-//            switch (Values.CurrentData.CURRENT_AUTO_NEXT_TYPE) {
+//            switch (Values.CurrentData.CURRENT_PLAY_TYPE) {
 //                case Values.TYPE_COMMON: {
-//                    Values.CurrentData.CURRENT_AUTO_NEXT_TYPE = Values.TYPE_REPEAT;
+//                    Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_REPEAT;
 //                    mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
 //                    animator.setFloatValues(0.3f, 1f);
 //                    animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));
@@ -514,12 +514,12 @@ package top.geek_studio.chenlongcould.musicplayer.unUsed;
 //                    break;
 //                }
 //                case Values.TYPE_REPEAT: {
-//                    Values.CurrentData.CURRENT_AUTO_NEXT_TYPE = Values.TYPE_REPEAT_ONE;
+//                    Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_REPEAT_ONE;
 //                    mRepeatButton.setImageResource(R.drawable.ic_repeat_one_white_24dp);
 //                }
 //                break;
 //                case Values.TYPE_REPEAT_ONE: {
-//                    Values.CurrentData.CURRENT_AUTO_NEXT_TYPE = Values.TYPE_COMMON;
+//                    Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_COMMON;
 //                    mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
 //                    animator.setFloatValues(1f, 0.3f);
 //                    animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));

@@ -16,6 +16,7 @@
     <string name="play_status">Play Status</string>
     <string name="key_id_1" translatable="false">the_key_one</string>
     <string name="key_id_2" translatable="false">the_key_two</string>
+    <string name="key_id_3" translatable="false">the_key_three</string>
     <string name="activity_music_detail_album_image" translatable="false">activity_music_detail_album_image</string>
     <string name="activity_music_detail_primary_background" translatable="false">activity_music_detail_primary_background</string>
     <string name="add">add</string>
@@ -43,7 +44,7 @@
     <string name="search">Search</string>
     <string name="app_color">App Color</string>
     <string name="color_primary">Color Primary</string>
-    <string name="this_is_dark_color_like_status_bar">This is dark color like status bar</string>
+    <string name="this_is_dark_color_like_status_bar">Change NavigationBar Color</string>
     <string name="style_settings">Style Settings</string>
     <string name="this_is_body_color_like_toolbar">This is body color like toolbar</string>
     <string name="the_accent_color_like_button">The accent color like button</string>
@@ -156,4 +157,19 @@
     <string name="clear">Clear</string>
     <string name="done">Done</string>
     <string name="confirm">Confirm</string>
+    <string name="next_will_play_x">Next Will play %1$s</string>
+    <string name="skip">Skip</string>
+    <string name="already_exsits">Already Exists!</string>
+    <string name="press_again_to_exit">Press again to exit!</string>
+    <string name="tab_music">Music Tab</string>
+    <string name="tab_album">Album Tab</string>
+    <string name="tab_artist">Artist Tab</string>
+    <string name="tab_playlist">Playlist Tab</string>
+    <string name="tab_fileviewer">FileViewer Tab</string>
+    <string name="close_the_tab_x_int">Close the tab %1$s ?</string>
+    <string name="type_somthing">TYPE SOMETHING</string>
+    <string name="transition_album_art" translatable="false">album_art_transition</string>
+    <string name="detail_header_cover" translatable="false">Detail_Header_Cover</string>
+    <string name="force_use_net_album">Force use Net-Album</string>
+    <string name="drop_to_trash_can">Drop to trash can</string>
 </resources>
