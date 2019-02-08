@@ -23,8 +23,8 @@ public class DialogUtil {
      * @param aTitle  theTitle
      * @return {@link AlertDialog.Builder}
      */
-    public final android.support.v7.app.AlertDialog getLoadingDialog(Context context, String... aTitle) {
-        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
+    public final androidx.appcompat.app.AlertDialog getLoadingDialog(Context context, String... aTitle) {
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
         final View loadView = LayoutInflater.from(context).inflate(R.layout.dialog_loading, null);
         // TODO: 2019/1/7 custom Theme loading animation
         builder.setView(loadView);

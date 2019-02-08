@@ -11,21 +11,28 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Activities;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.ColorInt;
-import android.support.annotation.Nullable;
-import android.support.design.widget.AppBarLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 
+import com.google.android.material.appbar.AppBarLayout;
+
+import java.lang.reflect.Field;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import top.geek_studio.chenlongcould.geeklibrary.Theme.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
@@ -38,6 +45,8 @@ public class MyBaseCompatActivity extends AppCompatActivity implements IStyle {
 
     private Toolbar mToolbar;
     private AppBarLayout mAppBarLayout;
+
+    private TextView mSubtitleView = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,6 +81,38 @@ public class MyBaseCompatActivity extends AppCompatActivity implements IStyle {
         setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, Utils.Ui.getPrimaryColor(this)));
         Utils.Ui.setTopBottomColor(this, mAppBarLayout, mToolbar);
         Utils.Ui.setOverToolbarColor(mToolbar, Utils.Ui.getTitleColor(this));
+    }
+
+    /**
+     * set Toolbar subTile with AlphaAnimation {@link android.view.animation.AlphaAnimation}
+     *
+     * @param toolbar  toolbar
+     * @param subtitle subTitle
+     */
+    public void setToolbarSubTitleWithAlphaAni(Toolbar toolbar, CharSequence subtitle) throws NoSuchFieldException, IllegalAccessException {
+        if (mSubtitleView == null) {
+            Field f = toolbar.getClass().getDeclaredField("mSubtitleTextView");
+            f.setAccessible(true);
+            mSubtitleView = (TextView) f.get(toolbar);
+        }
+
+        ValueAnimator animator = new ValueAnimator();
+        animator.setFloatValues(1f, 0f);
+        animator.setDuration(300);
+        animator.addUpdateListener(animation -> mSubtitleView.setAlpha((Float) animation.getAnimatedValue()));
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mSubtitleView.setText(subtitle);
+                ValueAnimator animator1 = new ValueAnimator();
+                animator1.setFloatValues(0f, 1f);
+                animator1.setDuration(300);
+                animator1.addUpdateListener(va -> mSubtitleView.setAlpha((Float) va.getAnimatedValue()));
+                animator1.start();
+            }
+        });
+        animator.start();
+
     }
 
     @Override

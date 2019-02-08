@@ -9,7 +9,7 @@
   ~ *************************************************************
   -->
 
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/music_item_album_layout"
     android:layout_width="match_parent"
@@ -41,7 +41,6 @@
         android:layout_marginBottom="8dp"
         android:ellipsize="end"
         android:maxLines="1"
-        android:text="Music Text"
         android:textColor="#3c3c3c"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -49,4 +48,4 @@
         app:layout_constraintStart_toEndOf="@+id/recycler_item_album_image"
         app:layout_constraintTop_toTopOf="parent" />
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -24,7 +24,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -39,22 +38,6 @@ import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
-import android.support.annotation.ColorInt;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.FloatRange;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.design.internal.NavigationMenuPresenter;
-import android.support.design.internal.NavigationMenuView;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.NavigationView;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
-import android.support.v7.app.AppCompatDelegate;
-import android.support.v7.graphics.Palette;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -68,6 +51,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.internal.NavigationMenuPresenter;
+import com.google.android.material.internal.NavigationMenuView;
+import com.google.android.material.navigation.NavigationView;
 
 import org.litepal.LitePal;
 
@@ -87,6 +74,18 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.FloatRange;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+import androidx.palette.graphics.Palette;
+import androidx.recyclerview.widget.RecyclerView;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Database.CustomAlbumPath;
@@ -95,7 +94,6 @@ import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.PlayListItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
-import top.geek_studio.chenlongcould.musicplayer.databinding.DialogLoadingBinding;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -216,25 +214,28 @@ public final class Utils {
             return albumPath[0];
         }
 
+        /**
+         * private
+         */
         private static Bitmap path2CoverByDB(Context context, String path) {
             if (TextUtils.isEmpty(path)) {
-                return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
+                return getDrawableBitmap(context, R.drawable.default_album_art);
             }
 
             if (path.equals("null")) {
-                return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
+                return getDrawableBitmap(context, R.drawable.default_album_art);
             }
 
             if (path.equals(NONE)) {
-                return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
+                return getDrawableBitmap(context, R.drawable.default_album_art);
             }
 
             File file = new File(path);
             if (!file.exists()) {
-                return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
+                return getDrawableBitmap(context, R.drawable.default_album_art);
             } else {
                 if (file.isDirectory()) {
-                    return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
+                    return getDrawableBitmap(context, R.drawable.default_album_art);
                 }
             }
 
@@ -252,14 +253,14 @@ public final class Utils {
         private static Bitmap path2CoverByMeta(final String mediaUri, Context context) {
 
             if (mediaUri == null)
-                return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
+                return getDrawableBitmap(context, R.drawable.default_album_art);
 
             if (mediaUri.equals(NONE))
-                return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
+                return getDrawableBitmap(context, R.drawable.default_album_art);
 
             final File file = new File(mediaUri);
             if (file.isDirectory() || !file.exists())
-                return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
+                return getDrawableBitmap(context, R.drawable.default_album_art);
 
             sMediaMetadataRetriever.setDataSource(mediaUri);
             byte[] picture = sMediaMetadataRetriever.getEmbeddedPicture();
@@ -267,7 +268,7 @@ public final class Utils {
             if (picture != null)
                 return BitmapFactory.decodeByteArray(picture, 0, picture.length);
             else
-                return getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
+                return getDrawableBitmap(context, R.drawable.default_album_art);
         }
 
         /**
@@ -275,7 +276,7 @@ public final class Utils {
          */
         @Nullable
         private static byte[] path2CoverByteByMeta(final String path, Context context) {
-            final Bitmap bitmap = getDrawableBitmap(context, R.drawable.ic_audiotrack_24px);
+            final Bitmap bitmap = getDrawableBitmap(context, R.drawable.default_album_art);
             final File file = new File(path);
 
             if (path == null || file.isDirectory() || !file.exists() || file.isDirectory()) {
@@ -470,11 +471,10 @@ public final class Utils {
          * @param aTitle  theTitle
          * @return {@link AlertDialog.Builder}
          */
-        public static android.support.v7.app.AlertDialog getLoadingDialog(Context context, String... aTitle) {
-            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
+        public static androidx.appcompat.app.AlertDialog getLoadingDialog(Context context, String... aTitle) {
+            androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
             final View loadView = LayoutInflater.from(context).inflate(R.layout.dialog_loading, null);
             // TODO: 2019/1/7 custom Theme loading animation
-            final DialogLoadingBinding binding = DataBindingUtil.inflate(LayoutInflater.from(context), R.layout.dialog_loading, null, false);
             builder.setView(loadView);
             builder.setTitle(aTitle.length == 0 ? "Loading..." : aTitle[0]);
             builder.setCancelable(false);
@@ -537,7 +537,7 @@ public final class Utils {
          * @param appBar   appBarLayout
          * @param toolbar  toolbar
          */
-        public static void setTopBottomColor(final Activity activity, final AppBarLayout appBar, final android.support.v7.widget.Toolbar toolbar) {
+        public static void setTopBottomColor(final Activity activity, final AppBarLayout appBar, final androidx.appcompat.widget.Toolbar toolbar) {
             SharedPreferences mDefPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
             appBar.setBackgroundColor(mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(activity, R.color.colorPrimary)));
             toolbar.setBackgroundColor(mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(activity, R.color.colorPrimary)));
@@ -887,11 +887,11 @@ public final class Utils {
         public static void addListDialog(Context context, MusicItem item) {
             final Resources resources = context.getResources();
 
-            final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
+            final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
             builder.setTitle(resources.getString(R.string.add_to_playlist));
 
             builder.setNegativeButton(resources.getString(R.string.new_list), (dialog, which) -> {
-                final android.support.v7.app.AlertDialog.Builder b2 = new android.support.v7.app.AlertDialog.Builder(context);
+                final androidx.appcompat.app.AlertDialog.Builder b2 = new androidx.appcompat.app.AlertDialog.Builder(context);
                 b2.setTitle(resources.getString(R.string.enter_name));
 
                 final EditText et = new EditText(context);
@@ -940,11 +940,11 @@ public final class Utils {
         public static void addListDialog(MainActivity activity, ArrayList<MusicItem> items) {
             final Resources resources = activity.getResources();
 
-            final android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(activity);
+            final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(activity);
             builder.setTitle(resources.getString(R.string.add_to_playlist));
 
             builder.setNegativeButton(resources.getString(R.string.new_list), (dialog, which) -> {
-                final android.support.v7.app.AlertDialog.Builder b2 = new android.support.v7.app.AlertDialog.Builder(activity);
+                final androidx.appcompat.app.AlertDialog.Builder b2 = new androidx.appcompat.app.AlertDialog.Builder(activity);
                 b2.setTitle(resources.getString(R.string.enter_name));
 
                 final EditText et = new EditText(activity);

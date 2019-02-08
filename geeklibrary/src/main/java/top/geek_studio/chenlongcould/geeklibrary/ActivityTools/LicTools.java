@@ -12,9 +12,6 @@
 package top.geek_studio.chenlongcould.geeklibrary.ActivityTools;
 
 import android.app.Activity;
-import android.support.annotation.ColorInt;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -24,6 +21,9 @@ import android.widget.Toolbar;
 import java.io.IOException;
 import java.io.InputStream;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;

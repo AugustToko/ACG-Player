@@ -20,13 +20,6 @@ import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.support.annotation.ColorInt;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.graphics.Palette;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -52,6 +45,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.content.ContextCompat;
+import androidx.palette.graphics.Palette;
+import androidx.recyclerview.widget.RecyclerView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -365,16 +365,25 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
     /**
      * load defaultAlbumImage by DB(from {@link MediaStore.Audio.Albums#ALBUM_ART})
      */
-    public void loadCoverDefault(Context context, @Nullable ImageView imageView, String albumPath, int index) {
+    public void loadCoverDefault(Context context, ImageView imageView, String albumPath, int index) {
         if (verify(imageView, index)) {
             //if verify(,) is true, the imageView must not null
-            assert imageView != null;
 
-            imageView.post(() -> GlideApp.with(context)
-                    .load(albumPath)
-                    .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .into(imageView));
+            if (TextUtils.isEmpty(albumPath) || albumPath.equals("null") || albumPath.equals("none")) {
+                imageView.post(() -> GlideApp.with(context)
+                        .load(R.drawable.default_album_art)
+                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .into(imageView));
+            } else {
+                imageView.post(() -> GlideApp.with(context)
+                        .load(albumPath)
+                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .into(imageView));
+            }
+
+
         }
     }
 

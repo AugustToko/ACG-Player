@@ -9,7 +9,7 @@
   ~ *************************************************************
   -->
 
-<android.support.constraint.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="180dp">
@@ -22,4 +22,4 @@
         android:contentDescription="@string/todo"
         android:foreground="@drawable/my_ripple_mask" />
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

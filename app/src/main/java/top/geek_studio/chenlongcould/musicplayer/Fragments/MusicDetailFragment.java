@@ -29,18 +29,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.support.annotation.ColorInt;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -59,6 +47,9 @@ import android.widget.Toast;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.lang.ref.WeakReference;
@@ -66,6 +57,16 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.geeklibrary.Theme.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Activities.AlbumDetailActivity;
@@ -176,6 +177,8 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
 
     private ImageView mNowPlayingBackgroundImage;
 
+    private ImageView mNowPlayingFavButton;
+
     private ConstraintLayout mNowPlayingBody;
 
     private ConstraintLayout mSlideUpGroup;
@@ -226,7 +229,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
 
             mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
         } else {
-            mPlayButton.setImageResource(R.drawable.ic_play_arrow_black_24dp);
+            mPlayButton.setImageResource(R.drawable.ic_play_arrow_grey_600_24dp);
         }
 
 
@@ -502,6 +505,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
         mNowPlayingSongAlbumText = view.findViewById(R.id.activity_main_now_playing_album_name);
         mNowPlayingBody = view.findViewById(R.id.current_info);
         mNowPlayingStatusImage = view.findViewById(R.id.activity_main_info_bar_status_image);
+        mNowPlayingFavButton = view.findViewById(R.id.activity_main_info_bar_fav_image);
         mNowPlayingBackgroundImage = view.findViewById(R.id.current_info_background);
         mNowPlayingSongText = view.findViewById(R.id.activity_main_now_playing_name);
         mNowPlayingSongImage = view.findViewById(R.id.recycler_item_clover_image);
@@ -541,13 +545,13 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
             switch (action) {
                 case MotionEvent.ACTION_DOWN:
                     //预加载
-                    GlideApp.with(this)
+                    GlideApp.with(getActivity())
                             .load(befItem == null ? R.drawable.ic_audiotrack_24px : Utils.Audio.getCoverPath(mMainActivity, befItem.getAlbumId()))
                             .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                             .diskCacheStrategy(DiskCacheStrategy.NONE)
                             .into(mMusicAlbumImageOth3);
 
-                    GlideApp.with(this)
+                    GlideApp.with(getActivity())
                             .load(nexItem == null ? R.drawable.ic_audiotrack_24px : Utils.Audio.getCoverPath(mMainActivity, nexItem.getAlbumId()))
                             .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                             .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -748,9 +752,8 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
 
                 case R.id.menu_toolbar_love: {
                     MusicUtil.toggleFavorite(mMainActivity, Data.sCurrentMusicItem);
-                    mToolbar.getMenu().findItem(R.id.menu_toolbar_love).setIcon(MusicUtil.isFavorite(mMainActivity, Data.sCurrentMusicItem) ?
-                            R.drawable.ic_favorite_white_24dp : R.drawable.ic_favorite_border_white_24dp);
-                    Toast.makeText(mMainActivity, "Done!", Toast.LENGTH_SHORT).show();
+                    updateFav();
+                    Toast.makeText(mMainActivity, getString(R.string.done), Toast.LENGTH_SHORT).show();
                 }
                 break;
 
@@ -1113,6 +1116,12 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
             }
         });
 
+        mNowPlayingFavButton.setOnClickListener(v -> {
+            MusicUtil.toggleFavorite(mMainActivity, Data.sCurrentMusicItem);
+            updateFav();
+            Toast.makeText(mMainActivity, getString(R.string.done), Toast.LENGTH_SHORT).show();
+        });
+
         mNowPlayingBody.setOnClickListener(v -> {
             if (Values.HAS_PLAYED) {
                 mMainActivity.getHandler().sendEmptyMessage(MainActivity.UP);
@@ -1254,27 +1263,17 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
         });
     }
 
-    public final void setCurrentInfo(@NonNull final String name, @NonNull final String albumName, @Nullable final Bitmap cover) {
+    public final void setCurrentInfo(@NonNull final String name, @NonNull final String albumName, final Bitmap cover) {
         mMainActivity.runOnUiThread(() -> {
             mCurrentMusicNameText.setText(name);
             mCurrentAlbumNameText.setText(albumName);
 
-            if (cover != null) {
-                GlideApp.with(mMainActivity)
-                        .load(cover)
-                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-                        .centerCrop()
-                        .diskCacheStrategy(DiskCacheStrategy.NONE)
-                        .into(mMusicAlbumImage);
-
-            } else {
-                GlideApp.with(this)
-                        .load(R.drawable.ic_audiotrack_24px)
-                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-                        .centerCrop()
-                        .diskCacheStrategy(DiskCacheStrategy.NONE)
-                        .into(mMusicAlbumImage);
-            }
+            GlideApp.with(mMainActivity)
+                    .load(cover)
+                    .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                    .centerCrop()
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .into(mMusicAlbumImage);
 
             updateFav();
 
@@ -1287,8 +1286,10 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
     }
 
     public final void updateFav() {
-        mToolbar.getMenu().findItem(R.id.menu_toolbar_love).setIcon(MusicUtil.isFavorite(mMainActivity, Data.sCurrentMusicItem) ?
-                R.drawable.ic_favorite_white_24dp : R.drawable.ic_favorite_border_white_24dp);
+        @DrawableRes int id = MusicUtil.isFavorite(mMainActivity, Data.sCurrentMusicItem) ?
+                R.drawable.ic_favorite_white_24dp : R.drawable.ic_favorite_border_white_24dp;
+        mToolbar.getMenu().findItem(R.id.menu_toolbar_love).setIcon(id);
+        mNowPlayingFavButton.setImageResource(id);
     }
 
     /**
@@ -1365,6 +1366,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
             mNowPlayingSongText.setTextColor(target);
             mNowPlayingSongAlbumText.setTextColor(target);
             mNowPlayingStatusImage.setColorFilter(target);
+            mNowPlayingFavButton.setColorFilter(target);
 
             mRandomButton.setColorFilter(target);
             mRepeatButton.setColorFilter(target);
@@ -1381,6 +1383,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
             mNowPlayingSongText.setTextColor(target);
             mNowPlayingSongAlbumText.setTextColor(target);
             mNowPlayingStatusImage.setColorFilter(target);
+            mNowPlayingFavButton.setColorFilter(target);
 
             mRandomButton.setColorFilter(target);
             mRepeatButton.setColorFilter(target);
@@ -1513,10 +1516,10 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                 case Values.HandlerWhat.SET_BUTTON_PAUSE: {
                     mWeakReference.get().runOnUiThread(() -> {
                         GlideApp.with(mMainActivity)
-                                .load(R.drawable.ic_play_arrow_black_24dp)
+                                .load(R.drawable.ic_play_arrow_grey_600_24dp)
                                 .into(mNowPlayingStatusImage);
                         GlideApp.with(mMainActivity)
-                                .load(R.drawable.ic_play_arrow_black_24dp)
+                                .load(R.drawable.ic_play_arrow_grey_600_24dp)
                                 .into(mPlayButton);
                     });
                 }

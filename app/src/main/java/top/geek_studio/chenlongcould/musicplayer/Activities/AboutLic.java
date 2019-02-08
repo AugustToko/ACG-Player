@@ -12,7 +12,6 @@
 package top.geek_studio.chenlongcould.musicplayer.Activities;
 
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,6 +19,7 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.io.InputStream;
 
+import androidx.appcompat.app.AlertDialog;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;

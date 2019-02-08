@@ -14,7 +14,7 @@ package top.geek_studio.chenlongcould.musicplayer.CustomView;
 import android.content.Context;
 import android.util.AttributeSet;
 
-public class AlbumImageView extends android.support.v7.widget.AppCompatImageView {
+public class AlbumImageView extends androidx.appcompat.widget.AppCompatImageView {
 
     private static final String TAG = "AlbumImageView";
 

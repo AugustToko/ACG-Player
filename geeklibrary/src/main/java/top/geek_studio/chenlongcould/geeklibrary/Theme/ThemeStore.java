@@ -11,6 +11,8 @@
 
 package top.geek_studio.chenlongcould.geeklibrary.Theme;
 
+import com.google.android.material.navigation.NavigationView;
+
 import java.io.File;
 
 import top.geek_studio.chenlongcould.geeklibrary.Required;
@@ -48,7 +50,7 @@ public final class ThemeStore {
      * NAV IMAGES
      * /sdcard/Android/data/<package-name>/themes/img/nav
      *
-     * nav: {@link android.support.design.widget.NavigationView}
+     * nav: {@link NavigationView}
      */
     public static final String DIR_IMG_NAV = DIR_IMG + File.separatorChar + SupportArea.NAV;
 
@@ -98,7 +100,7 @@ public final class ThemeStore {
         String TITLE = "title";
 
         /**
-         * show in {@link android.support.design.widget.NavigationView}
+         * show in {@link NavigationView}
          */
         @Required
         String NAV_NAME = "nav_name";

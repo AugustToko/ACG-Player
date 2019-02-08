@@ -26,13 +26,6 @@ import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
-import android.support.v7.widget.PopupMenu;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -64,6 +57,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.PopupMenu;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.RecyclerView;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -303,6 +303,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
             if (MainActivity.CURRENT_MENU.equals(MainActivity.MENU_COMMON)) {
                 mMainActivity.inflateChooseMenu(mMainActivity.getMainBinding().toolBar);
+                MainActivity.CURRENT_MENU = MainActivity.MENU_CHOOSE;
             }
             return true;
         });
@@ -738,6 +739,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         }
         Data.sSelections.clear();
         mMainActivity.inflateCommonMenu(mMainActivity.getMainBinding().toolBar);
+        MainActivity.CURRENT_MENU = MainActivity.MENU_COMMON;
     }
 
     class ModHolder extends ItemHolder {

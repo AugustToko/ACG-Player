@@ -20,18 +20,18 @@ import android.content.pm.ShortcutManager;
 import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
-import android.util.Log;
 
 import org.litepal.LitePal;
 
 import java.util.Collections;
 import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Fragments.AlbumListFragment;
+import top.geek_studio.chenlongcould.musicplayer.Fragments.ArtistListFragment;
 import top.geek_studio.chenlongcould.musicplayer.Utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.Utils.PlayListsUtil;
 
@@ -179,10 +179,14 @@ public final class MyApplication extends Application {
 
         if (getProcessName(this).equals(getPackageName())) {
             if (level == TRIM_MEMORY_MODERATE) {
-                if (AlbumListFragment.VIEW_HAS_LOAD) {
-                    Data.sAlbumItems.clear();
-                    Log.d(TAG, "onTrimMemory: AlbumFragment recycled");
-                }
+                Data.sTrashCanList.clear();
+                Data.sSelections.clear();
+
+                AlbumListFragment.VIEW_HAS_LOAD = false;
+                Data.sAlbumItems.clear();
+
+                ArtistListFragment.VIEW_HAS_LOAD = false;
+                Data.sArtistItems.clear();
             }
         }
 

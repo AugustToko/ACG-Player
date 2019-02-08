@@ -17,10 +17,6 @@ import android.content.Context;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
@@ -28,6 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import io.reactivex.disposables.Disposable;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.geeklibrary.RecyclerViewTools.RecycleViewDivider;
@@ -66,12 +66,11 @@ public final class Data {
      * data
      * */
     public static List<MusicItem> sMusicItems = new ArrayList<>();
+    public static List<MusicItem> sMusicItemsBackUp = new ArrayList<>();
 
     public static CarViewActivity sCarViewActivity = null;
     public static List<AlbumItem> sAlbumItems = new ArrayList<>();
-    public final static SimpleDateFormat sSimpleDateFormat2 = new SimpleDateFormat("mm:ss", Locale.CHINESE);
     public static List<AlbumItem> sAlbumItemsBackUp = new ArrayList<>();
-    public static List<MusicItem> sMusicItemsBackUp = new ArrayList<>();
     public static List<MusicItem> sPlayOrderList = new ArrayList<>();
     public static List<PlayListItem> sPlayListItems = new ArrayList<>();
     public static List<ArtistItem> sArtistItems = new ArrayList<>();

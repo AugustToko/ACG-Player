@@ -12,7 +12,7 @@
 <!--in MyRecyclerAdapter-->
 <layout xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/music_item_layout"
         android:layout_width="match_parent"
@@ -20,7 +20,7 @@
 
         <include layout="@layout/recycler_music_list_item_expand" />
 
-        <android.support.constraint.ConstraintLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/recycler_music_item_view"
             android:layout_width="match_parent"
             android:layout_height="@dimen/music_item_height"
@@ -97,7 +97,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/recycler_item_music_type_name"
                 app:layout_constraintTop_toBottomOf="@+id/recycler_item_music_name" />
 
-            <android.support.v7.widget.AppCompatImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/recycler_item_menu"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -112,7 +112,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-        </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

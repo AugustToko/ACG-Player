@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
-  ~ 文件：about_template_dul_text.xml  模块：app  项目：MusicPlayer
+  ~ 文件：about_dul_text.xml 项目：MusicPlayer
   ~ 当前修改时间：2019年01月17日 17:31:46
   ~ 上次修改时间：2019年01月17日 17:28:52
   ~ 作者：chenlongcould
@@ -11,7 +11,7 @@
 
 <layout xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/about_item_ver"
         android:layout_width="match_parent"
@@ -63,5 +63,5 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="版本" />
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

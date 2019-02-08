@@ -11,10 +11,12 @@
 
 package top.geek_studio.chenlongcould.geeklibrary;
 
+import androidx.fragment.app.Fragment;
+
 public interface VisibleOrGone {
 
     /**
-     * 动态显示或隐藏View(比如切换不同的Fragment {@link android.support.v4.app.Fragment#setUserVisibleHint(boolean)} )
+     * 动态显示或隐藏View(比如切换不同的Fragment {@link Fragment#setUserVisibleHint(boolean)} )
      */
     void visibleOrGone(int status);
 }

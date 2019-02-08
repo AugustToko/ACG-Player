@@ -13,12 +13,8 @@ package top.geek_studio.chenlongcould.musicplayer.Activities;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
@@ -28,6 +24,9 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.databinding.DataBindingUtil;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -54,14 +53,14 @@ public class AboutActivity extends MyBaseCompatActivity {
 
         mAppBinding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-        final AboutTemplateDulTextBinding version = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_template_dul_text, (ViewGroup) mAppBinding.getRoot(), false);
-        final AboutTemplateDulTextBinding author = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_template_dul_text, (ViewGroup) mAppBinding.getRoot(), false);
-        final AboutTemplateDulTextBinding web = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_template_dul_text, (ViewGroup) mAppBinding.getRoot(), false);
-        final AboutTemplateSingleTextBinding update = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_template_single_text, (ViewGroup) mAppBinding.getRoot(), false);
-        final AboutTemplateSingleTextBinding mail = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_template_single_text, (ViewGroup) mAppBinding.getRoot(), false);
-        final AboutTemplateSingleTextBinding lic = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_template_single_text, (ViewGroup) mAppBinding.getRoot(), false);
-        final AboutTemplateSingleTextBinding share = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_template_single_text, (ViewGroup) mAppBinding.getRoot(), false);
-        final AboutTemplateThanksBinding thanksBinding = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_template_thanks, (ViewGroup) mAppBinding.getRoot(), false);
+        final AboutTemplateDulTextBinding version = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_dul_text, (ViewGroup) mAppBinding.getRoot(), false);
+        final AboutTemplateDulTextBinding author = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_dul_text, (ViewGroup) mAppBinding.getRoot(), false);
+        final AboutTemplateDulTextBinding web = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_dul_text, (ViewGroup) mAppBinding.getRoot(), false);
+        final AboutTemplateSingleTextBinding update = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_single_text, (ViewGroup) mAppBinding.getRoot(), false);
+        final AboutTemplateSingleTextBinding mail = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_single_text, (ViewGroup) mAppBinding.getRoot(), false);
+        final AboutTemplateSingleTextBinding lic = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_single_text, (ViewGroup) mAppBinding.getRoot(), false);
+        final AboutTemplateSingleTextBinding share = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_single_text, (ViewGroup) mAppBinding.getRoot(), false);
+        final AboutTemplateThanksBinding thanksBinding = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_thanks, (ViewGroup) mAppBinding.getRoot(), false);
 
         version.ico.setImageResource(R.drawable.ic_info_outline_black_24dp);
         version.mainText.setText(getString(R.string.version));
@@ -97,15 +96,12 @@ public class AboutActivity extends MyBaseCompatActivity {
                         responseText = new StringBuilder(response.body().string());
                         final Document document = Jsoup.parse(responseText.toString());
                         final Elements elements = document.getAllElements();
-                        String status = elements.attr("status");
-                        Log.d(TAG, "onResponse: " + status);
-                        builder.setMessage(elements.get(0).text());
-
+                        String status = elements.select("p[class=apk_left_title_info]").text();
+                        builder.setMessage(status);
                         runOnUiThread(() -> {
                             load.dismiss();
                             builder.show();
                         });
-
                     } else {
                         Toast.makeText(AboutActivity.this, "Get Data Error", Toast.LENGTH_SHORT).show();
                     }

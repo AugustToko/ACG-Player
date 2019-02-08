@@ -13,13 +13,13 @@ package top.geek_studio.chenlongcould.musicplayer.CustomView;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.support.constraint.ConstraintLayout;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import top.geek_studio.chenlongcould.musicplayer.R;
 
 public class MyDualView extends ConstraintLayout {

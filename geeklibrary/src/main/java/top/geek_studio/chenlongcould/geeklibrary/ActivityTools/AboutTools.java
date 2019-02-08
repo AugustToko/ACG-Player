@@ -12,10 +12,6 @@
 package top.geek_studio.chenlongcould.geeklibrary.ActivityTools;
 
 import android.app.Activity;
-import android.support.annotation.ColorInt;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.NonNull;
-import android.support.design.widget.AppBarLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +21,11 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toolbar;
 
+import com.google.android.material.appbar.AppBarLayout;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
 import top.geek_studio.chenlongcould.geeklibrary.R;
 
 /**

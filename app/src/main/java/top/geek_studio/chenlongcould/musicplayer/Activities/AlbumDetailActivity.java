@@ -13,15 +13,10 @@ package top.geek_studio.chenlongcould.musicplayer.Activities;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.annotation.ColorInt;
-import android.support.v7.graphics.Palette;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -37,6 +32,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import androidx.annotation.ColorInt;
+import androidx.databinding.DataBindingUtil;
+import androidx.palette.graphics.Palette;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
@@ -116,7 +116,7 @@ public final class AlbumDetailActivity extends MyBaseCompatActivity {
             List<CustomAlbumPath> paths = LitePal.where("mAlbumId = ?", intentAlbumId).find(CustomAlbumPath.class);
 
             //update menu checkbox
-            if (!intentAlbumId.equals("-10")) {
+            if (!intentAlbumId.equals("-10") && paths.size() > 0) {
                 mAlbumDetailBinding.toolbar.getMenu().findItem(R.id.menu_toolbar_album_force_album).setChecked(paths.get(0).isForceUse());
             }
 

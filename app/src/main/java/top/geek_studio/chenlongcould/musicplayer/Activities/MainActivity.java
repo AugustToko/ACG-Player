@@ -11,12 +11,12 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
-import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.AudioManager;
@@ -26,22 +26,11 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.support.annotation.Nullable;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -52,11 +41,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.reward.RewardItem;
-import com.google.android.gms.ads.reward.RewardedVideoAd;
-import com.google.android.gms.ads.reward.RewardedVideoAdListener;
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
@@ -73,6 +58,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.databinding.DataBindingUtil;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.viewpager.widget.ViewPager;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
@@ -188,33 +185,16 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
 
-    private RewardedVideoAd mRewardedVideoAd;
 
-    private FirebaseAnalytics mFirebaseAnalytics;
-
-//    public static void sendKeyEvent(final int KeyCode) {
-//        new Thread() {     //不可在主线程中调用
-//            public void run() {
-//                Instrumentation inst = new Instrumentation();
-//                inst.sendKeyDownUpSync(KeyCode);
-//            }
-//
-//        }.start();
-//    }
+    private PowerManager.WakeLock wakeLock;
 
     /**
      * clear data
      */
     public static void clear() {
-        Data.sActivities.clear();
-        if (Data.sMainRef != null) {
-            Data.sMainRef.clear();
-        }
 
         Data.sPlayOrderList.clear();
-        Data.sTheme = null;
-        Data.sAlbumItems.clear();
-        Data.sHistoryPlay.clear();
+
         Data.sMusicItemsBackUp.clear();
         Data.sMusicItems.clear();
         Data.sAlbumItems.clear();
@@ -222,21 +202,10 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         AlbumListFragment.VIEW_HAS_LOAD = false;
 
         for (Disposable disposable : Data.sDisposables) {
-            if (disposable != null && !disposable.isDisposed()) {
-                disposable.dispose();
-            }
+            if (disposable != null && !disposable.isDisposed()) disposable.dispose();
         }
 
-        if (Data.getCurrentCover() != null)
-            Data.getCurrentCover().recycle();
-    }
-
-    /**
-     * show AD
-     */
-    private void loadRewardedVideoAd() {
-        mRewardedVideoAd.loadAd(MyApplication.AD_ID,
-                new AdRequest.Builder().build());
+        if (Data.getCurrentCover() != null) Data.getCurrentCover().recycle();
     }
 
     /**
@@ -249,57 +218,15 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         Data.init(this);
 
+        final PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
+        wakeLock.setReferenceCounted(false);
+
         mMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        final FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        MobileAds.initialize(this, MyApplication.APP_ID);
-        // Use an activity context to get the rewarded video instance.
-        mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
-        mRewardedVideoAd.setRewardedVideoAdListener(new RewardedVideoAdListener() {
-            @Override
-            public void onRewardedVideoAdLoaded() {
-                Log.d(TAG, "onRewardedVideoAdLoaded: ");
-            }
-
-            @Override
-            public void onRewardedVideoAdOpened() {
-                Log.d(TAG, "onRewardedVideoAdOpened: ");
-            }
-
-            @Override
-            public void onRewardedVideoStarted() {
-                Log.d(TAG, "onRewardedVideoStarted: ");
-            }
-
-            @Override
-            public void onRewardedVideoAdClosed() {
-                Log.d(TAG, "onRewardedVideoAdClosed: ");
-                loadRewardedVideoAd();
-            }
-
-            @Override
-            public void onRewarded(RewardItem rewardItem) {
-                Log.d(TAG, "onRewarded: ");
-            }
-
-            @Override
-            public void onRewardedVideoAdLeftApplication() {
-                Log.d(TAG, "onRewardedVideoAdLeftApplication: ");
-            }
-
-            @Override
-            public void onRewardedVideoAdFailedToLoad(int i) {
-                Log.d(TAG, "onRewardedVideoAdFailedToLoad: " + i);
-                mMainBinding.getRoot().postDelayed(() -> loadRewardedVideoAd(), 2000);
-            }
-
-            @Override
-            public void onRewardedVideoCompleted() {
-                Log.d(TAG, "onRewardedVideoCompleted: ");
-            }
-        });
-        loadRewardedVideoAd();
+//        MobileAds.initialize(this, MyApplication.APP_ID);
 
         //config
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
@@ -348,6 +275,12 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     }
 
     @Override
+    protected void onPause() {
+        if (getMusicListFragment() != null) getMusicListFragment().getAdapter().clearSelection();
+        super.onPause();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
 
@@ -361,11 +294,11 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             Data.sMusicItemsBackUp.clear();
             Data.sAlbumItemsBackUp.clear();
             Data.sAlbumItems.clear();
+            Data.sArtistItems.clear();
+            Data.sSelections.clear();
 
             loadData();
         }
-
-        mRewardedVideoAd.resume(this);
 
         initStyle();
 
@@ -374,175 +307,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         }
 
         if (getMusicListFragment() != null) getMusicListFragment().initStyle();
-    }
-
-    @Override
-    protected void onPause() {
-        mRewardedVideoAd.pause(this);
-        if (getMusicListFragment() != null) getMusicListFragment().getAdapter().clearSelection();
-        super.onPause();
-    }
-
-    private void loadData() {
-        load = Utils.Ui.getLoadingDialog(this, "Loading...");
-        load.show();
-
-        Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
-            final LitePalDB blackList = new LitePalDB("BlackList", 1);
-            blackList.addClassName(MyBlackPath.class.getName());
-            LitePal.use(blackList);
-
-            ArrayList<String> data = new ArrayList<>();
-            List<MyBlackPath> lists = LitePal.findAll(MyBlackPath.class);
-            for (MyBlackPath path : lists) {
-                data.add(path.getDirPath());
-            }
-            LitePal.useDefault();
-
-            if (Data.sMusicItems.isEmpty()) {
-                /*---------------------- init Data!!!! -------------------*/
-                final Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-                if (cursor != null && cursor.moveToFirst()) {
-                    //没有歌曲直接退出app
-                    if (cursor.getCount() == 0) {
-                        emitter.onNext(-2);
-                    } else {
-
-                        final boolean skipShort = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
-
-                        do {
-                            final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-                            boolean skip = false;
-                            for (String bl : data) {
-                                if (path.contains(bl)) {
-                                    skip = true;
-                                    break;
-                                }
-                            }
-                            if (skip) continue;
-
-                            final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-                            if (duration <= 0) {
-                                Log.d(TAG, "onCreate: the music-file duration is " + duration + ", skip...");
-                                continue;
-                            }
-                            if (skipShort && duration < 20) {
-                                continue;
-                            }
-
-                            final String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
-                            final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-                            final String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
-                            final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
-                            final int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-                            final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-                            final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
-                            final int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
-                            final int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID));
-
-                            final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
-                                    .musicAlbum(albumName)
-                                    .addTime((int) addTime)
-                                    .artist(artist)
-                                    .duration(duration)
-                                    .mimeName(mimeType)
-                                    .size(size)
-                                    .addAlbumId(albumId)
-                                    .addArtistId(artistId);
-
-                            Data.sMusicItems.add(builder.build());
-                            Data.sMusicItemsBackUp.add(builder.build());
-                            Data.sPlayOrderList.add(builder.build());
-                        }
-                        while (cursor.moveToNext());
-                        NEED_RELOAD = false;
-                        Log.i(Values.TAG_UNIVERSAL_ONE, "onCreate: The MusicData load done.");
-                        cursor.close();
-
-                        //sync
-                        MyDBSync.startActionSyncAlbum(this);
-
-                        if (PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM))
-                            Collections.shuffle(Data.sPlayOrderList);
-
-                        emitter.onNext(0);
-                    }
-                } else {
-                    //cursor null or getCount == 0
-                    emitter.onNext(-1);
-                }
-            } else {
-                //already has data -> initFragment
-                emitter.onNext(0);
-            }
-
-        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Integer>() {
-            @Override
-            public final void onSubscribe(Disposable disposable) {
-                Data.sDisposables.add(disposable);
-            }
-
-            @Override
-            public final void onNext(Integer result) {
-                load.dismiss();
-
-                if (result == -1) {
-                    Utils.Ui.fastToast(MainActivity.this, "cursor is null or moveToFirst Fail");
-                    mHandler.postDelayed(MainActivity.this::exitApp, 1000);
-                    return;
-                }
-                if (result == -2) {
-                    Utils.Ui.fastToast(MainActivity.this, "Can not find any music!");
-                    mHandler.postDelayed(MainActivity.this::exitApp, 1000);
-                    return;
-                }
-
-                if (getIntent().getStringExtra("shortcut_type") != null) {
-                    switch (getIntent().getStringExtra("shortcut_type")) {
-                        case MyApplication.SHORTCUT_RANDOM: {
-                            Utils.SendSomeThing.sendPlay(MainActivity.this, ReceiverOnMusicPlay.TYPE_SHUFFLE, null);
-                        }
-                        break;
-                        default:
-                            break;
-                    }
-                }
-
-                initFragmentData();
-                mMainBinding.toolBar.setSubtitle(Data.sPlayOrderList.size() + " Songs");
-            }
-
-            @Override
-            public final void onError(Throwable throwable) {
-                load.dismiss();
-                Toast.makeText(MainActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                exitApp();
-            }
-
-            @Override
-            public final void onComplete() {
-                load.dismiss();
-            }
-        });
-
-    }
-
-    @Override
-    protected void onDestroy() {
-
-        try {
-            unbindService(Data.sServiceConnection);
-        } catch (Exception e) {
-            Log.d(TAG, "onDestroy: " + e);
-        }
-        unregisterReceiver(Data.mMyHeadSetPlugReceiver);
-        mRewardedVideoAd.destroy(this);
-        Data.sActivities.clear();
-        mHandlerThread.quit();
-        mFragmentList.clear();
-        AlbumThreadPool.finish();
-        ItemCoverThreadPool.finish();
-        super.onDestroy();
     }
 
     @Override
@@ -701,11 +465,154 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         });
     }
 
+    private void loadData() {
+        load = Utils.Ui.getLoadingDialog(this, "Loading...");
+        load.show();
+
+        Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+            final LitePalDB blackList = new LitePalDB("BlackList", 1);
+            blackList.addClassName(MyBlackPath.class.getName());
+            LitePal.use(blackList);
+
+            ArrayList<String> data = new ArrayList<>();
+            List<MyBlackPath> lists = LitePal.findAll(MyBlackPath.class);
+            for (MyBlackPath path : lists) {
+                data.add(path.getDirPath());
+            }
+            LitePal.useDefault();
+
+            if (Data.sMusicItems.isEmpty()) {
+                /*---------------------- init Data!!!! -------------------*/
+                final Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+                if (cursor != null && cursor.moveToFirst()) {
+                    //没有歌曲直接退出app
+                    if (cursor.getCount() == 0) {
+                        emitter.onNext(-2);
+                    } else {
+
+                        final boolean skipShort = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
+
+                        do {
+                            final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+                            boolean skip = false;
+                            for (String bl : data) {
+                                if (path.contains(bl)) {
+                                    skip = true;
+                                    break;
+                                }
+                            }
+                            if (skip) continue;
+
+                            final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+                            if (duration <= 0) {
+                                Log.d(TAG, "onCreate: the music-file duration is " + duration + ", skip...");
+                                continue;
+                            }
+                            if (skipShort && duration < 20) {
+                                continue;
+                            }
+
+                            final String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+                            final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+                            final String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+                            final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+                            final int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
+                            final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+                            final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
+                            final int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+                            final int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID));
+
+                            final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
+                                    .musicAlbum(albumName)
+                                    .addTime((int) addTime)
+                                    .artist(artist)
+                                    .duration(duration)
+                                    .mimeName(mimeType)
+                                    .size(size)
+                                    .addAlbumId(albumId)
+                                    .addArtistId(artistId);
+
+                            Data.sMusicItems.add(builder.build());
+                            Data.sPlayOrderList.add(builder.build());
+                        }
+                        while (cursor.moveToNext());
+                        NEED_RELOAD = false;
+                        Log.i(Values.TAG_UNIVERSAL_ONE, "onCreate: The MusicData load done.");
+                        cursor.close();
+
+                        //sync
+                        MyDBSync.startActionSyncAlbum(this);
+
+                        if (PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM))
+                            Collections.shuffle(Data.sPlayOrderList);
+
+                        emitter.onNext(0);
+                    }
+                } else {
+                    //cursor null or getCount == 0
+                    emitter.onNext(-1);
+                }
+            } else {
+                //already has data -> initFragment
+                emitter.onNext(0);
+            }
+
+        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Integer>() {
+            @Override
+            public final void onSubscribe(Disposable disposable) {
+                Data.sDisposables.add(disposable);
+            }
+
+            @Override
+            public final void onNext(Integer result) {
+                load.dismiss();
+
+                if (result == -1) {
+                    Utils.Ui.fastToast(MainActivity.this, "cursor is null or moveToFirst Fail");
+                    mHandler.postDelayed(MainActivity.this::exitApp, 1000);
+                    return;
+                }
+                if (result == -2) {
+                    Utils.Ui.fastToast(MainActivity.this, "Can not find any music!");
+                    mHandler.postDelayed(MainActivity.this::exitApp, 1000);
+                    return;
+                }
+
+                if (getIntent().getStringExtra("shortcut_type") != null) {
+                    switch (getIntent().getStringExtra("shortcut_type")) {
+                        case MyApplication.SHORTCUT_RANDOM: {
+                            Utils.SendSomeThing.sendPlay(MainActivity.this, ReceiverOnMusicPlay.TYPE_SHUFFLE, null);
+                        }
+                        break;
+                        default:
+                            break;
+                    }
+                }
+
+                initFragmentData();
+                setSubtitle(Data.sPlayOrderList.size() + " Songs");
+            }
+
+            @Override
+            public final void onError(Throwable throwable) {
+                load.dismiss();
+                Toast.makeText(MainActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                exitApp();
+            }
+
+            @Override
+            public final void onComplete() {
+                load.dismiss();
+            }
+        });
+
+    }
+
     @Override
     public final void onBackPressed() {
 
         //1
-        if (mMainBinding.drawerLayout.isDrawerOpen(Gravity.START)) {
+        if (mMainBinding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             mMainBinding.drawerLayout.closeDrawers();
             return;
         }
@@ -743,82 +650,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     }
 
-//    @Override
-//    public final boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case R.id.menu_toolbar_exit: {
-//                exitApp();
-//            }
-//            break;
-//
-//            /*--------------- 快速 随机 播放 ----------------*/
-//            case R.id.menu_toolbar_fast_play: {
-//                //just fast random play, without change Data.sPlayOrderList
-//                Utils.SendSomeThing.sendPlay(this, ReceiverOnMusicPlay.TYPE_SHUFFLE, TAG);
-//            }
-//            break;
-//
-//            case R.id.menu_toolbar_linear: {
-//                SharedPreferences.Editor editor = mSharedPreferences.edit();
-//                editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.LINEAR_TYPE);
-//                editor.apply();
-//                mPagerAdapter.notifyDataSetChanged();
-//                mAlbumListFragment.setRecyclerViewData();
-//            }
-//            break;
-//
-//            case R.id.menu_toolbar_grid: {
-//                SharedPreferences.Editor editor = mSharedPreferences.edit();
-//                editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
-//                editor.apply();
-//                mPagerAdapter.notifyDataSetChanged();
-//                mAlbumListFragment.setRecyclerViewData();
-//            }
-//            break;
-//
-//            case R.id.menu_toolbar_reload: {
-//                mFragmentList.clear();
-//                mTitles.clear();
-//                Data.sMusicItems.clear();
-//                Data.sPlayOrderList.clear();
-//                Data.sMusicItemsBackUp.clear();
-//                Data.sAlbumItemsBackUp.clear();
-//                Data.sAlbumItems.clear();
-//
-//                loadData();
-//            }
-//            break;
-//        }
-//        return true;
-//    }
-
-//    @Override
-//    public final boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.menu_toolbar_main_common, menu);
-//
-//        MenuItem searchItem = menu.findItem(R.id.menu_toolbar_search);
-//
-//        mSearchView = (SearchView) searchItem.getActionView();
-//
-//        mSearchView.setIconifiedByDefault(true);
-//        mSearchView.setQueryHint("Enter Name...");
-//        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//            @Override
-//            public final boolean onQueryTextSubmit(String query) {
-//                mMusicListFragment.getMusicListBinding().includeRecycler.recyclerView.stopScroll();
-//                return false;
-//            }
-//
-//            @Override
-//            public final boolean onQueryTextChange(String newText) {
-//                filterData(newText);
-//                return true;
-//            }
-//        });
-//
-//        return true;
-//    }
-
     /**
      * 根据输入框中的值来过滤数据并更新RecyclerView
      *
@@ -827,11 +658,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     private void filterData(String filterStr) {
         final String tabOrder = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
         if (tabOrder.charAt(Values.CurrentData.CURRENT_PAGE_INDEX) == '1') {
-            MusicListFragment musicListFragment = getMusicListFragment();
-            if (musicListFragment == null) {
-                Log.d(TAG, "filterData: is null");
-                return;
-            }
+            final MusicListFragment musicListFragment = getMusicListFragment();
+            if (musicListFragment == null) return;
 
             if (TextUtils.isEmpty(filterStr)) {
                 Data.sMusicItems.clear();
@@ -853,11 +681,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         }
 
         if (tabOrder.charAt(Values.CurrentData.CURRENT_PAGE_INDEX) == '2') {
-            AlbumListFragment albumListFragment = getAlbumListFragment();
-            if (albumListFragment == null) {
-                Log.d(TAG, "filterData: is null");
-                return;
-            }
+            final AlbumListFragment albumListFragment = getAlbumListFragment();
+            if (albumListFragment == null) return;
 
             if (TextUtils.isEmpty(filterStr)) {
                 Data.sAlbumItems.clear();
@@ -881,6 +706,42 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         //artist
         if (tabOrder.charAt(Values.CurrentData.CURRENT_PAGE_INDEX) == '3') {
 
+        }
+    }
+
+    private void setTabLongClickListener() {
+        for (int i = 0; i < mMainBinding.tabLayout.getTabCount(); i++) {
+            TabLayout.Tab tab = mMainBinding.tabLayout.getTabAt(i);
+            if (tab != null) {
+                if (tab.view != null) {
+                    int finalI = i;
+                    ((LinearLayout) tab.view).setOnLongClickListener(v -> {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                        builder.setTitle(getString(R.string.are_u_sure));
+                        builder.setMessage(getString(R.string.close_the_tab_x_int, tab.getText()));
+                        builder.setCancelable(true);
+                        builder.setPositiveButton(getString(R.string.sure), (dialog, which) -> {
+                            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                            SharedPreferences.Editor editor = preferences.edit();
+                            StringBuilder currentOrder = new StringBuilder(preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER));
+                            currentOrder.deleteCharAt(tab.getPosition());
+                            editor.putString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, currentOrder.toString());
+                            editor.apply();
+
+                            mTitles.remove(tab.getPosition());
+                            mFragmentList.remove(tab.getPosition());
+                            mPagerAdapter.notifyDataSetChanged();
+                            mMainBinding.tabLayout.removeTabAt(finalI);
+
+                            mMainBinding.viewPager.setOffscreenPageLimit(mTitles.size() > 1 ? mTitles.size() - 1 : 1);
+                            dialog.dismiss();
+                        });
+                        builder.setNegativeButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
+                        builder.show();
+                        return true;
+                    });
+                }
+            }
         }
     }
 
@@ -1101,19 +962,19 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 if (order.charAt(i) == '1') {
                     getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(false);
                     getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(false);
-                    mMainBinding.toolBar.setSubtitle(Data.sMusicItems.size() + " Songs");
+                    setSubtitle(Data.sMusicItems.size() + " Songs");
                 }
 
                 if (order.charAt(i) == '2') {
                     getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(true);
                     getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(false);
-                    mMainBinding.toolBar.setSubtitle(Data.sAlbumItems.size() + " Albums");
+                    setSubtitle(Data.sAlbumItems.size() + " Albums");
                 }
 
                 if (order.charAt(i) == '3') {
                     getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(true);
                     getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(false);
-                    mMainBinding.toolBar.setSubtitle(Data.sArtistItems.size() + " Artists");
+                    setSubtitle(Data.sArtistItems.size() + " Artists");
                 }
 
                 //playlist
@@ -1121,7 +982,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(false);
                     getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(false);
                     getMenu().findItem(R.id.menu_toolbar_search).setVisible(false);
-                    mMainBinding.toolBar.setSubtitle(Data.sPlayListItems.size() + " Playlists");
+                    setSubtitle(Data.sPlayListItems.size() + " Playlists");
                 }
 
                 //fileviewer
@@ -1159,42 +1020,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     }
 
-    private void setTabLongClickListener() {
-        for (int i = 0; i < mMainBinding.tabLayout.getTabCount(); i++) {
-            TabLayout.Tab tab = mMainBinding.tabLayout.getTabAt(i);
-            if (tab != null) {
-                if (tab.view != null) {
-                    int finalI = i;
-                    ((LinearLayout) tab.view).setOnLongClickListener(v -> {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                        builder.setTitle(getString(R.string.are_u_sure));
-                        builder.setMessage(getString(R.string.close_the_tab_x_int, tab.getText()));
-                        builder.setCancelable(true);
-                        builder.setPositiveButton(getString(R.string.sure), (dialog, which) -> {
-                            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-                            SharedPreferences.Editor editor = preferences.edit();
-                            StringBuilder currentOrder = new StringBuilder(preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER));
-                            currentOrder.deleteCharAt(tab.getPosition());
-                            editor.putString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, currentOrder.toString());
-                            editor.apply();
-
-                            mTitles.remove(tab.getPosition());
-                            mFragmentList.remove(tab.getPosition());
-                            mPagerAdapter.notifyDataSetChanged();
-                            mMainBinding.tabLayout.removeTabAt(finalI);
-
-                            mMainBinding.viewPager.setOffscreenPageLimit(mTitles.size() > 1 ? mTitles.size() - 1 : 1);
-                            dialog.dismiss();
-                        });
-                        builder.setNegativeButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
-                        builder.show();
-                        return true;
-                    });
-                }
-            }
-        }
-    }
-
     public final void exitApp() {
 
         if (Values.HAS_PLAYED) {
@@ -1208,19 +1033,42 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
-
-//        //stop tile
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-//            stopService(new Intent(this, MyTile.class));
-//        }
+        Data.mMyHeadSetPlugReceiver = null;
 
         Data.sMusicBinder = null;
 
         Values.HAS_PLAYED = false;
 
+        wakeLock.release();
         clear();
         finish();
         android.os.Process.killProcess(android.os.Process.myPid());
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        unbindService(Data.sServiceConnection);
+        unregisterReceiver(Data.mMyHeadSetPlugReceiver);
+
+        Data.sActivities.clear();
+        if (Data.sMainRef != null) Data.sMainRef.clear();
+        Data.sTheme = null;
+        Data.sAlbumItems.clear();
+        Data.sHistoryPlay.clear();
+//        Data.sCurrentMusicItem = null;
+        Data.sTrashCanList.clear();
+
+        mHandlerThread.quit();
+        mFragmentList.clear();
+        AlbumThreadPool.finish();
+        ItemCoverThreadPool.finish();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
     }
 
     @Override
@@ -1481,12 +1329,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 }
                 break;
                 case R.id.menu_nav_ad: {
-                    if (mRewardedVideoAd.isLoaded()) {
-                        Toast.makeText(this, "AD showing...", Toast.LENGTH_SHORT).show();
-                        mRewardedVideoAd.show();
-                    } else {
-                        Toast.makeText(this, "AD not loaded try again...", Toast.LENGTH_SHORT).show();
-                    }
+                    Toast.makeText(this, "MAKINGS", Toast.LENGTH_SHORT).show();
                 }
                 break;
                 case R.id.debug: {
@@ -1504,6 +1347,16 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         // 设置按钮的动画效果; 如果不想要打开关闭抽屉时的箭头动画效果，可以不写此行代码
         mMainBinding.drawerLayout.addDrawerListener(mDrawerToggle);
 
+    }
+
+    public void setSubtitle(CharSequence subTitle) {
+        try {
+            super.setToolbarSubTitleWithAlphaAni(mMainBinding.toolBar, subTitle);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     ////////////get///////////////////////get///////////////////////get/////////////////
@@ -1633,4 +1486,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         }
         Toast.makeText(this, welcomeMessage, Toast.LENGTH_SHORT).show();
     }
+
+
 }

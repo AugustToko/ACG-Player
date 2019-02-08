@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
-  ~ 文件：dialog_theme.xml  模块：app  项目：MusicPlayer
+  ~ 文件：dialog_theme22.xml  模块：app  项目：MusicPlayer
   ~ 当前修改时间：2019年01月17日 17:31:46
   ~ 上次修改时间：2019年01月17日 17:28:52
   ~ 作者：chenlongcould
@@ -13,12 +13,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:layout_width="350dp"
         android:layout_height="wrap_content"
         tools:layout_gravity="center">
 
-        <android.support.constraint.ConstraintLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -89,7 +89,7 @@
                 android:background="@color/line_color"
                 app:layout_constraintTop_toBottomOf="@+id/ico" />
 
-            <android.support.v4.widget.NestedScrollView
+            <androidx.core.widget.NestedScrollView
                 android:id="@+id/nestedScrollView"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -103,7 +103,7 @@
                     android:id="@+id/include_dialog_content"
                     layout="@layout/dialog_theme_content" />
 
-            </android.support.v4.widget.NestedScrollView>
+            </androidx.core.widget.NestedScrollView>
 
             <View
                 android:id="@+id/line2"
@@ -134,8 +134,8 @@
             <!--app:layout_constraintBottom_toBottomOf="parent"-->
             <!--app:layout_constraintEnd_toStartOf="@+id/button_apply" />-->
 
-        </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
 </layout>

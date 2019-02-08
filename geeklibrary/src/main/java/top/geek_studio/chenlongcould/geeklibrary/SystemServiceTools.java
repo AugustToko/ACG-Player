@@ -14,7 +14,8 @@ package top.geek_studio.chenlongcould.geeklibrary;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 /**
  * @author chenlongcould

@@ -1,13 +1,12 @@
 package top.geek_studio.chenlongcould.musicplayer.Activities;
 
-import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.widget.Toast;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.litepal.LitePal;
 
@@ -15,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import androidx.databinding.DataBindingUtil;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Database.Detail;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
@@ -31,7 +31,7 @@ public class DetailActivity extends MyBaseCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mDetailBinding = DataBindingUtil.setContentView(this, R.layout.activity_detail);
+        mDetailBinding = DataBindingUtil.setContentView(this, R.layout.activity_info_detail);
         super.initView(mDetailBinding.toolbar, mDetailBinding.appbar);
 
         setSupportActionBar(mDetailBinding.toolbar);

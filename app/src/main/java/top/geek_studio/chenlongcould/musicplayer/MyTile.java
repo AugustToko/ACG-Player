@@ -22,14 +22,14 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
-import android.support.annotation.RequiresApi;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
 import java.util.Collections;
 
+import androidx.annotation.RequiresApi;
+import androidx.core.content.ContextCompat;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;

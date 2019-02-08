@@ -16,7 +16,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -24,12 +23,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,6 +37,13 @@ import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.Date;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import top.geek_studio.chenlongcould.musicplayer.Activities.CarViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.Adapters.MyWaitListAdapter;
@@ -84,7 +84,7 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mMusicDetail2Binding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_detail_2, container, false);
+        mMusicDetail2Binding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_detail_landspace, container, false);
 
         mRecyclerView = mMusicDetail2Binding.getRoot().findViewById(R.id.recycler_view);
 
@@ -134,7 +134,7 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
         if (Values.HAS_PLAYED) {
             mMusicDetail2Binding.includePlayerControlCar.playButton.setImageResource(R.drawable.ic_pause_black_24dp);
         } else {
-            mMusicDetail2Binding.includePlayerControlCar.playButton.setImageResource(R.drawable.ic_play_arrow_black_24dp);
+            mMusicDetail2Binding.includePlayerControlCar.playButton.setImageResource(R.drawable.ic_play_arrow_grey_600_24dp);
         }
 
         mMusicDetail2Binding.includePlayerControlCar.nextButton.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mCarViewActivity, 6, "next"));
@@ -453,7 +453,7 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
 
     public final void setButtonType(String type) {
         mCarViewActivity.runOnUiThread(() -> GlideApp.with(mCarViewActivity)
-                .load(type.equals("play") ? R.drawable.ic_play_arrow_black_24dp : R.drawable.ic_pause_black_24dp)
+                .load(type.equals("play") ? R.drawable.ic_play_arrow_grey_600_24dp : R.drawable.ic_pause_black_24dp)
                 .into(mMusicDetail2Binding.includePlayerControlCar.playButton));
     }
 
