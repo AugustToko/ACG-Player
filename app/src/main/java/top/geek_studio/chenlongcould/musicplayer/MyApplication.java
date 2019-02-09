@@ -29,11 +29,11 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.Fragments.AlbumListFragment;
-import top.geek_studio.chenlongcould.musicplayer.Fragments.ArtistListFragment;
-import top.geek_studio.chenlongcould.musicplayer.Utils.MusicUtil;
-import top.geek_studio.chenlongcould.musicplayer.Utils.PlayListsUtil;
+import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.fragment.AlbumListFragment;
+import top.geek_studio.chenlongcould.musicplayer.fragment.ArtistListFragment;
+import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
+import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
 
 public final class MyApplication extends Application {
 

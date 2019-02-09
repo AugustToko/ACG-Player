@@ -10,7 +10,7 @@ import org.litepal.LitePal;
 
 import java.util.List;
 
-import top.geek_studio.chenlongcould.musicplayer.Database.CustomAlbumPath;
+import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 
 public class MyDBSync extends IntentService {
 

@@ -5,7 +5,7 @@
     tools:ignore="InnerclassSeparator">
 
     <permission
-        android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts"
+        android:name="top.geek_studio.chenlongcould.musicplayer.broadcasts"
         android:protectionLevel="signature" />
     <permission
         android:name="top.geek_studio.chenlongcould.musicplayer.MyMusicService"
@@ -15,7 +15,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts" />
+    <uses-permission android:name="top.geek_studio.chenlongcould.musicplayer.broadcasts" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="top.geek_studio.chenlongcould.musicplayer.Service.MyMusicService" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -33,7 +33,7 @@
         android:theme="@style/LightTheme"
         tools:replace="android:allowBackup">
         <receiver
-            android:name=".BroadCasts.NotificationBroadcast"
+            android:name=".broadcasts.NotificationBroadcast"
             android:enabled="true"
             android:exported="true"
             android:permission="top.geek_studio.chenlongcould.musicplayer.BroadCasts"
@@ -44,16 +44,16 @@
             android:exported="false" />
 
         <activity
-            android:name=".Activities.DetailActivity"
+            android:name=".activity.DetailActivity"
             android:label="@string/title_activity_detail"
             android:theme="@style/LightTheme.NoActionBar" />
         <activity
-            android:name=".Activities.MainActivity"
+            android:name=".activity.MainActivity"
             android:launchMode="singleTask"
             android:theme="@style/LightTheme"
             android:windowSoftInputMode="stateHidden|adjustPan" />
         <activity
-            android:name=".Activities.SplashActivity"
+            android:name=".activity.SplashActivity"
             android:exported="true"
             android:launchMode="singleTask"
             android:theme="@style/SplashActivityTheme">
@@ -66,32 +66,32 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Activities.PublicActivity"
+            android:name=".activity.PublicActivity"
             android:exported="false" />
         <activity
-            android:name=".Activities.AlbumDetailActivity"
+            android:name=".activity.AlbumDetailActivity"
             android:exported="false"
             android:launchMode="singleTask" />
         <activity
-            android:name=".Activities.SettingsActivity"
+            android:name=".activity.SettingsActivity"
             android:exported="false"
             android:launchMode="singleTask" />
         <activity
-            android:name=".Activities.AboutLic"
+            android:name=".activity.AboutLic"
             android:exported="false"
             android:launchMode="singleTask" />
         <activity
-            android:name=".Activities.CarViewActivity"
+            android:name=".activity.CarViewActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_car_view"
             android:theme="@style/FullscreenTheme" />
         <activity
-            android:name=".Activities.ThemeActivity"
+            android:name=".activity.ThemeActivity"
             android:label="@string/title_activity_theme"
             android:launchMode="singleTask" />
-        <activity android:name=".Activities.TestActivity" />
+        <activity android:name=".activity.TestActivity" />
         <activity
-            android:name=".Activities.AboutActivity"
+            android:name=".activity.AboutActivity"
             android:exported="false"
             android:launchMode="singleTask" />
 
@@ -121,28 +121,28 @@
             android:process=":musicService" />
 
         <receiver
-            android:name=".BroadCasts.ReceiverOnMusicPlay"
+            android:name=".broadcasts.ReceiverOnMusicPlay"
             android:enabled="true"
             android:exported="true"
-            android:permission="top.geek_studio.chenlongcould.musicplayer.BroadCasts">
+            android:permission="top.geek_studio.chenlongcould.musicplayer.broadcasts">
             <intent-filter>
-                <action android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay" />
+                <action android:name="top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPlay" />
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".BroadCasts.ReceiverOnMusicPause"
+            android:name=".broadcasts.ReceiverOnMusicPause"
             android:enabled="true"
             android:exported="true"
-            android:permission="top.geek_studio.chenlongcould.musicplayer.BroadCasts">
+            android:permission="top.geek_studio.chenlongcould.musicplayer.broadcasts">
             <intent-filter>
-                <action android:name="top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPause" />
+                <action android:name="top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPause" />
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".BroadCasts.MyHeadSetPlugReceiver"
+            android:name=".broadcasts.MyHeadSetPlugReceiver"
             android:enabled="true"
             android:exported="true"
-            android:permission="top.geek_studio.chenlongcould.musicplayer.BroadCasts">
+            android:permission="top.geek_studio.chenlongcould.musicplayer.broadcasts">
             <intent-filter>
                 <action android:name="android.intent.action.HEADSET_PLUG" />
             </intent-filter>

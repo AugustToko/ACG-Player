@@ -30,15 +30,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import io.reactivex.disposables.Disposable;
 import jp.wasabeef.glide.transformations.BlurTransformation;
-import top.geek_studio.chenlongcould.geeklibrary.RecyclerViewTools.RecycleViewDivider;
-import top.geek_studio.chenlongcould.geeklibrary.Theme.Theme;
-import top.geek_studio.chenlongcould.musicplayer.Activities.CarViewActivity;
-import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.BroadCasts.MyHeadSetPlugReceiver;
+import top.geek_studio.chenlongcould.geeklibrary.recycler_tools.RecycleViewDivider;
+import top.geek_studio.chenlongcould.geeklibrary.theme.Theme;
 import top.geek_studio.chenlongcould.musicplayer.Models.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.ArtistItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.PlayListItem;
+import top.geek_studio.chenlongcould.musicplayer.activity.CarViewActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.broadcasts.MyHeadSetPlugReceiver;
 
 public final class Data {
 

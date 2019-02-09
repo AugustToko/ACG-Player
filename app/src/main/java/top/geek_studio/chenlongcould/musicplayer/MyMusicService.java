@@ -43,11 +43,11 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.palette.graphics.Palette;
-import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
-import top.geek_studio.chenlongcould.musicplayer.Database.Detail;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
-import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
+import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPlay;
+import top.geek_studio.chenlongcould.musicplayer.database.Detail;
+import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 public final class MyMusicService extends Service {
 

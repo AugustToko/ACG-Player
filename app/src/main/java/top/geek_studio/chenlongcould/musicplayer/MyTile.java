@@ -35,10 +35,10 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import top.geek_studio.chenlongcould.musicplayer.Activities.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
-import top.geek_studio.chenlongcould.musicplayer.Utils.Utils;
+import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPlay;
+import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 @RequiresApi(Build.VERSION_CODES.N)
 public class MyTile extends TileService {

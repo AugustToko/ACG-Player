@@ -204,10 +204,10 @@ public final class Values {
     }
 
     public static final class BroadCast {
-        public static String ReceiverOnMusicPlay = "top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPlay";
-        public static String ReceiverOnMusicStop = "top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicStop";
-        public static String ReceiverOnMusicPause = "top.geek_studio.chenlongcould.musicplayer.BroadCasts.ReceiverOnMusicPause";
-        public static String DayNightReceiver = "top.geek_studio.chenlongcould.musicplayer.BroadCasts.DayNightReceiver";
+        public static String ReceiverOnMusicPlay = "top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPlay";
+        public static String ReceiverOnMusicStop = "top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicStop";
+        public static String ReceiverOnMusicPause = "top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPause";
+        public static String DayNightReceiver = "top.geek_studio.chenlongcould.musicplayer.broadcasts.DayNightReceiver";
     }
 
     public static final class Color {
@@ -225,7 +225,7 @@ public final class Values {
     }
 
     public static final class Permission {
-        public static final String BROAD_CAST = "top.geek_studio.chenlongcould.musicplayer.BroadCasts";
+        public static final String BROAD_CAST = "top.geek_studio.chenlongcould.musicplayer.broadcasts";
     }
 
     public static final class Style {

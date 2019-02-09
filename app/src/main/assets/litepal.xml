@@ -6,8 +6,8 @@
     // 数据库版本为1,每次数据库发生变动版本号必须+1
     <list>// 有几张表就在list之间写几个mapping
         // list标签中的实体类都应该继承LitePalSupport这个类,这个千万别忘记
-        <mapping class="top.geek_studio.chenlongcould.musicplayer.Database.Detail" />
-        <mapping class="top.geek_studio.chenlongcould.musicplayer.Database.CustomAlbumPath" />
+        <mapping class="top.geek_studio.chenlongcould.musicplayer.database.Detail" />
+        <mapping class="top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath" />
     </list>
     <storage value="internal" />
     //storage 定义数据库文件存储的地方,可选 internal(内部) 和 external（外部）, 默认为 internal
