@@ -155,11 +155,14 @@ public final class Utils {
                 return BitmapFactory.decodeResource(Data.sActivities.get(0).getResources(), R.drawable.ic_audiotrack_24px);
         }
 
+        /**
+         * this
+         */
         public static Bitmap getCoverBitmap(Context context, int albumId) {
             return path2CoverByDB(context, getCoverPath(context, albumId));
         }
 
-        @NonNull
+        @Nullable
         private static String getCoverPathByDefDB(final Context context, final int albumId) {
             String img;
             final Cursor cursor = context.getContentResolver().query(
@@ -171,16 +174,13 @@ public final class Utils {
                 img = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART));
                 cursor.close();
             } else {
-                return NONE;
+                return null;
             }
             return img;
         }
 
-        /**
-         * use this
-         */
-        @NonNull
-        public static String getCoverPath(final Context context, final int albumId) {
+        @Nullable
+        private static String getCoverPath(final Context context, final int albumId) {
             final String[] albumPath = {null};
 
             final Cursor cursor = context.getContentResolver().query(
@@ -198,7 +198,7 @@ public final class Utils {
                     if (TextUtils.isEmpty(albumPath[0]) || custom.isForceUse()) {
                         File file = new File(custom.getAlbumArt());
                         if (custom.getAlbumArt().equals("null") && !file.exists()) {
-                            return NONE;
+                            return null;
                         } else {
                             albumPath[0] = custom.getAlbumArt();
                         }
@@ -305,7 +305,7 @@ public final class Utils {
 
         @SuppressWarnings("SameParameterValue")
         private static Bitmap getDrawableBitmap(@NonNull Context context, @DrawableRes int vectorDrawableId) {
-            return BitmapFactory.decodeResource(context.getResources(), vectorDrawableId);
+            return Ui.readBitmapFromRes(context, vectorDrawableId, 200, 200);
         }
 
         /**
@@ -441,6 +441,30 @@ public final class Utils {
 
             return BitmapFactory.decodeFile(filePath, options);
         }
+
+        public static Bitmap readBitmapFromRes(Context context, @DrawableRes int filePath, int width, int height) {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeResource(context.getResources(), filePath, options);
+            float srcWidth = options.outWidth;
+            float srcHeight = options.outHeight;
+            int inSampleSize = 1;
+
+            if (srcWidth > height && srcWidth > width) {
+                inSampleSize = (int) (srcWidth / width);
+            } else if (srcWidth < height && srcHeight > height) {
+                inSampleSize = (int) (srcHeight / height);
+            }
+
+            if (inSampleSize <= 0) {
+                inSampleSize = 1;
+            }
+            options.inJustDecodeBounds = false;
+            options.inSampleSize = inSampleSize;
+
+            return BitmapFactory.decodeResource(context.getResources(), filePath, options);
+        }
+
 
         public static Bitmap readBitmapFromArray(byte[] data, int width, int height) {
             BitmapFactory.Options options = new BitmapFactory.Options();

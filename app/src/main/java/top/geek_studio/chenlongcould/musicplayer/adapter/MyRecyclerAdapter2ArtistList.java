@@ -38,13 +38,13 @@ import androidx.core.content.ContextCompat;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
 import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
-import top.geek_studio.chenlongcould.musicplayer.AlbumThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.ArtistItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.thread_pool.AlbumThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyRecyclerAdapter2ArtistList.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter, IStyle {

@@ -28,11 +28,17 @@ android {
         applicationId "top.geek_studio.chenlongcould.musicplayer"
         minSdkVersion 21
         targetSdkVersion 28
-        versionName '2.6.0.6.5(201902082325)'
+        versionName '2.6.0.6(201902111056)'
         testInstrumentationRunner "android.support.albumLoader.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config
         versionCode 71
         flavorDimensions "default"
+
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++11"
+            }
+        }
     }
     buildTypes {
         release {
@@ -69,11 +75,17 @@ android {
     productFlavors {
     }
     dependencies {
-        def nav_version = "1.0.0-alpha11"
+        def nav_version = "1.0.0-beta01"
 
         implementation "android.arch.navigation:navigation-fragment:$nav_version"
         // use -ktx for Kotlin
         implementation "android.arch.navigation:navigation-ui:$nav_version" // use -ktx for Kotlin
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+        }
     }
 }
 

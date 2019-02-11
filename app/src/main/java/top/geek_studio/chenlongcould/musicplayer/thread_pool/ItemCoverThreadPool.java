@@ -9,7 +9,7 @@
  * ************************************************************
  */
 
-package top.geek_studio.chenlongcould.musicplayer;
+package top.geek_studio.chenlongcould.musicplayer.thread_pool;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;

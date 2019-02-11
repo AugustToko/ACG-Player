@@ -58,7 +58,6 @@ import okhttp3.Response;
 import top.geek_studio.chenlongcould.geeklibrary.DownloadUtil;
 import top.geek_studio.chenlongcould.geeklibrary.HttpUtil;
 import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
-import top.geek_studio.chenlongcould.musicplayer.AlbumThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.MyApplication;
@@ -67,6 +66,7 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
+import top.geek_studio.chenlongcould.musicplayer.thread_pool.AlbumThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRecyclerAdapter2AlbumList.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter, IStyle {
@@ -199,6 +199,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
                                     @Override
                                     public void onFailure(@NotNull Call call, @NotNull IOException e) {
                                         mMainActivity.runOnUiThread(() -> Toast.makeText(mMainActivity, e.getMessage(), Toast.LENGTH_SHORT).show());
+                                        loadCoverDefault(mMainActivity, viewHolder.mAlbumImage, albumPath[0], viewHolder.getAdapterPosition());
                                     }
 
                                     @Override
@@ -246,56 +247,34 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
                                                                 @Override
                                                                 public void onDownloadFailed(Exception e) {
                                                                     Log.d(TAG, "onDownloadFailed: " + img.toString() + " " + e.getMessage());
+                                                                    loadCoverDefault(mMainActivity, viewHolder.mAlbumImage, albumPath[0], viewHolder.getAdapterPosition());
                                                                 }
                                                             });
                                                 } else {
                                                     Log.d(TAG, "onResponse: img url error" + img.toString() + " albumName is: " + albumName);
+                                                    loadCoverDefault(mMainActivity, viewHolder.mAlbumImage, albumPath[0], viewHolder.getAdapterPosition());
                                                 }
                                             } else {
-                                                Log.d(TAG, "onResponse: " + content.select("lfm[status]").attr("status")
-                                                        + "_" + content.select("lfm[status]").select("error[code]").attr("code")
-                                                        + " : " + content.select("lfm[status]").text() + " albumName is: " + albumName);
-
-                                                if (verify(viewHolder.mAlbumImage, viewHolder.getAdapterPosition())) {
-                                                    viewHolder.mAlbumImage.post(() -> GlideApp.with(mMainActivity)
-                                                            .load(custom.getAlbumArt())
-                                                            .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-                                                            .diskCacheStrategy(DiskCacheStrategy.NONE)
-                                                            .into(viewHolder.mAlbumImage));
-                                                }
+                                                loadCoverDefault(mMainActivity, viewHolder.mAlbumImage, albumPath[0], viewHolder.getAdapterPosition());
                                             }
                                         } else {
                                             mMainActivity.runOnUiThread(() -> Toast.makeText(mMainActivity, "response is NUll! " + " albumName is: " + albumName, Toast.LENGTH_SHORT).show());
-
-                                            if (verify(viewHolder.mAlbumImage, viewHolder.getAdapterPosition())) {
-                                                viewHolder.mAlbumImage.post(() -> GlideApp.with(mMainActivity)
-                                                        .load(custom.getAlbumArt())
-                                                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-                                                        .diskCacheStrategy(DiskCacheStrategy.NONE)
-                                                        .into(viewHolder.mAlbumImage));
-                                            }
+                                            loadCoverDefault(mMainActivity, viewHolder.mAlbumImage, albumPath[0], viewHolder.getAdapterPosition());
                                         }
                                     }
                                 });
                             } else {
                                 Log.d(TAG, "already in customDB or not forceLoad, loading data from customDB " + " albumName is: " + albumName);
-                                if (verify(viewHolder.mAlbumImage, viewHolder.getAdapterPosition())) {
-                                    viewHolder.mAlbumImage.post(() -> GlideApp.with(mMainActivity)
-                                            .load(custom.getAlbumArt())
-                                            .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-                                            .diskCacheStrategy(DiskCacheStrategy.NONE)
-                                            .into(viewHolder.mAlbumImage));
-                                }
-
+                                viewHolder.mAlbumImage.post(() -> GlideApp.with(mMainActivity)
+                                        .load(file)
+                                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                        .into(viewHolder.mAlbumImage));
                             }
                         } else {
                             Log.d(TAG, "albumLoader: File exists or force not open, loading default..." + " albumName is: " + albumName);
                             loadCoverDefault(mMainActivity, viewHolder.mAlbumImage, albumPath[0], viewHolder.getAdapterPosition());
                         }
-//                    } catch (Exception e) {
-//                        Log.d(TAG, "albumLoader: load customAlbum Error, loading default..., msg: " + e.getMessage());
-//                        loadCoverDefault(mMainActivity, viewHolder.mAlbumImage, albumPath[0], viewHolder.getAdapterPosition());
-//                    }
                     } else {
                         Log.d(TAG, "customDB size is 0");
                         loadCoverDefault(mMainActivity, viewHolder.mAlbumImage, albumPath[0], viewHolder.getAdapterPosition());
@@ -368,8 +347,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
     public void loadCoverDefault(Context context, ImageView imageView, String albumPath, int index) {
         if (verify(imageView, index)) {
             //if verify(,) is true, the imageView must not null
-
-            if (TextUtils.isEmpty(albumPath) || albumPath.equals("null") || albumPath.equals("none")) {
+            if (TextUtils.isEmpty(albumPath) || albumPath.equals("null") || albumPath.equals("none") || albumPath.equals("NONE")) {
                 imageView.post(() -> GlideApp.with(context)
                         .load(R.drawable.default_album_art)
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))

@@ -80,11 +80,9 @@ import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
 import top.geek_studio.chenlongcould.geeklibrary.theme.Theme;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeUtils;
-import top.geek_studio.chenlongcould.musicplayer.AlbumThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.BuildConfig;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
-import top.geek_studio.chenlongcould.musicplayer.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.Models.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.MyApplication;
@@ -104,9 +102,16 @@ import top.geek_studio.chenlongcould.musicplayer.fragment.FileViewFragment;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicListFragment;
 import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
+import top.geek_studio.chenlongcould.musicplayer.thread_pool.AlbumThreadPool;
+import top.geek_studio.chenlongcould.musicplayer.thread_pool.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 public final class MainActivity extends MyBaseCompatActivity implements IStyle {
+
+//    // Used to load the 'native-lib' library on application startup.
+//    static {
+//        System.loadLibrary("native-lib");
+//    }
 
     public static final String TAG = "MainActivity";
 
@@ -184,7 +189,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     private AlertDialog load;
 
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
-
 
     private PowerManager.WakeLock wakeLock;
 
@@ -398,6 +402,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 case R.id.menu_toolbar_reload: {
                     mFragmentList.clear();
                     mTitles.clear();
+                    mMainBinding.tabLayout.removeAllTabs();
                     Data.sMusicItems.clear();
                     Data.sPlayOrderList.clear();
                     Data.sMusicItemsBackUp.clear();

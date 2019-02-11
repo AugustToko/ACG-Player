@@ -9,7 +9,7 @@
  * ************************************************************
  */
 
-package top.geek_studio.chenlongcould.musicplayer;
+package top.geek_studio.chenlongcould.musicplayer.thread_pool;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -23,8 +23,10 @@ public class AlbumThreadPool {
 
     private static final int KEEP_ALIVE = 10;
     private static AlbumThreadPool mInstance = null;
+    @SuppressWarnings("FieldCanBeLocal")
     private static int MAX_POOL_SIZE;
-    BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>();
+    @SuppressWarnings("FieldCanBeLocal")
+    private BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>();
     private ThreadPoolExecutor mThreadPoolExec;
 
     private AlbumThreadPool() {

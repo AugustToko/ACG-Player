@@ -18,6 +18,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
@@ -77,7 +78,6 @@ import top.geek_studio.chenlongcould.geeklibrary.HttpUtil;
 import top.geek_studio.chenlongcould.geeklibrary.ViewTools;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
-import top.geek_studio.chenlongcould.musicplayer.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.MyApplication;
 import top.geek_studio.chenlongcould.musicplayer.R;
@@ -88,6 +88,7 @@ import top.geek_studio.chenlongcould.musicplayer.activity.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicListFragment;
+import top.geek_studio.chenlongcould.musicplayer.thread_pool.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
@@ -424,12 +425,8 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 //                Data.sCurrentMusicItem = mMusicItems.get(holder.getAdapterPosition());
 
                 //cover set
-                String path = Utils.Audio.getCoverPath(mContext, mMusicItems.get(holder.getAdapterPosition()).getAlbumId());
-                if (path.equals(Utils.Audio.NONE)) {
-                    Data.setCurrentCover(null);
-                } else {
-                    Data.setCurrentCover(BitmapFactory.decodeFile(path));
-                }
+                Bitmap bitmap = Utils.Audio.getCoverBitmap(mContext, mMusicItems.get(holder.getAdapterPosition()).getAlbumId());
+                Data.setCurrentCover(bitmap);
 
                 for (int i = 0; i < Data.sMusicItems.size(); i++) {
                     MusicItem item = Data.sMusicItems.get(i);
@@ -521,8 +518,9 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
     }
 
     /**
-     * @return album path
-     */
+     * loader
+     * load image to imageView (net, defDB, customDB, defAlbum)
+     * */
     private void albumLoader(Activity activity, ImageView imageView, int albumId, String artist, String albumName, int index) {
         final String[] albumPath = {null};
 
@@ -556,6 +554,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                             httpUtil.sedOkHttpRequest(request.toString(), new Callback() {
                                 @Override
                                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                                    loadCoverDefault(activity, imageView, albumId, index);
                                     activity.runOnUiThread(() -> Toast.makeText(activity, e.getMessage(), Toast.LENGTH_SHORT).show());
                                 }
 
@@ -615,64 +614,56 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
                                                             @Override
                                                             public void onDownloadFailed(Exception e) {
+                                                                loadCoverDefault(activity, imageView, albumId, index);
                                                                 Log.d(TAG, "onDownloadFailed: " + img.toString() + " " + e.getMessage());
                                                             }
                                                         });
                                             } else {
                                                 Log.d(TAG, "onResponse: img url error" + img);
+                                                loadCoverDefault(activity, imageView, albumId, index);
                                             }
                                         } else {
                                             Log.d(TAG, "onResponse: " + content.select("lfm[status]").attr("status")
                                                     + "_" + content.select("lfm[status]").select("error[code]").attr("code")
                                                     + " : " + content.select("lfm[status]").text());
+                                            loadCoverDefault(activity, imageView, albumId, index);
                                         }
                                     } else {
                                         activity.runOnUiThread(() -> Toast.makeText(activity, "response is NUll!", Toast.LENGTH_SHORT).show());
+                                        loadCoverDefault(activity, imageView, albumId, index);
                                     }
-
                                 }
                             });
                         } else {
-                            Log.d(TAG, "albumLoader: customFile exists");
-                            if (imageView == null || imageView.getTag(R.string.key_id_1) == null) {
-                                Log.e(TAG, "doInBackground: key null------------------skip");
-                            } else {
-                                //根据position判断是否为复用ViewHolder
-                                if (((int) imageView.getTag(R.string.key_id_1)) != index) {
-                                    Log.e(TAG, "doInBackground: key error------------------skip");
-                                } else {
-                                    Log.d(TAG, "onBindViewHolder: already in customDB, loading");
-                                    imageView.post(() -> GlideApp.with(activity)
-                                            .load(custom.getAlbumArt())
-                                            .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-                                            .centerCrop()
-                                            .diskCacheStrategy(DiskCacheStrategy.NONE)
-                                            .into(imageView));
-                                }
-                            }
+                            Log.d(TAG, "albumLoader: has data in DB, loading...");
+                            imageView.post(() -> GlideApp.with(mMainActivity)
+                                    .load(file)
+                                    .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                    .into(imageView));
                         }
                     } else {
                         Log.d(TAG, "albumLoader: File exists or force not open, loading default...");
-                        loadCoverDefault(activity, imageView, albumPath[0], index);
+                        loadCoverDefault(activity, imageView, albumId, index);
                     }
                 } catch (Exception e) {
                     Log.d(TAG, "albumLoader: load customAlbum Error, loading default..., msg: " + e.getMessage());
-                    loadCoverDefault(activity, imageView, albumPath[0], index);
+                    loadCoverDefault(activity, imageView, albumId, index);
                 }
             } else {
                 Log.d(TAG, "customDB size is 0");
-                loadCoverDefault(activity, imageView, albumPath[0], index);
+                loadCoverDefault(activity, imageView, albumId, index);
             }
         } else {
             Log.d(TAG, "albumLoader: load default..., msg: FROM NET switch not checked");
-            loadCoverDefault(activity, imageView, albumPath[0], index);
+            loadCoverDefault(activity, imageView, albumId, index);
         }
     }
 
     /**
      * load defaultAlbumImage by DB(from {@link MediaStore.Audio.Albums#ALBUM_ART})
      */
-    private void loadCoverDefault(Context context, @Nullable ImageView imageView, String albumPath, int index) {
+    private void loadCoverDefault(Context context, @Nullable ImageView imageView, int album, int index) {
         if (imageView == null) {
             Log.e(TAG, "imageView null");
         } else {
@@ -684,7 +675,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                     Log.e(TAG, "doInBackground: key error------------------skip");
                 } else {
                     imageView.post(() -> GlideApp.with(context)
-                            .load(albumPath)
+                            .load(Utils.Audio.getCoverBitmap(context, album))
                             .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                             .centerCrop()
                             .diskCacheStrategy(DiskCacheStrategy.NONE)
