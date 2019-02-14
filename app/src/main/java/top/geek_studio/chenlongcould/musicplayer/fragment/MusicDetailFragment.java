@@ -154,8 +154,6 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
 
     private TextView mRightTime;
 
-    private ImageView mRecyclerMask;
-
     private TextView mNextWillText;
 
     /**
@@ -512,7 +510,6 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
         mAppBarLayout = view.findViewById(R.id.activity_music_detail_appbar);
         mLeftTime = view.findViewById(R.id.left_text);
         mRightTime = view.findViewById(R.id.right_text);
-        mRecyclerMask = view.findViewById(R.id.recycler_mask);
         mSlidingUpPanelLayout = view.findViewById(R.id.activity_detail_sliding_layout);
         mNextWillText = view.findViewById(R.id.next_will_text);
         mMusicAlbumImageOth2 = view.findViewById(R.id.activity_music_detail_album_image_2);

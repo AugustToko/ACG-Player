@@ -33,6 +33,7 @@ public class DetailActivity extends MyBaseCompatActivity {
 
         mDetailBinding = DataBindingUtil.setContentView(this, R.layout.activity_info_detail);
         super.initView(mDetailBinding.toolbar, mDetailBinding.appbar);
+        super.initStyle();
 
         setSupportActionBar(mDetailBinding.toolbar);
         mDetailBinding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
@@ -154,10 +155,5 @@ public class DetailActivity extends MyBaseCompatActivity {
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> Snackbar.make(view, "Clear Data?", Snackbar.LENGTH_LONG)
                 .setAction(getString(R.string.sure), v -> LitePal.deleteAll(Detail.class)).show());
-    }
-
-    @Override
-    public void initStyle() {
-        super.initStyle();
     }
 }

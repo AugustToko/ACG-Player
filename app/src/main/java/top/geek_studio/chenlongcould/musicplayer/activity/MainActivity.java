@@ -11,6 +11,7 @@
 
 package top.geek_studio.chenlongcould.musicplayer.activity;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -44,10 +45,10 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
+import org.jetbrains.annotations.NotNull;
 import org.litepal.LitePal;
 import org.litepal.LitePalDB;
 
@@ -58,17 +59,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.palette.graphics.Palette;
 import androidx.viewpager.widget.ViewPager;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
@@ -76,11 +80,11 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
 import top.geek_studio.chenlongcould.geeklibrary.theme.Theme;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeUtils;
-import top.geek_studio.chenlongcould.musicplayer.BuildConfig;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.AlbumItem;
@@ -105,6 +109,8 @@ import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.thread_pool.AlbumThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.thread_pool.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
+
+import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
@@ -233,25 +239,25 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 //        MobileAds.initialize(this, MyApplication.APP_ID);
 
         //config
-        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
-                .setDeveloperModeEnabled(BuildConfig.DEBUG)
-                .build();
-        mFirebaseRemoteConfig.setConfigSettings(configSettings);
-        mFirebaseRemoteConfig.setDefaults(R.xml.remote_config_deaults);
-        mFirebaseRemoteConfig.fetch(5000)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        Log.i(TAG, "initView: Fetch Succeeded");
-
-                        // After config data is successfully fetched, it must be activated before newly fetched
-                        // values are returned.
-                        mFirebaseRemoteConfig.activateFetched();
-                    } else {
-                        Log.i(TAG, "initView: Fetch Failed", new Throwable("Fetch Failed"));
-                    }
-                    displayWelcomeMessage();
-                });
+//        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+//        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+//                .setDeveloperModeEnabled(BuildConfig.DEBUG)
+//                .build();
+//        mFirebaseRemoteConfig.setConfigSettings(configSettings);
+//        mFirebaseRemoteConfig.setDefaults(R.xml.remote_config_deaults);
+//        mFirebaseRemoteConfig.fetch(5000)
+//                .addOnCompleteListener(this, task -> {
+//                    if (task.isSuccessful()) {
+//                        Log.i(TAG, "initView: Fetch Succeeded");
+//
+//                        // After config data is successfully fetched, it must be activated before newly fetched
+//                        // values are returned.
+//                        mFirebaseRemoteConfig.activateFetched();
+//                    } else {
+//                        Log.i(TAG, "initView: Fetch Failed", new Throwable("Fetch Failed"));
+//                    }
+//                    displayWelcomeMessage();
+//                });
 
         mHandlerThread = new HandlerThread("Handler Thread in MainActivity");
         mHandlerThread.start();
@@ -271,11 +277,14 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         loadData();
 
-        if (savedInstanceState != null)
-            mMainBinding.viewPager.setCurrentItem(savedInstanceState.getInt("viewpage", 0), true);
+        final String themeId = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.SELECT_THEME, "null");
+        if (themeId != null && !themeId.equals("null")) {
+            //todo
+        } else {
+            @ColorInt int color = Utils.Ui.getPrimaryColor(MainActivity.this);
+            Utils.Ui.setStatusBarTextColor(MainActivity.this, color);
+        }
 
-        //set play type
-        Values.CurrentData.CURRENT_PLAY_TYPE = mSharedPreferences.getString(Values.SharedPrefsTag.PLAY_TYPE, Values.TYPE_COMMON);
     }
 
     @Override
@@ -306,15 +315,13 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         initStyle();
 
-        if (mMusicDetailFragment != null) {
-            mMusicDetailFragment.initStyle();
-        }
+        if (mMusicDetailFragment != null) mMusicDetailFragment.initStyle();
 
         if (getMusicListFragment() != null) getMusicListFragment().initStyle();
     }
 
     @Override
-    public final void onAttachFragment(Fragment fragment) {
+    public final void onAttachFragment(@NotNull Fragment fragment) {
         super.onAttachFragment(fragment);
     }
 
@@ -417,10 +424,70 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         });
     }
 
+    /**
+     * @param toolbar not needed
+     * @deprecated
+     */
     public final void inflateChooseMenu(Toolbar toolbar) {
         toolbar.getMenu().clear();
         toolbar.inflateMenu(R.menu.menu_toolbar_main_choose);
         toolbar.setOnMenuItemClickListener(menuItem -> {
+            switch (menuItem.getItemId()) {
+                case R.id.menu_toolbar_main_choose_addlist: {
+                    ArrayList<MusicItem> helper = new ArrayList<>();
+                    for (MusicItem item : Data.sMusicItems) {
+                        for (int id : Data.sSelections) {
+                            if (id == item.getMusicID()) {
+                                helper.add(item);
+                            }
+                        }
+                    }
+                    Utils.DataSet.addListDialog(MainActivity.this, helper);
+                    if (getMusicListFragment() != null)
+                        getMusicListFragment().getAdapter().clearSelection();
+                }
+                break;
+                case R.id.menu_toolbar_main_choose_share: {
+                    new AsyncTask<Void, Void, Void>() {
+
+                        @Override
+                        protected Void doInBackground(Void... voids) {
+                            Intent intent = new Intent(Intent.ACTION_SEND);
+                            intent.setType("text/plain");
+                            StringBuilder content = new StringBuilder(getResources().getString(R.string.app_name))
+                                    .append("\r\n")
+                                    .append("https://www.coolapk.com/apk/top.geek_studio.chenlongcould.musicplayer.Common")
+                                    .append("\r\n");
+
+                            for (MusicItem item : Data.sMusicItems) {
+                                for (int id : Data.sSelections) {
+                                    if (id == item.getMusicID()) {
+                                        content.append(item.getMusicName()).append("\r\n");
+                                        break;
+                                    }
+                                }
+                            }
+
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intent.putExtra(Intent.EXTRA_TEXT, content.toString());
+                            startActivity(intent);
+                            return null;
+                        }
+                    }.execute();
+                }
+                break;
+            }
+            return true;
+        });
+    }
+
+    /**
+     * use this
+     */
+    public final void inflateChooseMenu() {
+        mMainBinding.toolBar.getMenu().clear();
+        mMainBinding.toolBar.inflateMenu(R.menu.menu_toolbar_main_choose);
+        mMainBinding.toolBar.setOnMenuItemClickListener(menuItem -> {
             switch (menuItem.getItemId()) {
                 case R.id.menu_toolbar_main_choose_addlist: {
                     ArrayList<MusicItem> helper = new ArrayList<>();
@@ -538,6 +605,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                                     .addArtistId(artistId);
 
                             Data.sMusicItems.add(builder.build());
+                            Data.sMusicItemsBackUp.add(builder.build());
                             Data.sPlayOrderList.add(builder.build());
                         }
                         while (cursor.moveToNext());
@@ -1072,34 +1140,28 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     }
 
     @Override
-    public void onTrimMemory(int level) {
-        super.onTrimMemory(level);
-    }
-
-    @Override
     public final void initStyle() {
-        super.initStyle();
+        mDrawerToggle.getDrawerArrowDrawable().setColor(Utils.Ui.getTitleColor(MainActivity.this));
+        setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, Utils.Ui.getPrimaryColor(MainActivity.this)));
+        mMainBinding.tabLayout.setTabTextColors(ColorStateList.valueOf(Utils.Ui.getTitleColor(MainActivity.this)));
+        mMainBinding.tabLayout.setSelectedTabIndicatorColor(Utils.Ui.getAccentColor(MainActivity.this));
+        Utils.Ui.setOverToolbarColor(mMainBinding.toolBar, Utils.Ui.getTitleColor(MainActivity.this));
 
-        mMainBinding.tabLayout.setTabTextColors(ColorStateList.valueOf(Utils.Ui.getTitleColor(this)));
-        mDrawerToggle.getDrawerArrowDrawable().setColor(Utils.Ui.getTitleColor(this));
-        mMainBinding.tabLayout.setBackgroundColor(Utils.Ui.getPrimaryColor(this));
-        mMainBinding.tabLayout.setSelectedTabIndicatorColor(Utils.Ui.getAccentColor(this));
+        getWindow().setNavigationBarColor(Utils.Ui.getPrimaryDarkColor(this));
+
+        final boolean[] needSetColor = {true};
 
         Observable.create((ObservableOnSubscribe<Theme>) emitter -> {
             final String themeId = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.SELECT_THEME, "null");
             if (themeId != null && !themeId.equals("null")) {
                 final File themeFile = ThemeUtils.getThemeFile(this, themeId);
                 final Theme theme = ThemeUtils.fileToTheme(themeFile);
-                if (theme != null) {
+                if (theme != null && theme.getSupport_area().contains(ThemeStore.SupportArea.NAV)) {
                     Data.sTheme = theme;
-                    if (theme.getSupport_area().contains(ThemeStore.SupportArea.NAV))
-                        emitter.onNext(theme);
-                } else {
-                    emitter.onError(null);
+                    emitter.onNext(theme);
                 }
-            } else {
-                emitter.onError(null);
             }
+            emitter.onComplete();
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<Theme>() {
             @Override
             public final void onSubscribe(Disposable disposable) {
@@ -1113,13 +1175,36 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     mMainBinding.styleTextNavTitle.setText(theme.getTitle());
                     mMainBinding.styleTextNavName.setText(theme.getNav_name());
 
-                    for (String nav : theme.getSelect().split(",")) {
-                        if (nav.contains(ThemeStore.SupportArea.NAV)) {
+                    for (String area : theme.getSelect().split(",")) {
+
+                        //检测是否匹配到NAV
+                        if (area.contains(ThemeStore.SupportArea.NAV)) {
+                            Log.d(TAG, "onNext: " + area);
+
+                            String bgPath = theme.getPath() + File.separatorChar + ThemeStore.DIR_IMG_NAV + File.separatorChar + area;
                             GlideApp.with(MainActivity.this)
-                                    .load(theme.getPath() + File.separatorChar + ThemeStore.DIR_IMG_NAV + File.separatorChar + nav + ".png")
+                                    .load(bgPath)
                                     .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                                     .diskCacheStrategy(DiskCacheStrategy.NONE)
                                     .into(mMainBinding.styleImgNav);
+                        }
+
+                        //检测是否匹配到BG
+                        if (area.contains(ThemeStore.SupportArea.BG)) {
+                            needSetColor[0] = false;
+
+                            String bgPath = ThemeUtils.getBgFileByName(theme, area);
+//                            @ColorInt int c = setUpStatus(bgPath);
+//                            getWindow().setNavigationBarColor(c);
+
+                            mMainBinding.toolBar.setBackgroundColor(Color.TRANSPARENT);
+                            mMainBinding.tabLayout.setBackgroundColor(Color.TRANSPARENT);
+                            mMainBinding.appbar.setBackgroundColor(Color.TRANSPARENT);
+
+                            GlideApp.with(MainActivity.this).load(bgPath)
+                                    .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                                    .apply(bitmapTransform(new BlurTransformation(10, 10)))
+                                    .into(mMainBinding.bgImage);
                         }
                     }
                 } else {
@@ -1134,9 +1219,39 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
             @Override
             public final void onComplete() {
+                Log.d(TAG, "onComplete: ");
+                if (needSetColor[0]) {
+                    Log.d(TAG, "onComplete: set Common color");
 
+                    @ColorInt int color = Utils.Ui.getPrimaryColor(MainActivity.this);
+                    Utils.Ui.setStatusBarTextColor(MainActivity.this, color);
+                    mMainBinding.tabLayout.setBackgroundColor(Utils.Ui.getPrimaryColor(MainActivity.this));
+                    mMainBinding.appbar.setBackgroundColor(Utils.Ui.getPrimaryColor(MainActivity.this));
+                    mMainBinding.toolBar.setBackgroundColor(Utils.Ui.getPrimaryColor(MainActivity.this));
+                    mMainBinding.bgImage.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.activityDefaultColor));
+                }
             }
         });
+    }
+
+    /**
+     * setUp status bright or dark by a bitmap
+     */
+    @ColorInt
+    private int setUpStatus(String bgPath) {
+        final int[] color = new int[1];
+        final Bitmap bitmap = Utils.Ui.readBitmapFromFile(bgPath, 50, 50);
+        if (bitmap != null) {
+            //color set (album tag)
+            Palette.from(bitmap).generate(p -> {
+                if (p != null) {
+                    color[0] = p.getVibrantColor(ContextCompat.getColor(MainActivity.this, R.color.colorPrimary));
+                    Utils.Ui.setStatusBarTextColor(MainActivity.this, color[0]);
+                    bitmap.recycle();
+                }
+            });
+        }
+        return color[0];
     }
 
     private void initView() {
@@ -1148,6 +1263,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mSearchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                Log.d(TAG, "onQueryTextSubmit: ");
                 if (getMusicListFragment() != null)
                     getMusicListFragment().getMusicListBinding().includeRecycler.recyclerView.stopScroll();
                 return true;
@@ -1155,23 +1271,9 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                Log.d(TAG, "onQueryTextChange: ");
                 filterData(newText);
                 return true;
-            }
-        });
-        mSearchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
-            @Override
-            public void onSearchViewShown() {
-                Data.sMusicItemsBackUp.addAll(Data.sMusicItems);
-                Data.sAlbumItemsBackUp.addAll(Data.sAlbumItems);
-                //Do some magic
-            }
-
-            @Override
-            public void onSearchViewClosed() {
-                Data.sMusicItemsBackUp.clear();
-                Data.sAlbumItemsBackUp.clear();
-                //Do some magic
             }
         });
 

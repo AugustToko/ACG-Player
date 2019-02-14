@@ -11,6 +11,8 @@
 
 package top.geek_studio.chenlongcould.geeklibrary.theme;
 
+import java.util.List;
+
 @SuppressWarnings("WeakerAccess")
 public class Theme {
     private String id;
@@ -26,7 +28,7 @@ public class Theme {
     private String thumbnail;
     private String select;
 
-    public Theme(String id, String path, String title, String date, String nav_name, String author, String support_area, String primary_color, String primary_color_dark, String accent_color, String thumbnail, String select) {
+    public Theme(String id, String path, String title, String date, String nav_name, String author, String support_area, String primary_color, String primary_color_dark, String accent_color, String thumbnail, String select, List<String> image_bg) {
         this.id = id;
         this.path = path;
         this.title = title;

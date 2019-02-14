@@ -116,7 +116,7 @@ public final class SettingsActivity extends MyBaseCompatActivity {
                     mPrimaryImage.clearAnimation();
 
                     //set cardColor
-                    SettingsActivity.super.setUpTaskCardColor(color);
+                    setUpTaskCardColor(color);
                 }
                 break;
 
@@ -199,6 +199,7 @@ public final class SettingsActivity extends MyBaseCompatActivity {
         mToolbar.inflateMenu(R.menu.menu_toolbar_settings);
 
         super.initView(mToolbar, mAppBarLayout);
+        super.initStyle();
         initPreView();
 
         mToolbar.setOnMenuItemClickListener(menuItem -> {
@@ -614,7 +615,6 @@ public final class SettingsActivity extends MyBaseCompatActivity {
 
     @Override
     public void initStyle() {
-        super.initStyle();
         mPrimaryImage.setBackgroundColor(Utils.Ui.getPrimaryColor(this));
         mPrimaryDarkImage.setBackgroundColor(Utils.Ui.getPrimaryDarkColor(this));
         mAccentImage.setBackgroundColor(Utils.Ui.getAccentColor(this));

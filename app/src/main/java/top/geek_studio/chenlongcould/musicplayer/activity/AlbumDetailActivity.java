@@ -149,7 +149,7 @@ public final class AlbumDetailActivity extends MyBaseCompatActivity {
             final View contentView = getWindow().getDecorView().findViewById(android.R.id.content);
             contentView.post(() -> observableScrollViewCallbacks.onScrollChanged(-headerViewHeight, false, false));
             mAlbumDetailBinding.recyclerView.setLayoutManager(new GridLayoutManager(AlbumDetailActivity.this, 1));
-            final MyRecyclerAdapter adapter = new MyRecyclerAdapter(mSongs, AlbumDetailActivity.this, TAG);
+            final MyRecyclerAdapter adapter = new MyRecyclerAdapter(mSongs, AlbumDetailActivity.this, TAG, 0);
             mAlbumDetailBinding.recyclerView.setAdapter(adapter);
             adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
                 @Override
@@ -353,11 +353,6 @@ public final class AlbumDetailActivity extends MyBaseCompatActivity {
             mAlbumDetailBinding.durationIcon.setColorFilter(Color.WHITE);
             mAlbumDetailBinding.albumYearIcon.setColorFilter(Color.WHITE);
         }
-    }
-
-    @Override
-    public void initStyle() {
-        super.initStyle();
     }
 
     @Override

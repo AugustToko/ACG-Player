@@ -1,0 +1,139 @@
+<!--
+  ~ *************************************************************
+  ~ 文件：recycler_music_list_item.xml  模块：app  项目：MusicPlayer
+  ~ 当前修改时间：2019年01月27日 13:11:38
+  ~ 上次修改时间：2019年01月19日 11:09:58
+  ~ 作者：chenlongcould
+  ~ Geek Studio
+  ~ Copyright (c) 2019
+  ~ *************************************************************
+  -->
+
+<!--in MyRecyclerAdapter-->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/recycler_music_item_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_16"
+        android:layout_marginTop="@dimen/margin_16"
+        android:layout_marginRight="@dimen/margin_16"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:shadowColor="@android:color/transparent"
+        android:shadowRadius="0"
+        app:cardBackgroundColor="@color/card_bg"
+        app:cardCornerRadius="3dp"
+        app:cardElevation="0dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/line_set"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/item_frame_line">
+
+            <include
+                layout="@layout/recycler_music_list_item_expand_style_1"
+                tools:visibility="gone" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/music_item_height"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:layout_editor_absoluteX="6dp">
+
+                <ImageView
+                    android:id="@+id/recycler_item_album_image"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="@dimen/margin_16"
+                    android:layout_marginBottom="@dimen/margin_16"
+                    android:contentDescription="@string/app_name"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:src="@color/colorPrimaryDark" />
+
+                <TextView
+                    android:id="@+id/recycler_item_music_type_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="16dp"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toStartOf="@+id/recycler_item_menu"
+                    app:layout_constraintTop_toBottomOf="@+id/recycler_item_music_name"
+                    tools:text="@string/app_name" />
+
+                <TextView
+                    android:id="@+id/recycler_item_music_album_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="8dp"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:text="Cover Text"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toStartOf="@+id/recycler_item_music_duration"
+                    app:layout_constraintStart_toStartOf="@+id/recycler_item_music_name"
+                    app:layout_constraintTop_toBottomOf="@+id/recycler_item_music_name" />
+
+                <TextView
+                    android:id="@+id/recycler_item_music_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:text="Music Text"
+                    android:textColor="?android:textColorPrimary"
+                    android:textSize="18sp"
+                    app:layout_constraintEnd_toStartOf="@+id/recycler_item_menu"
+                    app:layout_constraintStart_toEndOf="@+id/recycler_item_album_image"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/recycler_item_music_duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="8dp"
+                    android:text="Time"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toStartOf="@+id/recycler_item_music_type_name"
+                    app:layout_constraintTop_toBottomOf="@+id/recycler_item_music_name" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/recycler_item_menu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="8dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:src="@drawable/ic_more_vert_24px"
+                    android:tint="#636363"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</layout>

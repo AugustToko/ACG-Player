@@ -77,6 +77,7 @@ public class PublicActivity extends MyBaseCompatActivity {
         mAppBarLayout = findViewById(R.id.app_bar_layout);
         mToolbar = findViewById(R.id.toolbar);
         super.initView(mToolbar, mAppBarLayout);
+        super.initStyle();
         mToolbar.setNavigationOnClickListener(v -> onBackPressed());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 

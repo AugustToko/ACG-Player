@@ -38,6 +38,10 @@
     <dimen name="margin_8">8dp</dimen>
     <dimen name="margin_car_list">280dp</dimen>
 
+    <!--frame out line-->
+    <dimen name="frame_width">1dp</dimen>
+    <dimen name="frame_corners">2dp</dimen>
+
     <dimen name="album_image_height">400dp</dimen>
 
     <!--by Karim Abou Zeid (kabouzeid)-->

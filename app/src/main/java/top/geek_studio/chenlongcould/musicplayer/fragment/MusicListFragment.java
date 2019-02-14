@@ -64,7 +64,7 @@ public final class MusicListFragment extends Fragment implements IStyle {
 //        mMusicListBinding.includeRecycler.recyclerView.addItemDecoration(Data.getItemDecoration(mActivity));
         mMusicListBinding.includeRecycler.recyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
         mMusicListBinding.includeRecycler.recyclerView.setHasFixedSize(true);
-        adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity, TAG);
+        adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity, TAG, 1);
         mMusicListBinding.includeRecycler.recyclerView.setAdapter(adapter);
 
         return mMusicListBinding.getRoot();

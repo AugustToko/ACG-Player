@@ -96,4 +96,5 @@ public final class AboutLic extends MyBaseCompatActivity {
         mDisposable.dispose();
         super.onStop();
     }
+
 }

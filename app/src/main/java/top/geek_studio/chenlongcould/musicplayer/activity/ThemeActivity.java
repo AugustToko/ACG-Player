@@ -98,6 +98,7 @@ public class ThemeActivity extends MyBaseCompatActivity {
         super.onCreate(savedInstanceState);
         mThemeBinding = DataBindingUtil.setContentView(this, R.layout.activity_theme);
         super.initView(mThemeBinding.toolbar, mThemeBinding.appBarLayout);
+        super.initStyle();
 
         noteCheck();
 
@@ -152,6 +153,7 @@ public class ThemeActivity extends MyBaseCompatActivity {
             }
             return true;
         });
+        mThemeBinding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         mDBHelper = new MyThemeDBHelper(this, ThemeStore.DATA_BASE_NAME, null, 1);
         mThemeBinding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -247,6 +249,7 @@ public class ThemeActivity extends MyBaseCompatActivity {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     private void loadDataUI() {
         new AsyncTask<Void, Void, Void>() {
 
@@ -314,6 +317,7 @@ public class ThemeActivity extends MyBaseCompatActivity {
                     fileArrayList.sort(File::compareTo);
                 }
 
+                //转换File 为 Theme
                 for (File f : fileArrayList) {
                     mThemes.add(ThemeUtils.fileToTheme(f));
 //                        Log.d(TAG, "doInBackground: " + f.getPath());
@@ -431,11 +435,6 @@ public class ThemeActivity extends MyBaseCompatActivity {
             }
         }.execute();
 
-    }
-
-    @Override
-    public void initStyle() {
-        super.initStyle();
     }
 
     public ViewGroup getRoot() {

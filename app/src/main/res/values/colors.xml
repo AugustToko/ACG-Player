@@ -49,4 +49,6 @@
 
     <color name="item_default_bg">#fafafafa</color>
 
+    <color name="card_bg">#56FFFFFF</color>
+
 </resources>

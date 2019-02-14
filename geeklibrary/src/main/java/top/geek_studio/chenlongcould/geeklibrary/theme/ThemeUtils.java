@@ -18,6 +18,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -54,6 +56,10 @@ public final class ThemeUtils {
         return true;
     }
 
+    public static String getBgFileByName(Theme theme, String name) {
+        return theme.getPath() + File.separatorChar + ThemeStore.DIR_IMG_BG + File.separatorChar + name;
+    }
+
     /**
      * find theme with id
      */
@@ -87,6 +93,9 @@ public final class ThemeUtils {
                 String select = "null";
                 String path = f.getPath();
 
+                List<String> bgImages = new ArrayList<>();
+
+                //read Detail.text
                 final BufferedReader bufferedReader = new BufferedReader(new FileReader(detailText));
                 String line;
 
@@ -153,6 +162,13 @@ public final class ThemeUtils {
                     }
                 }
 
+                //add Background Image
+                File imgDir = new File(f.getAbsolutePath() + File.separatorChar + ThemeStore.DIR_IMG);
+                for (File file : imgDir.listFiles()) {
+                    bgImages.add(f.getAbsolutePath());
+                }
+
+                //检查项目数量
                 if (items >= ThemeStore.MIN_ITEM) {
                     Log.d(TAG, "fileToTheme: theme id is: " + f.getName());
                     return new Theme.Builder(f.getName())
@@ -167,6 +183,8 @@ public final class ThemeUtils {
                             .setThumbnail(thumbnail)
                             .setPrimaryColor(primary_color)
                             .build();
+                } else {
+                    Log.d(TAG, "fileToTheme: items not > min");
                 }
             }
         } catch (IOException e) {

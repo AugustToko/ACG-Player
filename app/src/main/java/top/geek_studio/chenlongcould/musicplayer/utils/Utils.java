@@ -26,10 +26,10 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.media.MediaMetadataRetriever;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
@@ -84,6 +84,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.core.graphics.ColorUtils;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
 import top.geek_studio.chenlongcould.musicplayer.Data;
@@ -179,8 +180,7 @@ public final class Utils {
             return img;
         }
 
-        @Nullable
-        private static String getCoverPath(final Context context, final int albumId) {
+        public static String getCoverPath(final Context context, final int albumId) {
             final String[] albumPath = {null};
 
             final Cursor cursor = context.getContentResolver().query(
@@ -305,7 +305,7 @@ public final class Utils {
 
         @SuppressWarnings("SameParameterValue")
         private static Bitmap getDrawableBitmap(@NonNull Context context, @DrawableRes int vectorDrawableId) {
-            return Ui.readBitmapFromRes(context, vectorDrawableId, 200, 200);
+            return Ui.readBitmapFromRes(context, vectorDrawableId, 100, 100);
         }
 
         /**
@@ -554,6 +554,17 @@ public final class Utils {
             return height;
         }
 
+        public static void setStatusBarTextColor(final Activity activity, @ColorInt int color) {
+            final View decor = activity.getWindow().getDecorView();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (isColorLight(color)) {
+                    decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+                } else {
+                    decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+                }
+            }
+        }
+
         /**
          * set color (style)
          *
@@ -561,11 +572,11 @@ public final class Utils {
          * @param appBar   appBarLayout
          * @param toolbar  toolbar
          */
-        public static void setTopBottomColor(final Activity activity, final AppBarLayout appBar, final androidx.appcompat.widget.Toolbar toolbar) {
-            SharedPreferences mDefPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
-            appBar.setBackgroundColor(mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(activity, R.color.colorPrimary)));
-            toolbar.setBackgroundColor(mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(activity, R.color.colorPrimary)));
-            activity.getWindow().setNavigationBarColor(mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, ContextCompat.getColor(activity, R.color.colorPrimaryDark)));
+        public static void setTopBottomColor(final Activity activity, final AppBarLayout appBar, final Toolbar toolbar) {
+            setStatusBarTextColor(activity, getPrimaryColor(activity));
+            appBar.setBackgroundColor(getPrimaryColor(activity));
+            toolbar.setBackgroundColor(getPrimaryColor(activity));
+            activity.getWindow().setNavigationBarColor(getPrimaryDarkColor(activity));
         }
 
         public static void setPlayButtonNowPlaying() {
@@ -805,9 +816,19 @@ public final class Utils {
 
         }
 
-        public static boolean isColorLight(@ColorInt final int color) {
-            double darkness = 1.0D - (0.299D * (double) Color.red(color) + 0.587D * (double) Color.green(color) + 0.114D * (double) Color.blue(color)) / 255.0D;
-            return darkness < 0.4D;
+//        public static boolean isColorLight(@ColorInt final int color) {
+//            double darkness = 1.0D - (0.299D * (double) Color.red(color) + 0.587D * (double) Color.green(color) + 0.114D * (double) Color.blue(color)) / 255.0D;
+//            return darkness < 0.4D;
+//        }
+
+        /**
+         * 判断颜色是不是亮色
+         *
+         * @param color
+         * @return bool
+         */
+        public static boolean isColorLight(@ColorInt int color) {
+            return ColorUtils.calculateLuminance(color) >= 0.5;
         }
 
         /**
@@ -819,9 +840,11 @@ public final class Utils {
         public static void setOverToolbarColor(Toolbar toolbar, @ColorInt int color) {
             if (toolbar.getNavigationIcon() != null) toolbar.getNavigationIcon().setTint(color);
             toolbar.setTitleTextColor(color);
+
             if (toolbar.getSubtitle() != null) {
                 toolbar.setSubtitleTextColor(color);
             }
+
             if (toolbar.getMenu().size() != 0) {
                 if (toolbar.getOverflowIcon() != null) toolbar.getOverflowIcon().setTint(color);
                 for (int i = 0; i < toolbar.getMenu().size(); i++) {

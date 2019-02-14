@@ -32,6 +32,11 @@
         android:screenOrientation="portrait"
         android:theme="@style/LightTheme"
         tools:replace="android:allowBackup">
+        <activity
+            android:name=".activity.ScrollingActivity"
+            android:label="@string/title_activity_scrolling"
+            android:theme="@style/LightTheme.NoActionBar"></activity>
+
         <receiver
             android:name=".broadcasts.NotificationBroadcast"
             android:enabled="true"

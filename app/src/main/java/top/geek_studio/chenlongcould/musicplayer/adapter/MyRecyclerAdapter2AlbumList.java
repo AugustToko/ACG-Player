@@ -15,7 +15,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -57,7 +56,6 @@ import okhttp3.Callback;
 import okhttp3.Response;
 import top.geek_studio.chenlongcould.geeklibrary.DownloadUtil;
 import top.geek_studio.chenlongcould.geeklibrary.HttpUtil;
-import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.MyApplication;
@@ -69,7 +67,7 @@ import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 import top.geek_studio.chenlongcould.musicplayer.thread_pool.AlbumThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
-public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRecyclerAdapter2AlbumList.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter, IStyle {
+public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRecyclerAdapter2AlbumList.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
 
     private static final String TAG = "AlbumAdapter";
 
@@ -83,7 +81,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
     private MainActivity mMainActivity;
 
-    private ViewHolder mCurrentBind;
+//    private ViewHolder mCurrentBind;
 
     public MyRecyclerAdapter2AlbumList(MainActivity activity, List<AlbumItem> albumNameList, int type) {
         this.mAlbumNameList = albumNameList;
@@ -122,43 +120,31 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
     }
 
     @Override
-    public void onViewRecycled(@NonNull ViewHolder holder) {
-        GlideApp.with(mMainActivity).clear(holder.mAlbumImage);
-        holder.mAlbumImage.setTag(null);
-        super.onViewRecycled(holder);
-    }
-
-    @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 
-        //verify AND CLEAR!
-        if (viewHolder.mAlbumImage == null) {
-            Log.e(TAG, "imageView null clear_image");
-            GlideApp.with(mMainActivity).clear(viewHolder.mAlbumImage);
-        } else {
-            if (viewHolder.mAlbumImage.getTag(R.string.key_id_3) == null) {
-                Log.e(TAG, "key null clear_image");
-                GlideApp.with(mMainActivity).clear(viewHolder.mAlbumImage);
-            } else {
-                //根据position判断是否为复用ViewHolder
-                if (((int) viewHolder.mAlbumImage.getTag(R.string.key_id_3)) != viewHolder.getAdapterPosition()) {
-                    Log.e(TAG, "key error clear_image");
-                    GlideApp.with(mMainActivity).clear(viewHolder.mAlbumImage);
-                }
-            }
-        }
+//        //verify AND CLEAR!
+//        if (viewHolder.mAlbumImage == null) {
+//            Log.e(TAG, "imageView null clear_image");
+//            GlideApp.with(mMainActivity).clear(viewHolder.mAlbumImage);
+//        } else {
+//            if (viewHolder.mAlbumImage.getTag(R.string.key_id_3) == null) {
+//                Log.e(TAG, "key null clear_image");
+//                GlideApp.with(mMainActivity).clear(viewHolder.mAlbumImage);
+//            } else {
+//                //根据position判断是否为复用ViewHolder
+//                if (((int) viewHolder.mAlbumImage.getTag(R.string.key_id_3)) != viewHolder.getAdapterPosition()) {
+//                    Log.e(TAG, "key error clear_image");
+//                    GlideApp.with(mMainActivity).clear(viewHolder.mAlbumImage);
+//                }
+//            }
+//        }
 
-        mCurrentBind = viewHolder;
-        Values.CurrentData.CURRENT_BIND_INDEX_ALBUM_LIST = viewHolder.getAdapterPosition();
-
-        initStyle();
 
         viewHolder.mAlbumText.setText(mAlbumNameList.get(viewHolder.getAdapterPosition()).getAlbumName());
         viewHolder.mAlbumImage.setTag(R.string.key_id_3, viewHolder.getAdapterPosition());      //set TAG
 
-        try {
             AlbumThreadPool.post(() -> {
-
+                Values.CurrentData.CURRENT_BIND_INDEX_ALBUM_LIST = viewHolder.getAdapterPosition();
                 final String[] albumPath = {null};
 
                 AlbumItem albumItem = mAlbumNameList.get(viewHolder.getAdapterPosition());
@@ -236,6 +222,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
                                                                                 .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                                                                                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                                                                                 .into(viewHolder.mAlbumImage));
+                                                                        viewHolder.mAlbumImage.setTag(R.string.key_id_3, null);
                                                                     }
                                                                 }
 
@@ -270,6 +257,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
                                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                                         .diskCacheStrategy(DiskCacheStrategy.NONE)
                                         .into(viewHolder.mAlbumImage));
+                                viewHolder.mAlbumImage.setTag(R.string.key_id_3, null);
                             }
                         } else {
                             Log.d(TAG, "albumLoader: File exists or force not open, loading default..." + " albumName is: " + albumName);
@@ -313,10 +301,6 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
                 }
 
             });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
     }
 
     /**
@@ -329,10 +313,12 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
         } else {
             if (imageView.getTag(R.string.key_id_3) == null) {
                 Log.e(TAG, "key null clear_image");
+                GlideApp.with(imageView).clear(imageView);
             } else {
                 //根据position判断是否为复用ViewHolder
                 if (((int) imageView.getTag(R.string.key_id_3)) != index) {
                     Log.e(TAG, "key error clear_image");
+                    GlideApp.with(imageView).clear(imageView);
                 } else {
                     flag = true;
                 }
@@ -353,12 +339,14 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                         .diskCacheStrategy(DiskCacheStrategy.NONE)
                         .into(imageView));
+                imageView.setTag(R.string.key_id_3, null);
             } else {
                 imageView.post(() -> GlideApp.with(context)
                         .load(albumPath)
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                         .diskCacheStrategy(DiskCacheStrategy.NONE)
                         .into(imageView));
+                imageView.setTag(R.string.key_id_3, null);
             }
 
 
@@ -377,19 +365,19 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
         return String.valueOf(mAlbumNameList.get(position).getAlbumName().charAt(0));
     }
 
-    @Override
-    public void initStyle() {
-        switch (mType) {
-            case LINEAR_TYPE: {
-                mCurrentBind.mAlbumText.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
-            }
-            break;
-            case GRID_TYPE: {
-                mCurrentBind.mAlbumText.setTextColor(Color.WHITE);
-            }
-            break;
-        }
-    }
+//    @Override
+//    public void initStyle() {
+//        switch (mType) {
+//            case LINEAR_TYPE: {
+//                mCurrentBind.mAlbumText.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
+//            }
+//            break;
+//            case GRID_TYPE: {
+//                mCurrentBind.mAlbumText.setTextColor(Color.WHITE);
+//            }
+//            break;
+//        }
+//    }
 
 //    static class MyTask extends AsyncTask<Void, Void, String> {
 //

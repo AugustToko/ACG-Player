@@ -20,6 +20,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -67,6 +68,9 @@ public class MyBaseCompatActivity extends AppCompatActivity implements IStyle {
 
     }
 
+    /**
+     * setup TaskCardColor
+     */
     protected void setUpTaskCardColor(@ColorInt int color) {
         setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, color));
     }
@@ -78,6 +82,7 @@ public class MyBaseCompatActivity extends AppCompatActivity implements IStyle {
 
     @Override
     public void initStyle() {
+        Log.d(TAG, "initStyle: ");
         setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, Utils.Ui.getPrimaryColor(this)));
         Utils.Ui.setTopBottomColor(this, mAppBarLayout, mToolbar);
         Utils.Ui.setOverToolbarColor(mToolbar, Utils.Ui.getTitleColor(this));

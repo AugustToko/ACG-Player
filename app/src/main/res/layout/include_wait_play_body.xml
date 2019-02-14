@@ -159,19 +159,19 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/recycler_mask" />
-
-    <ImageView
-        android:id="@+id/recycler_mask"
-        android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:src="@drawable/ramp_bg_light"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/next_will_text" />
+
+    <!--<ImageView-->
+    <!--android:id="@+id/recycler_mask"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="8dp"-->
+    <!--android:layout_marginStart="8dp"-->
+    <!--android:layout_marginTop="8dp"-->
+    <!--android:layout_marginEnd="8dp"-->
+    <!--android:src="@drawable/ramp_bg_light"-->
+    <!--app:layout_constraintEnd_toEndOf="parent"-->
+    <!--app:layout_constraintStart_toStartOf="parent"-->
+    <!--app:layout_constraintTop_toBottomOf="@+id/next_will_text" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
