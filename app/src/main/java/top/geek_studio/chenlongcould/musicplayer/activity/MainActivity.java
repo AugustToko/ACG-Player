@@ -692,6 +692,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         if (mSearchView.isSearchOpen()) {
             mSearchView.closeSearch();
+            return;
         }
 
         //2

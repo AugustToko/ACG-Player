@@ -31,7 +31,7 @@ android {
         versionName '2.6.0.6(201902121522)'
         testInstrumentationRunner "android.support.albumLoader.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config
-        versionCode 73
+        versionCode 74
         flavorDimensions "default"
 
         externalNativeBuild {

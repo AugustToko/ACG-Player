@@ -15,6 +15,7 @@ import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.graphics.drawable.Icon;
@@ -29,11 +30,13 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.fragment.AlbumListFragment;
 import top.geek_studio.chenlongcould.musicplayer.fragment.ArtistListFragment;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
+import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 public final class MyApplication extends Application {
 
@@ -57,7 +60,7 @@ public final class MyApplication extends Application {
 
     public static final String APP_ID = "ca-app-pub-1302949087387063~1079129255";
 
-    public static final int VER_CODE = 46;
+    public static final int VER_CODE = 74;
 
     @Override
     public void onCreate() {
@@ -68,23 +71,16 @@ public final class MyApplication extends Application {
         if (getProcessName(this).equals(getPackageName())) {
 
 //            // TODO: 2019/1/6 ver
-//            //noinspection StatementWithEmptyBody
-//            if (mDefSharedPreferences.getLong(VERSION_CODE, -1) != VER_CODE) {
+            //noinspection StatementWithEmptyBody
+            if (PreferenceManager.getDefaultSharedPreferences(this).getLong(VERSION_CODE, -1) != VER_CODE) {
 //                Toast.makeText(this, "建议手动清除该应用程序数据...", Toast.LENGTH_SHORT).show();
-//            }
-//
-//            //add version code
-//            final SharedPreferences.Editor ver_edit = mDefSharedPreferences.edit();
-//            ver_edit.putLong(VERSION_CODE, VER_CODE);
-//            ver_edit.apply();
-//
-//            int id = mDefSharedPreferences.getInt(Values.SharedPrefsTag.FAVOURITE_LIST_ID, -1);
-//            if (id == -1) {
-//                id = PlayListsUtil.createPlaylist(this, "Favourite List");
-//                SharedPreferences.Editor editor = mDefSharedPreferences.edit();
-//                editor.putInt(Values.SharedPrefsTag.FAVOURITE_LIST_ID, id);
-//                editor.apply();
-//            }
+                Utils.IO.delFolder(getExternalFilesDir(ThemeStore.DIR_NAME).getAbsolutePath());
+            }
+
+            //add version code
+            final SharedPreferences.Editor ver_edit = PreferenceManager.getDefaultSharedPreferences(this).edit();
+            ver_edit.putLong(VERSION_CODE, VER_CODE);
+            ver_edit.apply();
 
 //            //set language
 //            Resources resources = getResources();
