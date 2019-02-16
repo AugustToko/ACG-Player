@@ -14,21 +14,25 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/recycler_music_item_view"
+    <FrameLayout
+        android:id="@+id/u_view"
+        android:layout_marginRight="@dimen/margin_16"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/margin_16"
         android:layout_marginTop="@dimen/margin_16"
-        android:layout_marginRight="@dimen/margin_16"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?attr/selectableItemBackground"
-        android:shadowColor="@android:color/transparent"
-        android:shadowRadius="0"
-        app:cardBackgroundColor="@color/card_bg"
-        app:cardCornerRadius="3dp"
-        app:cardElevation="0dp">
+        android:foreground="?attr/selectableItemBackground">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/recycler_music_item_group"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="1dp"
+            android:shadowColor="@android:color/transparent"
+            android:shadowRadius="0"
+            app:cardBackgroundColor="@color/card_bg"
+            app:cardCornerRadius="3dp"
+            app:cardElevation="0dp" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/line_set"
@@ -43,8 +47,7 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/music_item_height"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:layout_editor_absoluteX="6dp">
+                app:layout_constraintTop_toTopOf="parent">
 
                 <ImageView
                     android:id="@+id/recycler_item_album_image"
@@ -57,8 +60,8 @@
                     android:contentDescription="@string/app_name"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:src="@color/colorPrimaryDark" />
+                    android:src="@drawable/default_album_art"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/recycler_item_music_type_name"
@@ -134,6 +137,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </androidx.cardview.widget.CardView>
+    </FrameLayout>
 
 </layout>

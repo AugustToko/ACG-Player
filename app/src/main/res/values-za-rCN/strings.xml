@@ -28,7 +28,7 @@
     <string name="app_color">应用颜色</string>
     <string name="color_primary">主要颜色</string>
     <string name="style_settings">风格设置</string>
-    <string name="this_is_body_color_like_toolbar">这是像Toolbar的颜色</string>
+    <string name="this_is_body_color_like_toolbar">应用于Toolbar, TabLayout</string>
     <string name="the_accent_color_like_button">强调色</string>
     <string name="album">专辑</string>
     <string name="music">音乐</string>
@@ -96,7 +96,7 @@
     <string name="author">作者</string>
     <string name="thanks">感谢</string>
     <string name="set_status_bar_translucent">设置状态栏透明</string>
-    <string name="set_status_bar_translucent_no_black_square_mask">设置状态栏半透明没有黑色方形遮罩</string>
+    <string name="set_status_bar_translucent_no_black_square_mask">设置状态栏是否显示黑色方形遮罩</string>
     <string name="donate">捐赠</string>
     <string name="update_log">更新日志</string>
     <string name="version">版本</string>
@@ -121,13 +121,13 @@
     <string name="black_list">黑名单</string>
     <string name="skip_the_directory_that_in_the_blacklist">跳过黑名单中的目录</string>
     <string name="shortest_time">最短的时间</string>
-    <string name="skip_songs_that_are_less_than_the_minimum_duration">跳过小于最小持续时间的歌曲</string>
+    <string name="skip_songs_that_are_less_than_the_minimum_duration">跳过小于最小持续时间(%1$d)的歌曲</string>
     <string name="filter">过滤器</string>
     <string name="remove_frome_black_list">从黑名单中删除</string>
     <string name="clear">清楚</string>
     <string name="done">完成</string>
     <string name="confirm">确认</string>
-    <string name="this_is_dark_color_like_status_bar">更改导航栏颜色</string>
+    <string name="this_is_dark_color_like_status_bar">应用于导航栏</string>
     <string name="next_will_play_x">接下來將播放 %1$s</string>
     <string name="skip">跳过</string>
     <string name="already_exsits">已经存在！</string>
@@ -140,4 +140,9 @@
     <string name="close_the_tab_x_int">关闭标签 %1$s ？</string>
     <string name="type_somthing">输入一些东西</string>
     <string name="force_use_net_album">强制使用网络封面</string>
+    <string name="drop_to_trash_can">扔到垃圾箱</string>
+    <string name="do_not_show_again">不再显示</string>
+    <string name="set_title_color">主要文字配色</string>
+    <string name="set_recyclerview_item_style">设置recyclerView项目样式</string>
+    <string name="recyclerview_item_style">RecyclerView项目样式</string>
 </resources>

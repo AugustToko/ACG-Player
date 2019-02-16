@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:background="#000">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="@dimen/toolbar_elevation">
+
+            <com.google.android.material.appbar.AppBarLayout
+                android:id="@+id/appbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:paddingTop="@dimen/toolbar_padding"
+                app:elevation="0dp">
+
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?actionBarSize"
+                    android:background="@android:color/transparent"
+                    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                    app:layout_scrollFlags="scroll|enterAlways"
+                    app:navigationIcon="@drawable/ic_arrow_back_white_24dp"
+                    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                    app:title="@string/app_name">
+
+                </androidx.appcompat.widget.Toolbar>
+
+            </com.google.android.material.appbar.AppBarLayout>
+
+            <ViewStub
+                android:id="@+id/cab_stub"
+                android:layout_width="match_parent"
+                android:layout_height="?android:attr/actionBarSize" />
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <top.geek_studio.chenlongcould.musicplayer.ObservableRecyclerView
+                android:id="@+id/recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:divider="@null"
+                android:dividerHeight="0dp"
+                android:scrollbars="none" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/header"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/detail_header_height"
+                    android:background="#eee"
+                    android:elevation="@dimen/toolbar_elevation"
+                    android:orientation="horizontal"
+                    tools:ignore="UnusedAttribute">
+
+                    <!--placeholder image view, the actual image view can't go here or the shared element transition won't work right-->
+                    <View
+                        android:layout_width="@dimen/detail_header_image_height"
+                        android:layout_height="@dimen/detail_header_image_height"
+                        android:layout_margin="16dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:orientation="vertical">
+
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingStart="0dp"
+                            android:paddingLeft="0dp"
+                            android:paddingEnd="16dp"
+                            android:paddingRight="16dp">
+
+                            <ImageView
+                                android:id="@+id/song_count_icon"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_marginStart="0dp"
+                                android:layout_marginLeft="0dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_marginRight="8dp"
+                                app:srcCompat="@drawable/ic_music_note_white_24dp"
+                                tools:ignore="ContentDescription,UnusedAttribute" />
+
+                            <TextView
+                                android:id="@+id/song_count_text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingStart="0dp"
+                            android:paddingLeft="0dp"
+                            android:paddingEnd="16dp"
+                            android:paddingRight="16dp">
+
+                            <ImageView
+                                android:id="@+id/duration_icon"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_marginStart="0dp"
+                                android:layout_marginLeft="0dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_marginRight="8dp"
+                                app:srcCompat="@drawable/ic_timer_white_24dp"
+                                tools:ignore="ContentDescription,UnusedAttribute" />
+
+                            <TextView
+                                android:id="@+id/duration_text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingStart="0dp"
+                            android:paddingLeft="0dp"
+                            android:paddingEnd="16dp"
+                            android:paddingRight="16dp">
+
+                            <ImageView
+                                android:id="@+id/artist_album_count"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_marginStart="0dp"
+                                android:layout_marginLeft="0dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_marginRight="8dp"
+                                app:srcCompat="@drawable/ic_album_white_24dp"
+                                tools:ignore="ContentDescription,UnusedAttribute" />
+
+                            <TextView
+                                android:id="@+id/artist_album_count_text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/transparent"
+                    tools:visibility="gone" />
+
+            </FrameLayout>
+
+            <ImageView
+                android:id="@+id/image"
+                android:layout_width="@dimen/detail_header_image_height"
+                android:layout_height="@dimen/detail_header_image_height"
+                android:layout_margin="16dp"
+                android:scaleType="centerCrop"
+                android:src="#fff"
+                android:transitionName="@string/transition_album_art"
+                tools:ignore="ContentDescription,UnusedAttribute" />
+
+            <View
+                android:id="@+id/header_overlay"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/detail_header_height"
+                android:elevation="@dimen/toolbar_elevation"
+                tools:visibility="gone" />
+        </FrameLayout>
+
+    </LinearLayout>
+</layout>

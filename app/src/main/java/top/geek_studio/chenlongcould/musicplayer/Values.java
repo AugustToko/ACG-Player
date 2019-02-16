@@ -50,10 +50,6 @@ public final class Values {
     public static final int REQUEST_WRITE_EXTERNAL_STORAGE = 60;
     public static final int MAX_HEIGHT_AND_WIDTH = 100;
 
-    public static boolean BIND_SERVICE = false;
-
-    public static boolean STYLE_CHANGED = false;
-
     /**
      * result(s), status
      */
@@ -201,6 +197,8 @@ public final class Values {
          * 提示是否扔进垃圾桶的警告
          */
         public static final String TIP_NOTICE_DROP_TRASH = "TIP_NOTICE_DROP_TRASH";
+
+        public static final String RECYCLER_VIEW_ITEM_STYLE = "RECYCLER_VIEW_ITEM_STYLE";
     }
 
     public static final class BroadCast {

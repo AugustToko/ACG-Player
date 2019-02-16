@@ -13,6 +13,7 @@ package top.geek_studio.chenlongcould.musicplayer.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentMusicListBinding;
@@ -64,7 +66,7 @@ public final class MusicListFragment extends Fragment implements IStyle {
 //        mMusicListBinding.includeRecycler.recyclerView.addItemDecoration(Data.getItemDecoration(mActivity));
         mMusicListBinding.includeRecycler.recyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
         mMusicListBinding.includeRecycler.recyclerView.setHasFixedSize(true);
-        adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity, TAG, 1);
+        adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity, TAG, PreferenceManager.getDefaultSharedPreferences(getContext()).getInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 0));
         mMusicListBinding.includeRecycler.recyclerView.setAdapter(adapter);
 
         return mMusicListBinding.getRoot();

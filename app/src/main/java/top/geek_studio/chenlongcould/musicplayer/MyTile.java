@@ -227,7 +227,7 @@ public class MyTile extends TileService {
         }
 
         if (Data.sActivities.size() == 0) {
-            MainActivity.clear();
+            MainActivity.clearData();
         }
 
         super.onDestroy();

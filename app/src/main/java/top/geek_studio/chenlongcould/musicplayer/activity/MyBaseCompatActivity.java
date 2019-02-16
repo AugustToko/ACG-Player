@@ -15,6 +15,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.graphics.Color;
 import android.os.Build;
@@ -49,8 +50,33 @@ public class MyBaseCompatActivity extends AppCompatActivity implements IStyle {
 
     private TextView mSubtitleView = null;
 
+    public static void setStatusBarTextColor(final Activity activity, @ColorInt int color) {
+        final View decor = activity.getWindow().getDecorView();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (Utils.Ui.isColorLight(color)) {
+                decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            } else {
+                decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            }
+        }
+    }
+
+    /**
+     * setup TaskCardColor
+     */
+    protected void setUpTaskCardColor(@ColorInt int color) {
+        setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, color));
+    }
+
+    protected void initView(Toolbar toolbar, AppBarLayout appBarLayout) {
+        mToolbar = toolbar;
+        mAppBarLayout = appBarLayout;
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        setStatusBarTextColor(this, Utils.Ui.getPrimaryColor(this));
+
         super.onCreate(savedInstanceState);
 
         //设置状态栏是否全透明
@@ -66,18 +92,6 @@ public class MyBaseCompatActivity extends AppCompatActivity implements IStyle {
             }
         }
 
-    }
-
-    /**
-     * setup TaskCardColor
-     */
-    protected void setUpTaskCardColor(@ColorInt int color) {
-        setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, color));
-    }
-
-    protected void initView(Toolbar toolbar, AppBarLayout appBarLayout) {
-        mToolbar = toolbar;
-        mAppBarLayout = appBarLayout;
     }
 
     @Override

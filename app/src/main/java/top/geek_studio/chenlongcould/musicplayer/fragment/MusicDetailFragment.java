@@ -29,6 +29,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -53,6 +54,8 @@ import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
 import java.util.Collections;
@@ -190,7 +193,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NotNull Context context) {
         Log.d(Values.LogTAG.LAG_TAG, "onAttach: MusicDetailFragment");
         super.onAttach(context);
         mMainActivity = (MainActivity) context;
@@ -211,28 +214,32 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
         mHandler.sendEmptyMessage(Values.HandlerWhat.SEEK_BAR_UPDATE);      //let seekBar loop update
         mHandler.sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);      //scroll to the position{@Values.CurrentData.CURRENT_MUSIC_INDEX}
 
-        mCurrentMusicNameText.setText(Data.sCurrentMusicItem.getMusicName());
-        mCurrentAlbumNameText.setText(Data.sCurrentMusicItem.getMusicAlbum());
+        if (Data.sMusicBinder != null) {
+            //检测后台播放
+            try {
 
-        //检测后台播放
-        if (Values.HAS_PLAYED) {
-            if (ReceiverOnMusicPlay.isPlayingMusic()) {
-                mNowPlayingStatusImage.setImageResource(R.drawable.ic_pause_black_24dp);
-                mPlayButton.setImageResource(R.drawable.ic_pause_black_24dp);
+                MusicItem item = Data.sMusicBinder.getCurrentItem();
+                if (item.getMusicID() != -1) {
+                    mCurrentMusicNameText.setText(item.getMusicName());
+                    mCurrentAlbumNameText.setText(item.getMusicAlbum());
+
+                    Bitmap bitmap = Utils.Audio.getCoverBitmap(getContext(), item.getAlbumId());
+                    mNowPlayingStatusImage.setImageResource(R.drawable.ic_pause_black_24dp);
+                    mPlayButton.setImageResource(R.drawable.ic_pause_black_24dp);
+
+                    setSlideInfo(item.getMusicName(), item.getMusicAlbum(), bitmap);
+                    setCurrentInfo(item.getMusicName(), item.getMusicAlbum(), bitmap);
+
+                    mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
+
+                } else {
+
+                }
+            } catch (RemoteException e) {
+                e.printStackTrace();
             }
 
-            Bitmap bitmap = Utils.Audio.getCoverBitmap(getActivity(), Data.sCurrentMusicItem.getAlbumId());
-
-            //nullable
-            setSlideInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), bitmap);
-            setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), bitmap);
-
-            mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
-        } else {
-            mPlayButton.setImageResource(R.drawable.ic_play_arrow_grey_600_24dp);
         }
-
-
         return view;
     }
 
@@ -245,7 +252,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
     private AlbumImageView mMusicAlbumImageOth2;
 
     /**
-     * clear all animations
+     * clearData all animations
      */
     public void clearAnimations() {
         mRandomButton.clearAnimation();
@@ -763,14 +770,15 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                 break;
 
                 case R.id.menu_toolbar_love: {
-                    MusicUtil.toggleFavorite(mMainActivity, Data.sCurrentMusicItem);
-                    updateFav();
+                    MusicUtil.toggleFavorite(mMainActivity, ReceiverOnMusicPlay.getCurrentItem());
+                    updateFav(ReceiverOnMusicPlay.getCurrentItem());
                     Toast.makeText(mMainActivity, getString(R.string.done), Toast.LENGTH_SHORT).show();
                 }
                 break;
 
                 case R.id.menu_toolbar_eq: {
-                    Utils.Audio.openEqualizer(mMainActivity, Data.sCurrentMusicItem.getAlbumId());
+                    MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
+                    if (item != null) Utils.Audio.openEqualizer(mMainActivity, item.getAlbumId());
                 }
 
                 case R.id.menu_toolbar_debug: {
@@ -783,7 +791,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                 }
                 break;
                 case R.id.menu_toolbar_trash_can: {
-                    dropToTrash();
+                    dropToTrash(ReceiverOnMusicPlay.getCurrentItem());
                 }
                 break;
             }
@@ -988,20 +996,23 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
         mPopupMenu.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
                 case Menu.FIRST + 1: {
-                    final String albumName = Data.sCurrentMusicItem.getMusicAlbum();
-                    final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
-                            MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{albumName}, null);
+                    final MusicItem currentItem = ReceiverOnMusicPlay.getCurrentItem();
+                    if (currentItem != null) {
+                        final String albumName = currentItem.getMusicAlbum();
+                        final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
+                                MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{albumName}, null);
 
-                    //int MusicDetailActivity
-                    final Intent intent = new Intent(mMainActivity, AlbumDetailActivity.class);
-                    intent.putExtra("key", albumName);
-                    if (cursor != null) {
-                        cursor.moveToFirst();
-                        int id = Integer.parseInt(cursor.getString(0));
-                        intent.putExtra("_id", id);
-                        cursor.close();
+                        //int MusicDetailActivity
+                        final Intent intent = new Intent(mMainActivity, AlbumDetailActivity.class);
+                        intent.putExtra("key", albumName);
+                        if (cursor != null) {
+                            cursor.moveToFirst();
+                            int id = Integer.parseInt(cursor.getString(0));
+                            intent.putExtra("_id", id);
+                            cursor.close();
+                        }
+                        startActivity(intent);
                     }
-                    startActivity(intent);
                 }
                 break;
                 case Menu.FIRST + 2: {
@@ -1026,7 +1037,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
 
         });
         mCurrentInfoBody.setOnLongClickListener(v -> {
-            dropToTrash();
+            dropToTrash(ReceiverOnMusicPlay.getCurrentItem());
             return true;
         });
 
@@ -1122,8 +1133,8 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
         });
 
         mNowPlayingFavButton.setOnClickListener(v -> {
-            MusicUtil.toggleFavorite(mMainActivity, Data.sCurrentMusicItem);
-            updateFav();
+            MusicUtil.toggleFavorite(mMainActivity, ReceiverOnMusicPlay.getCurrentItem());
+            updateFav(ReceiverOnMusicPlay.getCurrentItem());
             Toast.makeText(mMainActivity, getString(R.string.done), Toast.LENGTH_SHORT).show();
         });
 
@@ -1157,27 +1168,28 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
 
     }
 
-    private void dropToTrash() {
-        if (PreferenceManager.getDefaultSharedPreferences(mMainActivity).getBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, true)) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
-            builder.setTitle(getString(R.string.sure_int));
-            builder.setMessage(getString(R.string.drop_to_trash_can));
-            CheckBox checkBox = new CheckBox(mMainActivity);
-            checkBox.setText(getString(R.string.do_not_show_again));
-            builder.setView(checkBox);
-            builder.setCancelable(true);
-            builder.setNegativeButton(getString(R.string.sure), (dialog, which) -> {
-                if (checkBox.isChecked()) {
-                    PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit().putBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, false).apply();
-                }
-                Data.sTrashCanList.add(Data.sCurrentMusicItem);
-                dialog.dismiss();
-            });
-            builder.setPositiveButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
-            builder.show();
-        } else {
-            Data.sTrashCanList.add(Data.sCurrentMusicItem);
-        }
+    private void dropToTrash(@Nullable MusicItem item) {
+        if (item != null)
+            if (PreferenceManager.getDefaultSharedPreferences(mMainActivity).getBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, true)) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
+                builder.setTitle(getString(R.string.sure_int));
+                builder.setMessage(getString(R.string.drop_to_trash_can));
+                CheckBox checkBox = new CheckBox(mMainActivity);
+                checkBox.setText(getString(R.string.do_not_show_again));
+                builder.setView(checkBox);
+                builder.setCancelable(true);
+                builder.setNegativeButton(getString(R.string.sure), (dialog, which) -> {
+                    if (checkBox.isChecked()) {
+                        PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit().putBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, false).apply();
+                    }
+                    Data.sTrashCanList.add(item);
+                    dialog.dismiss();
+                });
+                builder.setPositiveButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
+                builder.show();
+            } else {
+                Data.sTrashCanList.add(item);
+            }
     }
 
     @Override
@@ -1239,7 +1251,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
 //            mCurrentAlbumNameText.setText(albumName);
 //
 //            if (cover != null) {
-//                GlideApp.with(this).clear(mMusicAlbumImage);
+//                GlideApp.with(this).clearData(mMusicAlbumImage);
 //                GlideApp.with(this)
 //                        .load(cover)
 //                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
@@ -1280,7 +1292,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .into(mMusicAlbumImage);
 
-            updateFav();
+            updateFav(ReceiverOnMusicPlay.getCurrentItem());
 
             Utils.Ui.setBlurEffect(mMainActivity, cover, mBGup, mBGdown, mNextWillText);
         });
@@ -1290,11 +1302,15 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
         return mHandler;
     }
 
-    private void updateFav() {
-        @DrawableRes int id = MusicUtil.isFavorite(mMainActivity, Data.sCurrentMusicItem) ?
-                R.drawable.ic_favorite_white_24dp : R.drawable.ic_favorite_border_white_24dp;
-        mToolbar.getMenu().findItem(R.id.menu_toolbar_love).setIcon(id);
-        mNowPlayingFavButton.setImageResource(id);
+    /**
+     * update Favourite music icon
+     */
+    private void updateFav(@Nullable MusicItem item) {
+        if (item != null) {
+            @DrawableRes int id = MusicUtil.isFavorite(mMainActivity, item) ? R.drawable.ic_favorite_white_24dp : R.drawable.ic_favorite_border_white_24dp;
+            mToolbar.getMenu().findItem(R.id.menu_toolbar_love).setIcon(id);
+            mNowPlayingFavButton.setImageResource(id);
+        }
     }
 
     /**
@@ -1432,124 +1448,124 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
         super.onDestroyView();
     }
 
-    public final class NotLeakHandler extends Handler {
-        private WeakReference<MainActivity> mWeakReference;
+public final class NotLeakHandler extends Handler {
+    private WeakReference<MainActivity> mWeakReference;
 
-        NotLeakHandler(MainActivity activity, Looper looper) {
-            super(looper);
-            mWeakReference = new WeakReference<>(activity);
-        }
+    NotLeakHandler(MainActivity activity, Looper looper) {
+        super(looper);
+        mWeakReference = new WeakReference<>(activity);
+    }
 
-        @Override
-        public void handleMessage(Message msg) {
+    @Override
+    public void handleMessage(Message msg) {
 
-            switch (msg.what) {
-                case Values.HandlerWhat.INIT_SEEK_BAR: {
-                    mWeakReference.get().runOnUiThread(() -> {
-                        if (Data.sMusicBinder == null) return;
+        switch (msg.what) {
+            case Values.HandlerWhat.INIT_SEEK_BAR: {
+                mWeakReference.get().runOnUiThread(() -> {
+                    if (Data.sMusicBinder == null) return;
 
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        mSeekBar.setProgress(0, true);
+                    } else {
+                        mSeekBar.setProgress(0);
+                    }
+
+                    mCurrentInfoSeek.getLayoutParams().width = 0;
+                    mCurrentInfoSeek.setLayoutParams(mCurrentInfoSeek.getLayoutParams());
+                    mCurrentInfoSeek.requestLayout();
+
+                    mRightTime.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(ReceiverOnMusicPlay.getDuration()))));
+                    mSeekBar.setMax(ReceiverOnMusicPlay.getDuration());
+                });
+            }
+            break;
+
+            case Values.HandlerWhat.SEEK_BAR_UPDATE: {
+                mWeakReference.get().runOnUiThread(() -> {
+                    //点击body 或 music 正在播放 才可以进行seekBar更新
+                    if (Data.sMusicBinder == null) return;
+
+                    if (ReceiverOnMusicPlay.isPlayingMusic()) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            mSeekBar.setProgress(0, true);
+                            mSeekBar.setProgress(ReceiverOnMusicPlay.getCurrentPosition(), true);
                         } else {
-                            mSeekBar.setProgress(0);
+                            mSeekBar.setProgress(ReceiverOnMusicPlay.getCurrentPosition());
                         }
 
-                        mCurrentInfoSeek.getLayoutParams().width = 0;
+                        mCurrentInfoSeek.getLayoutParams().width = mCurrentInfoBody.getWidth() * ReceiverOnMusicPlay.getCurrentPosition() / ReceiverOnMusicPlay.getDuration();
                         mCurrentInfoSeek.setLayoutParams(mCurrentInfoSeek.getLayoutParams());
                         mCurrentInfoSeek.requestLayout();
+                        mLeftTime.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(ReceiverOnMusicPlay.getCurrentPosition()))));
 
-                        mRightTime.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(ReceiverOnMusicPlay.getDuration()))));
-                        mSeekBar.setMax(ReceiverOnMusicPlay.getDuration());
-                    });
-                }
-                break;
+                        Log.i(TAG, "handleMessage: current position " + ReceiverOnMusicPlay.getCurrentPosition() + " ------------ " + ReceiverOnMusicPlay.getDuration());
 
-                case Values.HandlerWhat.SEEK_BAR_UPDATE: {
-                    mWeakReference.get().runOnUiThread(() -> {
-                        //点击body 或 music 正在播放 才可以进行seekBar更新
-                        if (Data.sMusicBinder == null) return;
+                        //播放模式不为循环单曲时，跳出提示
+                        if (!Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_REPEAT_ONE)) {
+                            if (ReceiverOnMusicPlay.getCurrentPosition() / 1000 == ReceiverOnMusicPlay.getDuration() / 1000 - 5 && !SNACK_NOTICE) {
+                                SNACK_NOTICE = true;
 
-                        if (ReceiverOnMusicPlay.isPlayingMusic()) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                mSeekBar.setProgress(ReceiverOnMusicPlay.getCurrentPosition(), true);
-                            } else {
-                                mSeekBar.setProgress(ReceiverOnMusicPlay.getCurrentPosition());
-                            }
-
-                            mCurrentInfoSeek.getLayoutParams().width = mCurrentInfoBody.getWidth() * ReceiverOnMusicPlay.getCurrentPosition() / ReceiverOnMusicPlay.getDuration();
-                            mCurrentInfoSeek.setLayoutParams(mCurrentInfoSeek.getLayoutParams());
-                            mCurrentInfoSeek.requestLayout();
-                            mLeftTime.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(ReceiverOnMusicPlay.getCurrentPosition()))));
-
-                            Log.i(TAG, "handleMessage: current position " + ReceiverOnMusicPlay.getCurrentPosition() + " ------------ " + ReceiverOnMusicPlay.getDuration());
-
-                            //播放模式不为循环单曲时，跳出提示
-                            if (!Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_REPEAT_ONE)) {
-                                if (ReceiverOnMusicPlay.getCurrentPosition() / 1000 == ReceiverOnMusicPlay.getDuration() / 1000 - 5 && !SNACK_NOTICE) {
-                                    SNACK_NOTICE = true;
-
-                                    final GkSnackbar gkSnackbar = new GkSnackbar(mSlidingUpPanelLayout, getString(R.string.next_will_play_x,
-                                            Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX + 1 != Data.sPlayOrderList.size() ? Values.CurrentData.CURRENT_MUSIC_INDEX + 1 : 0).getMusicName())
-                                            , Snackbar.LENGTH_LONG);
-                                    gkSnackbar.setAction(getString(R.string.skip), v -> {
-                                        //点击右侧的按钮之后的操作
-                                        Values.CurrentData.CURRENT_MUSIC_INDEX += 1;
-                                        Utils.SendSomeThing.sendPlay(mMainActivity, 6, ReceiverOnMusicPlay.TYPE_NEXT);
-                                    });
-                                    gkSnackbar.addCallback(new Snackbar.Callback() {
-                                        @Override
-                                        public void onDismissed(Snackbar transientBottomBar, int event) {
-                                            SNACK_NOTICE = false;
-                                        }
-                                    });
-                                    gkSnackbar.setBackgroundColor(Utils.Ui.getPrimaryColor(getActivity()))
-                                            .setBodyViewAlpha(0.8f).setActionTextColor(Color.BLACK);
-                                    gkSnackbar.show();
-
-                                }
+                                final GkSnackbar gkSnackbar = new GkSnackbar(mSlidingUpPanelLayout, getString(R.string.next_will_play_x,
+                                        Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX + 1 != Data.sPlayOrderList.size() ? Values.CurrentData.CURRENT_MUSIC_INDEX + 1 : 0).getMusicName())
+                                        , Snackbar.LENGTH_LONG);
+                                gkSnackbar.setAction(getString(R.string.skip), v -> {
+                                    //点击右侧的按钮之后的操作
+                                    Values.CurrentData.CURRENT_MUSIC_INDEX += 1;
+                                    Utils.SendSomeThing.sendPlay(mMainActivity, 6, ReceiverOnMusicPlay.TYPE_NEXT);
+                                });
+                                gkSnackbar.addCallback(new Snackbar.Callback() {
+                                    @Override
+                                    public void onDismissed(Snackbar transientBottomBar, int event) {
+                                        SNACK_NOTICE = false;
+                                    }
+                                });
+                                gkSnackbar.setBackgroundColor(Utils.Ui.getPrimaryColor(getActivity()))
+                                        .setBodyViewAlpha(0.8f).setActionTextColor(Color.BLACK);
+                                gkSnackbar.show();
 
                             }
 
                         }
-                    });
 
-                    //循环更新 0.5s 一次
-                    mHandler.sendEmptyMessageDelayed(Values.HandlerWhat.SEEK_BAR_UPDATE, 500);
-                }
-                break;
+                    }
+                });
 
-                case Values.HandlerWhat.RECYCLER_SCROLL: {
-                    mWeakReference.get().runOnUiThread(() -> mLinearLayoutManager.scrollToPositionWithOffset(Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sMusicItems.size() ?
-                            Values.CurrentData.CURRENT_MUSIC_INDEX : Values.CurrentData.CURRENT_MUSIC_INDEX + 1, 0));
-                }
-                break;
-
-                case Values.HandlerWhat.SET_BUTTON_PLAY: {
-                    mWeakReference.get().runOnUiThread(() -> {
-                        GlideApp.with(mMainActivity)
-                                .load(R.drawable.ic_pause_black_24dp)
-                                .into(mNowPlayingStatusImage);
-                        GlideApp.with(mMainActivity)
-                                .load(R.drawable.ic_pause_black_24dp)
-                                .into(mPlayButton);
-                    });
-                }
-                break;
-
-                case Values.HandlerWhat.SET_BUTTON_PAUSE: {
-                    mWeakReference.get().runOnUiThread(() -> {
-                        GlideApp.with(mMainActivity)
-                                .load(R.drawable.ic_play_arrow_grey_600_24dp)
-                                .into(mNowPlayingStatusImage);
-                        GlideApp.with(mMainActivity)
-                                .load(R.drawable.ic_play_arrow_grey_600_24dp)
-                                .into(mPlayButton);
-                    });
-                }
-                break;
-                default:
+                //循环更新 0.5s 一次
+                mHandler.sendEmptyMessageDelayed(Values.HandlerWhat.SEEK_BAR_UPDATE, 500);
             }
+            break;
 
+            case Values.HandlerWhat.RECYCLER_SCROLL: {
+                mWeakReference.get().runOnUiThread(() -> mLinearLayoutManager.scrollToPositionWithOffset(Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sMusicItems.size() ?
+                        Values.CurrentData.CURRENT_MUSIC_INDEX : Values.CurrentData.CURRENT_MUSIC_INDEX + 1, 0));
+            }
+            break;
+
+            case Values.HandlerWhat.SET_BUTTON_PLAY: {
+                mWeakReference.get().runOnUiThread(() -> {
+                    GlideApp.with(mMainActivity)
+                            .load(R.drawable.ic_pause_black_24dp)
+                            .into(mNowPlayingStatusImage);
+                    GlideApp.with(mMainActivity)
+                            .load(R.drawable.ic_pause_black_24dp)
+                            .into(mPlayButton);
+                });
+            }
+            break;
+
+            case Values.HandlerWhat.SET_BUTTON_PAUSE: {
+                mWeakReference.get().runOnUiThread(() -> {
+                    GlideApp.with(mMainActivity)
+                            .load(R.drawable.ic_play_arrow_grey_600_24dp)
+                            .into(mNowPlayingStatusImage);
+                    GlideApp.with(mMainActivity)
+                            .load(R.drawable.ic_play_arrow_grey_600_24dp)
+                            .into(mPlayButton);
+                });
+            }
+            break;
+            default:
         }
+
     }
+}
 }

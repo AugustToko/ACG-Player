@@ -12,6 +12,7 @@ import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
@@ -32,6 +33,8 @@ import top.geek_studio.chenlongcould.musicplayer.R;
  * @author Karim Abou Zeid (kabouzeid)
  */
 public class MusicUtil {
+
+    private static final String TAG = "MusicUtil";
 
     public static Uri getMediaStoreAlbumCoverUri(int albumId) {
         final Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
@@ -273,11 +276,15 @@ public class MusicUtil {
         return PlayListsUtil.doPlaylistContains(context, getFavoritesPlaylist(context).getId(), song.getMusicID());
     }
 
-    public static void toggleFavorite(@NonNull final Context context, @NonNull final MusicItem song) {
-        if (isFavorite(context, song)) {
-            PlayListsUtil.removeFromPlaylist(context, song, getFavoritesPlaylist(context).getId());
+    public static void toggleFavorite(@NonNull final Context context, @Nullable final MusicItem song) {
+        if (song != null) {
+            if (isFavorite(context, song)) {
+                PlayListsUtil.removeFromPlaylist(context, song, getFavoritesPlaylist(context).getId());
+            } else {
+                PlayListsUtil.addToPlaylist(context, song, getOrCreateFavoritesPlaylist(context).getId(), false);
+            }
         } else {
-            PlayListsUtil.addToPlaylist(context, song, getOrCreateFavoritesPlaylist(context).getId(), false);
+            Log.d(TAG, "toggleFavorite: the song is null.");
         }
     }
 

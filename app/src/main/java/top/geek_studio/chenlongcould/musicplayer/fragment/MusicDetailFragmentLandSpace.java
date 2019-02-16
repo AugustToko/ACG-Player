@@ -103,7 +103,9 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
                 break;
 
                 case R.id.menu_toolbar_eq: {
-                    Utils.Audio.openEqualizer(mCarViewActivity, Data.sCurrentMusicItem.getAlbumId());
+                    MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
+                    if (item != null)
+                        Utils.Audio.openEqualizer(mCarViewActivity, item.getAlbumId());
                 }
 
                 case R.id.menu_toolbar_debug: {

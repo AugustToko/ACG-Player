@@ -23,8 +23,10 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -561,6 +563,53 @@ public final class SettingsActivity extends MyBaseCompatActivity {
                 mSettingsBinding.albumSwitch.setChecked(true);
             }
             editor.apply();
+        });
+
+        mSettingsBinding.itemStyleSet.setOnClickListener(v -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
+            builder.setTitle(getString(R.string.set_recyclerview_item_style));
+
+            LinearLayout linearLayout = new LinearLayout(SettingsActivity.this);
+            linearLayout.setOrientation(LinearLayout.VERTICAL);
+
+            View s0 = getLayoutInflater().inflate(R.layout.recycler_music_list_item, null);
+            View s1 = getLayoutInflater().inflate(R.layout.recycler_music_list_item_style_1, null);
+
+            s0.findViewById(R.id.music_item_expand_view).setVisibility(View.GONE);
+            s1.findViewById(R.id.music_item_expand_view).setVisibility(View.GONE);
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            params.topMargin = (int) getResources().getDimension(R.dimen.margin_16);
+            params.leftMargin = (int) getResources().getDimension(R.dimen.margin_16);
+            params.rightMargin = (int) getResources().getDimension(R.dimen.margin_16);
+
+            s0.setLayoutParams(params);
+
+            LinearLayout.LayoutParams params2 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            params2.topMargin = (int) getResources().getDimension(R.dimen.margin_16);
+            params2.leftMargin = (int) getResources().getDimension(R.dimen.margin_16);
+            params2.rightMargin = (int) getResources().getDimension(R.dimen.margin_16);
+            params2.bottomMargin = (int) getResources().getDimension(R.dimen.margin_16);
+
+            s1.setLayoutParams(params2);
+
+            s0.setOnClickListener(v1 -> {
+                PreferenceManager.getDefaultSharedPreferences(SettingsActivity.this).edit().putInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 0).apply();
+                MainActivity.NEED_RELOAD = true;
+                Toast.makeText(this, "Select style 0", Toast.LENGTH_SHORT).show();
+            });
+
+            s1.setOnClickListener(v1 -> {
+                PreferenceManager.getDefaultSharedPreferences(SettingsActivity.this).edit().putInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 1).apply();
+                MainActivity.NEED_RELOAD = true;
+                Toast.makeText(this, "Select style 1", Toast.LENGTH_SHORT).show();
+            });
+
+            linearLayout.addView(s0);
+            linearLayout.addView(s1);
+
+            builder.setView(linearLayout);
+            builder.show();
         });
     }
 

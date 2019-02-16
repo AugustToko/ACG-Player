@@ -554,6 +554,9 @@ public final class Utils {
             return height;
         }
 
+        /**
+         * @deprecated {@link top.geek_studio.chenlongcould.musicplayer.activity.MyBaseCompatActivity#setStatusBarTextColor(Activity, int)}
+         */
         public static void setStatusBarTextColor(final Activity activity, @ColorInt int color) {
             final View decor = activity.getWindow().getDecorView();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -670,8 +673,8 @@ public final class Utils {
 //                }
 //            });
 //
-//            //clear
-//            GlideApp.with(activity).clear(primaryBackgroundBef);
+//            //clearData
+//            GlideApp.with(activity).clearData(primaryBackgroundBef);
 //            if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
 //                primaryBackgroundBef.post(() -> GlideApp.with(activity)
 //                        .load(bitmap)
@@ -697,7 +700,7 @@ public final class Utils {
 //
 //                @Override
 //                public void onAnimationEnd(Animator animation) {
-//                    GlideApp.with(activity).clear(primaryBackground);
+//                    GlideApp.with(activity).clearData(primaryBackground);
 //                    if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
 //                        GlideApp.with(activity)
 //                                .load(bitmap)

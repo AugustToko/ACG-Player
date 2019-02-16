@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -74,6 +73,7 @@ public final class Data {
     public static List<MusicItem> sPlayOrderList = new ArrayList<>();
     public static List<PlayListItem> sPlayListItems = new ArrayList<>();
     public static List<ArtistItem> sArtistItems = new ArrayList<>();
+    public static List<ArtistItem> sArtistItemsBackUp = new ArrayList<>();
 
     /**
      * init Data {@link MainActivity}
@@ -147,9 +147,5 @@ public final class Data {
 
         }
     };
-
-    public static void setCurrentMusicItem(@NonNull MusicItem item) {
-        sCurrentMusicItem = item;
-    }
 
 }

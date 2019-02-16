@@ -18,4 +18,6 @@ interface IMuiscService {
 
     //other data input
     void setCurrentMusicData(in MusicItem item);
+
+    MusicItem getCurrentItem();
 }

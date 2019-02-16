@@ -33,9 +33,9 @@ import okhttp3.Response;
 import top.geek_studio.chenlongcould.geeklibrary.HttpUtil;
 import top.geek_studio.chenlongcould.musicplayer.MyApplication;
 import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.databinding.AboutDulTextBinding;
 import top.geek_studio.chenlongcould.musicplayer.databinding.AboutSingleTextBinding;
-import top.geek_studio.chenlongcould.musicplayer.databinding.AboutTemplateDulTextBinding;
-import top.geek_studio.chenlongcould.musicplayer.databinding.AboutTemplateThanksBinding;
+import top.geek_studio.chenlongcould.musicplayer.databinding.AboutThanksBinding;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityAboutAppBinding;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
@@ -54,14 +54,14 @@ public class AboutActivity extends MyBaseCompatActivity {
 
         mAppBinding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-        final AboutTemplateDulTextBinding version = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_dul_text, (ViewGroup) mAppBinding.getRoot(), false);
-        final AboutTemplateDulTextBinding author = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_dul_text, (ViewGroup) mAppBinding.getRoot(), false);
-        final AboutTemplateDulTextBinding web = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_dul_text, (ViewGroup) mAppBinding.getRoot(), false);
+        final AboutDulTextBinding version = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_dul_text, (ViewGroup) mAppBinding.getRoot(), false);
+        final AboutDulTextBinding author = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_dul_text, (ViewGroup) mAppBinding.getRoot(), false);
+        final AboutDulTextBinding web = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_dul_text, (ViewGroup) mAppBinding.getRoot(), false);
         final AboutSingleTextBinding update = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_single_text, (ViewGroup) mAppBinding.getRoot(), false);
         final AboutSingleTextBinding mail = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_single_text, (ViewGroup) mAppBinding.getRoot(), false);
         final AboutSingleTextBinding lic = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_single_text, (ViewGroup) mAppBinding.getRoot(), false);
         final AboutSingleTextBinding share = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_single_text, (ViewGroup) mAppBinding.getRoot(), false);
-        final AboutTemplateThanksBinding thanksBinding = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_thanks, (ViewGroup) mAppBinding.getRoot(), false);
+        final AboutThanksBinding thanksBinding = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_thanks, (ViewGroup) mAppBinding.getRoot(), false);
 
         version.ico.setImageResource(R.drawable.ic_info_outline_black_24dp);
         version.mainText.setText(getString(R.string.version));

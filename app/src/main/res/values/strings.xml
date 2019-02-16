@@ -149,9 +149,9 @@
     <string name="albums">Albums</string>
     <string name="favorites">Favorites</string>
     <string name="black_list">Black List</string>
-    <string name="skip_the_directory_that_in_the_blacklist">Skip the directory that in the blacklist</string>
-    <string name="shortest_time">Shortest Time</string>
-    <string name="skip_songs_that_are_less_than_the_minimum_duration">Skip songs that are less than the minimum duration</string>
+    <string name="skip_the_directory_that_in_the_blacklist">Ignore audio in the blacklist directory</string>
+    <string name="shortest_time">Ignore too short audio</string>
+    <string name="skip_songs_that_are_less_than_the_minimum_duration">Skip songs that are less than the minimum duration: %1$d</string>
     <string name="filter">Filter</string>
     <string name="remove_frome_black_list">Remove from the blacklist</string>
     <string name="clear">Clear</string>
@@ -173,8 +173,8 @@
     <string name="force_use_net_album">Force use Net-Album</string>
     <string name="drop_to_trash_can">Drop to trash can</string>
     <string name="do_not_show_again">Do not show again</string>
-    <string name="title_activity_scrolling">ScrollingActivity</string>
-    <string name="large_text">
+    <string name="title_activity_scrolling" translatable="false">ScrollingActivity</string>
+    <string name="large_text" translatable="false">
         "Material is the metaphor.\n\n"
 
         "A material metaphor is the unifying theory of a rationalized space and a system of motion."
@@ -263,4 +263,7 @@
         "For example, position the FAB to one side of stream of a cards so the FAB won’t interfere "
         "when a user tries to pick up one of cards.\n\n"
     </string>
+    <string name="set_title_color">Set title color</string>
+    <string name="recyclerview_item_style">RecyclerView item style</string>
+    <string name="set_recyclerview_item_style">Set recyclerView item style</string>
 </resources>

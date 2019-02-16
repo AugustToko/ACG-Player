@@ -23,11 +23,11 @@
 	<string name="search">搜索</string>
 	<string name="app_color">應用顏色</string>
     <string name="color_primary">主要颜色</string>
-    <string name="this_is_dark_color_like_status_bar">更改導航欄顏色</string>
+    <string name="this_is_dark_color_like_status_bar">應用於導航欄</string>
     <string name="style_settings">風格設置</string>
-	<string name="this_is_body_color_like_toolbar">這是像工具欄一樣的車身顏色</string>
+    <string name="this_is_body_color_like_toolbar">應用於Toolbar, TabLayout</string>
     <string name="the_accent_color_like_button">強調色</string>
-	<string name="licenses">許可證</string>
+    <string name="licenses">許可</string>
 	<string name="music_detail_background">用Blur設置MusicDetailBackground</string>
 	<string name="set_background_color_or_image_with_blur">設置背景自動顏色或圖像與模糊</string>
 	<string name="auto_night_mode">夜間模式</string>
@@ -58,7 +58,7 @@
 	<string name="fav">喜愛</string>
 	<string name="random_play">隨機播放</string>
 	<string name="theme_image">主題形象</string>
-	<string name="title_activity_theme">ThemeActivity</string>
+    <string name="title_activity_theme">主題</string>
 	<string name="action_settings">設置</string>
     <string name="title_home">主頁</string>
 	<string name="title_dashboard">儀表板</string>
@@ -87,8 +87,8 @@
     <string name="reload">重新加載數據</string>
 	<string name="author">作者</string>
     <string name="thanks">感謝</string>
-	<string name="set_status_bar_translucent">設置狀態欄半透明</string>
-	<string name="set_status_bar_translucent_no_black_square_mask">設置狀態欄半透明沒有黑色方形掩碼</string>
+    <string name="set_status_bar_translucent">設置狀態欄透明</string>
+    <string name="set_status_bar_translucent_no_black_square_mask">設置狀態欄是否顯示黑色方形遮罩</string>
     <string name="donate">捐贈</string>
 	<string name="update_log">更新日誌</string>
     <string name="version">版本</string>
@@ -110,9 +110,9 @@
     <string name="albums">專輯</string>
     <string name="favorites">最愛</string>
     <string name="black_list">黑名單</string>
-    <string name="skip_the_directory_that_in_the_blacklist">跳過黑名單中的目錄</string>
-    <string name="shortest_time">最短的時間</string>
-    <string name="skip_songs_that_are_less_than_the_minimum_duration">跳過小於最小持續時間的歌曲</string>
+    <string name="skip_the_directory_that_in_the_blacklist">忽略黑名單目錄中的音頻</string>
+    <string name="shortest_time">忽略過短音頻</string>
+    <string name="skip_songs_that_are_less_than_the_minimum_duration">跳過小於最小持續時間(%1$d))的歌曲</string>
     <string name="filter">過濾器</string>
     <string name="remove_frome_black_list">從黑名單中刪除</string>
     <string name="clear">清楚</string>
@@ -130,4 +130,9 @@
     <string name="close_the_tab_x_int">關閉標籤 %1$s ？</string>
     <string name="type_somthing">輸入一些東西</string>
     <string name="force_use_net_album">強制使用網絡封面</string>
+    <string name="drop_to_trash_can">扔到垃圾箱</string>
+    <string name="do_not_show_again">不再顯示</string>
+    <string name="set_title_color">主要文字配色</string>
+    <string name="set_recyclerview_item_style">設置recyclerView項目樣式</string>
+    <string name="recyclerview_item_style">RecyclerView項目樣式</string>
 </resources>

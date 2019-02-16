@@ -105,6 +105,7 @@ public final class ArtistListFragment extends Fragment implements VisibleOrGone 
                         String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
                         String albumId = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID));
                         Data.sArtistItems.add(new ArtistItem(albumName, Integer.parseInt(albumId)));
+                        Data.sArtistItemsBackUp.add(new ArtistItem(albumName, Integer.parseInt(albumId)));
                     } while (cursor.moveToNext());
 
                     cursor.close();

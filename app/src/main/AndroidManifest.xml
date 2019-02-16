@@ -35,7 +35,7 @@
         <activity
             android:name=".activity.ScrollingActivity"
             android:label="@string/title_activity_scrolling"
-            android:theme="@style/LightTheme.NoActionBar"></activity>
+            android:theme="@style/LightTheme.NoActionBar" />
 
         <receiver
             android:name=".broadcasts.NotificationBroadcast"
@@ -45,7 +45,7 @@
             android:process=":musicService" />
 
         <service
-            android:name=".MyDBSync"
+            android:name=".MyDBAlbumSync"
             android:exported="false" />
 
         <activity
@@ -97,6 +97,10 @@
         <activity android:name=".activity.TestActivity" />
         <activity
             android:name=".activity.AboutActivity"
+            android:exported="false"
+            android:launchMode="singleTask" />
+        <activity
+            android:name=".activity.ArtistDetailActivity"
             android:exported="false"
             android:launchMode="singleTask" />
 

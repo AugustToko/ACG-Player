@@ -27,6 +27,7 @@ public final class ArtistItem implements Parcelable {
             return new ArtistItem[size];
         }
     };
+
     private String mArtistName;
     private int mArtistId;
 

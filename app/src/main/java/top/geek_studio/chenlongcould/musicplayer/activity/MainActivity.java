@@ -88,9 +88,10 @@ import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeUtils;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.AlbumItem;
+import top.geek_studio.chenlongcould.musicplayer.Models.ArtistItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.MyApplication;
-import top.geek_studio.chenlongcould.musicplayer.MyDBSync;
+import top.geek_studio.chenlongcould.musicplayer.MyDBAlbumSync;
 import top.geek_studio.chenlongcould.musicplayer.MyMusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
@@ -107,6 +108,7 @@ import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicListFragment;
 import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.thread_pool.AlbumThreadPool;
+import top.geek_studio.chenlongcould.musicplayer.thread_pool.ArtistThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.thread_pool.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
@@ -199,22 +201,20 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     private PowerManager.WakeLock wakeLock;
 
     /**
-     * clear data
+     * clearData data
      */
-    public static void clear() {
+    public static void clearData() {
 
         Data.sPlayOrderList.clear();
-
         Data.sMusicItemsBackUp.clear();
         Data.sMusicItems.clear();
         Data.sAlbumItems.clear();
+        Data.sAlbumItemsBackUp.clear();
 
         AlbumListFragment.VIEW_HAS_LOAD = false;
 
-        for (Disposable disposable : Data.sDisposables) {
+        for (Disposable disposable : Data.sDisposables)
             if (disposable != null && !disposable.isDisposed()) disposable.dispose();
-        }
-
         if (Data.getCurrentCover() != null) Data.getCurrentCover().recycle();
     }
 
@@ -276,15 +276,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         initView();
 
         loadData();
-
-        final String themeId = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.SELECT_THEME, "null");
-        if (themeId != null && !themeId.equals("null")) {
-            //todo
-        } else {
-            @ColorInt int color = Utils.Ui.getPrimaryColor(MainActivity.this);
-            Utils.Ui.setStatusBarTextColor(MainActivity.this, color);
-        }
-
     }
 
     @Override
@@ -325,23 +316,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         super.onAttachFragment(fragment);
     }
 
-    /**
-     * exit app without stop music
-     * without clear data...
-     */
-    private void goToBackground() {
-        try {
-            unbindService(Data.sServiceConnection);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        Data.sActivities.clear();
-        Data.sMainRef.clear();
-        Data.sMainRef = null;
-        GlideApp.get(this).clearMemory();
-        finish();
-    }
-
     public final void inflateCommonMenu(Toolbar toolbar) {
         toolbar.getMenu().clear();
         toolbar.inflateMenu(R.menu.menu_toolbar_main_common);
@@ -353,7 +327,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         toolbar.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
                 case R.id.menu_toolbar_exit: {
-                    exitApp();
+                    fullExit();
                 }
                 break;
 
@@ -614,7 +588,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                         cursor.close();
 
                         //sync
-                        MyDBSync.startActionSyncAlbum(this);
+                        MyDBAlbumSync.startActionSyncAlbum(this);
+                        MyDBAlbumSync.startActionSyncArtist(this);
 
                         if (PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM))
                             Collections.shuffle(Data.sPlayOrderList);
@@ -642,12 +617,12 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
                 if (result == -1) {
                     Utils.Ui.fastToast(MainActivity.this, "cursor is null or moveToFirst Fail");
-                    mHandler.postDelayed(MainActivity.this::exitApp, 1000);
+                    mHandler.postDelayed(MainActivity.this::fullExit, 1000);
                     return;
                 }
                 if (result == -2) {
                     Utils.Ui.fastToast(MainActivity.this, "Can not find any music!");
-                    mHandler.postDelayed(MainActivity.this::exitApp, 1000);
+                    mHandler.postDelayed(MainActivity.this::fullExit, 1000);
                     return;
                 }
 
@@ -670,7 +645,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             public final void onError(Throwable throwable) {
                 load.dismiss();
                 Toast.makeText(MainActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                exitApp();
+                fullExit();
             }
 
             @Override
@@ -715,7 +690,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         //4
         if (BACK_PRESSED) {
-            goToBackground();
+            finish();
         } else {
             BACK_PRESSED = true;
             Toast.makeText(this, getString(R.string.press_again_to_exit), Toast.LENGTH_SHORT).show();
@@ -779,7 +754,26 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         //artist
         if (tabOrder.charAt(Values.CurrentData.CURRENT_PAGE_INDEX) == '3') {
+            final ArtistListFragment artistListFragment = getArtistFragment();
+            if (artistListFragment == null) return;
 
+            if (TextUtils.isEmpty(filterStr)) {
+                Data.sArtistItems.clear();
+                Data.sArtistItems.addAll(Data.sArtistItemsBackUp);
+                artistListFragment.getAdapter2ArtistList().notifyDataSetChanged();
+            } else {
+                Data.sArtistItems.clear();
+
+                //algorithm
+                for (ArtistItem item : Data.sArtistItemsBackUp) {
+                    String name = item.getArtistName();
+                    if (name.contains(filterStr.toLowerCase()) || name.contains(filterStr.toUpperCase())) {
+                        Data.sArtistItems.add(item);
+                    }
+                }
+
+                artistListFragment.getAdapter2ArtistList().notifyDataSetChanged();
+            }
         }
     }
 
@@ -1094,50 +1088,48 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     }
 
-    public final void exitApp() {
+    @Override
+    protected void onDestroy() {
+        GlideApp.get(this).clearMemory();
 
-        if (Values.HAS_PLAYED) {
-            ReceiverOnMusicPlay.resetMusic();
+        try {
+            unbindService(Data.sServiceConnection);
+        } catch (Exception e) {
+            Log.d(TAG, "onDestroy: " + e.getMessage());
         }
-
-        stopService(new Intent(MainActivity.this, MyMusicService.class));
 
         try {
             unregisterReceiver(Data.mMyHeadSetPlugReceiver);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            Log.d(TAG, "onDestroy: " + e.getMessage());
         }
-        Data.mMyHeadSetPlugReceiver = null;
 
-        Data.sMusicBinder = null;
-
-        Values.HAS_PLAYED = false;
-
-        wakeLock.release();
-        clear();
-        finish();
-        android.os.Process.killProcess(android.os.Process.myPid());
-    }
-
-    @Override
-    protected void onDestroy() {
-
-        unbindService(Data.sServiceConnection);
-        unregisterReceiver(Data.mMyHeadSetPlugReceiver);
-
+        Data.HAS_BIND = false;
         Data.sActivities.clear();
         if (Data.sMainRef != null) Data.sMainRef.clear();
         Data.sTheme = null;
         Data.sAlbumItems.clear();
+        AlbumListFragment.VIEW_HAS_LOAD = false;
         Data.sHistoryPlay.clear();
-//        Data.sCurrentMusicItem = null;
         Data.sTrashCanList.clear();
 
         mHandlerThread.quit();
         mFragmentList.clear();
+
         AlbumThreadPool.finish();
         ItemCoverThreadPool.finish();
+        ArtistThreadPool.finish();
         super.onDestroy();
+    }
+
+    public void fullExit() {
+        unbindService(Data.sServiceConnection);
+        stopService(new Intent(MainActivity.this, MyMusicService.class));
+        Data.sMusicBinder = null;
+        wakeLock.release();
+        clearData();
+        Values.HAS_PLAYED = false;
+        finish();
     }
 
     @Override
@@ -1225,7 +1217,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     Log.d(TAG, "onComplete: set Common color");
 
                     @ColorInt int color = Utils.Ui.getPrimaryColor(MainActivity.this);
-                    Utils.Ui.setStatusBarTextColor(MainActivity.this, color);
+                    setStatusBarTextColor(MainActivity.this, color);
                     mMainBinding.tabLayout.setBackgroundColor(Utils.Ui.getPrimaryColor(MainActivity.this));
                     mMainBinding.appbar.setBackgroundColor(Utils.Ui.getPrimaryColor(MainActivity.this));
                     mMainBinding.toolBar.setBackgroundColor(Utils.Ui.getPrimaryColor(MainActivity.this));
@@ -1247,7 +1239,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             Palette.from(bitmap).generate(p -> {
                 if (p != null) {
                     color[0] = p.getVibrantColor(ContextCompat.getColor(MainActivity.this, R.color.colorPrimary));
-                    Utils.Ui.setStatusBarTextColor(MainActivity.this, color[0]);
+                    setStatusBarTextColor(MainActivity.this, color[0]);
                     bitmap.recycle();
                 }
             });
@@ -1283,23 +1275,23 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             if (TOOLBAR_CLICKED) {
                 switch (Values.CurrentData.CURRENT_PAGE_INDEX) {
                     case 0: {
-                        if (Values.CurrentData.CURRENT_BIND_INDEX_MUSIC_LIST > 20) {
-                            if (getMusicListFragment() != null)
-                                getMusicListFragment().getMusicListBinding().includeRecycler.recyclerView.scrollToPosition(0);
-                        } else {
+//                        if (Values.CurrentData.CURRENT_BIND_INDEX_MUSIC_LIST > 20) {
+//                            if (getMusicListFragment() != null)
+//                                getMusicListFragment().getMusicListBinding().includeRecycler.recyclerView.scrollToPosition(0);
+//                        } else {
                             if (getMusicListFragment() != null)
                                 getMusicListFragment().getMusicListBinding().includeRecycler.recyclerView.smoothScrollToPosition(0);
-                        }
+//                        }
                     }
                     break;
                     case 1: {
-                        if (Values.CurrentData.CURRENT_BIND_INDEX_ALBUM_LIST > 20) {
-                            if (getAlbumListFragment() != null)
-                                getAlbumListFragment().getRecyclerView().scrollToPosition(0);
-                        } else {
+//                        if (Values.CurrentData.CURRENT_BIND_INDEX_ALBUM_LIST > 20) {
+//                            if (getAlbumListFragment() != null)
+//                                getAlbumListFragment().getRecyclerView().scrollToPosition(0);
+//                        } else {
                             if (getAlbumListFragment() != null)
                                 getAlbumListFragment().getRecyclerView().smoothScrollToPosition(0);
-                        }
+//                        }
                     }
                 }
 
@@ -1411,7 +1403,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mMainBinding.navigationView.setNavigationItemSelectedListener(menuItem -> {
             switch (menuItem.getItemId()) {
                 case R.id.menu_nav_exit: {
-                    exitApp();
+                    fullExit();
                 }
                 break;
                 case R.id.menu_nav_detail_info: {

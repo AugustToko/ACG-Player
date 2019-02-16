@@ -28,7 +28,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import androidx.annotation.Nullable;
 import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.database.Detail;
@@ -208,6 +210,16 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
             Data.sMusicBinder.stopMusic();
         } catch (RemoteException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Nullable
+    public static MusicItem getCurrentItem() {
+        try {
+            return Data.sMusicBinder.getCurrentItem();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 

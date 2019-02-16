@@ -28,6 +28,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -189,6 +190,11 @@ public final class MyMusicService extends Service {
 
             mCurrentCover = Utils.Audio.getCoverBitmap(MyMusicService.this, mMusicItem.get().getAlbumId());
         }
+
+        @Override
+        public MusicItem getCurrentItem() throws RemoteException {
+            return mMusicItem.get();
+        }
     };
 
     private AtomicBoolean mIsServiceDestroyed = new AtomicBoolean(false);
@@ -320,6 +326,7 @@ public final class MyMusicService extends Service {
         mIsServiceDestroyed.set(true);
         if (mCurrentCover != null) mCurrentCover.recycle();
         wakeLock.release();
+        mMusicItem = null;
         super.onDestroy();
     }
 
