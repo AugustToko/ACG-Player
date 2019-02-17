@@ -10,4 +10,5 @@
 /captures
 .externalNativeBuild
 google-services.json
-/app/other_files/*
+/other_files
+/bfg.jar
