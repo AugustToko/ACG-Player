@@ -71,17 +71,17 @@ public class PublicActivity extends MyBaseCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_recent);
+
         mRecyclerView = findViewById(R.id.activity_add_recent_recycler);
         mAppBarLayout = findViewById(R.id.app_bar_layout);
         mToolbar = findViewById(R.id.toolbar);
+
         super.initView(mToolbar, mAppBarLayout);
-        super.initStyle();
+        super.onCreate(savedInstanceState);
+
         mToolbar.setNavigationOnClickListener(v -> onBackPressed());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        initStyle();
 
         mType = getIntent().getStringExtra(INTENT_START_BY);
 
@@ -277,6 +277,11 @@ public class PublicActivity extends MyBaseCompatActivity {
     }
 
     @Override
+    protected String getActivityTAG() {
+        return TAG;
+    }
+
+    @Override
     protected void onDestroy() {
         if (mDisposable != null && !mDisposable.isDisposed()) mDisposable.dispose();
         super.onDestroy();
@@ -293,10 +298,5 @@ public class PublicActivity extends MyBaseCompatActivity {
 
     public MyRecyclerAdapter getAdapter() {
         return adapter;
-    }
-
-    @Override
-    public void initStyle() {
-        Utils.Ui.setTopBottomColor(this, mAppBarLayout, mToolbar);
     }
 }

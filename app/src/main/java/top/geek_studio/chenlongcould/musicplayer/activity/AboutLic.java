@@ -95,6 +95,11 @@ public final class AboutLic extends MyBaseCompatActivity {
     }
 
     @Override
+    protected String getActivityTAG() {
+        return TAG;
+    }
+
+    @Override
     protected void onStop() {
         mDisposable.dispose();
         super.onStop();

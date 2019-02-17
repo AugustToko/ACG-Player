@@ -102,6 +102,11 @@ public final class ArtistDetailActivity extends MyBaseCompatActivity {
         initData();
     }
 
+    @Override
+    protected String getActivityTAG() {
+        return TAG;
+    }
+
     private void initData() {
         final Intent intent = getIntent();
         if (intent != null) {
@@ -145,29 +150,6 @@ public final class ArtistDetailActivity extends MyBaseCompatActivity {
                         .diskCacheStrategy(DiskCacheStrategy.NONE)
                         .into(mArtistDetailOthBinding.image);
             }
-
-//            mArtistDetailOthBinding.toolbar.setOnMenuItemClickListener(menuItem -> {
-//                switch (menuItem.getItemId()) {
-//                    case R.id.menu_toolbar_album_force_album: {
-//                        if (!intentAlbumId.equals("-10")) {
-//                            ArtistArtPath customArtistPath = paths.get(0);
-//                            if (menuItem.isChecked()) {
-//                                menuItem.setChecked(false);
-//                                customArtistPath.setForceUse(false);
-//                            } else {
-//                                menuItem.setChecked(true);
-//                                customArtistPath.setForceUse(true);
-//                            }
-//                            customArtistPath.save();
-//                        } else {
-//                            Toast.makeText(this, "Album Id Error..., finishing...", Toast.LENGTH_SHORT).show();
-//                            finish();
-//                        }
-//                    }
-//                    break;
-//                }
-//                return true;
-//            });
 
             mArtistDetailOthBinding.recyclerView.setPadding(0, headerViewHeight, 0, 0);
             mArtistDetailOthBinding.recyclerView.setScrollViewCallbacks(observableScrollViewCallbacks);

@@ -11,12 +11,14 @@
 
 package top.geek_studio.chenlongcould.musicplayer.activity;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,25 +34,29 @@ import com.google.android.material.appbar.AppBarLayout;
 import java.lang.reflect.Field;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
-import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 @SuppressLint("Registered")
-public class MyBaseCompatActivity extends AppCompatActivity implements IStyle {
+public abstract class MyBaseCompatActivity extends AppCompatActivity implements IStyle {
 
     private static final String TAG = "MyBaseCompatActivity";
 
-    private Toolbar mToolbar;
-    private AppBarLayout mAppBarLayout;
-
+    private Toolbar mToolbar = null;
+    private AppBarLayout mAppBarLayout = null;
     private TextView mSubtitleView = null;
 
-    public static void setStatusBarTextColor(final Activity activity, @ColorInt int color) {
+    /**
+     * set up status bar color
+     */
+    protected void setStatusBarTextColor(final Activity activity, @ColorInt int color) {
         final View decor = activity.getWindow().getDecorView();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (Utils.Ui.isColorLight(color)) {
@@ -63,21 +69,22 @@ public class MyBaseCompatActivity extends AppCompatActivity implements IStyle {
 
     /**
      * setup TaskCardColor
+     * ps: 通用
      */
     protected void setUpTaskCardColor(@ColorInt int color) {
         setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, color));
     }
 
-    protected void initView(Toolbar toolbar, AppBarLayout appBarLayout) {
-        mToolbar = toolbar;
-        mAppBarLayout = appBarLayout;
-    }
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        setStatusBarTextColor(this, Utils.Ui.getPrimaryColor(this));
 
-        super.onCreate(savedInstanceState);
+        //print TAG
+        Log.d(TAG, "onCreate: " + getActivityTAG());
+
+        //set taskDescription (all activity extends this)
+        setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, Utils.Ui.getPrimaryColor(this)));
+
+        initStyle();
 
         //设置状态栏是否全透明
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false)) {
@@ -92,14 +99,49 @@ public class MyBaseCompatActivity extends AppCompatActivity implements IStyle {
             }
         }
 
+        super.onCreate(savedInstanceState);
+    }
+
+    /**
+     * init permission, every Activity extends {@link MyBaseCompatActivity}
+     */
+    public boolean initPermission() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Values.REQUEST_WRITE_EXTERNAL_STORAGE);
+            return false;
+        }
+    }
+
+
+    /**
+     * @return ACTIVITY'S TAG
+     */
+    abstract protected String getActivityTAG();
+
+    /**
+     * set up view
+     */
+    protected void initView(@NonNull Toolbar toolbar, @NonNull AppBarLayout appBarLayout) {
+        mToolbar = toolbar;
+        mAppBarLayout = appBarLayout;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initStyle();
     }
 
     @Override
     public void initStyle() {
-        Log.d(TAG, "initStyle: ");
-        setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, Utils.Ui.getPrimaryColor(this)));
-        Utils.Ui.setTopBottomColor(this, mAppBarLayout, mToolbar);
-        Utils.Ui.setOverToolbarColor(mToolbar, Utils.Ui.getTitleColor(this));
+        setStatusBarTextColor(this, Utils.Ui.getPrimaryColor(this));
+        if (mAppBarLayout != null && mToolbar != null) {
+            Utils.Ui.setTopBottomColor(this, mAppBarLayout, mToolbar);
+            Utils.Ui.setOverToolbarColor(mToolbar, Utils.Ui.getTitleColor(this));
+        }
     }
 
     /**
@@ -115,9 +157,9 @@ public class MyBaseCompatActivity extends AppCompatActivity implements IStyle {
             mSubtitleView = (TextView) f.get(toolbar);
         }
 
-        ValueAnimator animator = new ValueAnimator();
+        final ValueAnimator animator = new ValueAnimator();
         animator.setFloatValues(1f, 0f);
-        animator.setDuration(300);
+        animator.setDuration(Values.DefaultValues.ANIMATION_DURATION);
         animator.addUpdateListener(animation -> mSubtitleView.setAlpha((Float) animation.getAnimatedValue()));
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -125,7 +167,7 @@ public class MyBaseCompatActivity extends AppCompatActivity implements IStyle {
                 mSubtitleView.setText(subtitle);
                 ValueAnimator animator1 = new ValueAnimator();
                 animator1.setFloatValues(0f, 1f);
-                animator1.setDuration(300);
+                animator1.setDuration(Values.DefaultValues.ANIMATION_DURATION);
                 animator1.addUpdateListener(va -> mSubtitleView.setAlpha((Float) va.getAnimatedValue()));
                 animator1.start();
             }
@@ -134,14 +176,4 @@ public class MyBaseCompatActivity extends AppCompatActivity implements IStyle {
 
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
-    protected void onPause() {
-        Data.sSelections.clear();
-        super.onPause();
-    }
 }

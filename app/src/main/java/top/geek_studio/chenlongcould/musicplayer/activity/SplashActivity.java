@@ -11,20 +11,16 @@
 
 package top.geek_studio.chenlongcould.musicplayer.activity;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
@@ -33,21 +29,11 @@ public final class SplashActivity extends MyBaseCompatActivity {
 
     private static final String TAG = "SplashActivity";
 
-    private void initPermission() {
-        if (ContextCompat.checkSelfPermission(SplashActivity.this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            initDone();
-        } else {
-            ActivityCompat.requestPermissions(SplashActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Values.REQUEST_WRITE_EXTERNAL_STORAGE);
-        }
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case Values.REQUEST_WRITE_EXTERNAL_STORAGE: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d(TAG, "onRequestPermissionsResult: grant");
                     initDone();
                 } else {
                     Utils.Ui.fastToast(this, "Failed to get permission, again!");
@@ -73,7 +59,6 @@ public final class SplashActivity extends MyBaseCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-//        Debug.startMethodTracing();
         super.onCreate(savedInstanceState);
 
         // Android 5.0 以上 全透明
@@ -89,9 +74,15 @@ public final class SplashActivity extends MyBaseCompatActivity {
         // 虚拟导航键
         window.setNavigationBarColor(Color.TRANSPARENT);
 
+
         setContentView(R.layout.activity_splash);
 
-        initPermission();
+        if (initPermission()) initDone();
+    }
+
+    @Override
+    protected String getActivityTAG() {
+        return TAG;
     }
 
 }

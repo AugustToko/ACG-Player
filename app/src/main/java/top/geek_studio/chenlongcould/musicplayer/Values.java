@@ -12,51 +12,110 @@
 package top.geek_studio.chenlongcould.musicplayer;
 
 @SuppressWarnings("WeakerAccess")
-public final class Values {
+public interface Values {
 
-    public static final String DEF_PREFS_NAME = "top.geek_studio.chenlongcould.musicplayer_preferences";
-
-    public static int DEF_CROSS_FATE_TIME = 500;
-
-    public static boolean FIRST_USE = true;
-
-    public static final class FLAG {
-        public static boolean THEME_CHANGED = false;
-    }
+    int DEF_CROSS_FATE_TIME = 500;
 
     /**
      * final string(s), TAGs
      */
-    public static final String INDEX = "index";
-    public static final String TAG_UNIVERSAL_ONE = "TAG_UNIVERSAL_ONE";
-    public static final String SURE_GET_PERMISSION = "SURE_GET_PERMISSION";
-    public static final String PLAY_LIST_SPF_KEY = "PLAY_LIST_SPF_KEY";
-    public static final String TYPE_RANDOM = "RANDOM";
-    public static final String TYPE_COMMON = "COMMON";
-    public static final String TYPE_REPEAT = "REPEAT";
-    public static final String TYPE_REPEAT_ONE = "REPEAT_ONE";
+    String INDEX = "index";
+    String TAG_UNIVERSAL_ONE = "TAG_UNIVERSAL_ONE";
+    String TYPE_RANDOM = "RANDOM";
+    String TYPE_COMMON = "COMMON";
+    String TYPE_REPEAT = "REPEAT";
+    String TYPE_REPEAT_ONE = "REPEAT_ONE";
 
-    public static boolean HAS_PLAYED = false;           //检测app打开后, 是否播放过音乐 (如果没, 默认点击播放按钮为快速随机播放)
+    boolean HAS_PLAYED = false;           //检测app打开后, 是否播放过音乐 (如果没, 默认点击播放按钮为快速随机播放)
+    /**
+     * permission RequestCode
+     */
+    int REQUEST_WRITE_EXTERNAL_STORAGE = 60;
+    int MAX_HEIGHT_AND_WIDTH = 100;
+    /**
+     * result(s), status
+     */
+    //default value false
+    boolean MUSIC_DATA_INIT_DONE = false;
+    /*
+     * 判断在MusicDetailActivity下动画是否加载完成
+     * */
+    boolean ON_ANIMATION_FINISH = true;
 
-    public static final class LogTAG {
+    /**
+     * sharedPrefs tag
+     */
+    interface SharedPrefsTag {
+
+        //color
+        String PRIMARY_COLOR = "mPrimaryColor";
+        String PRIMARY_DARK_COLOR = "mPrimaryDarkColor";
+        String ACCENT_COLOR = "mAccentColor";
+        String TITLE_COLOR = "mTitleColor";
+
+        String DETAIL_BG_STYLE = "DETAIL_BG_STYLE";
+        String AUTO_NIGHT_MODE = "NIGHT_MODE";
+        String ORDER_TYPE = "ORDER_TYPE";
+        String PLAY_TYPE = Values.TYPE_COMMON;
+
+        String ALBUM_LIST_DISPLAY_TYPE = "ALBUM_LIST_DISPLAY_TYPE";
+        String ARTIST_LIST_DISPLAY_TYPE = "ARTIST_LIST_DISPLAY_TYPE";
+        String ALBUM_LIST_GRID_TYPE_COUNT = "ALBUM_LIST_GRID_TYPE_COUNT";
+
+        //theme
+        String SELECT_THEME = "SELECT_THEME";
+        String THEME_USE_NOTE = "THEME_USE_NOTE";
+
+        String NOTIFICATION_COLORIZED = "NOTIFICATION_COLORIZED";
+
+        String TRANSPORT_STATUS = "TRANSPORT_STATUS";
+
+        String HIDE_SHORT_SONG = "HIDE_SHORT_SONG";
+
+        String USE_NET_WORK_ALBUM = "USE_NET_WORK_ALBUM";
+
+        /**
+         * 1 is MUSIC TAB
+         * 2 is ALBUM TAB
+         * 3 is ARTIST TAB
+         * 4 is PLAYLIST TAB
+         * 5 is FILE MANAGER TAB
+         * <p>
+         * default tab order is: 12345
+         */
+        String CUSTOM_TAB_LAYOUT = "CUSTOM_TAB_LAYOUT";
+
+        //tips
+        /**
+         * 提示是否扔进垃圾桶的警告
+         */
+        String TIP_NOTICE_DROP_TRASH = "TIP_NOTICE_DROP_TRASH";
+
+        String RECYCLER_VIEW_ITEM_STYLE = "RECYCLER_VIEW_ITEM_STYLE";
+    }
+
+    interface BroadCast {
+        String ReceiverOnMusicPlay = "top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPlay";
+        String ReceiverOnMusicStop = "top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicStop";
+        String ReceiverOnMusicPause = "top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPause";
+        String DayNightReceiver = "top.geek_studio.chenlongcould.musicplayer.broadcasts.DayNightReceiver";
+    }
+
+    interface DefaultValues {
+        int ANIMATION_DURATION = 300;
+    }
+
+    interface Permission {
+        String BROAD_CAST = "top.geek_studio.chenlongcould.musicplayer.broadcasts";
+    }
+
+    final class LogTAG {
         public static final String LIFT_TAG = "THE_TAG_OF_LIFE";
 
         public static final String LAG_TAG = "LAG_TAG";
     }
 
-    /**
-     * permission RequestCode
-     */
-    public static final int REQUEST_WRITE_EXTERNAL_STORAGE = 60;
-    public static final int MAX_HEIGHT_AND_WIDTH = 100;
-
-    /**
-     * result(s), status
-     */
-    //default value false
-    public static boolean MUSIC_DATA_INIT_DONE = false;
-
-    public static final class HandlerWhat {
+    final class HandlerWhat {
 
         /**
          * Handler msg.what
@@ -81,7 +140,7 @@ public final class Values {
      * {@link SharedPrefsTag#PRIMARY_DARK_COLOR}
      * {@link SharedPrefsTag#ACCENT_COLOR}
      */
-    public static final class ColorInt {
+    final class ColorInt {
         public static final String PRIMARY_COLOR = "mPrimaryColor";
 
         public static final String PRIMARY_DARK_COLOR = "mPrimaryDarkColor";
@@ -89,12 +148,7 @@ public final class Values {
         public static final String ACCENT_COLOR = "mAccentColor";
     }
 
-    /*
-     * 判断在MusicDetailActivity下动画是否加载完成
-     * */
-    public static boolean ON_ANIMATION_FINISH = true;
-
-    public static final class CurrentData {
+    final class CurrentData {
 
         /**
          * same as
@@ -104,9 +158,9 @@ public final class Values {
          * @deprecated use {@link UIMODE#MODE_COMMON}, {@link UIMODE#MODE_CAR}
          */
         @Deprecated
-        public static final String MODE_COMMON = UIMODE.MODE_COMMON;
+        public static String MODE_COMMON = UIMODE.MODE_COMMON;
         @Deprecated
-        public static final String MODE_CAR = UIMODE.MODE_CAR;
+        public static String MODE_CAR = UIMODE.MODE_CAR;
 
         public static String CURRENT_UI_MODE = UIMODE.MODE_COMMON;
 
@@ -144,71 +198,12 @@ public final class Values {
 
     }
 
-    public static final class UIMODE {
+    final class UIMODE {
         public static final String MODE_COMMON = "common";
         public static final String MODE_CAR = "car";
     }
 
-    /**
-     * sharedPrefs tag
-     */
-    public static final class SharedPrefsTag {
-
-        //color
-        public static final String PRIMARY_COLOR = "mPrimaryColor";
-        public static final String PRIMARY_DARK_COLOR = "mPrimaryDarkColor";
-        public static final String ACCENT_COLOR = "mAccentColor";
-        public static final String TITLE_COLOR = "mTitleColor";
-
-        public static final String DETAIL_BG_STYLE = "DETAIL_BG_STYLE";
-        public static final String AUTO_NIGHT_MODE = "NIGHT_MODE";
-        public static final String ORDER_TYPE = "ORDER_TYPE";
-        public static String PLAY_TYPE = Values.TYPE_COMMON;
-
-        public static final String ALBUM_LIST_DISPLAY_TYPE = "ALBUM_LIST_DISPLAY_TYPE";
-        public static final String ARTIST_LIST_DISPLAY_TYPE = "ARTIST_LIST_DISPLAY_TYPE";
-        public static final String ALBUM_LIST_GRID_TYPE_COUNT = "ALBUM_LIST_GRID_TYPE_COUNT";
-
-        //theme
-        public static final String SELECT_THEME = "SELECT_THEME";
-        public static final String THEME_USE_NOTE = "THEME_USE_NOTE";
-
-        public static final String NOTIFICATION_COLORIZED = "NOTIFICATION_COLORIZED";
-
-        public static final String TRANSPORT_STATUS = "TRANSPORT_STATUS";
-
-        public static final String HIDE_SHORT_SONG = "HIDE_SHORT_SONG";
-
-        public static final String USE_NET_WORK_ALBUM = "USE_NET_WORK_ALBUM";
-
-        /**
-         * 1 is MUSIC TAB
-         * 2 is ALBUM TAB
-         * 3 is ARTIST TAB
-         * 4 is PLAYLIST TAB
-         * 5 is FILE MANAGER TAB
-         * <p>
-         * default tab order is: 12345
-         */
-        public static final String CUSTOM_TAB_LAYOUT = "CUSTOM_TAB_LAYOUT";
-
-        //tips
-        /**
-         * 提示是否扔进垃圾桶的警告
-         */
-        public static final String TIP_NOTICE_DROP_TRASH = "TIP_NOTICE_DROP_TRASH";
-
-        public static final String RECYCLER_VIEW_ITEM_STYLE = "RECYCLER_VIEW_ITEM_STYLE";
-    }
-
-    public static final class BroadCast {
-        public static String ReceiverOnMusicPlay = "top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPlay";
-        public static String ReceiverOnMusicStop = "top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicStop";
-        public static String ReceiverOnMusicPause = "top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPause";
-        public static String DayNightReceiver = "top.geek_studio.chenlongcould.musicplayer.broadcasts.DayNightReceiver";
-    }
-
-    public static final class Color {
+    final class Color {
 
         /**
          * Ico color
@@ -222,11 +217,7 @@ public final class Values {
 
     }
 
-    public static final class Permission {
-        public static final String BROAD_CAST = "top.geek_studio.chenlongcould.musicplayer.broadcasts";
-    }
-
-    public static final class Style {
+    final class Style {
         public static final String STYLE_BACKGROUND_BLUR = "BLUR";
         public static final String STYLE_BACKGROUND_AUTO_COLOR = "AUTO_COLOR";
 

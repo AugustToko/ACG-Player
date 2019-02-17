@@ -575,7 +575,7 @@ public final class Utils {
          * @param appBar   appBarLayout
          * @param toolbar  toolbar
          */
-        public static void setTopBottomColor(final Activity activity, final AppBarLayout appBar, final Toolbar toolbar) {
+        public static void setTopBottomColor(@NonNull final Activity activity, @NonNull final AppBarLayout appBar, @NonNull final Toolbar toolbar) {
             setStatusBarTextColor(activity, getPrimaryColor(activity));
             appBar.setBackgroundColor(getPrimaryColor(activity));
             toolbar.setBackgroundColor(getPrimaryColor(activity));
@@ -1061,7 +1061,7 @@ public final class Utils {
             intent.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
             intent.putExtra("play_type", playType);
             intent.putExtra("args", args);
-            context.sendBroadcast(intent, "top.geek_studio.chenlongcould.musicplayer.broadcasts");
+            context.sendBroadcast(intent, Values.Permission.BROAD_CAST);
         }
     }
 

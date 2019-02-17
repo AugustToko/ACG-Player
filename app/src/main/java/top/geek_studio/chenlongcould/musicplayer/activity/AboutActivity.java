@@ -50,7 +50,6 @@ public class AboutActivity extends MyBaseCompatActivity {
         super.onCreate(savedInstanceState);
         mAppBinding = DataBindingUtil.setContentView(this, R.layout.activity_about_app);
         initView(mAppBinding.toolbar, mAppBinding.appbar);
-        initStyle();
 
         mAppBinding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
@@ -152,5 +151,10 @@ public class AboutActivity extends MyBaseCompatActivity {
         mAppBinding.card2.addView(mail.getRoot());
         mAppBinding.card2.addView(web.getRoot());
 
+    }
+
+    @Override
+    protected String getActivityTAG() {
+        return TAG;
     }
 }

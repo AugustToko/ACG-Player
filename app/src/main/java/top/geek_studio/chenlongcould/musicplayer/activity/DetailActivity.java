@@ -25,15 +25,17 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 public class DetailActivity extends MyBaseCompatActivity {
 
+    public static final String TAG = "DetailActivity";
+
     private ActivityInfoDetailBinding mDetailBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
         mDetailBinding = DataBindingUtil.setContentView(this, R.layout.activity_info_detail);
         super.initView(mDetailBinding.toolbar, mDetailBinding.appbar);
-        super.initStyle();
+        super.onCreate(savedInstanceState);
+//        super.initStyle();
 
         setSupportActionBar(mDetailBinding.toolbar);
         mDetailBinding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
@@ -155,5 +157,10 @@ public class DetailActivity extends MyBaseCompatActivity {
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> Snackbar.make(view, "Clear Data?", Snackbar.LENGTH_LONG)
                 .setAction(getString(R.string.sure), v -> LitePal.deleteAll(Detail.class)).show());
+    }
+
+    @Override
+    protected String getActivityTAG() {
+        return TAG;
     }
 }

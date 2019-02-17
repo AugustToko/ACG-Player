@@ -224,15 +224,15 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
         Data.init(this);
+
+        mMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        initView();
+        super.onCreate(savedInstanceState);
 
         final PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
         wakeLock.setReferenceCounted(false);
-
-        mMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         final FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -273,9 +273,14 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         startService(intent);
         Data.HAS_BIND = bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
 
-        initView();
+
 
         loadData();
+    }
+
+    @Override
+    protected String getActivityTAG() {
+        return TAG;
     }
 
     @Override
@@ -304,11 +309,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             loadData();
         }
 
-        initStyle();
-
-        if (mMusicDetailFragment != null) mMusicDetailFragment.initStyle();
-
-        if (getMusicListFragment() != null) getMusicListFragment().initStyle();
     }
 
     @Override
@@ -1247,7 +1247,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         return color[0];
     }
 
-    private void initView() {
+    protected void initView() {
         super.initView(mMainBinding.toolBar, mMainBinding.appbar);
 
         mSearchView = findViewById(R.id.search_view);

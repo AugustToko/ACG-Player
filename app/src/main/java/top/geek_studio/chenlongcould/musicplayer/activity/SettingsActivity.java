@@ -174,7 +174,6 @@ public final class SettingsActivity extends MyBaseCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         mSettingsBinding = DataBindingUtil.setContentView(this, R.layout.activity_settings);
 
         mDefPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -201,7 +200,8 @@ public final class SettingsActivity extends MyBaseCompatActivity {
         mToolbar.inflateMenu(R.menu.menu_toolbar_settings);
 
         super.initView(mToolbar, mAppBarLayout);
-        super.initStyle();
+        super.onCreate(savedInstanceState);
+//        super.initStyle();
         initPreView();
 
         mToolbar.setOnMenuItemClickListener(menuItem -> {
@@ -613,6 +613,11 @@ public final class SettingsActivity extends MyBaseCompatActivity {
         });
     }
 
+    @Override
+    protected String getActivityTAG() {
+        return TAG;
+    }
+
     private void clearAnimation() {
         mPrimaryImage.clearAnimation();
         mToolbar.clearAnimation();
@@ -657,13 +662,8 @@ public final class SettingsActivity extends MyBaseCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        initStyle();
-    }
-
-    @Override
     public void initStyle() {
+        super.initStyle();
         mPrimaryImage.setBackgroundColor(Utils.Ui.getPrimaryColor(this));
         mPrimaryDarkImage.setBackgroundColor(Utils.Ui.getPrimaryDarkColor(this));
         mAccentImage.setBackgroundColor(Utils.Ui.getAccentColor(this));

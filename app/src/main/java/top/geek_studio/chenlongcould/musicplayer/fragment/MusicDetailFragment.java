@@ -74,7 +74,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.geeklibrary.GkSnackbar;
-import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
@@ -91,7 +90,7 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
-public final class MusicDetailFragment extends Fragment implements IStyle {
+public final class MusicDetailFragment extends Fragment {
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -754,7 +753,7 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
             return true;
         });
 
-        initStyle();
+        mCurrentInfoSeek.setBackgroundColor(Utils.Ui.getAccentColor(mMainActivity));
 
         setDefAnimation();
         clearAnimations();
@@ -1190,11 +1189,6 @@ public final class MusicDetailFragment extends Fragment implements IStyle {
             } else {
                 Data.sTrashCanList.add(item);
             }
-    }
-
-    @Override
-    public void initStyle() {
-        mCurrentInfoSeek.setBackgroundColor(Utils.Ui.getAccentColor(mMainActivity));
     }
 
     /**

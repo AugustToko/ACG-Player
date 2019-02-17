@@ -23,7 +23,6 @@ import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
@@ -31,7 +30,7 @@ import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentMusicListBinding;
 
-public final class MusicListFragment extends Fragment implements IStyle {
+public final class MusicListFragment extends Fragment {
 
     public static final String TAG = "MusicListFragment";
 
@@ -87,7 +86,4 @@ public final class MusicListFragment extends Fragment implements IStyle {
 //            mMusicListBinding.includeRecycler.recyclerView.setVisibility(status);
 //    }
 
-    @Override
-    public void initStyle() {
-    }
 }

@@ -36,7 +36,6 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
@@ -47,7 +46,7 @@ import top.geek_studio.chenlongcould.musicplayer.activity.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
-public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter, IStyle {
+public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
 
     private static final String TAG = "MyWaitListAdapter";
 
@@ -177,12 +176,6 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
         viewHolder.mAlbumText.setText(mMusicItems.get(i).getMusicAlbum());
         viewHolder.mExtName.setText(prefix);
 
-        initStyle();
-
-    }
-
-    @Override
-    public void initStyle() {
         if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.UIMODE.MODE_CAR)) {
             // TODO: 2019/1/11 if bg is light
             currentBind.mMusicNameText.setTextColor(Color.WHITE);

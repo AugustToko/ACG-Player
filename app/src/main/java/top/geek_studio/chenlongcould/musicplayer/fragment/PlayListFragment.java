@@ -36,7 +36,6 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Models.PlayListItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
@@ -46,7 +45,7 @@ import top.geek_studio.chenlongcould.musicplayer.activity.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.PlayListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentPlaylistBinding;
 
-public final class PlayListFragment extends Fragment implements IStyle {
+public final class PlayListFragment extends Fragment {
 
     public static final String TAG = "PlayListFragment";
 
@@ -109,7 +108,9 @@ public final class PlayListFragment extends Fragment implements IStyle {
             startActivity(intent);
         });
 
-        initStyle();
+        mPlayListBinding.recentName.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
+        mPlayListBinding.favouriteName.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
+        mPlayListBinding.historyName.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
 
         mPlayListBinding.recyclerView.setLayoutManager(new LinearLayoutManager(mMainActivity));
         mPlayListBinding.recyclerView.setHasFixedSize(true);
@@ -168,13 +169,6 @@ public final class PlayListFragment extends Fragment implements IStyle {
 
     public Handler getHandler() {
         return mHandler;
-    }
-
-    @Override
-    public void initStyle() {
-        mPlayListBinding.recentName.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
-        mPlayListBinding.favouriteName.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
-        mPlayListBinding.historyName.setTextColor(Color.parseColor(Values.Color.TEXT_COLOR));
     }
 
 //    @Override

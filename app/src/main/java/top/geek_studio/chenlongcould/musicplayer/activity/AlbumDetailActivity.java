@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.List;
 
 import androidx.annotation.ColorInt;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -62,7 +63,7 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
  * @author chenlongcould
  * @apiNote some by others
  */
-public final class AlbumDetailActivity extends MyBaseCompatActivity {
+public final class AlbumDetailActivity extends AppCompatActivity {
 
     public static final String TAG = "AlbumDetailActivity";
 

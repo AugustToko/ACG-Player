@@ -21,7 +21,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -95,10 +94,9 @@ public class ThemeActivity extends MyBaseCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         mThemeBinding = DataBindingUtil.setContentView(this, R.layout.activity_theme);
         super.initView(mThemeBinding.toolbar, mThemeBinding.appBarLayout);
-        super.initStyle();
+        super.onCreate(savedInstanceState);
 
         noteCheck();
 
@@ -108,7 +106,6 @@ public class ThemeActivity extends MyBaseCompatActivity {
         mThemeBinding.toolbar.setOnMenuItemClickListener(menuItem -> {
             switch (menuItem.getItemId()) {
                 case R.id.menu_toolbar_theme_add: {
-                    Log.d(TAG, "onCreate: add");
                     Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                     intent.setType("application/zip");
                     intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -165,6 +162,11 @@ public class ThemeActivity extends MyBaseCompatActivity {
     }
 
     @Override
+    protected String getActivityTAG() {
+        return TAG;
+    }
+
+    @Override
     protected void onDestroy() {
         mDBHelper.close();
         if (mDisposable != null && !mDisposable.isDisposed()) {
@@ -195,12 +197,6 @@ public class ThemeActivity extends MyBaseCompatActivity {
             builder.setPositiveButton(getString(R.string.refuse), (dialog, which) -> finish());
             builder.show();
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        initStyle();
     }
 
     @SuppressLint("CheckResult")
