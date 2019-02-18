@@ -22,6 +22,7 @@ import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 
 import org.litepal.LitePal;
 
@@ -172,11 +173,13 @@ public final class MyApplication extends Application {
 
     @Override
     public void onTrimMemory(int level) {
+        Log.d(TAG, "onTrimMemory: the level is " + level);
 
-        if (getProcessName(this).equals(getPackageName())) {
+        if (getProcessName(this).equals("top.geek_studio.chenlongcould.musicplayer")
+                || getProcessName(this).equals("top.geek_studio.chenlongcould.musicplayer.Common")) {
+
             if (level == TRIM_MEMORY_MODERATE) {
                 Data.sTrashCanList.clear();
-                Data.sSelections.clear();
 
                 AlbumListFragment.VIEW_HAS_LOAD = false;
                 Data.sAlbumItems.clear();
@@ -184,9 +187,9 @@ public final class MyApplication extends Application {
                 ArtistListFragment.VIEW_HAS_LOAD = false;
                 Data.sArtistItems.clear();
             }
-        }
 
-        GlideApp.get(this).trimMemory(level);
+            GlideApp.get(this).trimMemory(level);
+        }
 
         super.onTrimMemory(level);
     }

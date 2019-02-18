@@ -463,7 +463,7 @@ package top.geek_studio.chenlongcould.musicplayer.useless;
 //        mToolbar.setOnMenuItemClickListener(menuItem -> {
 //            switch (menuItem.getItemId()) {
 //                case R.id.menu_toolbar_fast_play: {
-//                    Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, ReceiverOnMusicPlay.TYPE_SHUFFLE, TAG);
+//                    Utils.SendSomeThing.sendPlay(MusicDetailActivity.this, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, TAG);
 //                }
 //                break;
 //            }
@@ -590,7 +590,7 @@ package top.geek_studio.chenlongcould.musicplayer.useless;
 //                    public void onAnimationEnd(Animator animation) {
 //                        mRandomButton.setAlpha(0.3f);
 //                        mRandomButton.clearAnimation();
-//                        editor.putString(Values.SharedPrefsTag.PLAY_TYPE, Values.TYPE_COMMON);
+//                        editor.putString(Values.SharedPrefsTag.INTENT_PLAY_TYPE, Values.TYPE_COMMON);
 //                        editor.apply();
 //                    }
 //
@@ -621,7 +621,7 @@ package top.geek_studio.chenlongcould.musicplayer.useless;
 //                    public void onAnimationEnd(Animator animation) {
 //                        mRandomButton.setAlpha(1f);
 //                        mRandomButton.clearAnimation();
-//                        editor.putString(Values.SharedPrefsTag.PLAY_TYPE, Values.TYPE_RANDOM);
+//                        editor.putString(Values.SharedPrefsTag.INTENT_PLAY_TYPE, Values.TYPE_RANDOM);
 //                        editor.apply();
 //                    }
 //

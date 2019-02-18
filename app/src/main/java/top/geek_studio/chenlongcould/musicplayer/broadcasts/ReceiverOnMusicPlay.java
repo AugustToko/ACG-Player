@@ -19,6 +19,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Message;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -47,9 +48,12 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
     /**
      * @see Message#what
      */
-    public static final int TYPE_SHUFFLE = 90;
-    public static final int TYPE_ITEM_CLICK = 15;
-    public static final String PLAY_TYPE = "play_type";
+    public static final int CASE_TYPE_SHUFFLE = 90;
+    public static final int CASE_TYPE_ITEM_CLICK = 15;
+    public static final int CASE_TYPE_NOTIFICATION_RESUME = 2;
+
+    public static final String INTENT_PLAY_TYPE = "play_type";
+
     public static final String TYPE_NEXT = "next";
     public static final String TYPE_PREVIOUS = "previous";
     public static final String TYPE_SLIDE = "slide";
@@ -107,10 +111,8 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
         final String musicName = Data.sPlayOrderList.get(targetIndex).getMusicName();
         final String albumName = Data.sPlayOrderList.get(targetIndex).getMusicAlbum();
         final Bitmap cover = Utils.Audio.getCoverBitmap(musicDetailFragment.getActivity(), Data.sPlayOrderList.get(targetIndex).getAlbumId());
-        Data.setCurrentCover(cover);
 
         Utils.Ui.setPlayButtonNowPlaying();
-        musicDetailFragment.setSlideInfo(musicName, albumName, cover);
         musicDetailFragment.setCurrentInfo(musicName, albumName, cover);
 
         reSetSeekBar();         //防止seekBar跳动到Max
@@ -132,6 +134,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
         try {
             Data.sMusicBinder.setCurrentMusicData(Data.sCurrentMusicItem);
             Data.sMusicBinder.playMusic();
+            Data.HAS_PLAYED = true;
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -234,37 +237,22 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "onReceive: done");
 
-        final int type = intent.getIntExtra(PLAY_TYPE, 0);
+        final int type = intent.getIntExtra(INTENT_PLAY_TYPE, 0);
 
         ///////////////////////////BEFORE PLAYER SET/////////////////////////////////////////
 
-        Values.HAS_PLAYED = true;
-
         switch (type) {
-            case 0:
-                break;
-
-            //clicked by notif
-            case 2: {
+            //clicked by notif, just resume play
+            case CASE_TYPE_NOTIFICATION_RESUME: {
                 Utils.Ui.setPlayButtonNowPlaying();
                 playMusic();
             }
             break;
 
             //Type Random (play)
-            case TYPE_SHUFFLE: {
+            case CASE_TYPE_SHUFFLE: {
                 if (!READY.get()) break;
                 new FastShufflePlayback().execute();
-            }
-            break;
-
-            /*
-             * just resume play (form pause to play...)
-             * */
-            case 3: {
-                playMusic();
-                final MainActivity activity = (MainActivity) Data.sActivities.get(0);
-                activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.SET_BUTTON_PLAY);
             }
             break;
 
@@ -272,7 +260,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
             //by auto-next(mediaPlayer OnCompletionListener) of next-play by user, at this time MainActivity is present
             //by MusicDetailFragment preview imageButton (view history song list)
             case 6: {
-                Log.d(TAG, "onReceive: 6");
 
                 //检测是否指定下一首播放
                 if (Data.sNextWillPlayItem != null) {
@@ -280,12 +267,14 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                     break;
                 }
 
+                //检测循环
                 if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_REPEAT_ONE)) {
                     seekTo(0);
                     playMusic();
                     break;
                 }
 
+                //检测大小
                 if (Data.sPlayOrderList.size() <= 0) {
                     Toast.makeText(context, "Data.sPlayOrderList.size() <= 0", Toast.LENGTH_SHORT).show();
                     break;
@@ -325,9 +314,8 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                         final String musicName = Data.sPlayOrderList.get(targetIndex).getMusicName();
                         final String albumName = Data.sPlayOrderList.get(targetIndex).getMusicAlbum();
                         final Bitmap cover = Utils.Audio.getCoverBitmap(context, Data.sPlayOrderList.get(targetIndex).getAlbumId());
-                        Data.setCurrentCover(cover);
+
                         Utils.Ui.setPlayButtonNowPlaying();
-                        musicDetailFragment.setSlideInfo(musicName, albumName, cover);
                         musicDetailFragment.setCurrentInfoWithoutMainImage(musicName, albumName, cover);
                         reSetSeekBar();         //防止seekBar跳动到Max
 
@@ -345,13 +333,14 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
             break;
 
             //by MusicListFragment item click
-            case TYPE_ITEM_CLICK: {
+            case CASE_TYPE_ITEM_CLICK: {
                 //set current data
                 Data.sCurrentMusicItem = Data.sMusicItems.get(Integer.parseInt(intent.getStringExtra("args")));
                 Log.d(TAG, "onReceive: " + Data.sCurrentMusicItem.getMusicName());
 
                 ReceiverOnMusicPlay.resetMusic();
                 ReceiverOnMusicPlay.setDataSource(Data.sCurrentMusicItem.getMusicPath());
+
                 try {
                     ReceiverOnMusicPlay.prepare();
                 } catch (Exception e) {
@@ -366,8 +355,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 Utils.Ui.setPlayButtonNowPlaying();
                 MusicDetailFragment fragment = ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment();
                 fragment.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);         //update seek
-                fragment.setSlideInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
-                fragment.setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
+                fragment.setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Utils.Audio.getCoverBitmap(context, Data.sCurrentMusicItem.getAlbumId()));
                 ((MainActivity) Data.sActivities.get(0)).getMainBinding().slidingLayout.setTouchEnabled(true);
             }
             break;
@@ -389,6 +377,8 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
             info.setPlayTimes(info.getPlayTimes() + 1);
             Log.d(TAG, "onReceive create: " + info.save());
         }
+
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, Data.sCurrentMusicItem.getMusicID()).apply();
 
         //after type set
         if (!Data.sActivities.isEmpty()) {
@@ -427,11 +417,9 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
                 MusicDetailFragment musicDetailFragment = ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment();
 
                 final Bitmap cover = Utils.Audio.getCoverBitmap(Data.sActivities.get(0), Data.sNextWillPlayItem.getAlbumId());
-                Data.setCurrentCover(cover);
                 sureCar();
 
                 Utils.Ui.setPlayButtonNowPlaying();
-                musicDetailFragment.setSlideInfo(Data.sNextWillPlayItem.getMusicName(), Data.sNextWillPlayItem.getMusicAlbum(), cover);
                 musicDetailFragment.setCurrentInfo(Data.sNextWillPlayItem.getMusicName(), Data.sNextWillPlayItem.getMusicAlbum(), cover);
 
                 reSetSeekBar();         //防止seekBar跳动到Max

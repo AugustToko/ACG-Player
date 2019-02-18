@@ -26,17 +26,12 @@ public interface Values {
     String TYPE_REPEAT = "REPEAT";
     String TYPE_REPEAT_ONE = "REPEAT_ONE";
 
-    boolean HAS_PLAYED = false;           //检测app打开后, 是否播放过音乐 (如果没, 默认点击播放按钮为快速随机播放)
     /**
      * permission RequestCode
      */
     int REQUEST_WRITE_EXTERNAL_STORAGE = 60;
     int MAX_HEIGHT_AND_WIDTH = 100;
-    /**
-     * result(s), status
-     */
-    //default value false
-    boolean MUSIC_DATA_INIT_DONE = false;
+
     /*
      * 判断在MusicDetailActivity下动画是否加载完成
      * */
@@ -92,6 +87,8 @@ public interface Values {
         String TIP_NOTICE_DROP_TRASH = "TIP_NOTICE_DROP_TRASH";
 
         String RECYCLER_VIEW_ITEM_STYLE = "RECYCLER_VIEW_ITEM_STYLE";
+
+        String LAST_PLAY_MUSIC_ID = "LAST_PLAY_MUSIC_ID";
     }
 
     interface BroadCast {
@@ -140,7 +137,7 @@ public interface Values {
      * {@link SharedPrefsTag#PRIMARY_DARK_COLOR}
      * {@link SharedPrefsTag#ACCENT_COLOR}
      */
-    final class ColorInt {
+    final class ColorName {
         public static final String PRIMARY_COLOR = "mPrimaryColor";
 
         public static final String PRIMARY_DARK_COLOR = "mPrimaryDarkColor";
@@ -201,20 +198,6 @@ public interface Values {
     final class UIMODE {
         public static final String MODE_COMMON = "common";
         public static final String MODE_CAR = "car";
-    }
-
-    final class Color {
-
-        /**
-         * Ico color
-         */
-        public static final String WIN_BACKGROUND_COLOR = "#fafafa";
-
-        /**
-         * item title color (dynamic)
-         */
-        public static String TEXT_COLOR = "#3c3c3c";
-
     }
 
     final class Style {

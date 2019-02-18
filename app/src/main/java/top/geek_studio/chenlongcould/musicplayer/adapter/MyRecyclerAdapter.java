@@ -13,7 +13,6 @@ package top.geek_studio.chenlongcould.musicplayer.adapter;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -85,10 +84,10 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.MyBaseCompatActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
-import top.geek_studio.chenlongcould.musicplayer.fragment.MusicListFragment;
 import top.geek_studio.chenlongcould.musicplayer.thread_pool.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
@@ -106,12 +105,8 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
     /**
      * MAIN
      */
-    private MainActivity mMainActivity;
+    private MyBaseCompatActivity mActivity;
 
-    private Activity mContext;
-
-    //ui position, like: MainActivity or-> xxFragment...
-    private String mCurrentUiPosition;
     /**
      * 媒体库，默认顺序排序
      */
@@ -121,14 +116,11 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
     private int mStyleId = 0;
 
-    /**
-     * @param currentUiPosition current activity showed
-     */
-    public MyRecyclerAdapter(List<MusicItem> musicItems, Activity context, String currentUiPosition, int... styleId) {
-        mMainActivity = (MainActivity) Data.sActivities.get(0);
+    private ArrayList<Integer> mSelected = new ArrayList<>();
+
+    public MyRecyclerAdapter(MyBaseCompatActivity activity, List<MusicItem> musicItems, int... styleId) {
+        mActivity = activity;
         mMusicItems = musicItems;
-        mContext = context;
-        mCurrentUiPosition = currentUiPosition;
 
         if (styleId != null && styleId.length != 0) {
             mStyleId = styleId[0];
@@ -155,7 +147,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
          * ModHolder: common item + fastPlay item
          * */
         //在 MusicListFragment 的第一选项上面添加"快速随机播放项目"
-        if (itemType == MOD_TYPE && mCurrentUiPosition.equals(MusicListFragment.TAG)) {
+        if (itemType == MOD_TYPE && mActivity.getActivityTAG().equals(MainActivity.TAG)) {
 
             //style switch
             switch (mStyleId) {
@@ -171,11 +163,8 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
             }
 
-//            //when clicked ModHolder(fastPlay item)
-//            holder.itemView.setOnClickListener(v -> {
-//                Utils.DataSet.makeARandomList();
-//                Utils.SendSomeThing.sendPlay(mContext, ReceiverOnMusicPlay.TYPE_SHUFFLE, TAG);
-//            });
+            //when clicked ModHolder(fastPlay item)
+            holder.itemView.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mActivity, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, TAG));
 
         } else {
             switch (mStyleId) {
@@ -191,8 +180,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             }
 
         }
-
-
 
         mViewHolders.add(holder);
 
@@ -223,7 +210,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             animator.setDuration(300);
 
             if (((ConstraintLayout.LayoutParams) holder.mExpandView.getLayoutParams()).topMargin == 0) {
-                animator.setIntValues(0, (int) mContext.getResources().getDimension(R.dimen.recycler_expand_view));
+                animator.setIntValues(0, (int) mActivity.getResources().getDimension(R.dimen.recycler_expand_view));
                 holder.setIsRecyclable(false);
                 holder.mExpandView.setVisibility(View.VISIBLE);
                 animator.setInterpolator(new OvershootInterpolator());
@@ -242,7 +229,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                 /*--- button alpha animation ---*/
 
             } else {
-                animator.setIntValues((int) mContext.getResources().getDimension(R.dimen.recycler_expand_view), 0);
+                animator.setIntValues((int) mActivity.getResources().getDimension(R.dimen.recycler_expand_view), 0);
                 animator.addListener(new Animator.AnimatorListener() {
                     @Override
                     public void onAnimationStart(Animator animation) {
@@ -296,10 +283,10 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         });
 
         // TODO: 2018/12/5 button
-        holder.mButton1.setOnClickListener(v -> Toast.makeText(mContext, "1", Toast.LENGTH_SHORT).show());
-        holder.mButton2.setOnClickListener(v -> Toast.makeText(mContext, "2", Toast.LENGTH_SHORT).show());
-        holder.mButton3.setOnClickListener(v -> Utils.Audio.setRingtone(mContext, mMusicItems.get(holder.getAdapterPosition()).getMusicID()));
-        holder.mButton4.setOnClickListener(v -> mContext.startActivity(Intent.createChooser(Utils.Audio.createShareSongFileIntent(mMusicItems.get(holder.getAdapterPosition()), mContext), null)));
+        holder.mButton1.setOnClickListener(v -> Toast.makeText(mActivity, "1", Toast.LENGTH_SHORT).show());
+        holder.mButton2.setOnClickListener(v -> Toast.makeText(mActivity, "2", Toast.LENGTH_SHORT).show());
+        holder.mButton3.setOnClickListener(v -> Utils.Audio.setRingtone(mActivity, mMusicItems.get(holder.getAdapterPosition()).getMusicID()));
+        holder.mButton4.setOnClickListener(v -> mActivity.startActivity(Intent.createChooser(Utils.Audio.createShareSongFileIntent(mMusicItems.get(holder.getAdapterPosition()), mActivity), null)));
 
         holder.mItemMenuButton.setOnClickListener(v -> {
             holder.mPopupMenu.show();
@@ -319,7 +306,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
                 //add to list
                 case Menu.FIRST + 2: {
-                    Utils.DataSet.addListDialog(mMainActivity, mMusicItems.get(holder.getAdapterPosition()));
+                    Utils.DataSet.addListDialog(mActivity, mMusicItems.get(holder.getAdapterPosition()));
                 }
                 break;
 
@@ -331,7 +318,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
                 case Menu.FIRST + 4: {
                     String albumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
-                    Cursor cursor = mContext.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
+                    Cursor cursor = mActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
                             MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum()}, null);
 
                     //int MainActivity
@@ -344,15 +331,15 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                         intent.putExtra("_id", id);
                         cursor.close();
                     }
-                    mContext.startActivity(intent);
+                    mActivity.startActivity(intent);
 
                 }
                 break;
 
                 case Menu.FIRST + 5: {
-                    Intent intent = new Intent(mContext, PublicActivity.class);
+                    Intent intent = new Intent(mActivity, PublicActivity.class);
                     intent.putExtra("start_by", "detail");
-                    mContext.startActivity(intent);
+                    mActivity.startActivity(intent);
                 }
                 break;
 
@@ -361,7 +348,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                     Intent intent = new Intent(Intent.ACTION_SEND);
                     Log.d(TAG, "onCreateViewHolder: share: " + new File(mMusicItems.get(holder.getAdapterPosition()).getMusicPath()).exists());
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(mContext, mContext.getApplicationContext().getPackageName(), new File(mMusicItems.get(holder.getAdapterPosition()).getMusicPath())));
+                        intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(mActivity, mActivity.getApplicationContext().getPackageName(), new File(mMusicItems.get(holder.getAdapterPosition()).getMusicPath())));
                         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                         intent.setType("audio/*");
                     } else {
@@ -373,11 +360,11 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                      * by Karim Abou Zeid (kabouzeid)
                      * */
                     try {
-                        mContext.startActivity(intent);
+                        mActivity.startActivity(intent);
                     } catch (IllegalArgumentException e) {
                         // TODO the path is most likely not like /storage/emulated/0/... but something like /storage/28C7-75B0/...
                         e.printStackTrace();
-                        Toast.makeText(mContext, "Could not share this file, I'm aware of the issue.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mActivity, "Could not share this file, I'm aware of the issue.", Toast.LENGTH_SHORT).show();
                     }
                 }
                 break;
@@ -391,25 +378,24 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         onMusicItemClick(holder.mUView, holder);
 
         holder.mUView.setOnLongClickListener(v -> {
-            for (int id : Data.sSelections) {
+            for (int id : mSelected) {
                 if (id == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
-                    holder.mBody.setBackgroundColor(ContextCompat.getColor(mContext, R.color.card_bg));
-                    Data.sSelections.remove((Integer) mMusicItems.get(holder.getAdapterPosition()).getMusicID());
-                    if (Data.sSelections.size() == 0) {
+                    holder.mBody.setBackgroundColor(ContextCompat.getColor(mActivity, R.color.card_bg));
+                    mSelected.remove((Integer) mMusicItems.get(holder.getAdapterPosition()).getMusicID());
+                    if (mSelected.size() == 0) {
                         IS_CHOOSE = false;
-                        mMainActivity.inflateCommonMenu(mMainActivity.getMainBinding().toolBar);
+                        mActivity.inflateCommonMenu();
                     }
                     return true;
                 }
             }
 
-            Data.sSelections.add(mMusicItems.get(holder.getAdapterPosition()).getMusicID());
+            mSelected.add(mMusicItems.get(holder.getAdapterPosition()).getMusicID());
             IS_CHOOSE = true;
 
-            holder.mBody.setBackgroundColor(Utils.Ui.getAccentColor(mContext));
+            holder.mBody.setBackgroundColor(Utils.Ui.getAccentColor(mActivity));
 
-            mMainActivity.inflateChooseMenu();
-            MainActivity.CURRENT_MENU = MainActivity.MENU_CHOOSE;
+            mActivity.inflateChooseMenu();
             return true;
         });
 
@@ -421,20 +407,20 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         view.setOnClickListener(v -> {
             //在多选模式下
             if (IS_CHOOSE) {
-                for (int id : Data.sSelections) {
+                for (int id : mSelected) {
                     if (id == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
-                        ((ItemHolder) holder).mBody.setBackgroundColor(ContextCompat.getColor(mContext, R.color.card_bg));
-                        Data.sSelections.remove((Integer) mMusicItems.get(holder.getAdapterPosition()).getMusicID());
-                        if (Data.sSelections.size() == 0) {
+                        ((ItemHolder) holder).mBody.setBackgroundColor(ContextCompat.getColor(mActivity, R.color.card_bg));
+                        mSelected.remove((Integer) mMusicItems.get(holder.getAdapterPosition()).getMusicID());
+                        if (mSelected.size() == 0) {
                             IS_CHOOSE = false;
-                            mMainActivity.inflateCommonMenu(mMainActivity.getMainBinding().toolBar);
+                            mActivity.inflateCommonMenu();
                         }
                         return;
                     }
                 }
 
-                Data.sSelections.add(mMusicItems.get(holder.getAdapterPosition()).getMusicID());
-                ((ItemHolder) holder).mBody.setBackgroundColor(Utils.Ui.getAccentColor(mContext));
+                mSelected.add(mMusicItems.get(holder.getAdapterPosition()).getMusicID());
+                ((ItemHolder) holder).mBody.setBackgroundColor(Utils.Ui.getAccentColor(mActivity));
             } else {
 
                 //在通常模式（非多选）下
@@ -442,10 +428,6 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
                     //设置全局ITEM
 //                Data.sCurrentMusicItem = mMusicItems.get(holder.getAdapterPosition());
-
-                    //cover set
-                    Bitmap bitmap = Utils.Audio.getCoverBitmap(mContext, mMusicItems.get(holder.getAdapterPosition()).getAlbumId());
-                    Data.setCurrentCover(bitmap);
 
                     for (int i = 0; i < Data.sMusicItems.size(); i++) {
                         MusicItem item = Data.sMusicItems.get(i);
@@ -456,7 +438,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                         }
                     }
                 }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(integer -> Utils.SendSomeThing.sendPlay(mContext, ReceiverOnMusicPlay.TYPE_ITEM_CLICK, integer.toString()), Throwable::printStackTrace);
+                        .subscribe(integer -> Utils.SendSomeThing.sendPlay(mActivity, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, integer.toString()), Throwable::printStackTrace);
                 Data.sDisposables.add(disposable);
 
                 new AsyncTask<Void, Void, Void>() {
@@ -483,10 +465,10 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         final ItemHolder holder = ((ItemHolder) viewHolder);
 
         //check selection
-        if (Data.sSelections.contains(mMusicItems.get(holder.getAdapterPosition()).getMusicID())) {
-            holder.mBody.setBackgroundColor(Utils.Ui.getAccentColor(mContext));
+        if (mSelected.contains(mMusicItems.get(holder.getAdapterPosition()).getMusicID())) {
+            holder.mBody.setBackgroundColor(Utils.Ui.getAccentColor(mActivity));
         } else {
-            holder.mBody.setBackgroundColor(ContextCompat.getColor(mContext, R.color.card_bg));
+            holder.mBody.setBackgroundColor(ContextCompat.getColor(mActivity, R.color.card_bg));
         }
 
         holder.mMusicText.setText(mMusicItems.get(holder.getAdapterPosition()).getMusicName());
@@ -506,21 +488,21 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
 
             Log.d(TAG, "onBindViewHolder: " + holder.getAdapterPosition() + " _ _ " + index + " _ _ _ " + i);
 
-            albumLoader(mMainActivity, holder.mMusicCoverImage, mMusicItems.get(i).getAlbumId()
+            albumLoader(mActivity, holder.mMusicCoverImage, mMusicItems.get(i).getAlbumId()
                     , mMusicItems.get(i).getArtist(), mMusicItems.get(i).getMusicAlbum(), i);
 
             switch (mStyleId) {
                 case 1: {
                     ItemHolderS1 holderS1 = (ItemHolderS1) holder;
-                    final Bitmap bitmap = Utils.Ui.readBitmapFromFile(Utils.Audio.getCoverPath(mContext, mMusicItems.get(i).getAlbumId()), 50, 50);
+                    final Bitmap bitmap = Utils.Ui.readBitmapFromFile(Utils.Audio.getCoverPath(mActivity, mMusicItems.get(i).getAlbumId()), 50, 50);
                     if (bitmap != null) {
                         //color set (album tag)
                         Palette.from(bitmap).generate(p -> {
                             if (p != null) {
-                                @ColorInt int color = p.getVibrantColor(ContextCompat.getColor(mMainActivity, R.color.notVeryBlack));
+                                @ColorInt int color = p.getVibrantColor(ContextCompat.getColor(mActivity, R.color.notVeryBlack));
                                 GradientDrawable drawable = new GradientDrawable();
-                                drawable.setStroke(((int) mContext.getResources().getDimension(R.dimen.frame_width) * 2), color);
-                                drawable.setCornerRadius(mContext.getResources().getDimension(R.dimen.frame_corners));
+                                drawable.setStroke(((int) mActivity.getResources().getDimension(R.dimen.frame_width) * 2), color);
+                                drawable.setCornerRadius(mActivity.getResources().getDimension(R.dimen.frame_corners));
                                 holderS1.mFrame.setBackground(drawable);
                                 bitmap.recycle();
                             }
@@ -537,7 +519,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
      * loader
      * load image to imageView (net, defDB, customDB, defAlbum)
      */
-    private void albumLoader(Activity activity, ImageView imageView, int albumId, String artist, String albumName, int index) {
+    private void albumLoader(Context activity, ImageView imageView, int albumId, String artist, String albumName, int index) {
         final String[] albumPath = {null};
 
         final Cursor cursor = activity.getContentResolver().query(
@@ -585,7 +567,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                                 custom.save();
 
                                 if (verify(imageView, index)) {
-                                    imageView.post(() -> GlideApp.with(mMainActivity)
+                                    imageView.post(() -> GlideApp.with(mActivity)
                                             .load(mayPath)
                                             .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                                             .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -603,7 +585,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                                 httpUtil.sedOkHttpRequest(request.toString(), new Callback() {
                                     @Override
                                     public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                                        activity.runOnUiThread(() -> Toast.makeText(activity, e.getMessage(), Toast.LENGTH_SHORT).show());
+                                        imageView.post(() -> Toast.makeText(activity, e.getMessage(), Toast.LENGTH_SHORT).show());
                                     }
 
                                     @Override
@@ -683,14 +665,17 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                                                         .into(imageView)));
                                             }
                                         } else {
-                                            activity.runOnUiThread(() -> Toast.makeText(activity, "response is NUll!", Toast.LENGTH_SHORT).show());
-                                            imageView.post(() -> imageView.post(() -> GlideApp.with(imageView)
-                                                    .load(R.drawable.default_album_art)
-                                                    .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-                                                    .centerCrop()
-                                                    .override(100, 100)
-                                                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                                                    .into(imageView)));
+                                            imageView.post(() -> {
+                                                Toast.makeText(activity, "response is NUll!", Toast.LENGTH_SHORT).show();
+
+                                                GlideApp.with(imageView)
+                                                        .load(R.drawable.default_album_art)
+                                                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                                                        .centerCrop()
+                                                        .override(100, 100)
+                                                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                                        .into(imageView);
+                                            });
                                         }
                                     }
                                 });
@@ -699,7 +684,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                         } else {
                             Log.d(TAG, "albumLoader: has data in DB, loading...");
                             if (verify(imageView, index)) {
-                                imageView.post(() -> GlideApp.with(mMainActivity)
+                                imageView.post(() -> GlideApp.with(mActivity)
                                         .load(file)
                                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                                         .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -828,6 +813,10 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
         return mMusicItems.size();
     }
 
+    public ArrayList<Integer> getSelected() {
+        return mSelected;
+    }
+
     @Override
     public int getItemViewType(int position) {
         if (position == 0) {
@@ -837,12 +826,10 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
     }
 
     public void clearSelection() {
-        for (ItemHolder holder : mViewHolders) {
-            holder.mBody.setBackgroundColor(ContextCompat.getColor(mContext, R.color.card_bg));
-        }
-        Data.sSelections.clear();
-        mMainActivity.inflateCommonMenu(mMainActivity.getMainBinding().toolBar);
-        MainActivity.CURRENT_MENU = MainActivity.MENU_COMMON;
+        mSelected.clear();
+        mActivity.inflateCommonMenu();
+        for (ItemHolder holder : mViewHolders)
+            holder.mBody.setBackgroundColor(ContextCompat.getColor(mActivity, R.color.card_bg));
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -904,21 +891,21 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
             mButton3 = itemView.findViewById(R.id.expand_button_3);
             mButton4 = itemView.findViewById(R.id.expand_button_share);
 
-            mPopupMenu = new PopupMenu(mContext, mItemMenuButton);
+            mPopupMenu = new PopupMenu(mActivity, mItemMenuButton);
             mMenu = mPopupMenu.getMenu();
 
-            final Resources resources = mContext.getResources();
+            final Resources resources = mActivity.getResources();
 
             //Menu Load
             //noinspection PointlessArithmeticExpression
             mMenu.add(Menu.NONE, Menu.FIRST + 0, 0, resources.getString(R.string.next_play));
             mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, resources.getString(R.string.add_to_playlist));
-            if (!mCurrentUiPosition.equals(AlbumDetailActivity.TAG))
+            if (!mActivity.getActivityTAG().equals(AlbumDetailActivity.TAG))
                 mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, resources.getString(R.string.show_album));
             mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, resources.getString(R.string.more_info));
             mMenu.add(Menu.NONE, Menu.FIRST + 6, 0, resources.getString(R.string.share));
 
-            MenuInflater menuInflater = mContext.getMenuInflater();
+            MenuInflater menuInflater = mActivity.getMenuInflater();
             menuInflater.inflate(R.menu.recycler_song_item_menu, mMenu);
         }
     }

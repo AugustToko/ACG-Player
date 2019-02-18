@@ -152,7 +152,7 @@ public final class SettingsActivity extends MyBaseCompatActivity {
 
                 case TITLE: {
                     mTitleImage.clearAnimation();
-                    ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.SharedPrefsTag.TITLE_COLOR, R.color.def_title_color), color);
+                    ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.SharedPrefsTag.TITLE_COLOR, R.color.def_over_title_color), color);
                     animator.setDuration(300);
                     animator.addUpdateListener(animation -> {
                         mTitleImage.setBackgroundColor((Integer) animation.getAnimatedValue());
@@ -197,7 +197,7 @@ public final class SettingsActivity extends MyBaseCompatActivity {
         ConstraintLayout constraintLayout = findViewById(R.id.theme_settings);
         constraintLayout.setOnClickListener(v -> startActivity(new Intent(SettingsActivity.this, ThemeActivity.class)));
 
-        mToolbar.inflateMenu(R.menu.menu_toolbar_settings);
+        inflateCommonMenu();
 
         super.initView(mToolbar, mAppBarLayout);
         super.onCreate(savedInstanceState);
@@ -390,7 +390,7 @@ public final class SettingsActivity extends MyBaseCompatActivity {
 
             startService(intent);
 
-            if (Values.HAS_PLAYED) {
+            if (Data.HAS_PLAYED) {
                 try {
                     if (Data.sMusicBinder.isPlayingMusic()) {
                         Data.sMusicBinder.playMusic();
@@ -614,8 +614,18 @@ public final class SettingsActivity extends MyBaseCompatActivity {
     }
 
     @Override
-    protected String getActivityTAG() {
+    public String getActivityTAG() {
         return TAG;
+    }
+
+    @Override
+    public void inflateCommonMenu() {
+        mToolbar.inflateMenu(R.menu.menu_toolbar_settings);
+    }
+
+    @Override
+    public void inflateChooseMenu() {
+
     }
 
     private void clearAnimation() {

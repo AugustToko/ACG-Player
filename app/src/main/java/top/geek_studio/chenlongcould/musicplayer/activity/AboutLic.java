@@ -95,8 +95,18 @@ public final class AboutLic extends MyBaseCompatActivity {
     }
 
     @Override
-    protected String getActivityTAG() {
+    public String getActivityTAG() {
         return TAG;
+    }
+
+    @Override
+    public void inflateCommonMenu() {
+
+    }
+
+    @Override
+    public void inflateChooseMenu() {
+
     }
 
     @Override

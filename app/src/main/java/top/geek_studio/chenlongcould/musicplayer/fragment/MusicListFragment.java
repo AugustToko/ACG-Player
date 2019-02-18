@@ -18,6 +18,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.jetbrains.annotations.NotNull;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
@@ -49,28 +51,27 @@ public final class MusicListFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NotNull Context context) {
         super.onAttach(context);
         mActivity = (MainActivity) getActivity();
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mMusicListBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_list, container, false);
-//        mMusicListBinding.includeRecycler.recyclerView.addItemDecoration(Data.getItemDecoration(mActivity));
         mMusicListBinding.includeRecycler.recyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
         mMusicListBinding.includeRecycler.recyclerView.setHasFixedSize(true);
-        adapter = new MyRecyclerAdapter(Data.sMusicItems, mActivity, TAG, PreferenceManager.getDefaultSharedPreferences(getContext()).getInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 0));
+        adapter = new MyRecyclerAdapter(mActivity, Data.sMusicItems, PreferenceManager.getDefaultSharedPreferences(getContext()).getInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 0));
         mMusicListBinding.includeRecycler.recyclerView.setAdapter(adapter);
 
         return mMusicListBinding.getRoot();
     }
 
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        if (Data.sMusicItems.size() > 0 && adapter != null && !isVisibleToUser)
+            adapter.clearSelection();
+    }
 
     public final MyRecyclerAdapter getAdapter() {
         return adapter;
@@ -79,11 +80,5 @@ public final class MusicListFragment extends Fragment {
     public FragmentMusicListBinding getMusicListBinding() {
         return mMusicListBinding;
     }
-
-//    @Override
-//    public void visibleOrGone(int status) {
-//        if (mMusicListBinding.includeRecycler.recyclerView != null)
-//            mMusicListBinding.includeRecycler.recyclerView.setVisibility(status);
-//    }
 
 }

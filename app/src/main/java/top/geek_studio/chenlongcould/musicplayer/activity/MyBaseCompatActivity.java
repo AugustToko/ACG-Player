@@ -115,11 +115,20 @@ public abstract class MyBaseCompatActivity extends AppCompatActivity implements 
         }
     }
 
-
     /**
      * @return ACTIVITY'S TAG
      */
-    abstract protected String getActivityTAG();
+    abstract public String getActivityTAG();
+
+    /**
+     * Load the usual menu, no item is selected({@link androidx.recyclerview.widget.RecyclerView})
+     */
+    abstract public void inflateCommonMenu();
+
+    /**
+     * Load the selection menu, has item in selected({@link androidx.recyclerview.widget.RecyclerView})
+     */
+    abstract public void inflateChooseMenu();
 
     /**
      * set up view
@@ -175,5 +184,6 @@ public abstract class MyBaseCompatActivity extends AppCompatActivity implements 
         animator.start();
 
     }
+
 
 }

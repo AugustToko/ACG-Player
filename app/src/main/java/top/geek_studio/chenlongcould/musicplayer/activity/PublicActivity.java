@@ -14,14 +14,13 @@ package top.geek_studio.chenlongcould.musicplayer.activity;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 
 import com.google.android.material.appbar.AppBarLayout;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -34,13 +33,13 @@ import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
+// TODO: 2019/2/18 make a general menu
 public class PublicActivity extends MyBaseCompatActivity {
 
     public static final String TAG = "PublicActivity";
@@ -55,7 +54,7 @@ public class PublicActivity extends MyBaseCompatActivity {
     /**
      * 保存播放列表下的Music (如果当前type是play_list_item的话 {@link #mType} )
      */
-    private List<MusicItem> mMusicItemList;
+    private List<MusicItem> mMusicItemList = new ArrayList<>();
 
     /**
      * save current playlist name, if current type is play_list_item {@link #mType}
@@ -77,6 +76,8 @@ public class PublicActivity extends MyBaseCompatActivity {
         mAppBarLayout = findViewById(R.id.app_bar_layout);
         mToolbar = findViewById(R.id.toolbar);
 
+        inflateCommonMenu();
+
         super.initView(mToolbar, mAppBarLayout);
         super.onCreate(savedInstanceState);
 
@@ -89,6 +90,7 @@ public class PublicActivity extends MyBaseCompatActivity {
             switch (mType) {
                 case PlayListFragment.ACTION_ADD_RECENT: {
                     mToolbar.setTitle(getResources().getString(R.string.add_recent));
+
                     ArrayList<MusicItem> musicItems = new ArrayList<>(Data.sMusicItems);
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         musicItems.sort((o1, o2) -> {
@@ -97,19 +99,15 @@ public class PublicActivity extends MyBaseCompatActivity {
                             }
                             return Integer.compare(o1.getAddTime(), o2.getAddTime());
                         });
-                    } else {
-                        // TODO: 2018/11/22 quickSort
-                        System.exit(0);
                     }
-                    adapter = new MyRecyclerAdapter(musicItems, this, TAG);
+
+                    adapter = new MyRecyclerAdapter(this, musicItems);
                     mRecyclerView.setAdapter(adapter);
                 }
                 break;
 
                 case PlayListFragment.ACTION_FAVOURITE: {
                     mToolbar.setTitle(getResources().getString(R.string.my_favourite));
-
-                    mMusicItemList = new ArrayList<>();
 
                     int id = MusicUtil.getFavoritesPlaylist(this).getId();
                     if (id != -1) {
@@ -160,22 +158,8 @@ public class PublicActivity extends MyBaseCompatActivity {
                         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(i -> {
                                     if (i != 0) return;
-                                    adapter = new MyRecyclerAdapter(mMusicItemList, PublicActivity.this, TAG + PlayListFragment.ACTION_FAVOURITE);
+                                    adapter = new MyRecyclerAdapter(PublicActivity.this, mMusicItemList);
                                     mRecyclerView.setAdapter(adapter);
-
-                                    mToolbar.setOnMenuItemClickListener(menuItem -> {
-                                        switch (menuItem.getItemId()) {
-                                            case R.id.menu_random_play: {
-                                                Data.sPlayOrderList.clear();
-                                                Data.sPlayOrderList.addAll(mMusicItemList);        //更新数据
-                                                Collections.shuffle(Data.sPlayOrderList);
-                                                Utils.SendSomeThing.sendPlay(PublicActivity.this, ReceiverOnMusicPlay.TYPE_SHUFFLE, TAG + PlayListFragment.ACTION_FAVOURITE);
-                                            }
-                                            break;
-                                        }
-                                        return false;
-                                    });
-
                                 });
                     }
                 }
@@ -183,10 +167,8 @@ public class PublicActivity extends MyBaseCompatActivity {
 
                 //点击播放列表中的一项
                 case PlayListFragment.ACTION_PLAY_LIST_ITEM: {
-
                     mToolbar.setTitle(getIntent().getStringExtra("play_list_name"));
-                    mToolbar.inflateMenu(R.menu.menu_in_play_list_activity);
-                    mMusicItemList = new ArrayList<>();
+
                     currentListName = getIntent().getStringExtra("play_list_name");
 
                     mDisposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
@@ -236,38 +218,21 @@ public class PublicActivity extends MyBaseCompatActivity {
                     }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                             .subscribe(i -> {
                                 if (i != 0) return;
-                                adapter = new MyRecyclerAdapter(mMusicItemList, PublicActivity.this, TAG + "PlayList");
+                                adapter = new MyRecyclerAdapter(PublicActivity.this, mMusicItemList);
                                 mRecyclerView.setAdapter(adapter);
-
-                                mToolbar.setOnMenuItemClickListener(menuItem -> {
-                                    switch (menuItem.getItemId()) {
-                                        case R.id.menu_random_play: {
-                                            Data.sPlayOrderList.clear();
-                                            Data.sPlayOrderList.addAll(mMusicItemList);        //更新数据
-                                            if (PreferenceManager.getDefaultSharedPreferences(PublicActivity.this).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM))
-                                                Collections.shuffle(Data.sPlayOrderList);
-                                            Utils.SendSomeThing.sendPlay(PublicActivity.this, ReceiverOnMusicPlay.TYPE_SHUFFLE, TAG);
-                                        }
-                                        break;
-                                    }
-                                    return false;
-                                });
-
                             });
                 }
                 break;
 
                 case PlayListFragment.ACTION_HISTORY: {
                     mToolbar.setTitle(getString(R.string.history));
-                    mToolbar.inflateMenu(R.menu.menu_public_trash_can);
-                    mRecyclerView.setAdapter(new MyRecyclerAdapter(Data.sHistoryPlay, PublicActivity.this, TAG));
+                    mRecyclerView.setAdapter(new MyRecyclerAdapter(PublicActivity.this, Data.sHistoryPlay));
                 }
                 break;
 
                 case PlayListFragment.ACTION_TRASH_CAN: {
                     mToolbar.setTitle(getString(R.string.trash_can));
-                    mToolbar.inflateMenu(R.menu.menu_public_trash_can);
-                    mRecyclerView.setAdapter(new MyRecyclerAdapter(Data.sTrashCanList, PublicActivity.this, TAG));
+                    mRecyclerView.setAdapter(new MyRecyclerAdapter(PublicActivity.this, Data.sTrashCanList));
                 }
                 break;
                 default:
@@ -277,8 +242,35 @@ public class PublicActivity extends MyBaseCompatActivity {
     }
 
     @Override
-    protected String getActivityTAG() {
+    public String getActivityTAG() {
         return TAG;
+    }
+
+    @Override
+    public void inflateCommonMenu() {
+        mToolbar.getMenu().clear();
+        mToolbar.inflateMenu(R.menu.menu_public);
+        mToolbar.setOnMenuItemClickListener(item -> {
+            switch (item.getItemId()) {
+                case R.id.menu_public_random: {
+                    Data.sNextWillPlayItem = mMusicItemList.get(new Random().nextInt(mMusicItemList.size()));
+                    Utils.SendSomeThing.sendPlay(PublicActivity.this, 6, ReceiverOnMusicPlay.TYPE_NEXT);
+                }
+                break;
+
+                case R.id.menu_public_m3u: {
+
+                }
+                break;
+            }
+            return true;
+        });
+    }
+
+    @Override
+    public void inflateChooseMenu() {
+        mToolbar.getMenu().clear();
+        mToolbar.inflateMenu(R.menu.menu_toolbar_main_choose);
     }
 
     @Override

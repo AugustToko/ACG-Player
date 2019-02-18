@@ -33,7 +33,6 @@ import java.util.Date;
 import java.util.List;
 
 import androidx.annotation.ColorInt;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -63,7 +62,7 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
  * @author chenlongcould
  * @apiNote some by others
  */
-public final class AlbumDetailActivity extends AppCompatActivity {
+public final class AlbumDetailActivity extends MyBaseCompatActivity {
 
     public static final String TAG = "AlbumDetailActivity";
 
@@ -96,6 +95,10 @@ public final class AlbumDetailActivity extends AppCompatActivity {
 
     private List<MusicItem> mSongs = new ArrayList<>();
 
+    private String intentAlbumId = "0";
+
+    private List<CustomAlbumPath> paths;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,6 +108,48 @@ public final class AlbumDetailActivity extends AppCompatActivity {
         initData();
     }
 
+    @Override
+    public String getActivityTAG() {
+        return TAG;
+    }
+
+    @Override
+    public void inflateCommonMenu() {
+        mAlbumDetailBinding.toolbar.inflateMenu(R.menu.menu_toolbar_album_detail);
+        //update menu checkbox
+        if (!intentAlbumId.equals("-10") && paths.size() > 0) {
+            mAlbumDetailBinding.toolbar.getMenu().findItem(R.id.menu_toolbar_album_force_album).setChecked(paths.get(0).isForceUse());
+        }
+
+        mAlbumDetailBinding.toolbar.setOnMenuItemClickListener(menuItem -> {
+            switch (menuItem.getItemId()) {
+                case R.id.menu_toolbar_album_force_album: {
+                    if (!intentAlbumId.equals("-10")) {
+                        CustomAlbumPath customAlbumPath = paths.get(0);
+                        if (menuItem.isChecked()) {
+                            menuItem.setChecked(false);
+                            customAlbumPath.setForceUse(false);
+                        } else {
+                            menuItem.setChecked(true);
+                            customAlbumPath.setForceUse(true);
+                        }
+                        customAlbumPath.save();
+                    } else {
+                        Toast.makeText(this, "Album Id Error..., finishing...", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                }
+                break;
+            }
+            return true;
+        });
+    }
+
+    @Override
+    public void inflateChooseMenu() {
+
+    }
+
     private void initData() {
         final Intent intent = getIntent();
         if (intent != null) {
@@ -112,45 +157,17 @@ public final class AlbumDetailActivity extends AppCompatActivity {
 
             String key = intent.getStringExtra("key");
             mAlbumDetailBinding.toolbar.setTitle(key);
-            mAlbumDetailBinding.toolbar.inflateMenu(R.menu.menu_toolbar_album_detail);
-            String intentAlbumId = String.valueOf(intent.getIntExtra("_id", -10));
-            List<CustomAlbumPath> paths = LitePal.where("mAlbumId = ?", intentAlbumId).find(CustomAlbumPath.class);
 
-            //update menu checkbox
-            if (!intentAlbumId.equals("-10") && paths.size() > 0) {
-                mAlbumDetailBinding.toolbar.getMenu().findItem(R.id.menu_toolbar_album_force_album).setChecked(paths.get(0).isForceUse());
-            }
-
-            mAlbumDetailBinding.toolbar.setOnMenuItemClickListener(menuItem -> {
-                switch (menuItem.getItemId()) {
-                    case R.id.menu_toolbar_album_force_album: {
-                        if (!intentAlbumId.equals("-10")) {
-                            CustomAlbumPath customAlbumPath = paths.get(0);
-                            if (menuItem.isChecked()) {
-                                menuItem.setChecked(false);
-                                customAlbumPath.setForceUse(false);
-                            } else {
-                                menuItem.setChecked(true);
-                                customAlbumPath.setForceUse(true);
-                            }
-                            customAlbumPath.save();
-                        } else {
-                            Toast.makeText(this, "Album Id Error..., finishing...", Toast.LENGTH_SHORT).show();
-                            finish();
-                        }
-                    }
-                    break;
-                }
-                return true;
-            });
-
+            intentAlbumId = String.valueOf(intent.getIntExtra("_id", -10));
+            paths = LitePal.where("mAlbumId = ?", intentAlbumId).find(CustomAlbumPath.class);
+            inflateCommonMenu();
 
             mAlbumDetailBinding.recyclerView.setPadding(0, headerViewHeight, 0, 0);
             mAlbumDetailBinding.recyclerView.setScrollViewCallbacks(observableScrollViewCallbacks);
             final View contentView = getWindow().getDecorView().findViewById(android.R.id.content);
             contentView.post(() -> observableScrollViewCallbacks.onScrollChanged(-headerViewHeight, false, false));
             mAlbumDetailBinding.recyclerView.setLayoutManager(new GridLayoutManager(AlbumDetailActivity.this, 1));
-            final MyRecyclerAdapter adapter = new MyRecyclerAdapter(mSongs, AlbumDetailActivity.this, TAG, 0);
+            final MyRecyclerAdapter adapter = new MyRecyclerAdapter(this, mSongs, 0);
             mAlbumDetailBinding.recyclerView.setAdapter(adapter);
             adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
                 @Override

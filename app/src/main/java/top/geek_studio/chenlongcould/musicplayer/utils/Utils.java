@@ -80,7 +80,6 @@ import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
@@ -410,13 +409,13 @@ public final class Utils {
         }
 
         /**
-         * getTitleColor from {@link SharedPreferences}, default: {@link R.color#def_title_color}
+         * getTitleColor from {@link SharedPreferences}, default: {@link R.color#def_over_title_color}
          *
          * @return color (int)
          */
         @ColorInt
         public static int getTitleColor(Context context) {
-            return PreferenceManager.getDefaultSharedPreferences(context).getInt(Values.SharedPrefsTag.TITLE_COLOR, ContextCompat.getColor(context, R.color.def_title_color));
+            return PreferenceManager.getDefaultSharedPreferences(context).getInt(Values.SharedPrefsTag.TITLE_COLOR, ContextCompat.getColor(context, R.color.def_over_title_color));
         }
 
         public static Bitmap readBitmapFromFile(String filePath, int width, int height) {
@@ -859,17 +858,17 @@ public final class Utils {
             }
         }
 
-        public static void upDateStyle(final SharedPreferences mDefSharedPreferences) {
-            if (mDefSharedPreferences.getBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false)) {
-                Values.Style.NIGHT_MODE = true;
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                Values.Color.TEXT_COLOR = "#7c7c7c";
-            } else {
-                Values.Style.NIGHT_MODE = false;
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                Values.Color.TEXT_COLOR = "#3c3c3c";
-            }
-        }
+//        public static void upDateStyle(final SharedPreferences mDefSharedPreferences) {
+//            if (mDefSharedPreferences.getBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false)) {
+//                Values.Style.NIGHT_MODE = true;
+//                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+//                Values.Color.TEXT_COLOR = "#7c7c7c";
+//            } else {
+//                Values.Style.NIGHT_MODE = false;
+//                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+//                Values.Color.TEXT_COLOR = "#3c3c3c";
+//            }
+//        }
 
         public static Bitmap blurBitmap(Bitmap bitmap, float r, Context context) {
 
@@ -987,7 +986,7 @@ public final class Utils {
          * @param activity MainActivity
          * @param items    MusicItems
          */
-        public static void addListDialog(MainActivity activity, ArrayList<MusicItem> items) {
+        public static void addListDialog(Context activity, ArrayList<MusicItem> items) {
             final Resources resources = activity.getResources();
 
             final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(activity);
@@ -1015,8 +1014,8 @@ public final class Utils {
                     dialog.dismiss();
                     Data.sPlayListItems.add(0, new PlayListItem(result, et.getText().toString()));
 
-                    //update data
-                    activity.getPlayListFragment().getPlayListAdapter().notifyItemInserted(0);
+//                    //update data
+//                    activity.getPlayListFragment().getPlayListAdapter().notifyItemInserted(0);
                 });
                 b2.show();
             });
@@ -1054,13 +1053,13 @@ public final class Utils {
         }
 
         /**
-         * @param args play_type: previous, next, slide
+         * @param playBy play_type: previous, next, slide
          */
-        public static void sendPlay(final Context context, final int playType, final String args, final String... other) {
+        public static void sendPlay(final Context context, final int receiveType, final String playBy, final String... other) {
             Intent intent = new Intent();
             intent.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
-            intent.putExtra("play_type", playType);
-            intent.putExtra("args", args);
+            intent.putExtra("play_type", receiveType);
+            intent.putExtra("args", playBy);
             context.sendBroadcast(intent, Values.Permission.BROAD_CAST);
         }
     }

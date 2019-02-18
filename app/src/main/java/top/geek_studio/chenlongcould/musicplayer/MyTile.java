@@ -56,7 +56,6 @@ public class MyTile extends TileService {
 
     @Override
     public void onCreate() {
-        Log.d(TAG, "onCreate: ");
         super.onCreate();
         if (ContextCompat.checkSelfPermission(MyTile.this,
                 android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
@@ -65,7 +64,6 @@ public class MyTile extends TileService {
                 Intent intent = new Intent(this, MyMusicService.class);
                 startService(intent);
                 Data.HAS_BIND = bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
-                Log.d(TAG, "onClick: " + Data.HAS_BIND);
             }
         } else {
             Toast.makeText(this, "Need Permission, please open the app...", Toast.LENGTH_SHORT).show();
@@ -153,8 +151,6 @@ public class MyTile extends TileService {
                 Utils.Ui.fastToast(MyTile.this, "Can not find any music!");
                 return;
             }
-
-            Values.MUSIC_DATA_INIT_DONE = true;
         });
     }
 
@@ -184,14 +180,14 @@ public class MyTile extends TileService {
 
     @Override
     public void onClick() {
-        if (Values.MUSIC_DATA_INIT_DONE) {
+        if (Data.sPlayOrderList.size() == 0) {
             if (!mEnable) {
                 mEnable = true;
                 getQsTile().setState(Tile.STATE_ACTIVE);
                 getQsTile().setLabel("Playing...");
                 getQsTile().setIcon(Icon.createWithResource(this, R.drawable.ic_audiotrack_24px));
                 getQsTile().updateTile();
-                Utils.SendSomeThing.sendPlay(this, ReceiverOnMusicPlay.TYPE_SHUFFLE, null);
+                Utils.SendSomeThing.sendPlay(this, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, null);
             } else {
                 mEnable = false;
                 getQsTile().setState(Tile.STATE_INACTIVE);

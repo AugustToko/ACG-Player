@@ -16,7 +16,8 @@
     <color name="colorPrimaryDark">#d32f2f</color>
     <color name="colorAccent">#FF5252</color>
 
-    <color name="def_title_color">#fff</color>
+    <!--set the title(over toolbar, tabLayout) color, or menu icon color-->
+    <color name="def_over_title_color">#fff</color>
 
     <!--Blue-->
     <color name="blue">#3F51B5</color>
@@ -29,7 +30,7 @@
 
     <color name="mp3TypeColor">#d9d9d9</color>
 
-    <color name="item_title_text_color">#3c3c3c</color>
+    <color name="title_color">#3c3c3c</color>
 
     <color name="LightSkyBlue">#87cefa</color>
     <color name="SpringGreen">#3CB371</color>

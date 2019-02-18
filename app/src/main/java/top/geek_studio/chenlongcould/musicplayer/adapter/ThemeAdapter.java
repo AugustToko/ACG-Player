@@ -16,7 +16,6 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -165,7 +164,7 @@ public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> 
         if (mThemes.get(i).getId().equals(PreferenceManager.getDefaultSharedPreferences(mThemeActivity).getString(Values.SharedPrefsTag.SELECT_THEME, "null"))) {
             ((CardView) viewHolder.itemView).setCardBackgroundColor(ContextCompat.getColor(mThemeActivity, R.color.theme_in_use_item_bg_color));
         } else {
-            ((CardView) viewHolder.itemView).setCardBackgroundColor(Color.parseColor(Values.Color.WIN_BACKGROUND_COLOR));
+            ((CardView) viewHolder.itemView).setCardBackgroundColor(ContextCompat.getColor(mThemeActivity, R.color.win_background_color));
         }
 
         viewHolder.mTitle.setText(mThemes.get(i).getTitle());

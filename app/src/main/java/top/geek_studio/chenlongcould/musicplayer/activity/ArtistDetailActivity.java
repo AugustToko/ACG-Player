@@ -103,8 +103,18 @@ public final class ArtistDetailActivity extends MyBaseCompatActivity {
     }
 
     @Override
-    protected String getActivityTAG() {
+    public String getActivityTAG() {
         return TAG;
+    }
+
+    @Override
+    public void inflateCommonMenu() {
+
+    }
+
+    @Override
+    public void inflateChooseMenu() {
+
     }
 
     private void initData() {
@@ -156,7 +166,7 @@ public final class ArtistDetailActivity extends MyBaseCompatActivity {
             final View contentView = getWindow().getDecorView().findViewById(android.R.id.content);
             contentView.post(() -> observableScrollViewCallbacks.onScrollChanged(-headerViewHeight, false, false));
             mArtistDetailOthBinding.recyclerView.setLayoutManager(new GridLayoutManager(ArtistDetailActivity.this, 1));
-            final MyRecyclerAdapter adapter = new MyRecyclerAdapter(mSongs, ArtistDetailActivity.this, TAG, 0);
+            final MyRecyclerAdapter adapter = new MyRecyclerAdapter(this, mSongs, 0);
             mArtistDetailOthBinding.recyclerView.setAdapter(adapter);
             adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
                 @Override

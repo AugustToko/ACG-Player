@@ -60,6 +60,7 @@ public final class SplashActivity extends MyBaseCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_splash);
 
         // Android 5.0 以上 全透明
         Window window = getWindow();
@@ -74,15 +75,22 @@ public final class SplashActivity extends MyBaseCompatActivity {
         // 虚拟导航键
         window.setNavigationBarColor(Color.TRANSPARENT);
 
-
-        setContentView(R.layout.activity_splash);
-
         if (initPermission()) initDone();
     }
 
     @Override
-    protected String getActivityTAG() {
+    public String getActivityTAG() {
         return TAG;
+    }
+
+    @Override
+    public void inflateCommonMenu() {
+
+    }
+
+    @Override
+    public void inflateChooseMenu() {
+
     }
 
 }

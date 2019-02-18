@@ -19,7 +19,7 @@
     <color name="blue_dark">#303F9F</color>
     <color name="pink_light">#ff4081</color>
 
-    <color name="item_title_text_color">?android:textColorPrimary</color>
+    <color name="title_color">?android:textColorPrimary</color>
     <color name="notVeryWhite">#f4f4f4</color>
 
     <color name="line_color">#c1c1c1</color>

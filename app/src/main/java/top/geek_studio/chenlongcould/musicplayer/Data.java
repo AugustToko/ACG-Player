@@ -43,6 +43,8 @@ public final class Data {
 
     public volatile static boolean HAS_BIND = false;
 
+    public volatile static boolean HAS_PLAYED = false;           //检测app打开后, 是否播放过音乐 (如果没, 默认点击播放按钮为快速随机播放)
+
     public static ArrayList<Disposable> sDisposables = new ArrayList<>();
 
     public static WeakReference<MainActivity> sMainRef;
@@ -131,8 +133,6 @@ public final class Data {
     }
 
     public final static SimpleDateFormat sSimpleDateFormat = new SimpleDateFormat("mm:ss", Locale.CHINESE);
-    //多选存储, 存储MusicItem id
-    public static ArrayList<Integer> sSelections = new ArrayList<>();
 
     public final static SimpleDateFormat sSimpleDateFormatFile = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINESE);
 

@@ -13,7 +13,6 @@ package top.geek_studio.chenlongcould.musicplayer.adapter;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
@@ -147,10 +146,6 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
                 ReceiverOnMusicPlay.resetMusic();
 
-                //cover set
-                Bitmap img = Utils.Audio.getCoverBitmap(mMainActivity, mMusicItems.get(holder.getAdapterPosition()).getAlbumId());
-                Data.setCurrentCover(img);
-
                 for (int i = 0; i < Data.sMusicItems.size(); i++) {
                     MusicItem item = Data.sMusicItems.get(i);
                     if (item.getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
@@ -159,7 +154,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
                 }
 
             }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(integer -> Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.TYPE_ITEM_CLICK, integer.toString()), Throwable::printStackTrace);
+                    .subscribe(integer -> Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, integer.toString()), Throwable::printStackTrace);
             Data.sDisposables.add(disposable);
         });
     }

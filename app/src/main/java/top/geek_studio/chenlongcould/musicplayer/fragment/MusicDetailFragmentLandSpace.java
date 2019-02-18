@@ -98,7 +98,7 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
         mMusicDetail2Binding.toolbar.setOnMenuItemClickListener(menuItem -> {
             switch (menuItem.getItemId()) {
                 case R.id.menu_toolbar_fast_play: {
-                    Utils.SendSomeThing.sendPlay(mCarViewActivity, ReceiverOnMusicPlay.TYPE_SHUFFLE, PlayListFragment.TAG);
+                    Utils.SendSomeThing.sendPlay(mCarViewActivity, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, PlayListFragment.TAG);
                 }
                 break;
 
@@ -133,7 +133,7 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
 
         setData();
 
-        if (Values.HAS_PLAYED) {
+        if (Data.HAS_PLAYED) {
             mMusicDetail2Binding.includePlayerControlCar.playButton.setImageResource(R.drawable.ic_pause_black_24dp);
         } else {
             mMusicDetail2Binding.includePlayerControlCar.playButton.setImageResource(R.drawable.ic_play_arrow_grey_600_24dp);

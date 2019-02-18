@@ -102,6 +102,25 @@ public class ThemeActivity extends MyBaseCompatActivity {
 
         themeDir = getExternalFilesDir(ThemeStore.DIR_NAME);
 
+        inflateCommonMenu();
+        mThemeBinding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
+
+        mDBHelper = new MyThemeDBHelper(this, ThemeStore.DATA_BASE_NAME, null, 1);
+        mThemeBinding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        loadDataUI();
+
+        BottomNavigationView navigation = findViewById(R.id.navigation);
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+    }
+
+    @Override
+    public String getActivityTAG() {
+        return TAG;
+    }
+
+    @Override
+    public void inflateCommonMenu() {
         mThemeBinding.toolbar.inflateMenu(R.menu.menu_toolbar_theme);
         mThemeBinding.toolbar.setOnMenuItemClickListener(menuItem -> {
             switch (menuItem.getItemId()) {
@@ -150,20 +169,11 @@ public class ThemeActivity extends MyBaseCompatActivity {
             }
             return true;
         });
-        mThemeBinding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
-
-        mDBHelper = new MyThemeDBHelper(this, ThemeStore.DATA_BASE_NAME, null, 1);
-        mThemeBinding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        loadDataUI();
-
-        BottomNavigationView navigation = findViewById(R.id.navigation);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
     }
 
     @Override
-    protected String getActivityTAG() {
-        return TAG;
+    public void inflateChooseMenu() {
+
     }
 
     @Override

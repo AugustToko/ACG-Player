@@ -81,7 +81,6 @@ public final class MyMusicService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         mColorized = intent.getBooleanExtra(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true);
-        Log.d(TAG, "onStartCommand: do it" + mColorized);
         return START_STICKY;
     }
 
@@ -244,6 +243,7 @@ public final class MyMusicService extends Service {
         pause.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPause));
         PendingIntent pauseIntent = PendingIntent.getBroadcast(context, REQUEST_PAUSE, pause, PendingIntent.FLAG_UPDATE_CURRENT);
 
+        //resume play...(before show notification, must has music in playing...)
         Intent play = new Intent();
         play.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
         play.putExtra("play_type", 2);

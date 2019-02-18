@@ -1,24 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ *************************************************************
-  ~ 文件：menu_in_play_list_activity.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月17日 17:31:46
-  ~ 上次修改时间：2019年01月17日 17:28:53
+  ~ 文件：menu_public.xml项目：MusicPlayer
+  ~ 当前修改时间：2019年01月27日 13:11:38
+  ~ 上次修改时间：2019年01月27日 13:08:50
   ~ 作者：chenlongcould
   ~ Geek Studio
   ~ Copyright (c) 2019
   ~ *************************************************************
   -->
+
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/menu_random_play"
+        android:id="@+id/menu_public_random"
         android:icon="@drawable/ic_shuffle_white_24dp"
         android:title="Random play"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/menu_save_list_m3u"
+        android:id="@+id/menu_public_m3u"
         android:title="Save as M3U" />
-    <item
-        android:id="@+id/menu_del_playlist"
-        android:title="Remove this" />
 </menu>
