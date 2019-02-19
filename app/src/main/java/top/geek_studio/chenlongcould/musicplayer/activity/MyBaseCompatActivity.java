@@ -24,6 +24,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -159,7 +160,7 @@ public abstract class MyBaseCompatActivity extends AppCompatActivity implements 
      * @param toolbar  toolbar
      * @param subtitle subTitle
      */
-    public void setToolbarSubTitleWithAlphaAni(Toolbar toolbar, CharSequence subtitle) throws NoSuchFieldException, IllegalAccessException {
+    public void setToolbarSubTitleWithAlphaAnimation(Toolbar toolbar, CharSequence subtitle) throws NoSuchFieldException, IllegalAccessException {
         if (mSubtitleView == null) {
             Field f = toolbar.getClass().getDeclaredField("mSubtitleTextView");
             f.setAccessible(true);
@@ -182,8 +183,44 @@ public abstract class MyBaseCompatActivity extends AppCompatActivity implements 
             }
         });
         animator.start();
-
     }
 
+    /**
+     * @param menuItem the menuItem the icon will set AlphaAnimation by {@link ValueAnimator}
+     */
+    public void setMenuIconAlphaAnimation(MenuItem menuItem, boolean visibility) {
+        final ValueAnimator animator = new ValueAnimator();
+        animator.setDuration(Values.DefaultValues.ANIMATION_DURATION);
+        if (!visibility && menuItem.isVisible()) {
+            animator.setIntValues(255, 0);
+            animator.addUpdateListener(animation -> {
+                if (menuItem.getIcon() != null) {
+                    menuItem.getIcon().setAlpha((Integer) animation.getAnimatedValue());
+                }
+            });
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    menuItem.setVisible(false);
+                }
+            });
+            animator.start();
+        } else if (visibility && !menuItem.isVisible()) {
+            animator.setIntValues(0, 255);
+            animator.addUpdateListener(animation -> {
+                if (menuItem.getIcon() != null) {
+                    menuItem.getIcon().setAlpha((Integer) animation.getAnimatedValue());
+                }
+            });
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    menuItem.setVisible(true);
+                }
+            });
+            animator.start();
+        }
+
+    }
 
 }

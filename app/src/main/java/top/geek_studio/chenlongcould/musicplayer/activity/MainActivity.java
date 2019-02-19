@@ -936,8 +936,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                             public void onTabSelected(TabLayout.Tab tab) {
                                 //点击加号不会滑动ViewPager
                                 if (tab.getPosition() != mMainBinding.tabLayout.getTabCount() - 1) {
-                                    Log.d(TAG, "onTabSelected: tabpos " + tab.getPosition() + " title size: " + mTitles.size() + " frag size: " + mFragmentList.size()
-                                            + " tab size: " + mMainBinding.tabLayout.getTabCount());
+//                                    Log.d(TAG, "onTabSelected: tabpos " + tab.getPosition() + " title size: " + mTitles.size() + " frag size: " + mFragmentList.size()
+//                                            + " tab size: " + mMainBinding.tabLayout.getTabCount());
                                     mMainBinding.viewPager.setCurrentItem(tab.getPosition(), true);
                                 }
                             }
@@ -985,39 +985,39 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
                 String order = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
                 if (order.charAt(i) == '1') {
-                    getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(false);
-                    getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(false);
-                    getMenu().findItem(R.id.menu_toolbar_search).setVisible(true);
+                    setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false);
+                    setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false);
+                    setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true);
                     setSubtitle(Data.sMusicItems.size() + " Songs");
                 }
 
                 if (order.charAt(i) == '2') {
-                    getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(true);
-                    getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(false);
-                    getMenu().findItem(R.id.menu_toolbar_search).setVisible(true);
+                    setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), true);
+                    setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false);
+                    setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true);
                     setSubtitle(Data.sAlbumItems.size() + " Albums");
                 }
 
                 if (order.charAt(i) == '3') {
-                    getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(true);
-                    getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(false);
-                    getMenu().findItem(R.id.menu_toolbar_search).setVisible(true);
+                    setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false);
+                    setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), true);
+                    setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true);
                     setSubtitle(Data.sArtistItems.size() + " Artists");
                 }
 
                 //playlist
                 if (order.charAt(i) == '4') {
-                    getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(false);
-                    getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(false);
-                    getMenu().findItem(R.id.menu_toolbar_search).setVisible(false);
+                    setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false);
+                    setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false);
+                    setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), false);
                     setSubtitle(Data.sPlayListItems.size() + " Playlists");
                 }
 
                 //fileviewer
                 if (order.charAt(i) == '5') {
-                    getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(false);
-                    getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(false);
-                    getMenu().findItem(R.id.menu_toolbar_search).setVisible(false);
+                    setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false);
+                    setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false);
+                    setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), false);
                 }
             }
 
@@ -1112,9 +1112,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                         if (area.contains(ThemeStore.SupportArea.BG)) {
                             needSetColor[0] = false;
 
-                            String bgPath = ThemeUtils.getBgFileByName(theme, area);
-//                            @ColorInt int c = setUpStatus(bgPath);
-//                            getWindow().setNavigationBarColor(c);
+                            final String bgPath = ThemeUtils.getBgFileByName(theme, area);
 
                             mMainBinding.toolBar.setBackgroundColor(Color.TRANSPARENT);
                             mMainBinding.tabLayout.setBackgroundColor(Color.TRANSPARENT);
@@ -1138,9 +1136,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
             @Override
             public final void onComplete() {
-                Log.d(TAG, "onComplete: ");
                 if (needSetColor[0]) {
-                    Log.d(TAG, "onComplete: set Common color");
 
                     @ColorInt int color = Utils.Ui.getPrimaryColor(MainActivity.this);
                     setStatusBarTextColor(MainActivity.this, color);
@@ -1182,15 +1178,14 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mSearchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Log.d(TAG, "onQueryTextSubmit: ");
-                if (getMusicListFragment() != null)
+                if (getMusicListFragment() != null) {
                     getMusicListFragment().getMusicListBinding().includeRecycler.recyclerView.stopScroll();
+                }
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                Log.d(TAG, "onQueryTextChange: ");
                 filterData(newText);
                 return true;
             }
@@ -1377,11 +1372,13 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     public void setSubtitle(CharSequence subTitle) {
         try {
-            super.setToolbarSubTitleWithAlphaAni(mMainBinding.toolBar, subTitle);
+            super.setToolbarSubTitleWithAlphaAnimation(mMainBinding.toolBar, subTitle);
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 

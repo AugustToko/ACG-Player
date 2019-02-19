@@ -145,7 +145,6 @@ public class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.ViewHo
 
             Resources resources = mMainActivity.getResources();
 
-            // TODO: 2018/12/10 building
             mMenu.add(Menu.NONE, Menu.FIRST, 0, resources.getString(R.string.del));
             mMenu.add(Menu.NONE, Menu.FIRST + 1, 0, resources.getString(R.string.save_as));
             mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, resources.getString(R.string.play));

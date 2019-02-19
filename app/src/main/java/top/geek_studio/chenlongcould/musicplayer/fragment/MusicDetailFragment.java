@@ -41,6 +41,7 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.CheckBox;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -1175,12 +1176,17 @@ public final class MusicDetailFragment extends Fragment {
     private void dropToTrash(@Nullable MusicItem item) {
         if (item != null)
             if (PreferenceManager.getDefaultSharedPreferences(mMainActivity).getBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, true)) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
+                final AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
                 builder.setTitle(getString(R.string.sure_int));
                 builder.setMessage(getString(R.string.drop_to_trash_can));
-                CheckBox checkBox = new CheckBox(mMainActivity);
+                final FrameLayout frameLayout = new FrameLayout(mMainActivity);
+                final CheckBox checkBox = new CheckBox(mMainActivity);
                 checkBox.setText(getString(R.string.do_not_show_again));
-                builder.setView(checkBox);
+                frameLayout.addView(checkBox);
+                final FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                params.leftMargin = (int) mMainActivity.getResources().getDimension(R.dimen.margin_16);
+                checkBox.setLayoutParams(params);
+                builder.setView(frameLayout);
                 builder.setCancelable(true);
                 builder.setNegativeButton(getString(R.string.sure), (dialog, which) -> {
                     if (checkBox.isChecked()) {

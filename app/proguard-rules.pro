@@ -66,6 +66,7 @@
 -keep public class * extends android.support.v4.app.Fragment
 -keep public class * extends android.app.Fragment
 -keep class top.geek_studio.chenlongcould.geeklibrary.** { *;}
+-keep class androidx.appcompat.widget.** { *;}
 
 # 保持测试相关的代码
 #-dontnote junit.framework.**
