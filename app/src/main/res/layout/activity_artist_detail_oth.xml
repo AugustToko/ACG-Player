@@ -48,7 +48,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <top.geek_studio.chenlongcould.musicplayer.ObservableRecyclerView
+            <top.geek_studio.chenlongcould.musicplayer.misc.ObservableRecyclerView
                 android:id="@+id/recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

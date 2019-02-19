@@ -12,9 +12,9 @@ import org.litepal.LitePal;
 import top.geek_studio.chenlongcould.musicplayer.database.ArtistArtPath;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 
-public class MyDBAlbumSync extends IntentService {
+public class DBArtSync extends IntentService {
 
-    private static final String TAG = "MyDBAlbumSync";
+    private static final String TAG = "DBArtSync";
 
     private static final String ACTON_SYNC_ALBUM = "top.geek_studio.chenlongcould.musicplayer.action.SyncAlbum";
 
@@ -28,15 +28,15 @@ public class MyDBAlbumSync extends IntentService {
 
     public static boolean WORKING = false;
 
-    public MyDBAlbumSync() {
-        super("MyDBAlbumSync");
+    public DBArtSync() {
+        super("DBArtSync");
     }
 
     /**
      * @see #ACTON_SYNC_ALBUM
      */
     public static void startActionSyncAlbum(Context context) {
-        Intent intent = new Intent(context, MyDBAlbumSync.class);
+        Intent intent = new Intent(context, DBArtSync.class);
         intent.setAction(ACTON_SYNC_ALBUM);
         context.startService(intent);
     }
@@ -45,7 +45,7 @@ public class MyDBAlbumSync extends IntentService {
      * @see #ACTON_SYNC_ARTIST
      */
     public static void startActionSyncArtist(Context context) {
-        Intent intent = new Intent(context, MyDBAlbumSync.class);
+        Intent intent = new Intent(context, DBArtSync.class);
         intent.setAction(ACTON_SYNC_ARTIST);
         context.startService(intent);
     }

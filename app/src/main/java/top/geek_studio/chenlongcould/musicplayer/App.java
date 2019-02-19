@@ -1,6 +1,6 @@
 /*
  * ************************************************************
- * 文件：MyApplication.java  模块：app  项目：MusicPlayer
+ * 文件：App.java  模块：app  项目：MusicPlayer
  * 当前修改时间：2019年01月27日 13:11:38
  * 上次修改时间：2019年01月27日 13:08:44
  * 作者：chenlongcould
@@ -39,9 +39,9 @@ import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
-public final class MyApplication extends Application {
+public final class App extends Application {
 
-    private static final String TAG = "MyApplication";
+    private static final String TAG = "App";
 
     public static final String SHORT_CUT_ID_1 = "id1";
     public static final String SHORT_CUT_ID_2 = "id2";

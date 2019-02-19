@@ -1,6 +1,6 @@
 /*
  * ************************************************************
- * 文件：MyMusicService.java  模块：app  项目：MusicPlayer
+ * 文件：MusicService.java  模块：app  项目：MusicPlayer
  * 当前修改时间：2019年01月27日 13:11:38
  * 上次修改时间：2019年01月19日 14:07:05
  * 作者：chenlongcould
@@ -50,9 +50,9 @@ import top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.Detail;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
-public final class MyMusicService extends Service {
+public final class MusicService extends Service {
 
-    private static final String TAG = "MyMusicService";
+    private static final String TAG = "MusicService";
 
     public static final int MINIMUM_PLAY_TIME = 3000;
     private boolean HAS_PLAYED = false;
@@ -74,22 +74,6 @@ public final class MyMusicService extends Service {
     private AtomicReference<MusicItem> mMusicItem = new AtomicReference<>(new MusicItem.Builder(-1, "null", "null").build());
 
     private Bitmap mCurrentCover = null;
-
-    public MyMusicService() {
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        mColorized = intent.getBooleanExtra(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true);
-        return START_STICKY;
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        mColorized = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true);
-        return mMusicBinder;
-    }
-
     private final Binder mMusicBinder = new IMuiscService.Stub() {
         @Override
         public void playMusic() {
@@ -187,7 +171,7 @@ public final class MyMusicService extends Service {
                 mMusicItem = new AtomicReference<>(item);
             }
 
-            mCurrentCover = Utils.Audio.getCoverBitmap(MyMusicService.this, mMusicItem.get().getAlbumId());
+            mCurrentCover = Utils.Audio.getCoverBitmap(MusicService.this, mMusicItem.get().getAlbumId());
         }
 
         @Override
@@ -195,6 +179,21 @@ public final class MyMusicService extends Service {
             return mMusicItem.get();
         }
     };
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        mColorized = intent.getBooleanExtra(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true);
+        return START_STICKY;
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        mColorized = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true);
+        return mMusicBinder;
+    }
+
+    public MusicService() {
+    }
 
     private AtomicBoolean mIsServiceDestroyed = new AtomicBoolean(false);
 
@@ -205,7 +204,7 @@ public final class MyMusicService extends Service {
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
         wakeLock.setReferenceCounted(false);
 
-        mMediaPlayer.setOnCompletionListener(mp -> Utils.SendSomeThing.sendPlay(MyMusicService.this, 6, ReceiverOnMusicPlay.TYPE_NEXT));
+        mMediaPlayer.setOnCompletionListener(mp -> Utils.SendSomeThing.sendPlay(MusicService.this, 6, ReceiverOnMusicPlay.TYPE_NEXT));
 
         mMediaPlayer.setOnErrorListener((mp, what, extra) -> {
             mp.reset();

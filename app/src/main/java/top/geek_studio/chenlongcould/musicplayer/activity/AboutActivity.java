@@ -31,7 +31,7 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 import top.geek_studio.chenlongcould.geeklibrary.HttpUtil;
-import top.geek_studio.chenlongcould.musicplayer.MyApplication;
+import top.geek_studio.chenlongcould.musicplayer.App;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.databinding.AboutDulTextBinding;
 import top.geek_studio.chenlongcould.musicplayer.databinding.AboutSingleTextBinding;
@@ -137,9 +137,9 @@ public class AboutActivity extends MyBaseCompatActivity {
 
         web.ico.setImageResource(R.drawable.ic_open_in_browser_black_24dp);
         web.mainText.setText(getString(R.string.open_blog));
-        web.subText.setText(MyApplication.MY_WEB_SITE);
+        web.subText.setText(App.MY_WEB_SITE);
         web.aboutItemVer.setOnClickListener(v -> {
-            Uri uri = Uri.parse(MyApplication.MY_WEB_SITE);
+            Uri uri = Uri.parse(App.MY_WEB_SITE);
             startActivity(new Intent(Intent.ACTION_VIEW, uri));
         });
 

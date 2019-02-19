@@ -1,14 +1,3 @@
-/*
- * ************************************************************
- * 文件：MainActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月27日 13:11:38
- * 上次修改时间：2019年01月27日 13:08:48
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.musicplayer.activity;
 
 import android.app.ActivityManager;
@@ -82,14 +71,14 @@ import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
 import top.geek_studio.chenlongcould.geeklibrary.theme.Theme;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeUtils;
+import top.geek_studio.chenlongcould.musicplayer.App;
+import top.geek_studio.chenlongcould.musicplayer.DBArtSync;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.ArtistItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
-import top.geek_studio.chenlongcould.musicplayer.MyApplication;
-import top.geek_studio.chenlongcould.musicplayer.MyDBAlbumSync;
-import top.geek_studio.chenlongcould.musicplayer.MyMusicService;
+import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyPagerAdapter;
@@ -138,7 +127,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
      * 3 is ARTIST TAB
      * 4 is PLAYLIST TAB
      * 5 is FILE MANAGER TAB
-     * <p>
      * default tab order is: 12345
      */
     public static final String DEFAULT_TAB_ORDER = "12345";
@@ -232,7 +220,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         final FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-//        MobileAds.initialize(this, MyApplication.APP_ID);
+//        MobileAds.initialize(this, App.APP_ID);
 
         //config
 //        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
@@ -269,11 +257,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     }
 
     @Override
-    public String getActivityTAG() {
-        return TAG;
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
 
@@ -292,6 +275,91 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             loadData();
         }
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        GlideApp.get(this).clearMemory();
+
+        try {
+            unbindService(Data.sServiceConnection);
+        } catch (Exception e) {
+            Log.d(TAG, "onDestroy: " + e.getMessage());
+        }
+
+        try {
+            unregisterReceiver(Data.mMyHeadSetPlugReceiver);
+        } catch (Exception e) {
+            Log.d(TAG, "onDestroy: " + e.getMessage());
+        }
+
+        Data.HAS_BIND = false;
+        Data.sActivities.clear();
+        if (Data.sMainRef != null) Data.sMainRef.clear();
+        Data.sTheme = null;
+        Data.sAlbumItems.clear();
+        AlbumListFragment.VIEW_HAS_LOAD = false;
+        Data.sHistoryPlay.clear();
+        Data.sTrashCanList.clear();
+
+        mHandlerThread.quit();
+        mFragmentList.clear();
+
+        AlbumThreadPool.finish();
+        ItemCoverThreadPool.finish();
+        ArtistThreadPool.finish();
+        super.onDestroy();
+    }
+
+    @Override
+    public final void onBackPressed() {
+
+        //1
+        if (mMainBinding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mMainBinding.drawerLayout.closeDrawers();
+            return;
+        }
+
+        if (mSearchView.isSearchOpen()) {
+            mSearchView.closeSearch();
+            return;
+        }
+
+        //2
+        if (getMusicDetailFragment() != null
+                && getMusicDetailFragment().getSlidingUpPanelLayout() != null
+                && getMusicDetailFragment().getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+
+            getMusicDetailFragment().getSlidingUpPanelLayout()
+                    .setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+            return;
+        }
+
+        //3
+        if (mMainBinding.slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+            mMainBinding.slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+            return;
+        }
+
+//        if (!mFileViewFragment.getCurrentFile().getPath().equals(Environment.getExternalStorageDirectory().getPath())) {
+//            mFileViewFragment.onBackPressed();
+//            return;
+//        }
+
+        //4
+        if (BACK_PRESSED) {
+            finish();
+        } else {
+            BACK_PRESSED = true;
+            Toast.makeText(this, getString(R.string.press_again_to_exit), Toast.LENGTH_SHORT).show();
+            new Handler().postDelayed(() -> BACK_PRESSED = false, 2000);
+        }
+
+    }
+
+    @Override
+    public String getActivityTAG() {
+        return TAG;
     }
 
     @Override
@@ -520,8 +588,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                         cursor.close();
 
                         //sync
-                        MyDBAlbumSync.startActionSyncAlbum(this);
-                        MyDBAlbumSync.startActionSyncArtist(this);
+                        DBArtSync.startActionSyncAlbum(this);
+                        DBArtSync.startActionSyncArtist(this);
 
                         if (PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM))
                             Collections.shuffle(Data.sPlayOrderList);
@@ -560,7 +628,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
                 if (getIntent().getStringExtra("shortcut_type") != null) {
                     switch (getIntent().getStringExtra("shortcut_type")) {
-                        case MyApplication.SHORTCUT_RANDOM: {
+                        case App.SHORTCUT_RANDOM: {
                             Utils.SendSomeThing.sendPlay(MainActivity.this, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, null);
                         }
                         break;
@@ -573,7 +641,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 setSubtitle(Data.sPlayOrderList.size() + " Songs");
 
                 //service
-                Intent intent = new Intent(MainActivity.this, MyMusicService.class);
+                Intent intent = new Intent(MainActivity.this, MusicService.class);
                 startService(intent);
                 Data.HAS_BIND = bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
             }
@@ -590,48 +658,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 load.dismiss();
             }
         });
-
-    }
-
-    @Override
-    public final void onBackPressed() {
-
-        //1
-        if (mMainBinding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            mMainBinding.drawerLayout.closeDrawers();
-            return;
-        }
-
-        if (mSearchView.isSearchOpen()) {
-            mSearchView.closeSearch();
-            return;
-        }
-
-        //2
-        if (getMusicDetailFragment() != null && getMusicDetailFragment().getSlidingUpPanelLayout() != null && getMusicDetailFragment().getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
-            getMusicDetailFragment().getSlidingUpPanelLayout().setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-            return;
-        }
-
-        //3
-        if (mMainBinding.slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
-            mMainBinding.slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-            return;
-        }
-
-//        if (!mFileViewFragment.getCurrentFile().getPath().equals(Environment.getExternalStorageDirectory().getPath())) {
-//            mFileViewFragment.onBackPressed();
-//            return;
-//        }
-
-        //4
-        if (BACK_PRESSED) {
-            finish();
-        } else {
-            BACK_PRESSED = true;
-            Toast.makeText(this, getString(R.string.press_again_to_exit), Toast.LENGTH_SHORT).show();
-            new Handler().postDelayed(() -> BACK_PRESSED = false, 2000);
-        }
 
     }
 
@@ -1022,43 +1048,9 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     }
 
-    @Override
-    protected void onDestroy() {
-        GlideApp.get(this).clearMemory();
-
-        try {
-            unbindService(Data.sServiceConnection);
-        } catch (Exception e) {
-            Log.d(TAG, "onDestroy: " + e.getMessage());
-        }
-
-        try {
-            unregisterReceiver(Data.mMyHeadSetPlugReceiver);
-        } catch (Exception e) {
-            Log.d(TAG, "onDestroy: " + e.getMessage());
-        }
-
-        Data.HAS_BIND = false;
-        Data.sActivities.clear();
-        if (Data.sMainRef != null) Data.sMainRef.clear();
-        Data.sTheme = null;
-        Data.sAlbumItems.clear();
-        AlbumListFragment.VIEW_HAS_LOAD = false;
-        Data.sHistoryPlay.clear();
-        Data.sTrashCanList.clear();
-
-        mHandlerThread.quit();
-        mFragmentList.clear();
-
-        AlbumThreadPool.finish();
-        ItemCoverThreadPool.finish();
-        ArtistThreadPool.finish();
-        super.onDestroy();
-    }
-
     public void fullExit() {
         unbindService(Data.sServiceConnection);
-        stopService(new Intent(MainActivity.this, MyMusicService.class));
+        stopService(new Intent(MainActivity.this, MusicService.class));
         Data.sMusicBinder = null;
 //        wakeLock.release();
         clearData();

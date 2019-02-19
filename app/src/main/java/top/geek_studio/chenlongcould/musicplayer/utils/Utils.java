@@ -90,6 +90,7 @@ import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.PlayListItem;
+import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
@@ -245,7 +246,7 @@ public final class Utils {
          * 获取封面
          * <p>
          * same as {@link Audio#getMp3CoverByMeta(String)}
-         * may call from {@link top.geek_studio.chenlongcould.musicplayer.MyMusicService}
+         * may call from {@link MusicService}
          *
          * @param mediaUri mp3 path
          */
@@ -271,7 +272,7 @@ public final class Utils {
         }
 
         /**
-         * may call from {@link top.geek_studio.chenlongcould.musicplayer.MyMusicService}
+         * may call from {@link MusicService}
          */
         @Nullable
         private static byte[] path2CoverByteByMeta(final String path, Context context) {

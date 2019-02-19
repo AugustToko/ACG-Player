@@ -31,20 +31,6 @@ public final class MusicItem implements Parcelable {
     transient private boolean mIsFavourite;
     private int mArtistId;
 
-    protected MusicItem(Parcel in) {
-        this.mMimeName = in.readString();
-        this.mMusicName = in.readString();
-        this.mMusicPath = in.readString();
-        this.mMusicID = in.readInt();
-        this.mMusicAlbum = in.readString();
-        this.mDuration = in.readInt();
-        this.mSize = in.readInt();
-        this.mArtist = in.readString();
-        this.mAddTime = in.readInt();
-        this.mAlbumId = in.readInt();
-        this.mArtistId = in.readInt();
-    }
-
     public String getMusicName() {
         return mMusicName == null ? "null" : mMusicName;
     }
@@ -99,44 +85,12 @@ public final class MusicItem implements Parcelable {
         return mMimeName;
     }
 
-    public static final Parcelable.Creator<MusicItem> CREATOR = new Parcelable.Creator<MusicItem>() {
-        @Override
-        public MusicItem createFromParcel(Parcel source) {
-            return new MusicItem(source);
-        }
-
-        @Override
-        public MusicItem[] newArray(int size) {
-            return new MusicItem[size];
-        }
-    };
-
     public boolean isFavourite() {
         return mIsFavourite;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
     public int getAlbumId() {
         return mAlbumId;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.mMimeName);
-        dest.writeString(this.mMusicName);
-        dest.writeString(this.mMusicPath);
-        dest.writeInt(this.mMusicID);
-        dest.writeString(this.mMusicAlbum);
-        dest.writeInt(this.mDuration);
-        dest.writeInt(this.mSize);
-        dest.writeString(this.mArtist);
-        dest.writeInt(this.mAddTime);
-        dest.writeInt(this.mAlbumId);
-        dest.writeInt(this.mArtistId);
     }
 
     @NonNull
@@ -215,5 +169,51 @@ public final class MusicItem implements Parcelable {
             return new MusicItem(this);
         }
 
+    }
+
+    public static final Creator<MusicItem> CREATOR = new Creator<MusicItem>() {
+        @Override
+        public MusicItem createFromParcel(Parcel source) {
+            return new MusicItem(source);
+        }
+
+        @Override
+        public MusicItem[] newArray(int size) {
+            return new MusicItem[size];
+        }
+    };
+
+    protected MusicItem(Parcel in) {
+        this.mMimeName = in.readString();
+        this.mMusicName = in.readString();
+        this.mMusicPath = in.readString();
+        this.mMusicID = in.readInt();
+        this.mAlbumId = in.readInt();
+        this.mMusicAlbum = in.readString();
+        this.mDuration = in.readInt();
+        this.mSize = in.readInt();
+        this.mArtist = in.readString();
+        this.mAddTime = in.readInt();
+        this.mArtistId = in.readInt();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.mMimeName);
+        dest.writeString(this.mMusicName);
+        dest.writeString(this.mMusicPath);
+        dest.writeInt(this.mMusicID);
+        dest.writeInt(this.mAlbumId);
+        dest.writeString(this.mMusicAlbum);
+        dest.writeInt(this.mDuration);
+        dest.writeInt(this.mSize);
+        dest.writeString(this.mArtist);
+        dest.writeInt(this.mAddTime);
+        dest.writeInt(this.mArtistId);
     }
 }

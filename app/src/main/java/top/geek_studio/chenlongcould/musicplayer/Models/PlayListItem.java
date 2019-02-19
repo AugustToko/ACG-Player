@@ -11,7 +11,10 @@
 
 package top.geek_studio.chenlongcould.musicplayer.Models;
 
-public final class PlayListItem {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public final class PlayListItem implements Parcelable {
 
     private int mId;
 
@@ -47,5 +50,37 @@ public final class PlayListItem {
 
     public long getAddTime() {
         return mAddTime;
+    }
+
+    public static final Parcelable.Creator<PlayListItem> CREATOR = new Parcelable.Creator<PlayListItem>() {
+        @Override
+        public PlayListItem createFromParcel(Parcel source) {
+            return new PlayListItem(source);
+        }
+
+        @Override
+        public PlayListItem[] newArray(int size) {
+            return new PlayListItem[size];
+        }
+    };
+
+    protected PlayListItem(Parcel in) {
+        this.mId = in.readInt();
+        this.mName = in.readString();
+        this.mPath = in.readString();
+        this.mAddTime = in.readLong();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.mId);
+        dest.writeString(this.mName);
+        dest.writeString(this.mPath);
+        dest.writeLong(this.mAddTime);
     }
 }

@@ -49,10 +49,10 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
+import top.geek_studio.chenlongcould.musicplayer.DBArtSync;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
-import top.geek_studio.chenlongcould.musicplayer.MyDBAlbumSync;
-import top.geek_studio.chenlongcould.musicplayer.MyMusicService;
+import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
@@ -372,7 +372,7 @@ public final class SettingsActivity extends MyBaseCompatActivity {
 
         mSettingsBinding.colorNoti.setOnClickListener(v -> {
             final SharedPreferences.Editor editor = mDefPrefs.edit();
-            final Intent intent = new Intent(this, MyMusicService.class);
+            final Intent intent = new Intent(this, MusicService.class);
             if (mDefPrefs.getBoolean(NOTIFICATION_COLORIZED, true)) {
                 editor.putBoolean(NOTIFICATION_COLORIZED, false);
                 if (editor.commit()) {
@@ -429,7 +429,7 @@ public final class SettingsActivity extends MyBaseCompatActivity {
         });
 
         mSettingsBinding.itemBlacklist.setOnClickListener(v -> {
-            if (!MyDBAlbumSync.WORKING) {
+            if (!DBArtSync.WORKING) {
                 LitePalDB blackList = new LitePalDB("BlackList", 1);
                 blackList.addClassName(MyBlackPath.class.getName());
                 LitePal.use(blackList);

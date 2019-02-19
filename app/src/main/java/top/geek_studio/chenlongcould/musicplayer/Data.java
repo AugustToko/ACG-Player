@@ -124,7 +124,7 @@ public final class Data {
     /**
      * --------------------- Media Player ----------------------
      */
-//    public static MyMusicService.MusicBinder sMusicBinder;
+//    public static MusicService.MusicBinder sMusicBinder;
     public static IMuiscService sMusicBinder;
 
     public static void setCurrentCover(Bitmap currentCover) {

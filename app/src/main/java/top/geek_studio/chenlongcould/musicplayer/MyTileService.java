@@ -1,6 +1,6 @@
 /*
  * ************************************************************
- * 文件：MyTile.java  模块：app  项目：MusicPlayer
+ * 文件：MyTileService.java  模块：app  项目：MusicPlayer
  * 当前修改时间：2019年01月18日 18:58:29
  * 上次修改时间：2019年01月18日 18:57:39
  * 作者：chenlongcould
@@ -41,27 +41,27 @@ import top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 @RequiresApi(Build.VERSION_CODES.N)
-public class MyTile extends TileService {
+public class MyTileService extends TileService {
 
-    private static final String TAG = "MyTile";
+    private static final String TAG = "MyTileService";
 
     private boolean mEnable = false;
 
     private Disposable mDisposable;
 
-    public MyTile() {
+    public MyTileService() {
         super();
-        Log.d(TAG, "MyTile: ");
+        Log.d(TAG, "MyTileService: ");
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        if (ContextCompat.checkSelfPermission(MyTile.this,
+        if (ContextCompat.checkSelfPermission(MyTileService.this,
                 android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             loadData();
             if (!Data.HAS_BIND) {
-                Intent intent = new Intent(this, MyMusicService.class);
+                Intent intent = new Intent(this, MusicService.class);
                 startService(intent);
                 Data.HAS_BIND = bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
             }
@@ -144,11 +144,11 @@ public class MyTile extends TileService {
 
         }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(result -> {
             if (result == -1) {
-                Utils.Ui.fastToast(MyTile.this, "cursor is null or moveToFirst Fail");
+                Utils.Ui.fastToast(MyTileService.this, "cursor is null or moveToFirst Fail");
                 return;
             }
             if (result == -2) {
-                Utils.Ui.fastToast(MyTile.this, "Can not find any music!");
+                Utils.Ui.fastToast(MyTileService.this, "Can not find any music!");
                 return;
             }
         });

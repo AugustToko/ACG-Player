@@ -76,10 +76,10 @@ import okhttp3.Callback;
 import okhttp3.Response;
 import top.geek_studio.chenlongcould.geeklibrary.DownloadUtil;
 import top.geek_studio.chenlongcould.geeklibrary.HttpUtil;
+import top.geek_studio.chenlongcould.musicplayer.App;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
-import top.geek_studio.chenlongcould.musicplayer.MyApplication;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.AlbumDetailActivity;
@@ -576,7 +576,7 @@ public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.Vi
                             } else {
                                 //download
                                 StringBuilder request = new StringBuilder("http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=")
-                                        .append(MyApplication.LAST_FM_KEY)
+                                        .append(App.LAST_FM_KEY)
                                         .append("&artist=")
                                         .append(artist)
                                         .append("&album=")

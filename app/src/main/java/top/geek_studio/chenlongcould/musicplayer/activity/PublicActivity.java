@@ -39,7 +39,6 @@ import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
-// TODO: 2019/2/18 make a general menu
 public class PublicActivity extends MyBaseCompatActivity {
 
     public static final String TAG = "PublicActivity";

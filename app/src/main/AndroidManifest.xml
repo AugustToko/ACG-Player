@@ -8,7 +8,7 @@
         android:name="top.geek_studio.chenlongcould.musicplayer.broadcasts"
         android:protectionLevel="signature" />
     <permission
-        android:name="top.geek_studio.chenlongcould.musicplayer.MyMusicService"
+        android:name="top.geek_studio.chenlongcould.musicplayer.MusicService"
         android:protectionLevel="signature" />
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -21,7 +21,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
-        android:name=".MyApplication"
+        android:name=".App"
         android:allowBackup="false"
         android:fullBackupContent="@xml/backup_descriptor"
         android:icon="@mipmap/ic_launcher"
@@ -46,7 +46,7 @@
             android:process=":musicService" />
 
         <service
-            android:name=".MyDBAlbumSync"
+            android:name=".DBArtSync"
             android:exported="false" />
 
         <activity
@@ -116,7 +116,7 @@
         </provider>
 
         <service
-            android:name=".MyTile"
+            android:name=".MyTileService"
             android:icon="@drawable/ic_audiotrack_24px"
             android:label="@string/fast_play"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
@@ -125,7 +125,7 @@
             </intent-filter>
         </service>
         <service
-            android:name=".MyMusicService"
+            android:name=".MusicService"
             android:enabled="true"
             android:exported="false"
             android:process=":musicService" />

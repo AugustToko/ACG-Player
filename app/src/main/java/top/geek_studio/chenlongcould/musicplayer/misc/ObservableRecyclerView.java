@@ -1,4 +1,4 @@
-package top.geek_studio.chenlongcould.musicplayer;
+package top.geek_studio.chenlongcould.musicplayer.misc;
 
 import android.content.Context;
 import android.os.Parcel;
@@ -11,9 +11,6 @@ import android.view.ViewGroup;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import top.geek_studio.chenlongcould.musicplayer.misc.ObservableScrollViewCallbacks;
-import top.geek_studio.chenlongcould.musicplayer.misc.ScrollState;
-import top.geek_studio.chenlongcould.musicplayer.misc.Scrollable;
 
 /**
  * RecyclerView that its scroll position can be observed.
