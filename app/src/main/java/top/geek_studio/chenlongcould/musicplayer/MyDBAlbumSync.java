@@ -9,8 +9,6 @@ import android.util.Log;
 
 import org.litepal.LitePal;
 
-import java.util.List;
-
 import top.geek_studio.chenlongcould.musicplayer.database.ArtistArtPath;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 
@@ -22,9 +20,9 @@ public class MyDBAlbumSync extends IntentService {
 
     private static final String ACTON_SYNC_ARTIST = "top.geek_studio.chenlongcould.musicplayer.action.SyncArtist";
 
-    public static int CURRENT_POSITION_ALBUM = -1;
+    public static int CURRENT_POSITION_ALBUM = 0;
 
-    public static int CURRENT_POSITION_ARTIST = -1;
+    public static int CURRENT_POSITION_ARTIST = 0;
 
 //    public static int TOTAL_COUNT = -1;
 
@@ -72,34 +70,42 @@ public class MyDBAlbumSync extends IntentService {
     private void handleActionSyncAlbum() {
         final Cursor cursor = getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
         if (cursor != null && cursor.moveToFirst()) {
-//            TOTAL_COUNT = cursor.getCount();
             LitePal.useDefault();
-            List<CustomAlbumPath> customAlbumPaths = LitePal.findAll(CustomAlbumPath.class);
+//            List<CustomAlbumPath> customAlbumPaths = LitePal.findAll(CustomAlbumPath.class);
+
             do {
                 CURRENT_POSITION_ALBUM++;
 
                 int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID));
 
-                //如果大于则增加否则进行检测
-                if (CURRENT_POSITION_ALBUM > customAlbumPaths.size() - 1) {
+                if (LitePal.where("mAlbumId = ?", String.valueOf(albumId)).find(CustomAlbumPath.class).size() == 0) {
+                    Log.d(TAG, "handleActionSyncAlbum: not exists... add albumId: " + albumId);
                     CustomAlbumPath customAlbumPath = new CustomAlbumPath();
                     customAlbumPath.setAlbumId(albumId);
-                    LitePal.useDefault();
                     customAlbumPath.save();
-                    Log.d(TAG, "handleActionSyncAlbum:(the DEF_DB size > CUSTOM_ALBUM_DB size) add: albumId: " + albumId);
                 } else {
-                    if (customAlbumPaths.get(CURRENT_POSITION_ALBUM).getAlbumId() != albumId) {
-                        CustomAlbumPath customAlbumPath = LitePal.find(CustomAlbumPath.class, CURRENT_POSITION_ALBUM);
-                        if (customAlbumPath != null) {
-                            customAlbumPath.setAlbumId(albumId);
-                            LitePal.useDefault();
-                            customAlbumPath.save();
-                            Log.d(TAG, "handleActionSyncAlbum: sync fix: " + albumId);
-                        }
-                    } else {
-                        Log.d(TAG, "handleActionSyncAlbum: syncing: " + albumId);
-                    }
+                    Log.d(TAG, "handleActionSyncAlbum: albumId: " + albumId + " exists...");
                 }
+
+//                if (CURRENT_POSITION_ALBUM > customAlbumPaths.size()) {
+//                    CustomAlbumPath customAlbumPath = new CustomAlbumPath();
+//                    customAlbumPath.setAlbumId(albumId);
+//                    LitePal.useDefault();
+//                    customAlbumPath.save();
+//                    Log.d(TAG, "handleActionSyncAlbum:(the DEF_DB size > CUSTOM_ALBUM_DB size) add: albumId: " + albumId + " size: " + customAlbumPaths.size());
+//                } else {
+//                    if (customAlbumPaths.get(CURRENT_POSITION_ALBUM - 1).getAlbumId() != albumId) {
+//                        CustomAlbumPath customAlbumPath = LitePal.find(CustomAlbumPath.class, CURRENT_POSITION_ALBUM);
+//                        if (customAlbumPath != null) {
+//                            customAlbumPath.setAlbumId(albumId);
+//                            LitePal.useDefault();
+//                            customAlbumPath.save();
+//                            Log.d(TAG, "handleActionSyncAlbum: sync fix: " + albumId);
+//                        }
+//                    } else {
+//                        Log.d(TAG, "handleActionSyncAlbum: syncing: " + albumId);
+//                    }
+//                }
 
             } while (cursor.moveToNext());
             cursor.close();
@@ -110,33 +116,19 @@ public class MyDBAlbumSync extends IntentService {
     private void handleActionSyncArtist() {
         final Cursor cursor = getContentResolver().query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Artists.DEFAULT_SORT_ORDER);
         if (cursor != null && cursor.moveToFirst()) {
-//            TOTAL_COUNT = cursor.getCount();
             LitePal.useDefault();
-            List<ArtistArtPath> artistArtPaths = LitePal.findAll(ArtistArtPath.class);
             do {
                 CURRENT_POSITION_ARTIST++;
 
                 int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID));
 
-                //如果大于则增加否则进行检测
-                if (CURRENT_POSITION_ARTIST > artistArtPaths.size() - 1) {
+                if (LitePal.where("mArtistId = ?", String.valueOf(artistId)).find(ArtistArtPath.class).size() == 0) {
+                    Log.d(TAG, "handleActionSyncAlbum: not exists... add artist: " + artistId);
                     ArtistArtPath artistArtPath = new ArtistArtPath();
                     artistArtPath.setArtistId(artistId);
-                    LitePal.useDefault();
                     artistArtPath.save();
-                    Log.d(TAG, "handleActionSyncArtist:(the DEF_DB size > CUSTOM_ARTIST_DB size) add: albumId: " + artistId);
                 } else {
-                    if (artistArtPaths.get(CURRENT_POSITION_ARTIST).getArtistId() != artistId) {
-                        ArtistArtPath artistArtPath = LitePal.find(ArtistArtPath.class, CURRENT_POSITION_ARTIST);
-                        if (artistArtPath != null) {
-                            artistArtPath.setArtistId(artistId);
-                            LitePal.useDefault();
-                            artistArtPath.save();
-                            Log.d(TAG, "handleActionSyncAlbum: sync fix: " + artistId);
-                        }
-                    } else {
-                        Log.d(TAG, "handleActionSyncArtist: syncing: " + artistId);
-                    }
+                    Log.d(TAG, "handleActionSyncAlbum: mArtistId: " + artistId + " exists...");
                 }
 
             } while (cursor.moveToNext());

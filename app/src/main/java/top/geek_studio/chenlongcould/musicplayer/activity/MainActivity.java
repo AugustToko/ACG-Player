@@ -12,7 +12,6 @@
 package top.geek_studio.chenlongcould.musicplayer.activity;
 
 import android.app.ActivityManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -27,7 +26,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -48,7 +46,6 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import org.jetbrains.annotations.NotNull;
 import org.litepal.LitePal;
 import org.litepal.LitePalDB;
 
@@ -196,7 +193,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
 
-    private PowerManager.WakeLock wakeLock;
+//    private PowerManager.WakeLock wakeLock;
 
     /**
      * clearData data
@@ -228,9 +225,9 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         initView();
         super.onCreate(savedInstanceState);
 
-        final PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
-        wakeLock.setReferenceCounted(false);
+//        final PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+//        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
+//        wakeLock.setReferenceCounted(false);
 
         final FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -268,18 +265,12 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
 
         loadData();
+
     }
 
     @Override
     public String getActivityTAG() {
         return TAG;
-    }
-
-    @Override
-    protected void onPause() {
-//        if (getMusicListFragment() != null && getMusicListFragment().getAdapter() != null)
-//            getMusicListFragment().getAdapter().clearSelection();
-        super.onPause();
     }
 
     @Override
@@ -301,11 +292,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             loadData();
         }
 
-    }
-
-    @Override
-    public final void onAttachFragment(@NotNull Fragment fragment) {
-        super.onAttachFragment(fragment);
     }
 
     @Override
@@ -1074,7 +1060,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         unbindService(Data.sServiceConnection);
         stopService(new Intent(MainActivity.this, MyMusicService.class));
         Data.sMusicBinder = null;
-        wakeLock.release();
+//        wakeLock.release();
         clearData();
         Data.HAS_PLAYED = false;
         finish();
