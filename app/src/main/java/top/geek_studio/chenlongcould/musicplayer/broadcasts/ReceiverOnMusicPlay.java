@@ -218,12 +218,16 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
     @Nullable
     public static MusicItem getCurrentItem() {
-        try {
-            return Data.sMusicBinder.getCurrentItem();
-        } catch (RemoteException e) {
-            e.printStackTrace();
+        if (Data.sMusicBinder != null) {
+            try {
+                return Data.sMusicBinder.getCurrentItem();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        } else {
             return null;
         }
+        return null;
     }
 
     public static void sureCar() {

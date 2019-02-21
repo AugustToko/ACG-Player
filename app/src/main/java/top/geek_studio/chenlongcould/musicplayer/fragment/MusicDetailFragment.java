@@ -1304,7 +1304,8 @@ public final class MusicDetailFragment extends Fragment {
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .into(mMusicAlbumImage);
 
-            updateFav(ReceiverOnMusicPlay.getCurrentItem());
+            MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
+            if (item != null) updateFav(item);
 
             Utils.Ui.setBlurEffect(mMainActivity, cover, mBGup, mBGdown, mNextWillText);
         });

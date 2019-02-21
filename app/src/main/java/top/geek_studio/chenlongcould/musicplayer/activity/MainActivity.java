@@ -31,7 +31,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -43,7 +42,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
@@ -179,10 +177,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     private AlertDialog load;
 
-    private FirebaseRemoteConfig mFirebaseRemoteConfig;
-
-//    private PowerManager.WakeLock wakeLock;
-
     /**
      * clearData data
      */
@@ -212,10 +206,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         initView();
         super.onCreate(savedInstanceState);
-
-//        final PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-//        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
-//        wakeLock.setReferenceCounted(false);
 
         final FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -253,7 +243,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
 
         loadData();
-
     }
 
     @Override
@@ -1497,17 +1486,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             }
         }
 
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void displayWelcomeMessage() {
-        String welcomeMessage = mFirebaseRemoteConfig.getString("welcome_message");
-        if (mFirebaseRemoteConfig.getBoolean("welcome_message_caps")) {
-            welcomeMessage.toUpperCase(Locale.CHINESE);
-        } else {
-            welcomeMessage.toLowerCase(Locale.CHINESE);
-        }
-        Toast.makeText(this, welcomeMessage, Toast.LENGTH_SHORT).show();
     }
 
 }

@@ -64,6 +64,12 @@ public final class App extends Application {
     public static final int VER_CODE = 74;
 
     @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+//        Reflection.unseal(base);
+    }
+
+    @Override
     public void onCreate() {
         super.onCreate();
 

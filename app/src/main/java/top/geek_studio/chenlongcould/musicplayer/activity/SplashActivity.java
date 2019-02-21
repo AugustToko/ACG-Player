@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -60,7 +61,12 @@ public final class SplashActivity extends MyBaseCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash);
+
+        try {
+            setContentView(R.layout.activity_splash);
+        } catch (Exception e) {
+            Log.d(TAG, "onCreate: " + e.getMessage());
+        }
 
         // Android 5.0 以上 全透明
         Window window = getWindow();

@@ -188,7 +188,9 @@ public abstract class MyBaseCompatActivity extends AppCompatActivity implements 
     /**
      * @param menuItem the menuItem the icon will set AlphaAnimation by {@link ValueAnimator}
      */
-    public void setMenuIconAlphaAnimation(MenuItem menuItem, boolean visibility) {
+    public void setMenuIconAlphaAnimation(@Nullable MenuItem menuItem, boolean visibility) {
+        if (menuItem == null) return;
+
         final ValueAnimator animator = new ValueAnimator();
         animator.setDuration(Values.DefaultValues.ANIMATION_DURATION);
         if (!visibility && menuItem.isVisible()) {

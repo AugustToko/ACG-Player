@@ -47,7 +47,6 @@ public class AboutActivity extends MyBaseCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         mAppBinding = DataBindingUtil.setContentView(this, R.layout.activity_about_app);
         initView(mAppBinding.toolbar, mAppBinding.appbar);
