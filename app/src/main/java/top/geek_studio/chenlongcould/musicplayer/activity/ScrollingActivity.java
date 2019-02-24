@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import top.geek_studio.chenlongcould.musicplayer.R;
 
-public class ScrollingActivity extends AppCompatActivity {
+public final class ScrollingActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

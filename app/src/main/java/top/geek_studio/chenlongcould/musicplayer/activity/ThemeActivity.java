@@ -57,7 +57,7 @@ import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityThemeBindin
 import top.geek_studio.chenlongcould.musicplayer.utils.MyThemeDBHelper;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
-public class ThemeActivity extends MyBaseCompatActivity {
+public final class ThemeActivity extends MyBaseCompatActivity {
 
     public static final String TAG = "ThemeActivity";
 

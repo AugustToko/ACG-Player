@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * for load albumCover
  */
-public class AlbumThreadPool {
+public final class AlbumThreadPool {
 
     private static final int KEEP_ALIVE = 10;
     private static AlbumThreadPool mInstance = null;

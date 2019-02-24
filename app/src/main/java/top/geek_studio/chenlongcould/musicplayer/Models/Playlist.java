@@ -19,7 +19,7 @@ import androidx.annotation.NonNull;
 /**
  * @author Karim Abou Zeid (kabouzeid)
  */
-public class Playlist implements Parcelable {
+public final class Playlist implements Parcelable {
     public static final Creator<Playlist> CREATOR = new Creator<Playlist>() {
         public Playlist createFromParcel(Parcel source) {
             return new Playlist(source);

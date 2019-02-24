@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -330,10 +331,12 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             return;
         }
 
-//        if (!mFileViewFragment.getCurrentFile().getPath().equals(Environment.getExternalStorageDirectory().getPath())) {
-//            mFileViewFragment.onBackPressed();
-//            return;
-//        }
+        if (getFileViewerFragment() != null) {
+            if (!getFileViewerFragment().getCurrentFile().getPath().equals(Environment.getExternalStorageDirectory().getPath())) {
+                getFileViewerFragment().onBackPressed();
+                return;
+            }
+        }
 
         //4
         if (BACK_PRESSED) {
@@ -735,6 +738,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 if (tab.view != null) {
                     int finalI = i;
                     ((LinearLayout) tab.view).setOnLongClickListener(v -> {
+                        int pos = tab.getPosition();
+
                         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                         builder.setTitle(getString(R.string.are_u_sure));
                         builder.setMessage(getString(R.string.close_the_tab_x_int, tab.getText()));
@@ -743,16 +748,20 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
                             SharedPreferences.Editor editor = preferences.edit();
                             StringBuilder currentOrder = new StringBuilder(preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER));
-                            currentOrder.deleteCharAt(tab.getPosition());
+                            currentOrder.deleteCharAt(pos);
                             editor.putString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, currentOrder.toString());
-                            editor.apply();
 
-                            mTitles.remove(tab.getPosition());
-                            mFragmentList.remove(tab.getPosition());
-                            mPagerAdapter.notifyDataSetChanged();
-                            mMainBinding.tabLayout.removeTabAt(finalI);
+                            boolean result = editor.commit();
 
-                            mMainBinding.viewPager.setOffscreenPageLimit(mTitles.size() > 1 ? mTitles.size() - 1 : 1);
+                            if (result) {
+                                mTitles.remove(pos);
+                                mFragmentList.remove(pos);
+                                mPagerAdapter.notifyDataSetChanged();
+                                mMainBinding.tabLayout.removeTabAt(finalI);
+
+                                mMainBinding.viewPager.setOffscreenPageLimit(mTitles.size() > 1 ? mTitles.size() - 1 : 1);
+                            }
+
                             dialog.dismiss();
                         });
                         builder.setNegativeButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
@@ -1038,7 +1047,11 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     }
 
     public void fullExit() {
-        unbindService(Data.sServiceConnection);
+        try {
+            unbindService(Data.sServiceConnection);
+        } catch (Exception e) {
+            Log.d(TAG, "fullExit: " + e.getMessage());
+        }
         stopService(new Intent(MainActivity.this, MusicService.class));
         Data.sMusicBinder = null;
 //        wakeLock.release();
@@ -1363,10 +1376,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         try {
             super.setToolbarSubTitleWithAlphaAnimation(mMainBinding.toolBar, subTitle);
         } catch (NoSuchFieldException e) {
-            e.printStackTrace();
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }

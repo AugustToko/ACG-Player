@@ -41,7 +41,7 @@ import top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 @RequiresApi(Build.VERSION_CODES.N)
-public class MyTileService extends TileService {
+public final class MyTileService extends TileService {
 
     private static final String TAG = "MyTileService";
 

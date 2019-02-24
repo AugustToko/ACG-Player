@@ -1,8 +1,8 @@
 /*
  * ************************************************************
- * 文件：AlbumThreadPool.java  模块：app  项目：MusicPlayer
+ * 文件：ItemCoverThreadPool.java  模块：app  项目：MusicPlayer
  * 当前修改时间：2019年01月27日 13:11:38
- * 上次修改时间：2019年01月27日 13:08:50
+ * 上次修改时间：2019年01月27日 13:08:48
  * 作者：chenlongcould
  * Geek Studio
  * Copyright (c) 2019
@@ -16,20 +16,14 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-/**
- * for load albumCover
- */
-public final class ArtistThreadPool {
-
+public final class CustomThreadPool {
     private static final int KEEP_ALIVE = 10;
-    private static ArtistThreadPool mInstance = null;
-    @SuppressWarnings("FieldCanBeLocal")
+    private static CustomThreadPool mInstance = null;
     private static int MAX_POOL_SIZE;
-    @SuppressWarnings("FieldCanBeLocal")
-    private BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>();
+    BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>();
     private ThreadPoolExecutor mThreadPoolExec;
 
-    private ArtistThreadPool() {
+    private CustomThreadPool() {
         int coreNum = Runtime.getRuntime().availableProcessors();
         MAX_POOL_SIZE = coreNum * 2;
         mThreadPoolExec = new ThreadPoolExecutor(
@@ -42,7 +36,7 @@ public final class ArtistThreadPool {
 
     public static synchronized void post(Runnable runnable) {
         if (mInstance == null) {
-            mInstance = new ArtistThreadPool();
+            mInstance = new CustomThreadPool();
         }
         mInstance.mThreadPoolExec.execute(runnable);
     }

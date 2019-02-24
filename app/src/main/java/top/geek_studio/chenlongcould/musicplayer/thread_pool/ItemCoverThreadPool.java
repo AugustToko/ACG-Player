@@ -16,7 +16,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class ItemCoverThreadPool {
+public final class ItemCoverThreadPool {
     private static final int KEEP_ALIVE = 10;
     private static ItemCoverThreadPool mInstance = null;
     private static int MAX_POOL_SIZE;

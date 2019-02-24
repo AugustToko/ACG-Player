@@ -23,7 +23,7 @@ import top.geek_studio.chenlongcould.musicplayer.database.Detail;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityInfoDetailBinding;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
-public class DetailActivity extends MyBaseCompatActivity {
+public final class DetailActivity extends MyBaseCompatActivity {
 
     public static final String TAG = "DetailActivity";
 

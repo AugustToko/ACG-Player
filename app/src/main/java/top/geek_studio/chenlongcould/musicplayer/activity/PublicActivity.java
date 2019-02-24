@@ -39,7 +39,7 @@ import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
-public class PublicActivity extends MyBaseCompatActivity {
+public final class PublicActivity extends MyBaseCompatActivity {
 
     public static final String TAG = "PublicActivity";
 

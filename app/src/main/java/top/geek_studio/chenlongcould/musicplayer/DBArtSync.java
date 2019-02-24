@@ -12,7 +12,7 @@ import org.litepal.LitePal;
 import top.geek_studio.chenlongcould.musicplayer.database.ArtistArtPath;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 
-public class DBArtSync extends IntentService {
+public final class DBArtSync extends IntentService {
 
     private static final String TAG = "DBArtSync";
 

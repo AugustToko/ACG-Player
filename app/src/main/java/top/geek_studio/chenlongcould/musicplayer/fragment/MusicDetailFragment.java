@@ -655,9 +655,13 @@ public final class MusicDetailFragment extends Fragment {
                             @Override
                             public void onAnimationEnd(Animator animation) {
                                 Utils.SendSomeThing.sendPlay(mMainActivity, 6, "next_slide");
+                                Bitmap bitmap = null;
+                                if (finalNexItem != null)
+                                    bitmap = Utils.Audio.getCoverBitmap(mMainActivity, finalNexItem.getAlbumId());
                                 GlideApp.with(MusicDetailFragment.this)
-                                        .load(finalNexItem == null ? R.drawable.ic_audiotrack_24px : Utils.Audio.getCoverBitmap(mMainActivity, finalNexItem.getAlbumId()))
+                                        .load(finalNexItem == null ? R.drawable.default_album_art : bitmap)
                                         .into(mMusicAlbumImage);
+                                setIcoLightOrDark(bitmap);
                                 mMusicAlbumImage.setTranslationX(0);
                                 mMusicAlbumImageOth2.setTranslationX(mMusicAlbumImage.getWidth() * 2);
                                 mMusicAlbumImageOth2.setVisibility(View.GONE);
@@ -688,9 +692,13 @@ public final class MusicDetailFragment extends Fragment {
                             @Override
                             public void onAnimationEnd(Animator animation) {
                                 Utils.SendSomeThing.sendPlay(mMainActivity, 6, "previous_slide");
+                                Bitmap bitmap = null;
+                                if (finalBefItem != null)
+                                    bitmap = Utils.Audio.getCoverBitmap(mMainActivity, finalBefItem.getAlbumId());
                                 GlideApp.with(MusicDetailFragment.this)
-                                        .load(finalBefItem == null ? R.drawable.ic_audiotrack_24px : Utils.Audio.getCoverBitmap(mMainActivity, finalBefItem.getAlbumId()))
+                                        .load(finalBefItem == null ? R.drawable.default_album_art : bitmap)
                                         .into(mMusicAlbumImage);
+                                setIcoLightOrDark(bitmap);
                                 mMusicAlbumImage.setTranslationX(0);
                                 mMusicAlbumImageOth3.setVisibility(View.GONE);
                                 mMusicAlbumImageOth3.setTranslationX(0 - mMusicAlbumImage.getWidth());

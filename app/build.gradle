@@ -28,10 +28,10 @@ android {
         applicationId "top.geek_studio.chenlongcould.musicplayer"
         minSdkVersion 21
         targetSdkVersion 28
-        versionName '2.6.1.5(201902191939)'
+        versionName '2.6.1.5(201902211440)'
         testInstrumentationRunner "android.support.albumLoader.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config
-        versionCode 80
+        versionCode 81
         flavorDimensions "default"
 
         externalNativeBuild {
@@ -134,6 +134,5 @@ dependencies {
     implementation 'com.miguelcatalan:materialsearchview:1.4.0'
     implementation 'com.android.support:mediarouter-v7:28.0.0'
     //FreeReflection
-//    implementation 'me.weishu:free_reflection:1.2.0'
-
+    //    implementation 'me.weishu:free_reflection:1.2.0'
 }

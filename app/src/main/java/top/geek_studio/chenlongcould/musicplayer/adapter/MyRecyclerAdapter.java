@@ -91,7 +91,7 @@ import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 import top.geek_studio.chenlongcould.musicplayer.thread_pool.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
-public class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
+public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
 
     private static final String TAG = "MyRecyclerAdapter";
 

@@ -61,7 +61,7 @@ import top.geek_studio.chenlongcould.musicplayer.activity.ThemeActivity;
 import top.geek_studio.chenlongcould.musicplayer.databinding.DialogThemeBinding;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
-public class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
+public final class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
 
     public static final String TAG = "ThemeAdapter";
 

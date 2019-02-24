@@ -14,7 +14,7 @@ package top.geek_studio.chenlongcould.musicplayer.activity;
 import android.app.Activity;
 import android.os.Bundle;
 
-public class TestActivity extends Activity {
+public final class TestActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
