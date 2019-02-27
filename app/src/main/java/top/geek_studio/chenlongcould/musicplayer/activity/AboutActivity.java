@@ -151,7 +151,6 @@ public class AboutActivity extends MyBaseCompatActivity {
         mAppBinding.card2.addView(mail.getRoot());
         mAppBinding.card2.addView(web.getRoot());
 
-
     }
 
     @Override

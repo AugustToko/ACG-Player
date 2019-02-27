@@ -316,12 +316,9 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         }
 
         //2
-        if (getMusicDetailFragment() != null
-                && getMusicDetailFragment().getSlidingUpPanelLayout() != null
+        if (getMusicDetailFragment() != null && getMusicDetailFragment().getSlidingUpPanelLayout() != null
                 && getMusicDetailFragment().getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
-
-            getMusicDetailFragment().getSlidingUpPanelLayout()
-                    .setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+            getMusicDetailFragment().getSlidingUpPanelLayout().setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
             return;
         }
 
@@ -332,7 +329,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         }
 
         if (getFileViewerFragment() != null) {
-            if (!getFileViewerFragment().getCurrentFile().getPath().equals(Environment.getExternalStorageDirectory().getPath())) {
+            File file = getFileViewerFragment().getCurrentFile();
+            if (file != null && !file.getPath().equals(Environment.getExternalStorageDirectory().getPath())) {
                 getFileViewerFragment().onBackPressed();
                 return;
             }
@@ -660,6 +658,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
      */
     private void filterData(String filterStr) {
         final String tabOrder = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+
         if (tabOrder.charAt(Values.CurrentData.CURRENT_PAGE_INDEX) == '1') {
             final MusicListFragment musicListFragment = getMusicListFragment();
             if (musicListFragment == null) return;
@@ -1052,7 +1051,11 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         } catch (Exception e) {
             Log.d(TAG, "fullExit: " + e.getMessage());
         }
-        stopService(new Intent(MainActivity.this, MusicService.class));
+        try {
+            stopService(new Intent(MainActivity.this, MusicService.class));
+        } catch (Exception e) {
+            Log.d(TAG, "fullExit: " + e.getMessage());
+        }
         Data.sMusicBinder = null;
 //        wakeLock.release();
         clearData();

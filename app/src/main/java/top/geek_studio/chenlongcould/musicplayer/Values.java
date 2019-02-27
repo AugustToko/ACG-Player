@@ -167,7 +167,7 @@ public interface Values {
         //default value -1 or null
         public static int CURRENT_BIND_INDEX_MUSIC_LIST = -1;
         public static int CURRENT_BIND_INDEX_ALBUM_LIST = -1;
-        public static int CURRENT_PAGE_INDEX = -1;
+        public static int CURRENT_PAGE_INDEX = 0;
         public static int CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = -1;            //存储使浮动菜单弹出的item,def = -1
 
         /**

@@ -228,7 +228,7 @@ public final class AlbumDetailActivity extends MyBaseCompatActivity {
                             final long addTime = cursor2.getLong(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
                             final int albumId = cursor2.getInt(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
 
-                            Log.d(TAG, "initData: " + name + " " + path);
+//                            Log.d(TAG, "initData: " + name + " " + path);
 
                             final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
                                     .musicAlbum(albumName)

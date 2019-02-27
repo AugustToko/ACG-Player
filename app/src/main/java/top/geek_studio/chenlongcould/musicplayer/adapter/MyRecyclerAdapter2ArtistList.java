@@ -120,7 +120,7 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 
-        viewHolder.mArtistText.setText(mArtistItems.get(i).getArtistName());
+        viewHolder.mArtistText.setText(mArtistItems.get(viewHolder.getAdapterPosition()).getArtistName());
         viewHolder.mArtistImage.setTag(R.string.key_id_2, viewHolder.getAdapterPosition());
 
         dataSet(viewHolder.getAdapterPosition(), viewHolder.mArtistImage, viewHolder.mArtistText, viewHolder.mView);
@@ -290,14 +290,19 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
     private void loadDEF(ImageView imageView, View view, TextView textView, int index) {
         if (verify(imageView, index)) {
             Log.d(TAG, "key_test(loadDEF): tagId: " + imageView.getTag(R.string.key_id_2) + " pos: " + index);
-            imageView.post(() -> GlideApp.with(mMainActivity)
-                    .load(R.drawable.default_album_art)
-                    .placeholder(R.drawable.default_album_art)
-                    .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .into(imageView));
-            view.setBackgroundColor(ContextCompat.getColor(mMainActivity, R.color.notVeryBlack));
-            textView.setTextColor(ContextCompat.getColor(mMainActivity, R.color.notVeryWhite));
+            imageView.post(() -> {
+                GlideApp.with(mMainActivity)
+                        .load(R.drawable.default_album_art)
+                        .placeholder(R.drawable.default_album_art)
+                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .into(imageView);
+                if (view != null)
+                    view.setBackgroundColor(ContextCompat.getColor(mMainActivity, R.color.notVeryBlack));
+                if (textView != null)
+                    textView.setTextColor(ContextCompat.getColor(mMainActivity, R.color.notVeryWhite));
+            });
+
         }
     }
 
