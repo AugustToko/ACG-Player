@@ -465,7 +465,6 @@ public final class Utils {
             return BitmapFactory.decodeResource(context.getResources(), filePath, options);
         }
 
-
         public static Bitmap readBitmapFromArray(byte[] data, int width, int height) {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
@@ -489,11 +488,13 @@ public final class Utils {
             return BitmapFactory.decodeByteArray(data, 0, data.length, options);
         }
 
-
         /**
+         *
          * @param context context
          * @param aTitle  theTitle
          * @return {@link AlertDialog.Builder}
+         *
+         * @deprecated use {@see top.geek_studio.chenlongcould.geeklibrary.DialogUtil#getLoadingDialog(Context, String...) }
          */
         public static androidx.appcompat.app.AlertDialog getLoadingDialog(Context context, String... aTitle) {
             androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
@@ -554,9 +555,6 @@ public final class Utils {
             return height;
         }
 
-        /**
-         * @deprecated {@link top.geek_studio.chenlongcould.musicplayer.activity.MyBaseCompatActivity#setStatusBarTextColor(Activity, int)}
-         */
         public static void setStatusBarTextColor(final Activity activity, @ColorInt int color) {
             final View decor = activity.getWindow().getDecorView();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -615,6 +613,9 @@ public final class Utils {
             return builder.create();
         }
 
+        /**
+         * use Application Context
+         */
         public static void fastToast(@NonNull final Context context, @NonNull final String content) {
             Toast.makeText(context, content, Toast.LENGTH_SHORT).show();
         }

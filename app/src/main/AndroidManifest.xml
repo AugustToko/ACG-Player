@@ -32,7 +32,8 @@
         android:screenOrientation="portrait"
         android:theme="@style/LightTheme"
         android:persistent="true"
-        tools:replace="android:allowBackup">
+        tools:replace="android:allowBackup"
+        tools:targetApi="n">
         <activity
             android:name=".activity.ScrollingActivity"
             android:label="@string/title_activity_scrolling"

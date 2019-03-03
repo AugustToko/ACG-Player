@@ -15,8 +15,6 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.io.File;
 
-import top.geek_studio.chenlongcould.geeklibrary.Required;
-
 @SuppressWarnings("WeakerAccess")
 public final class ThemeStore {
 

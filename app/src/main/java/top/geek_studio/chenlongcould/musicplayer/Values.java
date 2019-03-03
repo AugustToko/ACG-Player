@@ -11,7 +11,6 @@
 
 package top.geek_studio.chenlongcould.musicplayer;
 
-@SuppressWarnings("WeakerAccess")
 public interface Values {
 
     int DEF_CROSS_FATE_TIME = 500;
@@ -31,11 +30,6 @@ public interface Values {
      */
     int REQUEST_WRITE_EXTERNAL_STORAGE = 60;
     int MAX_HEIGHT_AND_WIDTH = 100;
-
-    /*
-     * 判断在MusicDetailActivity下动画是否加载完成
-     * */
-    boolean ON_ANIMATION_FINISH = true;
 
     /**
      * sharedPrefs tag
@@ -80,7 +74,6 @@ public interface Values {
          */
         String CUSTOM_TAB_LAYOUT = "CUSTOM_TAB_LAYOUT";
 
-        //tips
         /**
          * 提示是否扔进垃圾桶的警告
          */
@@ -91,6 +84,7 @@ public interface Values {
         String LAST_PLAY_MUSIC_ID = "LAST_PLAY_MUSIC_ID";
     }
 
+    @SuppressWarnings("unused")
     interface BroadCast {
         String ReceiverOnMusicPlay = "top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPlay";
         String ReceiverOnMusicStop = "top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicStop";
@@ -106,6 +100,8 @@ public interface Values {
         String BROAD_CAST = "top.geek_studio.chenlongcould.musicplayer.broadcasts";
     }
 
+
+    @SuppressWarnings("unused")
     final class LogTAG {
         public static final String LIFT_TAG = "THE_TAG_OF_LIFE";
 
@@ -117,7 +113,6 @@ public interface Values {
         /**
          * Handler msg.what
          */
-        public static final int INIT_MUSIC_LIST_DONE = 50;
         public static final int SEEK_BAR_UPDATE = 53;
         public static final int INIT_SEEK_BAR = 54;
 
@@ -130,19 +125,6 @@ public interface Values {
 
         public static final int RECYCLER_SCROLL = 55001;
 
-    }
-
-    /**
-     * @deprecated use {@link SharedPrefsTag#PRIMARY_COLOR}
-     * {@link SharedPrefsTag#PRIMARY_DARK_COLOR}
-     * {@link SharedPrefsTag#ACCENT_COLOR}
-     */
-    final class ColorName {
-        public static final String PRIMARY_COLOR = "mPrimaryColor";
-
-        public static final String PRIMARY_DARK_COLOR = "mPrimaryDarkColor";
-
-        public static final String ACCENT_COLOR = "mAccentColor";
     }
 
     final class CurrentData {
@@ -165,8 +147,6 @@ public interface Values {
          * TEMP DATA
          */
         //default value -1 or null
-        public static int CURRENT_BIND_INDEX_MUSIC_LIST = -1;
-        public static int CURRENT_BIND_INDEX_ALBUM_LIST = -1;
         public static int CURRENT_PAGE_INDEX = 0;
         public static int CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = -1;            //存储使浮动菜单弹出的item,def = -1
 
@@ -187,11 +167,6 @@ public interface Values {
          * 4. random
          */
         public static String CURRENT_PLAY_TYPE = "COMMON";
-
-        /**
-         * current play order (default = all music)
-         */
-        public static String CURRENT_PLAY_LIST = "default";
 
     }
 
