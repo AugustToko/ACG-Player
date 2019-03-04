@@ -16,6 +16,7 @@ import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -49,6 +50,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
+import top.geek_studio.chenlongcould.geeklibrary.DialogUtil;
 import top.geek_studio.chenlongcould.musicplayer.DBArtSync;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
@@ -616,6 +618,10 @@ public final class SettingsActivity extends MyBaseCompatActivity {
             builder.setView(linearLayout);
             builder.show();
         });
+
+        mSettingsBinding.itemCleanAlbum.setOnClickListener(v -> clearAlbums());
+
+        mSettingsBinding.itemCleanArtist.setOnClickListener(v -> clearArtists());
     }
 
     @Override
@@ -641,6 +647,9 @@ public final class SettingsActivity extends MyBaseCompatActivity {
         mAccentImage.clearAnimation();
     }
 
+    /**
+     * setup imageViews
+     */
     private void initPreView() {
         mNightSwitch.setChecked(Values.Style.NIGHT_MODE);
 
@@ -698,6 +707,62 @@ public final class SettingsActivity extends MyBaseCompatActivity {
             imageView.setVisibility(View.GONE);
         }
 
+    }
+
+    /**
+     * clearAlbums data
+     */
+    public void clearAlbums() {
+        new AsyncTask<Void, Void, Void>() {
+
+            AlertDialog mAlertDialog;
+
+            @Override
+            protected void onPreExecute() {
+                mAlertDialog = new DialogUtil().getLoadingDialog(SettingsActivity.this);
+                mAlertDialog.show();
+            }
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separatorChar + "AlbumCovers";
+                Utils.IO.delFolder(path);
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                mAlertDialog.dismiss();
+            }
+        }.execute();
+    }
+
+    /**
+     * clearArtists data
+     */
+    public void clearArtists() {
+        new AsyncTask<Void, Void, Void>() {
+
+            AlertDialog mAlertDialog;
+
+            @Override
+            protected void onPreExecute() {
+                mAlertDialog = new DialogUtil().getLoadingDialog(SettingsActivity.this);
+                mAlertDialog.show();
+            }
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separatorChar + "ArtistCovers";
+                Utils.IO.delFolder(path);
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                mAlertDialog.dismiss();
+            }
+        }.execute();
     }
 
 }

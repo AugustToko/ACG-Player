@@ -119,12 +119,10 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-
         viewHolder.mArtistText.setText(mArtistItems.get(viewHolder.getAdapterPosition()).getArtistName());
         viewHolder.mArtistImage.setTag(R.string.key_id_2, viewHolder.getAdapterPosition());
 
         dataSet(viewHolder.getAdapterPosition(), viewHolder.mArtistImage, viewHolder.mArtistText, viewHolder.mView);
-
     }
 
     private void dataSet(int index, ImageView imageView, TextView textView, View view) {

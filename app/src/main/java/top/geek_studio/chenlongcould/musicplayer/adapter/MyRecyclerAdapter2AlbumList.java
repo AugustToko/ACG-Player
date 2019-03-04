@@ -349,6 +349,13 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
         });
     }
 
+    @Override
+    public void onViewRecycled(@NonNull ViewHolder holder) {
+        super.onViewRecycled(holder);
+        holder.mAlbumImage.setTag(R.string.key_id_3, -1);
+        GlideApp.with(mMainActivity).clear(holder.mAlbumImage);
+    }
+
     private String ifExists(int id) {
         String mayPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()
                 + File.separatorChar + "ArtistCovers"
