@@ -131,6 +131,7 @@
                     android:tint="#636363"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
                     app:layout_constraintTop_toTopOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>

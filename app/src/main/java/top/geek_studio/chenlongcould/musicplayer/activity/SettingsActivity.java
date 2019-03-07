@@ -186,6 +186,7 @@ public final class SettingsActivity extends MyBaseCompatActivity {
         final ConstraintLayout primaryDarkOpt = findViewById(R.id.primer_color_dark_option);
         final ConstraintLayout accentOpt = findViewById(R.id.accent_color_option);
         final ConstraintLayout titleOpt = findViewById(R.id.title_color);
+
         mPrimaryImage = findViewById(R.id.activity_settings_preview_primary);
         mPrimaryDarkImage = findViewById(R.id.activity_settings_preview_primary_dark);
         mAccentImage = findViewById(R.id.activity_settings_preview_acc);

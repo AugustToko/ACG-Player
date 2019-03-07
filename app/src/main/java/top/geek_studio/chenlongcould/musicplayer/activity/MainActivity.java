@@ -1113,6 +1113,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                                     .into(mMainBinding.styleImgNav);
                         }
 
+                        // TODO: 2019/3/6 关闭主题 但仍有背景图片
                         //检测是否匹配到BG
                         if (area.contains(ThemeStore.SupportArea.BG)) {
                             needSetColor[0] = false;

@@ -52,7 +52,7 @@
         android:clickable="true"
         android:contentDescription="@string/menu_button"
         android:focusable="true"
-        android:foreground="@drawable/my_ripple_mask"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_more_vert_24px"
         android:tint="#636363"
         app:layout_constraintBottom_toBottomOf="parent"
