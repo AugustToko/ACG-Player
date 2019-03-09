@@ -101,11 +101,6 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
-//    // Used to load the 'native-lib' library on application startup.
-//    static {
-//        System.loadLibrary("native-lib");
-//    }
-
     public static final String TAG = "MainActivity";
 
     private SharedPreferences mSharedPreferences;
