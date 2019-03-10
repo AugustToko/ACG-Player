@@ -86,7 +86,7 @@ import top.geek_studio.chenlongcould.musicplayer.activity.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MyBaseCompatActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.PublicActivity;
-import top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPlay;
+import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 import top.geek_studio.chenlongcould.musicplayer.thread_pool.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;

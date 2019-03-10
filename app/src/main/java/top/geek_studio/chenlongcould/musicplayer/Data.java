@@ -37,7 +37,7 @@ import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.PlayListItem;
 import top.geek_studio.chenlongcould.musicplayer.activity.CarViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.broadcasts.MyHeadSetPlugReceiver;
+import top.geek_studio.chenlongcould.musicplayer.broadcast.MyHeadSetPlugReceiver;
 
 public final class Data {
 

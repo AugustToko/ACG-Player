@@ -48,7 +48,7 @@
                 android:id="@+id/debug"
                 android:icon="@drawable/ic_info_outline_white_24dp"
                 android:title="DEBUG"
-                android:visible="false" />
+                android:visible="true" />
         </menu>
 
     </item>

@@ -10,9 +10,22 @@
   -->
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activity.TestActivity">
+
+    <top.geek_studio.chenlongcould.geeklibrary.widget.GkToolbar
+        android:id="@+id/gk_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:layout_marginTop="0dp"
+        android:background="@color/colorPrimary"
+        app:layout_constraintTop_toTopOf="parent"
+        app:subtitle="@string/app_name"
+        app:title="@string/app_name">
+
+    </top.geek_studio.chenlongcould.geeklibrary.widget.GkToolbar>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

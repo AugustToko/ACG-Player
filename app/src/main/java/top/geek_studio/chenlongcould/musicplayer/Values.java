@@ -86,10 +86,10 @@ public interface Values {
 
     @SuppressWarnings("unused")
     interface BroadCast {
-        String ReceiverOnMusicPlay = "top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPlay";
-        String ReceiverOnMusicStop = "top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicStop";
-        String ReceiverOnMusicPause = "top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPause";
-        String DayNightReceiver = "top.geek_studio.chenlongcould.musicplayer.broadcasts.DayNightReceiver";
+        String ReceiverOnMusicPlay = "top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay";
+        String ReceiverOnMusicStop = "top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicStop";
+        String ReceiverOnMusicPause = "top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPause";
+        String DayNightReceiver = "top.geek_studio.chenlongcould.musicplayer.broadcast.DayNightReceiver";
     }
 
     interface DefaultValues {
@@ -97,7 +97,7 @@ public interface Values {
     }
 
     interface Permission {
-        String BROAD_CAST = "top.geek_studio.chenlongcould.musicplayer.broadcasts";
+        String BROAD_CAST = "top.geek_studio.chenlongcould.musicplayer.broadcast";
     }
 
 

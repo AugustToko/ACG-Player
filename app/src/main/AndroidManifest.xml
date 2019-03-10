@@ -5,7 +5,7 @@
     tools:ignore="InnerclassSeparator">
 
     <permission
-        android:name="top.geek_studio.chenlongcould.musicplayer.broadcasts"
+        android:name="top.geek_studio.chenlongcould.musicplayer.broadcast"
         android:protectionLevel="signature" />
     <permission
         android:name="top.geek_studio.chenlongcould.musicplayer.MusicService"
@@ -40,7 +40,7 @@
             android:theme="@style/LightTheme.NoActionBar" />
 
         <receiver
-            android:name=".broadcasts.NotificationBroadcast"
+            android:name=".broadcast.NotificationBroadcast"
             android:enabled="true"
             android:exported="true"
             android:permission="top.geek_studio.chenlongcould.musicplayer.BroadCasts"
@@ -132,7 +132,7 @@
             android:process=":musicService" />
 
         <receiver
-            android:name=".broadcasts.ReceiverOnMusicPlay"
+            android:name=".broadcast.ReceiverOnMusicPlay"
             android:enabled="true"
             android:exported="true"
             android:permission="top.geek_studio.chenlongcould.musicplayer.broadcasts">
@@ -141,7 +141,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".broadcasts.ReceiverOnMusicPause"
+            android:name=".broadcast.ReceiverOnMusicPause"
             android:enabled="true"
             android:exported="true"
             android:permission="top.geek_studio.chenlongcould.musicplayer.broadcasts">
@@ -150,7 +150,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".broadcasts.MyHeadSetPlugReceiver"
+            android:name=".broadcast.MyHeadSetPlugReceiver"
             android:enabled="true"
             android:exported="true"
             android:permission="top.geek_studio.chenlongcould.musicplayer.broadcasts">

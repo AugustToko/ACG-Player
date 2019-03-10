@@ -1,4 +1,4 @@
-package top.geek_studio.chenlongcould.geeklibrary;
+package top.geek_studio.chenlongcould.geeklibrary.widget;
 
 import android.content.res.ColorStateList;
 import android.view.View;

@@ -14,10 +14,17 @@ package top.geek_studio.chenlongcould.musicplayer.activity;
 import android.app.Activity;
 import android.os.Bundle;
 
+import top.geek_studio.chenlongcould.geeklibrary.widget.GkToolbar;
+import top.geek_studio.chenlongcould.musicplayer.R;
+
 public final class TestActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_test);
+        GkToolbar toolbar = findViewById(R.id.gk_toolbar);
+        toolbar.setTitle("?????");
+
     }
 }

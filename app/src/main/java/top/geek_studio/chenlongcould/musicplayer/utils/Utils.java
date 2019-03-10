@@ -69,7 +69,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -86,6 +85,7 @@ import androidx.core.content.FileProvider;
 import androidx.core.graphics.ColorUtils;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
+import top.geek_studio.chenlongcould.geeklibrary.widget.GkToolbar;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
@@ -644,96 +644,10 @@ public final class Utils {
             return bright / count;
         }
 
-        public static AtomicBoolean ANIMATION_IN_DETAIL_DONE = new AtomicBoolean(true);
-
-//        /**
-//         * 设置背景与动画 (blur style)
-//         *
-//         * @param activity if use fragment may case {@link java.lang.NullPointerException}, glide will call {@link Fragment#getActivity()}
-//         */
-//        public static void setBlurEffect(@NonNull final MainActivity activity
-//                , @NonNull final byte[] bitmap, @NonNull final ImageView primaryBackgroundBef
-//                , @NonNull final ImageView primaryBackground, final TextView nextText) {
-//
-//            ANIMATION_IN_DETAIL_DONE.set(false);
-//            primaryBackground.setVisibility(View.VISIBLE);
-//
-//            final Bitmap data = readBitmapFromArray(bitmap, 100, 100);
-//            final AtomicInteger vibrantColor = new AtomicInteger(ContextCompat.getColor(activity, R.color.colorPrimary));
-//
-//            Palette.from(data).generate(p -> {
-//                if (p != null) {
-////                        nextText.clearAnimation();
-////                        ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), Color.BLACK, p.getVibrantColor(Color.parseColor(Values.Color.NOT_VERY_BLACK)));
-////                        animator.setDuration(300);
-////                        animator.addUpdateListener(animation -> nextText.setTextColor((Integer) animation.getAnimatedValue()));
-//                    vibrantColor.set(p.getVibrantColor(vibrantColor.get()));
-//                    nextText.setTextColor(vibrantColor.get());
-//                } else {
-//                    nextText.setTextColor(vibrantColor.get());
-//                }
-//            });
-//
-//            //clearData
-//            GlideApp.with(activity).clearData(primaryBackgroundBef);
-//            if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
-//                primaryBackgroundBef.post(() -> GlideApp.with(activity)
-//                        .load(bitmap)
-//                        .dontAnimate()
-//                        .apply(bitmapTransform(Data.sBlurTransformation))
-//                        .into(primaryBackgroundBef));
-//            } else {
-//                primaryBackgroundBef.setBackgroundColor(vibrantColor.get());
-//            }
-//
-//            Animator animator = ViewAnimationUtils.createCircularReveal(
-//                    primaryBackgroundBef, primaryBackgroundBef.getWidth() / 2, POSITION,
-//                    0,
-//                    (float) Math.hypot(primaryBackgroundBef.getWidth(), primaryBackgroundBef.getHeight()));
-//
-//            animator.setInterpolator(new AccelerateInterpolator());
-//            animator.setDuration(700);
-//            animator.addListener(new Animator.AnimatorListener() {
-//                @Override
-//                public void onAnimationStart(Animator animation) {
-//
-//                }
-//
-//                @Override
-//                public void onAnimationEnd(Animator animation) {
-//                    GlideApp.with(activity).clearData(primaryBackground);
-//                    if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
-//                        GlideApp.with(activity)
-//                                .load(bitmap)
-//                                .dontAnimate()
-//                                .apply(bitmapTransform(Data.sBlurTransformation))
-//                                .into(primaryBackground);
-//                    } else {
-//                        primaryBackground.setBackgroundColor(vibrantColor.get());
-//                    }
-//
-//                    primaryBackground.setVisibility(View.GONE);
-//                    ANIMATION_IN_DETAIL_DONE.set(true);
-//                }
-//
-//                @Override
-//                public void onAnimationCancel(Animator animation) {
-//
-//                }
-//
-//                @Override
-//                public void onAnimationRepeat(Animator animation) {
-//
-//                }
-//            });
-//            animator.start();
-//        }
-
         public static void setBlurEffect(@NonNull final MainActivity activity
                 , @Nullable final Bitmap bitmap, @NonNull final ImageView bgUp
                 , @NonNull final ImageView bgDown, final TextView nextText) {
 
-            ANIMATION_IN_DETAIL_DONE.set(false);
             bgDown.setVisibility(View.VISIBLE);
 
             @ColorInt final int defColor = ContextCompat.getColor(activity, R.color.colorPrimary);
@@ -802,7 +716,6 @@ public final class Utils {
                         }
 
                         bgDown.setVisibility(View.GONE);
-                        ANIMATION_IN_DETAIL_DONE.set(true);
                     }
 
                     @Override
@@ -815,7 +728,13 @@ public final class Utils {
 
                     }
                 });
-                animator.start();
+
+                // TODO: 2019/3/9 crash
+                try {
+                    animator.start();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             });
 
         }
@@ -840,6 +759,7 @@ public final class Utils {
          *
          * @param toolbar toolbar
          * @param color   color -> {@link ColorInt}
+         * @deprecated use {@link GkToolbar#setOverlayColor(int)}
          */
         public static void setOverToolbarColor(Toolbar toolbar, @ColorInt int color) {
             if (toolbar.getNavigationIcon() != null) toolbar.getNavigationIcon().setTint(color);
@@ -1051,7 +971,7 @@ public final class Utils {
         public static void sendPause(final Context context) {
             Intent intent = new Intent();
             intent.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPause));
-            context.sendBroadcast(intent, "top.geek_studio.chenlongcould.musicplayer.broadcasts");
+            context.sendBroadcast(intent, "top.geek_studio.chenlongcould.musicplayer.broadcast");
         }
 
         /**

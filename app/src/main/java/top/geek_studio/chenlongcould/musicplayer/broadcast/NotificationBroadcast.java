@@ -1,4 +1,4 @@
-package top.geek_studio.chenlongcould.musicplayer.broadcasts;
+package top.geek_studio.chenlongcould.musicplayer.broadcast;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

@@ -42,6 +42,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
+import top.geek_studio.chenlongcould.geeklibrary.widget.GkToolbar;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
@@ -50,8 +51,18 @@ public abstract class MyBaseCompatActivity extends AppCompatActivity implements 
 
     private static final String TAG = "MyBaseCompatActivity";
 
+    /**
+     * @deprecated use {@link GkToolbar}
+     */
+    @Deprecated
     private Toolbar mToolbar = null;
+
     private AppBarLayout mAppBarLayout = null;
+
+    /**
+     * @deprecated use {@link GkToolbar}
+     */
+    @Deprecated
     private TextView mSubtitleView = null;
 
     /**
