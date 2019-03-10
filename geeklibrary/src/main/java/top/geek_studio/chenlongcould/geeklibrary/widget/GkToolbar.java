@@ -18,11 +18,11 @@ import androidx.appcompat.widget.Toolbar;
 /**
  * @author : chenlongcould
  * date   : 2019/03/09/09
- * version: 1.0
+ * version: 0.1
  * project: MusicPlayer
  * pkg: top.geek_studio.chenlongcould.geeklibrary
  */
-//@SuppressWarnings("unused")
+@SuppressWarnings("unused")
 public class GkToolbar extends Toolbar {
 
     private static final String TARGET_CLASS = "androidx.appcompat.widget.Toolbar";
@@ -61,12 +61,14 @@ public class GkToolbar extends Toolbar {
     }
 
     public void init() {
-        // TODO: 2019/3/9 init
         try {
             Class clz = Class.forName("androidx.appcompat.widget.Toolbar");
             Field f = clz.getDeclaredField("mTitleTextView");
+            Field f2 = clz.getDeclaredField("mSubtitleTextView");
             f.setAccessible(true);
+            f2.setAccessible(true);
             mTitleTextView = (TextView) f.get(mToolbar);
+            mSubTitleTextView = (TextView) f2.get(mToolbar);
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -75,41 +77,12 @@ public class GkToolbar extends Toolbar {
             e.printStackTrace();
         }
 
-        try {
-            Class clz = Class.forName("androidx.appcompat.widget.Toolbar");
-            Field f = clz.getDeclaredField("mSubtitleTextView");
-            f.setAccessible(true);
-            mSubTitleTextView = (TextView) f.get(mToolbar);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
      * set Toolbar title alpha
      */
     public void setTitleAlpha(@FloatRange(from = 0, to = 1) float value) {
-
-//        //if null , init
-//        if (mTitleTextView == null) {
-//            try {
-//                Class clz = Class.forName("androidx.appcompat.widget.Toolbar");
-//                Field f = clz.getDeclaredField("mTitleTextView");
-//                f.setAccessible(true);
-//                mTitleTextView = (TextView) f.get(mToolbar);
-//            } catch (NoSuchFieldException e) {
-//                e.printStackTrace();
-//            } catch (IllegalAccessException e) {
-//                e.printStackTrace();
-//            } catch (ClassNotFoundException e) {
-//                e.printStackTrace();
-//            }
-//        }
-
         if (mTitleTextView != null) {
             mTitleTextView.setAlpha(value);
         }
@@ -119,21 +92,6 @@ public class GkToolbar extends Toolbar {
      * set Toolbar subtitle alpha
      */
     public void setSubTitleAlpha(@FloatRange(from = 0, to = 1) float value) {
-//        //if null , init
-//        if (mSubTitleTextView == null) {
-//            try {
-//                Class clz = Class.forName("androidx.appcompat.widget.Toolbar");
-//                Field f = clz.getDeclaredField("mSubtitleTextView");
-//                f.setAccessible(true);
-//                mSubTitleTextView = (TextView) f.get(mToolbar);
-//            } catch (NoSuchFieldException e) {
-//                e.printStackTrace();
-//            } catch (IllegalAccessException e) {
-//                e.printStackTrace();
-//            } catch (ClassNotFoundException e) {
-//                e.printStackTrace();
-//            }
-//        }
         if (mSubTitleTextView != null) {
             mSubTitleTextView.setAlpha(value);
         }

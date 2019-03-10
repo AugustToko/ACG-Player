@@ -39,11 +39,17 @@ import top.geek_studio.chenlongcould.musicplayer.activity.CarViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.MyHeadSetPlugReceiver;
 
+/**
+ * @author chenlongcould
+ */
 public final class Data {
 
     public volatile static boolean HAS_BIND = false;
 
-    public volatile static boolean HAS_PLAYED = false;           //检测app打开后, 是否播放过音乐 (如果没, 默认点击播放按钮为快速随机播放)
+    /**
+     * 检测app打开后, 是否播放过音乐 (如果没, 默认点击播放按钮为快速随机播放)
+     */
+    public volatile static boolean HAS_PLAYED = false;
 
     public static ArrayList<Disposable> sDisposables = new ArrayList<>();
 
@@ -122,13 +128,11 @@ public final class Data {
     }
 
     /**
-     * --------------------- Media Player ----------------------
-     */
-//    public static MusicService.MusicBinder sMusicBinder;
+     * public static MusicService.MusicBinder sMusicBinder;
+     * */
     public static IMuiscService sMusicBinder;
 
     public static void setCurrentCover(Bitmap currentCover) {
-//        if (sCurrentCover != null) sCurrentCover.recycle();
         sCurrentCover = currentCover;
     }
 

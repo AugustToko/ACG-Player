@@ -1,5 +1,6 @@
 package top.geek_studio.chenlongcould.musicplayer.activity;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -31,7 +32,6 @@ import android.widget.Toast;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.google.android.material.tabs.TabLayout;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -66,6 +66,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import jp.wasabeef.glide.transformations.BlurTransformation;
+import top.geek_studio.chenlongcould.geeklibrary.DialogUtil;
 import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
 import top.geek_studio.chenlongcould.geeklibrary.theme.Theme;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
@@ -99,11 +100,15 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
-public final class MainActivity extends MyBaseCompatActivity implements IStyle {
+/**
+ * @author chenlongcould
+ */
+@SuppressWarnings("ConstantConditions")
+public final class MainActivity extends BaseCompatActivity implements IStyle {
 
     public static final String TAG = "MainActivity";
 
-    private SharedPreferences mSharedPreferences;
+    public static final char MUSIC_LIST_FRAGMENT_ID = '1';
 
     public static final String MENU_COMMON = "MENU_COMMON";
 
@@ -141,9 +146,9 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     public static boolean ANIMATION_FLAG = true;
 
-    private boolean TOOLBAR_CLICKED = false;
+    private boolean toolbarClicked = false;
 
-    private boolean BACK_PRESSED = false;
+    private boolean backPressed = false;
 
     public static boolean NEED_RELOAD = false;
 
@@ -186,10 +191,13 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         AlbumListFragment.VIEW_HAS_LOAD = false;
 
-        for (Disposable disposable : Data.sDisposables)
-            if (disposable != null && !disposable.isDisposed()) disposable.dispose();
-        if (Data.getCurrentCover() != null) Data.getCurrentCover().recycle();
+        App.clearDisposable();
+
+        if (Data.getCurrentCover() != null) {
+            Data.getCurrentCover().recycle();
+        }
     }
+
 
     /**
      * onXXX
@@ -202,32 +210,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         initView();
         super.onCreate(savedInstanceState);
-
-        final FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-//        MobileAds.initialize(this, App.APP_ID);
-
-        //config
-//        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-//        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
-//                .setDeveloperModeEnabled(BuildConfig.DEBUG)
-//                .build();
-//        mFirebaseRemoteConfig.setConfigSettings(configSettings);
-//        mFirebaseRemoteConfig.setDefaults(R.xml.remote_config_deaults);
-//        mFirebaseRemoteConfig.fetch(5000)
-//                .addOnCompleteListener(this, task -> {
-//                    if (task.isSuccessful()) {
-//                        Log.i(TAG, "initView: Fetch Succeeded");
-//
-//                        // After config data is successfully fetched, it must be activated before newly fetched
-//                        // values are returned.
-//                        mFirebaseRemoteConfig.activateFetched();
-//                    } else {
-//                        Log.i(TAG, "initView: Fetch Failed", new Throwable("Fetch Failed"));
-//                    }
-//                    displayWelcomeMessage();
-//                });
 
         mHandlerThread = new HandlerThread("Handler Thread in MainActivity");
         mHandlerThread.start();
@@ -280,7 +262,9 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         Data.HAS_BIND = false;
         Data.sActivities.clear();
-        if (Data.sMainRef != null) Data.sMainRef.clear();
+        if (Data.sMainRef != null) {
+            Data.sMainRef.clear();
+        }
         Data.sTheme = null;
         Data.sAlbumItems.clear();
         AlbumListFragment.VIEW_HAS_LOAD = false;
@@ -332,12 +316,12 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         }
 
         //4
-        if (BACK_PRESSED) {
+        if (backPressed) {
             finish();
         } else {
-            BACK_PRESSED = true;
+            backPressed = true;
             Toast.makeText(this, getString(R.string.press_again_to_exit), Toast.LENGTH_SHORT).show();
-            new Handler().postDelayed(() -> BACK_PRESSED = false, 2000);
+            new Handler().postDelayed(() -> backPressed = false, 2000);
         }
 
     }
@@ -358,6 +342,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         mSearchView.setMenuItem(searchItem);
 
         toolbar.setOnMenuItemClickListener(item -> {
+            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+
             switch (item.getItemId()) {
                 case R.id.menu_toolbar_exit: {
                     fullExit();
@@ -372,68 +358,81 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 break;
 
                 case R.id.menu_toolbar_album_linear: {
-                    SharedPreferences.Editor editor = mSharedPreferences.edit();
                     editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.LINEAR_TYPE);
                     editor.apply();
                     mPagerAdapter.notifyDataSetChanged();
                     AlbumListFragment albumListFragment = getAlbumListFragment();
-                    if (albumListFragment != null) albumListFragment.setRecyclerViewData();
+                    if (albumListFragment != null) {
+                        albumListFragment.setRecyclerViewData();
+                    }
                 }
                 break;
 
                 case R.id.menu_toolbar_album_grid: {
-                    SharedPreferences.Editor editor = mSharedPreferences.edit();
                     editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
                     editor.apply();
                     mPagerAdapter.notifyDataSetChanged();
 
                     AlbumListFragment albumListFragment = getAlbumListFragment();
-                    if (albumListFragment != null) albumListFragment.setRecyclerViewData();
+                    if (albumListFragment != null) {
+                        albumListFragment.setRecyclerViewData();
+                    }
                 }
                 break;
 
                 case R.id.menu_toolbar_artist_linear: {
-                    SharedPreferences.Editor editor = mSharedPreferences.edit();
                     editor.putInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.LINEAR_TYPE);
                     editor.apply();
                     mPagerAdapter.notifyDataSetChanged();
                     ArtistListFragment artistListFragment = getArtistFragment();
-                    if (artistListFragment != null) artistListFragment.setRecyclerViewData();
+                    if (artistListFragment != null) {
+                        artistListFragment.setRecyclerViewData();
+                    }
                 }
                 break;
 
                 case R.id.menu_toolbar_artist_grid: {
-                    SharedPreferences.Editor editor = mSharedPreferences.edit();
                     editor.putInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.GRID_TYPE);
                     editor.apply();
                     mPagerAdapter.notifyDataSetChanged();
 
                     ArtistListFragment artistListFragment = getArtistFragment();
-                    if (artistListFragment != null) artistListFragment.setRecyclerViewData();
+                    if (artistListFragment != null) {
+                        artistListFragment.setRecyclerViewData();
+                    }
                 }
                 break;
 
                 case R.id.menu_toolbar_reload: {
-                    mFragmentList.clear();
-                    mTitles.clear();
-                    mMainBinding.tabLayout.removeAllTabs();
-                    Data.sMusicItems.clear();
-                    Data.sPlayOrderList.clear();
-                    Data.sMusicItemsBackUp.clear();
-                    Data.sAlbumItemsBackUp.clear();
-                    Data.sAlbumItems.clear();
-
-                    loadData();
+                    reload();
                 }
                 break;
+                default:
             }
             return true;
         });
     }
 
     /**
+     * reload data, like first enter app
+     */
+    private void reload() {
+        mFragmentList.clear();
+        mTitles.clear();
+        mMainBinding.tabLayout.removeAllTabs();
+        Data.sMusicItems.clear();
+        Data.sPlayOrderList.clear();
+        Data.sMusicItemsBackUp.clear();
+        Data.sAlbumItemsBackUp.clear();
+        Data.sAlbumItems.clear();
+
+        loadData();
+    }
+
+    /**
      * use this
      */
+    @SuppressLint("StaticFieldLeak")
     @Override
     public void inflateChooseMenu() {
         mMainBinding.toolBar.getMenu().clear();
@@ -452,8 +451,9 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     }
 
                     Utils.DataSet.addListDialog(MainActivity.this, helper);
-                    if (getMusicListFragment() != null)
+                    if (getMusicListFragment() != null) {
                         getMusicListFragment().getAdapter().clearSelection();
+                    }
                 }
                 break;
                 case R.id.menu_toolbar_main_choose_share: {
@@ -485,13 +485,14 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     }.execute();
                 }
                 break;
+                default:
             }
             return true;
         });
     }
 
     private void loadData() {
-        load = Utils.Ui.getLoadingDialog(this, "Loading...");
+        load = DialogUtil.getLoadingDialog(this, "Loading...");
         load.show();
 
         Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
@@ -526,7 +527,9 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                                     break;
                                 }
                             }
-                            if (skip) continue;
+                            if (skip) {
+                                continue;
+                            }
 
                             final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
                             if (duration <= 0) {
@@ -576,8 +579,9 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                         DBArtSync.startActionSyncAlbum(this);
                         DBArtSync.startActionSyncArtist(this);
 
-                        if (PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM))
+                        if (PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM)) {
                             Collections.shuffle(Data.sPlayOrderList);
+                        }
 
                         emitter.onNext(0);
                     }
@@ -605,14 +609,9 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                     mHandler.postDelayed(MainActivity.this::fullExit, 1000);
                     return;
                 }
-                if (result == -2) {
-                    Utils.Ui.fastToast(MainActivity.this, "Can not find any music!");
-                    mHandler.postDelayed(MainActivity.this::fullExit, 1000);
-                    return;
-                }
 
-                if (getIntent().getStringExtra("shortcut_type") != null) {
-                    switch (getIntent().getStringExtra("shortcut_type")) {
+                if (getIntent().getStringExtra(Values.IntentTAG.SHORTCUT_TYPE) != null) {
+                    switch (getIntent().getStringExtra("SHORTCUT_TYPE")) {
                         case App.SHORTCUT_RANDOM: {
                             Utils.SendSomeThing.sendPlay(MainActivity.this, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, null);
                         }
@@ -654,9 +653,11 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
     private void filterData(String filterStr) {
         final String tabOrder = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
 
-        if (tabOrder.charAt(Values.CurrentData.CURRENT_PAGE_INDEX) == '1') {
+        if (tabOrder.charAt(Values.CurrentData.CURRENT_PAGE_INDEX) == MUSIC_LIST_FRAGMENT_ID) {
             final MusicListFragment musicListFragment = getMusicListFragment();
-            if (musicListFragment == null) return;
+            if (musicListFragment == null) {
+                return;
+            }
 
             if (TextUtils.isEmpty(filterStr)) {
                 Data.sMusicItems.clear();
@@ -679,7 +680,9 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         if (tabOrder.charAt(Values.CurrentData.CURRENT_PAGE_INDEX) == '2') {
             final AlbumListFragment albumListFragment = getAlbumListFragment();
-            if (albumListFragment == null) return;
+            if (albumListFragment == null) {
+                return;
+            }
 
             if (TextUtils.isEmpty(filterStr)) {
                 Data.sAlbumItems.clear();
@@ -703,7 +706,9 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
         //artist
         if (tabOrder.charAt(Values.CurrentData.CURRENT_PAGE_INDEX) == '3') {
             final ArtistListFragment artistListFragment = getArtistFragment();
-            if (artistListFragment == null) return;
+            if (artistListFragment == null) {
+                return;
+            }
 
             if (TextUtils.isEmpty(filterStr)) {
                 Data.sArtistItems.clear();
@@ -912,6 +917,8 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                         }
                         break;
 
+                        default:
+
                     }
 
                     if (!added) {
@@ -928,8 +935,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                             public void onTabSelected(TabLayout.Tab tab) {
                                 //点击加号不会滑动ViewPager
                                 if (tab.getPosition() != mMainBinding.tabLayout.getTabCount() - 1) {
-//                                    Log.d(TAG, "onTabSelected: tabpos " + tab.getPosition() + " title size: " + mTitles.size() + " frag size: " + mFragmentList.size()
-//                                            + " tab size: " + mMainBinding.tabLayout.getTabCount());
                                     mMainBinding.viewPager.setCurrentItem(tab.getPosition(), true);
                                 }
                             }
@@ -972,8 +977,9 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 Values.CurrentData.CURRENT_PAGE_INDEX = i;
 
                 TabLayout.Tab tab = mMainBinding.tabLayout.getTabAt(i);
-                if (tab != null)
+                if (tab != null) {
                     tab.select();
+                }
 
                 String order = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
                 if (order.charAt(i) == '1') {
@@ -1023,8 +1029,9 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 //点击加号不会滑动ViewPager
-                if (tab.getPosition() != mMainBinding.tabLayout.getTabCount() - 1)
+                if (tab.getPosition() != mMainBinding.tabLayout.getTabCount() - 1) {
                     mMainBinding.viewPager.setCurrentItem(tab.getPosition(), true);
+                }
             }
 
             @Override
@@ -1052,7 +1059,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
             Log.d(TAG, "fullExit: " + e.getMessage());
         }
         Data.sMusicBinder = null;
-//        wakeLock.release();
         clearData();
         Data.HAS_PLAYED = false;
         finish();
@@ -1072,7 +1078,7 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         Observable.create((ObservableOnSubscribe<Theme>) emitter -> {
             final String themeId = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.SELECT_THEME, "null");
-            if (themeId != null && !themeId.equals("null")) {
+            if (themeId != null && !"null".equals(themeId)) {
                 final File themeFile = ThemeUtils.getThemeFile(this, themeId);
                 final Theme theme = ThemeUtils.fileToTheme(themeFile);
                 if (theme != null && theme.getSupport_area().contains(ThemeStore.SupportArea.NAV)) {
@@ -1098,7 +1104,6 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
                         //检测是否匹配到NAV
                         if (area.contains(ThemeStore.SupportArea.NAV)) {
-                            Log.d(TAG, "onNext: " + area);
 
                             String bgPath = theme.getPath() + File.separatorChar + ThemeStore.DIR_IMG_NAV + File.separatorChar + area;
                             GlideApp.with(MainActivity.this)
@@ -1194,32 +1199,24 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
 //        根据recycler view的滚动程度, 来判断如何返回顶部
         mMainBinding.toolBar.setOnClickListener(v -> {
-            if (TOOLBAR_CLICKED) {
+            if (toolbarClicked) {
                 switch (Values.CurrentData.CURRENT_PAGE_INDEX) {
                     case 0: {
-//                        if (Values.CurrentData.CURRENT_BIND_INDEX_MUSIC_LIST > 20) {
-//                            if (getMusicListFragment() != null)
-//                                getMusicListFragment().getMusicListBinding().includeRecycler.recyclerView.scrollToPosition(0);
-//                        } else {
-                        if (getMusicListFragment() != null)
+                        if (getMusicListFragment() != null) {
                             getMusicListFragment().getMusicListBinding().includeRecycler.recyclerView.smoothScrollToPosition(0);
-//                        }
+                        }
                     }
                     break;
                     case 1: {
-//                        if (Values.CurrentData.CURRENT_BIND_INDEX_ALBUM_LIST > 20) {
-//                            if (getAlbumListFragment() != null)
-//                                getAlbumListFragment().getRecyclerView().scrollToPosition(0);
-//                        } else {
-                        if (getAlbumListFragment() != null)
+                        if (getAlbumListFragment() != null) {
                             getAlbumListFragment().getRecyclerView().smoothScrollToPosition(0);
-//                        }
+                        }
                     }
                 }
 
             }
-            TOOLBAR_CLICKED = true;
-            new Handler().postDelayed(() -> TOOLBAR_CLICKED = false, 1000);         //双击机制
+            toolbarClicked = true;
+            new Handler().postDelayed(() -> toolbarClicked = false, 1000);         //双击机制
         });
 
         setSupportActionBar(mMainBinding.toolBar);
@@ -1314,10 +1311,11 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
         //First no music no slide
         if (Data.sMusicBinder != null) {
-            if (Data.HAS_PLAYED)
+            if (Data.HAS_PLAYED) {
                 mMainBinding.slidingLayout.setTouchEnabled(true);
-            else
+            } else {
                 mMainBinding.slidingLayout.setTouchEnabled(false);
+            }
         } else {
             mMainBinding.slidingLayout.setTouchEnabled(false);
         }
@@ -1344,10 +1342,11 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
                 }
                 break;
                 case R.id.car_mode: {
-                    if (Data.HAS_PLAYED)
+                    if (Data.HAS_PLAYED) {
                         startActivity(new Intent(MainActivity.this, CarViewActivity.class));
-                    else
+                    } else {
                         Toast.makeText(this, "No music playing...", Toast.LENGTH_SHORT).show();
+                    }
                 }
                 break;
                 case R.id.menu_nav_ad: {
@@ -1389,11 +1388,16 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     @Nullable
     public final MusicListFragment getMusicListFragment() {
-        if (mFragmentList.size() == 0) return null;
+        if (mFragmentList.size() == 0) {
+            return null;
+        }
+
         String order = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
         if (order.contains(TAB_MUSIC)) {
             MusicListFragment musicListFragment = (MusicListFragment) mFragmentList.get(order.indexOf(TAB_MUSIC));
-            if (musicListFragment != null) return musicListFragment;
+            if (musicListFragment != null) {
+                return musicListFragment;
+            }
         }
         return null;
     }
@@ -1404,11 +1408,16 @@ public final class MainActivity extends MyBaseCompatActivity implements IStyle {
 
     @Nullable
     public final AlbumListFragment getAlbumListFragment() {
-        if (mFragmentList.size() == 0) return null;
+        if (mFragmentList.size() == 0) {
+            return null;
+        }
         String order = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+
         if (order.contains(TAB_ALBUM)) {
             AlbumListFragment musicListFragment = (AlbumListFragment) mFragmentList.get(order.indexOf(TAB_ALBUM));
-            if (musicListFragment != null) return musicListFragment;
+            if (musicListFragment != null) {
+                return musicListFragment;
+            }
         }
         return null;
     }

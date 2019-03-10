@@ -14,6 +14,9 @@ package top.geek_studio.chenlongcould.musicplayer.Models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * @author chenlongcould
+ */
 public final class ArtistItem implements Parcelable {
 
     public static final Creator<ArtistItem> CREATOR = new Creator<ArtistItem>() {
@@ -36,7 +39,7 @@ public final class ArtistItem implements Parcelable {
         mArtistId = artistId;
     }
 
-    protected ArtistItem(Parcel in) {
+    private ArtistItem(Parcel in) {
         this.mArtistName = in.readString();
         this.mArtistId = in.readInt();
     }

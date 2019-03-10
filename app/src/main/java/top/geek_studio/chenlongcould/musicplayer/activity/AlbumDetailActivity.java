@@ -45,6 +45,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
+import top.geek_studio.chenlongcould.musicplayer.Models.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
@@ -62,7 +63,7 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
  * @author chenlongcould
  * @apiNote some by others
  */
-public final class AlbumDetailActivity extends MyBaseCompatActivity {
+public final class AlbumDetailActivity extends BaseCompatActivity {
 
     public static final String TAG = "AlbumDetailActivity";
 
@@ -117,14 +118,14 @@ public final class AlbumDetailActivity extends MyBaseCompatActivity {
     public void inflateCommonMenu() {
         mAlbumDetailBinding.toolbar.inflateMenu(R.menu.menu_toolbar_album_detail);
         //update menu checkbox
-        if (!intentAlbumId.equals("-10") && paths.size() > 0) {
+        if (!AlbumItem.DEFAULT_ALBUM_ID.equals(intentAlbumId) && paths.size() > 0) {
             mAlbumDetailBinding.toolbar.getMenu().findItem(R.id.menu_toolbar_album_force_album).setChecked(paths.get(0).isForceUse());
         }
 
         mAlbumDetailBinding.toolbar.setOnMenuItemClickListener(menuItem -> {
             switch (menuItem.getItemId()) {
                 case R.id.menu_toolbar_album_force_album: {
-                    if (!intentAlbumId.equals("-10")) {
+                    if (!AlbumItem.DEFAULT_ALBUM_ID.equals(intentAlbumId)) {
                         CustomAlbumPath customAlbumPath = paths.get(0);
                         if (menuItem.isChecked()) {
                             menuItem.setChecked(false);
@@ -158,7 +159,7 @@ public final class AlbumDetailActivity extends MyBaseCompatActivity {
             String key = intent.getStringExtra("key");
             mAlbumDetailBinding.toolbar.setTitle(key);
 
-            intentAlbumId = String.valueOf(intent.getIntExtra("_id", -10));
+            intentAlbumId = String.valueOf(intent.getIntExtra("_id", Integer.parseInt(AlbumItem.DEFAULT_ALBUM_ID)));
             paths = LitePal.where("mAlbumId = ?", intentAlbumId).find(CustomAlbumPath.class);
             inflateCommonMenu();
 
@@ -173,7 +174,9 @@ public final class AlbumDetailActivity extends MyBaseCompatActivity {
                 @Override
                 public void onChanged() {
                     super.onChanged();
-                    if (adapter.getItemCount() == 0) finish();
+                    if (adapter.getItemCount() == 0) {
+                        finish();
+                    }
                 }
             });
 
@@ -190,7 +193,9 @@ public final class AlbumDetailActivity extends MyBaseCompatActivity {
                 if (cursor != null && cursor.getCount() > 0) {
                     cursor.moveToFirst();
                     do {
-                        String id = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));     //get music _id
+
+                        //get music _id
+                        String id = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
                         mMusicIds.add(id);
                     } while (cursor.moveToNext());
                     cursor.close();
@@ -216,7 +221,9 @@ public final class AlbumDetailActivity extends MyBaseCompatActivity {
                         do {
                             final String path = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
 
-                            if (!new File(path).exists()) return;
+                            if (!new File(path).exists()) {
+                                return;
+                            }
 
                             final String mimeType = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
                             final String name = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
@@ -227,8 +234,6 @@ public final class AlbumDetailActivity extends MyBaseCompatActivity {
                             final String artist = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
                             final long addTime = cursor2.getLong(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
                             final int albumId = cursor2.getInt(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
-
-//                            Log.d(TAG, "initData: " + name + " " + path);
 
                             final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
                                     .musicAlbum(albumName)
@@ -377,7 +382,9 @@ public final class AlbumDetailActivity extends MyBaseCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         for (Disposable d : mDisposables) {
-            if (!d.isDisposed()) d.dispose();
+            if (!d.isDisposed()) {
+                d.dispose();
+            }
         }
     }
 }

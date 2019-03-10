@@ -60,7 +60,7 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
  * @author chenlongcould
  * @apiNote some by others
  */
-public final class ArtistDetailActivity extends MyBaseCompatActivity {
+public final class ArtistDetailActivity extends BaseCompatActivity {
 
     public static final String TAG = "ArtistDetailActivity";
 

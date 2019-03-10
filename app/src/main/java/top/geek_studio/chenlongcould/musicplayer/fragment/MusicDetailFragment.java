@@ -15,6 +15,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -91,6 +92,9 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
+/**
+ * @author chenlongcould
+ */
 public final class MusicDetailFragment extends Fragment {
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -187,7 +191,6 @@ public final class MusicDetailFragment extends Fragment {
 
     private ConstraintLayout mSlideUpGroup;
 
-    //实例化一个fragment
     public static MusicDetailFragment newInstance() {
         return new MusicDetailFragment();
     }
@@ -203,50 +206,12 @@ public final class MusicDetailFragment extends Fragment {
         mHandler = new MusicDetailFragment.NotLeakHandler(mMainActivity, mHandlerThread.getLooper());
     }
 
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_music_detail, container, false);
-
-        initView(view);
-
-        //init view data
-        mHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);        //init seekBar
-        mHandler.sendEmptyMessage(Values.HandlerWhat.SEEK_BAR_UPDATE);      //let seekBar loop update
-        mHandler.sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);      //scroll to the position{@Values.CurrentData.CURRENT_MUSIC_INDEX}
-
-        if (Data.sMusicBinder != null) {
-            //检测后台播放
-            try {
-
-                MusicItem item = Data.sMusicBinder.getCurrentItem();
-                if (item.getMusicID() != -1) {
-                    mCurrentMusicNameText.setText(item.getMusicName());
-                    mCurrentAlbumNameText.setText(item.getMusicAlbum());
-
-                    Bitmap bitmap = Utils.Audio.getCoverBitmap(getContext(), item.getAlbumId());
-                    mNowPlayingStatusImage.setImageResource(R.drawable.ic_pause_black_24dp);
-                    mPlayButton.setImageResource(R.drawable.ic_pause_black_24dp);
-
-                    setSlideInfo(item.getMusicName(), item.getMusicAlbum(), bitmap);
-                    setCurrentInfo(item.getMusicName(), item.getMusicAlbum(), bitmap);
-
-                    mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
-
-                } else {
-
-                }
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-
-        } else {
-            if (Data.sCurrentMusicItem.getMusicID() != -1) {
-                final Bitmap cover = Utils.Audio.getCoverBitmap(getContext(), Data.sCurrentMusicItem.getAlbumId());
-                setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), cover);
-            }
-        }
-        return view;
-    }
+    /**
+     * @see #mMusicAlbumImage 的滑动模式
+     * 0: just x
+     * 1: x & y
+     */
+    private int mode = 0;
 
     private AlbumImageView mMusicAlbumImage;
 
@@ -487,12 +452,52 @@ public final class MusicDetailFragment extends Fragment {
 
     }
 
-    /**
-     * @see #mMusicAlbumImage 的滑动模式
-     * 0: just x
-     * 1: x & y
-     */
-    int mode = 0;
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_music_detail, container, false);
+
+        initView(view);
+
+        //init seekBar
+        mHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
+        //let seekBar loop update
+        mHandler.sendEmptyMessage(Values.HandlerWhat.SEEK_BAR_UPDATE);
+        //scroll to the position{@Values.CurrentData.CURRENT_MUSIC_INDEX}
+        mHandler.sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
+
+        if (Data.sMusicBinder != null) {
+            //检测后台播放
+            try {
+
+                MusicItem item = Data.sMusicBinder.getCurrentItem();
+                if (item.getMusicID() != -1) {
+                    mCurrentMusicNameText.setText(item.getMusicName());
+                    mCurrentAlbumNameText.setText(item.getMusicAlbum());
+
+                    Bitmap bitmap = Utils.Audio.getCoverBitmap(getContext(), item.getAlbumId());
+                    mNowPlayingStatusImage.setImageResource(R.drawable.ic_pause_black_24dp);
+                    mPlayButton.setImageResource(R.drawable.ic_pause_black_24dp);
+
+                    setSlideInfo(item.getMusicName(), item.getMusicAlbum(), bitmap);
+                    setCurrentInfo(item.getMusicName(), item.getMusicAlbum(), bitmap);
+
+                    mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
+
+                } else {
+
+                }
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+
+        } else {
+            if (Data.sCurrentMusicItem.getMusicID() != -1) {
+                final Bitmap cover = Utils.Audio.getCoverBitmap(getContext(), Data.sCurrentMusicItem.getAlbumId());
+                setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), cover);
+            }
+        }
+        return view;
+    }
 
     /**
      * 记录是否为长按 (2000ms)
@@ -500,9 +505,10 @@ public final class MusicDetailFragment extends Fragment {
     private volatile AtomicBoolean lc = new AtomicBoolean(false);
 
     /**
-     * init Views
-     */
-    private void initView(View view) {
+     * find view by id
+     * @see android.app.Activity#findViewById(int)
+     * */
+    private void findView(View view) {
         mMusicAlbumImage = view.findViewById(R.id.activity_music_detail_album_image);
         mBGup = view.findViewById(R.id.activity_music_detail_primary_background_up);
         mBGdown = view.findViewById(R.id.activity_music_detail_primary_background_down);
@@ -534,12 +540,324 @@ public final class MusicDetailFragment extends Fragment {
         mNowPlayingSongText = view.findViewById(R.id.activity_main_now_playing_name);
         mNowPlayingSongImage = view.findViewById(R.id.recycler_item_clover_image);
         mSlideUpGroup = view.findViewById(R.id.detail_body);
+    }
 
-        mSlidingUpPanelLayout.post(() -> {
-            int val0 = view.getHeight() - view.findViewById(R.id.frame_ctrl).getBottom();
-            Log.d(TAG, "initView: upSlide the val is:" + val0);
-            mSlidingUpPanelLayout.setPanelHeight(val0);
+    private void setUpToolbar() {
+        /*------------------toolbar--------------------*/
+        mToolbar.inflateMenu(R.menu.menu_toolbar_in_detail);
+
+        mToolbar.setOnMenuItemClickListener(menuItem -> {
+            switch (menuItem.getItemId()) {
+                case R.id.menu_toolbar_fast_play: {
+                    Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, PlayListFragment.TAG);
+                }
+                break;
+
+                case R.id.menu_toolbar_love: {
+                    MusicUtil.toggleFavorite(mMainActivity, ReceiverOnMusicPlay.getCurrentItem());
+                    updateFav(ReceiverOnMusicPlay.getCurrentItem());
+                    Toast.makeText(mMainActivity, getString(R.string.done), Toast.LENGTH_SHORT).show();
+                }
+                break;
+
+                case R.id.menu_toolbar_eq: {
+                    MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
+                    if (item != null) {
+                        Utils.Audio.openEqualizer(mMainActivity, item.getAlbumId());
+                    }
+                }
+
+                case R.id.menu_toolbar_debug: {
+                }
+                break;
+                case R.id.menu_toolbar_trash_can: {
+                    dropToTrash(ReceiverOnMusicPlay.getCurrentItem());
+                }
+                break;
+                default:
+            }
+            return false;
         });
+
+        mToolbar.setNavigationOnClickListener(v -> mMainActivity.getHandler().sendEmptyMessage(MainActivity.DOWN));
+    }
+
+    private void setClickListener() {
+        mRepeatButton.setOnClickListener(v -> {
+
+            /*
+             * COMMON = 0f
+             * REPEAT = 1f
+             * REPEAT_ONE = 1f(another pic)
+             * */
+            final ValueAnimator animator = new ValueAnimator();
+            animator.setDuration(300);
+            mRepeatButton.clearAnimation();
+            switch (Values.CurrentData.CURRENT_PLAY_TYPE) {
+                case Values.TYPE_COMMON: {
+                    Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_REPEAT;
+                    mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
+                    animator.setFloatValues(0.3f, 1f);
+                    animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));
+                    animator.addListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            mRepeatButton.setAlpha(1f);
+                            mRepeatButton.clearAnimation();
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+
+                        }
+                    });
+                    animator.start();
+                    break;
+                }
+                case Values.TYPE_REPEAT: {
+                    mRepeatButton.setImageResource(R.drawable.ic_repeat_one_white_24dp);
+                    Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_REPEAT_ONE;
+                }
+                break;
+                case Values.TYPE_REPEAT_ONE: {
+                    Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_COMMON;
+                    mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
+                    animator.setFloatValues(1f, 0.3f);
+                    animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));
+                    animator.addListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            mRepeatButton.setAlpha(0.3f);
+                            mRepeatButton.clearAnimation();
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+
+                        }
+                    });
+                    animator.start();
+                    break;
+                }
+                default:
+            }
+        });
+
+        mRepeatButton.setOnLongClickListener(v -> {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
+            builder.setTitle("Repeater");
+            builder.setMessage("I am a Repeater...");
+            builder.setCancelable(true);
+            builder.show();
+            return false;
+        });
+
+        mRandomButton.setOnClickListener(v -> {
+            mRandomButton.clearAnimation();
+            final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit();
+            if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM)) {
+                editor.putString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).apply();
+                final ValueAnimator animator = new ValueAnimator();
+                animator.setFloatValues(1f, 0.3f);
+                animator.setDuration(300);
+                animator.addUpdateListener(animation -> mRandomButton.setAlpha((Float) animation.getAnimatedValue()));
+                animator.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mRandomButton.setAlpha(0.3f);
+                        mRandomButton.clearAnimation();
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                });
+                animator.start();
+
+                final MusicItem item = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX);
+
+                Data.sPlayOrderList.clear();
+                Data.sPlayOrderList.addAll(Data.sMusicItems);
+
+                for (int i = 0; i < Data.sMusicItems.size(); i++) {
+                    if (Data.sPlayOrderList.get(i).getMusicID() == item.getMusicID()) {
+                        Values.CurrentData.CURRENT_MUSIC_INDEX = i;
+                    }
+                }
+
+                mMyWaitListAdapter.notifyDataSetChanged();
+
+            } else {
+                editor.putString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_RANDOM).apply();
+                final ValueAnimator animator = new ValueAnimator();
+                animator.setFloatValues(0.3f, 1f);
+                animator.setDuration(300);
+                animator.addUpdateListener(animation -> mRandomButton.setAlpha((Float) animation.getAnimatedValue()));
+                animator.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mRandomButton.setAlpha(1f);
+                        mRandomButton.clearAnimation();
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                });
+                animator.start();
+
+                final MusicItem item = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX);
+                Collections.shuffle(Data.sPlayOrderList);
+
+                for (int i = 0; i < Data.sMusicItems.size(); i++) {
+                    if (Data.sPlayOrderList.get(i).getMusicID() == item.getMusicID()) {
+                        Values.CurrentData.CURRENT_MUSIC_INDEX = i;
+                    }
+                }
+
+                mMyWaitListAdapter.notifyDataSetChanged();
+
+            }
+        });
+
+        mMusicAlbumImage.setOnClickListener(v -> {
+            if (HIDE_TOOLBAR) {
+                showToolbar();
+            } else {
+                hideToolbar();
+            }
+        });
+
+        mMenuButton.setOnClickListener(v -> mPopupMenu.show());
+
+        //just pause or play
+        mPlayButton.setOnClickListener(v -> {
+            if (ReceiverOnMusicPlay.isPlayingMusic()) {
+                Utils.SendSomeThing.sendPause(mMainActivity);
+            } else {
+                ReceiverOnMusicPlay.playMusic();
+                Utils.Ui.setPlayButtonNowPlaying();
+            }
+        });
+
+        mNextButton.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mMainActivity, 6, ReceiverOnMusicPlay.TYPE_NEXT));
+
+        mNextButton.setOnLongClickListener(v -> {
+            int nowPosition = mSeekBar.getProgress() + ReceiverOnMusicPlay.getDuration() / 20;
+            if (nowPosition >= mSeekBar.getMax()) {
+                nowPosition = mSeekBar.getMax();
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                mSeekBar.setProgress(nowPosition, true);
+            } else {
+                mSeekBar.setProgress(nowPosition);
+            }
+            ReceiverOnMusicPlay.seekTo(nowPosition);
+            return true;
+        });
+
+        mPreviousButton.setOnClickListener(v -> {
+
+            //当进度条大于播放总长 1/20 那么重新播放该歌曲
+            //noinspection AlibabaUndefineMagicConstant
+            if (ReceiverOnMusicPlay.getCurrentPosition() > ReceiverOnMusicPlay.getDuration() / 20 || Values.CurrentData.CURRENT_MUSIC_INDEX == 0) {
+                ReceiverOnMusicPlay.seekTo(0);
+            } else {
+                Utils.SendSomeThing.sendPlay(mMainActivity, 6, "previous");
+            }
+
+        });
+
+        mPreviousButton.setOnLongClickListener(v -> {
+            int nowPosition = mSeekBar.getProgress() - ReceiverOnMusicPlay.getDuration() / 20;
+            if (nowPosition <= 0) {
+                nowPosition = 0;
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                mSeekBar.setProgress(nowPosition, true);
+            } else {
+                mSeekBar.setProgress(nowPosition);
+            }
+            ReceiverOnMusicPlay.seekTo(nowPosition);
+            return true;
+        });
+
+        mNowPlayingStatusImage.setOnClickListener(v -> {
+            //判断是否播放过, 如没有默认随机播放
+            if (Data.HAS_PLAYED) {
+                if (ReceiverOnMusicPlay.isPlayingMusic()) {
+                    Utils.SendSomeThing.sendPause(mMainActivity);
+                } else {
+                    Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_NOTIFICATION_RESUME, null);
+                }
+            } else {
+                Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, TAG);
+            }
+        });
+
+        mNowPlayingFavButton.setOnClickListener(v -> {
+            MusicUtil.toggleFavorite(mMainActivity, ReceiverOnMusicPlay.getCurrentItem());
+            updateFav(ReceiverOnMusicPlay.getCurrentItem());
+            Toast.makeText(mMainActivity, getString(R.string.done), Toast.LENGTH_SHORT).show();
+        });
+
+        mNowPlayingBody.setOnClickListener(v -> {
+            if (Data.HAS_PLAYED) {
+                mMainActivity.getHandler().sendEmptyMessage(MainActivity.UP);
+            } else {
+                Utils.Ui.fastToast(mMainActivity, "No music playing.");
+            }
+        });
+    }
+
+    /**
+     * init Views
+     */
+    private void initView(View view) {
+
+        findView(view);
 
         //get Default values
         mScaleType = mPlayButton.getScaleType();
@@ -550,6 +868,19 @@ public final class MusicDetailFragment extends Fragment {
         mMusicAlbumImageOth2.setX(mMusicAlbumImage.getWidth() * 2);
         mMusicAlbumImageOth2.setVisibility(View.GONE);
         mMusicAlbumImageOth3.setVisibility(View.GONE);
+
+        mCurrentInfoSeek.setBackgroundColor(Utils.Ui.getAccentColor(mMainActivity));
+
+        setDefAnimation();
+        clearAnimations();
+
+        setUpToolbar();
+
+        mSlidingUpPanelLayout.post(() -> {
+            int val0 = view.getHeight() - view.findViewById(R.id.frame_ctrl).getBottom();
+            Log.d(TAG, "initView: upSlide the val is:" + val0);
+            mSlidingUpPanelLayout.setPanelHeight(val0);
+        });
 
         mMusicAlbumImage.setOnTouchListener((v, event) -> {
             final int action = event.getAction();
@@ -693,8 +1024,9 @@ public final class MusicDetailFragment extends Fragment {
                             public void onAnimationEnd(Animator animation) {
                                 Utils.SendSomeThing.sendPlay(mMainActivity, 6, "previous_slide");
                                 Bitmap bitmap = null;
-                                if (finalBefItem != null)
+                                if (finalBefItem != null) {
                                     bitmap = Utils.Audio.getCoverBitmap(mMainActivity, finalBefItem.getAlbumId());
+                                }
                                 GlideApp.with(MusicDetailFragment.this)
                                         .load(finalBefItem == null ? R.drawable.default_album_art : bitmap)
                                         .into(mMusicAlbumImage);
@@ -767,234 +1099,7 @@ public final class MusicDetailFragment extends Fragment {
             return true;
         });
 
-        mCurrentInfoSeek.setBackgroundColor(Utils.Ui.getAccentColor(mMainActivity));
-
-        setDefAnimation();
-        clearAnimations();
-
-        /*------------------toolbar--------------------*/
-        mToolbar.inflateMenu(R.menu.menu_toolbar_in_detail);
-
-        mToolbar.setOnMenuItemClickListener(menuItem -> {
-            switch (menuItem.getItemId()) {
-                case R.id.menu_toolbar_fast_play: {
-                    Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, PlayListFragment.TAG);
-                }
-                break;
-
-                case R.id.menu_toolbar_love: {
-                    MusicUtil.toggleFavorite(mMainActivity, ReceiverOnMusicPlay.getCurrentItem());
-                    updateFav(ReceiverOnMusicPlay.getCurrentItem());
-                    Toast.makeText(mMainActivity, getString(R.string.done), Toast.LENGTH_SHORT).show();
-                }
-                break;
-
-                case R.id.menu_toolbar_eq: {
-                    MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
-                    if (item != null) Utils.Audio.openEqualizer(mMainActivity, item.getAlbumId());
-                }
-
-                case R.id.menu_toolbar_debug: {
-//                    Snackbar.make(mSlidingUpPanelLayout,
-//                            "Next Will play" + Data.sMusicItems.get(Values.CurrentData.CURRENT_MUSIC_INDEX != Data.sMusicItems.size() ? Values.CurrentData.CURRENT_MUSIC_INDEX : 0)
-//                            , Snackbar.LENGTH_LONG).setAction("按钮", v -> {
-//                        //点击右侧的按钮之后的操作
-//                        Utils.SendSomeThing.sendPause(mMainActivity);
-//                    }).show();
-                }
-                break;
-                case R.id.menu_toolbar_trash_can: {
-                    dropToTrash(ReceiverOnMusicPlay.getCurrentItem());
-                }
-                break;
-            }
-            return false;
-        });
-
-        mToolbar.setNavigationOnClickListener(v -> mMainActivity.getHandler().sendEmptyMessage(MainActivity.DOWN));
-
-        /*-------------------button---------------------*/
-        mRepeatButton.setOnClickListener(v -> {
-
-            /*
-             * COMMON = 0f
-             * REPEAT = 1f
-             * REPEAT_ONE = 1f(another pic)
-             * */
-            final ValueAnimator animator = new ValueAnimator();
-            animator.setDuration(300);
-            mRepeatButton.clearAnimation();
-            switch (Values.CurrentData.CURRENT_PLAY_TYPE) {
-                case Values.TYPE_COMMON: {
-                    Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_REPEAT;
-                    mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
-                    animator.setFloatValues(0.3f, 1f);
-                    animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));
-                    animator.addListener(new Animator.AnimatorListener() {
-                        @Override
-                        public void onAnimationStart(Animator animation) {
-
-                        }
-
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            mRepeatButton.setAlpha(1f);
-                            mRepeatButton.clearAnimation();
-                        }
-
-                        @Override
-                        public void onAnimationCancel(Animator animation) {
-
-                        }
-
-                        @Override
-                        public void onAnimationRepeat(Animator animation) {
-
-                        }
-                    });
-                    animator.start();
-                    break;
-                }
-                case Values.TYPE_REPEAT: {
-                    mRepeatButton.setImageResource(R.drawable.ic_repeat_one_white_24dp);
-                    Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_REPEAT_ONE;
-                }
-                break;
-                case Values.TYPE_REPEAT_ONE: {
-                    Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_COMMON;
-                    mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
-                    animator.setFloatValues(1f, 0.3f);
-                    animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));
-                    animator.addListener(new Animator.AnimatorListener() {
-                        @Override
-                        public void onAnimationStart(Animator animation) {
-
-                        }
-
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            mRepeatButton.setAlpha(0.3f);
-                            mRepeatButton.clearAnimation();
-                        }
-
-                        @Override
-                        public void onAnimationCancel(Animator animation) {
-
-                        }
-
-                        @Override
-                        public void onAnimationRepeat(Animator animation) {
-
-                        }
-                    });
-                    animator.start();
-                    break;
-                }
-            }
-        });
-
-        mRepeatButton.setOnLongClickListener(v -> {
-            final AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
-            builder.setTitle("Repeater");
-            builder.setMessage("I am a Repeater...");
-            builder.setCancelable(true);
-            builder.show();
-            return false;
-        });
-
-        mRandomButton.setOnClickListener(v -> {
-            mRandomButton.clearAnimation();
-            final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit();
-            if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM)) {
-                editor.putString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).apply();
-                final ValueAnimator animator = new ValueAnimator();
-                animator.setFloatValues(1f, 0.3f);
-                animator.setDuration(300);
-                animator.addUpdateListener(animation -> mRandomButton.setAlpha((Float) animation.getAnimatedValue()));
-                animator.addListener(new Animator.AnimatorListener() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mRandomButton.setAlpha(0.3f);
-                        mRandomButton.clearAnimation();
-                    }
-
-                    @Override
-                    public void onAnimationCancel(Animator animation) {
-
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animator animation) {
-
-                    }
-                });
-                animator.start();
-
-                final MusicItem item = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX);
-
-                Data.sPlayOrderList.clear();
-                Data.sPlayOrderList.addAll(Data.sMusicItems);
-
-                for (int i = 0; i < Data.sMusicItems.size(); i++) {
-                    if (Data.sPlayOrderList.get(i).getMusicID() == item.getMusicID())
-                        Values.CurrentData.CURRENT_MUSIC_INDEX = i;
-                }
-
-                mMyWaitListAdapter.notifyDataSetChanged();
-
-            } else {
-                editor.putString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_RANDOM).apply();
-                final ValueAnimator animator = new ValueAnimator();
-                animator.setFloatValues(0.3f, 1f);
-                animator.setDuration(300);
-                animator.addUpdateListener(animation -> mRandomButton.setAlpha((Float) animation.getAnimatedValue()));
-                animator.addListener(new Animator.AnimatorListener() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mRandomButton.setAlpha(1f);
-                        mRandomButton.clearAnimation();
-                    }
-
-                    @Override
-                    public void onAnimationCancel(Animator animation) {
-
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animator animation) {
-
-                    }
-                });
-                animator.start();
-
-                final MusicItem item = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX);
-                Collections.shuffle(Data.sPlayOrderList);
-
-                for (int i = 0; i < Data.sMusicItems.size(); i++) {
-                    if (Data.sPlayOrderList.get(i).getMusicID() == item.getMusicID()) {
-                        Values.CurrentData.CURRENT_MUSIC_INDEX = i;
-                    }
-                }
-
-                mMyWaitListAdapter.notifyDataSetChanged();
-
-            }
-        });
-
-        mMusicAlbumImage.setOnClickListener(v -> {
-            if (HIDE_TOOLBAR) showToolbar();
-            else hideToolbar();
-        });
+        setClickListener();
 
         /*---------------------- Menu -----------------------*/
         mPopupMenu = new PopupMenu(mMainActivity, mMenuButton);
@@ -1003,8 +1108,6 @@ public final class MusicDetailFragment extends Fragment {
 
         menu.add(Menu.NONE, Menu.FIRST + 1, 0, "查看专辑");
         menu.add(Menu.NONE, Menu.FIRST + 2, 0, "详细信息");
-
-        mMenuButton.setOnClickListener(v -> mPopupMenu.show());
 
         mPopupMenu.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
@@ -1033,11 +1136,12 @@ public final class MusicDetailFragment extends Fragment {
                     intent.putExtra("start_by", "detail");
                     startActivity(intent);
                 }
+                break;
+                default:
             }
             return false;
         });
 
-        /*--------------------new panel----------------------*/
         mCurrentInfoBody.setOnClickListener(v -> {
 
             if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
@@ -1049,6 +1153,7 @@ public final class MusicDetailFragment extends Fragment {
             mHandler.sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
 
         });
+
         mCurrentInfoBody.setOnLongClickListener(v -> {
             dropToTrash(ReceiverOnMusicPlay.getCurrentItem());
             return true;
@@ -1081,91 +1186,14 @@ public final class MusicDetailFragment extends Fragment {
             }
         });
 
-        //just pause or play
-        mPlayButton.setOnClickListener(v -> {
-            if (ReceiverOnMusicPlay.isPlayingMusic()) {
-                Utils.SendSomeThing.sendPause(mMainActivity);
-            } else {
-                ReceiverOnMusicPlay.playMusic();
-                Utils.Ui.setPlayButtonNowPlaying();
-            }
-        });
-
-        mNextButton.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mMainActivity, 6, ReceiverOnMusicPlay.TYPE_NEXT));
-
-        mNextButton.setOnLongClickListener(v -> {
-            int nowPosition = mSeekBar.getProgress() + ReceiverOnMusicPlay.getDuration() / 20;
-            if (nowPosition >= mSeekBar.getMax()) {
-                nowPosition = mSeekBar.getMax();
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                mSeekBar.setProgress(nowPosition, true);
-            } else {
-                mSeekBar.setProgress(nowPosition);
-            }
-            ReceiverOnMusicPlay.seekTo(nowPosition);
-            return true;
-        });
-
-        mPreviousButton.setOnClickListener(v -> {
-
-            //当进度条大于播放总长 1/20 那么重新播放该歌曲
-            if (ReceiverOnMusicPlay.getCurrentPosition() > ReceiverOnMusicPlay.getDuration() / 20 || Values.CurrentData.CURRENT_MUSIC_INDEX == 0) {
-                ReceiverOnMusicPlay.seekTo(0);
-            } else {
-                Utils.SendSomeThing.sendPlay(mMainActivity, 6, "previous");
-            }
-
-        });
-
-        mPreviousButton.setOnLongClickListener(v -> {
-            int nowPosition = mSeekBar.getProgress() - ReceiverOnMusicPlay.getDuration() / 20;
-            if (nowPosition <= 0) {
-                nowPosition = 0;
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                mSeekBar.setProgress(nowPosition, true);
-            } else {
-                mSeekBar.setProgress(nowPosition);
-            }
-            ReceiverOnMusicPlay.seekTo(nowPosition);
-            return true;
-        });
-
-        mNowPlayingStatusImage.setOnClickListener(v -> {
-            //判断是否播放过, 如没有默认随机播放
-            if (Data.HAS_PLAYED) {
-                if (ReceiverOnMusicPlay.isPlayingMusic()) {
-                    Utils.SendSomeThing.sendPause(mMainActivity);
-                } else {
-                    Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_NOTIFICATION_RESUME, null);
-                }
-            } else {
-                Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, TAG);
-            }
-        });
-
-        mNowPlayingFavButton.setOnClickListener(v -> {
-            MusicUtil.toggleFavorite(mMainActivity, ReceiverOnMusicPlay.getCurrentItem());
-            updateFav(ReceiverOnMusicPlay.getCurrentItem());
-            Toast.makeText(mMainActivity, getString(R.string.done), Toast.LENGTH_SHORT).show();
-        });
-
-        mNowPlayingBody.setOnClickListener(v -> {
-            if (Data.HAS_PLAYED) {
-                mMainActivity.getHandler().sendEmptyMessage(MainActivity.UP);
-            } else {
-                Utils.Ui.fastToast(mMainActivity, "No music playing.");
-            }
-        });
-
         mSlidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
                 CURRENT_SLIDE_OFFSET = slideOffset;
                 mSlideUpGroup.setTranslationY(0 - slideOffset * 120);
-                if (slideOffset == 0)
+                if (slideOffset == 0) {
                     mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
+                }
             }
 
             @Override
@@ -1181,8 +1209,11 @@ public final class MusicDetailFragment extends Fragment {
 
     }
 
+    /**
+     * the action drop to crash
+     */
     private void dropToTrash(@Nullable MusicItem item) {
-        if (item != null)
+        if (item != null) {
             if (PreferenceManager.getDefaultSharedPreferences(mMainActivity).getBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, true)) {
                 final AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
                 builder.setTitle(getString(R.string.sure_int));
@@ -1208,6 +1239,7 @@ public final class MusicDetailFragment extends Fragment {
             } else {
                 Data.sTrashCanList.add(item);
             }
+        }
     }
 
     /**
@@ -1257,34 +1289,6 @@ public final class MusicDetailFragment extends Fragment {
         mAppBarLayout.startAnimation(temp);
     }
 
-//    //set infoBar set AlbumImage set PrimaryBackground
-//    public final void setCurrentInfo(@NonNull String name, @NonNull String albumName, byte[] cover) {
-//        mMainActivity.runOnUiThread(() -> {
-//            mCurrentMusicNameText.setText(name);
-//            mCurrentAlbumNameText.setText(albumName);
-//
-//            if (cover != null) {
-//                GlideApp.with(this).clearData(mMusicAlbumImage);
-//                GlideApp.with(this)
-//                        .load(cover)
-//                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-//                        .centerCrop()
-//                        .into(mMusicAlbumImage);
-//                Utils.Ui.setBlurEffect(mMainActivity, cover, mBGup, mBGdown, mNextWillText);
-//            } else {
-//                GlideApp.with(this)
-//                        .load(R.drawable.ic_audiotrack_24px)
-//                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-//                        .centerCrop()
-//                        .into(mMusicAlbumImage);
-//                mBGup.setImageDrawable(null);
-//                mBGup.setBackgroundColor(Color.GRAY);
-//                mBGdown.setImageDrawable(null);
-//                mBGdown.setBackgroundColor(Color.GRAY);
-//            }
-//        });
-//    }
-
     public final void setCurrentInfoWithoutMainImage(@NonNull final String name, @NonNull final String albumName, final Bitmap cover) {
         mMainActivity.runOnUiThread(() -> {
             mCurrentMusicNameText.setText(name);
@@ -1295,8 +1299,9 @@ public final class MusicDetailFragment extends Fragment {
 
     public final void setCurrentInfo(@NonNull final String name, @NonNull final String albumName, final Bitmap cover) {
         mMusicAlbumImage.post(() -> {
-            if (Data.getCurrentCover() != null && Data.getCurrentCover().isRecycled())
+            if (Data.getCurrentCover() != null && Data.getCurrentCover().isRecycled()) {
                 Data.getCurrentCover().recycle();
+            }
 
             Data.setCurrentCover(cover);
 
@@ -1313,7 +1318,9 @@ public final class MusicDetailFragment extends Fragment {
                     .into(mMusicAlbumImage);
 
             MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
-            if (item != null) updateFav(item);
+            if (item != null) {
+                updateFav(item);
+            }
 
             Utils.Ui.setBlurEffect(mMainActivity, cover, mBGup, mBGdown, mNextWillText);
         });
@@ -1388,6 +1395,7 @@ public final class MusicDetailFragment extends Fragment {
      *
      * @param bitmap backgroundImage
      */
+    @SuppressLint("StaticFieldLeak")
     private void setIcoLightOrDark(@Nullable final Bitmap bitmap) {
         if (bitmap != null) {
             new AsyncTask<Void, Void, Integer>() {
@@ -1483,7 +1491,9 @@ public final class MusicDetailFragment extends Fragment {
             switch (msg.what) {
                 case Values.HandlerWhat.INIT_SEEK_BAR: {
                     mWeakReference.get().runOnUiThread(() -> {
-                        if (Data.sMusicBinder == null) return;
+                        if (Data.sMusicBinder == null) {
+                            return;
+                        }
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                             mSeekBar.setProgress(0, true);
@@ -1504,7 +1514,9 @@ public final class MusicDetailFragment extends Fragment {
                 case Values.HandlerWhat.SEEK_BAR_UPDATE: {
                     mWeakReference.get().runOnUiThread(() -> {
                         //点击body 或 music 正在播放 才可以进行seekBar更新
-                        if (Data.sMusicBinder == null) return;
+                        if (Data.sMusicBinder == null) {
+                            return;
+                        }
 
                         if (ReceiverOnMusicPlay.isPlayingMusic()) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

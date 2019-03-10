@@ -26,7 +26,10 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
-public final class SplashActivity extends MyBaseCompatActivity {
+/**
+ * @author chenlongcould
+ */
+public final class SplashActivity extends BaseCompatActivity {
 
     private static final String TAG = "SplashActivity";
 
@@ -50,6 +53,8 @@ public final class SplashActivity extends MyBaseCompatActivity {
                     builder.show();
                 }
             }
+            break;
+            default:
         }
     }
 
@@ -81,7 +86,9 @@ public final class SplashActivity extends MyBaseCompatActivity {
         // 虚拟导航键
         window.setNavigationBarColor(Color.TRANSPARENT);
 
-        if (initPermission()) initDone();
+        if (initPermission()) {
+            initDone();
+        }
     }
 
     @Override

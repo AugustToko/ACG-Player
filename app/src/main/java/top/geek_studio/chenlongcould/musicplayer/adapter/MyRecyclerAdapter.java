@@ -83,8 +83,8 @@ import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.AlbumDetailActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.BaseCompatActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.activity.MyBaseCompatActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
@@ -105,7 +105,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
     /**
      * MAIN
      */
-    private MyBaseCompatActivity mActivity;
+    private BaseCompatActivity mActivity;
 
     /**
      * 媒体库，默认顺序排序
@@ -118,7 +118,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
     private ArrayList<Integer> mSelected = new ArrayList<>();
 
-    public MyRecyclerAdapter(MyBaseCompatActivity activity, List<MusicItem> musicItems, int... styleId) {
+    public MyRecyclerAdapter(BaseCompatActivity activity, List<MusicItem> musicItems, int... styleId) {
         mActivity = activity;
         mMusicItems = musicItems;
 

@@ -28,26 +28,10 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragmentLandSpace;
 
 /**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
+ * @author chenlongcould
  */
 public final class CarViewActivity extends AppCompatActivity {
-    /**
-     * Whether or not the system UI should be auto-hidden after
-     * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-     */
-    private static final boolean AUTO_HIDE = true;
 
-    /**
-     * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-     * user interaction before hiding the system UI.
-     */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
     private static final int UI_ANIMATION_DELAY = 300;
     private static final String TAG = "CarViewActivity";
     private final Handler mHideHandler = new Handler();
@@ -125,16 +109,19 @@ public final class CarViewActivity extends AppCompatActivity {
     }
 
     private void toggle() {
-        if (mVisible)
+        if (mVisible) {
             hide();
-        else
+        } else {
             show();
+        }
     }
 
     public void hide() {
         // Hide UI first
         final ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) actionBar.hide();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
 
         mVisible = false;
 
@@ -155,7 +142,9 @@ public final class CarViewActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (BACK_PRESSED) return;
+        if (BACK_PRESSED) {
+            return;
+        }
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         show();
         findViewById(R.id.frag_land_space).setVisibility(View.GONE);

@@ -14,7 +14,12 @@ package top.geek_studio.chenlongcould.musicplayer.Models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * @author chenlongcould
+ */
 public final class AlbumItem implements Parcelable {
+
+    public static final String DEFAULT_ALBUM_ID = "-10";
 
     private String mAlbumName;
 

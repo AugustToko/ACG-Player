@@ -30,7 +30,10 @@ import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
-public final class AboutLic extends MyBaseCompatActivity {
+/**
+ * @author chenlongcould
+ */
+public final class AboutLic extends BaseCompatActivity {
 
     private static final String TAG = "AboutLic";
 

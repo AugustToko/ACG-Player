@@ -84,6 +84,10 @@ public interface Values {
         String LAST_PLAY_MUSIC_ID = "LAST_PLAY_MUSIC_ID";
     }
 
+    interface IntentTAG {
+        String SHORTCUT_TYPE = "SHORTCUT_TYPE";
+    }
+
     @SuppressWarnings("unused")
     interface BroadCast {
         String ReceiverOnMusicPlay = "top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay";

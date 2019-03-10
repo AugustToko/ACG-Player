@@ -13,6 +13,7 @@ package top.geek_studio.chenlongcould.musicplayer.activity;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -65,7 +66,10 @@ import static top.geek_studio.chenlongcould.musicplayer.Values.SharedPrefsTag.HI
 import static top.geek_studio.chenlongcould.musicplayer.Values.SharedPrefsTag.NOTIFICATION_COLORIZED;
 import static top.geek_studio.chenlongcould.musicplayer.Values.SharedPrefsTag.USE_NET_WORK_ALBUM;
 
-public final class SettingsActivity extends MyBaseCompatActivity {
+/**
+ * @author chenlongcould
+ */
+public final class SettingsActivity extends BaseCompatActivity {
 
     public static final String TAG = "SettingsActivity";
 
@@ -166,6 +170,9 @@ public final class SettingsActivity extends MyBaseCompatActivity {
                     editor.apply();
                     mPrimaryDarkImage.clearAnimation();
                 }
+                break;
+
+                default:
             }
         }
 
@@ -193,7 +200,7 @@ public final class SettingsActivity extends MyBaseCompatActivity {
         mTitleImage = findViewById(R.id.activity_settings_preview_title);
         mToolbar = findViewById(R.id.activity_settings_toolbar);
         mAppBarLayout = findViewById(R.id.activity_settings_appbar);
-        final ConstraintLayout setNightOpt = findViewById(R.id.night_style);
+//        final ConstraintLayout setNightOpt = findViewById(R.id.night_style);
         mNightSwitch = findViewById(R.id.activity_settings_night_switch);
         final ConstraintLayout styleOpt = findViewById(R.id.detail_background_style);
         mStyleSwitch = findViewById(R.id.activity_settings_style_switch);
@@ -205,7 +212,6 @@ public final class SettingsActivity extends MyBaseCompatActivity {
 
         super.initView(mToolbar, mAppBarLayout);
         super.onCreate(savedInstanceState);
-//        super.initStyle();
         initPreView();
 
         mToolbar.setOnMenuItemClickListener(menuItem -> {
@@ -244,6 +250,8 @@ public final class SettingsActivity extends MyBaseCompatActivity {
 
                     clearAnimation();
                 }
+                break;
+                default:
             }
             return false;
         });
@@ -381,15 +389,17 @@ public final class SettingsActivity extends MyBaseCompatActivity {
                 if (editor.commit()) {
                     mSettingsBinding.colorNotiSwitch.setChecked(false);
                     intent.putExtra(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, false);
-                } else
+                } else {
                     Toast.makeText(SettingsActivity.this, "Set Colorized Error...", Toast.LENGTH_SHORT).show();
+                }
             } else {
                 editor.putBoolean(NOTIFICATION_COLORIZED, true);
                 if (editor.commit()) {
                     mSettingsBinding.colorNotiSwitch.setChecked(true);
                     intent.putExtra(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true);
-                } else
+                } else {
                     Toast.makeText(SettingsActivity.this, "Set Colorized Error...", Toast.LENGTH_SHORT).show();
+                }
             }
 
             startService(intent);
@@ -498,7 +508,9 @@ public final class SettingsActivity extends MyBaseCompatActivity {
                     }
 
                     for (File file : sdcard.listFiles()) {
-                        if (file.isFile()) continue;
+                        if (file.isFile()) {
+                            continue;
+                        }
                         pathList.add(file.getName());
                     }
 
@@ -520,7 +532,9 @@ public final class SettingsActivity extends MyBaseCompatActivity {
                         }
 
                         for (File f : currentDir[0].listFiles()) {
-                            if (f.isFile()) continue;
+                            if (f.isFile()) {
+                                continue;
+                            }
                             pathList.add(f.getName());
                         }
 
@@ -713,6 +727,7 @@ public final class SettingsActivity extends MyBaseCompatActivity {
     /**
      * clearAlbums data
      */
+    @SuppressLint("StaticFieldLeak")
     public void clearAlbums() {
         new AsyncTask<Void, Void, Void>() {
 
@@ -720,7 +735,7 @@ public final class SettingsActivity extends MyBaseCompatActivity {
 
             @Override
             protected void onPreExecute() {
-                mAlertDialog = new DialogUtil().getLoadingDialog(SettingsActivity.this);
+                mAlertDialog = DialogUtil.getLoadingDialog(SettingsActivity.this);
                 mAlertDialog.show();
             }
 
@@ -741,6 +756,7 @@ public final class SettingsActivity extends MyBaseCompatActivity {
     /**
      * clearArtists data
      */
+    @SuppressLint("StaticFieldLeak")
     public void clearArtists() {
         new AsyncTask<Void, Void, Void>() {
 
@@ -748,7 +764,7 @@ public final class SettingsActivity extends MyBaseCompatActivity {
 
             @Override
             protected void onPreExecute() {
-                mAlertDialog = new DialogUtil().getLoadingDialog(SettingsActivity.this);
+                mAlertDialog = DialogUtil.getLoadingDialog(SettingsActivity.this);
                 mAlertDialog.show();
             }
 

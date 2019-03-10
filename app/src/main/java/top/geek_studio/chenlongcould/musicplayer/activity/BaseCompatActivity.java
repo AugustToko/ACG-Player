@@ -1,6 +1,6 @@
 /*
  * ************************************************************
- * 文件：MyBaseCompatActivity.java  模块：app  项目：MusicPlayer
+ * 文件：BaseCompatActivity.java  模块：app  项目：MusicPlayer
  * 当前修改时间：2019年01月17日 17:31:46
  * 上次修改时间：2019年01月17日 17:28:59
  * 作者：chenlongcould
@@ -46,10 +46,13 @@ import top.geek_studio.chenlongcould.geeklibrary.widget.GkToolbar;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
+/**
+ * @author chenlongcould
+ */
 @SuppressLint("Registered")
-public abstract class MyBaseCompatActivity extends AppCompatActivity implements IStyle {
+public abstract class BaseCompatActivity extends AppCompatActivity implements IStyle {
 
-    private static final String TAG = "MyBaseCompatActivity";
+    private static final String TAG = "BaseCompatActivity";
 
     /**
      * @deprecated use {@link GkToolbar}
@@ -115,7 +118,7 @@ public abstract class MyBaseCompatActivity extends AppCompatActivity implements 
     }
 
     /**
-     * init permission, every Activity extends {@link MyBaseCompatActivity}
+     * init permission, every Activity extends {@link BaseCompatActivity}
      */
     public boolean initPermission() {
         if (ContextCompat.checkSelfPermission(this,
@@ -128,6 +131,8 @@ public abstract class MyBaseCompatActivity extends AppCompatActivity implements 
     }
 
     /**
+     * Get Activity's TAG like {@link BaseCompatActivity#TAG}
+     *
      * @return ACTIVITY'S TAG
      */
     abstract public String getActivityTAG();
@@ -200,7 +205,9 @@ public abstract class MyBaseCompatActivity extends AppCompatActivity implements 
      * @param menuItem the menuItem the icon will set AlphaAnimation by {@link ValueAnimator}
      */
     public void setMenuIconAlphaAnimation(@Nullable MenuItem menuItem, boolean visibility) {
-        if (menuItem == null) return;
+        if (menuItem == null) {
+            return;
+        }
 
         final ValueAnimator animator = new ValueAnimator();
         animator.setDuration(Values.DefaultValues.ANIMATION_DURATION);

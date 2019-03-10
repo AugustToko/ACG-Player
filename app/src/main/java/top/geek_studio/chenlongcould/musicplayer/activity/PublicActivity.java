@@ -41,7 +41,10 @@ import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
-public final class PublicActivity extends MyBaseCompatActivity {
+/**
+ * @author chenlongcould
+ */
+public final class PublicActivity extends BaseCompatActivity {
 
     public static final String TAG = "PublicActivity";
 
@@ -72,7 +75,6 @@ public final class PublicActivity extends MyBaseCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_add_recent);
-
         mRecyclerView = findViewById(R.id.activity_add_recent_recycler);
         mAppBarLayout = findViewById(R.id.app_bar_layout);
         mToolbar = findViewById(R.id.toolbar);
@@ -161,7 +163,9 @@ public final class PublicActivity extends MyBaseCompatActivity {
                                 observableEmitter.onNext(0);
                             }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                                     .subscribe(i -> {
-                                        if (i != 0) return;
+                                        if (i != 0) {
+                                            return;
+                                        }
                                         adapter = new MyRecyclerAdapter(PublicActivity.this, mMusicItemList);
                                         mRecyclerView.setAdapter(adapter);
                                     });
@@ -224,7 +228,9 @@ public final class PublicActivity extends MyBaseCompatActivity {
                         observableEmitter.onNext(0);
                     }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                             .subscribe(i -> {
-                                if (i != 0) return;
+                                if (i != 0) {
+                                    return;
+                                }
                                 adapter = new MyRecyclerAdapter(PublicActivity.this, mMusicItemList);
                                 mRecyclerView.setAdapter(adapter);
                             });
@@ -269,6 +275,7 @@ public final class PublicActivity extends MyBaseCompatActivity {
 
                 }
                 break;
+                default:
             }
             return true;
         });
@@ -282,7 +289,9 @@ public final class PublicActivity extends MyBaseCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if (mDisposable != null && !mDisposable.isDisposed()) mDisposable.dispose();
+        if (mDisposable != null && !mDisposable.isDisposed()) {
+            mDisposable.dispose();
+        }
         super.onDestroy();
     }
 

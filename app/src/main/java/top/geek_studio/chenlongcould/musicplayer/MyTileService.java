@@ -40,6 +40,9 @@ import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
+/**
+ * @author chenlongcould
+ */
 @RequiresApi(Build.VERSION_CODES.N)
 public final class MyTileService extends TileService {
 
@@ -213,7 +216,10 @@ public final class MyTileService extends TileService {
         getQsTile().setIcon(Icon.createWithResource(this, R.drawable.ic_audiotrack_24px));
         getQsTile().updateTile();
 
-        if (mDisposable != null && !mDisposable.isDisposed()) mDisposable.dispose();
+        if (mDisposable != null && !mDisposable.isDisposed()) {
+            mDisposable.dispose();
+        }
+
         if (Data.HAS_BIND) {
             try {
                 unbindService(Data.sServiceConnection);

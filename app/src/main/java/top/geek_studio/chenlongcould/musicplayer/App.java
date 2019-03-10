@@ -31,6 +31,7 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import io.reactivex.disposables.Disposable;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.fragment.AlbumListFragment;
@@ -114,41 +115,12 @@ public final class App extends Application {
 
     public static final String SHORTCUT_RANDOM = "SHORTCUT_RANDOM";
 
-    /**
-     * 动态添加
-     */
-    @RequiresApi(api = Build.VERSION_CODES.N_MR1)
-    private void getNewShortcutInfo() {
-
-        Intent randomPlay = new Intent(this, MainActivity.class);
-        randomPlay.setAction(Intent.ACTION_MAIN);
-        randomPlay.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        randomPlay.putExtra("shortcut_type", SHORTCUT_RANDOM);
-
-        ShortcutInfo shortcut = new ShortcutInfo.Builder(this, SHORT_CUT_ID_1)
-                .setShortLabel(getString(R.string.random_play))
-                .setLongLabel(getString(R.string.random_play))
-                .setIcon(Icon.createWithResource(this, R.drawable.ic_shuffle_blue_24dp))
-                .setIntent(randomPlay)
-                .build();
-
-//        ShortcutInfo shortcut2 = new ShortcutInfo.Builder(this, SHORT_CUT_ID_2)
-//                .setShortLabel("csdn")
-//                .setLongLabel("第二个")
-//                .setIcon(Icon.createWithResource(this, R.drawable.ic_play_arrow_black_24dp))
-//                .setIntent(new Intent(Intent.ACTION_VIEW,
-//                        Uri.parse("https://www.csdn.com/")))
-//                .build();
-//
-//        ShortcutInfo shortcut3 = new ShortcutInfo.Builder(this, SHORT_CUT_ID_3)
-//                .setShortLabel("github")
-//                .setLongLabel("第三个")
-//                .setIcon(Icon.createWithResource(this, R.drawable.ic_play_arrow_black_24dp))
-//                .setIntent(new Intent(Intent.ACTION_VIEW,
-//                        Uri.parse("https://www.github.com/")))
-//                .build();
-
-        mShortcutManager.setDynamicShortcuts(Collections.singletonList(shortcut));
+    public static void clearDisposable() {
+        for (Disposable disposable : Data.sDisposables) {
+            if (disposable != null && !disposable.isDisposed()) {
+                disposable.dispose();
+            }
+        }
     }
 
     /**
@@ -197,5 +169,42 @@ public final class App extends Application {
         }
 
         super.onTrimMemory(level);
+    }
+
+    /**
+     * 动态添加
+     */
+    @RequiresApi(api = Build.VERSION_CODES.N_MR1)
+    private void getNewShortcutInfo() {
+
+        Intent randomPlay = new Intent(this, MainActivity.class);
+        randomPlay.setAction(Intent.ACTION_MAIN);
+        randomPlay.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        randomPlay.putExtra("SHORTCUT_TYPE", SHORTCUT_RANDOM);
+
+        ShortcutInfo shortcut = new ShortcutInfo.Builder(this, SHORT_CUT_ID_1)
+                .setShortLabel(getString(R.string.random_play))
+                .setLongLabel(getString(R.string.random_play))
+                .setIcon(Icon.createWithResource(this, R.drawable.ic_shuffle_blue_24dp))
+                .setIntent(randomPlay)
+                .build();
+
+//        ShortcutInfo shortcut2 = new ShortcutInfo.Builder(this, SHORT_CUT_ID_2)
+//                .setShortLabel("csdn")
+//                .setLongLabel("第二个")
+//                .setIcon(Icon.createWithResource(this, R.drawable.ic_play_arrow_black_24dp))
+//                .setIntent(new Intent(Intent.ACTION_VIEW,
+//                        Uri.parse("https://www.csdn.com/")))
+//                .build();
+//
+//        ShortcutInfo shortcut3 = new ShortcutInfo.Builder(this, SHORT_CUT_ID_3)
+//                .setShortLabel("github")
+//                .setLongLabel("第三个")
+//                .setIcon(Icon.createWithResource(this, R.drawable.ic_play_arrow_black_24dp))
+//                .setIntent(new Intent(Intent.ACTION_VIEW,
+//                        Uri.parse("https://www.github.com/")))
+//                .build();
+
+        mShortcutManager.setDynamicShortcuts(Collections.singletonList(shortcut));
     }
 }

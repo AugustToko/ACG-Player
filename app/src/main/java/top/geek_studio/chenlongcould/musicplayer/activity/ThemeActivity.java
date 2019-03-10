@@ -46,6 +46,7 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import top.geek_studio.chenlongcould.geeklibrary.DialogUtil;
 import top.geek_studio.chenlongcould.geeklibrary.theme.Theme;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeUtils;
@@ -57,7 +58,10 @@ import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityThemeBindin
 import top.geek_studio.chenlongcould.musicplayer.utils.MyThemeDBHelper;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
-public final class ThemeActivity extends MyBaseCompatActivity {
+/**
+ * @author chenlongcould
+ */
+public final class ThemeActivity extends BaseCompatActivity {
 
     public static final String TAG = "ThemeActivity";
 
@@ -85,6 +89,7 @@ public final class ThemeActivity extends MyBaseCompatActivity {
                     return true;
                 case R.id.navigation_notifications:
                     return true;
+                default:
             }
             return false;
         }
@@ -166,6 +171,9 @@ public final class ThemeActivity extends MyBaseCompatActivity {
                     preferences.apply();
                     noteCheck();
                 }
+                break;
+
+                default:
             }
             return true;
         });
@@ -224,7 +232,7 @@ public final class ThemeActivity extends MyBaseCompatActivity {
                             final String documentId = cursor.getString(cursor.getColumnIndexOrThrow("document_id"));
                             final String path = Environment.getExternalStorageDirectory().getPath() + File.separatorChar + documentId.split(":")[1];
 
-                            final AlertDialog load = Utils.Ui.getLoadingDialog(ThemeActivity.this, "Loading...");
+                            final AlertDialog load = DialogUtil.getLoadingDialog(ThemeActivity.this, "Loading...");
                             load.show();
 
                             mDisposable = Observable.create((ObservableOnSubscribe<Theme>) emitter -> {
@@ -234,10 +242,11 @@ public final class ThemeActivity extends MyBaseCompatActivity {
                                 final File themeFile = new File(themeDir.getAbsolutePath() + File.separatorChar + name);
                                 final Theme theme = ThemeUtils.fileToTheme(themeFile);
 
-                                if (theme != null)
+                                if (theme != null) {
                                     emitter.onNext(theme);
-                                else
+                                } else {
                                     Utils.IO.delFolder(themeFile.getAbsolutePath());
+                                }
 
                                 cursor.close();
                             }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
@@ -263,7 +272,7 @@ public final class ThemeActivity extends MyBaseCompatActivity {
 
             @Override
             protected void onPreExecute() {
-                mDialog = Utils.Ui.getLoadingDialog(ThemeActivity.this, "Loading...");
+                mDialog = DialogUtil.getLoadingDialog(ThemeActivity.this, "Loading...");
                 mDialog.show();
             }
 
@@ -272,15 +281,21 @@ public final class ThemeActivity extends MyBaseCompatActivity {
 
                 final File themeDir = getExternalFilesDir(ThemeStore.DIR_NAME);
 
-                if (themeDir == null) return null;
+                if (themeDir == null) {
+                    return null;
+                }
 
                 final File defTheme1 = new File(getExternalFilesDir(ThemeStore.DIR_NAME).getAbsolutePath() + File.separatorChar + "0_def");
                 final File defTheme2 = new File(getExternalFilesDir(ThemeStore.DIR_NAME).getAbsolutePath() + File.separatorChar + "01_def");
 
                 //load default themes
                 if (!defTheme1.exists() || defTheme1.isFile() || !defTheme2.exists() || defTheme2.isFile()) {
-                    if (defTheme1.exists()) defTheme1.delete();
-                    if (defTheme2.exists()) defTheme2.delete();
+                    if (defTheme1.exists()) {
+                        defTheme1.delete();
+                    }
+                    if (defTheme2.exists()) {
+                        defTheme2.delete();
+                    }
                     runOnUiThread(() -> Toast.makeText(ThemeActivity.this, "Loading Default Theme...", Toast.LENGTH_SHORT).show());
                     File defFile1 = new File(getExternalFilesDir(ThemeStore.DIR_NAME).getAbsolutePath() + File.separatorChar + "content_1.zip");
                     File defFile2 = new File(getExternalFilesDir(ThemeStore.DIR_NAME).getAbsolutePath() + File.separatorChar + "content_2.zip");
@@ -326,108 +341,6 @@ public final class ThemeActivity extends MyBaseCompatActivity {
                 //转换File 为 Theme
                 for (File f : fileArrayList) {
                     mThemes.add(ThemeUtils.fileToTheme(f));
-//                        Log.d(TAG, "doInBackground: " + f.getPath());
-//                        if (f.isDirectory()) {
-//                            final File detailText = new File(f.getPath() + File.separatorChar + ThemeStore.DETAIL_FILE_NAME);
-//
-//                            themeId++;
-//
-//                            //temp
-//                            String title = "null";
-//                            String date = "null";
-//                            String nav_name = "null";
-//                            String author = "null";
-//                            String support_area = "null";
-//                            String primary_color = "null";
-//                            String accent_color = "null";
-//                            String primary_color_dark = "null";
-//                            String thumbnail = "null";
-//                            String select = "null";
-//                            String path = f.getPath();
-//
-//                            final BufferedReader bufferedReader = new BufferedReader(new FileReader(detailText));
-//                            String line;
-//
-//                            int items = 0;
-//                            while ((line = bufferedReader.readLine()) != null) {
-//                                if (line.contains(ThemeStore.ThemeColumns.AUTHOR)) {
-//                                    author = line.split(":")[1];
-//                                    Log.d(TAG, "doInBackground: " + author + " @ " + detailText.getPath());
-//                                    items++;
-//                                }
-//
-//                                if (line.contains(ThemeStore.ThemeColumns.TITLE)) {
-//                                    title = line.split(":")[1];
-//                                    Log.d(TAG, "doInBackground: " + title + " @ " + detailText.getPath());
-//                                    items++;
-//                                }
-//
-//                                if (line.contains(ThemeStore.ThemeColumns.NAV_NAME)) {
-//                                    nav_name = line.split(":")[1];
-//                                    Log.d(TAG, "doInBackground: " + nav_name + " @ " + detailText.getPath());
-//                                    items++;
-//                                }
-//
-//                                if (line.contains(ThemeStore.ThemeColumns.THUMBNAIL)) {
-//                                    thumbnail = f.getPath() + File.separatorChar + line.split(":")[1];
-//                                    Log.d(TAG, "doInBackground: " + thumbnail + " @ " + detailText.getPath());
-//                                    items++;
-//                                }
-//
-//                                if (line.contains(ThemeStore.ThemeColumns.SUPPORT_AREA)) {
-//                                    support_area = line.split(":")[1];
-//                                    Log.d(TAG, "doInBackground: " + support_area + " @ " + detailText.getPath());
-//                                    items++;
-//                                }
-//
-//                                if (line.contains(ThemeStore.ThemeColumns.PRIMARY_COLOR)) {
-//                                    primary_color = line.split(":")[1];
-//                                    Log.d(TAG, "doInBackground: " + primary_color);
-//                                    items++;
-//                                }
-//
-//                                if (line.contains(ThemeStore.ThemeColumns.PRIMARY_COLOR_DARK)) {
-//                                    primary_color_dark = line.split(":")[1];
-//                                    Log.d(TAG, "doInBackground: " + select);
-//                                    items++;
-//                                }
-//
-//                                if (line.contains(ThemeStore.ThemeColumns.ACCENT_COLOR)) {
-//                                    accent_color = line.split(":")[1];
-//                                    Log.d(TAG, "doInBackground: " + select);
-//                                    items++;
-//                                }
-//
-//                                if (line.contains(ThemeStore.ThemeColumns.DATE)) {
-//                                    date = line.split(":")[1];
-//                                    Log.d(TAG, "doInBackground: " + date);
-//                                    items++;
-//                                }
-//
-//                                if (line.contains(ThemeStore.ThemeColumns.SELECT)) {
-//                                    select = line.split(":")[1];
-//                                    Log.d(TAG, "doInBackground: " + select);
-//                                    items++;
-//                                }
-//                            }
-//
-//                            if (items >= ThemeStore.MIN_ITEM) {
-//                                Log.d(TAG, "doInBackground: add!");
-//                                final Theme theme = new Theme.Builder(themeId)
-//                                        .setAccentColor(accent_color)
-//                                        .setAuthor(author)
-//                                        .setDate(date)
-//                                        .setNavName(nav_name)
-//                                        .setPath(path).setPrimaryColorDark(primary_color_dark)
-//                                        .setSupportArea(support_area)
-//                                        .setSelect(select)
-//                                        .setTitle(title)
-//                                        .setThumbnail(thumbnail)
-//                                        .setPrimaryColor(primary_color)
-//                                        .build();
-//                                mThemes.add(theme);
-//                            }
-//                        }
                 }
 
                 return null;
