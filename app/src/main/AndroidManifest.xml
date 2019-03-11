@@ -15,7 +15,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="top.geek_studio.chenlongcould.musicplayer.broadcasts" />
+    <uses-permission android:name="top.geek_studio.chenlongcould.musicplayer.broadcast" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="top.geek_studio.chenlongcould.musicplayer.Service.MyMusicService" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -135,25 +135,25 @@
             android:name=".broadcast.ReceiverOnMusicPlay"
             android:enabled="true"
             android:exported="true"
-            android:permission="top.geek_studio.chenlongcould.musicplayer.broadcasts">
+            android:permission="top.geek_studio.chenlongcould.musicplayer.broadcast">
             <intent-filter>
-                <action android:name="top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPlay" />
+                <action android:name="top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay" />
             </intent-filter>
         </receiver>
         <receiver
             android:name=".broadcast.ReceiverOnMusicPause"
             android:enabled="true"
             android:exported="true"
-            android:permission="top.geek_studio.chenlongcould.musicplayer.broadcasts">
+            android:permission="top.geek_studio.chenlongcould.musicplayer.broadcast">
             <intent-filter>
-                <action android:name="top.geek_studio.chenlongcould.musicplayer.broadcasts.ReceiverOnMusicPause" />
+                <action android:name="top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPause" />
             </intent-filter>
         </receiver>
         <receiver
             android:name=".broadcast.MyHeadSetPlugReceiver"
             android:enabled="true"
             android:exported="true"
-            android:permission="top.geek_studio.chenlongcould.musicplayer.broadcasts">
+            android:permission="top.geek_studio.chenlongcould.musicplayer.broadcast">
             <intent-filter>
                 <action android:name="android.intent.action.HEADSET_PLUG" />
             </intent-filter>

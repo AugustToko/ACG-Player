@@ -38,6 +38,9 @@ import top.geek_studio.chenlongcould.musicplayer.database.Detail;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
+/**
+ * @author chenlongcould
+ */
 public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
     @SuppressWarnings("unused")

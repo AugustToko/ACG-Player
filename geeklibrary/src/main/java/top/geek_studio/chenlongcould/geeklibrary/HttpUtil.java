@@ -16,6 +16,9 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
+/**
+ * @author chenlongcould
+ */
 public final class HttpUtil {
 
     /**
@@ -26,7 +29,9 @@ public final class HttpUtil {
                 .retryOnConnectionFailure(false)
                 .connectTimeout(5000, TimeUnit.MILLISECONDS)
                 .build();
-        Request request = new Request.Builder().url(address).build();       //传入地址
-        okHttpClient.newCall(request).enqueue(callback);                          //处理服务器响应
+        //传入地址
+        Request request = new Request.Builder().url(address).build();
+        //处理服务器响应
+        okHttpClient.newCall(request).enqueue(callback);
     }
 }

@@ -1056,7 +1056,7 @@ public final class Utils {
                 while ((entry = zis.getNextEntry()) != null) {
 
                     try {
-                        Log.i("Unzip: ", "=" + entry);
+                        Log.i("unzip: ", "=" + entry);
 
                         int count;
                         byte data[] = new byte[BUFFER];

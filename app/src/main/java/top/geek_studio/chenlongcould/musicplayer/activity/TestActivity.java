@@ -25,6 +25,5 @@ public final class TestActivity extends Activity {
         setContentView(R.layout.activity_test);
         GkToolbar toolbar = findViewById(R.id.gk_toolbar);
         toolbar.setTitle("?????");
-
     }
 }

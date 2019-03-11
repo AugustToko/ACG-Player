@@ -91,6 +91,9 @@ import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 import top.geek_studio.chenlongcould.musicplayer.thread_pool.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
+/**
+ * @author chenlongcould
+ */
 public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
 
     private static final String TAG = "MyRecyclerAdapter";
@@ -537,13 +540,13 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
                 Log.d(TAG, "albumLoader: the album id DEFAULT_DB is ability, loading def");
                 loadFromDefaultDB(albumPath[0], imageView, index);
             } else {
-                imageView.post(() -> imageView.post(() -> GlideApp.with(imageView)
+                imageView.post(() -> GlideApp.with(imageView)
                         .load(R.drawable.default_album_art)
                         .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
                         .centerCrop()
                         .override(100, 100)
                         .diskCacheStrategy(DiskCacheStrategy.NONE)
-                        .into(imageView)));
+                        .into(imageView));
             }
         } else {
             Log.d(TAG, "albumLoader: the album id DEFAULT_DB is NOT ability, loading from network");
@@ -556,7 +559,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
                         File file = new File(custom.getAlbumArt());
 
                         //判断CUSTOM_DB下albumArt是否存在
-                        if (custom.getAlbumArt().equals("null") && !file.exists()) {
+                        if ("null".equals(custom.getAlbumArt()) && !file.exists()) {
 
                             String mayPath = ifExists(albumId);
                             if (mayPath != null) {

@@ -23,28 +23,36 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+/**
+ * @author chenlongcould
+ */
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class FileUtil {
 
 
     private static final String TAG = "FileUtil";
 
-    public static void Unzip(String zipFile, String targetDir) {
-        int BUFFER = 4096;          //这里缓冲区我们使用4KB，
-        String strEntry;            //保存每个zip的条目名称
+    public static void unzip(String zipFile, String targetDir) {
+        //这里缓冲区我们使用4KB，
+        int buffer = 4096;
+        //保存每个zip的条目名称
+        String strEntry;
 
         try {
-            BufferedOutputStream dest;          //缓冲输出流
+            //缓冲输出流
+            BufferedOutputStream dest;
             FileInputStream fis = new FileInputStream(zipFile);
             ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis));
-            ZipEntry entry;         //每个zip条目的实例
+            //每个zip条目的实例
+            ZipEntry entry;
 
             while ((entry = zis.getNextEntry()) != null) {
 
                 try {
-                    Log.i("Unzip: ", "=" + entry);
+                    Log.i("unzip: ", "=" + entry);
 
                     int count;
-                    byte data[] = new byte[BUFFER];
+                    byte data[] = new byte[buffer];
                     strEntry = entry.getName();
 
                     File entryFile = new File(targetDir + strEntry);
@@ -57,8 +65,8 @@ public class FileUtil {
                     if (!entry.isDirectory()) {
                         FileOutputStream fos = new FileOutputStream(entryFile);
 
-                        dest = new BufferedOutputStream(fos, BUFFER);
-                        while ((count = zis.read(data, 0, BUFFER)) != -1) {
+                        dest = new BufferedOutputStream(fos, buffer);
+                        while ((count = zis.read(data, 0, buffer)) != -1) {
                             dest.write(data, 0, count);
                         }
                         dest.flush();
@@ -80,9 +88,11 @@ public class FileUtil {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void delFolder(String folderPath) {
         try {
-            delAllFile(folderPath); //删除完里面所有内容
+            //删除完里面所有内容
+            delAllFile(folderPath);
             File myFilePath = new File(folderPath);
-            myFilePath.delete(); //删除空文件夹
+            //删除空文件夹
+            myFilePath.delete();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -110,8 +120,10 @@ public class FileUtil {
                 temp.delete();
             }
             if (temp.isDirectory()) {
-                delAllFile(path + "/" + aTempList);//先删除文件夹里面的文件
-                delFolder(path + "/" + aTempList);//再删除空文件夹
+                //先删除文件夹里面的文件
+                delAllFile(path + "/" + aTempList);
+                //再删除空文件夹
+                delFolder(path + "/" + aTempList);
                 flag = true;
             }
         }
@@ -140,16 +152,19 @@ public class FileUtil {
     private static void zip(ZipOutputStream zos, File file, String path) throws IOException {
         // 首先判断是文件，还是文件夹，文件直接写入目录进入点，文件夹则遍历
         if (file.isDirectory()) {
-            ZipEntry entry = new ZipEntry(path + File.separator);// 文件夹的目录进入点必须以名称分隔符结尾
+            // 文件夹的目录进入点必须以名称分隔符结尾
+            ZipEntry entry = new ZipEntry(path + File.separator);
             zos.putNextEntry(entry);
             File[] files = file.listFiles();
             for (File x : files) {
                 zip(zos, x, path + File.separator + x.getName());
             }
         } else {
-            FileInputStream fis = new FileInputStream(file);// 目录进入点的名字是文件在压缩文件中的路径
+            // 目录进入点的名字是文件在压缩文件中的路径
+            FileInputStream fis = new FileInputStream(file);
             ZipEntry entry = new ZipEntry(path);
-            zos.putNextEntry(entry);// 建立一个目录进入点
+            // 建立一个目录进入点
+            zos.putNextEntry(entry);
 
             int len = 0;
             byte[] buf = new byte[1024];
@@ -158,7 +173,8 @@ public class FileUtil {
             }
             zos.flush();
             fis.close();
-            zos.closeEntry();// 关闭当前目录进入点，将输入流移动下一个目录进入点
+            // 关闭当前目录进入点，将输入流移动下一个目录进入点
+            zos.closeEntry();
         }
     }
 

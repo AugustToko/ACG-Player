@@ -25,6 +25,9 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+/**
+ * @author chenlongcould
+ */
 public class DownloadUtil {
     private static final String TAG = "DownloadUtil";
     private static DownloadUtil downloadUtil;
@@ -88,14 +91,16 @@ public class DownloadUtil {
                     listener.onDownloadFailed(e);
                 } finally {
                     try {
-                        if (is != null)
+                        if (is != null) {
                             is.close();
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     try {
-                        if (fos != null)
+                        if (fos != null) {
                             fos.close();
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -106,16 +111,22 @@ public class DownloadUtil {
 
     public interface OnDownloadListener {
         /**
+         * callback if download success
+         *
          * @param file 下载成功后的文件
          */
         void onDownloadSuccess(File file);
 
         /**
+         * callback download progress
+         *
          * @param progress 下载进度
          */
         void onDownloading(int progress);
 
         /**
+         * callback if download failed
+         *
          * @param e 下载异常信息
          */
         void onDownloadFailed(Exception e);

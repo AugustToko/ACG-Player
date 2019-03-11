@@ -28,6 +28,9 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Hashtable;
 
+/**
+ * @author chenlongcould
+ */
 public class QRHelper {
 
     public static String getResult(Bitmap mBitmap) {
@@ -68,7 +71,8 @@ public class QRHelper {
 
     private static Result scan(Bitmap mBitmap) {
         Hashtable<DecodeHintType, String> hints = new Hashtable<DecodeHintType, String>();
-        hints.put(DecodeHintType.CHARACTER_SET, "utf-8"); // 设置二维码内容的编码
+        // 设置二维码内容的编码
+        hints.put(DecodeHintType.CHARACTER_SET, "utf-8");
         Bitmap scanBitmap = Bitmap.createBitmap(mBitmap);
 
         int px[] = new int[scanBitmap.getWidth() * scanBitmap.getHeight()];

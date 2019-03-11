@@ -25,6 +25,9 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
+/**
+ * @author chenlongcould
+ */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class OpenFile {
 
@@ -37,7 +40,9 @@ public class OpenFile {
     public static Intent openFile(Activity context, String filePath) {
 
         File file = new File(filePath);
-        if (!file.exists()) return null;
+        if (!file.exists()) {
+            return null;
+        }
         /* 取得扩展名 */
         String end = file.getName().substring(file.getName().lastIndexOf(".") + 1, file.getName().length()).toLowerCase();
         /* 依扩展名的类型决定MimeType */
@@ -116,14 +121,21 @@ public class OpenFile {
         return intent;
     }
 
-    //Android获取一个用于打开APK文件的intent
+    /**
+     * getApkIntent
+     *
+     * @param activity activity
+     * @param param    param
+     *
+     * @return the intent
+     */
     @RequiresApi(api = Build.VERSION_CODES.O)
     public static Intent getApkFileIntent(Activity activity, String param) {
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        // 7.0+以上版本
-        Uri apkUri = FileProvider.getUriForFile(activity, AUT, new File(param));  //包名.fileprovider
+        //包名.FileProvider
+        Uri apkUri = FileProvider.getUriForFile(activity, AUT, new File(param));
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
 
@@ -142,7 +154,15 @@ public class OpenFile {
         }
     }
 
-    //Android获取一个用于打开VIDEO文件的intent
+
+    /**
+     * Android获取一个用于打开VIDEO文件的intent
+     *
+     * @param context context
+     * @param param   param
+     *
+     * @return the intent
+     */
     public static Intent getVideoFileIntent(Context context, String param) {
 
         Intent intent = new Intent("android.intent.action.VIEW");
@@ -155,7 +175,15 @@ public class OpenFile {
         return intent;
     }
 
-    //Android获取一个用于打开AUDIO文件的intent
+
+    /**
+     * Android获取一个用于打开AUDIO文件的intent
+     *
+     * @param context context
+     * @param param   param
+     *
+     * @return the intent
+     */
     public static Intent getAudioFileIntent(Context context, String param) {
 
         Intent intent = new Intent("android.intent.action.VIEW");
@@ -168,7 +196,9 @@ public class OpenFile {
         return intent;
     }
 
-    //Android获取一个用于打开Html文件的intent
+    /**
+     * Android获取一个用于打开Html文件的intent
+     */
     public static Intent getHtmlFileIntent(Context context, String param) {
 
         Uri uri = Uri.parse(param).buildUpon().encodedAuthority("com.android.htmlfileprovider").scheme("content").encodedPath(param).build();
@@ -177,7 +207,9 @@ public class OpenFile {
         return intent;
     }
 
-    //Android获取一个用于打开图片文件的intent
+    /**
+     * Android获取一个用于打开图片文件的intent
+     */
     public static Intent getImageFileIntent(Context context, String param) {
 
         Intent intent = new Intent("android.intent.action.VIEW");
@@ -189,7 +221,9 @@ public class OpenFile {
         return intent;
     }
 
-    //Android获取一个用于打开PPT文件的intent
+    /**
+     * Android获取一个用于打开PPT文件的intent
+     */
     public static Intent getPptFileIntent(Context context, String param) {
 
         Intent intent = new Intent("android.intent.action.VIEW");
@@ -201,7 +235,9 @@ public class OpenFile {
         return intent;
     }
 
-    //Android获取一个用于打开Excel文件的intent
+    /**
+     * Android获取一个用于打开Excel文件的intent
+     */
     public static Intent getExcelFileIntent(Context context, String param) {
 
         Intent intent = new Intent("android.intent.action.VIEW");
@@ -213,7 +249,9 @@ public class OpenFile {
         return intent;
     }
 
-    //Android获取一个用于打开Word文件的intent
+    /**
+     * Android获取一个用于打开Word文件的intent
+     */
     public static Intent getWordFileIntent(Context context, String param) {
 
         Intent intent = new Intent("android.intent.action.VIEW");
@@ -225,7 +263,9 @@ public class OpenFile {
         return intent;
     }
 
-    //Android获取一个用于打开CHM文件的intent
+    /**
+     * Android获取一个用于打开CHM文件的intent
+     */
     public static Intent getChmFileIntent(Context context, String param) {
 
         Intent intent = new Intent("android.intent.action.VIEW");
@@ -237,7 +277,9 @@ public class OpenFile {
         return intent;
     }
 
-    //Android获取一个用于打开文本文件的intent
+    /**
+     * Android获取一个用于打开文本文件的intent
+     */
     public static Intent getTextFileIntent(String param, boolean paramBoolean) {
 
         Intent intent = new Intent("android.intent.action.VIEW");
@@ -253,7 +295,9 @@ public class OpenFile {
         return intent;
     }
 
-    //Android获取一个用于打开PDF文件的intent
+    /**
+     * Android获取一个用于打开PDF文件的intent
+     */
     public static Intent getPdfFileIntent(Context context, String param) {
 
         Intent intent = new Intent("android.intent.action.VIEW");

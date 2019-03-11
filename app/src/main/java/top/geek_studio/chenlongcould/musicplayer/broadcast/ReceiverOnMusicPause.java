@@ -19,6 +19,9 @@ import android.util.Log;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
+/**
+ * @author chenlongcould
+ */
 public final class ReceiverOnMusicPause extends BroadcastReceiver {
 
     @Override
