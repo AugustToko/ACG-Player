@@ -112,7 +112,7 @@ public final class PublicActivity extends BaseCompatActivity {
                 case PlayListFragment.ACTION_FAVOURITE: {
                     mToolbar.setTitle(getResources().getString(R.string.my_favourite));
 
-                    PlayListItem playListItem = MusicUtil.getFavoritesPlaylist(this);
+                    final PlayListItem playListItem = MusicUtil.getFavoritesPlaylist(this);
 
                     if (playListItem != null) {
                         int id = playListItem.getId();

@@ -75,32 +75,25 @@ public final class App extends Application {
 
         LitePal.initialize(this);
 
-        if (getProcessName(this).equals(getPackageName())) {
+        if (getProcessName(this).equals(getPackageName() + ".Common")) {
 
-//            // TODO: 2019/1/6 ver
-            //noinspection StatementWithEmptyBody
             if (PreferenceManager.getDefaultSharedPreferences(this).getLong(VERSION_CODE, -1) != VER_CODE) {
 //                Toast.makeText(this, "建议手动清除该应用程序数据...", Toast.LENGTH_SHORT).show();
                 Utils.IO.delFolder(getExternalFilesDir(ThemeStore.DIR_NAME).getAbsolutePath());
             }
 
             //add version code
-            final SharedPreferences.Editor ver_edit = PreferenceManager.getDefaultSharedPreferences(this).edit();
-            ver_edit.putLong(VERSION_CODE, VER_CODE);
-            ver_edit.apply();
-
-//            //set language
-//            Resources resources = getResources();
-//            DisplayMetrics dm = resources.getDisplayMetrics();
-//            Configuration config = resources.getConfiguration();
-//            config.locale = Locale.getDefault();
-//            resources.updateConfiguration(config, dm);
+            final SharedPreferences.Editor verEdit = PreferenceManager.getDefaultSharedPreferences(this).edit();
+            verEdit.putLong(VERSION_CODE, VER_CODE);
+            verEdit.apply();
 
             Values.Style.DETAIL_BACKGROUND = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_BLUR);
 
             //init favourite
-            if (MusicUtil.getFavoritesPlaylist(this) == null)
+            if (MusicUtil.getFavoritesPlaylist(this) == null) {
+                Log.d(TAG, "onCreate: CREATING FAV_LIST");
                 PlayListsUtil.createPlaylist(this, getString(R.string.favorites));
+            }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
                 mShortcutManager = getSystemService(ShortcutManager.class);
@@ -131,6 +124,7 @@ public final class App extends Application {
      * 此方法可以提高一半启动时间。
      *
      * @param context 上下文环境对象
+     *
      * @return 获取此进程的进程名
      */
     private String getProcessName(@NonNull Context context) {

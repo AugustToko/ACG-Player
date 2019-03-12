@@ -63,6 +63,8 @@ public interface Values {
 
         String USE_NET_WORK_ALBUM = "USE_NET_WORK_ALBUM";
 
+        String FAVOURITE_LIST_ID = "FAVOURITE_LIST_ID";
+
         /**
          * 1 is MUSIC TAB
          * 2 is ALBUM TAB

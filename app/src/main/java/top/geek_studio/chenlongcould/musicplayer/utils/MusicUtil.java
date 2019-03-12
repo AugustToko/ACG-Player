@@ -263,7 +263,6 @@ public class MusicUtil {
         return playlist.name != null && playlist.name.equals(context.getString(R.string.favorites));
     }
 
-    @Nullable
     public static PlayListItem getFavoritesPlaylist(@NonNull final Context context) {
         return PlaylistLoader.getPlaylist(context, context.getString(R.string.favorites));
     }

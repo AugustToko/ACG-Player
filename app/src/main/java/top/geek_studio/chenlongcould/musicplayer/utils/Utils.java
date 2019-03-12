@@ -13,7 +13,6 @@ package top.geek_studio.chenlongcould.musicplayer.utils;
 
 import android.animation.Animator;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -79,10 +78,12 @@ import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.graphics.ColorUtils;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
 import top.geek_studio.chenlongcould.geeklibrary.widget.GkToolbar;
@@ -95,6 +96,7 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
+import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -489,9 +491,9 @@ public final class Utils {
         }
 
         /**
-         *
          * @param context context
          * @param aTitle  theTitle
+         *
          * @return {@link AlertDialog.Builder}
          *
          * @deprecated use {@see top.geek_studio.chenlongcould.geeklibrary.DialogUtil#getLoadingDialog(Context, String...) }
@@ -545,6 +547,7 @@ public final class Utils {
          * 获取导航栏高度
          *
          * @param context context
+         *
          * @return nav height
          */
         public static int getNavheight(final Context context) {
@@ -748,6 +751,7 @@ public final class Utils {
          * 判断颜色是不是亮色
          *
          * @param color
+         *
          * @return bool
          */
         public static boolean isColorLight(@ColorInt int color) {
@@ -759,6 +763,7 @@ public final class Utils {
          *
          * @param toolbar toolbar
          * @param color   color -> {@link ColorInt}
+         *
          * @deprecated use {@link GkToolbar#setOverlayColor(int)}
          */
         public static void setOverToolbarColor(Toolbar toolbar, @ColorInt int color) {
@@ -878,14 +883,16 @@ public final class Utils {
                     }
 
                     final int result = PlayListsUtil.createPlaylist(context, et.getText().toString());
-                    if (result != -1)
+
+                    if (result != -1) {
                         PlayListsUtil.addToPlaylist(context, item, result, false);
+                    }
+
                     dialog.dismiss();
                     Data.sPlayListItems.add(0, new PlayListItem(result, et.getText().toString()));
 
-                    //update data
-                    // TODO: 2019/2/2 让PlayListFragment被动加载，而非主动去刷新
-                    ((MainActivity) Data.sActivities.get(0)).getPlayListFragment().getPlayListAdapter().notifyItemInserted(0);
+                    final Intent intent = new Intent(PlayListFragment.ItemChange.ACTION_REFRESH_LIST);
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 });
                 b2.show();
             });
@@ -895,7 +902,11 @@ public final class Utils {
             builder.setSingleChoiceItems(context.getContentResolver()
                             .query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null),
                     -1, MediaStore.Audio.Playlists.NAME, (dialog, which) -> {
-                        PlayListsUtil.addToPlaylist(context, item, Data.sPlayListItems.get(which).getId(), false);
+                        if (which == 0) {
+                            PlayListsUtil.addToPlaylist(context, item, MusicUtil.getFavoritesPlaylist(context).getId(), false);
+                        } else {
+                            PlayListsUtil.addToPlaylist(context, item, Data.sPlayListItems.get(which).getId(), false);
+                        }
                         dialog.dismiss();
                     });
             builder.show();
@@ -905,20 +916,20 @@ public final class Utils {
         /**
          * add into music List
          *
-         * @param activity MainActivity
-         * @param items    MusicItems
+         * @param context MainActivity
+         * @param items   MusicItems
          */
-        public static void addListDialog(Context activity, ArrayList<MusicItem> items) {
-            final Resources resources = activity.getResources();
+        public static void addListDialog(Context context, ArrayList<MusicItem> items) {
+            final Resources resources = context.getResources();
 
-            final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(activity);
+            final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
             builder.setTitle(resources.getString(R.string.add_to_playlist));
 
             builder.setNegativeButton(resources.getString(R.string.new_list), (dialog, which) -> {
-                final androidx.appcompat.app.AlertDialog.Builder b2 = new androidx.appcompat.app.AlertDialog.Builder(activity);
+                final androidx.appcompat.app.AlertDialog.Builder b2 = new androidx.appcompat.app.AlertDialog.Builder(context);
                 b2.setTitle(resources.getString(R.string.enter_name));
 
-                final EditText et = new EditText(activity);
+                final EditText et = new EditText(context);
                 b2.setView(et);
 
                 et.setHint(resources.getString(R.string.enter_name));
@@ -926,28 +937,32 @@ public final class Utils {
                 b2.setNegativeButton(resources.getString(R.string.cancel), null);
                 b2.setPositiveButton(resources.getString(R.string.sure), (dialog1, which1) -> {
                     if (TextUtils.isEmpty(et.getText())) {
-                        Toast.makeText(activity, "name can not empty!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "name can not empty!", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
-                    final int result = PlayListsUtil.createPlaylist(activity, et.getText().toString());
+                    final int result = PlayListsUtil.createPlaylist(context, et.getText().toString());
                     if (result != -1)
-                        PlayListsUtil.addToPlaylist(activity, items, result, false);
+                        PlayListsUtil.addToPlaylist(context, items, result, false);
                     dialog.dismiss();
                     Data.sPlayListItems.add(0, new PlayListItem(result, et.getText().toString()));
 
-//                    //update data
-//                    activity.getPlayListFragment().getPlayListAdapter().notifyItemInserted(0);
+                    final Intent intent = new Intent(PlayListFragment.ItemChange.ACTION_REFRESH_LIST);
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 });
                 b2.show();
             });
 
             builder.setCancelable(true);
 
-            builder.setSingleChoiceItems(activity.getContentResolver()
+            builder.setSingleChoiceItems(context.getContentResolver()
                             .query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null),
                     -1, MediaStore.Audio.Playlists.NAME, (dialog, which) -> {
-                        PlayListsUtil.addToPlaylist(activity, items, Data.sPlayListItems.get(which).getId(), false);
+                        if (which == 0) {
+                            PlayListsUtil.addToPlaylist(context, items, MusicUtil.getFavoritesPlaylist(context).getId(), false);
+                        } else {
+                            PlayListsUtil.addToPlaylist(context, items, Data.sPlayListItems.get(which).getId(), false);
+                        }
                         dialog.dismiss();
                     });
             builder.show();

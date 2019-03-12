@@ -409,7 +409,6 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
             return true;
         });
 
-
         return holder;
     }
 
@@ -785,6 +784,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .into(imageView));
         }
+
     }
 
     /**
