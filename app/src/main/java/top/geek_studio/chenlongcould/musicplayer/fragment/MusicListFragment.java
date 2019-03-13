@@ -34,51 +34,48 @@ import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentMusicListBi
 
 public final class MusicListFragment extends Fragment {
 
-    public static final String TAG = "MusicListFragment";
+	public static final String TAG = "MusicListFragment";
+	@SuppressWarnings("unused")
+	private static boolean sIsScrolling = false;
+	private FragmentMusicListBinding mMusicListBinding;
+	private MyRecyclerAdapter adapter;
 
-    private FragmentMusicListBinding mMusicListBinding;
+	private MainActivity mActivity;
 
-    @SuppressWarnings("unused")
-    private static boolean sIsScrolling = false;
+	//实例化一个fragment
+	public static MusicListFragment newInstance() {
+		return new MusicListFragment();
+	}
 
-    private MyRecyclerAdapter adapter;
+	@Override
+	public void onAttach(@NotNull Context context) {
+		super.onAttach(context);
+		mActivity = (MainActivity) getActivity();
+	}
 
-    private MainActivity mActivity;
+	@Override
+	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+		mMusicListBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_list, container, false);
+		mMusicListBinding.includeRecycler.recyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
+		mMusicListBinding.includeRecycler.recyclerView.setHasFixedSize(true);
+		adapter = new MyRecyclerAdapter(mActivity, Data.sMusicItems, PreferenceManager.getDefaultSharedPreferences(getContext()).getInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 0));
+		mMusicListBinding.includeRecycler.recyclerView.setAdapter(adapter);
 
-    //实例化一个fragment
-    public static MusicListFragment newInstance() {
-        return new MusicListFragment();
-    }
+		return mMusicListBinding.getRoot();
+	}
 
-    @Override
-    public void onAttach(@NotNull Context context) {
-        super.onAttach(context);
-        mActivity = (MainActivity) getActivity();
-    }
+	@Override
+	public void setUserVisibleHint(boolean isVisibleToUser) {
+		if (Data.sMusicItems.size() > 0 && adapter != null && !isVisibleToUser)
+			adapter.clearSelection();
+	}
 
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mMusicListBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_list, container, false);
-        mMusicListBinding.includeRecycler.recyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
-        mMusicListBinding.includeRecycler.recyclerView.setHasFixedSize(true);
-        adapter = new MyRecyclerAdapter(mActivity, Data.sMusicItems, PreferenceManager.getDefaultSharedPreferences(getContext()).getInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 0));
-        mMusicListBinding.includeRecycler.recyclerView.setAdapter(adapter);
+	public final MyRecyclerAdapter getAdapter() {
+		return adapter;
+	}
 
-        return mMusicListBinding.getRoot();
-    }
-
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        if (Data.sMusicItems.size() > 0 && adapter != null && !isVisibleToUser)
-            adapter.clearSelection();
-    }
-
-    public final MyRecyclerAdapter getAdapter() {
-        return adapter;
-    }
-
-    public FragmentMusicListBinding getMusicListBinding() {
-        return mMusicListBinding;
-    }
+	public FragmentMusicListBinding getMusicListBinding() {
+		return mMusicListBinding;
+	}
 
 }

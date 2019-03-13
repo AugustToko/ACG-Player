@@ -22,68 +22,68 @@ import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 
 public class MyCardView extends CardView {
-    private static final String TAG = "MyCardView";
+	private static final String TAG = "MyCardView";
 
-    float moveX = 0;
-    float moveY = 0;
+	float moveX = 0;
+	float moveY = 0;
 
-    float mRawX;
+	float mRawX;
 
-    //追踪速度关键的类。没有这个这篇文章将毫无意义
-    VelocityTracker velocityTracker;
+	//追踪速度关键的类。没有这个这篇文章将毫无意义
+	VelocityTracker velocityTracker;
 
-    public MyCardView(@NonNull Context context) {
-        super(context);
-    }
+	public MyCardView(@NonNull Context context) {
+		super(context);
+	}
 
-    public MyCardView(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-    }
+	public MyCardView(@NonNull Context context, @Nullable AttributeSet attrs) {
+		super(context, attrs);
+	}
 
-    public MyCardView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
+	public MyCardView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+		super(context, attrs, defStyleAttr);
+	}
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        Log.d(TAG, "onTouchEvent: on touch");
-        int action = event.getAction();
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		Log.d(TAG, "onTouchEvent: on touch");
+		int action = event.getAction();
 
-        switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                moveX = event.getX();
-                moveY = event.getY();
+		switch (action) {
+			case MotionEvent.ACTION_DOWN:
+				moveX = event.getX();
+				moveY = event.getY();
 
-                mRawX = event.getRawX();
+				mRawX = event.getRawX();
 
 //                velocityTracker = VelocityTracker.obtain();
 
-                break;
-            case MotionEvent.ACTION_MOVE:
+				break;
+			case MotionEvent.ACTION_MOVE:
 
 //                velocityTracker.addMovement(event);
 //                velocityTracker.computeCurrentVelocity(1000);
 
-                setTranslationX(getX() + (event.getX() - moveX));
+				setTranslationX(getX() + (event.getX() - moveX));
 //                setTranslationY(getY() + (event.getY() - moveY));
 
-                Log.d(TAG, "onTouchEvent: getx:" + getX() + " event.getx: " + event.getX() + " pointX: " + moveX + " transX: " + getTranslationX());
+				Log.d(TAG, "onTouchEvent: getx:" + getX() + " event.getx: " + event.getX() + " pointX: " + moveX + " transX: " + getTranslationX());
 
-                break;
+				break;
 
-            case MotionEvent.ACTION_CANCEL:
-                break;
-            case MotionEvent.ACTION_UP:
+			case MotionEvent.ACTION_CANCEL:
+				break;
+			case MotionEvent.ACTION_UP:
 
-                break;
-        }
+				break;
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    @Override
-    public boolean performClick() {
-        Log.d(TAG, "performClick: do");
-        return super.performClick();
-    }
+	@Override
+	public boolean performClick() {
+		Log.d(TAG, "performClick: do");
+		return super.performClick();
+	}
 }

@@ -40,196 +40,192 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.Models.PlayListItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.PlayListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentPlaylistBinding;
+import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 
+/**
+ * @author chenlongcould
+ */
 public final class PlayListFragment extends Fragment {
 
-    public static final String TAG = "PlayListFragment";
+	public static final String TAG = "PlayListFragment";
 
-    public static final String ACTION_ADD_RECENT = "add recent";
-    public static final String ACTION_FAVOURITE = "favourite music";
-    public static final String ACTION_HISTORY = "play history";
-    public static final String ACTION_TRASH_CAN = "trash can";
-    public static final String ACTION_PLAY_LIST_ITEM = "play_list_item";
+	public static final String ACTION_ADD_RECENT = "add recent";
+	public static final String ACTION_FAVOURITE = "favourite music";
+	public static final String ACTION_HISTORY = "play history";
+	public static final String ACTION_TRASH_CAN = "trash can";
+	public static final String ACTION_PLAY_LIST_ITEM = "play_list_item";
+	public static final int RE_LOAD_PLAY_LIST = 80001;
+	private LocalBroadcastManager mBroadcastManager;
+	private FragmentPlaylistBinding mPlayListBinding;
+	private MainActivity mMainActivity;
+	private Handler mHandler;
+	private PlayListAdapter mPlayListAdapter;
+	private BroadcastReceiver mRefreshReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			mPlayListAdapter.notifyDataSetChanged();
+		}
+	};
 
-    private LocalBroadcastManager mBroadcastManager;
-    private BroadcastReceiver mRefreshReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mPlayListAdapter.notifyDataSetChanged();
-        }
-    };
+	/**
+	 * 实例化 {@link PlayListFragment}
+	 */
+	public static PlayListFragment newInstance() {
+		return new PlayListFragment();
+	}
 
+	/**
+	 * receive broadcast
+	 *
+	 * @see PlayListFragment#mBroadcastManager
+	 * @see PlayListFragment.ItemChange#ACTION_REFRESH_LIST
+	 */
+	private void receiveItemChange() {
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(ItemChange.ACTION_REFRESH_LIST);
+		mBroadcastManager.registerReceiver(mRefreshReceiver, intentFilter);
+	}
 
-    public static final int RE_LOAD_PLAY_LIST = 80001;
+	@Override
+	public void onAttach(@NonNull Context context) {
+		super.onAttach(context);
+		mMainActivity = (MainActivity) getActivity();
+		mHandler = new NotLeakHandler(this);
 
-    private FragmentPlaylistBinding mPlayListBinding;
+		mBroadcastManager = LocalBroadcastManager.getInstance(context);
+		receiveItemChange();
+	}
 
-    private MainActivity mMainActivity;
+	/**
+	 * load data
+	 */
+	private void initData() {
+		final PlayListItem item = MusicUtil.getFavoritesPlaylist(mMainActivity);
 
-    private Handler mHandler;
+		Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+			Data.sPlayListItems.clear();
+			Cursor cursor = mMainActivity.getContentResolver()
+					.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null);
+			if (cursor != null && cursor.moveToFirst()) {
+				do {
+					final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists._ID));
+					if (item != null && item.getId() == id) {
+						//匹配到喜爱列表 跳过
+						continue;
+					}
+					final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.NAME));
+					final String filePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATA));
+					final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATE_ADDED));
 
-    private PlayListAdapter mPlayListAdapter;
+					// TODO: 2018/12/10 M3U FILE
+					final File file = new File(filePath + ".m3u");
 
-    /**
-     * 实例化 {@link PlayListFragment}
-     */
-    public static PlayListFragment newInstance() {
-        return new PlayListFragment();
-    }
+					Data.sPlayListItems.add(new PlayListItem(id, name, filePath, addTime));
+				} while (cursor.moveToNext());
+				cursor.close();
+			}
 
-    /**
-     * receive broadcast
-     *
-     * @see PlayListFragment#mBroadcastManager
-     * @see PlayListFragment.ItemChange#ACTION_REFRESH_LIST
-     */
-    private void receiveItemChange() {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(ItemChange.ACTION_REFRESH_LIST);
-        mBroadcastManager.registerReceiver(mRefreshReceiver, intentFilter);
-    }
+			//done
+			emitter.onNext(0);
+		}).subscribeOn(Schedulers.newThread())
+				.observeOn(AndroidSchedulers.mainThread())
+				.subscribe(integer -> {
+					if (integer == 0) {
 
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        mMainActivity = (MainActivity) getActivity();
-        mHandler = new NotLeakHandler(this);
+						//load recyclerView
+						mPlayListAdapter = new PlayListAdapter(mMainActivity, Data.sPlayListItems);
+						mPlayListBinding.recyclerView.setAdapter(mPlayListAdapter);
+					}
+				});
+		Data.sDisposables.add(disposable);
+	}
 
-        mBroadcastManager = LocalBroadcastManager.getInstance(context);
-        receiveItemChange();
-    }
+	@Override
+	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+		mPlayListBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_playlist, container, false);
 
-    /**
-     * load data
-     */
-    private void initData() {
-        final PlayListItem item = MusicUtil.getFavoritesPlaylist(mMainActivity);
+		mPlayListBinding.addRecent.setOnClickListener(v -> {
+			Intent intent = new Intent(mMainActivity, PublicActivity.class);
+			intent.putExtra(PublicActivity.INTENT_START_BY, ACTION_ADD_RECENT);
+			startActivity(intent);
+		});
 
-        Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
-            Data.sPlayListItems.clear();
-            Cursor cursor = mMainActivity.getContentResolver()
-                    .query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null);
-            if (cursor != null && cursor.moveToFirst()) {
-                do {
-                    final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists._ID));
-                    if (item != null && item.getId() == id) {
-                        //匹配到喜爱列表 跳过
-                        continue;
-                    }
-                    final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.NAME));
-                    final String filePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATA));
-                    final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATE_ADDED));
+		mPlayListBinding.favourite.setOnClickListener(v -> {
+			Intent intent = new Intent(mMainActivity, PublicActivity.class);
+			intent.putExtra(PublicActivity.INTENT_START_BY, ACTION_FAVOURITE);
+			startActivity(intent);
+		});
 
-                    // TODO: 2018/12/10 M3U FILE
-                    final File file = new File(filePath + ".m3u");
+		mPlayListBinding.history.setOnClickListener(v -> {
+			Intent intent = new Intent(mMainActivity, PublicActivity.class);
+			intent.putExtra(PublicActivity.INTENT_START_BY, ACTION_HISTORY);
+			startActivity(intent);
+		});
 
-                    Data.sPlayListItems.add(new PlayListItem(id, name, filePath, addTime));
-                } while (cursor.moveToNext());
-                cursor.close();
-            }
+		mPlayListBinding.trashCan.setOnClickListener(v -> {
+			Intent intent = new Intent(mMainActivity, PublicActivity.class);
+			intent.putExtra(PublicActivity.INTENT_START_BY, ACTION_TRASH_CAN);
+			startActivity(intent);
+		});
 
-            //done
-            emitter.onNext(0);
-        }).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(integer -> {
-                    if (integer == 0) {
+		mPlayListBinding.recentName.setTextColor(ContextCompat.getColor(mMainActivity, R.color.title_color));
+		mPlayListBinding.favouriteName.setTextColor(ContextCompat.getColor(mMainActivity, R.color.title_color));
+		mPlayListBinding.historyName.setTextColor(ContextCompat.getColor(mMainActivity, R.color.title_color));
 
-                        //load recyclerView
-                        mPlayListAdapter = new PlayListAdapter(mMainActivity, Data.sPlayListItems);
-                        mPlayListBinding.recyclerView.setAdapter(mPlayListAdapter);
-                    }
-                });
-        Data.sDisposables.add(disposable);
-    }
+		mPlayListBinding.recyclerView.setLayoutManager(new LinearLayoutManager(mMainActivity));
+		mPlayListBinding.recyclerView.setHasFixedSize(true);
+		mPlayListBinding.recyclerView.addItemDecoration(Data.getItemDecoration(mMainActivity));
 
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mPlayListBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_playlist, container, false);
+		initData();
+		return mPlayListBinding.getRoot();
+	}
 
-        mPlayListBinding.addRecent.setOnClickListener(v -> {
-            Intent intent = new Intent(mMainActivity, PublicActivity.class);
-            intent.putExtra(PublicActivity.INTENT_START_BY, ACTION_ADD_RECENT);
-            startActivity(intent);
-        });
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		mBroadcastManager.unregisterReceiver(mRefreshReceiver);
+	}
 
-        mPlayListBinding.favourite.setOnClickListener(v -> {
-            Intent intent = new Intent(mMainActivity, PublicActivity.class);
-            intent.putExtra(PublicActivity.INTENT_START_BY, ACTION_FAVOURITE);
-            startActivity(intent);
-        });
+	public PlayListAdapter getPlayListAdapter() {
+		return mPlayListAdapter;
+	}
 
-        mPlayListBinding.history.setOnClickListener(v -> {
-            Intent intent = new Intent(mMainActivity, PublicActivity.class);
-            intent.putExtra(PublicActivity.INTENT_START_BY, ACTION_HISTORY);
-            startActivity(intent);
-        });
+	public Handler getHandler() {
+		return mHandler;
+	}
 
-        mPlayListBinding.trashCan.setOnClickListener(v -> {
-            Intent intent = new Intent(mMainActivity, PublicActivity.class);
-            intent.putExtra(PublicActivity.INTENT_START_BY, ACTION_TRASH_CAN);
-            startActivity(intent);
-        });
+	/**
+	 * for intent use
+	 */
+	public interface ItemChange {
+		/**
+		 * for broadcasts
+		 */
+		String ACTION_REFRESH_LIST = "ACTION_REFRESH_LIST";
+	}
 
-        mPlayListBinding.recentName.setTextColor(ContextCompat.getColor(mMainActivity, R.color.title_color));
-        mPlayListBinding.favouriteName.setTextColor(ContextCompat.getColor(mMainActivity, R.color.title_color));
-        mPlayListBinding.historyName.setTextColor(ContextCompat.getColor(mMainActivity, R.color.title_color));
+	static class NotLeakHandler extends Handler {
+		@SuppressWarnings("unused")
+		private WeakReference<PlayListFragment> mWeakReference;
 
-        mPlayListBinding.recyclerView.setLayoutManager(new LinearLayoutManager(mMainActivity));
-        mPlayListBinding.recyclerView.setHasFixedSize(true);
-        mPlayListBinding.recyclerView.addItemDecoration(Data.getItemDecoration(mMainActivity));
+		NotLeakHandler(PlayListFragment fragment) {
+			mWeakReference = new WeakReference<>(fragment);
+		}
 
-        initData();
-        return mPlayListBinding.getRoot();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mBroadcastManager.unregisterReceiver(mRefreshReceiver);
-    }
-
-    public PlayListAdapter getPlayListAdapter() {
-        return mPlayListAdapter;
-    }
-
-    public Handler getHandler() {
-        return mHandler;
-    }
-
-    static class NotLeakHandler extends Handler {
-        @SuppressWarnings("unused")
-        private WeakReference<PlayListFragment> mWeakReference;
-
-        NotLeakHandler(PlayListFragment fragment) {
-            mWeakReference = new WeakReference<>(fragment);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case RE_LOAD_PLAY_LIST: {
-                    mWeakReference.get().initData();
-                    mWeakReference.get().getPlayListAdapter().notifyDataSetChanged();
-                }
-            }
-        }
-    }
-
-    /**
-     * for intent use
-     */
-    public interface ItemChange {
-        /**
-         * for broadcasts
-         * */
-        String ACTION_REFRESH_LIST = "ACTION_REFRESH_LIST";
-    }
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+				case RE_LOAD_PLAY_LIST: {
+					mWeakReference.get().initData();
+					mWeakReference.get().getPlayListAdapter().notifyDataSetChanged();
+				}
+			}
+		}
+	}
 }

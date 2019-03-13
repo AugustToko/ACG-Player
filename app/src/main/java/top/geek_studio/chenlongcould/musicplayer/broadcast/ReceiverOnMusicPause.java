@@ -24,10 +24,10 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
  */
 public final class ReceiverOnMusicPause extends BroadcastReceiver {
 
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        Log.d(Values.TAG_UNIVERSAL_ONE, "onReceive: on pause");
-        ReceiverOnMusicPlay.pauseMusic();
-        Utils.Ui.setPlayButtonNowPause();
-    }
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		Log.d(Values.TAG_UNIVERSAL_ONE, "onReceive: on pause");
+		ReceiverOnMusicPlay.pauseMusic();
+		Utils.Ui.setPlayButtonNowPause();
+	}
 }

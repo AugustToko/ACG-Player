@@ -21,13 +21,13 @@ import org.jetbrains.annotations.NotNull;
 
 @GlideModule
 public final class MyAppGlideModule extends AppGlideModule {
-    @Override
-    public void applyOptions(@NotNull Context context, @NotNull GlideBuilder builder) {
-    }
+	@Override
+	public void applyOptions(@NotNull Context context, @NotNull GlideBuilder builder) {
+	}
 
-    //    针对V4用户可以提升速度
-    @Override
-    public boolean isManifestParsingEnabled() {
-        return false;
-    }
+	//    针对V4用户可以提升速度
+	@Override
+	public boolean isManifestParsingEnabled() {
+		return false;
+	}
 }

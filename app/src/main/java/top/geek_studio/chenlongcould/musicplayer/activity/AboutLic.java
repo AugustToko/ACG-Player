@@ -35,87 +35,87 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
  */
 public final class AboutLic extends BaseCompatActivity {
 
-    private static final String TAG = "AboutLic";
+	private static final String TAG = "AboutLic";
 
-    private Button close;
+	private Button close;
 
-    private Disposable mDisposable;
+	private Disposable mDisposable;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_about_lic);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_about_lic);
 
-        ((Toolbar) findViewById(R.id.toolbar)).setNavigationOnClickListener(v -> onBackPressed());
+		((Toolbar) findViewById(R.id.toolbar)).setNavigationOnClickListener(v -> onBackPressed());
 
-        close = findViewById(R.id.close_button_activity_lic);
+		close = findViewById(R.id.close_button_activity_lic);
 
-        close.setEnabled(true);
-        close.setClickable(true);
-        close.setOnClickListener(v -> finish());
+		close.setEnabled(true);
+		close.setClickable(true);
+		close.setOnClickListener(v -> finish());
 
-        final TextView textView = findViewById(R.id.show_lic_activity_lic);
+		final TextView textView = findViewById(R.id.show_lic_activity_lic);
 
-        final AlertDialog load = Utils.Ui.getLoadingDialog(this, "Loading...");
-        load.show();
+		final AlertDialog load = Utils.Ui.getLoadingDialog(this, "Loading...");
+		load.show();
 
-        Observable.create((ObservableOnSubscribe<String>) observableEmitter -> {
-            try {
-                InputStream inputStream = getAssets().open("Licenses");
-                byte[] b = new byte[inputStream.available()];
-                if (inputStream.read(b) != -1) {
-                    observableEmitter.onNext(new String(b));
-                    observableEmitter.onComplete();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                observableEmitter.onError(new Throwable("Load Licence Error"));
-            }
-        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<String>() {
-            @Override
-            public void onSubscribe(Disposable disposable) {
-                mDisposable = disposable;
-            }
+		Observable.create((ObservableOnSubscribe<String>) observableEmitter -> {
+			try {
+				InputStream inputStream = getAssets().open("Licenses");
+				byte[] b = new byte[inputStream.available()];
+				if (inputStream.read(b) != -1) {
+					observableEmitter.onNext(new String(b));
+					observableEmitter.onComplete();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+				observableEmitter.onError(new Throwable("Load Licence Error"));
+			}
+		}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<String>() {
+			@Override
+			public void onSubscribe(Disposable disposable) {
+				mDisposable = disposable;
+			}
 
-            @Override
-            public void onNext(String data) {
-                textView.setText(data);
-                load.dismiss();
-            }
+			@Override
+			public void onNext(String data) {
+				textView.setText(data);
+				load.dismiss();
+			}
 
-            @Override
-            public void onError(Throwable throwable) {
-                load.dismiss();
-                throwable.printStackTrace();
-                Toast.makeText(AboutLic.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
-            }
+			@Override
+			public void onError(Throwable throwable) {
+				load.dismiss();
+				throwable.printStackTrace();
+				Toast.makeText(AboutLic.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+			}
 
-            @Override
-            public void onComplete() {
+			@Override
+			public void onComplete() {
 
-            }
-        });
-    }
+			}
+		});
+	}
 
-    @Override
-    public String getActivityTAG() {
-        return TAG;
-    }
+	@Override
+	public String getActivityTAG() {
+		return TAG;
+	}
 
-    @Override
-    public void inflateCommonMenu() {
+	@Override
+	public void inflateCommonMenu() {
 
-    }
+	}
 
-    @Override
-    public void inflateChooseMenu() {
+	@Override
+	public void inflateChooseMenu() {
 
-    }
+	}
 
-    @Override
-    protected void onStop() {
-        mDisposable.dispose();
-        super.onStop();
-    }
+	@Override
+	protected void onStop() {
+		mDisposable.dispose();
+		super.onStop();
+	}
 
 }

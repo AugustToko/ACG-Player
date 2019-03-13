@@ -1,7 +1,7 @@
 // IMuiscService.aidl
 package top.geek_studio.chenlongcould.musicplayer;
 
-import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
+import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 
 interface IMuiscService {
     void playMusic();

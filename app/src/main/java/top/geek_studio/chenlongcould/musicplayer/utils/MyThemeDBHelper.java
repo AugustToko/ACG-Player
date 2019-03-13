@@ -21,33 +21,33 @@ import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
 
 public class MyThemeDBHelper extends SQLiteOpenHelper {
 
-    public static final String TAG = "MyThemeDBHelper";
-    private static final String CREATE_THEME = "create table " + ThemeStore.TABLE + " ("
-            + "id integer primary key autoincrement, "
-            + "author text, "
-            + "title text, "
-            + "nav_name text, "
-            + "thumbnail text, "
-            + "support_area text, "
-            + "primary_color text, "
-            + "date text)";
-    private Context mContext;
-    private String mDBName;
+	public static final String TAG = "MyThemeDBHelper";
+	private static final String CREATE_THEME = "create table " + ThemeStore.TABLE + " ("
+			+ "id integer primary key autoincrement, "
+			+ "author text, "
+			+ "title text, "
+			+ "nav_name text, "
+			+ "thumbnail text, "
+			+ "support_area text, "
+			+ "primary_color text, "
+			+ "date text)";
+	private Context mContext;
+	private String mDBName;
 
-    public MyThemeDBHelper(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
-        super(context, name, factory, version);
-        mContext = context;
-        mDBName = name;
-    }
+	public MyThemeDBHelper(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
+		super(context, name, factory, version);
+		mContext = context;
+		mDBName = name;
+	}
 
-    @Override
-    public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATE_THEME);
-        Log.d(TAG, "onCreate: create db: " + mDBName + " done");
-    }
+	@Override
+	public void onCreate(SQLiteDatabase db) {
+		db.execSQL(CREATE_THEME);
+		Log.d(TAG, "onCreate: create db: " + mDBName + " done");
+	}
 
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+	@Override
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
-    }
+	}
 }

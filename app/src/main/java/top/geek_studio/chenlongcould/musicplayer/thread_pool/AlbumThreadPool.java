@@ -21,36 +21,36 @@ import java.util.concurrent.TimeUnit;
  */
 public final class AlbumThreadPool {
 
-    private static final int KEEP_ALIVE = 10;
-    private static AlbumThreadPool mInstance = null;
-    @SuppressWarnings("FieldCanBeLocal")
-    private static int MAX_POOL_SIZE;
-    @SuppressWarnings("FieldCanBeLocal")
-    private BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>();
-    private ThreadPoolExecutor mThreadPoolExec;
+	private static final int KEEP_ALIVE = 10;
+	private static AlbumThreadPool mInstance = null;
+	@SuppressWarnings("FieldCanBeLocal")
+	private static int MAX_POOL_SIZE;
+	@SuppressWarnings("FieldCanBeLocal")
+	private BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>();
+	private ThreadPoolExecutor mThreadPoolExec;
 
-    private AlbumThreadPool() {
-        int coreNum = Runtime.getRuntime().availableProcessors();
-        MAX_POOL_SIZE = coreNum * 2;
-        mThreadPoolExec = new ThreadPoolExecutor(
-                coreNum,
-                MAX_POOL_SIZE,
-                KEEP_ALIVE,
-                TimeUnit.SECONDS,
-                workQueue);
-    }
+	private AlbumThreadPool() {
+		int coreNum = Runtime.getRuntime().availableProcessors();
+		MAX_POOL_SIZE = coreNum * 2;
+		mThreadPoolExec = new ThreadPoolExecutor(
+				coreNum,
+				MAX_POOL_SIZE,
+				KEEP_ALIVE,
+				TimeUnit.SECONDS,
+				workQueue);
+	}
 
-    public static synchronized void post(Runnable runnable) {
-        if (mInstance == null) {
-            mInstance = new AlbumThreadPool();
-        }
-        mInstance.mThreadPoolExec.execute(runnable);
-    }
+	public static synchronized void post(Runnable runnable) {
+		if (mInstance == null) {
+			mInstance = new AlbumThreadPool();
+		}
+		mInstance.mThreadPoolExec.execute(runnable);
+	}
 
-    public static void finish() {
-        if (mInstance != null) {
-            mInstance.mThreadPoolExec.shutdown();
-            mInstance = null;
-        }
-    }
+	public static void finish() {
+		if (mInstance != null) {
+			mInstance.mThreadPoolExec.shutdown();
+			mInstance = null;
+		}
+	}
 }

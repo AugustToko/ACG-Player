@@ -25,32 +25,32 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 
 public class PublicFragment extends Fragment {
 
-    //实例化一个fragment
-    public static PublicFragment newInstance(int index) {
-        PublicFragment myFragment = new PublicFragment();
-        Bundle bundle = new Bundle();
-        //传递参数
-        bundle.putInt(Values.INDEX, index);
-        myFragment.setArguments(bundle);
-        return myFragment;
-    }
+	//实例化一个fragment
+	public static PublicFragment newInstance(int index) {
+		PublicFragment myFragment = new PublicFragment();
+		Bundle bundle = new Bundle();
+		//传递参数
+		bundle.putInt(Values.INDEX, index);
+		myFragment.setArguments(bundle);
+		return myFragment;
+	}
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_public_fragment_layout, container, false);
+	@Nullable
+	@Override
+	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.fragment_public_fragment_layout, container, false);
 
-        TextView textView = view.findViewById(R.id.text_view_frag);
+		TextView textView = view.findViewById(R.id.text_view_frag);
 
-        if (this.getArguments() != null) {
-            textView.setText(String.valueOf(this.getArguments().getInt(Values.INDEX, -1)));
-        }
+		if (this.getArguments() != null) {
+			textView.setText(String.valueOf(this.getArguments().getInt(Values.INDEX, -1)));
+		}
 
-        return view;
-    }
+		return view;
+	}
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-    }
+	@Override
+	public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+	}
 }

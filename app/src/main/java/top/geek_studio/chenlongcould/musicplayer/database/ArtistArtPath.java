@@ -10,35 +10,35 @@ import org.litepal.crud.LitePalSupport;
  */
 public class ArtistArtPath extends LitePalSupport {
 
-    private int mArtistId;
+	private int mArtistId;
 
-    @Column(defaultValue = "null")
-    private String mArtistArt;
+	@Column(defaultValue = "null")
+	private String mArtistArt;
 
-    @Column(defaultValue = "false")
-    private boolean mForceUse;
+	@Column(defaultValue = "false")
+	private boolean mForceUse;
 
-    public int getArtistId() {
-        return mArtistId;
-    }
+	public int getArtistId() {
+		return mArtistId;
+	}
 
-    public void setArtistId(int artistId) {
-        mArtistId = artistId;
-    }
+	public void setArtistId(int artistId) {
+		mArtistId = artistId;
+	}
 
-    public String getArtistArt() {
-        return mArtistArt;
-    }
+	public String getArtistArt() {
+		return mArtistArt;
+	}
 
-    public void setArtistArt(String artistArt) {
-        mArtistArt = artistArt;
-    }
+	public void setArtistArt(String artistArt) {
+		mArtistArt = artistArt;
+	}
 
-    public boolean isForceUse() {
-        return mForceUse;
-    }
+	public boolean isForceUse() {
+		return mForceUse;
+	}
 
-    public void setForceUse(boolean forceUse) {
-        mForceUse = forceUse;
-    }
+	public void setForceUse(boolean forceUse) {
+		mForceUse = forceUse;
+	}
 }

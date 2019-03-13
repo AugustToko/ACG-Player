@@ -36,147 +36,147 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.geeklibrary.VisibleOrGone;
 import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.Models.ArtistItem;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter2ArtistList;
+import top.geek_studio.chenlongcould.musicplayer.model.ArtistItem;
 
 public final class ArtistListFragment extends Fragment implements VisibleOrGone {
 
-    public static final String TAG = "ArtistListFragment";
+	public static final String TAG = "ArtistListFragment";
 
-    /**
-     * 用于检测此Fragment是否已经创建
-     */
-    public static boolean VIEW_HAS_LOAD = false;
+	/**
+	 * 用于检测此Fragment是否已经创建
+	 */
+	public static boolean VIEW_HAS_LOAD = false;
 
-    private RecyclerView mRecyclerView;
+	private RecyclerView mRecyclerView;
 
-    private MainActivity mMainActivity;
+	private MainActivity mMainActivity;
 
-    private MyRecyclerAdapter2ArtistList mAdapter2ArtistList;
+	private MyRecyclerAdapter2ArtistList mAdapter2ArtistList;
 
-    //实例化一个fragment
-    public static ArtistListFragment newInstance() {
-        return new ArtistListFragment();
-    }
+	//实例化一个fragment
+	public static ArtistListFragment newInstance() {
+		return new ArtistListFragment();
+	}
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mMainActivity = (MainActivity) getActivity();
-    }
+	@Override
+	public void onAttach(Context context) {
+		super.onAttach(context);
+		mMainActivity = (MainActivity) getActivity();
+	}
 
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_album_list, container, false);
-    }
+	@Override
+	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+		return inflater.inflate(R.layout.fragment_album_list, container, false);
+	}
 
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        if (isVisibleToUser) {
-            if (!VIEW_HAS_LOAD || Data.sArtistItems.size() == 0) {
-                initArtistData();          //getData
-                VIEW_HAS_LOAD = true;
-            }
-        }
-    }
+	@Override
+	public void setUserVisibleHint(boolean isVisibleToUser) {
+		if (isVisibleToUser) {
+			if (!VIEW_HAS_LOAD || Data.sArtistItems.size() == 0) {
+				initArtistData();          //getData
+				VIEW_HAS_LOAD = true;
+			}
+		}
+	}
 
-    @Override
-    public void onDestroyView() {
-        VIEW_HAS_LOAD = false;
-        super.onDestroyView();
-    }
+	@Override
+	public void onDestroyView() {
+		VIEW_HAS_LOAD = false;
+		super.onDestroyView();
+	}
 
-    private void initArtistData() {
-        Log.d(TAG, "initArtistData: log");
+	private void initArtistData() {
+		Log.d(TAG, "initArtistData: log");
 
 //        final AlertDialog load = Utils.Ui.getLoadingDialog(mMainActivity, "Loading");
 //        load.show();
 
-        Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
-            if (Data.sArtistItems.size() == 0) {
-                Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, null, null, null, null);
-                if (cursor != null) {
-                    cursor.moveToFirst();
+		Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+			if (Data.sArtistItems.size() == 0) {
+				Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, null, null, null, null);
+				if (cursor != null) {
+					cursor.moveToFirst();
 
-                    do {
-                        String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
-                        String albumId = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID));
-                        Data.sArtistItems.add(new ArtistItem(albumName, Integer.parseInt(albumId)));
-                        Data.sArtistItemsBackUp.add(new ArtistItem(albumName, Integer.parseInt(albumId)));
-                    } while (cursor.moveToNext());
+					do {
+						String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
+						String albumId = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID));
+						Data.sArtistItems.add(new ArtistItem(albumName, Integer.parseInt(albumId)));
+						Data.sArtistItemsBackUp.add(new ArtistItem(albumName, Integer.parseInt(albumId)));
+					} while (cursor.moveToNext());
 
-                    cursor.close();
-                }   //initData
-            }
+					cursor.close();
+				}   //initData
+			}
 
-            emitter.onComplete();
-        }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
-                .safeSubscribe(new Observer<Integer>() {
-                    @Override
-                    public void onSubscribe(Disposable disposable) {
-                        Data.sDisposables.add(disposable);
-                    }
+			emitter.onComplete();
+		}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+				.safeSubscribe(new Observer<Integer>() {
+					@Override
+					public void onSubscribe(Disposable disposable) {
+						Data.sDisposables.add(disposable);
+					}
 
-                    @Override
-                    public void onNext(Integer result) {
-                    }
+					@Override
+					public void onNext(Integer result) {
+					}
 
-                    @Override
-                    public void onError(Throwable throwable) {
+					@Override
+					public void onError(Throwable throwable) {
 
-                    }
+					}
 
-                    @Override
-                    public void onComplete() {
-                        setRecyclerViewData();
-                        mMainActivity.getMainBinding().toolBar.setSubtitle(Data.sArtistItems.size() + " Artists");
-                    }
-                });
-    }
+					@Override
+					public void onComplete() {
+						setRecyclerViewData();
+						mMainActivity.getMainBinding().toolBar.setSubtitle(Data.sArtistItems.size() + " Artists");
+					}
+				});
+	}
 
-    /**
-     * by firstStartApp, change Layout...
-     */
-    public void setRecyclerViewData() {
+	/**
+	 * by firstStartApp, change Layout...
+	 */
+	public void setRecyclerViewData() {
 
-        if (getView() != null) {
-            mRecyclerView = getView().findViewById(R.id.recycler_view);
-            mRecyclerView.setHasFixedSize(true);
+		if (getView() != null) {
+			mRecyclerView = getView().findViewById(R.id.recycler_view);
+			mRecyclerView.setHasFixedSize(true);
 
-            //get type
-            final SharedPreferences mDef = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            int type = mDef.getInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.GRID_TYPE);
-            switch (type) {
-                case MyRecyclerAdapter2ArtistList.LINEAR_TYPE: {
-                    mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                }
-                break;
-                case MyRecyclerAdapter2ArtistList.GRID_TYPE: {
-                    mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2)));
-                }
-                break;
-            }
+			//get type
+			final SharedPreferences mDef = PreferenceManager.getDefaultSharedPreferences(getActivity());
+			int type = mDef.getInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.GRID_TYPE);
+			switch (type) {
+				case MyRecyclerAdapter2ArtistList.LINEAR_TYPE: {
+					mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+				}
+				break;
+				case MyRecyclerAdapter2ArtistList.GRID_TYPE: {
+					mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2)));
+				}
+				break;
+			}
 
-            mAdapter2ArtistList = new MyRecyclerAdapter2ArtistList(mMainActivity, Data.sArtistItems, type);
-            mRecyclerView.setAdapter(mAdapter2ArtistList);
-        }
-    }
+			mAdapter2ArtistList = new MyRecyclerAdapter2ArtistList(mMainActivity, Data.sArtistItems, type);
+			mRecyclerView.setAdapter(mAdapter2ArtistList);
+		}
+	}
 
-    public RecyclerView getRecyclerView() {
-        return mRecyclerView;
-    }
+	public RecyclerView getRecyclerView() {
+		return mRecyclerView;
+	}
 
-    public MyRecyclerAdapter2ArtistList getAdapter2ArtistList() {
-        return mAdapter2ArtistList;
-    }
+	public MyRecyclerAdapter2ArtistList getAdapter2ArtistList() {
+		return mAdapter2ArtistList;
+	}
 
-    @Override
-    public void visibleOrGone(int status) {
-        if (mRecyclerView != null) mRecyclerView.setVisibility(status);
-    }
+	@Override
+	public void visibleOrGone(int status) {
+		if (mRecyclerView != null) mRecyclerView.setVisibility(status);
+	}
 
 //    public class MyPreloadModelProvider implements ListPreloader.PreloadModelProvider<AlbumItem> {
 //        @NonNull

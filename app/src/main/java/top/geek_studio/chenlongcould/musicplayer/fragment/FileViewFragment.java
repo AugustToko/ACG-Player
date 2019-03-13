@@ -49,188 +49,188 @@ import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentFileViewerB
 
 public final class FileViewFragment extends Fragment {
 
-    private FragmentFileViewerBinding mFileViewerBinding;
+	private FragmentFileViewerBinding mFileViewerBinding;
 
-    private boolean HAS_LOAD = false;
+	private boolean HAS_LOAD = false;
 
-    private MainActivity mMainActivity;
+	private MainActivity mMainActivity;
 
-    private List<File> mFileItems = new ArrayList<>();
+	private List<File> mFileItems = new ArrayList<>();
 
-    private MyAdapter mMyAdapter;
+	private MyAdapter mMyAdapter;
 
-    private File mCurrentFile;
+	private File mCurrentFile;
 
-    public static FileViewFragment newInstance() {
-        return new FileViewFragment();
-    }
+	public static FileViewFragment newInstance() {
+		return new FileViewFragment();
+	}
 
-    @Override
-    public void onAttach(@NotNull Context context) {
-        super.onAttach(context);
-        mMainActivity = (MainActivity) context;
-    }
+	@Override
+	public void onAttach(@NotNull Context context) {
+		super.onAttach(context);
+		mMainActivity = (MainActivity) context;
+	}
 
-    @NotNull
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mFileViewerBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_file_viewer, container, false);
-        mFileViewerBinding.includeRecyclerView.recyclerView.setLayoutManager(new LinearLayoutManager(mMainActivity));
-        mFileViewerBinding.includeRecyclerView.recyclerView.addItemDecoration(new DividerItemDecoration(mMainActivity, DividerItemDecoration.VERTICAL));
+	@NotNull
+	@Override
+	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+		mFileViewerBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_file_viewer, container, false);
+		mFileViewerBinding.includeRecyclerView.recyclerView.setLayoutManager(new LinearLayoutManager(mMainActivity));
+		mFileViewerBinding.includeRecyclerView.recyclerView.addItemDecoration(new DividerItemDecoration(mMainActivity, DividerItemDecoration.VERTICAL));
 
-        if (!HAS_LOAD) {
-            final File file = Environment.getExternalStorageDirectory();
-            mFileItems.addAll(new ArrayList<>(Arrays.asList(file.listFiles())));
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) mFileItems.sort(File::compareTo);
-            mCurrentFile = file;
-        }
+		if (!HAS_LOAD) {
+			final File file = Environment.getExternalStorageDirectory();
+			mFileItems.addAll(new ArrayList<>(Arrays.asList(file.listFiles())));
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) mFileItems.sort(File::compareTo);
+			mCurrentFile = file;
+		}
 
-        mMyAdapter = new MyAdapter(mFileItems);
-        mFileViewerBinding.includeRecyclerView.recyclerView.setAdapter(mMyAdapter);
-        HAS_LOAD = true;
+		mMyAdapter = new MyAdapter(mFileItems);
+		mFileViewerBinding.includeRecyclerView.recyclerView.setAdapter(mMyAdapter);
+		HAS_LOAD = true;
 
-        return mFileViewerBinding.getRoot();
-    }
+		return mFileViewerBinding.getRoot();
+	}
 
-    @Override
-    public void onDetach() {
-        mFileItems.clear();
-        super.onDetach();
-    }
+	@Override
+	public void onDetach() {
+		mFileItems.clear();
+		super.onDetach();
+	}
 
-    public File getCurrentFile() {
-        return mCurrentFile;
-    }
+	public File getCurrentFile() {
+		return mCurrentFile;
+	}
 
-    public void onBackPressed() {
-        mCurrentFile = mCurrentFile.getParentFile();
-        mFileItems.clear();
-        mFileItems.addAll(new ArrayList<>(Arrays.asList(mCurrentFile.listFiles())));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            mFileItems.sort(File::compareTo);
-        }
-        mMyAdapter.notifyDataSetChanged();
-    }
+	public void onBackPressed() {
+		mCurrentFile = mCurrentFile.getParentFile();
+		mFileItems.clear();
+		mFileItems.addAll(new ArrayList<>(Arrays.asList(mCurrentFile.listFiles())));
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+			mFileItems.sort(File::compareTo);
+		}
+		mMyAdapter.notifyDataSetChanged();
+	}
 
-    class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
+	class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
 
-        private List<File> mFiles;
+		private List<File> mFiles;
 
-        MyAdapter(List<File> files) {
-            mFiles = files;
-        }
+		MyAdapter(List<File> files) {
+			mFiles = files;
+		}
 
-        String getFileSize(File f) {
-            float fileSize = f.length() / 1024;        //kb
+		String getFileSize(File f) {
+			float fileSize = f.length() / 1024;        //kb
 
-            int sizeLength = String.valueOf((int) fileSize).length();
-            if (sizeLength <= 3) {
-                return String.valueOf((double) Math.round(fileSize * 100) / 100 + "KB");
-            } else if (sizeLength < 7) {
-                return String.valueOf((double) Math.round(fileSize / 1024 * 100) / 100 + "MB");
-            } else {
-                return String.valueOf((double) Math.round(fileSize / 1024 / 1024 * 100) / 100 + "GB");
-            }
+			int sizeLength = String.valueOf((int) fileSize).length();
+			if (sizeLength <= 3) {
+				return String.valueOf((double) Math.round(fileSize * 100) / 100 + "KB");
+			} else if (sizeLength < 7) {
+				return String.valueOf((double) Math.round(fileSize / 1024 * 100) / 100 + "MB");
+			} else {
+				return String.valueOf((double) Math.round(fileSize / 1024 / 1024 * 100) / 100 + "GB");
+			}
 
-        }
+		}
 
-        @Override
-        public void onBindViewHolder(@NonNull MyAdapter.ViewHolder holder, int position) {
+		@Override
+		public void onBindViewHolder(@NonNull MyAdapter.ViewHolder holder, int position) {
 
 //            show file size (b kb mb gb)
-            if (!mFiles.get(position).isDirectory()) {
-                holder.subTile_2.setText(String.valueOf(getFileSize(mFiles.get(holder.getAdapterPosition()))));
-            } else {
-                holder.subTile_2.setText("---");
-            }
-            //local
-            holder.subTitle.setText(String.valueOf(Data.sSimpleDateFormatFile.format(new Date(mFiles.get(position).lastModified()))));
-            holder.itemText.setText(mFiles.get(position).getName());
+			if (!mFiles.get(position).isDirectory()) {
+				holder.subTile_2.setText(String.valueOf(getFileSize(mFiles.get(holder.getAdapterPosition()))));
+			} else {
+				holder.subTile_2.setText("---");
+			}
+			//local
+			holder.subTitle.setText(String.valueOf(Data.sSimpleDateFormatFile.format(new Date(mFiles.get(position).lastModified()))));
+			holder.itemText.setText(mFiles.get(position).getName());
 
-            if (mFiles.get(position).isDirectory()) {
-                GlideApp.with(mMainActivity).load(R.drawable.ic_folder_24px).into(holder.itemIco);
-            } else {
+			if (mFiles.get(position).isDirectory()) {
+				GlideApp.with(mMainActivity).load(R.drawable.ic_folder_24px).into(holder.itemIco);
+			} else {
 
-                File file = mFiles.get(position);
+				File file = mFiles.get(position);
 
-                String end = file.getName().substring(file.getName().lastIndexOf(".") + 1, file.getName().length()).toLowerCase();
+				String end = file.getName().substring(file.getName().lastIndexOf(".") + 1, file.getName().length()).toLowerCase();
 
-                if ("mp4".equals(end) || "avi".equals(end) || "wmv".equals(end) || "mov".equals(end)) {
-                    GlideApp.with(mMainActivity).load(R.drawable.ic_movie_creation_24px).into(holder.itemIco);
+				if ("mp4".equals(end) || "avi".equals(end) || "wmv".equals(end) || "mov".equals(end)) {
+					GlideApp.with(mMainActivity).load(R.drawable.ic_movie_creation_24px).into(holder.itemIco);
 
-                } else if ("jpg".equals(end) || "png".equals(end) || "gif".equals(end) || "psd".equals(end) || "ai".equals(end)) {
-                    GlideApp.with(mMainActivity).load(R.drawable.ic_image_24px).into(holder.itemIco);
+				} else if ("jpg".equals(end) || "png".equals(end) || "gif".equals(end) || "psd".equals(end) || "ai".equals(end)) {
+					GlideApp.with(mMainActivity).load(R.drawable.ic_image_24px).into(holder.itemIco);
 
-                } else if ("mp3".equals(end) || "wav".equals(end) || "dsd".equals(end) || "dst".equals(end) || "ogg".equals(end) || "flac".equals(end)) {
-                    GlideApp.with(mMainActivity).load(R.drawable.ic_audiotrack_24px).into(holder.itemIco);
-                } else {
-                    GlideApp.with(mMainActivity).load(R.drawable.ic_insert_drive_file_24px).into(holder.itemIco);
-                }
+				} else if ("mp3".equals(end) || "wav".equals(end) || "dsd".equals(end) || "dst".equals(end) || "ogg".equals(end) || "flac".equals(end)) {
+					GlideApp.with(mMainActivity).load(R.drawable.ic_audiotrack_24px).into(holder.itemIco);
+				} else {
+					GlideApp.with(mMainActivity).load(R.drawable.ic_insert_drive_file_24px).into(holder.itemIco);
+				}
 
-            }
-        }
+			}
+		}
 
-        @NonNull
-        @Override
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_file_item, parent, false);
-            ViewHolder holder = new ViewHolder(view);
+		@NonNull
+		@Override
+		public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+			View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_file_item, parent, false);
+			ViewHolder holder = new ViewHolder(view);
 
-            holder.itemView.setOnClickListener(v -> {
+			holder.itemView.setOnClickListener(v -> {
 
-                if (mFileItems.get(holder.getAdapterPosition()).isFile()) {
+				if (mFileItems.get(holder.getAdapterPosition()).isFile()) {
 
-                    Intent intent;
+					Intent intent;
 
-                    OpenFile.init(mMainActivity.getPackageName());
-                    if ((intent = OpenFile.openFile(mMainActivity, mFileItems.get(holder.getAdapterPosition()).getPath())) != null) {
-                        startActivity(intent);
-                    } else {
-                        Toast.makeText(mMainActivity, "Open File", Toast.LENGTH_LONG).show();
-                    }
-                    return;
-                }
+					OpenFile.init(mMainActivity.getPackageName());
+					if ((intent = OpenFile.openFile(mMainActivity, mFileItems.get(holder.getAdapterPosition()).getPath())) != null) {
+						startActivity(intent);
+					} else {
+						Toast.makeText(mMainActivity, "Open File", Toast.LENGTH_LONG).show();
+					}
+					return;
+				}
 
-                final ArrayList<File> temp = new ArrayList<>(Arrays.asList(mFileItems.get(holder.getAdapterPosition()).listFiles()));
-                mCurrentFile = mFiles.get(holder.getAdapterPosition());
-                mFileItems.clear();
-                mFileItems.addAll(temp);
-                //sort
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    mFileItems.sort(File::compareTo);
-                }
-                mMyAdapter.notifyDataSetChanged();
-            });
+				final ArrayList<File> temp = new ArrayList<>(Arrays.asList(mFileItems.get(holder.getAdapterPosition()).listFiles()));
+				mCurrentFile = mFiles.get(holder.getAdapterPosition());
+				mFileItems.clear();
+				mFileItems.addAll(temp);
+				//sort
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+					mFileItems.sort(File::compareTo);
+				}
+				mMyAdapter.notifyDataSetChanged();
+			});
 
-            return holder;
-        }
+			return holder;
+		}
 
-        @NonNull
-        @Override
-        public String getSectionName(int position) {
-            return String.valueOf(mFileItems.get(position).getName().charAt(0));
-        }
+		@NonNull
+		@Override
+		public String getSectionName(int position) {
+			return String.valueOf(mFileItems.get(position).getName().charAt(0));
+		}
 
-        @Override
-        public int getItemCount() {
-            return mFileItems.size();
-        }
+		@Override
+		public int getItemCount() {
+			return mFileItems.size();
+		}
 
-        class ViewHolder extends RecyclerView.ViewHolder {
+		class ViewHolder extends RecyclerView.ViewHolder {
 
-            ImageView itemIco;
-            TextView itemText;
-            TextView subTitle;
-            TextView subTile_2;
+			ImageView itemIco;
+			TextView itemText;
+			TextView subTitle;
+			TextView subTile_2;
 
-            ViewHolder(View itemView) {
-                super(itemView);
-                itemIco = itemView.findViewById(R.id.item_ico);
-                itemText = itemView.findViewById(R.id.item_text);
-                subTitle = itemView.findViewById(R.id.item_small_text);
-                subTile_2 = itemView.findViewById(R.id.item_small_text_2);
-            }
-        }
+			ViewHolder(View itemView) {
+				super(itemView);
+				itemIco = itemView.findViewById(R.id.item_ico);
+				itemText = itemView.findViewById(R.id.item_text);
+				subTitle = itemView.findViewById(R.id.item_small_text);
+				subTile_2 = itemView.findViewById(R.id.item_small_text_2);
+			}
+		}
 
-    }
+	}
 }

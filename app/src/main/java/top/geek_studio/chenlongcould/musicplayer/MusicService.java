@@ -28,7 +28,6 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -44,289 +43,295 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.palette.graphics.Palette;
-import top.geek_studio.chenlongcould.musicplayer.Models.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.Detail;
+import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
+/**
+ * @author chenlongcould
+ */
 public final class MusicService extends Service {
 
-    private static final String TAG = "MusicService";
+	public static final int MINIMUM_PLAY_TIME = 3000;
+	//PI requests
+	public static final int REQUEST_PAUSE = 1;
+	public static final int REQUEST_PLAY = 2;
+	public static final int REQUEST_NEXT = 3;
+	public static final int REQUEST_PRE = 4;
+	private static final String TAG = "MusicService";
+	private final MediaPlayer mMediaPlayer = new MediaPlayer();
+	private boolean hasPlayed = false;
 
-    public static final int MINIMUM_PLAY_TIME = 3000;
-    private boolean HAS_PLAYED = false;
+	/**
+	 * NotificationId
+	 */
+	private String mId = "Player";
+	private int mStartNotiId = 1;
 
-    //PI requests
-    public static final int REQUEST_PAUSE = 1;
-    public static final int REQUEST_PLAY = 2;
-    public static final int REQUEST_NEXT = 3;
-    public static final int REQUEST_PRE = 4;
+	private boolean mColorized = true;
 
-    private final MediaPlayer mMediaPlayer = new MediaPlayer();
-    //NotificationId
-    private String mId = "Player";
-    private int mStartNotiId = 1;
+	private PowerManager.WakeLock wakeLock;
+	private AtomicReference<MusicItem> mMusicItem = new AtomicReference<>(new MusicItem.Builder(-1, "null", "null").build());
 
-    private boolean mColorized = true;
+	private Bitmap mCurrentCover = null;
+	private final Binder mMusicBinder = new IMuiscService.Stub() {
+		@Override
+		public void playMusic() {
+			hasPlayed = true;
+			mMediaPlayer.start();
+			startFN();
+		}
 
-    private PowerManager.WakeLock wakeLock;
-    private AtomicReference<MusicItem> mMusicItem = new AtomicReference<>(new MusicItem.Builder(-1, "null", "null").build());
+		@Override
+		public void pauseMusic() {
+			mMediaPlayer.pause();
+			startFN();
+		}
 
-    private Bitmap mCurrentCover = null;
-    private final Binder mMusicBinder = new IMuiscService.Stub() {
-        @Override
-        public void playMusic() {
-            HAS_PLAYED = true;
-            mMediaPlayer.start();
-            startFN();
-        }
+		@Override
+		public void stopMusic() {
+			mMediaPlayer.stop();
+			stopForeground(true);
+		}
 
-        @Override
-        public void pauseMusic() {
-            mMediaPlayer.pause();
-            startFN();
-        }
+		@Override
+		public boolean isPlayingMusic() {
+			return mMediaPlayer.isPlaying();
+		}
 
-        @Override
-        public void stopMusic() {
-            mMediaPlayer.stop();
-            stopForeground(true);
-        }
+		@Override
+		public void resetMusic() {
+			if (hasPlayed) {
+				final List<Detail> infos = LitePal.where("MusicId = ?", String.valueOf(mMusicItem.get().getMusicID())).find(Detail.class);
+				if (infos.size() > 0) {
+					Detail detail = infos.get(0);
+					detail.setPlayDuration(detail.getPlayDuration() + mMediaPlayer.getCurrentPosition());
+					if (mMediaPlayer.getCurrentPosition() < MINIMUM_PLAY_TIME) {
+						detail.setMinimumPlayTimes(detail.getMinimumPlayTimes() + 1);
+					}
+					detail.save();
+				} else {
+					Detail detail = new Detail();
+					detail.setMusicId(mMusicItem.get().getMusicID());
+					if (mMediaPlayer.getCurrentPosition() < MINIMUM_PLAY_TIME) {
+						detail.setMinimumPlayTimes(detail.getMinimumPlayTimes() + 1);
+					}
+					detail.setPlayTimes(getCurrentPosition());
+					detail.setPlayDuration(detail.getPlayDuration() + mMediaPlayer.getCurrentPosition());
+					detail.save();
+				}
+			}
 
-        @Override
-        public boolean isPlayingMusic() {
-            return mMediaPlayer.isPlaying();
-        }
+			mMediaPlayer.reset();
+		}
 
-        @Override
-        public void resetMusic() {
-            if (HAS_PLAYED) {
-                final List<Detail> infos = LitePal.where("MusicId = ?", String.valueOf(mMusicItem.get().getMusicID())).find(Detail.class);
-                if (infos.size() > 0) {
-                    Detail detail = infos.get(0);
-                    detail.setPlayDuration(detail.getPlayDuration() + mMediaPlayer.getCurrentPosition());
-                    if (mMediaPlayer.getCurrentPosition() < MINIMUM_PLAY_TIME) {
-                        detail.setMinimumPlayTimes(detail.getMinimumPlayTimes() + 1);
-                    }
-                    detail.save();
-                } else {
-                    Detail detail = new Detail();
-                    detail.setMusicId(mMusicItem.get().getMusicID());
-                    if (mMediaPlayer.getCurrentPosition() < MINIMUM_PLAY_TIME) {
-                        detail.setMinimumPlayTimes(detail.getMinimumPlayTimes() + 1);
-                    }
-                    detail.setPlayTimes(getCurrentPosition());
-                    detail.setPlayDuration(detail.getPlayDuration() + mMediaPlayer.getCurrentPosition());
-                    detail.save();
-                }
-            }
+		@Override
+		public void setDataSource(String path) {
+			try {
+				mMediaPlayer.setDataSource(path);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 
-            mMediaPlayer.reset();
-        }
+		@Override
+		public void prepare() {
+			try {
+				mMediaPlayer.prepare();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 
-        @Override
-        public void setDataSource(String path) {
-            try {
-                mMediaPlayer.setDataSource(path);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+		@Override
+		public int getDuration() {
+			return mMediaPlayer.getDuration();
+		}
 
-        @Override
-        public void prepare() {
-            try {
-                mMediaPlayer.prepare();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+		@Override
+		public int getCurrentPosition() {
+			return mMediaPlayer.getCurrentPosition();
+		}
 
-        @Override
-        public int getDuration() {
-            return mMediaPlayer.getDuration();
-        }
+		@Override
+		public void seekTo(int position) {
+			mMediaPlayer.seekTo(position);
+		}
 
-        @Override
-        public int getCurrentPosition() {
-            return mMediaPlayer.getCurrentPosition();
-        }
+		@Override
+		public void release() {
+			mMediaPlayer.release();
+		}
 
-        @Override
-        public void seekTo(int position) {
-            mMediaPlayer.seekTo(position);
-        }
+		@Override
+		public void setCurrentMusicData(MusicItem item) {
+			if (item == null) {
+				mMusicItem = new AtomicReference<>(new MusicItem.Builder(-1, "null", "null").build());
+			} else {
+				mMusicItem = new AtomicReference<>(item);
+			}
 
-        @Override
-        public void release() {
-            mMediaPlayer.release();
-        }
+			mCurrentCover = Utils.Audio.getCoverBitmap(MusicService.this, mMusicItem.get().getAlbumId());
+		}
 
-        @Override
-        public void setCurrentMusicData(MusicItem item) {
-            if (item == null) {
-                mMusicItem = new AtomicReference<>(new MusicItem.Builder(-1, "null", "null").build());
-            } else {
-                mMusicItem = new AtomicReference<>(item);
-            }
+		@Override
+		public MusicItem getCurrentItem() {
+			return mMusicItem.get();
+		}
+	};
+	private AtomicBoolean mIsServiceDestroyed = new AtomicBoolean(false);
 
-            mCurrentCover = Utils.Audio.getCoverBitmap(MusicService.this, mMusicItem.get().getAlbumId());
-        }
+	public MusicService() {
+	}
 
-        @Override
-        public MusicItem getCurrentItem() throws RemoteException {
-            return mMusicItem.get();
-        }
-    };
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		mColorized = intent.getBooleanExtra(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true);
+		return START_STICKY;
+	}
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        mColorized = intent.getBooleanExtra(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true);
-        return START_STICKY;
-    }
+	@Override
+	public IBinder onBind(Intent intent) {
+		mColorized = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true);
+		return mMusicBinder;
+	}
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        mColorized = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true);
-        return mMusicBinder;
-    }
+	@Override
+	public void onCreate() {
+		Log.d(TAG, "onCreate: do it");
+		final PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+		wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
+		wakeLock.setReferenceCounted(false);
 
-    public MusicService() {
-    }
+		mMediaPlayer.setOnCompletionListener(mp -> Utils.SendSomeThing.sendPlay(MusicService.this, 6, ReceiverOnMusicPlay.TYPE_NEXT));
 
-    private AtomicBoolean mIsServiceDestroyed = new AtomicBoolean(false);
+		mMediaPlayer.setOnErrorListener((mp, what, extra) -> {
+			mp.reset();
+			return true;
+		});
 
-    @Override
-    public void onCreate() {
-        Log.d(TAG, "onCreate: do it");
-        final PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
-        wakeLock.setReferenceCounted(false);
+		//Notification
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+			NotificationChannel channel = new NotificationChannel(mId, "Now playing", NotificationManager.IMPORTANCE_DEFAULT);
+			channel.setDescription("playing_notification_description");
+			channel.enableLights(false);
+			channel.enableVibration(false);
+			channel.setShowBadge(false);
+			channel.setSound(null, null);
+			((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).createNotificationChannel(channel);
+		}
+	}
 
-        mMediaPlayer.setOnCompletionListener(mp -> Utils.SendSomeThing.sendPlay(MusicService.this, 6, ReceiverOnMusicPlay.TYPE_NEXT));
+	private void startFN() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			startForeground(mStartNotiId, getChannelNotification(mMusicItem.get().getMusicName(), mMusicItem.get().getMusicAlbum(), mCurrentCover, this).build());
+		} else {
+			startForeground(mStartNotiId, getNotification25(mMusicItem.get().getMusicName(), mMusicItem.get().getMusicAlbum(), mCurrentCover, this).build());
+		}
+	}
 
-        mMediaPlayer.setOnErrorListener((mp, what, extra) -> {
-            mp.reset();
-            return true;
-        });
+	@RequiresApi(api = Build.VERSION_CODES.O)
+	@NonNull
+	private Notification.Builder getChannelNotification(final String title, final String content, final @Nullable Bitmap cover, final Context context) {
+		//pi(s)
+		Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
+		PendingIntent pi = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        //Notification
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(mId, "Now playing", NotificationManager.IMPORTANCE_DEFAULT);
-            channel.setDescription("playing_notification_description");
-            channel.enableLights(false);
-            channel.enableVibration(false);
-            channel.setShowBadge(false);
-            channel.setSound(null, null);
-            ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).createNotificationChannel(channel);
-        }
-    }
+		Intent pause = new Intent();
+		pause.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPause));
+		PendingIntent pauseIntent = PendingIntent.getBroadcast(context, REQUEST_PAUSE, pause, PendingIntent.FLAG_UPDATE_CURRENT);
 
-    private void startFN() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForeground(mStartNotiId, getChannelNotification(mMusicItem.get().getMusicName(), mMusicItem.get().getMusicAlbum(), mCurrentCover, this).build());
-        } else {
-            startForeground(mStartNotiId, getNotification_25(mMusicItem.get().getMusicName(), mMusicItem.get().getMusicAlbum(), mCurrentCover, this).build());
-        }
-    }
+		//resume play...(before show notification, must has music in playing...)
+		Intent play = new Intent();
+		play.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
+		play.putExtra("play_type", 2);
+		PendingIntent playIntent = PendingIntent.getBroadcast(context, REQUEST_PLAY, play, PendingIntent.FLAG_UPDATE_CURRENT);
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    @NonNull
-    private Notification.Builder getChannelNotification(final String title, final String content, final @Nullable Bitmap cover, final Context context) {
-        //pi(s)
-        Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
-        PendingIntent pi = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		Intent next = new Intent();
+		next.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
+		next.putExtra("play_type", 6);
+		next.putExtra("args", "next");
+		PendingIntent nextIntent = PendingIntent.getBroadcast(context, REQUEST_NEXT, next, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Intent pause = new Intent();
-        pause.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPause));
-        PendingIntent pauseIntent = PendingIntent.getBroadcast(context, REQUEST_PAUSE, pause, PendingIntent.FLAG_UPDATE_CURRENT);
+		Intent previous = new Intent();
+		previous.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
+		previous.putExtra("play_type", 6);
+		previous.putExtra("args", "previous");
+		PendingIntent previousIntent = PendingIntent.getBroadcast(context, REQUEST_PRE, previous, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        //resume play...(before show notification, must has music in playing...)
-        Intent play = new Intent();
-        play.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
-        play.putExtra("play_type", 2);
-        PendingIntent playIntent = PendingIntent.getBroadcast(context, REQUEST_PLAY, play, PendingIntent.FLAG_UPDATE_CURRENT);
+		Notification.MediaStyle mediaStyle = new Notification.MediaStyle();
 
-        Intent next = new Intent();
-        next.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
-        next.putExtra("play_type", 6);
-        next.putExtra("args", "next");
-        PendingIntent nextIntent = PendingIntent.getBroadcast(context, REQUEST_NEXT, next, PendingIntent.FLAG_UPDATE_CURRENT);
+		//小型化通知的按钮布局
+		mediaStyle.setShowActionsInCompactView(0, 1, 2);
 
-        Intent previous = new Intent();
-        previous.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
-        previous.putExtra("play_type", 6);
-        previous.putExtra("args", "previous");
-        PendingIntent previousIntent = PendingIntent.getBroadcast(context, REQUEST_PRE, previous, PendingIntent.FLAG_UPDATE_CURRENT);
+		Notification.Builder builder = new Notification.Builder(getApplicationContext(), mId)
+				.setContentTitle(title)
+				.setContentText(content)
+				.setSmallIcon(Icon.createWithResource(context, R.drawable.ic_audiotrack_24px))
+				.setStyle(mediaStyle)
+				.setLargeIcon(cover == null ? BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px) : cover)
+				.setContentIntent(pi)
+				.setVisibility(Notification.VISIBILITY_PUBLIC)
+				.setAutoCancel(false)
+				.setOngoing(true);
 
-        Notification.MediaStyle mediaStyle = new Notification.MediaStyle();
-        mediaStyle.setShowActionsInCompactView(0, 1, 2);        //小型化通知的按钮布局
+		if (mMediaPlayer.isPlaying()) {
+			Notification.Action[] actions = {
+					new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_previous_white_24dp), "previous", previousIntent).build(),
+					new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_pause_white_24dp), "play", pauseIntent).build(),
+					new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_next_white_24dp), "next", nextIntent).build()};
+			builder.setActions(actions);
+		} else {
+			Notification.Action[] actions = {
+					new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_previous_white_24dp), "previous", previousIntent).build(),
+					new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_play_arrow_grey_600_24dp), "play", playIntent).build(),
+					new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_next_white_24dp), "next", nextIntent).build()};
+			builder.setActions(actions);
+		}
 
-        Notification.Builder builder = new Notification.Builder(getApplicationContext(), mId)
-                .setContentTitle(title)
-                .setContentText(content)
-                .setSmallIcon(Icon.createWithResource(context, R.drawable.ic_audiotrack_24px))
-                .setStyle(mediaStyle)
-                .setLargeIcon(cover == null ? BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px) : cover)
-                .setContentIntent(pi)
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setAutoCancel(false)
-                .setOngoing(true);
+		if (cover != null) {
+			Palette palette = Palette.from(cover).generate();
+			builder.setColor(palette.getVibrantColor(Color.TRANSPARENT));
+		} else {
+			builder.setColor(Color.WHITE);
+		}
 
-        if (mMediaPlayer.isPlaying()) {
-            Notification.Action[] actions = {
-                    new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_previous_white_24dp), "previous", previousIntent).build(),
-                    new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_pause_white_24dp), "play", pauseIntent).build(),
-                    new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_next_white_24dp), "next", nextIntent).build()};
-            builder.setActions(actions);
-        } else {
-            Notification.Action[] actions = {
-                    new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_previous_white_24dp), "previous", previousIntent).build(),
-                    new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_play_arrow_grey_600_24dp), "play", playIntent).build(),
-                    new Notification.Action.Builder(Icon.createWithResource(context, R.drawable.ic_skip_next_white_24dp), "next", nextIntent).build()};
-            builder.setActions(actions);
-        }
+		builder.setColorized(mColorized);
 
-        if (cover != null) {
-            Palette palette = Palette.from(cover).generate();
-            builder.setColor(palette.getVibrantColor(Color.TRANSPARENT));
-        } else {
-            builder.setColor(Color.WHITE);
-        }
+		return builder;
+	}
 
-        builder.setColorized(mColorized);
+	private NotificationCompat.Builder getNotification25(final String title, final String content, final @Nullable Bitmap cover, final Context context) {
+		Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
+		PendingIntent pi = PendingIntent.getActivity(context, 0, intent, 0);
 
-        return builder;
-    }
+		@SuppressWarnings("UnnecessaryLocalVariable") NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), mId)
+				.setContentTitle(title)
+				.setContentText(content)
+				.setSmallIcon(R.drawable.ic_audiotrack_24px)
+				.setLargeIcon(cover == null ? BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px) : cover)
+				.setContentIntent(pi)
+				.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+				.setPriority(NotificationCompat.PRIORITY_DEFAULT)
+				.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+				.setAutoCancel(false);
+		return builder;
+	}
 
-    private NotificationCompat.Builder getNotification_25(final String title, final String content, final @Nullable Bitmap cover, final Context context) {
-        Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
-        PendingIntent pi = PendingIntent.getActivity(context, 0, intent, 0);
-
-        @SuppressWarnings("UnnecessaryLocalVariable") NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), mId)
-                .setContentTitle(title)
-                .setContentText(content)
-                .setSmallIcon(R.drawable.ic_audiotrack_24px)
-                .setLargeIcon(cover == null ? BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px) : cover)
-                .setContentIntent(pi)
-                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-                .setPriority(Notification.PRIORITY_DEFAULT)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setAutoCancel(false);
-        return builder;
-    }
-
-    @Override
-    public void onDestroy() {
-        Log.d(TAG, "onDestroy: ");
-        mMediaPlayer.release();
-        stopForeground(true);
-        mIsServiceDestroyed.set(true);
-        if (mCurrentCover != null) mCurrentCover.recycle();
-        wakeLock.release();
-        mMusicItem = null;
-        super.onDestroy();
-    }
+	@Override
+	public void onDestroy() {
+		Log.d(TAG, "onDestroy: ");
+		mMediaPlayer.release();
+		stopForeground(true);
+		mIsServiceDestroyed.set(true);
+		if (mCurrentCover != null) {
+			mCurrentCover.recycle();
+		}
+		wakeLock.release();
+		mMusicItem = null;
+		super.onDestroy();
+	}
 
 }

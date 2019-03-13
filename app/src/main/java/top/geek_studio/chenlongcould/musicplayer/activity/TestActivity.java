@@ -13,48 +13,50 @@ package top.geek_studio.chenlongcould.musicplayer.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.Handler;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.AnticipateOvershootInterpolator;
 
-import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.transition.ChangeBounds;
-import androidx.transition.Transition;
-import androidx.transition.TransitionManager;
-import top.geek_studio.chenlongcould.geeklibrary.widget.GkToolbar;
+import androidx.appcompat.widget.Toolbar;
 import top.geek_studio.chenlongcould.musicplayer.R;
 
 public final class TestActivity extends Activity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_test);
-        GkToolbar toolbar = findViewById(R.id.gk_toolbar);
-        toolbar.setTitle("?????");
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_test);
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+		Toolbar toolbar = findViewById(R.id.toolbar);
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Transition transition = new ChangeBounds();
-                transition.setInterpolator(new AnticipateOvershootInterpolator(0.5f));
-                transition.setDuration(3000);
+		toolbar.inflateMenu(R.menu.menu_test);
 
-                ConstraintSet constraintSet = new ConstraintSet();
-                constraintSet.clone(TestActivity.this, R.layout.activity_test_2);
-                ViewGroup root = ((ViewGroup) getWindow().getDecorView());
-                TransitionManager.beginDelayedTransition(root, transition);
-                constraintSet.applyTo(findViewById(R.id.root_view));
-            }
-        }, 3000);
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                ConstraintSet constraintSet = new ConstraintSet();
+//                constraintSet.clone((ConstraintLayout) LayoutInflater.from(TestActivity.this).inflate(R.layout.activity_test2, null).findViewById(R.id.body));
+//
+//                Transition transition = new ChangeBounds();
+//                transition.setInterpolator(new AnticipateOvershootInterpolator(0.5f));
+//                transition.setDuration(2000);
+//                TransitionManager.beginDelayedTransition((ViewGroup) getWindow().getDecorView(), transition);
+//
+//                constraintSet.applyTo(findViewById(R.id.body));
+//            }
+//        }, 2000);
+//
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                ConstraintSet constraintSet = new ConstraintSet();
+//                constraintSet.clone(TestActivity.this, R.layout.activity_test2);
+//
+//                Transition transition = new ChangeBounds();
+//                transition.setInterpolator(new AnticipateOvershootInterpolator(0.5f));
+//                transition.setDuration(2000);
+//                TransitionManager.beginDelayedTransition((ViewGroup) getWindow().getDecorView(), transition);
+//
+//                constraintSet.applyTo(findViewById(R.id.root_view));
+//            }
+//        }, 1800);
 
-    }
+	}
 }

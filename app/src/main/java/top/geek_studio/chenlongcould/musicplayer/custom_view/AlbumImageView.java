@@ -16,28 +16,28 @@ import android.util.AttributeSet;
 
 public class AlbumImageView extends androidx.appcompat.widget.AppCompatImageView {
 
-    private static final String TAG = "AlbumImageView";
+	private static final String TAG = "AlbumImageView";
 
-    float mLastX = 0;
-    float mLastY = 0;
+	float mLastX = 0;
+	float mLastY = 0;
 
-    float moveX = 0;
-    float moveY = 0;
+	float moveX = 0;
+	float moveY = 0;
 
-    public AlbumImageView(Context context) {
-        this(context, null);
-    }
+	public AlbumImageView(Context context) {
+		this(context, null);
+	}
 
-    public AlbumImageView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
+	public AlbumImageView(Context context, AttributeSet attrs) {
+		this(context, attrs, 0);
+	}
 
-    public AlbumImageView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
+	public AlbumImageView(Context context, AttributeSet attrs, int defStyleAttr) {
+		super(context, attrs, defStyleAttr);
+	}
 
-    @Override
-    public boolean performClick() {
-        return super.performClick();
-    }
+	@Override
+	public boolean performClick() {
+		return super.performClick();
+	}
 }

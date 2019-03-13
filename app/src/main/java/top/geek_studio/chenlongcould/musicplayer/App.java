@@ -42,146 +42,136 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 public final class App extends Application {
 
-    private static final String TAG = "App";
+	public static final String SHORT_CUT_ID_1 = "id1";
+	public static final String SHORT_CUT_ID_2 = "id2";
+	public static final String SHORT_CUT_ID_3 = "id3";
+	public static final String LAST_FM_KEY = "726e129841377374f2c8c804facb6d11";
+	public static final String MY_WEB_SITE = "https://blog.geek-studio.top/";
+	public static final String VERSION_CODE = "ver_code";
+	public static final String AD_ID = "ca-app-pub-1302949087387063/3066110293";
+	public static final String AD_ID_TEST = "ca-app-pub-3940256099942544/5224354917";
+	public static final String APP_ID = "ca-app-pub-1302949087387063~1079129255";
+	public static final int VER_CODE = 74;
+	public static final String SHORTCUT_RANDOM = "SHORTCUT_RANDOM";
+	private static final String TAG = "App";
+	private ShortcutManager mShortcutManager;
 
-    public static final String SHORT_CUT_ID_1 = "id1";
-    public static final String SHORT_CUT_ID_2 = "id2";
-    public static final String SHORT_CUT_ID_3 = "id3";
+	public static void clearDisposable() {
+		for (Disposable disposable : Data.sDisposables) {
+			if (disposable != null && !disposable.isDisposed()) {
+				disposable.dispose();
+			}
+		}
+	}
 
-    private ShortcutManager mShortcutManager;
+	@Override
+	protected void attachBaseContext(Context base) {
+		super.attachBaseContext(base);
+	}
 
-    public static final String LAST_FM_KEY = "726e129841377374f2c8c804facb6d11";
+	@Override
+	public void onCreate() {
+		super.onCreate();
 
-    public static final String MY_WEB_SITE = "https://blog.geek-studio.top/";
+		LitePal.initialize(this);
 
-    public static final String VERSION_CODE = "ver_code";
+		if (getProcessName(this).equals(getPackageName() + ".Common")) {
 
-    public static final String AD_ID = "ca-app-pub-1302949087387063/3066110293";
-
-    public static final String AD_ID_TEST = "ca-app-pub-3940256099942544/5224354917";
-
-    public static final String APP_ID = "ca-app-pub-1302949087387063~1079129255";
-
-    public static final int VER_CODE = 74;
-
-    @Override
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-        LitePal.initialize(this);
-
-        if (getProcessName(this).equals(getPackageName() + ".Common")) {
-
-            if (PreferenceManager.getDefaultSharedPreferences(this).getLong(VERSION_CODE, -1) != VER_CODE) {
+			if (PreferenceManager.getDefaultSharedPreferences(this).getLong(VERSION_CODE, -1) != VER_CODE) {
 //                Toast.makeText(this, "建议手动清除该应用程序数据...", Toast.LENGTH_SHORT).show();
-                Utils.IO.delFolder(getExternalFilesDir(ThemeStore.DIR_NAME).getAbsolutePath());
-            }
+				Utils.IO.delFolder(getExternalFilesDir(ThemeStore.DIR_NAME).getAbsolutePath());
+			}
 
-            //add version code
-            final SharedPreferences.Editor verEdit = PreferenceManager.getDefaultSharedPreferences(this).edit();
-            verEdit.putLong(VERSION_CODE, VER_CODE);
-            verEdit.apply();
+			//add version code
+			final SharedPreferences.Editor verEdit = PreferenceManager.getDefaultSharedPreferences(this).edit();
+			verEdit.putLong(VERSION_CODE, VER_CODE);
+			verEdit.apply();
 
-            Values.Style.DETAIL_BACKGROUND = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_BLUR);
+			Values.Style.DETAIL_BACKGROUND = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_BLUR);
 
-            //init favourite
-            if (MusicUtil.getFavoritesPlaylist(this) == null) {
-                Log.d(TAG, "onCreate: CREATING FAV_LIST");
-                PlayListsUtil.createPlaylist(this, getString(R.string.favorites));
-            }
+			//init favourite
+			if (MusicUtil.getFavoritesPlaylist(this) == null) {
+				Log.d(TAG, "onCreate: CREATING FAV_LIST");
+				PlayListsUtil.createPlaylist(this, getString(R.string.favorites));
+			}
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-                mShortcutManager = getSystemService(ShortcutManager.class);
-                getNewShortcutInfo();
-            }
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+				mShortcutManager = getSystemService(ShortcutManager.class);
+				getNewShortcutInfo();
+			}
 
-        } else {
-            //action in MusicService Process
-        }
+		} else {
+			//action in MusicService Process
+		}
 
-    }
+	}
 
-    public static final String SHORTCUT_RANDOM = "SHORTCUT_RANDOM";
+	/**
+	 * 获取进程名。
+	 * 由于app是一个多进程应用，因此每个进程被os创建时，
+	 * onCreate()方法均会被执行一次，
+	 * 进行辨别初始化，针对特定进程进行相应初始化工作，
+	 * 此方法可以提高一半启动时间。
+	 *
+	 * @param context 上下文环境对象
+	 *
+	 * @return 获取此进程的进程名
+	 */
+	private String getProcessName(@NonNull Context context) {
+		final ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+		List<ActivityManager.RunningAppProcessInfo> runningAppProcesses = am.getRunningAppProcesses();
+		if (runningAppProcesses == null) {
+			return "";
+		}
 
-    public static void clearDisposable() {
-        for (Disposable disposable : Data.sDisposables) {
-            if (disposable != null && !disposable.isDisposed()) {
-                disposable.dispose();
-            }
-        }
-    }
+		for (ActivityManager.RunningAppProcessInfo runningAppProcess : runningAppProcesses) {
+			if (runningAppProcess.pid == android.os.Process.myPid() && !TextUtils.isEmpty(runningAppProcess.processName)) {
+				return runningAppProcess.processName;
+			}
+		}
+		return "";
+	}
 
-    /**
-     * 获取进程名。
-     * 由于app是一个多进程应用，因此每个进程被os创建时，
-     * onCreate()方法均会被执行一次，
-     * 进行辨别初始化，针对特定进程进行相应初始化工作，
-     * 此方法可以提高一半启动时间。
-     *
-     * @param context 上下文环境对象
-     *
-     * @return 获取此进程的进程名
-     */
-    private String getProcessName(@NonNull Context context) {
-        final ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningAppProcessInfo> runningAppProcesses = am.getRunningAppProcesses();
-        if (runningAppProcesses == null) {
-            return "";
-        }
+	@Override
+	public void onTrimMemory(int level) {
+		Log.d(TAG, "onTrimMemory: the level is " + level);
 
-        for (ActivityManager.RunningAppProcessInfo runningAppProcess : runningAppProcesses) {
-            if (runningAppProcess.pid == android.os.Process.myPid() && !TextUtils.isEmpty(runningAppProcess.processName)) {
-                return runningAppProcess.processName;
-            }
-        }
-        return "";
-    }
+		if (getProcessName(this).equals("top.geek_studio.chenlongcould.musicplayer")
+				|| getProcessName(this).equals("top.geek_studio.chenlongcould.musicplayer.Common")) {
 
-    @Override
-    public void onTrimMemory(int level) {
-        Log.d(TAG, "onTrimMemory: the level is " + level);
+			if (level == TRIM_MEMORY_MODERATE) {
+				Data.sTrashCanList.clear();
 
-        if (getProcessName(this).equals("top.geek_studio.chenlongcould.musicplayer")
-                || getProcessName(this).equals("top.geek_studio.chenlongcould.musicplayer.Common")) {
+				AlbumListFragment.VIEW_HAS_LOAD = false;
+				Data.sAlbumItems.clear();
 
-            if (level == TRIM_MEMORY_MODERATE) {
-                Data.sTrashCanList.clear();
+				ArtistListFragment.VIEW_HAS_LOAD = false;
+				Data.sArtistItems.clear();
+			}
 
-                AlbumListFragment.VIEW_HAS_LOAD = false;
-                Data.sAlbumItems.clear();
+			GlideApp.get(this).trimMemory(level);
+		}
 
-                ArtistListFragment.VIEW_HAS_LOAD = false;
-                Data.sArtistItems.clear();
-            }
+		super.onTrimMemory(level);
+	}
 
-            GlideApp.get(this).trimMemory(level);
-        }
+	/**
+	 * 动态添加
+	 */
+	@RequiresApi(api = Build.VERSION_CODES.N_MR1)
+	private void getNewShortcutInfo() {
 
-        super.onTrimMemory(level);
-    }
+		Intent randomPlay = new Intent(this, MainActivity.class);
+		randomPlay.setAction(Intent.ACTION_MAIN);
+		randomPlay.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		randomPlay.putExtra("SHORTCUT_TYPE", SHORTCUT_RANDOM);
 
-    /**
-     * 动态添加
-     */
-    @RequiresApi(api = Build.VERSION_CODES.N_MR1)
-    private void getNewShortcutInfo() {
-
-        Intent randomPlay = new Intent(this, MainActivity.class);
-        randomPlay.setAction(Intent.ACTION_MAIN);
-        randomPlay.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        randomPlay.putExtra("SHORTCUT_TYPE", SHORTCUT_RANDOM);
-
-        ShortcutInfo shortcut = new ShortcutInfo.Builder(this, SHORT_CUT_ID_1)
-                .setShortLabel(getString(R.string.random_play))
-                .setLongLabel(getString(R.string.random_play))
-                .setIcon(Icon.createWithResource(this, R.drawable.ic_shuffle_blue_24dp))
-                .setIntent(randomPlay)
-                .build();
+		ShortcutInfo shortcut = new ShortcutInfo.Builder(this, SHORT_CUT_ID_1)
+				.setShortLabel(getString(R.string.random_play))
+				.setLongLabel(getString(R.string.random_play))
+				.setIcon(Icon.createWithResource(this, R.drawable.ic_shuffle_blue_24dp))
+				.setIntent(randomPlay)
+				.build();
 
 //        ShortcutInfo shortcut2 = new ShortcutInfo.Builder(this, SHORT_CUT_ID_2)
 //                .setShortLabel("csdn")
@@ -199,6 +189,6 @@ public final class App extends Application {
 //                        Uri.parse("https://www.github.com/")))
 //                .build();
 
-        mShortcutManager.setDynamicShortcuts(Collections.singletonList(shortcut));
-    }
+		mShortcutManager.setDynamicShortcuts(Collections.singletonList(shortcut));
+	}
 }

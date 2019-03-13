@@ -21,15 +21,15 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 public final class MyHeadSetPlugReceiver extends BroadcastReceiver {
 
-    private static final String TAG = "MyHeadSetPlugReceiver";
+	private static final String TAG = "MyHeadSetPlugReceiver";
 
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        Log.d(TAG, "onReceive: ");
-        String action = intent.getAction();
-        if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(action)) {
-            //暂停操作
-            Utils.SendSomeThing.sendPause(context);
-        }
-    }
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		Log.d(TAG, "onReceive: ");
+		String action = intent.getAction();
+		if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(action)) {
+			//暂停操作
+			Utils.SendSomeThing.sendPause(context);
+		}
+	}
 }

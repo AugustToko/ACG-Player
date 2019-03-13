@@ -23,32 +23,32 @@ import androidx.viewpager.widget.PagerAdapter;
 
 public final class MyPagerAdapter extends FragmentStatePagerAdapter {
 
-    private static final String TAG = "MyPagerAdapter";
-    private List<Fragment> mFragmentList;
-    private List<String> mTitles;
+	private static final String TAG = "MyPagerAdapter";
+	private List<Fragment> mFragmentList;
+	private List<String> mTitles;
 
-    public MyPagerAdapter(FragmentManager fm, List<Fragment> fragmentList, List<String> titles) {
-        super(fm);
-        mFragmentList = fragmentList;
-        mTitles = titles;
-    }
+	public MyPagerAdapter(FragmentManager fm, List<Fragment> fragmentList, List<String> titles) {
+		super(fm);
+		mFragmentList = fragmentList;
+		mTitles = titles;
+	}
 
-    public Fragment getItem(int position) {
-        return mFragmentList.get(position);
-    }
+	public Fragment getItem(int position) {
+		return mFragmentList.get(position);
+	}
 
-    @Override
-    public int getCount() {
-        return mFragmentList.size();
-    }
+	@Override
+	public int getCount() {
+		return mFragmentList.size();
+	}
 
-    @Override
-    public int getItemPosition(@NonNull Object object) {
-        return PagerAdapter.POSITION_NONE;
-    }
+	@Override
+	public int getItemPosition(@NonNull Object object) {
+		return PagerAdapter.POSITION_NONE;
+	}
 
-    public CharSequence getPageTitle(int position) {
-        Log.d(TAG, "getPageTitle: " + position);
-        return mTitles.get(position);
-    }
+	public CharSequence getPageTitle(int position) {
+		Log.d(TAG, "getPageTitle: " + position);
+		return mTitles.get(position);
+	}
 }

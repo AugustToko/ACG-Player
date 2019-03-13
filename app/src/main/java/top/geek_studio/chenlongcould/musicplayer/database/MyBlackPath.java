@@ -4,14 +4,14 @@ import org.litepal.crud.LitePalSupport;
 
 public class MyBlackPath extends LitePalSupport {
 
-    private String mDirPath;
+	private String mDirPath;
 
-    public String getDirPath() {
-        return mDirPath;
-    }
+	public String getDirPath() {
+		return mDirPath;
+	}
 
-    public void setDirPath(String dirPath) {
-        mDirPath = dirPath;
-    }
+	public void setDirPath(String dirPath) {
+		mDirPath = dirPath;
+	}
 
 }

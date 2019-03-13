@@ -1,57 +1,56 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-  ~ *************************************************************
-  ~ 文件：activity_test.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月17日 17:31:46
-  ~ 上次修改时间：2019年01月17日 17:28:53
-  ~ 作者：chenlongcould
-  ~ Geek Studio
-  ~ Copyright (c) 2019
-  ~ *************************************************************
-  -->
-
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/root_view"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.TestActivity">
+    tools:context=".activity.Test2Activity">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <ImageView
+        android:id="@+id/bg_image"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
-        android:paddingTop="@dimen/toolbar_padding"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:navigationIcon="@drawable/ic_arrow_back_white_24dp"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:title="@string/app_name">
-
-
-        </androidx.appcompat.widget.Toolbar>
-
-    </com.google.android.material.appbar.AppBarLayout>
+        android:layout_height="match_parent"
+        android:layout_marginEnd="0dp"
+        android:layout_marginBottom="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:alpha="0.2f"
+        tools:background="@color/title_color" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/body"
-        android:layout_width="150dp"
+        android:layout_width="match_parent"
         android:layout_height="150dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:background="#27FF0000">
+
+        <ImageView
+            android:id="@+id/cover"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:background="@color/colorPrimary"
+
+            android:transitionName="@string/image_trans_album"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="12dp"
+            app:layout_constraintBottom_toBottomOf="@+id/constraintLayout"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <TextView
             android:id="@+id/main_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="158dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:maxLines="1"
@@ -71,33 +70,11 @@
             app:layout_constraintStart_toStartOf="@+id/main_title"
             app:layout_constraintTop_toBottomOf="@+id/main_title" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="12dp"
-            app:layout_constraintBottom_toBottomOf="@+id/constraintLayout"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-
-        <ImageView
-            android:id="@+id/cover"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:background="@color/colorPrimary"
-
-            android:transitionName="@string/image_trans_album"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintLayout"
             android:layout_width="0dp"
             android:layout_height="30dp"
-            android:layout_marginTop="150dp"
+            android:layout_marginTop="100dp"
             android:background="#45000000"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/cover"
@@ -121,6 +98,5 @@
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
