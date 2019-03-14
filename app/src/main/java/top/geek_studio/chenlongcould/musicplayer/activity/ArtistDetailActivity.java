@@ -87,10 +87,6 @@ public final class ArtistDetailActivity extends BaseCompatActivity {
 	};
 	private List<Disposable> mDisposables = new ArrayList<>();
 
-	/**
-	 * ------------- data ---------------
-	 */
-
 	private List<MusicItem> mSongs = new ArrayList<>();
 
 	@Override
@@ -128,7 +124,7 @@ public final class ArtistDetailActivity extends BaseCompatActivity {
 		final List<ArtistArtPath> paths = LitePal.where("mArtistId = ?", intentArtistId).find(ArtistArtPath.class);
 		if (paths.size() > 0) {
 			ArtistArtPath art = paths.get(0);
-			if (!art.getArtistArt().equals("null")) {
+			if (!"null".equals(art.getArtistArt())) {
 				Bitmap bitmap = Utils.Ui.readBitmapFromFile(paths.get(0).getArtistArt(), 50, 50);
 				if (bitmap != null) {
 					toolbarColor = Palette.from(bitmap).generate().getVibrantColor(Utils.Ui.getPrimaryColor(this));
@@ -179,8 +175,8 @@ public final class ArtistDetailActivity extends BaseCompatActivity {
 
 		final long[] totalDuration = {0};
 
-		int SIZE_DONE = 0;
-		int DURATION_DONE = 1;
+		int sizeDone = 0;
+		int durationDone = 1;
 
 		Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
 			List<String> mMusicIds = new ArrayList<>();
@@ -244,8 +240,8 @@ public final class ArtistDetailActivity extends BaseCompatActivity {
 						mSongs.add(builder.build());
 					} while (cursor2.moveToNext());
 					cursor2.close();
-					emitter.onNext(DURATION_DONE);
-					emitter.onNext(SIZE_DONE);
+					emitter.onNext(durationDone);
+					emitter.onNext(sizeDone);
 					emitter.onComplete();
 				}
 			}
@@ -260,11 +256,11 @@ public final class ArtistDetailActivity extends BaseCompatActivity {
 
 			@Override
 			public void onNext(Integer integer) {
-				if (integer == SIZE_DONE) {
+				if (integer == sizeDone) {
 					mArtistDetailOthBinding.songCountText.setText(String.valueOf(mSongs.size()));
 				}
 
-				if (integer == DURATION_DONE) {
+				if (integer == durationDone) {
 					mArtistDetailOthBinding.durationText.setText(Data.sSimpleDateFormat.format(new Date(totalDuration[0])));
 				}
 			}
@@ -286,6 +282,7 @@ public final class ArtistDetailActivity extends BaseCompatActivity {
 			if (cursor != null && cursor.moveToFirst()) {
 				int albumCount = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.NUMBER_OF_ALBUMS));
 				Log.d(TAG, "initData: " + albumCount);
+				cursor.close();
 				emitter.onNext(albumCount);
 			}
 		}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Integer>() {
@@ -342,7 +339,9 @@ public final class ArtistDetailActivity extends BaseCompatActivity {
 	protected void onDestroy() {
 		super.onDestroy();
 		for (Disposable d : mDisposables) {
-			if (!d.isDisposed()) d.dispose();
+			if (!d.isDisposed()) {
+				d.dispose();
+			}
 		}
 	}
 }

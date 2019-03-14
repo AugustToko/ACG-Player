@@ -16,19 +16,21 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author chenlongcould
+ */
 public final class ItemCoverThreadPool {
 	private static final int KEEP_ALIVE = 10;
 	private static ItemCoverThreadPool mInstance = null;
-	private static int MAX_POOL_SIZE;
-	BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>();
 	private ThreadPoolExecutor mThreadPoolExec;
 
 	private ItemCoverThreadPool() {
 		int coreNum = Runtime.getRuntime().availableProcessors();
-		MAX_POOL_SIZE = coreNum * 2;
+		int maxPoolSize = coreNum * 2;
+		BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>();
 		mThreadPoolExec = new ThreadPoolExecutor(
 				coreNum,
-				MAX_POOL_SIZE,
+				maxPoolSize,
 				KEEP_ALIVE,
 				TimeUnit.SECONDS,
 				workQueue);

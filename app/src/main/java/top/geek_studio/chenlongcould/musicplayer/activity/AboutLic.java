@@ -27,8 +27,8 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import top.geek_studio.chenlongcould.geeklibrary.DialogUtil;
 import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 /**
  * @author chenlongcould
@@ -36,8 +36,6 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 public final class AboutLic extends BaseCompatActivity {
 
 	private static final String TAG = "AboutLic";
-
-	private Button close;
 
 	private Disposable mDisposable;
 
@@ -48,7 +46,7 @@ public final class AboutLic extends BaseCompatActivity {
 
 		((Toolbar) findViewById(R.id.toolbar)).setNavigationOnClickListener(v -> onBackPressed());
 
-		close = findViewById(R.id.close_button_activity_lic);
+		final Button close = findViewById(R.id.close_button_activity_lic);
 
 		close.setEnabled(true);
 		close.setClickable(true);
@@ -56,7 +54,7 @@ public final class AboutLic extends BaseCompatActivity {
 
 		final TextView textView = findViewById(R.id.show_lic_activity_lic);
 
-		final AlertDialog load = Utils.Ui.getLoadingDialog(this, "Loading...");
+		final AlertDialog load = DialogUtil.getLoadingDialog(this, "Loading...");
 		load.show();
 
 		Observable.create((ObservableOnSubscribe<String>) observableEmitter -> {

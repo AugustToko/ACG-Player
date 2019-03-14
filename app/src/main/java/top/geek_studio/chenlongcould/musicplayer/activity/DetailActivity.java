@@ -27,18 +27,15 @@ public final class DetailActivity extends BaseCompatActivity {
 
 	public static final String TAG = "DetailActivity";
 
-	private ActivityInfoDetailBinding mDetailBinding;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
-		mDetailBinding = DataBindingUtil.setContentView(this, R.layout.activity_info_detail);
-		super.initView(mDetailBinding.toolbar, mDetailBinding.appbar);
+		final ActivityInfoDetailBinding detailBinding = DataBindingUtil.setContentView(this, R.layout.activity_info_detail);
+		super.initView(detailBinding.toolbar, detailBinding.appbar);
 		super.onCreate(savedInstanceState);
-//        super.initStyle();
 
-		setSupportActionBar(mDetailBinding.toolbar);
-		mDetailBinding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
+		setSupportActionBar(detailBinding.toolbar);
+		detailBinding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
 		List<Detail> infos = LitePal.findAll(Detail.class);
 
@@ -62,10 +59,15 @@ public final class DetailActivity extends BaseCompatActivity {
 			int totalDuration = 0;
 			int totalTimes = 0;
 			for (Detail info : infos) {
-				if (info.getPlayTimes() > maxTimes) maxTimes = info.getPlayTimes();
-				if (info.getMinimumPlayTimes() > minimumTimes)
+				if (info.getPlayTimes() > maxTimes) {
+					maxTimes = info.getPlayTimes();
+				}
+				if (info.getMinimumPlayTimes() > minimumTimes) {
 					minimumTimes = info.getMinimumPlayTimes();
-				if (info.getPlayDuration() > maxDuration) maxDuration = info.getPlayDuration();
+				}
+				if (info.getPlayDuration() > maxDuration) {
+					maxDuration = info.getPlayDuration();
+				}
 			}
 			for (Detail detail : infos) {
 				totalDuration += detail.getPlayDuration();
@@ -104,50 +106,50 @@ public final class DetailActivity extends BaseCompatActivity {
 				}
 			}
 
-			mDetailBinding.includeContent.textTotalPlays.setText(mDetailBinding.includeContent.textTotalPlays.getText() + String.valueOf(totalTimes) + " times");
-			mDetailBinding.includeContent.textTotalPlayTime.setText(mDetailBinding.includeContent.textTotalPlayTime.getText() + String.valueOf(Data.sSimpleDateFormat.format(new Date(totalDuration))) + " (mm:ss)");
+			detailBinding.includeContent.textTotalPlays.setText(detailBinding.includeContent.textTotalPlays.getText() + String.valueOf(totalTimes) + " times");
+			detailBinding.includeContent.textTotalPlayTime.setText(detailBinding.includeContent.textTotalPlayTime.getText() + String.valueOf(Data.sSimpleDateFormat.format(new Date(totalDuration))) + " (mm:ss)");
 
-			mDetailBinding.includeContent.t1.setText(mDetailBinding.includeContent.t1.getText() + String.valueOf(maxTimes) + " times");
-			mDetailBinding.includeContent.t2.setText(mDetailBinding.includeContent.t2.getText() + String.valueOf(Data.sSimpleDateFormat.format(new Date(maxDuration))) + " (mm:ss)");
-			mDetailBinding.includeContent.t3.setText(mDetailBinding.includeContent.t3.getText() + String.valueOf(minimumTimes) + " times");
+			detailBinding.includeContent.t1.setText(detailBinding.includeContent.t1.getText() + String.valueOf(maxTimes) + " times");
+			detailBinding.includeContent.t2.setText(detailBinding.includeContent.t2.getText() + String.valueOf(Data.sSimpleDateFormat.format(new Date(maxDuration))) + " (mm:ss)");
+			detailBinding.includeContent.t3.setText(detailBinding.includeContent.t3.getText() + String.valueOf(minimumTimes) + " times");
 
 			if (itemDuration != null) {
-				mDetailBinding.includeContent.includeItemPlayDuration.recyclerItemMusicName.setText(itemDuration.getMusicName());
-				mDetailBinding.includeContent.includeItemPlayDuration.recyclerItemMusicAlbumName.setText(itemDuration.getMusicAlbum());
-				mDetailBinding.includeContent.includeItemPlayDuration.recyclerItemMusicDuration.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(itemDuration.getDuration()))));
+				detailBinding.includeContent.includeItemPlayDuration.recyclerItemMusicName.setText(itemDuration.getMusicName());
+				detailBinding.includeContent.includeItemPlayDuration.recyclerItemMusicAlbumName.setText(itemDuration.getMusicAlbum());
+				detailBinding.includeContent.includeItemPlayDuration.recyclerItemMusicDuration.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(itemDuration.getDuration()))));
 				final String prefix = itemDuration.getMusicPath().substring(itemDuration.getMusicPath().lastIndexOf(".") + 1);
-				mDetailBinding.includeContent.includeItemPlayDuration.recyclerItemMusicTypeName.setText(prefix);
+				detailBinding.includeContent.includeItemPlayDuration.recyclerItemMusicTypeName.setText(prefix);
 				GlideApp.with(this).load(Utils.Audio.getCoverBitmap(this, itemDuration.getAlbumId()))
 						.diskCacheStrategy(DiskCacheStrategy.NONE)
-						.into(mDetailBinding.includeContent.includeItemPlayDuration.recyclerItemAlbumImage);
+						.into(detailBinding.includeContent.includeItemPlayDuration.recyclerItemAlbumImage);
 
-				mDetailBinding.includeContent.includeItemPlayDuration.recyclerItemMenu.setVisibility(View.GONE);
+				detailBinding.includeContent.includeItemPlayDuration.recyclerItemMenu.setVisibility(View.GONE);
 			}
 
 			if (itemMinimum != null) {
-				mDetailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMusicName.setText(itemMinimum.getMusicName());
-				mDetailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMusicAlbumName.setText(itemMinimum.getMusicAlbum());
-				mDetailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMusicDuration.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(itemMinimum.getDuration()))));
+				detailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMusicName.setText(itemMinimum.getMusicName());
+				detailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMusicAlbumName.setText(itemMinimum.getMusicAlbum());
+				detailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMusicDuration.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(itemMinimum.getDuration()))));
 				final String prefix = itemMinimum.getMusicPath().substring(itemMinimum.getMusicPath().lastIndexOf(".") + 1);
-				mDetailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMusicTypeName.setText(prefix);
+				detailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMusicTypeName.setText(prefix);
 				GlideApp.with(this).load(Utils.Audio.getCoverBitmap(this, itemMinimum.getAlbumId()))
 						.diskCacheStrategy(DiskCacheStrategy.NONE)
-						.into(mDetailBinding.includeContent.includeItemPlayMinitimes.recyclerItemAlbumImage);
+						.into(detailBinding.includeContent.includeItemPlayMinitimes.recyclerItemAlbumImage);
 
-				mDetailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMenu.setVisibility(View.GONE);
+				detailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMenu.setVisibility(View.GONE);
 			}
 
 			if (itemTimes != null) {
-				mDetailBinding.includeContent.includeItemPlaytimes.recyclerItemMusicName.setText(itemTimes.getMusicName());
-				mDetailBinding.includeContent.includeItemPlaytimes.recyclerItemMusicAlbumName.setText(itemTimes.getMusicAlbum());
-				mDetailBinding.includeContent.includeItemPlaytimes.recyclerItemMusicDuration.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(itemTimes.getDuration()))));
+				detailBinding.includeContent.includeItemPlaytimes.recyclerItemMusicName.setText(itemTimes.getMusicName());
+				detailBinding.includeContent.includeItemPlaytimes.recyclerItemMusicAlbumName.setText(itemTimes.getMusicAlbum());
+				detailBinding.includeContent.includeItemPlaytimes.recyclerItemMusicDuration.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(itemTimes.getDuration()))));
 				final String prefix = itemTimes.getMusicPath().substring(itemTimes.getMusicPath().lastIndexOf(".") + 1);
-				mDetailBinding.includeContent.includeItemPlaytimes.recyclerItemMusicTypeName.setText(prefix);
+				detailBinding.includeContent.includeItemPlaytimes.recyclerItemMusicTypeName.setText(prefix);
 				GlideApp.with(this).load(Utils.Audio.getCoverBitmap(this, itemTimes.getAlbumId()))
 						.diskCacheStrategy(DiskCacheStrategy.NONE)
-						.into(mDetailBinding.includeContent.includeItemPlaytimes.recyclerItemAlbumImage);
+						.into(detailBinding.includeContent.includeItemPlaytimes.recyclerItemAlbumImage);
 
-				mDetailBinding.includeContent.includeItemPlaytimes.recyclerItemMenu.setVisibility(View.GONE);
+				detailBinding.includeContent.includeItemPlaytimes.recyclerItemMenu.setVisibility(View.GONE);
 			}
 
 		} else {

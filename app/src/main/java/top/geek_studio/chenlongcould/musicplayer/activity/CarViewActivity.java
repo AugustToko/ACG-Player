@@ -42,7 +42,7 @@ public final class CarViewActivity extends AppCompatActivity {
 			actionBar.show();
 		}
 	};
-	private boolean BACK_PRESSED = false;
+	private boolean backPressed = false;
 	private View mContentView;
 	private final Runnable mHidePart2Runnable = new Runnable() {
 		@Override
@@ -142,7 +142,7 @@ public final class CarViewActivity extends AppCompatActivity {
 
 	@Override
 	public void onBackPressed() {
-		if (BACK_PRESSED) {
+		if (backPressed) {
 			return;
 		}
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -151,7 +151,7 @@ public final class CarViewActivity extends AppCompatActivity {
 		mContentView.setVisibility(View.GONE);
 		getWindow().setBackgroundDrawable(null);
 
-		BACK_PRESSED = true;
+		backPressed = true;
 		Data.sCarViewActivity = null;
 		Toast.makeText(this, "Exiting", Toast.LENGTH_SHORT).show();
 		Values.CurrentData.CURRENT_UI_MODE = Values.UIMODE.MODE_COMMON;

@@ -54,13 +54,20 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
  */
 public final class MusicService extends Service {
 
+	/**
+	 * 最短播放时间为3000毫秒
+	 */
 	public static final int MINIMUM_PLAY_TIME = 3000;
-	//PI requests
+	/**
+	 * PI requests
+	 * @see PendingIntent
+	 * */
 	public static final int REQUEST_PAUSE = 1;
+	private static final String TAG = "MusicService";
 	public static final int REQUEST_PLAY = 2;
 	public static final int REQUEST_NEXT = 3;
 	public static final int REQUEST_PRE = 4;
-	private static final String TAG = "MusicService";
+
 	private final MediaPlayer mMediaPlayer = new MediaPlayer();
 	private boolean hasPlayed = false;
 
@@ -82,6 +89,7 @@ public final class MusicService extends Service {
 			hasPlayed = true;
 			mMediaPlayer.start();
 			startFN();
+			PreferenceManager.getDefaultSharedPreferences(MusicService.this).edit().putInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, mMusicItem.get().getMusicID()).apply();
 		}
 
 		@Override
@@ -240,7 +248,8 @@ public final class MusicService extends Service {
 		PendingIntent pi = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 		Intent pause = new Intent();
-		pause.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPause));
+		pause.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
+		pause.putExtra("play_type", -1);
 		PendingIntent pauseIntent = PendingIntent.getBroadcast(context, REQUEST_PAUSE, pause, PendingIntent.FLAG_UPDATE_CURRENT);
 
 		//resume play...(before show notification, must has music in playing...)

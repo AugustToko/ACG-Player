@@ -35,7 +35,6 @@ import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentMusicListBi
 public final class MusicListFragment extends Fragment {
 
 	public static final String TAG = "MusicListFragment";
-	@SuppressWarnings("unused")
 	private static boolean sIsScrolling = false;
 	private FragmentMusicListBinding mMusicListBinding;
 	private MyRecyclerAdapter adapter;

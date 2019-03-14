@@ -24,7 +24,7 @@ public final class HttpUtil {
     /**
      * sample okHttp util
      */
-    public final void sedOkHttpRequest(String address, okhttp3.Callback callback) {
+	public static void sedOkHttpRequest(String address, okhttp3.Callback callback) {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .retryOnConnectionFailure(false)
                 .connectTimeout(5000, TimeUnit.MILLISECONDS)

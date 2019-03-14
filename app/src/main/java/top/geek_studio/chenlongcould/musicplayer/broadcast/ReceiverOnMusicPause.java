@@ -14,10 +14,6 @@ package top.geek_studio.chenlongcould.musicplayer.broadcast;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
-
-import top.geek_studio.chenlongcould.musicplayer.Values;
-import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 /**
  * @author chenlongcould
@@ -26,8 +22,6 @@ public final class ReceiverOnMusicPause extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Log.d(Values.TAG_UNIVERSAL_ONE, "onReceive: on pause");
-		ReceiverOnMusicPlay.pauseMusic();
-		Utils.Ui.setPlayButtonNowPause();
+//		ReceiverOnMusicPlay.pauseMusic();
 	}
 }

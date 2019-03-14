@@ -251,11 +251,11 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 						holder.mButton3.setAlpha(0);
 						holder.mButton4.setAlpha(0);
 
-						holder.mButton1.setVisibility(View.GONE);
-						holder.mButton2.setVisibility(View.GONE);
-						holder.mButton3.setVisibility(View.GONE);
-						holder.mButton4.setVisibility(View.GONE);
-						holder.mExpandText.setVisibility(View.GONE);
+						holder.mButton1.setVisibility(View.INVISIBLE);
+						holder.mButton2.setVisibility(View.INVISIBLE);
+						holder.mButton3.setVisibility(View.INVISIBLE);
+						holder.mButton4.setVisibility(View.INVISIBLE);
+						holder.mExpandText.setVisibility(View.INVISIBLE);
 
 					}
 
@@ -272,7 +272,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 			}
 
 			//cover rotation
-			ValueAnimator rotationAnima = new ValueAnimator();
+			final ValueAnimator rotationAnima = new ValueAnimator();
 			rotationAnima.setFloatValues(0f, 360f);
 			rotationAnima.setDuration(300);
 			rotationAnima.setInterpolator(new OvershootInterpolator());
@@ -324,28 +324,25 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 				break;
 
 				case Menu.FIRST + 4: {
-					String albumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
-					Cursor cursor = mActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
+					final String albumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
+					final Cursor cursor = mActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
 							MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum()}, null);
-
-					//int MainActivity
-					MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
-					Intent intent = new Intent(mainActivity, AlbumDetailActivity.class);
-					intent.putExtra("key", albumName);
 					if (cursor != null) {
+						final Intent intent = new Intent(mActivity, AlbumDetailActivity.class);
+						intent.putExtra("key", albumName);
 						cursor.moveToFirst();
 						int id = Integer.parseInt(cursor.getString(0));
 						intent.putExtra("_id", id);
+						mActivity.startActivity(intent);
 						cursor.close();
 					}
-					mActivity.startActivity(intent);
 
 				}
 				break;
 
 				case Menu.FIRST + 5: {
 					Intent intent = new Intent(mActivity, PublicActivity.class);
-					intent.putExtra("start_by", "detail");
+					intent.putExtra(PublicActivity.INTENT_START_BY, "detail");
 					mActivity.startActivity(intent);
 				}
 				break;
@@ -444,7 +441,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 					//设置全局ITEM
 					for (int i = 0; i < Data.sMusicItems.size(); i++) {
-						MusicItem item = Data.sMusicItems.get(i);
+						final MusicItem item = Data.sMusicItems.get(i);
 						if (item.getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
 							observableEmitter.onNext(i);
 							break;
@@ -521,6 +518,10 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 	/**
 	 * loader
 	 * load image to imageView (net, defDB, customDB, defAlbum)
+	 *
+	 * 1. DEFAULT DB {@link MediaStore.Audio.Albums#EXTERNAL_CONTENT_URI}
+	 *
+	 * 2. NET WORK <a href="http://ws.audioscrobbler.com"/>
 	 */
 	private void albumLoader(@NonNull final Context activity, @NonNull final ImageView imageView, final int albumId, @NonNull final String artist, @NonNull final String albumName) {
 		final String[] albumPath = {null};
@@ -580,14 +581,13 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 								loadPath2ImageView(mayPath, imageView);
 							} else {
 								//DB内不存在Cover, 且缓存也不存在, 进行下载
-								@SuppressWarnings("StringBufferReplaceableByString") final StringBuilder request = new StringBuilder("http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=")
-										.append(App.LAST_FM_KEY)
-										.append("&artist=")
-										.append(artist)
-										.append("&album=")
-										.append(albumName);
-								HttpUtil httpUtil = new HttpUtil();
-								httpUtil.sedOkHttpRequest(request.toString(), new Callback() {
+								String request = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" +
+										App.LAST_FM_KEY +
+										"&artist=" +
+										artist +
+										"&album=" +
+										albumName;
+								HttpUtil.sedOkHttpRequest(request, new Callback() {
 									@Override
 									public void onFailure(@NotNull Call call, @NotNull IOException e) {
 										imageView.post(() -> Toast.makeText(activity, e.getMessage(), Toast.LENGTH_SHORT).show());
@@ -607,7 +607,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 												if (img.toString().contains("http") && img.toString().contains("https")) {
 													Log.d(TAG, "onResponse: ok, now downloading...");
 
-													DownloadUtil.get().download(img.toString(), Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + "/" + "AlbumCovers"
+													DownloadUtil.get().download(img.toString(), Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separatorChar + "AlbumCovers"
 															, albumId + "." + img.substring(img.lastIndexOf(".") + 1), new DownloadUtil.OnDownloadListener() {
 																@Override
 																public void onDownloadSuccess(File file) {
@@ -667,7 +667,8 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 				}
 			} else {
 				Log.d(TAG, "albumLoader: load from Cache..., msg: FROM NET switch not checked");
-				if (!"null".equals(baseCoverPath) && !TextUtils.isEmpty(baseCoverPath)) {
+				if (!TextUtils.isEmpty(baseCoverPath) && !"null".equals(baseCoverPath)) {
+					assert baseCoverPath != null;
 					File file = new File(baseCoverPath);
 					if (file.exists()) {
 						Log.d(TAG, "albumLoader: exists...");
@@ -696,43 +697,28 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 				+ File.separatorChar + "ArtistCovers"
 				+ File.separatorChar + id + ".";
 
-		if (new File(mayPath + "png").exists()) {
-			return mayPath + "png";
+		if (new File(mayPath + FileType.PNG).exists()) {
+			return mayPath + FileType.PNG;
 		}
 
-		if (new File(mayPath + "jpg").exists()) {
-			return mayPath + "jpg";
+		if (new File(mayPath + FileType.JPG).exists()) {
+			return mayPath + FileType.JPG;
 		}
 
-		if (new File(mayPath + "gif").exists()) {
-			return mayPath + "gif";
+		if (new File(mayPath + FileType.GIF).exists()) {
+			return mayPath + FileType.GIF;
 		}
 
 		return null;
 	}
 
 	/**
-	 * load defaultAlbumImage by DB(from {@link MediaStore.Audio.Albums#ALBUM_ART})
-	 *
-	 * @deprecated
-	 */
-	private void loadCoverDefault(@NonNull final Context context, @NonNull final ImageView imageView, int album, int index) {
-		if (imageView.getTag(R.string.key_id_1) == null) {
-			Log.d(TAG, "key null");
-		} else {
-			//根据position判断是否为复用ViewHolder
-			if (((int) imageView.getTag(R.string.key_id_1)) != index) {
-				Log.e(TAG, "doInBackground: key error------------------skip");
-			} else {
-				imageView.post(() -> GlideApp.with(context)
-						.load(Utils.Audio.getCoverBitmap(context, album))
-						.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-						.centerCrop()
-						.override(100, 100)
-						.diskCacheStrategy(DiskCacheStrategy.NONE)
-						.into(imageView));
-			}
-		}
+	 * file type for AlbumCover or ArtistCover
+	 * */
+	private interface FileType {
+		String PNG = "png";
+		String JPG = "jpg";
+		String GIF = "gif";
 	}
 
 	/**
@@ -786,7 +772,6 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 			Log.e(TAG, "key null clear_image");
 			GlideApp.with(imageView).clear(imageView);
 		} else {
-			//根据position判断是否为复用ViewHolder
 			flag = true;
 		}
 		return flag;

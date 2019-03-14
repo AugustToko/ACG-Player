@@ -83,6 +83,9 @@ public interface Values {
 
 		String RECYCLER_VIEW_ITEM_STYLE = "RECYCLER_VIEW_ITEM_STYLE";
 
+		/**
+		 * 存储最后播放的音乐的Id
+		 */
 		String LAST_PLAY_MUSIC_ID = "LAST_PLAY_MUSIC_ID";
 	}
 
@@ -94,7 +97,7 @@ public interface Values {
 	interface BroadCast {
 		String ReceiverOnMusicPlay = "top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay";
 		String ReceiverOnMusicStop = "top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicStop";
-		String ReceiverOnMusicPause = "top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPause";
+		//		String ReceiverOnMusicPause = "top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPause";
 		String DayNightReceiver = "top.geek_studio.chenlongcould.musicplayer.broadcast.DayNightReceiver";
 	}
 

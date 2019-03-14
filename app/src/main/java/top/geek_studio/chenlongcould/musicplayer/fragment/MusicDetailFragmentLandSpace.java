@@ -76,7 +76,7 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
 	}
 
 	@Override
-	public void onAttach(Context context) {
+	public void onAttach(@NonNull Context context) {
 		super.onAttach(context);
 		mCarViewActivity = (CarViewActivity) context;
 		mHandler = new NotLeakHandler(mCarViewActivity);
@@ -109,14 +109,9 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
 				}
 
 				case R.id.menu_toolbar_debug: {
-//                    Snackbar.make(mSlidingUpPanelLayout,
-//                            "Next Will play" + Data.sMusicItems.get(Values.CurrentData.CURRENT_MUSIC_INDEX != Data.sMusicItems.size() ? Values.CurrentData.CURRENT_MUSIC_INDEX : 0)
-//                            , Snackbar.LENGTH_LONG).setAction("按钮", v -> {
-//                        //点击右侧的按钮之后的操作
-//                        Utils.SendSomeThing.sendPause(mMainActivity);
-//                    }).show();
 				}
 				break;
+				default:
 			}
 			return false;
 		});
@@ -255,6 +250,7 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
 					animator.start();
 					break;
 				}
+				default:
 			}
 		});
 
@@ -455,7 +451,7 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
 
 	public final void setButtonType(String type) {
 		mCarViewActivity.runOnUiThread(() -> GlideApp.with(mCarViewActivity)
-				.load(type.equals("play") ? R.drawable.ic_play_arrow_grey_600_24dp : R.drawable.ic_pause_black_24dp)
+				.load("play".equals(type) ? R.drawable.ic_play_arrow_grey_600_24dp : R.drawable.ic_pause_black_24dp)
 				.into(mMusicDetail2Binding.includePlayerControlCar.playButton));
 	}
 

@@ -79,23 +79,24 @@ public class NotificationUtils extends ContextWrapper {
 		PendingIntent pi = PendingIntent.getActivity(context, 0, intent, 0);
 
 		Intent pause = new Intent();
-		pause.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPause));
+		pause.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
+		pause.putExtra(ReceiverOnMusicPlay.INTENT_PLAY_TYPE, -1);
 		PendingIntent pauseIntent = PendingIntent.getBroadcast(context, REQUEST_PAUSE, pause, 0);
 
 		Intent play = new Intent();
 		play.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
-		play.putExtra("play_type", 2);
+		play.putExtra(ReceiverOnMusicPlay.INTENT_PLAY_TYPE, 2);
 		PendingIntent playIntent = PendingIntent.getBroadcast(context, REQUEST_PLAY, play, 0);
 
 		Intent next = new Intent();
 		next.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
-		next.putExtra("play_type", 6);
+		next.putExtra(ReceiverOnMusicPlay.INTENT_PLAY_TYPE, 6);
 		next.putExtra("args", "next");
 		PendingIntent nextIntent = PendingIntent.getBroadcast(context, REQUEST_NEXT, next, 0);
 
 		Intent previous = new Intent();
 		previous.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
-		previous.putExtra("play_type", 7);
+		previous.putExtra(ReceiverOnMusicPlay.INTENT_PLAY_TYPE, 7);
 		previous.putExtra("args", "previous");
 		PendingIntent previousIntent = PendingIntent.getBroadcast(context, REQUEST_PRE, previous, 0);
 

@@ -134,27 +134,25 @@ public final class Utils {
 		 * @param mediaUri mp3 path
 		 */
 		@NonNull
-		private static Bitmap getMp3CoverByMeta(final String mediaUri) {
+		private static Bitmap getMp3CoverByMeta(@NonNull Context context, final String mediaUri) {
 
-//            //检测不支持封面的音乐类型
-//            if (mediaUri.contains("ogg") || mediaUri.contains("flac")) {
-//                return BitmapFactory.decodeResource(Resources.getSystem(), R.drawable.ic_audiotrack_24px);
-//            }
-
-			if (mediaUri == null)
-				return BitmapFactory.decodeResource(Data.sActivities.get(0).getResources(), R.drawable.ic_audiotrack_24px);
+			if (mediaUri == null) {
+				return BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px);
+			}
 
 			final File file = new File(mediaUri);
-			if (file.isDirectory() || !file.exists())
-				return BitmapFactory.decodeResource(Data.sActivities.get(0).getResources(), R.drawable.ic_audiotrack_24px);
+			if (file.isDirectory() || !file.exists()) {
+				return BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px);
+			}
 
 			sMediaMetadataRetriever.setDataSource(mediaUri);
 			byte[] picture = sMediaMetadataRetriever.getEmbeddedPicture();
 
-			if (picture != null)
+			if (picture != null) {
 				return BitmapFactory.decodeByteArray(picture, 0, picture.length);
-			else
-				return BitmapFactory.decodeResource(Data.sActivities.get(0).getResources(), R.drawable.ic_audiotrack_24px);
+			} else {
+				return BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px);
+			}
 		}
 
 		/**
@@ -245,10 +243,6 @@ public final class Utils {
 
 		/**
 		 * 获取封面
-		 * <p>
-		 * same as {@link Audio#getMp3CoverByMeta(String)}
-		 * may call from {@link MusicService}
-		 *
 		 * @param mediaUri mp3 path
 		 */
 		private static Bitmap path2CoverByMeta(final String mediaUri, Context context) {
@@ -593,20 +587,6 @@ public final class Utils {
 			}
 		}
 
-		/**
-		 * by broadcast
-		 */
-		public static void setPlayButtonNowPause() {
-			if (!Data.sActivities.isEmpty()) {
-				MainActivity activity = (MainActivity) Data.sActivities.get(0);
-				activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.SET_BUTTON_PAUSE);
-
-				if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.CurrentData.MODE_CAR)) {
-					Data.sCarViewActivity.getFragmentLandSpace().setButtonType("play");
-				}
-			}
-		}
-
 		public static AlertDialog createMessageDialog(@NonNull final Activity context, @NonNull final String title, @NonNull final String message) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(context);
 			builder.setTitle(title);
@@ -856,10 +836,10 @@ public final class Utils {
 		/**
 		 * add into music List
 		 *
-		 * @param context MainActivity
-		 * @param item    MusicItem
+		 * @param context   MainActivity
+		 * @param musicItem MusicItem
 		 */
-		public static void addListDialog(Context context, MusicItem item) {
+		public static void addListDialog(Context context, MusicItem musicItem) {
 			final Resources resources = context.getResources();
 
 			final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
@@ -884,7 +864,7 @@ public final class Utils {
 					final int result = PlayListsUtil.createPlaylist(context, et.getText().toString());
 
 					if (result != -1) {
-						PlayListsUtil.addToPlaylist(context, item, result, false);
+						PlayListsUtil.addToPlaylist(context, musicItem, result, false);
 					}
 
 					dialog.dismiss();
@@ -901,10 +881,16 @@ public final class Utils {
 			builder.setSingleChoiceItems(context.getContentResolver()
 							.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null),
 					-1, MediaStore.Audio.Playlists.NAME, (dialog, which) -> {
+						//0 is favourite music list
 						if (which == 0) {
-							PlayListsUtil.addToPlaylist(context, item, MusicUtil.getFavoritesPlaylist(context).getId(), false);
+							PlayListItem favItem = MusicUtil.getFavoritesPlaylist(context);
+							if (!PlayListsUtil.doPlaylistContains(context, favItem.getId(), musicItem.getMusicID())) {
+								PlayListsUtil.addToPlaylist(context, musicItem, MusicUtil.getFavoritesPlaylist(context).getId(), false);
+							} else {
+								Toast.makeText(context, "Already in Favourite music list.", Toast.LENGTH_SHORT).show();
+							}
 						} else {
-							PlayListsUtil.addToPlaylist(context, item, Data.sPlayListItems.get(which).getId(), false);
+							PlayListsUtil.addToPlaylist(context, musicItem, Data.sPlayListItems.get(which).getId(), false);
 						}
 						dialog.dismiss();
 					});
@@ -941,8 +927,9 @@ public final class Utils {
 					}
 
 					final int result = PlayListsUtil.createPlaylist(context, et.getText().toString());
-					if (result != -1)
+					if (result != -1) {
 						PlayListsUtil.addToPlaylist(context, items, result, false);
+					}
 					dialog.dismiss();
 					Data.sPlayListItems.add(0, new PlayListItem(result, et.getText().toString()));
 
@@ -957,8 +944,16 @@ public final class Utils {
 			builder.setSingleChoiceItems(context.getContentResolver()
 							.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null),
 					-1, MediaStore.Audio.Playlists.NAME, (dialog, which) -> {
+						//0 is favourite music list
 						if (which == 0) {
-							PlayListsUtil.addToPlaylist(context, items, MusicUtil.getFavoritesPlaylist(context).getId(), false);
+							PlayListItem favItem = MusicUtil.getFavoritesPlaylist(context);
+							for (MusicItem item : items) {
+								if (!PlayListsUtil.doPlaylistContains(context, favItem.getId(), item.getMusicID())) {
+									PlayListsUtil.addToPlaylist(context, items, favItem.getId(), false);
+								} else {
+									Toast.makeText(context, "Already in Favourite music list.", Toast.LENGTH_SHORT).show();
+								}
+							}
 						} else {
 							PlayListsUtil.addToPlaylist(context, items, Data.sPlayListItems.get(which).getId(), false);
 						}
@@ -984,8 +979,9 @@ public final class Utils {
 		 */
 		public static void sendPause(final Context context) {
 			Intent intent = new Intent();
-			intent.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPause));
-			context.sendBroadcast(intent, "top.geek_studio.chenlongcould.musicplayer.broadcast");
+			intent.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
+			intent.putExtra("play_type", -1);
+			context.sendBroadcast(intent, Values.Permission.BROAD_CAST);
 		}
 
 		/**

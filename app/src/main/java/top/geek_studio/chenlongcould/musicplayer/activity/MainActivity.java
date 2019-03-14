@@ -103,16 +103,11 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 /**
  * @author chenlongcould
  */
-@SuppressWarnings("ConstantConditions")
 public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 	public static final String TAG = "MainActivity";
 
 	public static final char MUSIC_LIST_FRAGMENT_ID = '1';
-
-	public static final String MENU_COMMON = "MENU_COMMON";
-
-	public static final String MENU_CHOOSE = "MENU_CHOOSE";
 
 	public static final String TAB_MUSIC = "1";
 	public static final String TAB_ALBUM = "2";
@@ -329,13 +324,13 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		final Toolbar toolbar = mMainBinding.toolBar;
 		toolbar.getMenu().clear();
 		toolbar.inflateMenu(R.menu.menu_toolbar_main_common);
-		Menu menu = mMainBinding.toolBar.getMenu();
+		final Menu menu = mMainBinding.toolBar.getMenu();
 
-		MenuItem searchItem = menu.findItem(R.id.menu_toolbar_search);
+		final MenuItem searchItem = menu.findItem(R.id.menu_toolbar_search);
 		mSearchView.setMenuItem(searchItem);
 
 		toolbar.setOnMenuItemClickListener(item -> {
-			SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+			final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
 
 			switch (item.getItemId()) {
 				case R.id.menu_toolbar_exit: {
@@ -354,7 +349,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.LINEAR_TYPE);
 					editor.apply();
 					mPagerAdapter.notifyDataSetChanged();
-					AlbumListFragment albumListFragment = getAlbumListFragment();
+					final AlbumListFragment albumListFragment = getAlbumListFragment();
 					if (albumListFragment != null) {
 						albumListFragment.setRecyclerViewData();
 					}
@@ -366,7 +361,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					editor.apply();
 					mPagerAdapter.notifyDataSetChanged();
 
-					AlbumListFragment albumListFragment = getAlbumListFragment();
+					final AlbumListFragment albumListFragment = getAlbumListFragment();
 					if (albumListFragment != null) {
 						albumListFragment.setRecyclerViewData();
 					}
@@ -377,7 +372,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					editor.putInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.LINEAR_TYPE);
 					editor.apply();
 					mPagerAdapter.notifyDataSetChanged();
-					ArtistListFragment artistListFragment = getArtistFragment();
+					final ArtistListFragment artistListFragment = getArtistFragment();
 					if (artistListFragment != null) {
 						artistListFragment.setRecyclerViewData();
 					}
@@ -389,7 +384,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					editor.apply();
 					mPagerAdapter.notifyDataSetChanged();
 
-					ArtistListFragment artistListFragment = getArtistFragment();
+					final ArtistListFragment artistListFragment = getArtistFragment();
 					if (artistListFragment != null) {
 						artistListFragment.setRecyclerViewData();
 					}
@@ -618,7 +613,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				setSubtitle(Data.sPlayOrderList.size() + " Songs");
 
 				//service
-				Intent intent = new Intent(MainActivity.this, MusicService.class);
+				final Intent intent = new Intent(MainActivity.this, MusicService.class);
 				startService(intent);
 				Data.HAS_BIND = bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
 			}
@@ -661,7 +656,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 				//algorithm
 				for (MusicItem item : Data.sMusicItemsBackUp) {
-					String name = item.getMusicName();
+					final String name = item.getMusicName();
 					if (name.contains(filterStr.toLowerCase()) || name.contains(filterStr.toUpperCase())) {
 						Data.sMusicItems.add(item);
 					}
@@ -686,7 +681,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 				//algorithm
 				for (AlbumItem item : Data.sAlbumItemsBackUp) {
-					String name = item.getAlbumName();
+					final String name = item.getAlbumName();
 					if (name.contains(filterStr.toLowerCase()) || name.contains(filterStr.toUpperCase())) {
 						Data.sAlbumItems.add(item);
 					}
@@ -771,40 +766,43 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	private void initFragmentData() {
 
 		String tabOrder = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+
+		assert tabOrder != null;
+
 		for (char c : tabOrder.toCharArray()) {
 			if (c == '1') {
-				final String tab_1 = getResources().getString(R.string.music);
-				mTitles.add(tab_1);
+				final String tab1 = getResources().getString(R.string.music);
+				mTitles.add(tab1);
 				mFragmentList.add(MusicListFragment.newInstance());
-				mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab_1));
+				mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab1));
 			}
 
 			if (c == '2') {
-				final String tab_2 = getResources().getString(R.string.album);
-				mTitles.add(tab_2);
+				final String tab2 = getResources().getString(R.string.album);
+				mTitles.add(tab2);
 				mFragmentList.add(AlbumListFragment.newInstance());
-				mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab_2));
+				mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab2));
 			}
 
 			if (c == '3') {
-				final String tab_3 = getResources().getString(R.string.artist);
-				mTitles.add(tab_3);
+				final String tab3 = getResources().getString(R.string.artist);
+				mTitles.add(tab3);
 				mFragmentList.add(ArtistListFragment.newInstance());
-				mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab_3));
+				mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab3));
 			}
 
 			if (c == '4') {
-				final String tab_4 = getResources().getString(R.string.play_list);
-				mTitles.add(tab_4);
+				final String tab4 = getResources().getString(R.string.play_list);
+				mTitles.add(tab4);
 				mFragmentList.add(PlayListFragment.newInstance());
-				mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab_4));
+				mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab4));
 			}
 
 			if (c == '5') {
-				final String tab_5 = getResources().getString(R.string.tab_file);
-				mTitles.add(tab_5);
+				final String tab5 = getResources().getString(R.string.tab_file);
+				mTitles.add(tab5);
 				mFragmentList.add(FileViewFragment.newInstance());
-				mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab_5));
+				mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab5));
 			}
 		}
 
@@ -819,11 +817,11 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		mPagerAdapter = new MyPagerAdapter(getSupportFragmentManager(), mFragmentList, mTitles);
 		mMainBinding.viewPager.setAdapter(mPagerAdapter);
 		mMainBinding.viewPager.setOffscreenPageLimit(mTitles.size() > 1 ? mTitles.size() - 1 : 1);
-//        mMainBinding.tabLayout.setupWithViewPager(mMainBinding.viewPager);
 
 		inflateCommonMenu();
-		getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(false);       //hide
-		getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(false);      //hide
+		//hide
+		getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(false);
+		getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(false);
 
 		setTabLongClickListener();
 
@@ -852,10 +850,10 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 						case Menu.FIRST: {
 							if (!PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER).contains("1")) {
-								final String tab_1 = getResources().getString(R.string.music);
-								mTitles.add(tab_1);
+								final String tab1 = getResources().getString(R.string.music);
+								mTitles.add(tab1);
 								mFragmentList.add(MusicListFragment.newInstance());
-								mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab_1), mMainBinding.tabLayout.getTabCount() - 1);
+								mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab1), mMainBinding.tabLayout.getTabCount() - 1);
 								added = true;
 								typeAdded = "1";
 							}
@@ -864,10 +862,10 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 						case Menu.FIRST + 1: {
 							if (!PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER).contains("2")) {
-								final String tab_2 = getResources().getString(R.string.album);
-								mTitles.add(tab_2);
+								final String tab2 = getResources().getString(R.string.album);
+								mTitles.add(tab2);
 								mFragmentList.add(AlbumListFragment.newInstance());
-								mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab_2), mMainBinding.tabLayout.getTabCount() - 1);
+								mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab2), mMainBinding.tabLayout.getTabCount() - 1);
 								added = true;
 								typeAdded = "2";
 							}
@@ -876,10 +874,10 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 						case Menu.FIRST + 2: {
 							if (!PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER).contains("3")) {
-								final String tab_3 = getResources().getString(R.string.artist);
-								mTitles.add(tab_3);
+								final String tab3 = getResources().getString(R.string.artist);
+								mTitles.add(tab3);
 								mFragmentList.add(ArtistListFragment.newInstance());
-								mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab_3), mMainBinding.tabLayout.getTabCount() - 1);
+								mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab3), mMainBinding.tabLayout.getTabCount() - 1);
 								added = true;
 								typeAdded = "3";
 							}
@@ -888,10 +886,10 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 						case Menu.FIRST + 3: {
 							if (!PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER).contains("4")) {
-								final String tab_4 = getResources().getString(R.string.play_list);
-								mTitles.add(tab_4);
+								final String tab4 = getResources().getString(R.string.play_list);
+								mTitles.add(tab4);
 								mFragmentList.add(PlayListFragment.newInstance());
-								mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab_4), mMainBinding.tabLayout.getTabCount() - 1);
+								mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab4), mMainBinding.tabLayout.getTabCount() - 1);
 								added = true;
 								typeAdded = "4";
 							}
@@ -900,10 +898,10 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 						case Menu.FIRST + 4: {
 							if (!PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER).contains("5")) {
-								final String tab_5 = getResources().getString(R.string.tab_file);
-								mTitles.add(tab_5);
+								final String tab5 = getResources().getString(R.string.tab_file);
+								mTitles.add(tab5);
 								mFragmentList.add(FileViewFragment.newInstance());
-								mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab_5), mMainBinding.tabLayout.getTabCount() - 1);
+								mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab5), mMainBinding.tabLayout.getTabCount() - 1);
 								added = true;
 								typeAdded = "5";
 							}
@@ -1350,6 +1348,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					startActivity(new Intent(this, TestActivity.class));
 				}
 				break;
+				default:
 			}
 			return true;
 		});
@@ -1417,11 +1416,15 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 	@Nullable
 	public final PlayListFragment getPlayListFragment() {
-		if (mFragmentList.size() == 0) return null;
-		String order = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+		if (mFragmentList.size() == 0) {
+			return null;
+		}
+		final String order = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
 		if (order.contains(TAB_PLAYLIST)) {
 			PlayListFragment musicListFragment = (PlayListFragment) mFragmentList.get(order.indexOf(TAB_PLAYLIST));
-			if (musicListFragment != null) return musicListFragment;
+			if (musicListFragment != null) {
+				return musicListFragment;
+			}
 		}
 		return null;
 	}
@@ -1439,11 +1442,16 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 	@Nullable
 	public final ArtistListFragment getArtistFragment() {
-		if (mFragmentList.size() == 0) return null;
-		String order = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+		if (mFragmentList.size() == 0) {
+			return null;
+		}
+		final String order = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+		assert order != null;
 		if (order.contains(TAB_ARTIST)) {
 			ArtistListFragment fragment = (ArtistListFragment) mFragmentList.get(order.indexOf(TAB_ARTIST));
-			if (fragment != null) return fragment;
+			if (fragment != null) {
+				return fragment;
+			}
 		}
 		return null;
 	}

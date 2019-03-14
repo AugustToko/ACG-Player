@@ -77,8 +77,6 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
 	private MainActivity mMainActivity;
 
-//    private ViewHolder mCurrentBind;
-
 	public MyRecyclerAdapter2AlbumList(MainActivity activity, List<AlbumItem> albumNameList, int type) {
 		this.mAlbumNameList = albumNameList;
 		mMainActivity = activity;
