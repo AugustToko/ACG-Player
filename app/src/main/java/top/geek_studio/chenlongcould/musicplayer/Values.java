@@ -117,25 +117,6 @@ public interface Values {
 		public static final String LAG_TAG = "LAG_TAG";
 	}
 
-	final class HandlerWhat {
-
-		/**
-		 * Handler msg.what
-		 */
-		public static final int SEEK_BAR_UPDATE = 53;
-		public static final int INIT_SEEK_BAR = 54;
-
-		/**
-		 * in MainActivity
-		 */
-		public static final int SET_BUTTON_PLAY = 58;
-		public static final int SET_BUTTON_PAUSE = 57;
-		public static final int LOAD_INTO_NAV_IMAGE = 5003;
-
-		public static final int RECYCLER_SCROLL = 55001;
-
-	}
-
 	final class CurrentData {
 
 		/**
@@ -157,7 +138,11 @@ public interface Values {
 		 */
 		//default value -1 or null
 		public static int CURRENT_PAGE_INDEX = 0;
-		public static int CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = -1;            //存储使浮动菜单弹出的item,def = -1
+
+		/**
+		 * 存储使浮动菜单弹出的item,def = -1
+		 */
+		public static int CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = -1;
 
 		/**
 		 * 当前序列指针, 指向 {@link Data#sPlayOrderList} 的位置
@@ -190,7 +175,9 @@ public interface Values {
 
 		public static boolean NIGHT_MODE = false;
 
-		//background style model
+		/**
+		 * background style model
+		 * */
 		public static String DETAIL_BACKGROUND = STYLE_BACKGROUND_BLUR;
 	}
 

@@ -17,7 +17,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.View;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -125,7 +124,7 @@ public final class ArtistDetailActivity extends BaseCompatActivity {
 		if (paths.size() > 0) {
 			ArtistArtPath art = paths.get(0);
 			if (!"null".equals(art.getArtistArt())) {
-				Bitmap bitmap = Utils.Ui.readBitmapFromFile(paths.get(0).getArtistArt(), 50, 50);
+				final Bitmap bitmap = Utils.Ui.readBitmapFromFile(paths.get(0).getArtistArt(), 50, 50);
 				if (bitmap != null) {
 					toolbarColor = Palette.from(bitmap).generate().getVibrantColor(Utils.Ui.getPrimaryColor(this));
 				} else {
@@ -179,7 +178,7 @@ public final class ArtistDetailActivity extends BaseCompatActivity {
 		int durationDone = 1;
 
 		Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
-			List<String> mMusicIds = new ArrayList<>();
+			final List<String> mMusicIds = new ArrayList<>();
 
 			//根据Album名称查music ID
 			final Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -187,7 +186,7 @@ public final class ArtistDetailActivity extends BaseCompatActivity {
 			if (cursor != null && cursor.getCount() > 0) {
 				cursor.moveToFirst();
 				do {
-					String id = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
+					final String id = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
 					mMusicIds.add(id);
 				} while (cursor.moveToNext());
 				cursor.close();
@@ -195,7 +194,7 @@ public final class ArtistDetailActivity extends BaseCompatActivity {
 
 			//selection...
 			if (mMusicIds.size() > 0) {
-				StringBuilder selection = new StringBuilder(MediaStore.Audio.Media._ID + " IN (");
+				final StringBuilder selection = new StringBuilder(MediaStore.Audio.Media._ID + " IN (");
 				for (int i = 0; i < mMusicIds.size(); i++) {
 					selection.append("?");
 					if (i != mMusicIds.size() - 1) {
@@ -277,11 +276,10 @@ public final class ArtistDetailActivity extends BaseCompatActivity {
 		});
 
 		Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
-			Cursor cursor = getContentResolver().query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, null,
+			final Cursor cursor = getContentResolver().query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, null,
 					MediaStore.Audio.Artists._ID + " = ?", new String[]{intentArtistId}, MediaStore.Audio.Artists.DEFAULT_SORT_ORDER);
 			if (cursor != null && cursor.moveToFirst()) {
 				int albumCount = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.NUMBER_OF_ALBUMS));
-				Log.d(TAG, "initData: " + albumCount);
 				cursor.close();
 				emitter.onNext(albumCount);
 			}

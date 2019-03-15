@@ -88,8 +88,8 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		musicDetailFragment.setCurrentInfo(musicName, albumName, cover);
 
 		reSetSeekBar();         //防止seekBar跳动到Max
-		musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
-		musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
+		musicDetailFragment.getHandler().sendEmptyMessage(MusicDetailFragment.HandlerWhat.INIT_SEEK_BAR);
+		musicDetailFragment.getHandler().sendEmptyMessage(MusicDetailFragment.HandlerWhat.RECYCLER_SCROLL);
 		((MainActivity) Data.sActivities.get(0)).getMainBinding().slidingLayout.setTouchEnabled(true);
 	}
 
@@ -200,8 +200,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		}
 	}
 
-	////////////////////////MEDIA CONTROL/////////////////////////////
-
 	@Nullable
 	public static MusicItem getCurrentItem() {
 		if (Data.sMusicBinder != null) {
@@ -216,6 +214,8 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		return null;
 	}
 
+	////////////////////////MEDIA CONTROL/////////////////////////////
+
 	public static void sureCar() {
 		//set data (image and name)
 		if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.CurrentData.MODE_CAR)) {
@@ -228,6 +228,8 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		Log.d(TAG, "onReceive: done");
 
 		final int type = intent.getIntExtra(INTENT_PLAY_TYPE, 0);
+
+		final LocalBroadcastManager manager = LocalBroadcastManager.getInstance(context);
 
 		///////////////////////////BEFORE PLAYER SET/////////////////////////////////////////
 
@@ -320,8 +322,8 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 						musicDetailFragment.setCurrentInfoWithoutMainImage(musicName, albumName, cover);
 						reSetSeekBar();
 
-						musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
-						musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
+						musicDetailFragment.getHandler().sendEmptyMessage(MusicDetailFragment.HandlerWhat.INIT_SEEK_BAR);
+						musicDetailFragment.getHandler().sendEmptyMessage(MusicDetailFragment.HandlerWhat.RECYCLER_SCROLL);
 					} else {
 						uiSet(musicDetailFragment, targetIndex);
 					}
@@ -342,11 +344,19 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 				sureCar();
 
 				Utils.Ui.setPlayButtonNowPlaying();
-				MusicDetailFragment fragment = ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment();
+
 				//update seek
-				fragment.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
-				fragment.setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Utils.Audio.getCoverBitmap(context, Data.sCurrentMusicItem.getAlbumId()));
-				((MainActivity) Data.sActivities.get(0)).getMainBinding().slidingLayout.setTouchEnabled(true);
+				final Intent initSeekBarIntent = new Intent();
+				initSeekBarIntent.setAction(MusicDetailFragment.BroadCastAction.ACTION_INIT_SEEK_BAR);
+
+				final Intent updateInfo = new Intent();
+				updateInfo.setAction(MusicDetailFragment.BroadCastAction.ACTION_UPDATE_CURRENT_INFO);
+
+				manager.sendBroadcast(updateInfo);
+				manager.sendBroadcast(initSeekBarIntent);
+
+				MainActivity.mHandler.sendEmptyMessage(MainActivity.SET_SLIDE_TOUCH_ENABLE);
+
 			}
 			break;
 			default:
@@ -400,17 +410,17 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 			if (!Data.sActivities.isEmpty()) {
 
-				MusicDetailFragment musicDetailFragment = ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment();
+				final MusicDetailFragment musicDetailFragment = ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment();
 
-				final Bitmap cover = Utils.Audio.getCoverBitmap(Data.sActivities.get(0), Data.sNextWillPlayItem.getAlbumId());
+				final Bitmap cover = Utils.Audio.getCoverBitmap(musicDetailFragment.getContext(), Data.sNextWillPlayItem.getAlbumId());
 				sureCar();
 
 				Utils.Ui.setPlayButtonNowPlaying();
 				musicDetailFragment.setCurrentInfo(Data.sNextWillPlayItem.getMusicName(), Data.sNextWillPlayItem.getMusicAlbum(), cover);
 
 				reSetSeekBar();         //防止seekBar跳动到Max
-				musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
-				musicDetailFragment.getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
+				musicDetailFragment.getHandler().sendEmptyMessage(MusicDetailFragment.HandlerWhat.INIT_SEEK_BAR);
+				musicDetailFragment.getHandler().sendEmptyMessage(MusicDetailFragment.HandlerWhat.RECYCLER_SCROLL);
 			}
 
 			Data.sNextWillPlayItem = null;

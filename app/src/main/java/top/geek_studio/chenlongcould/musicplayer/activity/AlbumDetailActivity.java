@@ -152,6 +152,9 @@ public final class AlbumDetailActivity extends BaseCompatActivity {
 
 	}
 
+	/**
+	 * loadData
+	 */
 	private void initData() {
 		final Intent intent = getIntent();
 		if (intent != null) {

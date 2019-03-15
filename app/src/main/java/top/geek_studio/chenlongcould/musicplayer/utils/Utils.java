@@ -94,6 +94,7 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
+import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
@@ -579,7 +580,7 @@ public final class Utils {
 		public static void setPlayButtonNowPlaying() {
 			if (!Data.sActivities.isEmpty()) {
 				MainActivity activity = (MainActivity) Data.sActivities.get(0);
-				activity.getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.SET_BUTTON_PLAY);
+				activity.getMusicDetailFragment().getHandler().sendEmptyMessage(MusicDetailFragment.HandlerWhat.SET_BUTTON_PLAY);
 
 				if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.CurrentData.MODE_CAR)) {
 					Data.sCarViewActivity.getFragmentLandSpace().setButtonType("pause");
@@ -746,7 +747,9 @@ public final class Utils {
 		 * @deprecated use {@link GkToolbar#setOverlayColor(int)}
 		 */
 		public static void setOverToolbarColor(Toolbar toolbar, @ColorInt int color) {
-			if (toolbar.getNavigationIcon() != null) toolbar.getNavigationIcon().setTint(color);
+			if (toolbar.getNavigationIcon() != null) {
+				toolbar.getNavigationIcon().setTint(color);
+			}
 			toolbar.setTitleTextColor(color);
 
 			if (toolbar.getSubtitle() != null) {

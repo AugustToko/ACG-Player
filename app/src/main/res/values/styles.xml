@@ -38,6 +38,7 @@
     <style name="SplashActivityTheme" parent="MyBaseTheme">
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowBackground">@drawable/activity_bg_bitmap</item>
     </style>
 
     <style name="LightTheme" parent="CommonActivityTheme">

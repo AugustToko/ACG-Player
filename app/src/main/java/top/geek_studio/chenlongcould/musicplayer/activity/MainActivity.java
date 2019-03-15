@@ -130,6 +130,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	 */
 	public static final int UP = 50070;
 	public static final int DOWN = 50071;
+	public static final int LOAD_INTO_NAV_IMAGE = 5003;
+	public static final int SET_SLIDE_TOUCH_ENABLE = 5004;
 
 	/**
 	 * 检测当前 slide 的位置.
@@ -148,7 +150,12 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	 * ALL FRAGMENTS
 	 */
 	private List<Fragment> mFragmentList = new ArrayList<>();
-	private NotLeakHandler mHandler;
+
+	/**
+	 * handler
+	 */
+	public static NotLeakHandler mHandler = null;
+
 	private ActivityMainBinding mMainBinding;
 	private ActionBarDrawerToggle mDrawerToggle;
 	private MyPagerAdapter mPagerAdapter;
@@ -203,7 +210,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
 
 		//监听耳机(有线或无线)的插拔动作, 拔出暂停音乐
-		IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+		final IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
 		intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
 		registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
 
@@ -456,7 +463,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 									.append("https://www.coolapk.com/apk/top.geek_studio.chenlongcould.musicplayer.Common")
 									.append("\r\n");
 
-							for (MusicItem item : Data.sMusicItems) {
+							for (final MusicItem item : Data.sMusicItems) {
 								for (int id : getMusicListFragment().getAdapter().getSelected()) {
 									if (id == item.getMusicID()) {
 										content.append(item.getMusicName()).append("\r\n");
@@ -732,9 +739,9 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 						builder.setMessage(getString(R.string.close_the_tab_x_int, tab.getText()));
 						builder.setCancelable(true);
 						builder.setPositiveButton(getString(R.string.sure), (dialog, which) -> {
-							SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-							SharedPreferences.Editor editor = preferences.edit();
-							StringBuilder currentOrder = new StringBuilder(preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER));
+							final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+							final SharedPreferences.Editor editor = preferences.edit();
+							final StringBuilder currentOrder = new StringBuilder(preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER));
 							currentOrder.deleteCharAt(pos);
 							editor.putString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, currentOrder.toString());
 
@@ -1065,18 +1072,16 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 		getWindow().setNavigationBarColor(Utils.Ui.getPrimaryDarkColor(this));
 
-		final boolean[] needSetColor = {true};
-
 		Observable.create((ObservableOnSubscribe<Theme>) emitter -> {
-			final String themeId = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.SELECT_THEME, "null");
+			final String themeId = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.SELECT_THEME, ThemeActivity.DEFAULT_THEME);
 			if (themeId != null && !"null".equals(themeId)) {
 				final File themeFile = ThemeUtils.getThemeFile(this, themeId);
-				final Theme theme = ThemeUtils.fileToTheme(themeFile);
-				if (theme != null && theme.getSupport_area().contains(ThemeStore.SupportArea.NAV)) {
-					Data.sTheme = theme;
-					emitter.onNext(theme);
-				}
+				Data.sTheme = ThemeUtils.fileToTheme(themeFile);
+			} else {
+				Data.sTheme = null;
 			}
+
+			emitter.onNext(Data.sTheme);
 			emitter.onComplete();
 		}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<Theme>() {
 			@Override
@@ -1086,62 +1091,64 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 			@Override
 			public final void onNext(Theme theme) {
-				if (theme != null) {
-					mMainBinding.styleNav.setVisibility(View.VISIBLE);
-					mMainBinding.styleTextNavTitle.setText(theme.getTitle());
-					mMainBinding.styleTextNavName.setText(theme.getNav_name());
 
-					for (String area : theme.getSelect().split(",")) {
+				mMainBinding.styleNav.setVisibility(View.VISIBLE);
+				mMainBinding.styleTextNavTitle.setText(theme.getTitle());
+				mMainBinding.styleTextNavName.setText(theme.getNav_name());
 
-						//检测是否匹配到NAV
-						if (area.contains(ThemeStore.SupportArea.NAV)) {
+				for (String area : theme.getSelect().split(",")) {
 
-							String bgPath = theme.getPath() + File.separatorChar + ThemeStore.DIR_IMG_NAV + File.separatorChar + area;
-							GlideApp.with(MainActivity.this)
-									.load(bgPath)
-									.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-									.diskCacheStrategy(DiskCacheStrategy.NONE)
-									.into(mMainBinding.styleImgNav);
-						}
+					//检测是否匹配到NAV
+					if (area.contains(ThemeStore.SupportArea.NAV)) {
 
-						// TODO: 2019/3/6 关闭主题 但仍有背景图片
-						//检测是否匹配到BG
-						if (area.contains(ThemeStore.SupportArea.BG)) {
-							needSetColor[0] = false;
+						String bgPath = theme.getPath() + File.separatorChar + ThemeStore.DIR_IMG_NAV + File.separatorChar + area;
 
-							final String bgPath = ThemeUtils.getBgFileByName(theme, area);
-
-							mMainBinding.toolBar.setBackgroundColor(Color.TRANSPARENT);
-							mMainBinding.tabLayout.setBackgroundColor(Color.TRANSPARENT);
-							mMainBinding.appbar.setBackgroundColor(Color.TRANSPARENT);
-
-							GlideApp.with(MainActivity.this).load(bgPath)
-									.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-									.apply(bitmapTransform(new BlurTransformation(10, 10)))
-									.into(mMainBinding.bgImage);
-						}
+						GlideApp.with(MainActivity.this)
+								.load(bgPath)
+								.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+								.diskCacheStrategy(DiskCacheStrategy.NONE)
+								.into(mMainBinding.styleImgNav);
 					}
-				} else {
-					mMainBinding.styleNav.setVisibility(View.GONE);
+
+					//检测是否匹配到BG
+					if (area.contains(ThemeStore.SupportArea.BG)) {
+
+						final String bgPath = ThemeUtils.getBgFileByName(theme, area);
+
+						mMainBinding.toolBar.setBackgroundColor(Color.TRANSPARENT);
+						mMainBinding.tabLayout.setBackgroundColor(Color.TRANSPARENT);
+						mMainBinding.appbar.setBackgroundColor(Color.TRANSPARENT);
+
+						GlideApp.with(MainActivity.this).load(bgPath)
+								.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+								.apply(bitmapTransform(new BlurTransformation(10, 10)))
+								.into(mMainBinding.bgImage);
+
+						setStatusBarTextColor(MainActivity.this, new Palette.Builder(Utils.Ui.readBitmapFromFile(bgPath, 50, 50))
+								.generate().getVibrantColor(Utils.Ui.getPrimaryColor(MainActivity.this)));
+					}
 				}
 			}
 
 			@Override
 			public final void onError(Throwable throwable) {
-				mMainBinding.styleNav.setVisibility(View.GONE);
+				Log.d(TAG, "onError: " + throwable.getMessage());
+
+				//theme is null, call onError
+
+				mMainBinding.styleNav.setVisibility(View.INVISIBLE);
+
+				GlideApp.with(mMainBinding.bgImage).clear(mMainBinding.bgImage);
+
+				@ColorInt int color = Utils.Ui.getPrimaryColor(MainActivity.this);
+				setStatusBarTextColor(MainActivity.this, color);
+				mMainBinding.tabLayout.setBackgroundColor(color);
+				mMainBinding.appbar.setBackgroundColor(color);
+				mMainBinding.toolBar.setBackgroundColor(color);
 			}
 
 			@Override
 			public final void onComplete() {
-				if (needSetColor[0]) {
-
-					@ColorInt int color = Utils.Ui.getPrimaryColor(MainActivity.this);
-					setStatusBarTextColor(MainActivity.this, color);
-					mMainBinding.tabLayout.setBackgroundColor(Utils.Ui.getPrimaryColor(MainActivity.this));
-					mMainBinding.appbar.setBackgroundColor(Utils.Ui.getPrimaryColor(MainActivity.this));
-					mMainBinding.toolBar.setBackgroundColor(Utils.Ui.getPrimaryColor(MainActivity.this));
-					mMainBinding.bgImage.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.activityDefaultColor));
-				}
 			}
 		});
 	}
@@ -1203,11 +1210,15 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 							getAlbumListFragment().getRecyclerView().smoothScrollToPosition(0);
 						}
 					}
+					break;
+					default:
 				}
 
 			}
 			toolbarClicked = true;
-			new Handler().postDelayed(() -> toolbarClicked = false, 1000);         //双击机制
+
+			//双击机制
+			new Handler().postDelayed(() -> toolbarClicked = false, 1000);
 		});
 
 		setSupportActionBar(mMainBinding.toolBar);
@@ -1238,7 +1249,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			@Override
 			public void onPanelSlide(View panel, float slideOffset) {
 
-				getMusicDetailFragment().getHandler().sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
+				getMusicDetailFragment().getHandler().sendEmptyMessage(MusicDetailFragment.HandlerWhat.RECYCLER_SCROLL);
 
 				CURRENT_SLIDE_OFFSET = slideOffset;
 
@@ -1255,21 +1266,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				}
 
 				if (current == 0) {
-
-//                    FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-//                    fragmentTransaction.hide(mAlbumListFragment).hide(mPlayListFragment).hide(mPlayListFragment);
-//                    fragmentTransaction.commit();
-//                    mMusicListFragment.visibleOrGone(View.GONE);
-
 					//隐藏BODY
-					mMusicDetailFragment.getNowPlayingBody().setVisibility(View.GONE);
-//
-//                    mMainBinding.tabLayout.setVisibility(View.GONE);
-//                    mMainBinding.tabLayout.setVisibility(View.GONE);
-//
-//                    if (AlbumListFragment.VIEW_HAS_LOAD)
-//                        mAlbumListFragment.visibleOrGone(View.GONE);
-//                    mPlayListFragment.visibleOrGone(View.GONE);
+					mMusicDetailFragment.getNowPlayingBody().setVisibility(View.INVISIBLE);
 
 					//start animation
 					if (ANIMATION_FLAG) {
@@ -1281,13 +1279,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					mMainBinding.tabLayout.setVisibility(View.VISIBLE);
 					mMainBinding.tabLayout.setVisibility(View.VISIBLE);
 					mMusicDetailFragment.getNowPlayingBody().setVisibility(View.VISIBLE);
-//                    if (AlbumListFragment.VIEW_HAS_LOAD)
-//                        mAlbumListFragment.visibleOrGone(View.VISIBLE);
-////                    mPlayListFragment.visibleOrGone(View.VISIBLE);
-////                    mMusicListFragment.visibleOrGone(View.VISIBLE);
-//                    FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-//                    fragmentTransaction.show(mAlbumListFragment).show(mPlayListFragment).show(mPlayListFragment);
-//                    fragmentTransaction.commit();
 				}
 			}
 
@@ -1295,8 +1286,9 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			public final void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
 				if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
 					mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-				} else if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED)
+				} else if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
 					mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+				}
 			}
 		});
 
@@ -1353,11 +1345,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			return true;
 		});
 
-		// 参数：开启抽屉的activity、DrawerLayout的对象、toolbar按钮打开关闭的对象、描述open drawer、描述close drawer
 		mDrawerToggle = new ActionBarDrawerToggle(this, mMainBinding.drawerLayout, mMainBinding.toolBar, R.string.open, R.string.close);
-		// 添加抽屉按钮，通过点击按钮实现打开和关闭功能; 如果不想要抽屉按钮，只允许在侧边边界拉出侧边栏，可以不写此行代码
 		mDrawerToggle.syncState();
-		// 设置按钮的动画效果; 如果不想要打开关闭抽屉时的箭头动画效果，可以不写此行代码
 		mMainBinding.drawerLayout.addDrawerListener(mDrawerToggle);
 
 	}
@@ -1384,7 +1373,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			return null;
 		}
 
-		String order = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+		final String order = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
 		if (order.contains(TAB_MUSIC)) {
 			MusicListFragment musicListFragment = (MusicListFragment) mFragmentList.get(order.indexOf(TAB_MUSIC));
 			if (musicListFragment != null) {
@@ -1431,11 +1420,15 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 	@Nullable
 	public final FileViewFragment getFileViewerFragment() {
-		if (mFragmentList.size() == 0) return null;
+		if (mFragmentList.size() == 0) {
+			return null;
+		}
 		String order = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
 		if (order.contains(TAB_FILE)) {
 			FileViewFragment musicListFragment = (FileViewFragment) mFragmentList.get(order.indexOf(TAB_FILE));
-			if (musicListFragment != null) return musicListFragment;
+			if (musicListFragment != null) {
+				return musicListFragment;
+			}
 		}
 		return null;
 	}
@@ -1482,7 +1475,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		@Override
 		public final void handleMessage(Message msg) {
 			switch (msg.what) {
-				case Values.HandlerWhat.LOAD_INTO_NAV_IMAGE: {
+				case LOAD_INTO_NAV_IMAGE: {
 					mWeakReference.get().runOnUiThread(() -> {
 						final Bitmap cover = (Bitmap) msg.obj;
 						GlideApp.with(mWeakReference.get())
@@ -1500,6 +1493,11 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 				case DOWN: {
 					mMainBinding.slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+				}
+				break;
+
+				case SET_SLIDE_TOUCH_ENABLE: {
+					mMainBinding.slidingLayout.setTouchEnabled(true);
 				}
 				break;
 				default:

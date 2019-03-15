@@ -103,11 +103,45 @@ public final class MusicDetailFragment extends Fragment {
 	//////////////////////////////////////////////////////////////////////////////////////
 
 	public static final String TAG = "MusicDetailFragment";
+
 	/**
 	 * @see MainActivity#CURRENT_SLIDE_OFFSET
 	 */
 	public static float CURRENT_SLIDE_OFFSET = 1;
-	public NotLeakHandler mHandler;
+
+	/**
+	 * Handler
+	 */
+	private NotLeakHandler mHandler;
+	private BroadcastReceiver mButtonChangeReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			String action = intent.getAction();
+			if (action == null) {
+				return;
+			}
+			switch (action) {
+				case BroadCastAction.ACTION_SCROLL: {
+					mHandler.sendEmptyMessage(HandlerWhat.RECYCLER_SCROLL);
+				}
+				break;
+				case BroadCastAction.ACTION_CHANGE_BUTTON_PAUSE: {
+					mHandler.sendEmptyMessage(HandlerWhat.SET_BUTTON_PAUSE);
+				}
+				break;
+				case BroadCastAction.ACTION_INIT_SEEK_BAR: {
+					mHandler.sendEmptyMessage(HandlerWhat.INIT_SEEK_BAR);
+				}
+				break;
+				case BroadCastAction.ACTION_UPDATE_CURRENT_INFO: {
+					setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Utils.Audio.getCoverBitmap(context, Data.sCurrentMusicItem.getAlbumId()));
+				}
+				break;
+				default:
+			}
+		}
+	};
+
 	float mLastX = 0;
 	float mLastY = 0;
 	float moveX = 0;
@@ -205,57 +239,18 @@ public final class MusicDetailFragment extends Fragment {
 	private volatile AtomicBoolean lc = new AtomicBoolean(false);
 
 	/**
-	 * broadcast
-	 */
-	private LocalBroadcastManager mBroadcastManager;
-	private BroadcastReceiver mButtonChangeReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			String action = intent.getAction();
-			if (action == null) {
-				return;
-			}
-			switch (action) {
-				case BroadCastAction.ACTION_SCROLL: {
-					mHandler.sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
-				}
-				break;
-				case BroadCastAction.ACTION_CHANGE_BUTTON_PAUSE: {
-					mHandler.sendEmptyMessage(Values.HandlerWhat.SET_BUTTON_PAUSE);
-				}
-				break;
-				default:
-			}
-		}
-	};
-
-	@Override
-	public void onAttach(@NotNull Context context) {
-		Log.d(Values.LogTAG.LAG_TAG, "onAttach: MusicDetailFragment");
-		super.onAttach(context);
-		mMainActivity = (MainActivity) context;
-
-		mHandlerThread = new HandlerThread("Handler Thread in MusicDetailActivity");
-		mHandlerThread.start();
-		mHandler = new MusicDetailFragment.NotLeakHandler(mMainActivity, mHandlerThread.getLooper());
-
-		mBroadcastManager = LocalBroadcastManager.getInstance(context);
-		receiveButtonChange();
-	}
-
-	public static MusicDetailFragment newInstance() {
-		return new MusicDetailFragment();
-	}
-
-	/**
 	 * changeButton play or pause
 	 */
 	private void receiveButtonChange() {
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(BroadCastAction.ACTION_CHANGE_BUTTON_PAUSE);
 		intentFilter.addAction(BroadCastAction.ACTION_SCROLL);
+		intentFilter.addAction(BroadCastAction.ACTION_INIT_SEEK_BAR);
+		intentFilter.addAction(BroadCastAction.ACTION_UPDATE_CURRENT_INFO);
 		mBroadcastManager.registerReceiver(mButtonChangeReceiver, intentFilter);
 	}
+
+	private LocalBroadcastManager mBroadcastManager;
 
 	/**
 	 * init Views
@@ -283,7 +278,6 @@ public final class MusicDetailFragment extends Fragment {
 
 		mSlidingUpPanelLayout.post(() -> {
 			int val0 = view.getHeight() - view.findViewById(R.id.frame_ctrl).getBottom();
-			Log.d(TAG, "initView: upSlide the val is:" + val0);
 			mSlidingUpPanelLayout.setPanelHeight(val0);
 		});
 
@@ -305,14 +299,14 @@ public final class MusicDetailFragment extends Fragment {
 			switch (action) {
 				case MotionEvent.ACTION_DOWN:
 					//预加载
-					GlideApp.with(mMainActivity)
-							.load(befItem == null ? R.drawable.ic_audiotrack_24px : Utils.Audio.getCoverBitmap(mMainActivity, befItem.getAlbumId()))
+					GlideApp.with(MusicDetailFragment.this)
+							.load(befItem == null ? R.drawable.default_album_art : Utils.Audio.getCoverBitmap(mMainActivity, befItem.getAlbumId()))
 							.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
 							.diskCacheStrategy(DiskCacheStrategy.NONE)
 							.into(mMusicAlbumImageOth3);
 
-					GlideApp.with(getActivity())
-							.load(nexItem == null ? R.drawable.ic_audiotrack_24px : Utils.Audio.getCoverBitmap(mMainActivity, nexItem.getAlbumId()))
+					GlideApp.with(MusicDetailFragment.this)
+							.load(nexItem == null ? R.drawable.default_album_art : Utils.Audio.getCoverBitmap(mMainActivity, nexItem.getAlbumId()))
 							.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
 							.diskCacheStrategy(DiskCacheStrategy.NONE)
 							.into(mMusicAlbumImageOth2);
@@ -322,29 +316,26 @@ public final class MusicDetailFragment extends Fragment {
 					mLastX = event.getRawX();
 					mLastY = event.getRawY();
 
-//                    lc.set(true);
-
-//                    new Handler().postDelayed(() -> {
-//                        if (lc.get()) {
-//                            mSlidingUpPanelLayout.setTouchEnabled(false);
-//                            mode = 1;
-//                            mMainActivity.runOnUiThread(() -> Toast.makeText(mMainActivity, "Free move mode", Toast.LENGTH_SHORT).show());
-//                        }
-//                    }, 2000);
-
 					break;
 				case MotionEvent.ACTION_MOVE:
 
 //                    if (mSlidingUpPanelLayout.getPanelState() != SlidingUpPanelLayout.PanelState.EXPANDED || CURRENT_SLIDE_OFFSET != 0)
-					if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED)
+					if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
 						break;
+					}
 
 					//首尾禁止对应边缘滑动
-					if (Values.CurrentData.CURRENT_MUSIC_INDEX == 0)
-						if (event.getRawX() > mLastX) break;
+					if (Values.CurrentData.CURRENT_MUSIC_INDEX == 0) {
+						if (event.getRawX() > mLastX) {
+							break;
+						}
+					}
 
-					if (Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sPlayOrderList.size() - 1)
-						if (event.getRawX() < mLastX) break;
+					if (Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sPlayOrderList.size() - 1) {
+						if (event.getRawX() < mLastX) {
+							break;
+						}
+					}
 
 					float val = mMusicAlbumImage.getX() + (event.getX() - moveX);
 					mMusicAlbumImage.setTranslationX(val);
@@ -392,8 +383,9 @@ public final class MusicDetailFragment extends Fragment {
 							public void onAnimationEnd(Animator animation) {
 								Utils.SendSomeThing.sendPlay(mMainActivity, 6, "next_slide");
 								Bitmap bitmap = null;
-								if (finalNexItem != null)
+								if (finalNexItem != null) {
 									bitmap = Utils.Audio.getCoverBitmap(mMainActivity, finalNexItem.getAlbumId());
+								}
 								GlideApp.with(MusicDetailFragment.this)
 										.load(finalNexItem == null ? R.drawable.default_album_art : bitmap)
 										.into(mMusicAlbumImage);
@@ -556,7 +548,7 @@ public final class MusicDetailFragment extends Fragment {
 				mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
 			}
 
-			mHandler.sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
+			mHandler.sendEmptyMessage(HandlerWhat.RECYCLER_SCROLL);
 
 		});
 
@@ -588,7 +580,7 @@ public final class MusicDetailFragment extends Fragment {
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				ReceiverOnMusicPlay.seekTo(seekBar.getProgress());
 				ReceiverOnMusicPlay.playMusic();
-				mHandler.sendEmptyMessage(Values.HandlerWhat.SET_BUTTON_PLAY);
+				mHandler.sendEmptyMessage(HandlerWhat.SET_BUTTON_PLAY);
 			}
 		});
 
@@ -606,13 +598,107 @@ public final class MusicDetailFragment extends Fragment {
 			public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
 				if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
 					mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
-					mHandler.sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
+					mHandler.sendEmptyMessage(HandlerWhat.RECYCLER_SCROLL);
 				} else {
 					mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(false);
 				}
 			}
 		});
 
+	}
+
+	@Override
+	public void onAttach(@NotNull Context context) {
+		Log.d(Values.LogTAG.LAG_TAG, "onAttach: MusicDetailFragment");
+		super.onAttach(context);
+		mMainActivity = (MainActivity) context;
+
+		mHandlerThread = new HandlerThread("Handler Thread in MusicDetailActivity");
+		mHandlerThread.start();
+		mHandler = new MusicDetailFragment.NotLeakHandler(mMainActivity, mHandlerThread.getLooper());
+
+		mBroadcastManager = LocalBroadcastManager.getInstance(context);
+		receiveButtonChange();
+	}
+
+	public static MusicDetailFragment newInstance() {
+		return new MusicDetailFragment();
+	}
+
+	@Override
+	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.fragment_music_detail, container, false);
+
+		initView(view);
+
+		//init seekBar
+		mHandler.sendEmptyMessage(HandlerWhat.INIT_SEEK_BAR);
+		//let seekBar loop update
+		mHandler.sendEmptyMessage(HandlerWhat.SEEK_BAR_UPDATE);
+		//scroll to the position{@Values.CurrentData.CURRENT_MUSIC_INDEX}
+		mHandler.sendEmptyMessage(HandlerWhat.RECYCLER_SCROLL);
+
+		if (Data.sMusicBinder != null) {
+			//检测后台播放
+			try {
+
+				MusicItem item = Data.sMusicBinder.getCurrentItem();
+				if (item.getMusicID() != -1) {
+					mCurrentMusicNameText.setText(item.getMusicName());
+					mCurrentAlbumNameText.setText(item.getMusicAlbum());
+
+					Bitmap bitmap = Utils.Audio.getCoverBitmap(getContext(), item.getAlbumId());
+					mNowPlayingStatusImage.setImageResource(R.drawable.ic_pause_black_24dp);
+					mPlayButton.setImageResource(R.drawable.ic_pause_black_24dp);
+
+					setSlideInfo(item.getMusicName(), item.getMusicAlbum(), bitmap);
+					setCurrentInfo(item.getMusicName(), item.getMusicAlbum(), bitmap);
+
+					mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
+
+				} else {
+
+				}
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+
+		} else {
+			if (Data.sCurrentMusicItem.getMusicID() != -1) {
+				final Bitmap cover = Utils.Audio.getCoverBitmap(getContext(), Data.sCurrentMusicItem.getAlbumId());
+				setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), cover);
+			}
+		}
+		return view;
+	}
+
+	public final void setCurrentInfo(@NonNull final String name, @NonNull final String albumName, final Bitmap cover) {
+		mMainActivity.runOnUiThread(() -> {
+			if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
+				Data.getCurrentCover().recycle();
+			}
+
+			Data.setCurrentCover(cover);
+
+			mCurrentMusicNameText.setText(name);
+			mCurrentAlbumNameText.setText(albumName);
+
+			setSlideInfo(name, albumName, cover);
+
+			GlideApp.with(mMainActivity)
+					.load(cover)
+					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+					.centerCrop()
+					.diskCacheStrategy(DiskCacheStrategy.NONE)
+					.into(mMusicAlbumImage);
+
+			final MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
+			if (item != null) {
+				updateFav(item);
+			}
+
+			Utils.Ui.setBlurEffect(mMainActivity, cover, mBGup, mBGdown, mNextWillText);
+		});
 	}
 
 	public final ConstraintLayout getNowPlayingBody() {
@@ -846,51 +932,39 @@ public final class MusicDetailFragment extends Fragment {
 
 	}
 
-	@Override
-	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.fragment_music_detail, container, false);
+	/**
+	 * set Info (auto put in data.)
+	 *
+	 * @param songName  music name
+	 * @param albumName music album name
+	 * @param cover     music cover image, it is @NullAble(some types of music do not have cover)
+	 */
+	private void setSlideInfo(String songName, String albumName, Bitmap cover) {
+		mMainActivity.runOnUiThread(() -> {
+			setIcoLightOrDark(cover);
 
-		initView(view);
+			mNowPlayingSongText.setText(songName);
+			mNowPlayingSongAlbumText.setText(albumName);
 
-		//init seekBar
-		mHandler.sendEmptyMessage(Values.HandlerWhat.INIT_SEEK_BAR);
-		//let seekBar loop update
-		mHandler.sendEmptyMessage(Values.HandlerWhat.SEEK_BAR_UPDATE);
-		//scroll to the position{@Values.CurrentData.CURRENT_MUSIC_INDEX}
-		mHandler.sendEmptyMessage(Values.HandlerWhat.RECYCLER_SCROLL);
+			GlideApp.with(MusicDetailFragment.this).load(cover)
+					.transition(DrawableTransitionOptions.withCrossFade())
+					.diskCacheStrategy(DiskCacheStrategy.NONE)
+					.into(mNowPlayingSongImage);
 
-		if (Data.sMusicBinder != null) {
-			//检测后台播放
-			try {
+			GlideApp.with(MusicDetailFragment.this).load(cover)
+					.transition(DrawableTransitionOptions.withCrossFade())
+					.centerCrop()
+					.diskCacheStrategy(DiskCacheStrategy.NONE)
+					.into(mMainActivity.getNavHeaderImageView());
 
-				MusicItem item = Data.sMusicBinder.getCurrentItem();
-				if (item.getMusicID() != -1) {
-					mCurrentMusicNameText.setText(item.getMusicName());
-					mCurrentAlbumNameText.setText(item.getMusicAlbum());
-
-					Bitmap bitmap = Utils.Audio.getCoverBitmap(getContext(), item.getAlbumId());
-					mNowPlayingStatusImage.setImageResource(R.drawable.ic_pause_black_24dp);
-					mPlayButton.setImageResource(R.drawable.ic_pause_black_24dp);
-
-					setSlideInfo(item.getMusicName(), item.getMusicAlbum(), bitmap);
-					setCurrentInfo(item.getMusicName(), item.getMusicAlbum(), bitmap);
-
-					mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
-
-				} else {
-
-				}
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
-
-		} else {
-			if (Data.sCurrentMusicItem.getMusicID() != -1) {
-				final Bitmap cover = Utils.Audio.getCoverBitmap(getContext(), Data.sCurrentMusicItem.getAlbumId());
-				setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), cover);
-			}
-		}
-		return view;
+			//load blur...
+			GlideApp.with(MusicDetailFragment.this).load(cover)
+					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+					.apply(bitmapTransform(new BlurTransformation(30, 20)))
+					.override(50, 50)
+					.diskCacheStrategy(DiskCacheStrategy.NONE)
+					.into(mNowPlayingBackgroundImage);
+		});
 	}
 
 	/**
@@ -1243,14 +1317,6 @@ public final class MusicDetailFragment extends Fragment {
 	}
 
 	/**
-	 * action for broadcast
-	 */
-	public interface BroadCastAction {
-		String ACTION_CHANGE_BUTTON_PAUSE = "ACTION_CHANGE_BUTTON_PAUSE";
-		String ACTION_SCROLL = "ACTION_SCROLL";
-	}
-
-	/**
 	 * the action drop to crash
 	 */
 	private void dropToTrash(@Nullable MusicItem item) {
@@ -1338,33 +1404,15 @@ public final class MusicDetailFragment extends Fragment {
 		});
 	}
 
-	public final void setCurrentInfo(@NonNull final String name, @NonNull final String albumName, final Bitmap cover) {
-		mMusicAlbumImage.post(() -> {
-			if (Data.getCurrentCover() != null && Data.getCurrentCover().isRecycled()) {
-				Data.getCurrentCover().recycle();
-			}
-
-			Data.setCurrentCover(cover);
-
-			mCurrentMusicNameText.setText(name);
-			mCurrentAlbumNameText.setText(albumName);
-
-			setSlideInfo(name, albumName, cover);
-
-			GlideApp.with(mMainActivity)
-					.load(cover)
-					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-					.centerCrop()
-					.diskCacheStrategy(DiskCacheStrategy.NONE)
-					.into(mMusicAlbumImage);
-
-			MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
-			if (item != null) {
-				updateFav(item);
-			}
-
-			Utils.Ui.setBlurEffect(mMainActivity, cover, mBGup, mBGdown, mNextWillText);
-		});
+	/**
+	 * for {@link #mHandler}
+	 */
+	public interface HandlerWhat {
+		int INIT_SEEK_BAR = 54;
+		int RECYCLER_SCROLL = 55001;
+		int SET_BUTTON_PAUSE = 57;
+		int SEEK_BAR_UPDATE = 53;
+		int SET_BUTTON_PLAY = 58;
 	}
 
 	public final NotLeakHandler getHandler() {
@@ -1383,52 +1431,13 @@ public final class MusicDetailFragment extends Fragment {
 	}
 
 	/**
-	 * set Info (auto put in data.)
-	 *
-	 * @param songName  music name
-	 * @param albumName music album name
-	 * @param cover     music cover image, it is @NullAble(some types of music do not have cover)
+	 * action for broadcast {@link #mBroadcastManager}
 	 */
-	private void setSlideInfo(String songName, String albumName, Bitmap cover) {
-		mMainActivity.runOnUiThread(() -> {
-			setIcoLightOrDark(cover);
-
-			mNowPlayingSongText.setText(songName);
-			mNowPlayingSongAlbumText.setText(albumName);
-//                Palette.Builder paletteBuilder = Palette.from(Data.sCurrentMusicBitmap);
-//                paletteBuilder.generate(palette -> {
-//                    if (palette != null) {
-//                        Palette.Swatch vibrant = palette.getVibrantSwatch();
-//                        if (!Utils.Ui.isColorLight(vibrant == null ? Color.TRANSPARENT : vibrant.getRgb())) {
-//                            mNowPlayingSongText.setTextColor(Data.sDefTextColorStateList);
-//                            mNowPlayingSongAlbumText.setTextColor(Data.sDefTextColorStateList);
-//                            mNowPlayingStatusImage.setColorFilter(Color.BLACK);
-//                        } else {
-//                            mNowPlayingSongText.setTextColor(Color.WHITE);
-//                            mNowPlayingSongAlbumText.setTextColor(Color.WHITE);
-//                            mNowPlayingStatusImage.setColorFilter(Color.WHITE);
-//                        }
-//                    }
-//                });
-			GlideApp.with(mMainActivity).load(cover)
-					.transition(DrawableTransitionOptions.withCrossFade())
-					.diskCacheStrategy(DiskCacheStrategy.NONE)
-					.into(mNowPlayingSongImage);
-
-			GlideApp.with(mMainActivity).load(cover)
-					.transition(DrawableTransitionOptions.withCrossFade())
-					.centerCrop()
-					.diskCacheStrategy(DiskCacheStrategy.NONE)
-					.into(mMainActivity.getNavHeaderImageView());
-
-			//load blur...
-			GlideApp.with(mMainActivity).load(cover)
-					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-					.apply(bitmapTransform(new BlurTransformation(30, 20)))
-					.override(50, 50)
-					.diskCacheStrategy(DiskCacheStrategy.NONE)
-					.into(mNowPlayingBackgroundImage);
-		});
+	public interface BroadCastAction {
+		String ACTION_CHANGE_BUTTON_PAUSE = "ACTION_CHANGE_BUTTON_PAUSE";
+		String ACTION_SCROLL = "ACTION_SCROLL";
+		String ACTION_INIT_SEEK_BAR = "ACTION_INIT_SEEK_BAR";
+		String ACTION_UPDATE_CURRENT_INFO = "ACTION_UPDATE_CURRENT_INFO";
 	}
 
 	/**
@@ -1530,7 +1539,7 @@ public final class MusicDetailFragment extends Fragment {
 		public void handleMessage(Message msg) {
 
 			switch (msg.what) {
-				case Values.HandlerWhat.INIT_SEEK_BAR: {
+				case HandlerWhat.INIT_SEEK_BAR: {
 					mWeakReference.get().runOnUiThread(() -> {
 						if (Data.sMusicBinder == null) {
 							return;
@@ -1552,7 +1561,7 @@ public final class MusicDetailFragment extends Fragment {
 				}
 				break;
 
-				case Values.HandlerWhat.SEEK_BAR_UPDATE: {
+				case HandlerWhat.SEEK_BAR_UPDATE: {
 					mWeakReference.get().runOnUiThread(() -> {
 						//点击body 或 music 正在播放 才可以进行seekBar更新
 						if (Data.sMusicBinder == null) {
@@ -1604,17 +1613,17 @@ public final class MusicDetailFragment extends Fragment {
 					});
 
 					//循环更新 0.5s 一次
-					mHandler.sendEmptyMessageDelayed(Values.HandlerWhat.SEEK_BAR_UPDATE, 500);
+					mHandler.sendEmptyMessageDelayed(HandlerWhat.SEEK_BAR_UPDATE, 500);
 				}
 				break;
 
-				case Values.HandlerWhat.RECYCLER_SCROLL: {
+				case HandlerWhat.RECYCLER_SCROLL: {
 					mWeakReference.get().runOnUiThread(() -> mLinearLayoutManager.scrollToPositionWithOffset(Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sMusicItems.size() ?
 							Values.CurrentData.CURRENT_MUSIC_INDEX : Values.CurrentData.CURRENT_MUSIC_INDEX + 1, 0));
 				}
 				break;
 
-				case Values.HandlerWhat.SET_BUTTON_PLAY: {
+				case HandlerWhat.SET_BUTTON_PLAY: {
 					mWeakReference.get().runOnUiThread(() -> {
 						GlideApp.with(mMainActivity)
 								.load(R.drawable.ic_pause_black_24dp)
@@ -1626,7 +1635,7 @@ public final class MusicDetailFragment extends Fragment {
 				}
 				break;
 
-				case Values.HandlerWhat.SET_BUTTON_PAUSE: {
+				case HandlerWhat.SET_BUTTON_PAUSE: {
 					mWeakReference.get().runOnUiThread(() -> {
 						GlideApp.with(mMainActivity)
 								.load(R.drawable.ic_play_arrow_grey_600_24dp)

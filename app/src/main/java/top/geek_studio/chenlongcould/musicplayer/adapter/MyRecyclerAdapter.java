@@ -195,11 +195,14 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		holder.mButton2.setAlpha(0);
 		holder.mButton3.setAlpha(0);
 		holder.mButton4.setAlpha(0);
-		holder.mButton1.setVisibility(View.GONE);
-		holder.mButton2.setVisibility(View.GONE);
-		holder.mButton3.setVisibility(View.GONE);
-		holder.mButton4.setVisibility(View.GONE);
-		holder.mExpandText.setVisibility(View.GONE);
+		holder.mButton1.setVisibility(View.INVISIBLE);
+		holder.mButton2.setVisibility(View.INVISIBLE);
+		holder.mButton3.setVisibility(View.INVISIBLE);
+		holder.mButton4.setVisibility(View.INVISIBLE);
+		holder.mExpandText.setVisibility(View.INVISIBLE);
+
+		holder.mExpandView.setVisibility(View.VISIBLE);
+		holder.mExpandView.setAlpha(1f);
 
 		holder.mCoverReference.get().setOnClickListener(v -> {
 
@@ -581,7 +584,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 								loadPath2ImageView(mayPath, imageView);
 							} else {
 								//DB内不存在Cover, 且缓存也不存在, 进行下载
-								String request = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" +
+								final String request = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" +
 										App.LAST_FM_KEY +
 										"&artist=" +
 										artist +

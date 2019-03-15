@@ -113,9 +113,7 @@ public class AboutActivity extends BaseCompatActivity {
 			builder.setTitle(getString(R.string.update_log));
 			builder.setPositiveButton(getString(R.string.close), (dialog, which) -> dialog.cancel());
 
-			final HttpUtil httpUtil = new HttpUtil();
-
-			httpUtil.sedOkHttpRequest("https://www.coolapk.com/apk/top.geek_studio.chenlongcould.musicplayer.Common", new Callback() {
+			HttpUtil.sedOkHttpRequest("https://www.coolapk.com/apk/top.geek_studio.chenlongcould.musicplayer.Common", new Callback() {
 				@Override
 				public void onFailure(@NonNull Call call, @NonNull IOException e) {
 					runOnUiThread(() -> Toast.makeText(AboutActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show());

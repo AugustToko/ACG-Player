@@ -65,6 +65,8 @@ public final class ThemeActivity extends BaseCompatActivity {
 
 	public static final String TAG = "ThemeActivity";
 
+	public static final String DEFAULT_THEME = "null";
+
 	private static final int REQUEST_ADD_THEME = 1;
 
 	private File themeDir;
@@ -149,7 +151,7 @@ public final class ThemeActivity extends BaseCompatActivity {
 					builder.setNegativeButton(getString(R.string.sure), (dialog, which) -> {
 						Data.sTheme = null;
 						SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(ThemeActivity.this).edit();
-						editor.putString(Values.SharedPrefsTag.SELECT_THEME, "null");
+						editor.putString(Values.SharedPrefsTag.SELECT_THEME, DEFAULT_THEME);
 						editor.apply();
 
 						reLoadDataUi();

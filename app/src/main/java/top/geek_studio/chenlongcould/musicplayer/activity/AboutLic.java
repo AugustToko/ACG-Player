@@ -59,7 +59,7 @@ public final class AboutLic extends BaseCompatActivity {
 
 		Observable.create((ObservableOnSubscribe<String>) observableEmitter -> {
 			try {
-				InputStream inputStream = getAssets().open("Licenses");
+				final InputStream inputStream = getAssets().open("Licenses");
 				byte[] b = new byte[inputStream.available()];
 				if (inputStream.read(b) != -1) {
 					observableEmitter.onNext(new String(b));

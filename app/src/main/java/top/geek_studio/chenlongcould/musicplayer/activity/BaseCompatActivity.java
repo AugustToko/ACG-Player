@@ -71,15 +71,17 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 	/**
 	 * set up status bar color
 	 */
-	protected void setStatusBarTextColor(final Activity activity, @ColorInt int color) {
-		final View decor = activity.getWindow().getDecorView();
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			if (Utils.Ui.isColorLight(color)) {
-				decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-			} else {
-				decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+	protected void setStatusBarTextColor(@NonNull final Activity activity, @ColorInt int color) {
+		activity.runOnUiThread(() -> {
+			final View decor = activity.getWindow().getDecorView();
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+				if (Utils.Ui.isColorLight(color)) {
+					decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+				} else {
+					decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+				}
 			}
-		}
+		});
 	}
 
 	/**

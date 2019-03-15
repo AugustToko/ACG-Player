@@ -386,7 +386,7 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				ReceiverOnMusicPlay.seekTo(seekBar.getProgress());
-				mHandler.sendEmptyMessage(Values.HandlerWhat.SET_BUTTON_PLAY);
+				mHandler.sendEmptyMessage(MusicDetailFragment.HandlerWhat.SET_BUTTON_PLAY);
 			}
 		});
 

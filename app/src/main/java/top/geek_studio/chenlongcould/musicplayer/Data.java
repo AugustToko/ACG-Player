@@ -65,6 +65,7 @@ public final class Data {
 	 * old
 	 */
 	public static List<Activity> sActivities = new ArrayList<>();
+
 	/**
 	 * data
 	 */
