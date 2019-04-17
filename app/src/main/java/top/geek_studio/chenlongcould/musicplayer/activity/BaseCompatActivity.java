@@ -67,31 +67,7 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 	 */
 	@Deprecated
 	private TextView mSubtitleView = null;
-
-	/**
-	 * set up status bar color
-	 */
-	protected void setStatusBarTextColor(@NonNull final Activity activity, @ColorInt int color) {
-		activity.runOnUiThread(() -> {
-			final View decor = activity.getWindow().getDecorView();
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-				if (Utils.Ui.isColorLight(color)) {
-					decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-				} else {
-					decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-				}
-			}
-		});
-	}
-
-	/**
-	 * setup TaskCardColor
-	 * ps: 通用
-	 */
-	protected void setUpTaskCardColor(@ColorInt int color) {
-		setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, color));
-	}
-
+	
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 
@@ -118,7 +94,37 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 
 		super.onCreate(savedInstanceState);
 	}
-
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		initStyle();
+	}
+	
+	/**
+	 * set up status bar color
+	 */
+	protected void setStatusBarTextColor(@NonNull final Activity activity, @ColorInt int color) {
+		activity.runOnUiThread(() -> {
+			final View decor = activity.getWindow().getDecorView();
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+				if (Utils.Ui.isColorLight(color)) {
+					decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+				} else {
+					decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+				}
+			}
+		});
+	}
+	
+	/**
+	 * setup TaskCardColor
+	 * ps: 通用
+	 */
+	protected void setUpTaskCardColor(@ColorInt int color) {
+		setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, color));
+	}
+	
 	/**
 	 * init permission, every Activity extends {@link BaseCompatActivity}
 	 */
@@ -156,13 +162,7 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 		mToolbar = toolbar;
 		mAppBarLayout = appBarLayout;
 	}
-
-	@Override
-	protected void onResume() {
-		super.onResume();
-		initStyle();
-	}
-
+	
 	@Override
 	public void initStyle() {
 		setStatusBarTextColor(this, Utils.Ui.getPrimaryColor(this));

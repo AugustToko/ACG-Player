@@ -26,7 +26,7 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 public final class DetailActivity extends BaseCompatActivity {
 
 	public static final String TAG = "DetailActivity";
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -160,7 +160,7 @@ public final class DetailActivity extends BaseCompatActivity {
 		fab.setOnClickListener(view -> Snackbar.make(view, "Clear Data?", Snackbar.LENGTH_LONG)
 				.setAction(getString(R.string.sure), v -> LitePal.deleteAll(Detail.class)).show());
 	}
-
+	
 	@Override
 	public String getActivityTAG() {
 		return TAG;

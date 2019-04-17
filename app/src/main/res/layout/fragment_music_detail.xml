@@ -75,7 +75,7 @@
             android:focusable="true"
             app:layout_constraintTop_toTopOf="parent">
 
-            <top.geek_studio.chenlongcould.musicplayer.custom_view.AlbumImageView
+            <top.geek_studio.chenlongcould.musicplayer.customView.AlbumImageView
                 android:id="@+id/activity_music_detail_album_image_3"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/album_image_height"
@@ -85,7 +85,7 @@
                 android:visibility="visible"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <top.geek_studio.chenlongcould.musicplayer.custom_view.AlbumImageView
+            <top.geek_studio.chenlongcould.musicplayer.customView.AlbumImageView
                 android:id="@+id/activity_music_detail_album_image_2"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/album_image_height"
@@ -95,7 +95,7 @@
                 android:visibility="visible"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <top.geek_studio.chenlongcould.musicplayer.custom_view.AlbumImageView
+            <top.geek_studio.chenlongcould.musicplayer.customView.AlbumImageView
                 android:id="@+id/activity_music_detail_album_image"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/album_image_height"

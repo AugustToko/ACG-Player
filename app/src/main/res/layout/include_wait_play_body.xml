@@ -81,7 +81,7 @@
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
             android:maxLines="1"
-            android:text="Clover Text"
+            android:text="@string/app_name"
             android:textSize="12sp"
             app:layout_constraintEnd_toStartOf="@+id/item_text_two"
             app:layout_constraintStart_toStartOf="@+id/item_main_text"
@@ -94,34 +94,28 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:maxLines="1"
-            android:text="Music Text"
+            android:text="@string/app_name"
             android:textColor="?android:textColorPrimary"
             android:textSize="18sp"
             app:layout_constraintStart_toEndOf="@+id/imageView2"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageButton
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/item_menu"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="8dp"
-            android:background="@drawable/my_ripple_mask"
             android:contentDescription="@string/menu_button"
             android:src="@drawable/ic_more_vert_24px"
             android:tint="#636363"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
             app:layout_constraintBottom_toBottomOf="@+id/item_layout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!--        <View
-                    android:id="@+id/view_line_one"
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#e6e6e6" />-->
 
     <View
         android:id="@+id/view6"
@@ -155,6 +149,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

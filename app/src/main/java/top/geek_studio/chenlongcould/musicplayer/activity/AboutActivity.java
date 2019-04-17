@@ -47,7 +47,7 @@ public class AboutActivity extends BaseCompatActivity {
 	private static final String TAG = "AboutActivity";
 
 	private ActivityAboutAppBinding mAppBinding;
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -67,7 +67,7 @@ public class AboutActivity extends BaseCompatActivity {
 		setUpLicense();
 		setUpShare();
 	}
-
+	
 	private void setUpVersion() {
 		final AboutDulTextBinding version = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_dul_text, (ViewGroup) mAppBinding.getRoot(), false);
 		version.ico.setImageResource(R.drawable.ic_info_outline_black_24dp);

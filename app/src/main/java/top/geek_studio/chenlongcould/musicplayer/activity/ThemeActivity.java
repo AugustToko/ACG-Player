@@ -98,7 +98,7 @@ public final class ThemeActivity extends BaseCompatActivity {
 	};
 
 	private Disposable mDisposable;
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		mThemeBinding = DataBindingUtil.setContentView(this, R.layout.activity_theme);
@@ -120,7 +120,21 @@ public final class ThemeActivity extends BaseCompatActivity {
 		BottomNavigationView navigation = findViewById(R.id.navigation);
 		navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 	}
-
+	
+	@Override
+	protected void onDestroy() {
+		mDBHelper.close();
+		if (mDisposable != null && !mDisposable.isDisposed()) {
+			mDisposable.dispose();
+		}
+		for (Disposable disposable : mThemeAdapter.getDisposables()) {
+			if (disposable != null && !disposable.isDisposed()) {
+				disposable.dispose();
+			}
+		}
+		super.onDestroy();
+	}
+	
 	@Override
 	public String getActivityTAG() {
 		return TAG;
@@ -185,21 +199,7 @@ public final class ThemeActivity extends BaseCompatActivity {
 	public void inflateChooseMenu() {
 
 	}
-
-	@Override
-	protected void onDestroy() {
-		mDBHelper.close();
-		if (mDisposable != null && !mDisposable.isDisposed()) {
-			mDisposable.dispose();
-		}
-		for (Disposable disposable : mThemeAdapter.getDisposables()) {
-			if (disposable != null && !disposable.isDisposed()) {
-				disposable.dispose();
-			}
-		}
-		super.onDestroy();
-	}
-
+	
 	private void noteCheck() {
 		final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		if (!preferences.getBoolean(Values.SharedPrefsTag.THEME_USE_NOTE, false)) {

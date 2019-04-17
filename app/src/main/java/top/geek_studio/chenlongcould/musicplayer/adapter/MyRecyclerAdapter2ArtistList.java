@@ -59,7 +59,7 @@ import top.geek_studio.chenlongcould.musicplayer.activity.ArtistDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.database.ArtistArtPath;
 import top.geek_studio.chenlongcould.musicplayer.model.ArtistItem;
-import top.geek_studio.chenlongcould.musicplayer.thread_pool.AlbumThreadPool;
+import top.geek_studio.chenlongcould.musicplayer.threadPool.AlbumThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyRecyclerAdapter2ArtistList.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {

@@ -177,4 +177,5 @@
     <string name="set_title_color">Set title color</string>
     <string name="recyclerview_item_style">RecyclerView item style</string>
     <string name="set_recyclerview_item_style">Set recyclerView item style</string>
+    <string name="show_detail">Show Detail</string>
 </resources>

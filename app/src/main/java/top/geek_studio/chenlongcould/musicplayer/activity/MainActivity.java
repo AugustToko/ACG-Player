@@ -93,9 +93,9 @@ import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.model.ArtistItem;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
-import top.geek_studio.chenlongcould.musicplayer.thread_pool.AlbumThreadPool;
-import top.geek_studio.chenlongcould.musicplayer.thread_pool.ArtistThreadPool;
-import top.geek_studio.chenlongcould.musicplayer.thread_pool.ItemCoverThreadPool;
+import top.geek_studio.chenlongcould.musicplayer.threadPool.AlbumThreadPool;
+import top.geek_studio.chenlongcould.musicplayer.threadPool.ArtistThreadPool;
+import top.geek_studio.chenlongcould.musicplayer.threadPool.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
@@ -171,28 +171,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	private HandlerThread mHandlerThread;
 
 	private AlertDialog load;
-
-	/**
-	 * clearData data
-	 */
-	public static void clearData() {
-
-		Data.sPlayOrderList.clear();
-		Data.sMusicItemsBackUp.clear();
-		Data.sMusicItems.clear();
-		Data.sAlbumItems.clear();
-		Data.sAlbumItemsBackUp.clear();
-
-		AlbumListFragment.VIEW_HAS_LOAD = false;
-
-		App.clearDisposable();
-
-		if (Data.getCurrentCover() != null) {
-			Data.getCurrentCover().recycle();
-		}
-	}
-
-
+	
 	/**
 	 * onXXX
 	 * At Override
@@ -217,28 +196,27 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		loadData();
 
 	}
-
-	@Override
-	protected void onResume() {
-		super.onResume();
-
-		//数据重载
-		if (NEED_RELOAD) {
-			mFragmentList.clear();
-			mTitles.clear();
-			mMainBinding.tabLayout.removeAllTabs();
-			Data.sMusicItems.clear();
-			Data.sPlayOrderList.clear();
-			Data.sMusicItemsBackUp.clear();
-			Data.sAlbumItemsBackUp.clear();
-			Data.sAlbumItems.clear();
-			Data.sArtistItems.clear();
-
-			loadData();
+	
+	/**
+	 * clearData data
+	 */
+	public static void clearData() {
+		
+		Data.sPlayOrderList.clear();
+		Data.sMusicItemsBackUp.clear();
+		Data.sMusicItems.clear();
+		Data.sAlbumItems.clear();
+		Data.sAlbumItemsBackUp.clear();
+		
+		AlbumListFragment.VIEW_HAS_LOAD = false;
+		
+		App.clearDisposable();
+		
+		if (Data.getCurrentCover() != null) {
+			Data.getCurrentCover().recycle();
 		}
-
 	}
-
+	
 	@Override
 	protected void onDestroy() {
 		GlideApp.get(this).clearMemory();
@@ -274,7 +252,35 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		ArtistThreadPool.finish();
 		super.onDestroy();
 	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
 
+//		getMusicListFragment().getAdapter().notifyDataSetChanged();
+		
+		if (getMusicListFragment() != null) {
+			getMusicListFragment().getRecyclerView().scheduleLayoutAnimation();
+		}
+		
+		//数据重载
+		if (NEED_RELOAD) {
+			mFragmentList.clear();
+			mTitles.clear();
+			mMainBinding.tabLayout.removeAllTabs();
+			Data.sMusicItems.clear();
+			Data.sPlayOrderList.clear();
+			Data.sMusicItemsBackUp.clear();
+			Data.sAlbumItemsBackUp.clear();
+			Data.sAlbumItems.clear();
+			Data.sArtistItems.clear();
+			
+			loadData();
+		}
+
+	}
+	
+	
 	@Override
 	public final void onBackPressed() {
 

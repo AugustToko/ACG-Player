@@ -87,7 +87,7 @@ public final class ArtistDetailActivity extends BaseCompatActivity {
 	private List<Disposable> mDisposables = new ArrayList<>();
 
 	private List<MusicItem> mSongs = new ArrayList<>();
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -96,7 +96,17 @@ public final class ArtistDetailActivity extends BaseCompatActivity {
 		headerViewHeight = getResources().getDimensionPixelSize(R.dimen.detail_header_height);
 		initData();
 	}
-
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		for (Disposable d : mDisposables) {
+			if (!d.isDisposed()) {
+				d.dispose();
+			}
+		}
+	}
+	
 	@Override
 	public String getActivityTAG() {
 		return TAG;
@@ -332,14 +342,5 @@ public final class ArtistDetailActivity extends BaseCompatActivity {
 			mArtistDetailOthBinding.artistAlbumCount.setColorFilter(Color.WHITE);
 		}
 	}
-
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		for (Disposable d : mDisposables) {
-			if (!d.isDisposed()) {
-				d.dispose();
-			}
-		}
-	}
+	
 }

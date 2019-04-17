@@ -181,7 +181,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 		}
 	};
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		mSettingsBinding = DataBindingUtil.setContentView(this, R.layout.activity_settings);
@@ -638,7 +638,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 		mSettingsBinding.itemCleanArtist.setOnClickListener(v -> clearArtists());
 	}
-
+	
 	@Override
 	public String getActivityTAG() {
 		return TAG;

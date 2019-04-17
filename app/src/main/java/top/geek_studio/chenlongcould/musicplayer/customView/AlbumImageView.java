@@ -9,7 +9,7 @@
  * ************************************************************
  */
 
-package top.geek_studio.chenlongcould.musicplayer.custom_view;
+package top.geek_studio.chenlongcould.musicplayer.customView;
 
 import android.content.Context;
 import android.util.AttributeSet;

@@ -38,7 +38,7 @@ public final class AboutLic extends BaseCompatActivity {
 	private static final String TAG = "AboutLic";
 
 	private Disposable mDisposable;
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -94,7 +94,13 @@ public final class AboutLic extends BaseCompatActivity {
 			}
 		});
 	}
-
+	
+	@Override
+	protected void onStop() {
+		mDisposable.dispose();
+		super.onStop();
+	}
+	
 	@Override
 	public String getActivityTAG() {
 		return TAG;
@@ -109,11 +115,5 @@ public final class AboutLic extends BaseCompatActivity {
 	public void inflateChooseMenu() {
 
 	}
-
-	@Override
-	protected void onStop() {
-		mDisposable.dispose();
-		super.onStop();
-	}
-
+	
 }

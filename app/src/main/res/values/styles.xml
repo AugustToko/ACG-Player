@@ -12,7 +12,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="MyBaseTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+    <style name="MyBaseTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="android:windowAllowEnterTransitionOverlap">true</item>
         <item name="android:windowAllowReturnTransitionOverlap">true</item>
         <item name="android:windowContentTransitions">true</item>
@@ -70,18 +70,18 @@
         <item name="android:background">@color/black_overlay</item>
     </style>
 
-    <style name="GreenTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="GreenTheme.AppBarOverlay" parent="Theme.MaterialComponents" />
 
-    <style name="GreenTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="GreenTheme.PopupOverlay" parent="Theme.MaterialComponents.Light" />
 
     <style name="LightTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="LightTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="LightTheme.AppBarOverlay" parent="Theme.MaterialComponents" />
 
-    <style name="LightTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="LightTheme.PopupOverlay" parent="Theme.MaterialComponents.Light" />
 
 
 </resources>

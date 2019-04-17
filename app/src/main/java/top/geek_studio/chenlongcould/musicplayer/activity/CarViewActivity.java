@@ -64,7 +64,7 @@ public final class CarViewActivity extends AppCompatActivity {
 	private final Runnable mHideRunnable = this::hide;
 
 	private MusicDetailFragmentLandSpace mFragmentLandSpace;
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Values.CurrentData.CURRENT_UI_MODE = Values.CurrentData.MODE_CAR;
@@ -87,7 +87,22 @@ public final class CarViewActivity extends AppCompatActivity {
 		transaction.replace(R.id.frag_land_space, mFragmentLandSpace);
 		transaction.commit();
 	}
-
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if (mVisible) {
+			mHideHandler.removeCallbacks(mHideRunnable);
+			mHideHandler.postDelayed(mHideRunnable, 100);
+		}
+	}
+	
+	@Override
+	protected void onDestroy() {
+		Log.d(TAG, "onDestroy: ");
+		super.onDestroy();
+	}
+	
 	public MusicDetailFragmentLandSpace getFragmentLandSpace() {
 		return mFragmentLandSpace;
 	}
@@ -98,16 +113,7 @@ public final class CarViewActivity extends AppCompatActivity {
 		mHideHandler.removeCallbacks(mHideRunnable);
 		mHideHandler.postDelayed(mHideRunnable, 100);
 	}
-
-	@Override
-	protected void onResume() {
-		super.onResume();
-		if (mVisible) {
-			mHideHandler.removeCallbacks(mHideRunnable);
-			mHideHandler.postDelayed(mHideRunnable, 100);
-		}
-	}
-
+	
 	private void toggle() {
 		if (mVisible) {
 			hide();
@@ -162,13 +168,7 @@ public final class CarViewActivity extends AppCompatActivity {
 	public boolean isVisible() {
 		return mVisible;
 	}
-
-	@Override
-	protected void onDestroy() {
-		Log.d(TAG, "onDestroy: ");
-		super.onDestroy();
-	}
-
+	
 	@Override
 	protected void finalize() throws Throwable {
 		Log.d(TAG, "finalize: ");

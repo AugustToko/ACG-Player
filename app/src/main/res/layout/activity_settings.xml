@@ -49,6 +49,7 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layoutAnimation="@anim/layout_animation_fall_down"
                 android:paddingTop="16dp">
 
                 <TextView

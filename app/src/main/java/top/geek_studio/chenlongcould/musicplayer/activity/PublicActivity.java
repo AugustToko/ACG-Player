@@ -71,7 +71,7 @@ public final class PublicActivity extends BaseCompatActivity {
 	private String mType;
 
 	private Disposable mDisposable;
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		setContentView(R.layout.activity_add_recent);
@@ -253,7 +253,15 @@ public final class PublicActivity extends BaseCompatActivity {
 		}
 
 	}
-
+	
+	@Override
+	protected void onDestroy() {
+		if (mDisposable != null && !mDisposable.isDisposed()) {
+			mDisposable.dispose();
+		}
+		super.onDestroy();
+	}
+	
 	@Override
 	public String getActivityTAG() {
 		return TAG;
@@ -286,15 +294,7 @@ public final class PublicActivity extends BaseCompatActivity {
 		mToolbar.getMenu().clear();
 		mToolbar.inflateMenu(R.menu.menu_toolbar_main_choose);
 	}
-
-	@Override
-	protected void onDestroy() {
-		if (mDisposable != null && !mDisposable.isDisposed()) {
-			mDisposable.dispose();
-		}
-		super.onDestroy();
-	}
-
+	
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();

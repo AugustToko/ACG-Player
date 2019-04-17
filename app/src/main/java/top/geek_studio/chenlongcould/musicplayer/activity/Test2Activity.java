@@ -10,13 +10,13 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 public class Test2Activity extends BaseCompatActivity {
 
 	public static final String TAG = "Test2Activity";
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_test);
 	}
-
+	
 	@Override
 	public String getActivityTAG() {
 		return TAG;

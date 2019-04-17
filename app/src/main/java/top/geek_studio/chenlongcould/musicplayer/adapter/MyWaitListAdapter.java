@@ -20,7 +20,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
@@ -29,6 +28,7 @@ import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.RecyclerView;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
@@ -193,8 +193,8 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 	}
 
 	class ViewHolder extends RecyclerView.ViewHolder {
-
-		ImageView mItemMenuButton;
+		
+		AppCompatImageView mItemMenuButton;
 
 		TextView mMusicNameText;
 

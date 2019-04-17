@@ -11,7 +11,6 @@
 
 package top.geek_studio.chenlongcould.musicplayer.utils;
 
-import android.animation.Animator;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -41,15 +40,10 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewAnimationUtils;
-import android.view.animation.AccelerateInterpolator;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.internal.NavigationMenuPresenter;
 import com.google.android.material.internal.NavigationMenuView;
@@ -84,11 +78,9 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.graphics.ColorUtils;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
 import top.geek_studio.chenlongcould.geeklibrary.widget.GkToolbar;
 import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
@@ -99,21 +91,19 @@ import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
 
-import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
-
 @SuppressWarnings("WeakerAccess")
 public final class Utils {
-
+	
 	public static final String TAG = "Utils";
-
+	
 	private Utils() {
 	}
-
+	
 	public static final class Audio {
-
+		
 		public static final String NONE = "NONE";
 		private final static MediaMetadataRetriever sMediaMetadataRetriever = new MediaMetadataRetriever();
-
+		
 		public static void openEqualizer(@NonNull final Activity activity, int id) {
 			if (id == AudioEffect.ERROR_BAD_VALUE) {
 				Toast.makeText(activity, activity.getResources().getString(R.string.no_audio_ID), Toast.LENGTH_LONG).show();
@@ -128,7 +118,7 @@ public final class Utils {
 				}
 			}
 		}
-
+		
 		/**
 		 * 获取封面
 		 *
@@ -136,40 +126,40 @@ public final class Utils {
 		 */
 		@NonNull
 		private static Bitmap getMp3CoverByMeta(@NonNull Context context, final String mediaUri) {
-
+			
 			if (mediaUri == null) {
 				return BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px);
 			}
-
+			
 			final File file = new File(mediaUri);
 			if (file.isDirectory() || !file.exists()) {
 				return BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px);
 			}
-
+			
 			sMediaMetadataRetriever.setDataSource(mediaUri);
 			byte[] picture = sMediaMetadataRetriever.getEmbeddedPicture();
-
+			
 			if (picture != null) {
 				return BitmapFactory.decodeByteArray(picture, 0, picture.length);
 			} else {
 				return BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px);
 			}
 		}
-
+		
 		/**
 		 * this
 		 */
 		public static Bitmap getCoverBitmap(Context context, int albumId) {
 			return path2CoverByDB(context, getCoverPath(context, albumId));
 		}
-
+		
 		@Nullable
 		private static String getCoverPathByDefDB(final Context context, final int albumId) {
 			String img;
 			final Cursor cursor = context.getContentResolver().query(
 					Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + albumId)
 					, new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
-
+			
 			if (cursor != null && cursor.getCount() != 0) {
 				cursor.moveToFirst();
 				img = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART));
@@ -179,10 +169,10 @@ public final class Utils {
 			}
 			return img;
 		}
-
+		
 		public static String getCoverPath(final Context context, final int albumId) {
 			final String[] albumPath = {null};
-
+			
 			final Cursor cursor = context.getContentResolver().query(
 					Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + albumId)
 					, new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
@@ -213,7 +203,7 @@ public final class Utils {
 			}
 			return albumPath[0];
 		}
-
+		
 		/**
 		 * private
 		 */
@@ -221,15 +211,15 @@ public final class Utils {
 			if (TextUtils.isEmpty(path)) {
 				return getDrawableBitmap(context, R.drawable.default_album_art);
 			}
-
+			
 			if (path.equals("null")) {
 				return getDrawableBitmap(context, R.drawable.default_album_art);
 			}
-
+			
 			if (path.equals(NONE)) {
 				return getDrawableBitmap(context, R.drawable.default_album_art);
 			}
-
+			
 			File file = new File(path);
 			if (!file.exists()) {
 				return getDrawableBitmap(context, R.drawable.default_album_art);
@@ -238,35 +228,36 @@ public final class Utils {
 					return getDrawableBitmap(context, R.drawable.default_album_art);
 				}
 			}
-
+			
 			return BitmapFactory.decodeFile(path);
 		}
-
+		
 		/**
 		 * 获取封面
+		 *
 		 * @param mediaUri mp3 path
 		 */
 		private static Bitmap path2CoverByMeta(final String mediaUri, Context context) {
-
+			
 			if (mediaUri == null)
 				return getDrawableBitmap(context, R.drawable.default_album_art);
-
+			
 			if (mediaUri.equals(NONE))
 				return getDrawableBitmap(context, R.drawable.default_album_art);
-
+			
 			final File file = new File(mediaUri);
 			if (file.isDirectory() || !file.exists())
 				return getDrawableBitmap(context, R.drawable.default_album_art);
-
+			
 			sMediaMetadataRetriever.setDataSource(mediaUri);
 			byte[] picture = sMediaMetadataRetriever.getEmbeddedPicture();
-
+			
 			if (picture != null)
 				return BitmapFactory.decodeByteArray(picture, 0, picture.length);
 			else
 				return getDrawableBitmap(context, R.drawable.default_album_art);
 		}
-
+		
 		/**
 		 * may call from {@link MusicService}
 		 */
@@ -274,7 +265,7 @@ public final class Utils {
 		private static byte[] path2CoverByteByMeta(final String path, Context context) {
 			final Bitmap bitmap = getDrawableBitmap(context, R.drawable.default_album_art);
 			final File file = new File(path);
-
+			
 			if (path == null || file.isDirectory() || !file.exists() || file.isDirectory()) {
 				if (bitmap != null) {
 					final ByteBuffer buffer = ByteBuffer.allocate(bitmap.getByteCount());
@@ -283,10 +274,10 @@ public final class Utils {
 					return null;
 				}
 			}
-
+			
 			sMediaMetadataRetriever.setDataSource(path);
 			byte[] cover = sMediaMetadataRetriever.getEmbeddedPicture();
-
+			
 			if (cover == null) {
 				if (bitmap != null)
 					return ByteBuffer.allocate(bitmap.getByteCount()).array();
@@ -296,14 +287,14 @@ public final class Utils {
 				if (bitmap != null) bitmap.recycle();
 				return cover;
 			}
-
+			
 		}
-
+		
 		@SuppressWarnings("SameParameterValue")
 		private static Bitmap getDrawableBitmap(@NonNull Context context, @DrawableRes int vectorDrawableId) {
 			return Ui.readBitmapFromRes(context, vectorDrawableId, 100, 100);
 		}
-
+		
 		/**
 		 * @author Karim Abou Zeid (kabouzeid)
 		 */
@@ -322,14 +313,14 @@ public final class Utils {
 				return new Intent();
 			}
 		}
-
+		
 		/**
 		 * @author Karim Abou Zeid (kabouzeid)
 		 */
 		public static Uri getSongFileUri(int songId) {
 			return ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId);
 		}
-
+		
 		/**
 		 * @author Karim Abou Zeid (kabouzeid)
 		 */
@@ -344,7 +335,7 @@ public final class Utils {
 			} catch (@NonNull final UnsupportedOperationException ignored) {
 				return;
 			}
-
+			
 			try {
 				Cursor cursor = resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
 						new String[]{MediaStore.MediaColumns.TITLE},
@@ -366,15 +357,13 @@ public final class Utils {
 			} catch (SecurityException ignored) {
 			}
 		}
-
+		
 	}
-
+	
 	public static final class Ui {
-
+		
 		private static final String TAG = "Ui";
-
-		public static int POSITION = 200;
-
+		
 		/**
 		 * getAccentColor from {@link SharedPreferences}, default: {@link R.color#colorAccent}
 		 *
@@ -384,7 +373,7 @@ public final class Utils {
 		public static int getAccentColor(Context context) {
 			return PreferenceManager.getDefaultSharedPreferences(context).getInt(Values.SharedPrefsTag.ACCENT_COLOR, ContextCompat.getColor(context, R.color.colorAccent));
 		}
-
+		
 		/**
 		 * getPrimaryColor from {@link SharedPreferences}, default: {@link R.color#colorPrimary}
 		 *
@@ -394,7 +383,7 @@ public final class Utils {
 		public static int getPrimaryColor(Context context) {
 			return PreferenceManager.getDefaultSharedPreferences(context).getInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(context, R.color.colorPrimary));
 		}
-
+		
 		/**
 		 * getPrimaryDarkColor from {@link SharedPreferences}, default: {@link R.color#colorPrimaryDark}
 		 *
@@ -404,7 +393,7 @@ public final class Utils {
 		public static int getPrimaryDarkColor(Context context) {
 			return PreferenceManager.getDefaultSharedPreferences(context).getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, ContextCompat.getColor(context, R.color.colorPrimaryDark));
 		}
-
+		
 		/**
 		 * getTitleColor from {@link SharedPreferences}, default: {@link R.color#def_over_title_color}
 		 *
@@ -414,7 +403,7 @@ public final class Utils {
 		public static int getTitleColor(Context context) {
 			return PreferenceManager.getDefaultSharedPreferences(context).getInt(Values.SharedPrefsTag.TITLE_COLOR, ContextCompat.getColor(context, R.color.def_over_title_color));
 		}
-
+		
 		public static Bitmap readBitmapFromFile(String filePath, int width, int height) {
 			BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inJustDecodeBounds = true;
@@ -422,22 +411,22 @@ public final class Utils {
 			float srcWidth = options.outWidth;
 			float srcHeight = options.outHeight;
 			int inSampleSize = 1;
-
+			
 			if (srcWidth > height && srcWidth > width) {
 				inSampleSize = (int) (srcWidth / width);
 			} else if (srcWidth < height && srcHeight > height) {
 				inSampleSize = (int) (srcHeight / height);
 			}
-
+			
 			if (inSampleSize <= 0) {
 				inSampleSize = 1;
 			}
 			options.inJustDecodeBounds = false;
 			options.inSampleSize = inSampleSize;
-
+			
 			return BitmapFactory.decodeFile(filePath, options);
 		}
-
+		
 		public static Bitmap readBitmapFromRes(Context context, @DrawableRes int filePath, int width, int height) {
 			BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inJustDecodeBounds = true;
@@ -445,22 +434,22 @@ public final class Utils {
 			float srcWidth = options.outWidth;
 			float srcHeight = options.outHeight;
 			int inSampleSize = 1;
-
+			
 			if (srcWidth > height && srcWidth > width) {
 				inSampleSize = (int) (srcWidth / width);
 			} else if (srcWidth < height && srcHeight > height) {
 				inSampleSize = (int) (srcHeight / height);
 			}
-
+			
 			if (inSampleSize <= 0) {
 				inSampleSize = 1;
 			}
 			options.inJustDecodeBounds = false;
 			options.inSampleSize = inSampleSize;
-
+			
 			return BitmapFactory.decodeResource(context.getResources(), filePath, options);
 		}
-
+		
 		public static Bitmap readBitmapFromArray(byte[] data, int width, int height) {
 			BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inJustDecodeBounds = true;
@@ -468,22 +457,22 @@ public final class Utils {
 			float srcWidth = options.outWidth;
 			float srcHeight = options.outHeight;
 			int inSampleSize = 1;
-
+			
 			if (srcWidth > height && srcWidth > width) {
 				inSampleSize = (int) (srcWidth / width);
 			} else if (srcWidth < height && srcHeight > height) {
 				inSampleSize = (int) (srcHeight / height);
 			}
-
+			
 			if (inSampleSize <= 0) {
 				inSampleSize = 1;
 			}
 			options.inJustDecodeBounds = false;
 			options.inSampleSize = inSampleSize;
-
+			
 			return BitmapFactory.decodeByteArray(data, 0, data.length, options);
 		}
-
+		
 		/**
 		 * @param context context
 		 * @param aTitle  theTitle
@@ -501,7 +490,7 @@ public final class Utils {
 			builder.setCancelable(false);
 			return builder.create();
 		}
-
+		
 		public static void setNavigationMenuLineStyle(NavigationView navigationView, @ColorInt final int color, final int height) {
 			try {
 				Field fieldByPressenter = navigationView.getClass().getDeclaredField("presenter");
@@ -510,11 +499,11 @@ public final class Utils {
 				Field fieldByMenuView = menuPresenter.getClass().getDeclaredField("menuView");
 				fieldByMenuView.setAccessible(true);
 				final NavigationMenuView mMenuView = (NavigationMenuView) fieldByMenuView.get(menuPresenter);
-
+				
 				mMenuView.addOnChildAttachStateChangeListener(new RecyclerView.OnChildAttachStateChangeListener() {
 					@Override
 					public void onChildViewAttachedToWindow(@NonNull View view) {
-
+						
 						RecyclerView.ViewHolder viewHolder = mMenuView.getChildViewHolder(view);
 						if (viewHolder != null && "SeparatorViewHolder".equals(viewHolder.getClass().getSimpleName())) {
 							if (viewHolder.itemView instanceof FrameLayout) {
@@ -526,17 +515,17 @@ public final class Utils {
 							}
 						}
 					}
-
+					
 					@Override
 					public void onChildViewDetachedFromWindow(@NonNull View view) {
-
+					
 					}
 				});
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}
 		}
-
+		
 		/**
 		 * 获取导航栏高度
 		 *
@@ -551,7 +540,7 @@ public final class Utils {
 			Log.v("dbw", "Navi height:" + height);
 			return height;
 		}
-
+		
 		public static void setStatusBarTextColor(final Activity activity, @ColorInt int color) {
 			final View decor = activity.getWindow().getDecorView();
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -562,7 +551,7 @@ public final class Utils {
 				}
 			}
 		}
-
+		
 		/**
 		 * set color (style)
 		 *
@@ -576,18 +565,18 @@ public final class Utils {
 			toolbar.setBackgroundColor(getPrimaryColor(activity));
 			activity.getWindow().setNavigationBarColor(getPrimaryDarkColor(activity));
 		}
-
+		
 		public static void setPlayButtonNowPlaying() {
 			if (!Data.sActivities.isEmpty()) {
 				MainActivity activity = (MainActivity) Data.sActivities.get(0);
 				activity.getMusicDetailFragment().getHandler().sendEmptyMessage(MusicDetailFragment.HandlerWhat.SET_BUTTON_PLAY);
-
+				
 				if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.CurrentData.MODE_CAR)) {
 					Data.sCarViewActivity.getFragmentLandSpace().setButtonType("pause");
 				}
 			}
 		}
-
+		
 		public static AlertDialog createMessageDialog(@NonNull final Activity context, @NonNull final String title, @NonNull final String message) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(context);
 			builder.setTitle(title);
@@ -595,14 +584,14 @@ public final class Utils {
 			builder.setCancelable(true);
 			return builder.create();
 		}
-
+		
 		/**
 		 * use Application Context
 		 */
 		public static void fastToast(@NonNull final Context context, @NonNull final String content) {
 			Toast.makeText(context, content, Toast.LENGTH_SHORT).show();
 		}
-
+		
 		/**
 		 * 获取图片亮度
 		 *
@@ -627,106 +616,11 @@ public final class Utils {
 			return bright / count;
 		}
 
-		public static void setBlurEffect(@NonNull final MainActivity activity
-				, @Nullable final Bitmap bitmap, @NonNull final ImageView bgUp
-				, @NonNull final ImageView bgDown, final TextView nextText) {
-
-			bgDown.setVisibility(View.VISIBLE);
-
-			@ColorInt final int defColor = ContextCompat.getColor(activity, R.color.colorPrimary);
-
-			if (bitmap != null) {
-				Palette.from(bitmap).generate(palette -> {
-					if (palette != null) nextText.setTextColor(palette.getVibrantColor(defColor));
-				});
-			} else {
-				nextText.setTextColor(defColor);
-			}
-
-			if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
-				Log.d(TAG, "setBlurEffect: blur" + Values.Style.DETAIL_BACKGROUND);
-				bgUp.post(() -> GlideApp.with(activity)
-						.load(bitmap)
-						.dontAnimate()
-						.apply(bitmapTransform(Data.sBlurTransformation))
-						.diskCacheStrategy(DiskCacheStrategy.NONE)
-						.into(bgUp));
-			} else {
-				Log.d(TAG, "setBlurEffect: not blur" + Values.Style.DETAIL_BACKGROUND);
-				if (bitmap != null) {
-					Palette.from(bitmap).generate(palette -> {
-						if (palette != null)
-							bgUp.setBackgroundColor(palette.getVibrantColor(defColor));
-					});
-				} else {
-					bgUp.setBackgroundColor(defColor);
-				}
-			}
-
-			bgUp.post(() -> {
-				final Animator animator = ViewAnimationUtils.createCircularReveal(
-						bgUp, bgUp.getWidth() / 2, POSITION, 0, (float) Math.hypot(bgUp.getWidth(), bgUp.getHeight()));
-
-				animator.setInterpolator(new AccelerateInterpolator());
-				animator.setDuration(700);
-				animator.addListener(new Animator.AnimatorListener() {
-					@Override
-					public void onAnimationStart(Animator animation) {
-
-					}
-
-					@Override
-					public void onAnimationEnd(Animator animation) {
-						GlideApp.with(activity).clear(bgDown);
-						if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
-							Log.d(TAG, "onAnimationEnd: blur" + Values.Style.DETAIL_BACKGROUND);
-							GlideApp.with(activity)
-									.load(bitmap)
-									.dontAnimate()
-									.apply(bitmapTransform(Data.sBlurTransformation))
-									.diskCacheStrategy(DiskCacheStrategy.NONE)
-									.into(bgDown);
-						} else {
-							Log.d(TAG, "onAnimationEnd: not blur" + Values.Style.DETAIL_BACKGROUND);
-							if (bitmap != null) {
-								Palette.from(bitmap).generate(palette -> {
-									if (palette != null)
-										bgDown.setBackgroundColor(palette.getVibrantColor(defColor));
-								});
-							} else {
-								bgDown.setBackgroundColor(defColor);
-							}
-						}
-
-						bgDown.setVisibility(View.GONE);
-					}
-
-					@Override
-					public void onAnimationCancel(Animator animation) {
-
-					}
-
-					@Override
-					public void onAnimationRepeat(Animator animation) {
-
-					}
-				});
-
-				// TODO: 2019/3/9 crash
-				try {
-					animator.start();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			});
-
-		}
-
 //        public static boolean isColorLight(@ColorInt final int color) {
 //            double darkness = 1.0D - (0.299D * (double) Color.red(color) + 0.587D * (double) Color.green(color) + 0.114D * (double) Color.blue(color)) / 255.0D;
 //            return darkness < 0.4D;
 //        }
-
+		
 		/**
 		 * 判断颜色是不是亮色
 		 *
@@ -737,7 +631,7 @@ public final class Utils {
 		public static boolean isColorLight(@ColorInt int color) {
 			return ColorUtils.calculateLuminance(color) >= 0.5;
 		}
-
+		
 		/**
 		 * 设置toolbar上的文字、导航、菜单的图标颜色
 		 *
@@ -751,11 +645,11 @@ public final class Utils {
 				toolbar.getNavigationIcon().setTint(color);
 			}
 			toolbar.setTitleTextColor(color);
-
+			
 			if (toolbar.getSubtitle() != null) {
 				toolbar.setSubtitleTextColor(color);
 			}
-
+			
 			if (toolbar.getMenu().size() != 0) {
 				if (toolbar.getOverflowIcon() != null) toolbar.getOverflowIcon().setTint(color);
 				for (int i = 0; i < toolbar.getMenu().size(); i++) {
@@ -778,42 +672,42 @@ public final class Utils {
 //                Values.Color.TEXT_COLOR = "#3c3c3c";
 //            }
 //        }
-
+		
 		public static Bitmap blurBitmap(Bitmap bitmap, float r, Context context) {
-
+			
 			//Let's create an empty bitmap with the same size of the bitmap we want to blur
 			Bitmap outBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-
+			
 			//Instantiate a new Renderscript
 			RenderScript rs = RenderScript.create(context);
-
+			
 			//Create an Intrinsic Blur Script using the Renderscript
 			ScriptIntrinsicBlur blurScript = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
-
+			
 			//Create the Allocations (in/out) with the Renderscript and the in/out bitmaps
 			Allocation allIn = Allocation.createFromBitmap(rs, bitmap);
 			Allocation allOut = Allocation.createFromBitmap(rs, outBitmap);
-
+			
 			//Set the radius of the blur: 0 < radius <= 25
 			blurScript.setRadius(25.0f);
-
+			
 			//Perform the Renderscript
 			blurScript.setInput(allIn);
 			blurScript.forEach(allOut);
-
+			
 			//Copy the final bitmap created by the out Allocation to the outBitmap
 			allOut.copyTo(outBitmap);
-
+			
 			//recycle the original bitmap
 			bitmap.recycle();
-
+			
 			//After finishing everything, we destroy the Renderscript.
 			rs.destroy();
-
+			
 			return outBitmap;
-
+			
 		}
-
+		
 		/**
 		 * by kabouzeid
 		 */
@@ -824,9 +718,9 @@ public final class Utils {
 			return a + rgb;
 		}
 	}
-
+	
 	public static final class DataSet {
-
+		
 		/**
 		 * make a random play list, data by {@link Data#sMusicItems}
 		 */
@@ -835,7 +729,7 @@ public final class Utils {
 			Data.sPlayOrderList.addAll(Data.sMusicItems);
 			Collections.shuffle(Data.sPlayOrderList);
 		}
-
+		
 		/**
 		 * add into music List
 		 *
@@ -844,17 +738,17 @@ public final class Utils {
 		 */
 		public static void addListDialog(Context context, MusicItem musicItem) {
 			final Resources resources = context.getResources();
-
+			
 			final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
 			builder.setTitle(resources.getString(R.string.add_to_playlist));
-
+			
 			builder.setNegativeButton(resources.getString(R.string.new_list), (dialog, which) -> {
 				final androidx.appcompat.app.AlertDialog.Builder b2 = new androidx.appcompat.app.AlertDialog.Builder(context);
 				b2.setTitle(resources.getString(R.string.enter_name));
-
+				
 				final EditText et = new EditText(context);
 				b2.setView(et);
-
+				
 				et.setHint(resources.getString(R.string.enter_name));
 				et.setSingleLine(true);
 				b2.setNegativeButton(resources.getString(R.string.cancel), null);
@@ -863,24 +757,24 @@ public final class Utils {
 						Toast.makeText(context, "name can not empty!", Toast.LENGTH_SHORT).show();
 						return;
 					}
-
+					
 					final int result = PlayListsUtil.createPlaylist(context, et.getText().toString());
-
+					
 					if (result != -1) {
 						PlayListsUtil.addToPlaylist(context, musicItem, result, false);
 					}
-
+					
 					dialog.dismiss();
 					Data.sPlayListItems.add(0, new PlayListItem(result, et.getText().toString()));
-
+					
 					final Intent intent = new Intent(PlayListFragment.ItemChange.ACTION_REFRESH_LIST);
 					LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 				});
 				b2.show();
 			});
-
+			
 			builder.setCancelable(true);
-
+			
 			builder.setSingleChoiceItems(context.getContentResolver()
 							.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null),
 					-1, MediaStore.Audio.Playlists.NAME, (dialog, which) -> {
@@ -898,9 +792,9 @@ public final class Utils {
 						dialog.dismiss();
 					});
 			builder.show();
-
+			
 		}
-
+		
 		/**
 		 * add into music List
 		 *
@@ -909,17 +803,17 @@ public final class Utils {
 		 */
 		public static void addListDialog(Context context, ArrayList<MusicItem> items) {
 			final Resources resources = context.getResources();
-
+			
 			final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
 			builder.setTitle(resources.getString(R.string.add_to_playlist));
-
+			
 			builder.setNegativeButton(resources.getString(R.string.new_list), (dialog, which) -> {
 				final androidx.appcompat.app.AlertDialog.Builder b2 = new androidx.appcompat.app.AlertDialog.Builder(context);
 				b2.setTitle(resources.getString(R.string.enter_name));
-
+				
 				final EditText et = new EditText(context);
 				b2.setView(et);
-
+				
 				et.setHint(resources.getString(R.string.enter_name));
 				et.setSingleLine(true);
 				b2.setNegativeButton(resources.getString(R.string.cancel), null);
@@ -928,22 +822,22 @@ public final class Utils {
 						Toast.makeText(context, "name can not empty!", Toast.LENGTH_SHORT).show();
 						return;
 					}
-
+					
 					final int result = PlayListsUtil.createPlaylist(context, et.getText().toString());
 					if (result != -1) {
 						PlayListsUtil.addToPlaylist(context, items, result, false);
 					}
 					dialog.dismiss();
 					Data.sPlayListItems.add(0, new PlayListItem(result, et.getText().toString()));
-
+					
 					final Intent intent = new Intent(PlayListFragment.ItemChange.ACTION_REFRESH_LIST);
 					LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 				});
 				b2.show();
 			});
-
+			
 			builder.setCancelable(true);
-
+			
 			builder.setSingleChoiceItems(context.getContentResolver()
 							.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null),
 					-1, MediaStore.Audio.Playlists.NAME, (dialog, which) -> {
@@ -963,18 +857,18 @@ public final class Utils {
 						dialog.dismiss();
 					});
 			builder.show();
-
+			
 		}
-
+		
 	}
-
+	
 	/**
 	 * start activity, broadcast, service...
 	 */
 	public static final class SendSomeThing {
-
+		
 		public static final String TAG = "SendSomeThing";
-
+		
 		/**
 		 * send broadcast by pause
 		 *
@@ -986,7 +880,7 @@ public final class Utils {
 			intent.putExtra("play_type", -1);
 			context.sendBroadcast(intent, Values.Permission.BROAD_CAST);
 		}
-
+		
 		/**
 		 * @param playBy play_type: previous, next, slide
 		 */
@@ -998,7 +892,7 @@ public final class Utils {
 			context.sendBroadcast(intent, Values.Permission.BROAD_CAST);
 		}
 	}
-
+	
 	public static final class M3Utils {
 		// TODO: 2018/12/10 read the m3u file
 //            new AsyncTask<Void, Void, Void>() {
@@ -1045,46 +939,46 @@ public final class Utils {
 //                    return null;
 //                }
 //            }.execute();
-
+	
 	}
-
+	
 	public static final class Res {
 		public static String getString(final Context context, @StringRes final int id) {
 			return context.getResources().getString(id);
 		}
 	}
-
+	
 	public static final class IO {
-
+		
 		public static void Unzip(String zipFile, String targetDir) {
 			int BUFFER = 4096;          //这里缓冲区我们使用4KB，
 			String strEntry;            //保存每个zip的条目名称
-
+			
 			try {
 				BufferedOutputStream dest;          //缓冲输出流
 				FileInputStream fis = new FileInputStream(zipFile);
 				ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis));
 				ZipEntry entry;         //每个zip条目的实例
-
+				
 				while ((entry = zis.getNextEntry()) != null) {
-
+					
 					try {
 						Log.i("unzip: ", "=" + entry);
-
+						
 						int count;
 						byte data[] = new byte[BUFFER];
 						strEntry = entry.getName();
-
+						
 						File entryFile = new File(targetDir + strEntry);
 						File entryDir = new File(entryFile.getParent());
-
+						
 						if (!entryDir.exists()) {
 							entryDir.mkdirs();
 						}
-
+						
 						if (!entry.isDirectory()) {
 							FileOutputStream fos = new FileOutputStream(entryFile);
-
+							
 							dest = new BufferedOutputStream(fos, BUFFER);
 							while ((count = zis.read(data, 0, BUFFER)) != -1) {
 								dest.write(data, 0, count);
@@ -1094,7 +988,7 @@ public final class Utils {
 						} else {
 							entryFile.mkdir();
 						}
-
+						
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}
@@ -1104,7 +998,7 @@ public final class Utils {
 				cwj.printStackTrace();
 			}
 		}
-
+		
 		@SuppressWarnings("ResultOfMethodCallIgnored")
 		public static void delFolder(String folderPath) {
 			try {
@@ -1115,7 +1009,7 @@ public final class Utils {
 				e.printStackTrace();
 			}
 		}
-
+		
 		@SuppressWarnings({"UnusedReturnValue", "ConstantConditions", "ResultOfMethodCallIgnored"})
 		private static boolean delAllFile(String path) {
 			boolean flag = false;
@@ -1145,7 +1039,7 @@ public final class Utils {
 			}
 			return flag;
 		}
-
+		
 		/**
 		 * 压缩一个文件夹
 		 */
@@ -1159,7 +1053,7 @@ public final class Utils {
 			zos.flush();
 			zos.close();
 		}
-
+		
 		/**
 		 * @param zos  压缩输出流
 		 * @param file 当前需要压缩的文件
@@ -1178,7 +1072,7 @@ public final class Utils {
 				FileInputStream fis = new FileInputStream(file);// 目录进入点的名字是文件在压缩文件中的路径
 				ZipEntry entry = new ZipEntry(path);
 				zos.putNextEntry(entry);// 建立一个目录进入点
-
+				
 				int len = 0;
 				byte[] buf = new byte[1024];
 				while ((len = fis.read(buf)) != -1) {

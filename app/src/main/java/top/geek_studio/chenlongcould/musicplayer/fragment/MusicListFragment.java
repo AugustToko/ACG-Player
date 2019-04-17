@@ -18,6 +18,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
+
 import org.jetbrains.annotations.NotNull;
 
 import androidx.annotation.NonNull;
@@ -75,6 +77,10 @@ public final class MusicListFragment extends Fragment {
 
 	public FragmentMusicListBinding getMusicListBinding() {
 		return mMusicListBinding;
+	}
+	
+	public FastScrollRecyclerView getRecyclerView() {
+		return mMusicListBinding.includeRecycler.recyclerView;
 	}
 
 }

@@ -99,7 +99,7 @@ public final class AlbumDetailActivity extends BaseCompatActivity {
 	private String intentAlbumId = "0";
 
 	private List<CustomAlbumPath> paths;
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -108,7 +108,17 @@ public final class AlbumDetailActivity extends BaseCompatActivity {
 		headerViewHeight = getResources().getDimensionPixelSize(R.dimen.detail_header_height);
 		initData();
 	}
-
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		for (Disposable d : mDisposables) {
+			if (!d.isDisposed()) {
+				d.dispose();
+			}
+		}
+	}
+	
 	@Override
 	public String getActivityTAG() {
 		return TAG;
@@ -381,14 +391,5 @@ public final class AlbumDetailActivity extends BaseCompatActivity {
 			mAlbumDetailBinding.albumYearIcon.setColorFilter(Color.WHITE);
 		}
 	}
-
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		for (Disposable d : mDisposables) {
-			if (!d.isDisposed()) {
-				d.dispose();
-			}
-		}
-	}
+	
 }
