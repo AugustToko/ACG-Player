@@ -23,7 +23,7 @@ android {
             storePassword '18551348272Chen'
         }
     }
-    compileSdkVersion 'android-Q'
+    compileSdkVersion 28
     defaultConfig {
         applicationId "top.geek_studio.chenlongcould.musicplayer"
         minSdkVersion 21

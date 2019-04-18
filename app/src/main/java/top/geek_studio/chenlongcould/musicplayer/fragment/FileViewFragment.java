@@ -81,7 +81,9 @@ public final class FileViewFragment extends Fragment {
 		if (!HAS_LOAD) {
 			final File file = Environment.getExternalStorageDirectory();
 			mFileItems.addAll(new ArrayList<>(Arrays.asList(file.listFiles())));
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) mFileItems.sort(File::compareTo);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+				mFileItems.sort(File::compareTo);
+			}
 			mCurrentFile = file;
 		}
 
@@ -144,7 +146,7 @@ public final class FileViewFragment extends Fragment {
 				holder.subTile_2.setText("---");
 			}
 			//local
-			holder.subTitle.setText(String.valueOf(Data.sSimpleDateFormatFile.format(new Date(mFiles.get(position).lastModified()))));
+			holder.subTitle.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT_FILE.format(new Date(mFiles.get(position).lastModified()))));
 			holder.itemText.setText(mFiles.get(position).getName());
 
 			if (mFiles.get(position).isDirectory()) {

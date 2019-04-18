@@ -36,7 +36,6 @@ import io.reactivex.disposables.Disposable;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.fragment.AlbumListFragment;
-import top.geek_studio.chenlongcould.musicplayer.fragment.ArtistListFragment;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
@@ -145,12 +144,11 @@ public final class App extends Application {
 				|| "top.geek_studio.chenlongcould.musicplayer.Common".equals(getProcessName(this))) {
 			
 			if (level == TRIM_MEMORY_MODERATE) {
-				Data.sTrashCanList.clear();
+				Data.S_TRASH_CAN_LIST.clear();
 				
 				AlbumListFragment.VIEW_HAS_LOAD = false;
 				Data.sAlbumItems.clear();
 				
-				ArtistListFragment.VIEW_HAS_LOAD = false;
 				Data.sArtistItems.clear();
 			}
 			

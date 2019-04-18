@@ -161,7 +161,7 @@ public class AboutActivity extends BaseCompatActivity {
 		final AboutSingleTextBinding lic = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_single_text, (ViewGroup) mAppBinding.getRoot(), false);
 		lic.text.setText(getString(R.string.licenses));
 		lic.ico.setImageResource(R.drawable.ic_find_in_page_black_24dp);
-		lic.body.setOnClickListener(v -> startActivity(new Intent(AboutActivity.this, AboutLic.class)));
+		lic.body.setOnClickListener(v -> startActivity(new Intent(AboutActivity.this, AboutLicActivity.class)));
 		mAppBinding.card1.addView(lic.getRoot());
 	}
 

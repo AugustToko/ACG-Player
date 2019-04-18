@@ -19,13 +19,12 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 
-public class PublicFragment extends Fragment {
+@Deprecated
+public class PublicFragment extends BaseFragment {
 
-	//实例化一个fragment
 	public static PublicFragment newInstance(int index) {
 		PublicFragment myFragment = new PublicFragment();
 		Bundle bundle = new Bundle();

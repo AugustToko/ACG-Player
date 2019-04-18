@@ -18,14 +18,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-
 import org.jetbrains.annotations.NotNull;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
@@ -34,26 +31,27 @@ import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentMusicListBinding;
 
-public final class MusicListFragment extends Fragment {
-
+/**
+ * @author chenlongcould
+ */
+public final class MusicListFragment extends BaseFragment {
+	
 	public static final String TAG = "MusicListFragment";
-	private static boolean sIsScrolling = false;
 	private FragmentMusicListBinding mMusicListBinding;
 	private MyRecyclerAdapter adapter;
-
+	
 	private MainActivity mActivity;
-
-	//实例化一个fragment
+	
 	public static MusicListFragment newInstance() {
 		return new MusicListFragment();
 	}
-
+	
 	@Override
 	public void onAttach(@NotNull Context context) {
 		super.onAttach(context);
 		mActivity = (MainActivity) getActivity();
 	}
-
+	
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		mMusicListBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_list, container, false);
@@ -61,26 +59,23 @@ public final class MusicListFragment extends Fragment {
 		mMusicListBinding.includeRecycler.recyclerView.setHasFixedSize(true);
 		adapter = new MyRecyclerAdapter(mActivity, Data.sMusicItems, PreferenceManager.getDefaultSharedPreferences(getContext()).getInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 0));
 		mMusicListBinding.includeRecycler.recyclerView.setAdapter(adapter);
-
+		
 		return mMusicListBinding.getRoot();
 	}
-
+	
 	@Override
 	public void setUserVisibleHint(boolean isVisibleToUser) {
-		if (Data.sMusicItems.size() > 0 && adapter != null && !isVisibleToUser)
+		if (adapter != null && !isVisibleToUser) {
 			adapter.clearSelection();
+		}
 	}
-
+	
 	public final MyRecyclerAdapter getAdapter() {
 		return adapter;
 	}
-
+	
 	public FragmentMusicListBinding getMusicListBinding() {
 		return mMusicListBinding;
 	}
 	
-	public FastScrollRecyclerView getRecyclerView() {
-		return mMusicListBinding.includeRecycler.recyclerView;
-	}
-
 }

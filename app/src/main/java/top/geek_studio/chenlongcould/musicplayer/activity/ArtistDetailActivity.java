@@ -270,7 +270,7 @@ public final class ArtistDetailActivity extends BaseCompatActivity {
 				}
 
 				if (integer == durationDone) {
-					mArtistDetailOthBinding.durationText.setText(Data.sSimpleDateFormat.format(new Date(totalDuration[0])));
+					mArtistDetailOthBinding.durationText.setText(Data.S_SIMPLE_DATE_FORMAT.format(new Date(totalDuration[0])));
 				}
 			}
 

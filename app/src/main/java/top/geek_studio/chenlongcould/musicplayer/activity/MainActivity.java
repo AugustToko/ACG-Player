@@ -201,17 +201,15 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	 * clearData data
 	 */
 	public static void clearData() {
-		
+
 		Data.sPlayOrderList.clear();
 		Data.sMusicItemsBackUp.clear();
 		Data.sMusicItems.clear();
 		Data.sAlbumItems.clear();
 		Data.sAlbumItemsBackUp.clear();
 		
-		AlbumListFragment.VIEW_HAS_LOAD = false;
-		
 		App.clearDisposable();
-		
+
 		if (Data.getCurrentCover() != null) {
 			Data.getCurrentCover().recycle();
 		}
@@ -240,9 +238,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		}
 		Data.sTheme = null;
 		Data.sAlbumItems.clear();
-		AlbumListFragment.VIEW_HAS_LOAD = false;
-		Data.sHistoryPlay.clear();
-		Data.sTrashCanList.clear();
+		Data.S_HISTORY_PLAY.clear();
+		Data.S_TRASH_CAN_LIST.clear();
 
 		mHandlerThread.quit();
 		mFragmentList.clear();
@@ -257,12 +254,10 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	protected void onResume() {
 		super.onResume();
 
-//		getMusicListFragment().getAdapter().notifyDataSetChanged();
-		
 		if (getMusicListFragment() != null) {
-			getMusicListFragment().getRecyclerView().scheduleLayoutAnimation();
+			getMusicListFragment().getMusicListBinding().includeRecycler.recyclerView.scheduleLayoutAnimation();
 		}
-		
+
 		//数据重载
 		if (NEED_RELOAD) {
 			mFragmentList.clear();

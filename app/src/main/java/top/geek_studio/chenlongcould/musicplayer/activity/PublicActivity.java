@@ -47,30 +47,12 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 public final class PublicActivity extends BaseCompatActivity {
 
 	public static final String TAG = "PublicActivity";
-
-	public static final String INTENT_START_BY = "start_by";
-
-	private AppBarLayout mAppBarLayout;
-	private Toolbar mToolbar;
-	private RecyclerView mRecyclerView;
-	private MyRecyclerAdapter adapter;
-
+	
 	/**
-	 * 保存播放列表下的Music (如果当前type是play_list_item的话 {@link #mType} )
-	 */
-	private List<MusicItem> mMusicItemList = new ArrayList<>();
-
-	/**
-	 * save current playlist name, if current type is play_list_item {@link #mType}
-	 */
-	private String currentListName;
-
-	/**
-	 * different type enter different UI(Activity)
-	 */
-	private String mType;
-
-	private Disposable mDisposable;
+	 * @deprecated use {@link IntentTag#INTENT_START_BY}
+	 * */
+	@Deprecated
+	public static final String INTENT_START_BY = IntentTag.INTENT_START_BY;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -239,19 +221,63 @@ public final class PublicActivity extends BaseCompatActivity {
 
 				case PlayListFragment.ACTION_HISTORY: {
 					mToolbar.setTitle(getString(R.string.history));
-					mRecyclerView.setAdapter(new MyRecyclerAdapter(PublicActivity.this, Data.sHistoryPlay));
+					mRecyclerView.setAdapter(new MyRecyclerAdapter(PublicActivity.this, Data.S_HISTORY_PLAY));
 				}
 				break;
 
 				case PlayListFragment.ACTION_TRASH_CAN: {
 					mToolbar.setTitle(getString(R.string.trash_can));
-					mRecyclerView.setAdapter(new MyRecyclerAdapter(PublicActivity.this, Data.sTrashCanList));
+					mRecyclerView.setAdapter(new MyRecyclerAdapter(PublicActivity.this, Data.S_TRASH_CAN_LIST));
 				}
 				break;
 				default:
 			}
 		}
 
+	}
+	
+	private AppBarLayout mAppBarLayout;
+	private Toolbar mToolbar;
+	private RecyclerView mRecyclerView;
+	private MyRecyclerAdapter adapter;
+	
+	/**
+	 * 保存播放列表下的Music (如果当前type是play_list_item的话 {@link #mType} )
+	 */
+	private List<MusicItem> mMusicItemList = new ArrayList<>();
+	
+	/**
+	 * save current playlist name, if current type is play_list_item {@link #mType}
+	 */
+	private String currentListName;
+	
+	/**
+	 * different type enter different UI(Activity)
+	 */
+	private String mType;
+	
+	private Disposable mDisposable;
+	
+	@Override
+	public void inflateCommonMenu() {
+		mToolbar.getMenu().clear();
+		mToolbar.inflateMenu(R.menu.menu_public);
+		mToolbar.setOnMenuItemClickListener(item -> {
+			switch (item.getItemId()) {
+				case R.id.menu_public_random: {
+					Data.sNextWillPlayItem = mMusicItemList.get(new Random().nextInt(mMusicItemList.size()));
+					Utils.SendSomeThing.sendPlay(PublicActivity.this, ReceiverOnMusicPlay.ReceiveType.RECEIVE_TYPE_COMMON, ReceiverOnMusicPlay.TYPE_NEXT);
+				}
+				break;
+
+				case R.id.menu_public_m3u: {
+
+				}
+				break;
+				default:
+			}
+			return true;
+		});
 	}
 	
 	@Override
@@ -266,27 +292,9 @@ public final class PublicActivity extends BaseCompatActivity {
 	public String getActivityTAG() {
 		return TAG;
 	}
-
-	@Override
-	public void inflateCommonMenu() {
-		mToolbar.getMenu().clear();
-		mToolbar.inflateMenu(R.menu.menu_public);
-		mToolbar.setOnMenuItemClickListener(item -> {
-			switch (item.getItemId()) {
-				case R.id.menu_public_random: {
-					Data.sNextWillPlayItem = mMusicItemList.get(new Random().nextInt(mMusicItemList.size()));
-					Utils.SendSomeThing.sendPlay(PublicActivity.this, 6, ReceiverOnMusicPlay.TYPE_NEXT);
-				}
-				break;
-
-				case R.id.menu_public_m3u: {
-
-				}
-				break;
-				default:
-			}
-			return true;
-		});
+	
+	public interface IntentTag {
+		String INTENT_START_BY = "start_by";
 	}
 
 	@Override

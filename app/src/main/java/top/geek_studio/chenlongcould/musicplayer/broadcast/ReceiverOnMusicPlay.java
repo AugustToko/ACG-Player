@@ -40,11 +40,24 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 	public static final String TAG = "ReceiverOnMusicPlay";
-
+	
+	@Deprecated
 	public static final int CASE_TYPE_SHUFFLE = 90;
-
+	@Deprecated
 	public static final int CASE_TYPE_ITEM_CLICK = 15;
+	@Deprecated
 	public static final int CASE_TYPE_NOTIFICATION_RESUME = 2;
+	@Deprecated
+	public static final int RECEIVE_TYPE_COMMON = 6;
+	
+	public static void setDataSource(String path) {
+		Data.S_HISTORY_PLAY.add(Data.sCurrentMusicItem);
+		try {
+			Data.sMusicBinder.setDataSource(path);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
 
 	public static final String INTENT_PLAY_TYPE = "play_type";
 	public static final String INTENT_ARGS = "args";
@@ -148,81 +161,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		}
 	}
 
-	public static void setDataSource(String path) {
-		Data.sHistoryPlay.add(Data.sCurrentMusicItem);
-		try {
-			Data.sMusicBinder.setDataSource(path);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static int getDuration() {
-		try {
-			return Data.sMusicBinder.getDuration();
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-		return -1;
-	}
-
-	public static boolean isPlayingMusic() {
-		try {
-			return Data.sMusicBinder.isPlayingMusic();
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
-
-	public static int getCurrentPosition() {
-		try {
-			return Data.sMusicBinder.getCurrentPosition();
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-		return 0;
-	}
-
-	public static void seekTo(int nowPosition) {
-		try {
-			Data.sMusicBinder.seekTo(nowPosition);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void stopMusic() {
-		try {
-			Data.sMusicBinder.stopMusic();
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-	}
-
-	@Nullable
-	public static MusicItem getCurrentItem() {
-		if (Data.sMusicBinder != null) {
-			try {
-				return Data.sMusicBinder.getCurrentItem();
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
-		} else {
-			return null;
-		}
-		return null;
-	}
-
-	////////////////////////MEDIA CONTROL/////////////////////////////
-
-	public static void sureCar() {
-		//set data (image and name)
-		if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.CurrentData.MODE_CAR)) {
-			Data.sCarViewActivity.getFragmentLandSpace().setData();
-		}
-	}
-
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		Log.d(TAG, "onReceive: done");
@@ -262,7 +200,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 			//by next button...(in detail or noti) (must ActivityList isn't empty)
 			//by auto-next(mediaPlayer OnCompletionListener) of next-play by user, at this time MainActivity is present
 			//by MusicDetailFragment preview imageButton (view history song list)
-			case 6: {
+			case RECEIVE_TYPE_COMMON: {
 
 				//检测是否指定下一首播放
 				if (Data.sNextWillPlayItem != null) {
@@ -372,6 +310,82 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 			((MainActivity) Data.sActivities.get(0)).getMainBinding().slidingLayout.setTouchEnabled(true);
 		}
 
+	}
+	
+	public static int getDuration() {
+		try {
+			return Data.sMusicBinder.getDuration();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+	
+	public static boolean isPlayingMusic() {
+		try {
+			return Data.sMusicBinder.isPlayingMusic();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	public static int getCurrentPosition() {
+		try {
+			return Data.sMusicBinder.getCurrentPosition();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+	
+	public static void seekTo(int nowPosition) {
+		try {
+			Data.sMusicBinder.seekTo(nowPosition);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void stopMusic() {
+		try {
+			Data.sMusicBinder.stopMusic();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Nullable
+	public static MusicItem getCurrentItem() {
+		if (Data.sMusicBinder != null) {
+			try {
+				return Data.sMusicBinder.getCurrentItem();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+		} else {
+			return null;
+		}
+		return null;
+	}
+	
+	////////////////////////MEDIA CONTROL/////////////////////////////
+	
+	public static void sureCar() {
+		//set data (image and name)
+		if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.CurrentData.MODE_CAR)) {
+			Data.sCarViewActivity.getFragmentLandSpace().setData();
+		}
+	}
+	
+	/**
+	 * Receive Types
+	 */
+	public interface ReceiveType {
+		int CASE_TYPE_SHUFFLE = 90;
+		int CASE_TYPE_ITEM_CLICK = 15;
+		int CASE_TYPE_NOTIFICATION_RESUME = 2;
+		int RECEIVE_TYPE_COMMON = 6;
 	}
 
 	private void playMusicInOne(@NonNull String path) {

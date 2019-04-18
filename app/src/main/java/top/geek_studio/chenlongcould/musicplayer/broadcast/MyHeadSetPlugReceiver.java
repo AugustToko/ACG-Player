@@ -19,10 +19,13 @@ import android.util.Log;
 
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
+/**
+ * @author chenlongcould
+ */
 public final class MyHeadSetPlugReceiver extends BroadcastReceiver {
-
+	
 	private static final String TAG = "MyHeadSetPlugReceiver";
-
+	
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		Log.d(TAG, "onReceive: ");

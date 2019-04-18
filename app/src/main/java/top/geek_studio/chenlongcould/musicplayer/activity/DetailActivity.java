@@ -107,16 +107,16 @@ public final class DetailActivity extends BaseCompatActivity {
 			}
 
 			detailBinding.includeContent.textTotalPlays.setText(detailBinding.includeContent.textTotalPlays.getText() + String.valueOf(totalTimes) + " times");
-			detailBinding.includeContent.textTotalPlayTime.setText(detailBinding.includeContent.textTotalPlayTime.getText() + String.valueOf(Data.sSimpleDateFormat.format(new Date(totalDuration))) + " (mm:ss)");
+			detailBinding.includeContent.textTotalPlayTime.setText(detailBinding.includeContent.textTotalPlayTime.getText() + String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(totalDuration))) + " (mm:ss)");
 
 			detailBinding.includeContent.t1.setText(detailBinding.includeContent.t1.getText() + String.valueOf(maxTimes) + " times");
-			detailBinding.includeContent.t2.setText(detailBinding.includeContent.t2.getText() + String.valueOf(Data.sSimpleDateFormat.format(new Date(maxDuration))) + " (mm:ss)");
+			detailBinding.includeContent.t2.setText(detailBinding.includeContent.t2.getText() + String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(maxDuration))) + " (mm:ss)");
 			detailBinding.includeContent.t3.setText(detailBinding.includeContent.t3.getText() + String.valueOf(minimumTimes) + " times");
 
 			if (itemDuration != null) {
 				detailBinding.includeContent.includeItemPlayDuration.recyclerItemMusicName.setText(itemDuration.getMusicName());
 				detailBinding.includeContent.includeItemPlayDuration.recyclerItemMusicAlbumName.setText(itemDuration.getMusicAlbum());
-				detailBinding.includeContent.includeItemPlayDuration.recyclerItemMusicDuration.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(itemDuration.getDuration()))));
+				detailBinding.includeContent.includeItemPlayDuration.recyclerItemMusicDuration.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(itemDuration.getDuration()))));
 				final String prefix = itemDuration.getMusicPath().substring(itemDuration.getMusicPath().lastIndexOf(".") + 1);
 				detailBinding.includeContent.includeItemPlayDuration.recyclerItemMusicTypeName.setText(prefix);
 				GlideApp.with(this).load(Utils.Audio.getCoverBitmap(this, itemDuration.getAlbumId()))
@@ -129,7 +129,7 @@ public final class DetailActivity extends BaseCompatActivity {
 			if (itemMinimum != null) {
 				detailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMusicName.setText(itemMinimum.getMusicName());
 				detailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMusicAlbumName.setText(itemMinimum.getMusicAlbum());
-				detailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMusicDuration.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(itemMinimum.getDuration()))));
+				detailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMusicDuration.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(itemMinimum.getDuration()))));
 				final String prefix = itemMinimum.getMusicPath().substring(itemMinimum.getMusicPath().lastIndexOf(".") + 1);
 				detailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMusicTypeName.setText(prefix);
 				GlideApp.with(this).load(Utils.Audio.getCoverBitmap(this, itemMinimum.getAlbumId()))
@@ -142,7 +142,7 @@ public final class DetailActivity extends BaseCompatActivity {
 			if (itemTimes != null) {
 				detailBinding.includeContent.includeItemPlaytimes.recyclerItemMusicName.setText(itemTimes.getMusicName());
 				detailBinding.includeContent.includeItemPlaytimes.recyclerItemMusicAlbumName.setText(itemTimes.getMusicAlbum());
-				detailBinding.includeContent.includeItemPlaytimes.recyclerItemMusicDuration.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(itemTimes.getDuration()))));
+				detailBinding.includeContent.includeItemPlaytimes.recyclerItemMusicDuration.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(itemTimes.getDuration()))));
 				final String prefix = itemTimes.getMusicPath().substring(itemTimes.getMusicPath().lastIndexOf(".") + 1);
 				detailBinding.includeContent.includeItemPlaytimes.recyclerItemMusicTypeName.setText(prefix);
 				GlideApp.with(this).load(Utils.Audio.getCoverBitmap(this, itemTimes.getAlbumId()))

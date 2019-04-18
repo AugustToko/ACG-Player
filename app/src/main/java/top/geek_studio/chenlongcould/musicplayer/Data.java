@@ -47,13 +47,13 @@ public final class Data {
 	/**
 	 * 存储播放历史(序列) default...
 	 */
-	public final static List<MusicItem> sHistoryPlay = new ArrayList<>();
+	public final static List<MusicItem> S_HISTORY_PLAY = new ArrayList<>();
 	/**
 	 * 垃圾箱(dislike)
 	 */
-	public final static List<MusicItem> sTrashCanList = new ArrayList<>();
-	public final static SimpleDateFormat sSimpleDateFormat = new SimpleDateFormat("mm:ss", Locale.CHINESE);
-	public final static SimpleDateFormat sSimpleDateFormatFile = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINESE);
+	public final static List<MusicItem> S_TRASH_CAN_LIST = new ArrayList<>();
+	public final static SimpleDateFormat S_SIMPLE_DATE_FORMAT = new SimpleDateFormat("mm:ss", Locale.CHINESE);
+	public final static SimpleDateFormat S_SIMPLE_DATE_FORMAT_FILE = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINESE);
 	public volatile static boolean HAS_BIND = false;
 	/**
 	 * 检测app打开后, 是否播放过音乐 (如果没, 默认点击播放按钮为快速随机播放)

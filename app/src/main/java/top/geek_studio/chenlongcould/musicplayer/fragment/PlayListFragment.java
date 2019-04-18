@@ -31,7 +31,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
-import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import io.reactivex.Observable;
@@ -51,7 +50,7 @@ import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 /**
  * @author chenlongcould
  */
-public final class PlayListFragment extends Fragment {
+public final class PlayListFragment extends BaseFragment {
 
 	public static final String TAG = "PlayListFragment";
 
@@ -225,6 +224,8 @@ public final class PlayListFragment extends Fragment {
 					mWeakReference.get().initData();
 					mWeakReference.get().getPlayListAdapter().notifyDataSetChanged();
 				}
+				break;
+				default:
 			}
 		}
 	}

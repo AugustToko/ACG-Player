@@ -83,8 +83,6 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 	private ActivitySettingsBinding mSettingsBinding;
 
-	private Switch mNightSwitch;
-
 	private Switch mStyleSwitch;
 
 	private ImageView mPrimaryImage;
@@ -201,7 +199,6 @@ public final class SettingsActivity extends BaseCompatActivity {
 		mToolbar = findViewById(R.id.activity_settings_toolbar);
 		mAppBarLayout = findViewById(R.id.activity_settings_appbar);
 //        final ConstraintLayout setNightOpt = findViewById(R.id.night_style);
-		mNightSwitch = findViewById(R.id.activity_settings_night_switch);
 		final ConstraintLayout styleOpt = findViewById(R.id.detail_background_style);
 		mStyleSwitch = findViewById(R.id.activity_settings_style_switch);
 
@@ -666,7 +663,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 	 * setup imageViews
 	 */
 	private void initPreView() {
-		mNightSwitch.setChecked(Values.Style.NIGHT_MODE);
+//		mNightSwitch.setChecked(Values.Style.NIGHT_MODE);
 
 		//noinspection ConstantConditions
 		if (mDefPrefs.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_BLUR).equals(Values.Style.STYLE_BACKGROUND_AUTO_COLOR)) {

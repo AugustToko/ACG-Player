@@ -483,7 +483,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		holder.mMusicAlbumName.setText(mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum());
 		String prefix = mMusicItems.get(holder.getAdapterPosition()).getMusicPath().substring(mMusicItems.get(holder.getAdapterPosition()).getMusicPath().lastIndexOf(".") + 1);
 		holder.mMusicExtName.setText(prefix);
-		holder.mTime.setText(Data.sSimpleDateFormat.format(new Date(mMusicItems.get(holder.getAdapterPosition()).getDuration())));
+		holder.mTime.setText(Data.S_SIMPLE_DATE_FORMAT.format(new Date(mMusicItems.get(holder.getAdapterPosition()).getDuration())));
 
 		/*--- 添加标记以便避免ImageView因为ViewHolder的复用而出现混乱 ---*/
 		holder.mCoverReference.get().setTag(R.string.key_id_1, holder.getAdapterPosition());

@@ -1,6 +1,6 @@
 /*
  * ************************************************************
- * 文件：AboutLic.java  模块：app  项目：MusicPlayer
+ * 文件：AboutLicActivity.java  模块：app  项目：MusicPlayer
  * 当前修改时间：2019年01月18日 18:58:29
  * 上次修改时间：2019年01月18日 18:57:39
  * 作者：chenlongcould
@@ -33,9 +33,9 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 /**
  * @author chenlongcould
  */
-public final class AboutLic extends BaseCompatActivity {
-
-	private static final String TAG = "AboutLic";
+public final class AboutLicActivity extends BaseCompatActivity {
+	
+	private static final String TAG = "AboutLicActivity";
 
 	private Disposable mDisposable;
 	
@@ -85,7 +85,7 @@ public final class AboutLic extends BaseCompatActivity {
 			public void onError(Throwable throwable) {
 				load.dismiss();
 				throwable.printStackTrace();
-				Toast.makeText(AboutLic.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+				Toast.makeText(AboutLicActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
 			}
 
 			@Override

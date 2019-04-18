@@ -76,7 +76,6 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -102,7 +101,7 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 /**
  * @author chenlongcould
  */
-public final class MusicDetailFragment extends Fragment {
+public final class MusicDetailFragment extends BaseFragment {
 	
 	//////////////////////////////////////////////////////////////////////////////////////
 	
@@ -531,11 +530,11 @@ public final class MusicDetailFragment extends Fragment {
 						
 						//int MusicDetailActivity
 						final Intent intent = new Intent(mMainActivity, AlbumDetailActivity.class);
-						intent.putExtra("key", albumName);
+						intent.putExtra(AlbumDetailActivity.IntentKey.ALBUM_NAME, albumName);
 						if (cursor != null) {
 							cursor.moveToFirst();
 							int id = Integer.parseInt(cursor.getString(0));
-							intent.putExtra("_id", id);
+							intent.putExtra(AlbumDetailActivity.IntentKey.ID, id);
 							cursor.close();
 						}
 						startActivity(intent);
@@ -544,7 +543,7 @@ public final class MusicDetailFragment extends Fragment {
 				break;
 				case Menu.FIRST + 2: {
 					Intent intent = new Intent(mMainActivity, PublicActivity.class);
-					intent.putExtra("start_by", "detail");
+					intent.putExtra(PublicActivity.IntentTag.INTENT_START_BY, "detail");
 					startActivity(intent);
 				}
 				break;
@@ -1430,13 +1429,13 @@ public final class MusicDetailFragment extends Fragment {
 					if (checkBox.isChecked()) {
 						PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit().putBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, false).apply();
 					}
-					Data.sTrashCanList.add(item);
+					Data.S_TRASH_CAN_LIST.add(item);
 					dialog.dismiss();
 				});
 				builder.setPositiveButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
 				builder.show();
 			} else {
-				Data.sTrashCanList.add(item);
+				Data.S_TRASH_CAN_LIST.add(item);
 			}
 		}
 	}
@@ -1646,7 +1645,7 @@ public final class MusicDetailFragment extends Fragment {
 						mCurrentInfoSeek.setLayoutParams(mCurrentInfoSeek.getLayoutParams());
 						mCurrentInfoSeek.requestLayout();
 						
-						mRightTime.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(ReceiverOnMusicPlay.getDuration()))));
+						mRightTime.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(ReceiverOnMusicPlay.getDuration()))));
 						mSeekBar.setMax(ReceiverOnMusicPlay.getDuration());
 					});
 				}
@@ -1669,7 +1668,7 @@ public final class MusicDetailFragment extends Fragment {
 							mCurrentInfoSeek.getLayoutParams().width = mCurrentInfoBody.getWidth() * ReceiverOnMusicPlay.getCurrentPosition() / ReceiverOnMusicPlay.getDuration();
 							mCurrentInfoSeek.setLayoutParams(mCurrentInfoSeek.getLayoutParams());
 							mCurrentInfoSeek.requestLayout();
-							mLeftTime.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(ReceiverOnMusicPlay.getCurrentPosition()))));
+							mLeftTime.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(ReceiverOnMusicPlay.getCurrentPosition()))));
 							
 							Log.i(TAG, "handleMessage: current position " + ReceiverOnMusicPlay.getCurrentPosition() + " ------------ " + ReceiverOnMusicPlay.getDuration());
 							

@@ -41,7 +41,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.databinding.DataBindingUtil;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import top.geek_studio.chenlongcould.musicplayer.Data;
@@ -58,7 +57,10 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
-public final class MusicDetailFragmentLandSpace extends Fragment {
+/**
+ * @author chenlongcould
+ */
+public final class MusicDetailFragmentLandSpace extends BaseFragment {
 
 	private static final String TAG = "DetailLandSpace";
 	private static boolean HIDE_TOOLBAR = false;
@@ -422,7 +424,7 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
 		updateSeek();
 
 		mMusicDetail2Binding.includeSeekBarCar.seekBar.setProgress(0);
-		mMusicDetail2Binding.includeSeekBarCar.rightText.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(ReceiverOnMusicPlay.getDuration()))));
+		mMusicDetail2Binding.includeSeekBarCar.rightText.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(ReceiverOnMusicPlay.getDuration()))));
 		mMusicDetail2Binding.includeSeekBarCar.seekBar.setMax(ReceiverOnMusicPlay.getDuration());
 	}
 
@@ -464,7 +466,7 @@ public final class MusicDetailFragmentLandSpace extends Fragment {
 			} else {
 				mMusicDetail2Binding.includeSeekBarCar.seekBar.setProgress(ReceiverOnMusicPlay.getCurrentPosition());
 			}
-			mMusicDetail2Binding.includeSeekBarCar.leftText.setText(String.valueOf(Data.sSimpleDateFormat.format(new Date(ReceiverOnMusicPlay.getCurrentPosition()))));
+			mMusicDetail2Binding.includeSeekBarCar.leftText.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(ReceiverOnMusicPlay.getCurrentPosition()))));
 		}
 
 		mHandler.postDelayed(this::updateSeek, 100);

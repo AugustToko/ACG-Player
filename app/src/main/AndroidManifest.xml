@@ -85,7 +85,7 @@
             android:exported="false"
             android:launchMode="singleTask" />
         <activity
-            android:name=".activity.AboutLic"
+            android:name=".activity.AboutLicActivity"
             android:exported="false"
             android:launchMode="singleTask" />
         <activity
