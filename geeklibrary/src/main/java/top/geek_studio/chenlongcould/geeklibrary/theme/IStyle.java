@@ -19,6 +19,8 @@ package top.geek_studio.chenlongcould.geeklibrary.theme;
  * @implNote activity or adapter or fragment
  */
 public interface IStyle {
-    //text color, bg color, toolbar color, tabLayout color, night(model)
+	/**
+	 * text color, bg color, toolbar color, tabLayout color, night(model)
+	 */
     void initStyle();
 }

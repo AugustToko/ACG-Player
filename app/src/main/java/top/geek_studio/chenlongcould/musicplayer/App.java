@@ -1,14 +1,3 @@
-/*
- * ************************************************************
- * 文件：App.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月27日 13:11:38
- * 上次修改时间：2019年01月27日 13:08:44
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.musicplayer;
 
 import android.app.ActivityManager;
@@ -24,18 +13,19 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
-import org.litepal.LitePal;
-
-import java.util.Collections;
-import java.util.List;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+
+import org.litepal.LitePal;
+
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
+
 import io.reactivex.disposables.Disposable;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.fragment.AlbumListFragment;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
@@ -46,19 +36,22 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 public final class App extends Application {
 	
 	public static final String SHORT_CUT_ID_1 = "id1";
-	public static final String SHORT_CUT_ID_2 = "id2";
-	public static final String SHORT_CUT_ID_3 = "id3";
 	public static final String LAST_FM_KEY = "726e129841377374f2c8c804facb6d11";
 	public static final String MY_WEB_SITE = "https://blog.geek-studio.top/";
 	public static final String VERSION_CODE = "ver_code";
-	public static final String AD_ID = "ca-app-pub-1302949087387063/3066110293";
-	public static final String AD_ID_TEST = "ca-app-pub-3940256099942544/5224354917";
-	public static final String APP_ID = "ca-app-pub-1302949087387063~1079129255";
 	public static final int VER_CODE = 74;
 	public static final String SHORTCUT_RANDOM = "SHORTCUT_RANDOM";
 	private static final String TAG = "App";
+	
+	private static final String PKG_1 = "top.geek_studio.chenlongcould.musicplayer";
+	
+	private static final String PKG_SUFFIX = ".Common";
+	
 	private ShortcutManager mShortcutManager;
 	
+	/**
+	 * @see Disposable#dispose()
+	 */
 	public static void clearDisposable() {
 		for (Disposable disposable : Data.sDisposables) {
 			if (disposable != null && !disposable.isDisposed()) {
@@ -66,23 +59,21 @@ public final class App extends Application {
 			}
 		}
 	}
-	
-	@Override
-	protected void attachBaseContext(Context base) {
-		super.attachBaseContext(base);
-	}
-	
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		
 		LitePal.initialize(this);
 		
-		if (getProcessName(this).equals(getPackageName() + ".Common")) {
-			
+		String processName = getProcessName(this);
+		
+		if (processName != null && processName.equals(getPackageName() + PKG_SUFFIX)) {
 			if (PreferenceManager.getDefaultSharedPreferences(this).getLong(VERSION_CODE, -1) != VER_CODE) {
-//                Toast.makeText(this, "建议手动清除该应用程序数据...", Toast.LENGTH_SHORT).show();
-				Utils.IO.delFolder(getExternalFilesDir(ThemeStore.DIR_NAME).getAbsolutePath());
+				File file = getExternalFilesDir(ThemeStore.DIR_NAME);
+				if (file != null) {
+					Utils.IO.delFolder(file.getAbsolutePath());
+				}
 			}
 			
 			//add version code
@@ -103,8 +94,6 @@ public final class App extends Application {
 				getNewShortcutInfo();
 			}
 			
-		} else {
-			//action in MusicService Process
 		}
 		
 	}
@@ -133,20 +122,19 @@ public final class App extends Application {
 				return runningAppProcess.processName;
 			}
 		}
-		return "";
+		return null;
 	}
 	
 	@Override
 	public void onTrimMemory(int level) {
 		Log.d(TAG, "onTrimMemory: the level is " + level);
 		
-		if ("top.geek_studio.chenlongcould.musicplayer".equals(getProcessName(this))
+		if (PKG_1.equals(getProcessName(this))
 				|| "top.geek_studio.chenlongcould.musicplayer.Common".equals(getProcessName(this))) {
 			
 			if (level == TRIM_MEMORY_MODERATE) {
 				Data.S_TRASH_CAN_LIST.clear();
 				
-				AlbumListFragment.VIEW_HAS_LOAD = false;
 				Data.sAlbumItems.clear();
 				
 				Data.sArtistItems.clear();
@@ -176,22 +164,6 @@ public final class App extends Application {
 				.setIntent(randomPlay)
 				.build();
 
-//        ShortcutInfo shortcut2 = new ShortcutInfo.Builder(this, SHORT_CUT_ID_2)
-//                .setShortLabel("csdn")
-//                .setLongLabel("第二个")
-//                .setIcon(Icon.createWithResource(this, R.drawable.ic_play_arrow_black_24dp))
-//                .setIntent(new Intent(Intent.ACTION_VIEW,
-//                        Uri.parse("https://www.csdn.com/")))
-//                .build();
-//
-//        ShortcutInfo shortcut3 = new ShortcutInfo.Builder(this, SHORT_CUT_ID_3)
-//                .setShortLabel("github")
-//                .setLongLabel("第三个")
-//                .setIcon(Icon.createWithResource(this, R.drawable.ic_play_arrow_black_24dp))
-//                .setIntent(new Intent(Intent.ACTION_VIEW,
-//                        Uri.parse("https://www.github.com/")))
-//                .build();
-		
 		mShortcutManager.setDynamicShortcuts(Collections.singletonList(shortcut));
 	}
 }

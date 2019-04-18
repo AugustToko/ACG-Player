@@ -1,14 +1,3 @@
-/*
- * ************************************************************
- * 文件：AlbumDetailActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月18日 18:58:29
- * 上次修改时间：2019年01月18日 11:15:25
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.musicplayer.activity;
 
 import android.content.Intent;
@@ -21,6 +10,13 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.databinding.DataBindingUtil;
+import androidx.palette.graphics.Palette;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 
@@ -31,11 +27,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import androidx.annotation.ColorInt;
-import androidx.databinding.DataBindingUtil;
-import androidx.palette.graphics.Palette;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
@@ -56,7 +47,6 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 /**
  * a activity that show Music Album Detail data
- * <p>
  * has dataBinding
  *
  * @author chenlongcould
@@ -65,6 +55,8 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 public final class AlbumDetailActivity extends BaseCompatActivity {
 	
 	public static final String TAG = "AlbumDetailActivity";
+	
+	private MyRecyclerAdapter mAdapter;
 	
 	private final SimpleObservableScrollViewCallbacks observableScrollViewCallbacks = new SimpleObservableScrollViewCallbacks() {
 		@Override
@@ -138,7 +130,7 @@ public final class AlbumDetailActivity extends BaseCompatActivity {
 		mAlbumDetailBinding = DataBindingUtil.setContentView(this, R.layout.activity_album_detail_oth);
 		mAlbumDetailBinding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
 		headerViewHeight = getResources().getDimensionPixelSize(R.dimen.detail_header_height);
-		initData();
+		init();
 	}
 	
 	@Override
@@ -164,184 +156,198 @@ public final class AlbumDetailActivity extends BaseCompatActivity {
 	/**
 	 * loadData
 	 */
-	private void initData() {
+	private void init() {
 		final Intent intent = getIntent();
-		if (intent != null) {
-			setupAlbumCover(intent);
-			
-			String key = intent.getStringExtra(IntentKey.ALBUM_NAME);
-			mAlbumDetailBinding.toolbar.setTitle(key);
-			
-			intentAlbumId = String.valueOf(intent.getIntExtra(IntentKey.ID, Integer.parseInt(AlbumItem.DEFAULT_ALBUM_ID)));
-			paths = LitePal.where("mAlbumId = ?", intentAlbumId).find(CustomAlbumPath.class);
-			inflateCommonMenu();
-			
-			mAlbumDetailBinding.recyclerView.setPadding(0, headerViewHeight, 0, 0);
-			mAlbumDetailBinding.recyclerView.setScrollViewCallbacks(observableScrollViewCallbacks);
-			final View contentView = getWindow().getDecorView().findViewById(android.R.id.content);
-			contentView.post(() -> observableScrollViewCallbacks.onScrollChanged(-headerViewHeight, false, false));
-			mAlbumDetailBinding.recyclerView.setLayoutManager(new GridLayoutManager(AlbumDetailActivity.this, 1));
-			final MyRecyclerAdapter adapter = new MyRecyclerAdapter(this, mSongs, 0);
-			mAlbumDetailBinding.recyclerView.setAdapter(adapter);
-			adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-				@Override
-				public void onChanged() {
-					super.onChanged();
-					if (adapter.getItemCount() == 0) {
-						finish();
-					}
-				}
-			});
-			
-			final long[] totalDuration = {0};
-			
-			int SIZE_DONE = 0;
-			int DURATION_DONE = 1;
-			
-			Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
-				List<String> mMusicIds = new ArrayList<>();
-				//根据Album名称查music ID
-				final Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-						new String[]{MediaStore.Audio.Media._ID}, MediaStore.Audio.Media.ALBUM + " = ?", new String[]{key}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-				if (cursor != null && cursor.getCount() > 0) {
-					cursor.moveToFirst();
-					do {
-						
-						//get music _id
-						String id = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
-						mMusicIds.add(id);
-					} while (cursor.moveToNext());
-					cursor.close();
-				}
-				
-				//selection...
-				if (mMusicIds.size() > 0) {
-					StringBuilder selection = new StringBuilder(MediaStore.Audio.Media._ID + " IN (");
-					for (int i = 0; i < mMusicIds.size(); i++) {
-						selection.append("?");
-						if (i != mMusicIds.size() - 1) {
-							selection.append(",");
-						}
-					}
-					selection.append(")");
-					
-					final Cursor cursor2 = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null,
-							selection.toString(), mMusicIds.toArray(new String[0]), MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-					
-					//获取数据(该专辑下歌曲)
-					if (cursor2 != null) {
-						cursor2.moveToFirst();
-						do {
-							final String path = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-							
-							if (!new File(path).exists()) {
-								return;
-							}
-							
-							final String mimeType = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
-							final String name = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-							final String albumName = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
-							final int id = cursor2.getInt(cursor2.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
-							final int size = (int) cursor2.getLong(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-							final int duration = cursor2.getInt(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-							final String artist = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-							final long addTime = cursor2.getLong(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
-							final int albumId = cursor2.getInt(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
-							
-							final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
-									.musicAlbum(albumName)
-									.addTime((int) addTime)
-									.artist(artist)
-									.duration(duration)
-									.mimeName(mimeType)
-									.size(size)
-									.addAlbumId(albumId);
-							
-							totalDuration[0] += duration;
-							
-							mSongs.add(builder.build());
-						} while (cursor2.moveToNext());
-						cursor2.close();
-						emitter.onNext(DURATION_DONE);
-						emitter.onNext(SIZE_DONE);
-						emitter.onComplete();
-					}
-				}
-				
-				
-			}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Integer>() {
-				
-				@Override
-				public void onSubscribe(Disposable d) {
-					mDisposables.add(d);
-				}
-				
-				@Override
-				public void onNext(Integer integer) {
-					if (integer == SIZE_DONE) {
-						mAlbumDetailBinding.songCountText.setText(String.valueOf(mSongs.size()));
-					}
-					
-					if (integer == DURATION_DONE) {
-						mAlbumDetailBinding.durationText.setText(Data.S_SIMPLE_DATE_FORMAT.format(new Date(totalDuration[0])));
-					}
-				}
-				
-				@Override
-				public void onError(Throwable e) {
-				
-				}
-				
-				@Override
-				public void onComplete() {
-					mAlbumDetailBinding.recyclerView.getAdapter().notifyDataSetChanged();
-				}
-			});
-			
-			final String[] date = {"-"};
-			final String[] artistOfAlbum = {"-"};
-			Observable.create(emitter -> {
-				//get year
-				final Cursor albumInfo = getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
-						MediaStore.Audio.Media.ALBUM + " = ?", new String[]{key}, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
-				
-				if (albumInfo != null && albumInfo.getCount() > 0) {
-					albumInfo.moveToFirst();
-					do {
-						if (!TextUtils.isEmpty(albumInfo.getString(albumInfo.getColumnIndexOrThrow(MediaStore.Audio.Albums.FIRST_YEAR)))) {
-							date[0] = albumInfo.getString(albumInfo.getColumnIndexOrThrow(MediaStore.Audio.Albums.FIRST_YEAR));
-						}
-						if (!TextUtils.isEmpty(albumInfo.getString(albumInfo.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST)))) {
-							artistOfAlbum[0] = albumInfo.getString(albumInfo.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
-						}
-					} while (albumInfo.moveToNext());
-					albumInfo.close();
-					emitter.onComplete();
-				}
-			}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Object>() {
-				@Override
-				public void onSubscribe(Disposable d) {
-					mDisposables.add(d);
-				}
-				
-				@Override
-				public void onNext(Object o) {
-				
-				}
-				
-				@Override
-				public void onError(Throwable e) {
-				
-				}
-				
-				@Override
-				public void onComplete() {
-					mAlbumDetailBinding.albumYearText.setText(date[0]);
-					mAlbumDetailBinding.artistText.setText(artistOfAlbum[0]);
-				}
-			});
+		if (intent == null) {
+			return;
 		}
 		
+		final String key = intent.getStringExtra(IntentKey.ALBUM_NAME);
+		mAlbumDetailBinding.toolbar.setTitle(key);
+		
+		intentAlbumId = String.valueOf(intent.getIntExtra(IntentKey.ID, Integer.parseInt(AlbumItem.DEFAULT_ALBUM_ID)));
+		paths = LitePal.where("mAlbumId = ?", intentAlbumId).find(CustomAlbumPath.class);
+		
+		setupView(intent);
+		
+		final long[] totalDuration = {0};
+		
+		int sizeDone = 0;
+		int durationDone = 1;
+		
+		Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+			List<String> mMusicIds = new ArrayList<>();
+			//根据Album名称查music ID
+			final Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+					new String[]{MediaStore.Audio.Media._ID}, MediaStore.Audio.Media.ALBUM + " = ?", new String[]{key}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+			if (cursor != null && cursor.getCount() > 0) {
+				cursor.moveToFirst();
+				do {
+					//get music _id
+					String id = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID));
+					mMusicIds.add(id);
+				} while (cursor.moveToNext());
+				cursor.close();
+			}
+			
+			//selection...
+			if (mMusicIds.size() > 0) {
+				StringBuilder selection = new StringBuilder(MediaStore.Audio.Media._ID + " IN (");
+				for (int i = 0; i < mMusicIds.size(); i++) {
+					selection.append("?");
+					if (i != mMusicIds.size() - 1) {
+						selection.append(",");
+					}
+				}
+				selection.append(")");
+				
+				final Cursor cursor2 = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null,
+						selection.toString(), mMusicIds.toArray(new String[0]), MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+				
+				//获取数据(该专辑下歌曲)
+				if (cursor2 != null) {
+					cursor2.moveToFirst();
+					do {
+						final String path = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+						
+						if (!new File(path).exists()) {
+							return;
+						}
+						
+						final String mimeType = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+						final String name = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+						final String albumName = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+						final int id = cursor2.getInt(cursor2.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+						final int size = (int) cursor2.getLong(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
+						final int duration = cursor2.getInt(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+						final String artist = cursor2.getString(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+						final long addTime = cursor2.getLong(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
+						final int albumId = cursor2.getInt(cursor2.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+						
+						final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
+								.musicAlbum(albumName)
+								.addTime((int) addTime)
+								.artist(artist)
+								.duration(duration)
+								.mimeName(mimeType)
+								.size(size)
+								.addAlbumId(albumId);
+						
+						totalDuration[0] += duration;
+						
+						mSongs.add(builder.build());
+					} while (cursor2.moveToNext());
+					cursor2.close();
+					emitter.onNext(durationDone);
+					emitter.onNext(sizeDone);
+					emitter.onComplete();
+				}
+			}
+			
+			
+		}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Integer>() {
+			
+			@Override
+			public void onSubscribe(Disposable d) {
+				mDisposables.add(d);
+			}
+			
+			@Override
+			public void onNext(Integer integer) {
+				if (integer == sizeDone) {
+					mAlbumDetailBinding.songCountText.setText(String.valueOf(mSongs.size()));
+				}
+				
+				if (integer == durationDone) {
+					mAlbumDetailBinding.durationText.setText(Data.S_SIMPLE_DATE_FORMAT.format(new Date(totalDuration[0])));
+				}
+			}
+			
+			@Override
+			public void onError(Throwable e) {
+			
+			}
+			
+			@Override
+			public void onComplete() {
+				mAdapter.notifyDataSetChanged();
+			}
+		});
+		
+		showInfoText(key);
+	}
+	
+	/**
+	 * 设置view
+	 */
+	private void setupView(@NonNull Intent intent) {
+		setupAlbumCover(intent);
+		inflateCommonMenu();
+		
+		mAlbumDetailBinding.recyclerView.setPadding(0, headerViewHeight, 0, 0);
+		mAlbumDetailBinding.recyclerView.setScrollViewCallbacks(observableScrollViewCallbacks);
+		final View contentView = getWindow().getDecorView().findViewById(android.R.id.content);
+		contentView.post(() -> observableScrollViewCallbacks.onScrollChanged(-headerViewHeight, false, false));
+		mAlbumDetailBinding.recyclerView.setLayoutManager(new GridLayoutManager(AlbumDetailActivity.this, 1));
+		mAdapter = new MyRecyclerAdapter(this, mSongs, 0);
+		mAlbumDetailBinding.recyclerView.setAdapter(mAdapter);
+		mAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+			@Override
+			public void onChanged() {
+				super.onChanged();
+				if (mAdapter.getItemCount() == 0) {
+					finish();
+				}
+			}
+		});
+	}
+	
+	/**
+	 * 完成数据加载后对用于显示数据统计的 {@link android.widget.TextView} 设置值
+	 */
+	private void showInfoText(String key) {
+		final String[] date = {"-"};
+		final String[] artistOfAlbum = {"-"};
+		Observable.create(emitter -> {
+			//get year
+			final Cursor albumInfo = getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
+					MediaStore.Audio.Media.ALBUM + " = ?", new String[]{key}, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
+			
+			if (albumInfo != null && albumInfo.getCount() > 0) {
+				albumInfo.moveToFirst();
+				do {
+					if (!TextUtils.isEmpty(albumInfo.getString(albumInfo.getColumnIndexOrThrow(MediaStore.Audio.Albums.FIRST_YEAR)))) {
+						date[0] = albumInfo.getString(albumInfo.getColumnIndexOrThrow(MediaStore.Audio.Albums.FIRST_YEAR));
+					}
+					if (!TextUtils.isEmpty(albumInfo.getString(albumInfo.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST)))) {
+						artistOfAlbum[0] = albumInfo.getString(albumInfo.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
+					}
+				} while (albumInfo.moveToNext());
+				albumInfo.close();
+				emitter.onComplete();
+			}
+		}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Object>() {
+			@Override
+			public void onSubscribe(Disposable d) {
+				mDisposables.add(d);
+			}
+			
+			@Override
+			public void onNext(Object o) {
+			
+			}
+			
+			@Override
+			public void onError(Throwable e) {
+			
+			}
+			
+			@Override
+			public void onComplete() {
+				mAlbumDetailBinding.albumYearText.setText(date[0]);
+				mAlbumDetailBinding.artistText.setText(artistOfAlbum[0]);
+			}
+		});
 	}
 	
 	private void setUpColor() {

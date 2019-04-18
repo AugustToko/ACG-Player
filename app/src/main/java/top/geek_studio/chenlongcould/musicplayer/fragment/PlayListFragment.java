@@ -1,14 +1,3 @@
-/*
- * ************************************************************
- * 文件：PlayListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月27日 13:11:38
- * 上次修改时间：2019年01月27日 13:08:50
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.musicplayer.fragment;
 
 import android.content.BroadcastReceiver;
@@ -24,15 +13,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.io.File;
-import java.lang.ref.WeakReference;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
+
+import java.io.File;
+import java.lang.ref.WeakReference;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -151,25 +141,25 @@ public final class PlayListFragment extends BaseFragment {
 
 		mPlayListBinding.addRecent.setOnClickListener(v -> {
 			Intent intent = new Intent(mMainActivity, PublicActivity.class);
-			intent.putExtra(PublicActivity.INTENT_START_BY, ACTION_ADD_RECENT);
+			intent.putExtra(PublicActivity.IntentTag.INTENT_START_BY, ACTION_ADD_RECENT);
 			startActivity(intent);
 		});
 
 		mPlayListBinding.favourite.setOnClickListener(v -> {
 			Intent intent = new Intent(mMainActivity, PublicActivity.class);
-			intent.putExtra(PublicActivity.INTENT_START_BY, ACTION_FAVOURITE);
+			intent.putExtra(PublicActivity.IntentTag.INTENT_START_BY, ACTION_FAVOURITE);
 			startActivity(intent);
 		});
 
 		mPlayListBinding.history.setOnClickListener(v -> {
 			Intent intent = new Intent(mMainActivity, PublicActivity.class);
-			intent.putExtra(PublicActivity.INTENT_START_BY, ACTION_HISTORY);
+			intent.putExtra(PublicActivity.IntentTag.INTENT_START_BY, ACTION_HISTORY);
 			startActivity(intent);
 		});
 
 		mPlayListBinding.trashCan.setOnClickListener(v -> {
 			Intent intent = new Intent(mMainActivity, PublicActivity.class);
-			intent.putExtra(PublicActivity.INTENT_START_BY, ACTION_TRASH_CAN);
+			intent.putExtra(PublicActivity.IntentTag.INTENT_START_BY, ACTION_TRASH_CAN);
 			startActivity(intent);
 		});
 
@@ -210,7 +200,7 @@ public final class PlayListFragment extends BaseFragment {
 	}
 
 	static class NotLeakHandler extends Handler {
-		@SuppressWarnings("unused")
+		
 		private WeakReference<PlayListFragment> mWeakReference;
 
 		NotLeakHandler(PlayListFragment fragment) {
@@ -219,6 +209,7 @@ public final class PlayListFragment extends BaseFragment {
 
 		@Override
 		public void handleMessage(Message msg) {
+			//noinspection SwitchStatementWithTooFewBranches
 			switch (msg.what) {
 				case RE_LOAD_PLAY_LIST: {
 					mWeakReference.get().initData();

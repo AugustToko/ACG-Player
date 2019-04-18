@@ -1,14 +1,3 @@
-/*
- * ************************************************************
- * 文件：ReceiverOnMusicPlay.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月27日 13:11:38
- * 上次修改时间：2019年01月27日 13:08:44
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.musicplayer.broadcast;
 
 import android.content.BroadcastReceiver;
@@ -21,12 +10,13 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
@@ -41,13 +31,9 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 	public static final String TAG = "ReceiverOnMusicPlay";
 	
-	@Deprecated
 	public static final int CASE_TYPE_SHUFFLE = 90;
-	@Deprecated
 	public static final int CASE_TYPE_ITEM_CLICK = 15;
-	@Deprecated
 	public static final int CASE_TYPE_NOTIFICATION_RESUME = 2;
-	@Deprecated
 	public static final int RECEIVE_TYPE_COMMON = 6;
 	
 	public static void setDataSource(String path) {

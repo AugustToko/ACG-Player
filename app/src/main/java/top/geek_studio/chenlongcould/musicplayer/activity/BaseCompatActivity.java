@@ -30,10 +30,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-import com.google.android.material.appbar.AppBarLayout;
-
-import java.lang.reflect.Field;
-
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -41,6 +37,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import com.google.android.material.appbar.AppBarLayout;
+
+import java.lang.reflect.Field;
+
 import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
 import top.geek_studio.chenlongcould.geeklibrary.widget.GkToolbar;
 import top.geek_studio.chenlongcould.musicplayer.Values;
@@ -119,7 +120,6 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 	
 	/**
 	 * setup TaskCardColor
-	 * ps: 通用
 	 */
 	protected void setUpTaskCardColor(@ColorInt int color) {
 		setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, color));

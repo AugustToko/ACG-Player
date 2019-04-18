@@ -1,14 +1,3 @@
-/*
- * ************************************************************
- * 文件：AboutActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月27日 13:11:38
- * 上次修改时间：2019年01月19日 12:17:57
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.musicplayer.activity;
 
 import android.content.Intent;
@@ -18,15 +7,16 @@ import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.databinding.DataBindingUtil;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.databinding.DataBindingUtil;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -57,7 +47,7 @@ public class AboutActivity extends BaseCompatActivity {
 		mAppBinding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
 		// TODO: 2019/3/10 add Thinking
-		final AboutThanksBinding thanksBinding = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_thanks, (ViewGroup) mAppBinding.getRoot(), false);
+		@SuppressWarnings("unused") final AboutThanksBinding thanksBinding = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_thanks, (ViewGroup) mAppBinding.getRoot(), false);
 
 		setUpVersion();
 		setUpAuthor();
@@ -183,11 +173,11 @@ public class AboutActivity extends BaseCompatActivity {
 
 	@Override
 	public void inflateCommonMenu() {
-
+		//not need
 	}
 
 	@Override
 	public void inflateChooseMenu() {
-
+		//not need
 	}
 }
