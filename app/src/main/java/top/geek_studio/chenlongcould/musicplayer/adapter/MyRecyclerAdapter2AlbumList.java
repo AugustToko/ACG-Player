@@ -27,6 +27,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.content.ContextCompat;
+import androidx.palette.graphics.Palette;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
@@ -44,12 +51,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityOptionsCompat;
-import androidx.core.content.ContextCompat;
-import androidx.palette.graphics.Palette;
-import androidx.recyclerview.widget.RecyclerView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -311,7 +312,10 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 		super.onViewRecycled(holder);
 		holder.mImageViewReference.get().setTag(R.string.key_id_3, null);
 		GlideApp.with(mMainActivity).clear(holder.mImageViewReference.get());
-		holder.mView.setBackgroundColor(ContextCompat.getColor(mMainActivity, R.color.notVeryBlack));
+
+        if (mType == GRID_TYPE) {
+            holder.mView.setBackgroundColor(ContextCompat.getColor(mMainActivity, R.color.notVeryBlack));
+        }
 	}
 
 	private String ifExists(int id) {
@@ -336,8 +340,6 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
 	/**
 	 * @param imageView ImageView
-	 *
-	 * @see MyRecyclerAdapter#loadDefaultArt(ImageView)
 	 */
 	private void loadDefaultArt(@NonNull final ImageView imageView) {
 		if (verify(imageView)) {
@@ -394,7 +396,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 			mAlbumText = itemView.findViewById(R.id.recycler_item_song_album_name);
 			mImageViewReference = new WeakReference<>(itemView.findViewById(R.id.recycler_item_album_image));
 			mUView = itemView.findViewById(R.id.u_view);
-			itemView.setBackground(null);//新增代码
+            itemView.setBackground(null);
 
 			switch (mType) {
 				case GRID_TYPE: {
