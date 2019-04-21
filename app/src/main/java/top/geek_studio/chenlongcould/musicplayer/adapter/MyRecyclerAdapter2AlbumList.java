@@ -26,18 +26,18 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.content.ContextCompat;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -45,15 +45,6 @@ import org.jsoup.parser.Parser;
 import org.jsoup.parser.XmlTreeBuilder;
 import org.jsoup.select.Elements;
 import org.litepal.LitePal;
-
-import java.io.File;
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.util.List;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
 import top.geek_studio.chenlongcould.geeklibrary.DownloadUtil;
 import top.geek_studio.chenlongcould.geeklibrary.HttpUtil;
 import top.geek_studio.chenlongcould.musicplayer.App;
@@ -66,6 +57,11 @@ import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.AlbumThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.List;
 
 public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRecyclerAdapter2AlbumList.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
 
@@ -175,7 +171,6 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 								loadPath2ImageView(mayPath, imageView);
 							} else {
 								//download
-								HttpUtil httpUtil = new HttpUtil();
 								String request = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" +
 										App.LAST_FM_KEY +
 										"&artist=" +
@@ -183,7 +178,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 										"&album=" +
 										albumName;
 
-								httpUtil.sedOkHttpRequest(request, new Callback() {
+								HttpUtil.sedOkHttpRequest(request, new Callback() {
 									@Override
 									public void onFailure(@NotNull Call call, @NotNull IOException e) {
 										imageView.post(() -> Toast.makeText(mMainActivity, e.getMessage(), Toast.LENGTH_SHORT).show());

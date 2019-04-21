@@ -22,23 +22,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-
-import org.jetbrains.annotations.NotNull;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.parser.Parser;
-import org.jsoup.parser.XmlTreeBuilder;
-import org.jsoup.select.Elements;
-import org.litepal.LitePal;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -46,9 +29,19 @@ import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.content.ContextCompat;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+import org.jetbrains.annotations.NotNull;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.parser.Parser;
+import org.jsoup.parser.XmlTreeBuilder;
+import org.jsoup.select.Elements;
+import org.litepal.LitePal;
 import top.geek_studio.chenlongcould.geeklibrary.DownloadUtil;
 import top.geek_studio.chenlongcould.geeklibrary.HttpUtil;
 import top.geek_studio.chenlongcould.musicplayer.App;
@@ -61,6 +54,10 @@ import top.geek_studio.chenlongcould.musicplayer.database.ArtistArtPath;
 import top.geek_studio.chenlongcould.musicplayer.model.ArtistItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.AlbumThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyRecyclerAdapter2ArtistList.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
 
@@ -119,25 +116,33 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-		viewHolder.mArtistText.setText(mArtistItems.get(viewHolder.getAdapterPosition()).getArtistName());
-		viewHolder.mArtistImage.setTag(R.string.key_id_2, viewHolder.getAdapterPosition());
-
-		dataSet(viewHolder.getAdapterPosition(), viewHolder.mArtistImage, viewHolder.mArtistText, viewHolder.mView);
+		viewHolder.mArtistText.setText(mArtistItems.get(i).getArtistName());
+		viewHolder.mArtistImage.setTag(R.string.key_id_2, i);
+		dataSet(i, viewHolder.mArtistImage, viewHolder.mArtistText, viewHolder.mView);
 	}
 
-	private void dataSet(int index, ImageView imageView, TextView textView, View view) {
+	private void dataSet(final int index, final ImageView imageView, final TextView textView, final View view) {
 		AlbumThreadPool.post(() -> {
 
-			ArtistItem artistItem = mArtistItems.get(index);
+			final ArtistItem artistItem = mArtistItems.get(index);
 			int artistId = artistItem.getArtistId();
 			String artistName = artistItem.getArtistName();
 
-			List<ArtistArtPath> customs = LitePal.where("mArtistId = ?", String.valueOf(artistId)).find(ArtistArtPath.class);
 			Log.d(TAG, "onBindViewHolder: id: " + artistId + " name: " + artistName);
+
+			//if artistName is unknown unset data
+			if ("<unknown>".equals(artistName)) {
+				return;
+			}
+
+			List<ArtistArtPath> customs = LitePal.where("mArtistId = ?", String.valueOf(artistId)).find(ArtistArtPath.class);
+
 			if (customs.size() != 0) {
 				final ArtistArtPath custom = customs.get(0);
+
 				String path = custom.getArtistArt();
-				if (TextUtils.isEmpty(path) || path.equals("null") || path.toLowerCase().equals("none")) {
+
+				if (TextUtils.isEmpty(path) || path.toLowerCase().equals("null") || path.toLowerCase().equals("none")) {
 
 					String mayPath = ifExists(artistId);
 					if (mayPath != null) {
@@ -159,13 +164,12 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 					} else {
 						Log.d(TAG, "onBindViewHolder: (in CUSTOM_DB) DB not ability, path not ability, download...");
 						//download
-						HttpUtil httpUtil = new HttpUtil();
 						String request = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist="
 								+ artistName
 								+ "&api_key="
 								+ App.LAST_FM_KEY;
 
-						httpUtil.sedOkHttpRequest(request, new Callback() {
+						HttpUtil.sedOkHttpRequest(request, new Callback() {
 							@Override
 							public void onFailure(@NotNull Call call, @NotNull IOException e) {
 								imageView.post(() -> Toast.makeText(mMainActivity, e.getMessage(), Toast.LENGTH_SHORT).show());
@@ -183,7 +187,9 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 									if (status.equals("ok")) {
 										StringBuilder img = new StringBuilder(content.select("image[size=extralarge]").text());
 
-										Log.d(TAG, "onResponse: imgUrl: " + img + " albumName is: " + artistName);
+										if (!checkStringEmpty(img.toString())) {
+											Log.d(TAG, "check_name_and_imageUrl: imgUrl: " + img + " albumName is: " + artistName);
+										}
 
 										if (img.toString().contains("http") && img.toString().contains("https")) {
 
@@ -194,6 +200,7 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 														@Override
 														public void onDownloadSuccess(File file) {
 															String newPath = file.getAbsolutePath();
+
 															Log.d(TAG, "onDownloadSuccess: " + newPath + " albumName is: " + artistName);
 
 															ArtistArtPath c = customs.get(0);
@@ -258,6 +265,7 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 
 					} else {
 						Log.d(TAG, "onBindViewHolder: already in DB but not a file path");
+						//TODO 存在于数据库 但 路径失效了
 						loadDEF(imageView, view, textView, index);
 					}
 				}
@@ -285,6 +293,26 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 		return null;
 	}
 
+	@SuppressWarnings("RedundantIfStatement")
+	private boolean checkStringEmpty(final String data, boolean... isFile) {
+		if (isFile.length > 0 && isFile[0] && new File(data).exists()) {
+			return false;
+		} else {
+			if (TextUtils.isEmpty(data) || "null".equals(data.toLowerCase()) || "none".equals(data.toLowerCase())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Load default image into imageView
+	 *
+	 * @param imageView imageView
+	 * @param view      title background
+	 * @param textView  textView, show artist name
+	 * @param index     tag
+	 */
 	private void loadDEF(ImageView imageView, View view, TextView textView, int index) {
 		if (verify(imageView, index)) {
 			Log.d(TAG, "key_test(loadDEF): tagId: " + imageView.getTag(R.string.key_id_2) + " pos: " + index);
@@ -312,11 +340,12 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 		if (imageView == null) {
 			Log.e(TAG, "imageView null clear_image");
 		} else {
-			if (imageView.getTag(R.string.key_id_2) == null) {
+			final Object tag = imageView.getTag(R.string.key_id_2);
+			if (tag == null || ((int) tag == -1)) {
 				Log.e(TAG, "key null clear_image");
 			} else {
 				//根据position判断是否为复用ViewHolder
-				if (((int) imageView.getTag(R.string.key_id_2)) != index) {
+				if (((int) tag) != index) {
 					Log.e(TAG, "key error clear_image");
 				} else {
 					flag = true;
@@ -353,6 +382,7 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 
 			}
 			break;
+			default:
 		}
 	}
 
