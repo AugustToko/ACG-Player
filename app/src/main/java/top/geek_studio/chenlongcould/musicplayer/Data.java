@@ -17,13 +17,6 @@ import android.content.Context;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.os.IBinder;
-
-import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -38,6 +31,12 @@ import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.model.ArtistItem;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
+
+import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * @author chenlongcould
@@ -63,7 +62,9 @@ public final class Data {
 	public static WeakReference<MainActivity> sMainRef;
 	/**
 	 * old
+	 * @deprecated
 	 */
+	@Deprecated
 	public static List<Activity> sActivities = new ArrayList<>();
 
 	/**

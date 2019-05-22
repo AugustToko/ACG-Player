@@ -4,45 +4,19 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
-import android.os.Message;
-import android.os.RemoteException;
+import android.os.*;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewAnimationUtils;
-import android.view.ViewGroup;
+import android.view.*;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.widget.CheckBox;
-import android.widget.FrameLayout;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.PopupMenu;
-import android.widget.SeekBar;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.*;
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -55,22 +29,14 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
-
-import org.jetbrains.annotations.NotNull;
-
-import java.lang.ref.WeakReference;
-import java.util.Collections;
-import java.util.Date;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import jp.wasabeef.glide.transformations.BlurTransformation;
+import org.jetbrains.annotations.NotNull;
 import top.geek_studio.chenlongcould.geeklibrary.widget.GkSnackbar;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
@@ -86,26 +52,33 @@ import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
+import java.lang.ref.WeakReference;
+import java.util.Collections;
+import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 /**
  * @author chenlongcould
  */
 public final class MusicDetailFragment extends BaseFragment {
-	
+
 	//////////////////////////////////////////////////////////////////////////////////////
-	
+
 	public static final String TAG = "MusicDetailFragment";
-	
+
 	/**
 	 * @see MainActivity#CURRENT_SLIDE_OFFSET
 	 */
 	public static float CURRENT_SLIDE_OFFSET = 1;
-	
+
 	/**
 	 * Handler
 	 */
-	private NotLeakHandler mHandler;
+	public static NotLeakHandler mHandler;
+
+	@Deprecated
 	private BroadcastReceiver mButtonChangeReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -114,16 +87,24 @@ public final class MusicDetailFragment extends BaseFragment {
 				return;
 			}
 			switch (action) {
+				case BroadCastAction.ACTION_CHANGE_MUSIC_PLAY: {
+
+				}
+				break;
 				case BroadCastAction.ACTION_SCROLL: {
 					mHandler.sendEmptyMessage(HandlerWhat.RECYCLER_SCROLL);
 				}
 				break;
-				case BroadCastAction.ACTION_CHANGE_BUTTON_PAUSE: {
+				case BroadCastAction.ACTION_CHANGE_MUSIC_PAUSE: {
 					mHandler.sendEmptyMessage(HandlerWhat.SET_BUTTON_PAUSE);
 				}
 				break;
 				case BroadCastAction.ACTION_INIT_SEEK_BAR: {
 					mHandler.sendEmptyMessage(HandlerWhat.INIT_SEEK_BAR);
+				}
+				break;
+				case BroadCastAction.ACTION_SET_SEEK_BAR: {
+					setSeekBar(intent.getIntExtra("value", 0));
 				}
 				break;
 				case BroadCastAction.ACTION_UPDATE_CURRENT_INFO: {
@@ -134,86 +115,86 @@ public final class MusicDetailFragment extends BaseFragment {
 			}
 		}
 	};
-	
+
 	private ImageView mBGup;
-	
+
 	private ImageView mBGdown;
-	
+
 	private SeekBar mSeekBar;
-	
+
 	private View mCurrentInfoSeek;
-	
+
 	private HandlerThread mHandlerThread;
-	
+
 	private FloatingActionButton mPlayButton;
-	
+
 	private ImageButton mNextButton;
-	
+
 	private ImageButton mPreviousButton;
-	
+
 	private RecyclerView mRecyclerView;
-	
+
 	private LinearLayoutManager mLinearLayoutManager;
-	
+
 	private MainActivity mMainActivity;
-	
+
 	private ConstraintLayout mCurrentInfoBody;
-	
+
 	private TextView mCurrentAlbumNameText;
-	
+
 	private TextView mCurrentMusicNameText;
-	
+
 	private ImageButton mRandomButton;
-	
+
 	private ImageButton mRepeatButton;
-	
+
 	private Toolbar mToolbar;
-	
+
 	private AppBarLayout mAppBarLayout;
-	
+
 	private TextView mLeftTime;
-	
+
 	private TextView mRightTime;
-	
+
 	private TextView mNextWillText;
-	
+
 	/**
 	 * for {@link #setBlurEffect(Bitmap, ImageView, ImageView, TextView)}
 	 *
 	 * @see ViewAnimationUtils#createCircularReveal
 	 */
 	private final int m_Position = 200;
-	
+
 	private PopupMenu mPopupMenu;
-	
+
 	private SlidingUpPanelLayout mSlidingUpPanelLayout;
-	
+
 	/**
 	 * ----------------- playing info ---------------------
 	 */
 	private TextView mNowPlayingSongText;
-	
+
 	private ImageView mNowPlayingSongImage;
-	
+
 	private TextView mNowPlayingSongAlbumText;
-	
+
 	private ImageView mNowPlayingStatusImage;
-	
+
 	private ImageView mNowPlayingBackgroundImage;
-	
+
 	private ImageView mNowPlayingFavButton;
-	
+
 	private ConstraintLayout mNowPlayingBody;
-	
+
 	private ConstraintLayout mSlideUpGroup;
-	
+
 	/**
 	 * @see #mMusicAlbumImage 的滑动模式
 	 * 0: just x
 	 * 1: x & y
 	 */
 	private int mode = 0;
-	
+
 	private AlbumImageView mMusicAlbumImage;
 	private AlbumImageView mMusicAlbumImageOth2;
 	private AlbumImageView mMusicAlbumImageOth3;
@@ -222,20 +203,23 @@ public final class MusicDetailFragment extends BaseFragment {
 	 * 记录是否为长按 (2000ms)
 	 */
 	private volatile AtomicBoolean lc = new AtomicBoolean(false);
-	
+
+	@Deprecated
+	private LocalBroadcastManager mBroadcastManager;
+
 	/**
 	 * changeButton play or pause
 	 */
+	@Deprecated
 	private void receiveButtonChange() {
 		IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction(BroadCastAction.ACTION_CHANGE_BUTTON_PAUSE);
+		intentFilter.addAction(BroadCastAction.ACTION_CHANGE_MUSIC_PAUSE);
 		intentFilter.addAction(BroadCastAction.ACTION_SCROLL);
 		intentFilter.addAction(BroadCastAction.ACTION_INIT_SEEK_BAR);
 		intentFilter.addAction(BroadCastAction.ACTION_UPDATE_CURRENT_INFO);
 		mBroadcastManager.registerReceiver(mButtonChangeReceiver, intentFilter);
 	}
-	
-	private LocalBroadcastManager mBroadcastManager;
+
 	/**
 	 * menu
 	 */
@@ -253,39 +237,39 @@ public final class MusicDetailFragment extends BaseFragment {
 	 */
 	@ColorInt
 	private int targetColor;
-	
+
 	/**
 	 * init Views
 	 */
 	private void initView(View view) {
-		
+
 		findView(view);
-		
+
 		//get Default values
 		ImageView.ScaleType scaleType = mPlayButton.getScaleType();
 		defXScale = mPlayButton.getScaleX();
 		defYScale = mPlayButton.getScaleY();
-		
+
 		mMusicAlbumImageOth3.setX(0 - mMusicAlbumImage.getWidth());
 		mMusicAlbumImageOth2.setX(mMusicAlbumImage.getWidth() * 2);
 		mMusicAlbumImageOth2.setVisibility(View.GONE);
 		mMusicAlbumImageOth3.setVisibility(View.GONE);
-		
+
 		mCurrentInfoSeek.setBackgroundColor(Utils.Ui.getAccentColor(mMainActivity));
-		
+
 		setDefAnimation();
 		clearAnimations();
-		
+
 		setUpToolbar();
-		
+
 		mSlidingUpPanelLayout.post(() -> {
 			int val0 = view.getHeight() - view.findViewById(R.id.frame_ctrl).getBottom();
 			mSlidingUpPanelLayout.setPanelHeight(val0);
 		});
-		
+
 		mMusicAlbumImage.setOnTouchListener((v, event) -> {
 			final int action = event.getAction();
-			
+
 			MusicItem befItem = null;
 			MusicItem nexItem = null;
 			if (Values.CurrentData.CURRENT_MUSIC_INDEX > 0 && Values.CurrentData.CURRENT_MUSIC_INDEX < Data.sPlayOrderList.size() - 1) {
@@ -294,10 +278,10 @@ public final class MusicDetailFragment extends BaseFragment {
 			if (Values.CurrentData.CURRENT_MUSIC_INDEX < Data.sPlayOrderList.size() - 1 && Values.CurrentData.CURRENT_MUSIC_INDEX > 0) {
 				nexItem = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX + 1);
 			}
-			
+
 			mMusicAlbumImageOth2.setVisibility(View.VISIBLE);
 			mMusicAlbumImageOth3.setVisibility(View.VISIBLE);
-			
+
 			switch (action) {
 				case MotionEvent.ACTION_DOWN:
 					//预加载
@@ -306,18 +290,18 @@ public final class MusicDetailFragment extends BaseFragment {
 							.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
 							.diskCacheStrategy(DiskCacheStrategy.NONE)
 							.into(mMusicAlbumImageOth3);
-					
+
 					GlideApp.with(MusicDetailFragment.this)
 							.load(nexItem == null ? R.drawable.default_album_art : Utils.Audio.getCoverBitmap(mMainActivity, nexItem.getAlbumId()))
 							.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
 							.diskCacheStrategy(DiskCacheStrategy.NONE)
 							.into(mMusicAlbumImageOth2);
-					
+
 					moveX = event.getX();
 //					moveY = event.getY();
 					mLastX = event.getRawX();
 //					mLastY = event.getRawY();
-					
+
 					break;
 				case MotionEvent.ACTION_MOVE:
 
@@ -325,52 +309,52 @@ public final class MusicDetailFragment extends BaseFragment {
 					if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
 						break;
 					}
-					
+
 					//首尾禁止对应边缘滑动
 					if (Values.CurrentData.CURRENT_MUSIC_INDEX == 0) {
 						if (event.getRawX() > mLastX) {
 							break;
 						}
 					}
-					
+
 					if (Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sPlayOrderList.size() - 1) {
 						if (event.getRawX() < mLastX) {
 							break;
 						}
 					}
-					
+
 					float val = mMusicAlbumImage.getX() + (event.getX() - moveX);
 					mMusicAlbumImage.setTranslationX(val);
 					mMusicAlbumImageOth2.setTranslationX(mMusicAlbumImage.getWidth() + val);
 					mMusicAlbumImageOth3.setTranslationX(0 - mMusicAlbumImage.getWidth() + val);
-					
+
 					// FIXME: 2018/12/11 上下滑动删除
 //                    if (mode == 1) {
 //                        float val2 = mMusicAlbumImage.getY() + (event.getY() - moveY);
 //                        mMusicAlbumImage.setTranslationY(val2);
 //                    }
-					
+
 					break;
-				
+
 				case MotionEvent.ACTION_CANCEL:
 				case MotionEvent.ACTION_UP:
-					
+
 					//reset
 					mode = 0;
 					lc.set(false);
 					mSlidingUpPanelLayout.setTouchEnabled(true);
-					
+
 					if (Math.abs(Math.abs(event.getRawX()) - Math.abs(mLastX)) < 5) {
 						mMusicAlbumImage.performClick();
 						break;
 					}
-					
+
 					/*
 					 * enter Animation...
 					 * */
 					ValueAnimator animatorMain = new ValueAnimator();
 					animatorMain.setDuration(300);
-					
+
 					//左滑一半 滑过去
 					if (mMusicAlbumImage.getX() < 0 && Math.abs(mMusicAlbumImage.getX()) >= mMusicAlbumImage.getWidth() / 2) {
 						animatorMain.setFloatValues(mMusicAlbumImage.getX(), 0 - mMusicAlbumImage.getWidth());
@@ -378,9 +362,9 @@ public final class MusicDetailFragment extends BaseFragment {
 						animatorMain.addListener(new Animator.AnimatorListener() {
 							@Override
 							public void onAnimationStart(Animator animation) {
-							
+
 							}
-							
+
 							@Override
 							public void onAnimationEnd(Animator animation) {
 								Utils.SendSomeThing.sendPlay(mMainActivity, 6, "next_slide");
@@ -397,18 +381,18 @@ public final class MusicDetailFragment extends BaseFragment {
 								mMusicAlbumImageOth2.setVisibility(View.GONE);
 								GlideApp.with(MusicDetailFragment.this).clear(mMusicAlbumImageOth2);
 							}
-							
+
 							@Override
 							public void onAnimationCancel(Animator animation) {
-							
+
 							}
-							
+
 							@Override
 							public void onAnimationRepeat(Animator animation) {
-							
+
 							}
 						});
-						
+
 						/*右滑一半 滑过去*/
 					} else if (mMusicAlbumImage.getX() > 0 && Math.abs(mMusicAlbumImage.getX()) >= mMusicAlbumImage.getWidth() / 2) {
 						animatorMain.setFloatValues(mMusicAlbumImage.getX(), mMusicAlbumImage.getWidth());
@@ -416,9 +400,9 @@ public final class MusicDetailFragment extends BaseFragment {
 						animatorMain.addListener(new Animator.AnimatorListener() {
 							@Override
 							public void onAnimationStart(Animator animation) {
-							
+
 							}
-							
+
 							@Override
 							public void onAnimationEnd(Animator animation) {
 								Utils.SendSomeThing.sendPlay(mMainActivity, 6, "previous_slide");
@@ -435,31 +419,31 @@ public final class MusicDetailFragment extends BaseFragment {
 								mMusicAlbumImageOth3.setTranslationX(0 - mMusicAlbumImage.getWidth());
 								GlideApp.with(MusicDetailFragment.this).clear(mMusicAlbumImageOth3);
 							}
-							
+
 							@Override
 							public void onAnimationCancel(Animator animation) {
-							
+
 							}
-							
+
 							@Override
 							public void onAnimationRepeat(Animator animation) {
-							
+
 							}
 						});
-						
+
 					} else {
 						animatorMain.setFloatValues(mMusicAlbumImage.getX(), 0);
-						
+
 						animatorMain.addListener(new Animator.AnimatorListener() {
 							@Override
 							public void onAnimationStart(Animator animation) {
-							
+
 							}
-							
+
 							@Override
 							public void onAnimationEnd(Animator animation) {
 								mMusicAlbumImage.setTranslationX(0);
-								
+
 								GlideApp.with(MusicDetailFragment.this).clear(mMusicAlbumImageOth3);
 								GlideApp.with(MusicDetailFragment.this).clear(mMusicAlbumImageOth2);
 								mMusicAlbumImageOth2.setTranslationX(mMusicAlbumImage.getWidth() * 2);
@@ -467,48 +451,48 @@ public final class MusicDetailFragment extends BaseFragment {
 								mMusicAlbumImageOth2.setVisibility(View.GONE);
 								mMusicAlbumImageOth3.setVisibility(View.GONE);
 							}
-							
+
 							@Override
 							public void onAnimationCancel(Animator animation) {
-							
+
 							}
-							
+
 							@Override
 							public void onAnimationRepeat(Animator animation) {
-							
+
 							}
 						});
 					}
-					
+
 					ValueAnimator animatorY = new ValueAnimator();
 					animatorY.setDuration(300);
 					animatorY.setFloatValues(mMusicAlbumImage.getTranslationY(), 0);
 					animatorY.addUpdateListener(animation -> mMusicAlbumImage.setTranslationY((Float) animation.getAnimatedValue()));
 					animatorY.start();
-					
+
 					animatorMain.addUpdateListener(animation -> {
 						mMusicAlbumImage.setTranslationX((Float) animation.getAnimatedValue());
 						mMusicAlbumImageOth2.setTranslationX((Float) animation.getAnimatedValue() + mMusicAlbumImage.getWidth());
 						mMusicAlbumImageOth3.setTranslationX(0 - mMusicAlbumImage.getWidth() + (Float) animation.getAnimatedValue());
 					});
 					animatorMain.start();
-					
+
 					return true;
 				default:
 			}
 			return true;
 		});
-		
+
 		setClickListener();
-		
+
 		/*---------------------- Menu -----------------------*/
 		mPopupMenu = new PopupMenu(mMainActivity, mMenuButton);
-		
+
 		final Menu menu = mPopupMenu.getMenu();
-		
+
 		menu.add(Menu.NONE, Menu.FIRST + 1, 0, getString(R.string.show_album));
 		menu.add(Menu.NONE, Menu.FIRST + 2, 0, getString(R.string.show_detail));
-		
+
 		mPopupMenu.setOnMenuItemClickListener(item -> {
 			switch (item.getItemId()) {
 				case Menu.FIRST + 1: {
@@ -517,7 +501,7 @@ public final class MusicDetailFragment extends BaseFragment {
 						final String albumName = currentItem.getMusicAlbum();
 						final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
 								MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{albumName}, null);
-						
+
 						//int MusicDetailActivity
 						final Intent intent = new Intent(mMainActivity, AlbumDetailActivity.class);
 						intent.putExtra(AlbumDetailActivity.IntentKey.ALBUM_NAME, albumName);
@@ -541,30 +525,30 @@ public final class MusicDetailFragment extends BaseFragment {
 			}
 			return false;
 		});
-		
+
 		mCurrentInfoBody.setOnClickListener(v -> {
-			
+
 			if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
 				mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
 			} else {
 				mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
 			}
-			
+
 			mHandler.sendEmptyMessage(HandlerWhat.RECYCLER_SCROLL);
-			
+
 		});
-		
+
 		mCurrentInfoBody.setOnLongClickListener(v -> {
 			dropToTrash(ReceiverOnMusicPlay.getCurrentItem());
 			return true;
 		});
-		
+
 		mLinearLayoutManager = new LinearLayoutManager(mMainActivity);
-		
+
 		mRecyclerView.setLayoutManager(mLinearLayoutManager);
 		mMyWaitListAdapter = new MyWaitListAdapter(mMainActivity, Data.sPlayOrderList);
 		mRecyclerView.setAdapter(mMyWaitListAdapter);
-		
+
 		mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -572,12 +556,12 @@ public final class MusicDetailFragment extends BaseFragment {
 					ReceiverOnMusicPlay.seekTo(progress);
 				}
 			}
-			
+
 			@Override
 			public void onStartTrackingTouch(SeekBar seekBar) {
-			
+
 			}
-			
+
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				ReceiverOnMusicPlay.seekTo(seekBar.getProgress());
@@ -585,7 +569,7 @@ public final class MusicDetailFragment extends BaseFragment {
 				mHandler.sendEmptyMessage(HandlerWhat.SET_BUTTON_PLAY);
 			}
 		});
-		
+
 		mSlidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
 			@Override
 			public void onPanelSlide(View panel, float slideOffset) {
@@ -595,7 +579,7 @@ public final class MusicDetailFragment extends BaseFragment {
 					mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
 				}
 			}
-			
+
 			@Override
 			public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
 				if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
@@ -606,16 +590,16 @@ public final class MusicDetailFragment extends BaseFragment {
 				}
 			}
 		});
-		
+
 	}
-	
+
 	private void setBlurEffect(@Nullable final Bitmap bitmap, @NonNull final ImageView bgUp
 			, @NonNull final ImageView bgDown, final TextView nextText) {
-		
+
 		bgDown.setVisibility(View.VISIBLE);
-		
+
 		@ColorInt final int defColor = ContextCompat.getColor(mMainActivity, R.color.colorPrimary);
-		
+
 		if (bitmap != null) {
 			Palette.from(bitmap).generate(palette -> {
 				if (palette != null) {
@@ -626,7 +610,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		} else {
 			nextText.setTextColor(defColor);
 		}
-		
+
 		if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
 			bgUp.post(() -> GlideApp.with(this)
 					.load(bitmap)
@@ -641,19 +625,19 @@ public final class MusicDetailFragment extends BaseFragment {
 				bgUp.setBackgroundColor(defColor);
 			}
 		}
-		
+
 		bgUp.post(() -> {
 			final Animator animator = ViewAnimationUtils.createCircularReveal(
 					bgUp, bgUp.getWidth() / 2, m_Position, 0, (float) Math.hypot(bgUp.getWidth(), bgUp.getHeight()));
-			
+
 			animator.setInterpolator(new AccelerateInterpolator());
 			animator.setDuration(700);
 			animator.addListener(new Animator.AnimatorListener() {
 				@Override
 				public void onAnimationStart(Animator animation) {
-				
+
 				}
-				
+
 				@Override
 				public void onAnimationEnd(Animator animation) {
 					GlideApp.with(MusicDetailFragment.this).clear(bgDown);
@@ -673,77 +657,85 @@ public final class MusicDetailFragment extends BaseFragment {
 					}
 					bgDown.setVisibility(View.GONE);
 				}
-				
+
 				@Override
 				public void onAnimationCancel(Animator animation) {
-				
+
 				}
-				
+
 				@Override
 				public void onAnimationRepeat(Animator animation) {
-				
+
 				}
 			});
 			animator.start();
 		});
-		
+
 	}
-	
+
+	public void setSeekBar(int val) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+			mSeekBar.setProgress(val, true);
+		} else {
+			mSeekBar.setProgress(val);
+		}
+	}
+
 	@Override
 	public void onAttach(@NotNull Context context) {
 		super.onAttach(context);
 		mMainActivity = (MainActivity) context;
-		
+
 		mHandlerThread = new HandlerThread("Handler Thread in MusicDetailActivity");
 		mHandlerThread.start();
 		mHandler = new MusicDetailFragment.NotLeakHandler(mMainActivity, mHandlerThread.getLooper());
-		
+
 		mBroadcastManager = LocalBroadcastManager.getInstance(context);
 		receiveButtonChange();
 	}
-	
+
 	public static MusicDetailFragment newInstance() {
 		return new MusicDetailFragment();
 	}
-	
+
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_music_detail, container, false);
-		
+
 		initView(view);
-		
+
 		//init seekBar
 		mHandler.sendEmptyMessage(HandlerWhat.INIT_SEEK_BAR);
 		//let seekBar loop update
 		mHandler.sendEmptyMessage(HandlerWhat.SEEK_BAR_UPDATE);
 		//scroll to the position{@Values.CurrentData.CURRENT_MUSIC_INDEX}
 		mHandler.sendEmptyMessage(HandlerWhat.RECYCLER_SCROLL);
-		
+
 		if (Data.sMusicBinder != null) {
 			//检测后台播放
 			try {
-				
+
 				MusicItem item = Data.sMusicBinder.getCurrentItem();
 				if (item.getMusicID() != -1) {
 					mCurrentMusicNameText.setText(item.getMusicName());
 					mCurrentAlbumNameText.setText(item.getMusicAlbum());
-					
+
 					Bitmap bitmap = Utils.Audio.getCoverBitmap(getContext(), item.getAlbumId());
 					mNowPlayingStatusImage.setImageResource(R.drawable.ic_pause_black_24dp);
 					mPlayButton.setImageResource(R.drawable.ic_pause_black_24dp);
-					
+
 					setSlideInfo(item.getMusicName(), item.getMusicAlbum(), bitmap);
 					setCurrentInfo(item.getMusicName(), item.getMusicAlbum(), bitmap);
-					
+
 					mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
-					
+
 				} else {
-				
+
 				}
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}
-			
+
 		} else {
 			if (Data.sCurrentMusicItem.getMusicID() != -1) {
 				final Bitmap cover = Utils.Audio.getCoverBitmap(getContext(), Data.sCurrentMusicItem.getAlbumId());
@@ -752,40 +744,40 @@ public final class MusicDetailFragment extends BaseFragment {
 		}
 		return view;
 	}
-	
+
 	public final void setCurrentInfo(@NonNull final String name, @NonNull final String albumName, final Bitmap cover) {
 		mMainActivity.runOnUiThread(() -> {
 			if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
 				Data.getCurrentCover().recycle();
 			}
-			
+
 			Data.setCurrentCover(cover);
-			
+
 			mCurrentMusicNameText.setText(name);
 			mCurrentAlbumNameText.setText(albumName);
-			
+
 			setSlideInfo(name, albumName, cover);
-			
+
 			GlideApp.with(mMainActivity)
 					.load(cover)
 					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
 					.centerCrop()
 					.diskCacheStrategy(DiskCacheStrategy.NONE)
 					.into(mMusicAlbumImage);
-			
+
 			final MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
 			if (item != null) {
 				updateFav(item);
 			}
-			
+
 			setBlurEffect(cover, mBGup, mBGdown, mNextWillText);
 		});
 	}
-	
+
 	public final ConstraintLayout getNowPlayingBody() {
 		return mNowPlayingBody;
 	}
-	
+
 	/**
 	 * clearData all animations
 	 */
@@ -796,7 +788,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		mPreviousButton.clearAnimation();
 		mNextButton.clearAnimation();
 	}
-	
+
 	/**
 	 * set all animations Default
 	 */
@@ -807,7 +799,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		mPlayButton.setScaleX(0);
 		mPlayButton.setScaleY(0);
 	}
-	
+
 	/**
 	 * init & start animations
 	 */
@@ -825,23 +817,23 @@ public final class MusicDetailFragment extends BaseFragment {
 			animator.addListener(new Animator.AnimatorListener() {
 				@Override
 				public void onAnimationStart(Animator animation) {
-				
+
 				}
-				
+
 				@Override
 				public void onAnimationEnd(Animator animation) {
 					mRandomButton.setAlpha(1f);
 					mRandomButton.clearAnimation();
 				}
-				
+
 				@Override
 				public void onAnimationCancel(Animator animation) {
-				
+
 				}
-				
+
 				@Override
 				public void onAnimationRepeat(Animator animation) {
-				
+
 				}
 			});
 			animator.start();
@@ -853,28 +845,28 @@ public final class MusicDetailFragment extends BaseFragment {
 			animator.addListener(new Animator.AnimatorListener() {
 				@Override
 				public void onAnimationStart(Animator animation) {
-				
+
 				}
-				
+
 				@Override
 				public void onAnimationEnd(Animator animation) {
 					mRandomButton.setAlpha(0.3f);
 					mRandomButton.clearAnimation();
 				}
-				
+
 				@Override
 				public void onAnimationCancel(Animator animation) {
-				
+
 				}
-				
+
 				@Override
 				public void onAnimationRepeat(Animator animation) {
-				
+
 				}
 			});
 			animator.start();
 		}
-		
+
 		final ValueAnimator animator = new ValueAnimator();
 		animator.setDuration(300);
 		switch (Values.CurrentData.CURRENT_PLAY_TYPE) {
@@ -885,23 +877,23 @@ public final class MusicDetailFragment extends BaseFragment {
 				animator.addListener(new Animator.AnimatorListener() {
 					@Override
 					public void onAnimationStart(Animator animation) {
-					
+
 					}
-					
+
 					@Override
 					public void onAnimationEnd(Animator animation) {
 						mRepeatButton.setAlpha(0.3f);
 						mRepeatButton.clearAnimation();
 					}
-					
+
 					@Override
 					public void onAnimationCancel(Animator animation) {
-					
+
 					}
-					
+
 					@Override
 					public void onAnimationRepeat(Animator animation) {
-					
+
 					}
 				});
 				animator.start();
@@ -914,23 +906,23 @@ public final class MusicDetailFragment extends BaseFragment {
 				animator.addListener(new Animator.AnimatorListener() {
 					@Override
 					public void onAnimationStart(Animator animation) {
-					
+
 					}
-					
+
 					@Override
 					public void onAnimationEnd(Animator animation) {
 						mRepeatButton.setAlpha(1f);
 						mRepeatButton.clearAnimation();
 					}
-					
+
 					@Override
 					public void onAnimationCancel(Animator animation) {
-					
+
 					}
-					
+
 					@Override
 					public void onAnimationRepeat(Animator animation) {
-					
+
 					}
 				});
 				animator.start();
@@ -943,23 +935,23 @@ public final class MusicDetailFragment extends BaseFragment {
 				animator.addListener(new Animator.AnimatorListener() {
 					@Override
 					public void onAnimationStart(Animator animation) {
-					
+
 					}
-					
+
 					@Override
 					public void onAnimationEnd(Animator animation) {
 						mRepeatButton.setAlpha(1f);
 						mRepeatButton.clearAnimation();
 					}
-					
+
 					@Override
 					public void onAnimationCancel(Animator animation) {
-					
+
 					}
-					
+
 					@Override
 					public void onAnimationRepeat(Animator animation) {
-					
+
 					}
 				});
 				animator.start();
@@ -972,35 +964,35 @@ public final class MusicDetailFragment extends BaseFragment {
 				animator.addListener(new Animator.AnimatorListener() {
 					@Override
 					public void onAnimationStart(Animator animation) {
-					
+
 					}
-					
+
 					@Override
 					public void onAnimationEnd(Animator animation) {
 						mRepeatButton.setAlpha(0.3f);
 						mRepeatButton.clearAnimation();
 					}
-					
+
 					@Override
 					public void onAnimationCancel(Animator animation) {
-					
+
 					}
-					
+
 					@Override
 					public void onAnimationRepeat(Animator animation) {
-					
+
 					}
 				});
 				animator.start();
 			}
 		}
-		
+
 		final ValueAnimator mPlayButtonRotationAnimation = new ValueAnimator();
 		mPlayButtonRotationAnimation.setFloatValues(-90f, 0f);
 		mPlayButtonRotationAnimation.setDuration(300);
 		mPlayButtonRotationAnimation.addUpdateListener(animation -> mPlayButton.setRotation((Float) animation.getAnimatedValue()));
 		mPlayButtonRotationAnimation.start();
-		
+
 		final ValueAnimator mPlayButtonScale = new ValueAnimator();
 		mPlayButtonScale.setFloatValues(0, defXScale);
 		mPlayButtonScale.setDuration(300);
@@ -1009,9 +1001,9 @@ public final class MusicDetailFragment extends BaseFragment {
 			mPlayButton.setScaleY((Float) animation.getAnimatedValue());
 		});
 		mPlayButtonScale.start();
-		
+
 	}
-	
+
 	/**
 	 * set Info (auto put in data.)
 	 *
@@ -1022,21 +1014,21 @@ public final class MusicDetailFragment extends BaseFragment {
 	private void setSlideInfo(String songName, String albumName, Bitmap cover) {
 		mMainActivity.runOnUiThread(() -> {
 			setIcoLightOrDark(cover);
-			
+
 			mNowPlayingSongText.setText(songName);
 			mNowPlayingSongAlbumText.setText(albumName);
-			
+
 			GlideApp.with(this).load(cover)
 					.transition(DrawableTransitionOptions.withCrossFade())
 					.diskCacheStrategy(DiskCacheStrategy.NONE)
 					.into(mNowPlayingSongImage);
-			
+
 			GlideApp.with(this).load(cover)
 					.transition(DrawableTransitionOptions.withCrossFade())
 					.centerCrop()
 					.diskCacheStrategy(DiskCacheStrategy.NONE)
 					.into(mMainActivity.getNavHeaderImageView());
-			
+
 			//load blur...
 			GlideApp.with(this).load(cover)
 					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
@@ -1046,7 +1038,7 @@ public final class MusicDetailFragment extends BaseFragment {
 					.into(mNowPlayingBackgroundImage);
 		});
 	}
-	
+
 	/**
 	 * find view by id
 	 *
@@ -1085,32 +1077,32 @@ public final class MusicDetailFragment extends BaseFragment {
 		mNowPlayingSongImage = view.findViewById(R.id.recycler_item_clover_image);
 		mSlideUpGroup = view.findViewById(R.id.detail_body);
 	}
-	
+
 	private void setUpToolbar() {
 		/*------------------toolbar--------------------*/
 		mToolbar.inflateMenu(R.menu.menu_toolbar_in_detail);
-		
+
 		mToolbar.setOnMenuItemClickListener(menuItem -> {
 			switch (menuItem.getItemId()) {
 				case R.id.menu_toolbar_fast_play: {
 					Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, PlayListFragment.TAG);
 				}
 				break;
-				
+
 				case R.id.menu_toolbar_love: {
 					MusicUtil.toggleFavorite(mMainActivity, ReceiverOnMusicPlay.getCurrentItem());
 					updateFav(ReceiverOnMusicPlay.getCurrentItem());
 					Toast.makeText(mMainActivity, getString(R.string.done), Toast.LENGTH_SHORT).show();
 				}
 				break;
-				
+
 				case R.id.menu_toolbar_eq: {
 					MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
 					if (item != null) {
 						Utils.Audio.openEqualizer(mMainActivity, item.getAlbumId());
 					}
 				}
-				
+
 				case R.id.menu_toolbar_debug: {
 				}
 				break;
@@ -1122,13 +1114,13 @@ public final class MusicDetailFragment extends BaseFragment {
 			}
 			return false;
 		});
-		
+
 		mToolbar.setNavigationOnClickListener(v -> mMainActivity.getHandler().sendEmptyMessage(MainActivity.DOWN));
 	}
-	
+
 	private void setClickListener() {
 		mRepeatButton.setOnClickListener(v -> {
-			
+
 			/*
 			 * COMMON = 0f
 			 * REPEAT = 1f
@@ -1146,23 +1138,23 @@ public final class MusicDetailFragment extends BaseFragment {
 					animator.addListener(new Animator.AnimatorListener() {
 						@Override
 						public void onAnimationStart(Animator animation) {
-						
+
 						}
-						
+
 						@Override
 						public void onAnimationEnd(Animator animation) {
 							mRepeatButton.setAlpha(1f);
 							mRepeatButton.clearAnimation();
 						}
-						
+
 						@Override
 						public void onAnimationCancel(Animator animation) {
-						
+
 						}
-						
+
 						@Override
 						public void onAnimationRepeat(Animator animation) {
-						
+
 						}
 					});
 					animator.start();
@@ -1181,23 +1173,23 @@ public final class MusicDetailFragment extends BaseFragment {
 					animator.addListener(new Animator.AnimatorListener() {
 						@Override
 						public void onAnimationStart(Animator animation) {
-						
+
 						}
-						
+
 						@Override
 						public void onAnimationEnd(Animator animation) {
 							mRepeatButton.setAlpha(0.3f);
 							mRepeatButton.clearAnimation();
 						}
-						
+
 						@Override
 						public void onAnimationCancel(Animator animation) {
-						
+
 						}
-						
+
 						@Override
 						public void onAnimationRepeat(Animator animation) {
-						
+
 						}
 					});
 					animator.start();
@@ -1206,7 +1198,7 @@ public final class MusicDetailFragment extends BaseFragment {
 				default:
 			}
 		});
-		
+
 		mRepeatButton.setOnLongClickListener(v -> {
 			final AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
 			builder.setTitle("Repeater");
@@ -1215,7 +1207,7 @@ public final class MusicDetailFragment extends BaseFragment {
 			builder.show();
 			return false;
 		});
-		
+
 		mRandomButton.setOnClickListener(v -> {
 			mRandomButton.clearAnimation();
 			final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit();
@@ -1228,40 +1220,40 @@ public final class MusicDetailFragment extends BaseFragment {
 				animator.addListener(new Animator.AnimatorListener() {
 					@Override
 					public void onAnimationStart(Animator animation) {
-					
+
 					}
-					
+
 					@Override
 					public void onAnimationEnd(Animator animation) {
 						mRandomButton.setAlpha(0.3f);
 						mRandomButton.clearAnimation();
 					}
-					
+
 					@Override
 					public void onAnimationCancel(Animator animation) {
-					
+
 					}
-					
+
 					@Override
 					public void onAnimationRepeat(Animator animation) {
-					
+
 					}
 				});
 				animator.start();
-				
+
 				final MusicItem item = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX);
-				
+
 				Data.sPlayOrderList.clear();
 				Data.sPlayOrderList.addAll(Data.sMusicItems);
-				
+
 				for (int i = 0; i < Data.sMusicItems.size(); i++) {
 					if (Data.sPlayOrderList.get(i).getMusicID() == item.getMusicID()) {
 						Values.CurrentData.CURRENT_MUSIC_INDEX = i;
 					}
 				}
-				
+
 				mMyWaitListAdapter.notifyDataSetChanged();
-				
+
 			} else {
 				editor.putString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_RANDOM).apply();
 				final ValueAnimator animator = new ValueAnimator();
@@ -1271,41 +1263,41 @@ public final class MusicDetailFragment extends BaseFragment {
 				animator.addListener(new Animator.AnimatorListener() {
 					@Override
 					public void onAnimationStart(Animator animation) {
-					
+
 					}
-					
+
 					@Override
 					public void onAnimationEnd(Animator animation) {
 						mRandomButton.setAlpha(1f);
 						mRandomButton.clearAnimation();
 					}
-					
+
 					@Override
 					public void onAnimationCancel(Animator animation) {
-					
+
 					}
-					
+
 					@Override
 					public void onAnimationRepeat(Animator animation) {
-					
+
 					}
 				});
 				animator.start();
-				
+
 				final MusicItem item = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX);
 				Collections.shuffle(Data.sPlayOrderList);
-				
+
 				for (int i = 0; i < Data.sMusicItems.size(); i++) {
 					if (Data.sPlayOrderList.get(i).getMusicID() == item.getMusicID()) {
 						Values.CurrentData.CURRENT_MUSIC_INDEX = i;
 					}
 				}
-				
+
 				mMyWaitListAdapter.notifyDataSetChanged();
-				
+
 			}
 		});
-		
+
 		mMusicAlbumImage.setOnClickListener(v -> {
 			if (hideToolbar) {
 				showToolbar();
@@ -1313,21 +1305,23 @@ public final class MusicDetailFragment extends BaseFragment {
 				hideToolbar();
 			}
 		});
-		
+
 		mMenuButton.setOnClickListener(v -> mPopupMenu.show());
-		
+
 		//just pause or play
 		mPlayButton.setOnClickListener(v -> {
 			if (ReceiverOnMusicPlay.isPlayingMusic()) {
 				Utils.SendSomeThing.sendPause(mMainActivity);
 			} else {
 				ReceiverOnMusicPlay.playMusic();
-				Utils.Ui.setPlayButtonNowPlaying();
+				Intent pauseIntent = new Intent();
+				pauseIntent.setAction(BroadCastAction.ACTION_CHANGE_MUSIC_PLAY);
+				LocalBroadcastManager.getInstance(mMainActivity).sendBroadcast(pauseIntent);
 			}
 		});
-		
+
 		mNextButton.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mMainActivity, 6, ReceiverOnMusicPlay.TYPE_NEXT));
-		
+
 		mNextButton.setOnLongClickListener(v -> {
 			int nowPosition = mSeekBar.getProgress() + ReceiverOnMusicPlay.getDuration() / 20;
 			if (nowPosition >= mSeekBar.getMax()) {
@@ -1341,9 +1335,9 @@ public final class MusicDetailFragment extends BaseFragment {
 			ReceiverOnMusicPlay.seekTo(nowPosition);
 			return true;
 		});
-		
+
 		mPreviousButton.setOnClickListener(v -> {
-			
+
 			//当进度条大于播放总长 1/20 那么重新播放该歌曲
 			//noinspection AlibabaUndefineMagicConstant
 			if (ReceiverOnMusicPlay.getCurrentPosition() > ReceiverOnMusicPlay.getDuration() / 20 || Values.CurrentData.CURRENT_MUSIC_INDEX == 0) {
@@ -1351,9 +1345,9 @@ public final class MusicDetailFragment extends BaseFragment {
 			} else {
 				Utils.SendSomeThing.sendPlay(mMainActivity, 6, "previous");
 			}
-			
+
 		});
-		
+
 		mPreviousButton.setOnLongClickListener(v -> {
 			int nowPosition = mSeekBar.getProgress() - ReceiverOnMusicPlay.getDuration() / 20;
 			if (nowPosition <= 0) {
@@ -1367,7 +1361,7 @@ public final class MusicDetailFragment extends BaseFragment {
 			ReceiverOnMusicPlay.seekTo(nowPosition);
 			return true;
 		});
-		
+
 		mNowPlayingStatusImage.setOnClickListener(v -> {
 			//判断是否播放过, 如没有默认随机播放
 			if (Data.HAS_PLAYED) {
@@ -1380,13 +1374,13 @@ public final class MusicDetailFragment extends BaseFragment {
 				Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, TAG);
 			}
 		});
-		
+
 		mNowPlayingFavButton.setOnClickListener(v -> {
 			MusicUtil.toggleFavorite(mMainActivity, ReceiverOnMusicPlay.getCurrentItem());
 			updateFav(ReceiverOnMusicPlay.getCurrentItem());
 			Toast.makeText(mMainActivity, getString(R.string.done), Toast.LENGTH_SHORT).show();
 		});
-		
+
 		mNowPlayingBody.setOnClickListener(v -> {
 			if (Data.HAS_PLAYED) {
 				mMainActivity.getHandler().sendEmptyMessage(MainActivity.UP);
@@ -1395,7 +1389,7 @@ public final class MusicDetailFragment extends BaseFragment {
 			}
 		});
 	}
-	
+
 	/**
 	 * the action drop to crash
 	 */
@@ -1428,7 +1422,7 @@ public final class MusicDetailFragment extends BaseFragment {
 			}
 		}
 	}
-	
+
 	/**
 	 * hide or show toolbar
 	 */
@@ -1441,7 +1435,7 @@ public final class MusicDetailFragment extends BaseFragment {
 			public void onAnimationEnd(Animator animation) {
 				mAppBarLayout.clearAnimation();
 			}
-			
+
 			@Override
 			public void onAnimationStart(Animator animation) {
 				mAppBarLayout.setVisibility(View.VISIBLE);
@@ -1450,7 +1444,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		anim.addUpdateListener(animation1 -> mAppBarLayout.setAlpha((Float) animation1.getAnimatedValue()));
 		anim.start();
 	}
-	
+
 	private void hideToolbar() {
 		hideToolbar = true;
 		final AlphaAnimation temp = new AlphaAnimation(1f, 0f);
@@ -1460,22 +1454,22 @@ public final class MusicDetailFragment extends BaseFragment {
 			@Override
 			public void onAnimationStart(Animation animation) {
 			}
-			
+
 			@Override
 			public void onAnimationEnd(Animation animation) {
 				mAppBarLayout.clearAnimation();
 				mAppBarLayout.setAlpha(0f);
 				mAppBarLayout.setVisibility(View.GONE);
 			}
-			
+
 			@Override
 			public void onAnimationRepeat(Animation animation) {
-			
+
 			}
 		});
 		mAppBarLayout.startAnimation(temp);
 	}
-	
+
 	public final void setCurrentInfoWithoutMainImage(@NonNull final String name, @NonNull final String albumName, final Bitmap cover) {
 		mMainActivity.runOnUiThread(() -> {
 			mCurrentMusicNameText.setText(name);
@@ -1483,22 +1477,82 @@ public final class MusicDetailFragment extends BaseFragment {
 			setBlurEffect(cover, mBGup, mBGdown, mNextWillText);
 		});
 	}
-	
+
 	/**
-	 * for {@link #mHandler}
+	 * setIcon White or Black (by bitmap light)
+	 *
+	 * @param bitmap backgroundImage
 	 */
-	public interface HandlerWhat {
-		int INIT_SEEK_BAR = 54;
-		int RECYCLER_SCROLL = 55001;
-		int SET_BUTTON_PAUSE = 57;
-		int SEEK_BAR_UPDATE = 53;
-		int SET_BUTTON_PLAY = 58;
+	private void setIcoLightOrDark(@Nullable final Bitmap bitmap) {
+		if (bitmap != null) {
+			new AsyncTask<Void, Void, Integer>() {
+
+				@Override
+				protected Integer doInBackground(Void... voids) {
+					//InfoBar background color AND text color balance
+					return Utils.Ui.getBright(bitmap);
+				}
+
+				@Override
+				protected void onPostExecute(Integer integer) {
+					if (integer > (255 / 2)) {
+						@ColorInt final int target = ContextCompat.getColor(mMainActivity, R.color.notVeryBlack);
+
+						ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mNextWillText.getCurrentTextColor(), target);
+						animator.setDuration(0);
+						animator.setStartDelay(300);
+						animator.addUpdateListener(animation -> {
+							@ColorInt int val = (int) animation.getAnimatedValue();
+							mNowPlayingSongText.setTextColor(val);
+							mNowPlayingSongAlbumText.setTextColor(val);
+							mNowPlayingStatusImage.setColorFilter(val);
+							mNowPlayingFavButton.setColorFilter(val);
+
+							mRandomButton.setColorFilter(val);
+							mRepeatButton.setColorFilter(val);
+							mNextButton.setColorFilter(val);
+							mPreviousButton.setColorFilter(val);
+							mLeftTime.setTextColor(val);
+							mRightTime.setTextColor(val);
+
+							mSeekBar.getProgressDrawable().setTint(val);
+							mSeekBar.getThumb().setTint(val);
+						});
+						animator.start();
+					} else {
+						@ColorInt final int target = ContextCompat.getColor(mMainActivity, R.color.notVeryWhite);
+
+						ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mNextWillText.getCurrentTextColor(), target);
+						animator.setDuration(0);
+						animator.addUpdateListener(animation -> {
+							@ColorInt int val = (int) animation.getAnimatedValue();
+							mNowPlayingSongText.setTextColor(val);
+							mNowPlayingSongAlbumText.setTextColor(val);
+							mNowPlayingStatusImage.setColorFilter(val);
+							mNowPlayingFavButton.setColorFilter(val);
+
+							mRandomButton.setColorFilter(val);
+							mRepeatButton.setColorFilter(val);
+							mNextButton.setColorFilter(val);
+							mPreviousButton.setColorFilter(val);
+							mLeftTime.setTextColor(val);
+							mRightTime.setTextColor(val);
+
+							mSeekBar.getProgressDrawable().setTint(val);
+							mSeekBar.getThumb().setTint(val);
+						});
+						animator.start();
+					}
+
+				}
+			}.execute();
+		}
 	}
-	
+
 	public final NotLeakHandler getHandler() {
 		return mHandler;
 	}
-	
+
 	/**
 	 * update Favourite music icon
 	 */
@@ -1509,163 +1563,119 @@ public final class MusicDetailFragment extends BaseFragment {
 			mNowPlayingFavButton.setImageResource(id);
 		}
 	}
-	
+
+	public void setPlayButtonNowPlaying() {
+		mHandler.sendEmptyMessage(MusicDetailFragment.HandlerWhat.SET_BUTTON_PLAY);
+		if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.UIMODE.MODE_CAR)) {
+			Data.sCarViewActivity.getFragmentLandSpace().setButtonType("pause");
+		}
+	}
+
+	/**
+	 * for {@link #mHandler}
+	 */
+	public interface HandlerWhat {
+		int INIT_SEEK_BAR = 54;
+		int RECYCLER_SCROLL = 55001;
+		int SET_BUTTON_PAUSE = 57;
+		int SEEK_BAR_UPDATE = 53;
+		int SET_BUTTON_PLAY = 58;
+		int SET_MUSIC_DATA = 59;
+	}
+
+	public final SlidingUpPanelLayout getSlidingUpPanelLayout() {
+		return mSlidingUpPanelLayout;
+	}
+
+	public final SeekBar getSeekBar() {
+		return mSeekBar;
+	}
+
 	/**
 	 * action for broadcast {@link #mBroadcastManager}
 	 */
 	public interface BroadCastAction {
+		String ACTION_CHANGE_MUSIC_PAUSE = "ACTION_CHANGE_MUSIC_PAUSE";
+		String ACTION_CHANGE_MUSIC_PLAY = "ACTION_CHANGE_MUSIC_PLAY";
+
+		/**
+		 * use {@link #ACTION_CHANGE_MUSIC_PAUSE}
+		 *
+		 * @deprecated
+		 */
+		@Deprecated
 		String ACTION_CHANGE_BUTTON_PAUSE = "ACTION_CHANGE_BUTTON_PAUSE";
+
 		String ACTION_SCROLL = "ACTION_SCROLL";
 		String ACTION_INIT_SEEK_BAR = "ACTION_INIT_SEEK_BAR";
+		String ACTION_SET_SEEK_BAR = "ACTION_SET_SEEK_BAR";
 		String ACTION_UPDATE_CURRENT_INFO = "ACTION_UPDATE_CURRENT_INFO";
 	}
-	
-	/**
-	 * setIcon White or Black (by bitmap light)
-	 *
-	 * @param bitmap backgroundImage
-	 */
-	@SuppressLint("StaticFieldLeak")
-	private void setIcoLightOrDark(@Nullable final Bitmap bitmap) {
-		if (bitmap != null) {
-			new AsyncTask<Void, Void, Integer>() {
-				
-				@Override
-				protected Integer doInBackground(Void... voids) {
-					//InfoBar background color AND text color balance
-					return Utils.Ui.getBright(bitmap);
-				}
-				
-				@Override
-				protected void onPostExecute(Integer integer) {
-					if (integer > (255 / 2)) {
-						@ColorInt final int target = ContextCompat.getColor(mMainActivity, R.color.notVeryBlack);
-						
-						ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mNextWillText.getCurrentTextColor(), target);
-						animator.setDuration(0);
-						animator.setStartDelay(300);
-						animator.addUpdateListener(animation -> {
-							@ColorInt int val = (int) animation.getAnimatedValue();
-							mNowPlayingSongText.setTextColor(val);
-							mNowPlayingSongAlbumText.setTextColor(val);
-							mNowPlayingStatusImage.setColorFilter(val);
-							mNowPlayingFavButton.setColorFilter(val);
-							
-							mRandomButton.setColorFilter(val);
-							mRepeatButton.setColorFilter(val);
-							mNextButton.setColorFilter(val);
-							mPreviousButton.setColorFilter(val);
-							mLeftTime.setTextColor(val);
-							mRightTime.setTextColor(val);
-							
-							mSeekBar.getProgressDrawable().setTint(val);
-							mSeekBar.getThumb().setTint(val);
-						});
-						animator.start();
-					} else {
-						@ColorInt final int target = ContextCompat.getColor(mMainActivity, R.color.notVeryWhite);
-						
-						ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mNextWillText.getCurrentTextColor(), target);
-						animator.setDuration(0);
-						animator.addUpdateListener(animation -> {
-							@ColorInt int val = (int) animation.getAnimatedValue();
-							mNowPlayingSongText.setTextColor(val);
-							mNowPlayingSongAlbumText.setTextColor(val);
-							mNowPlayingStatusImage.setColorFilter(val);
-							mNowPlayingFavButton.setColorFilter(val);
-							
-							mRandomButton.setColorFilter(val);
-							mRepeatButton.setColorFilter(val);
-							mNextButton.setColorFilter(val);
-							mPreviousButton.setColorFilter(val);
-							mLeftTime.setTextColor(val);
-							mRightTime.setTextColor(val);
-							
-							mSeekBar.getProgressDrawable().setTint(val);
-							mSeekBar.getThumb().setTint(val);
-						});
-						animator.start();
-					}
-					
-				}
-			}.execute();
-		}
-	}
-	
-	public final SlidingUpPanelLayout getSlidingUpPanelLayout() {
-		return mSlidingUpPanelLayout;
-	}
-	
-	public final SeekBar getSeekBar() {
-		return mSeekBar;
-	}
-	
+
 	@Override
 	public void onDestroyView() {
 		mHandlerThread.quitSafely();
 		super.onDestroyView();
 	}
-	
+
 	public final class NotLeakHandler extends Handler {
 		private WeakReference<MainActivity> mWeakReference;
-		
+
 		NotLeakHandler(MainActivity activity, Looper looper) {
 			super(looper);
 			mWeakReference = new WeakReference<>(activity);
 		}
-		
+
 		@Override
 		public void handleMessage(Message msg) {
-			
+
 			switch (msg.what) {
 				case HandlerWhat.INIT_SEEK_BAR: {
 					mWeakReference.get().runOnUiThread(() -> {
 						if (Data.sMusicBinder == null) {
 							return;
 						}
-						
+
 						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 							mSeekBar.setProgress(0, true);
 						} else {
 							mSeekBar.setProgress(0);
 						}
-						
+
 						mCurrentInfoSeek.getLayoutParams().width = 0;
 						mCurrentInfoSeek.setLayoutParams(mCurrentInfoSeek.getLayoutParams());
 						mCurrentInfoSeek.requestLayout();
-						
+
 						mRightTime.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(ReceiverOnMusicPlay.getDuration()))));
 						mSeekBar.setMax(ReceiverOnMusicPlay.getDuration());
 					});
 				}
 				break;
-				
+
 				case HandlerWhat.SEEK_BAR_UPDATE: {
 					mWeakReference.get().runOnUiThread(() -> {
 						//点击body 或 music 正在播放 才可以进行seekBar更新
 						if (Data.sMusicBinder == null) {
 							return;
 						}
-						
+
 						if (ReceiverOnMusicPlay.isPlayingMusic()) {
 							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 								mSeekBar.setProgress(ReceiverOnMusicPlay.getCurrentPosition(), true);
 							} else {
 								mSeekBar.setProgress(ReceiverOnMusicPlay.getCurrentPosition());
 							}
-							
+
 							mCurrentInfoSeek.getLayoutParams().width = mCurrentInfoBody.getWidth() * ReceiverOnMusicPlay.getCurrentPosition() / ReceiverOnMusicPlay.getDuration();
 							mCurrentInfoSeek.setLayoutParams(mCurrentInfoSeek.getLayoutParams());
 							mCurrentInfoSeek.requestLayout();
 							mLeftTime.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(ReceiverOnMusicPlay.getCurrentPosition()))));
-							
-							Log.i(TAG, "handleMessage: current position " + ReceiverOnMusicPlay.getCurrentPosition() + " ------------ " + ReceiverOnMusicPlay.getDuration());
-							
+
 							//播放模式不为循环单曲时，跳出提示
 							if (!Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_REPEAT_ONE)) {
 								if (ReceiverOnMusicPlay.getCurrentPosition() / 1000 == ReceiverOnMusicPlay.getDuration() / 1000 - 5 && !snackNotice) {
 									snackNotice = true;
-									
+
 									final GkSnackbar gkSnackbar = new GkSnackbar(mSlidingUpPanelLayout, getString(R.string.next_will_play_x,
 											Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX + 1 != Data.sPlayOrderList.size() ? Values.CurrentData.CURRENT_MUSIC_INDEX + 1 : 0).getMusicName())
 											, Snackbar.LENGTH_LONG);
@@ -1683,25 +1693,25 @@ public final class MusicDetailFragment extends BaseFragment {
 									gkSnackbar.setBackgroundColor(Utils.Ui.getPrimaryColor(getActivity()))
 											.setBodyViewAlpha(0.8f).setActionTextColor(Color.BLACK);
 									gkSnackbar.show();
-									
+
 								}
-								
+
 							}
-							
+
 						}
 					});
-					
+
 					//循环更新 0.5s 一次
 					mHandler.sendEmptyMessageDelayed(HandlerWhat.SEEK_BAR_UPDATE, 500);
 				}
 				break;
-				
+
 				case HandlerWhat.RECYCLER_SCROLL: {
 					mWeakReference.get().runOnUiThread(() -> mLinearLayoutManager.scrollToPositionWithOffset(Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sMusicItems.size() ?
 							Values.CurrentData.CURRENT_MUSIC_INDEX : Values.CurrentData.CURRENT_MUSIC_INDEX + 1, 0));
 				}
 				break;
-				
+
 				case HandlerWhat.SET_BUTTON_PLAY: {
 					mWeakReference.get().runOnUiThread(() -> {
 						GlideApp.with(mMainActivity)
@@ -1713,7 +1723,7 @@ public final class MusicDetailFragment extends BaseFragment {
 					});
 				}
 				break;
-				
+
 				case HandlerWhat.SET_BUTTON_PAUSE: {
 					mWeakReference.get().runOnUiThread(() -> {
 						GlideApp.with(mMainActivity)
@@ -1725,9 +1735,16 @@ public final class MusicDetailFragment extends BaseFragment {
 					});
 				}
 				break;
+
+				case HandlerWhat.SET_MUSIC_DATA: {
+					Bundle data = msg.getData();
+					setCurrentInfo(data.getString("name", "Name"),
+							data.getString("albumName", "Album Name"), Data.getCurrentCover());
+				}
+				break;
 				default:
 			}
-			
+
 		}
 	}
 }
