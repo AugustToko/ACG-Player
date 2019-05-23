@@ -13,8 +13,8 @@ package top.geek_studio.chenlongcould.musicplayer.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public final class MusicItem implements Parcelable {
 
@@ -122,6 +122,23 @@ public final class MusicItem implements Parcelable {
 	@Override
 	public String toString() {
 		return mMusicName + " @ " + mMusicAlbum + " @ " + getMusicPath();
+	}
+
+	@Override
+	public boolean equals(@Nullable Object obj) {
+		boolean result = false;
+		if (obj instanceof MusicItem) {
+			MusicItem item = (MusicItem) obj;
+			if (item.getMusicID() == mMusicID) {
+				result = true;
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public int hashCode() {
+		return mMusicID;
 	}
 
 	@Override

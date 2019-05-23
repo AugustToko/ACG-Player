@@ -11,11 +11,7 @@
 
 package top.geek_studio.chenlongcould.musicplayer;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
+import android.app.*;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -30,24 +26,22 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
-
-import org.litepal.LitePal;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.palette.graphics.Palette;
+import org.litepal.LitePal;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.Detail;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author chenlongcould
@@ -60,8 +54,9 @@ public final class MusicService extends Service {
 	public static final int MINIMUM_PLAY_TIME = 3000;
 	/**
 	 * PI requests
+	 *
 	 * @see PendingIntent
-	 * */
+	 */
 	public static final int REQUEST_PAUSE = 1;
 	private static final String TAG = "MusicService";
 	public static final int REQUEST_PLAY = 2;
@@ -69,6 +64,7 @@ public final class MusicService extends Service {
 	public static final int REQUEST_PRE = 4;
 
 	private final MediaPlayer mMediaPlayer = new MediaPlayer();
+
 	private boolean hasPlayed = false;
 
 	/**
@@ -179,6 +175,7 @@ public final class MusicService extends Service {
 				mMusicItem = new AtomicReference<>(new MusicItem.Builder(-1, "null", "null").build());
 			} else {
 				mMusicItem = new AtomicReference<>(item);
+				setDataSource(item.getMusicPath());
 			}
 
 			mCurrentCover = Utils.Audio.getCoverBitmap(MusicService.this, mMusicItem.get().getAlbumId());

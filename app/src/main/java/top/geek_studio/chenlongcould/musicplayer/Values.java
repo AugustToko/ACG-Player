@@ -136,7 +136,7 @@ public interface Values {
 		/**
 		 * 当前序列指针, 指向 {@link Data#sPlayOrderList} 的位置
 		 */
-		public static int CURRENT_MUSIC_INDEX = -1;
+		public static volatile int CURRENT_MUSIC_INDEX = -1;
 		
 		/**
 		 * 用户手动切歌的播放模式

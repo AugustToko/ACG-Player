@@ -15,26 +15,13 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.provider.MediaStore;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-
-import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-
-import java.util.List;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.RecyclerView;
-import io.reactivex.Observable;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
+import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
@@ -44,6 +31,8 @@ import top.geek_studio.chenlongcould.musicplayer.activity.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
+
+import java.util.List;
 
 public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
 
@@ -134,28 +123,30 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
 	private void onMusicItemClick(View view, ViewHolder holder) {
 		view.setOnClickListener(v -> {
-			final Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
+//			final Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
 
-				//因为mMusicItems 与 Data.sPlayOrderList 同步, 所以无需转换index
+			//因为mMusicItems 与 Data.sPlayOrderList 同步, 所以无需转换index
 //                for (int i = 0; i < Data.sPlayOrderList.size(); i++) {
 //                    if (Data.sPlayOrderList.get(i).getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
 //                        Values.CurrentData.CURRENT_MUSIC_INDEX = i;
 //                    }
 //                }
-				Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
 
-				ReceiverOnMusicPlay.resetMusic();
+			Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
+			Data.sCurrentMusicItem = Data.sPlayOrderList.get(holder.getAdapterPosition());
 
-				for (int i = 0; i < Data.sMusicItems.size(); i++) {
-					MusicItem item = Data.sMusicItems.get(i);
-					if (item.getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
-						observableEmitter.onNext(i);
-					}
-				}
+			Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, "null");
 
-			}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
-					.subscribe(integer -> Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, integer.toString()), Throwable::printStackTrace);
-			Data.sDisposables.add(disposable);
+//				for (int i = 0; i < Data.sMusicItems.size(); i++) {
+//					MusicItem item = Data.sMusicItems.get(i);
+//					if (item.getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
+//						observableEmitter.onNext(i);
+//					}
+//				}
+
+//			}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+//					.subscribe(integer -> Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, integer.toString()), Throwable::printStackTrace);
+//			Data.sDisposables.add(disposable);
 		});
 	}
 
@@ -193,7 +184,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 	}
 
 	class ViewHolder extends RecyclerView.ViewHolder {
-		
+
 		AppCompatImageView mItemMenuButton;
 
 		TextView mMusicNameText;

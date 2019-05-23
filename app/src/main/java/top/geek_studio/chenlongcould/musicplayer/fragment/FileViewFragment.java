@@ -22,17 +22,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-
-import org.jetbrains.annotations.NotNull;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
@@ -40,6 +29,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
+import org.jetbrains.annotations.NotNull;
 import top.geek_studio.chenlongcould.geeklibrary.OpenFile;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
@@ -47,6 +38,13 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentFileViewerBinding;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+// FIXME: 2019/5/22 bugs...
 public final class FileViewFragment extends Fragment {
 
 	private FragmentFileViewerBinding mFileViewerBinding;
@@ -127,11 +125,11 @@ public final class FileViewFragment extends Fragment {
 
 			int sizeLength = String.valueOf((int) fileSize).length();
 			if (sizeLength <= 3) {
-				return String.valueOf((double) Math.round(fileSize * 100) / 100 + "KB");
+				return (double) Math.round(fileSize * 100) / 100 + "KB";
 			} else if (sizeLength < 7) {
-				return String.valueOf((double) Math.round(fileSize / 1024 * 100) / 100 + "MB");
+				return (double) Math.round(fileSize / 1024 * 100) / 100 + "MB";
 			} else {
-				return String.valueOf((double) Math.round(fileSize / 1024 / 1024 * 100) / 100 + "GB");
+				return (double) Math.round(fileSize / 1024 / 1024 * 100) / 100 + "GB";
 			}
 
 		}
@@ -155,7 +153,7 @@ public final class FileViewFragment extends Fragment {
 
 				File file = mFiles.get(position);
 
-				String end = file.getName().substring(file.getName().lastIndexOf(".") + 1, file.getName().length()).toLowerCase();
+				String end = file.getName().substring(file.getName().lastIndexOf(".") + 1).toLowerCase();
 
 				if ("mp4".equals(end) || "avi".equals(end) || "wmv".equals(end) || "mov".equals(end)) {
 					GlideApp.with(mMainActivity).load(R.drawable.ic_movie_creation_24px).into(holder.itemIco);

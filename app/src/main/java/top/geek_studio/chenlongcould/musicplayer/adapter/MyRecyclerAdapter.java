@@ -23,40 +23,17 @@ import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.view.animation.OvershootInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-
-import org.jetbrains.annotations.NotNull;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.parser.Parser;
-import org.jsoup.parser.XmlTreeBuilder;
-import org.jsoup.select.Elements;
-import org.litepal.LitePal;
-
-import java.io.File;
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -66,21 +43,22 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
-import io.reactivex.Observable;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+import org.jetbrains.annotations.NotNull;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.parser.Parser;
+import org.jsoup.parser.XmlTreeBuilder;
+import org.jsoup.select.Elements;
+import org.litepal.LitePal;
 import top.geek_studio.chenlongcould.geeklibrary.DownloadUtil;
 import top.geek_studio.chenlongcould.geeklibrary.HttpUtil;
-import top.geek_studio.chenlongcould.musicplayer.App;
-import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.GlideApp;
-import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.*;
 import top.geek_studio.chenlongcould.musicplayer.activity.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.BaseCompatActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
@@ -90,6 +68,13 @@ import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author chenlongcould
@@ -171,7 +156,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 			}
 
 			//when clicked ModHolder(fastPlay item)
-			holder.itemView.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mActivity, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, TAG));
+			holder.itemView.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mActivity, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, "null"));
 
 		} else {
 			switch (mStyleId) {
@@ -439,30 +424,34 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 				((ItemHolder) holder).mBody.setBackgroundColor(Utils.Ui.getAccentColor(mActivity));
 			} else {
 
-				//在通常模式（非多选）下
-				final Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
+//				//在通常模式（非多选）下
+//				final Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
+//
+//					//设置全局ITEM
+//					for (int i = 0; i < Data.sMusicItems.size(); i++) {
+//						final MusicItem item = Data.sMusicItems.get(i);
+//						if (item.getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
+//							observableEmitter.onNext(i);
+//							break;
+//						}
+//					}
+//				}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+//						.subscribe(integer -> Utils.SendSomeThing.sendPlay(mActivity, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, integer.toString()), Throwable::printStackTrace);
+//				Data.sDisposables.add(disposable);
 
-					//设置全局ITEM
-					for (int i = 0; i < Data.sMusicItems.size(); i++) {
-						final MusicItem item = Data.sMusicItems.get(i);
-						if (item.getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
-							observableEmitter.onNext(i);
-							break;
-						}
-					}
-				}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
-						.subscribe(integer -> Utils.SendSomeThing.sendPlay(mActivity, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, integer.toString()), Throwable::printStackTrace);
-				Data.sDisposables.add(disposable);
+				Data.sCurrentMusicItem = Data.sMusicItems.get(holder.getAdapterPosition());
+				Values.CurrentData.CURRENT_MUSIC_INDEX = Data.sPlayOrderList.indexOf(Data.sCurrentMusicItem);
+				Utils.SendSomeThing.sendPlay(mActivity, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, "null");
 
-				ItemCoverThreadPool.post(() -> {
-					//因为mMusicItems 与 Data.sPlayOrderList 不同步, 所以需要转换index
-					//MUSIC INDEX
-					for (int i = 0; i < Data.sPlayOrderList.size(); i++) {
-						if (Data.sPlayOrderList.get(i).getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
-							Values.CurrentData.CURRENT_MUSIC_INDEX = i;
-						}
-					}
-				});
+//				ItemCoverThreadPool.post(() -> {
+//					//因为mMusicItems 与 Data.sPlayOrderList 不同步, 所以需要转换index
+//					//MUSIC INDEX
+//					for (int i = 0; i < Data.sPlayOrderList.size(); i++) {
+//						if (Data.sPlayOrderList.get(i).getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
+//							Values.CurrentData.CURRENT_MUSIC_INDEX = i;
+//						}
+//					}
+//				});
 			}
 		});
 	}
@@ -622,8 +611,12 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 																	c.setAlbumArt(newPath);
 																	c.save();
 
-																	if (Data.sCurrentMusicItem.getAlbumId() == albumId && Data.getCurrentCover() == null) {
-																		Data.setCurrentCover(BitmapFactory.decodeFile(newPath));
+																	try {
+																		if (Data.sMusicBinder.getCurrentItem().getAlbumId() == albumId && Data.getCurrentCover() == null) {
+																			Data.setCurrentCover(BitmapFactory.decodeFile(newPath));
+																		}
+																	} catch (RemoteException e) {
+																		e.printStackTrace();
 																	}
 
 																	loadFile2ImageView(file, imageView);

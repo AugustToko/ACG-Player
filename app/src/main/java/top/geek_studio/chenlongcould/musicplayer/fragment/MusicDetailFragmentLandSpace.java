@@ -30,19 +30,13 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.SeekBar;
-
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-
-import java.lang.ref.WeakReference;
-import java.util.Collections;
-import java.util.Date;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.R;
@@ -54,6 +48,10 @@ import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentMusicDetailLandspaceBinding;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
+
+import java.lang.ref.WeakReference;
+import java.util.Collections;
+import java.util.Date;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -388,7 +386,7 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				ReceiverOnMusicPlay.seekTo(seekBar.getProgress());
-				mHandler.sendEmptyMessage(MusicDetailFragment.HandlerWhat.SET_BUTTON_PLAY);
+				mHandler.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
 			}
 		});
 
@@ -478,8 +476,6 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 
 	/**
 	 * hide or show toolbar
-	 * same as {@link MusicDetailFragment#showToolbar()}
-	 * {@link MusicDetailFragment#hideToolbar()}
 	 */
 	private void showToolbar() {
 		HIDE_TOOLBAR = false;

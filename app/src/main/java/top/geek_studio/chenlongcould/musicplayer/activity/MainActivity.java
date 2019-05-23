@@ -10,13 +10,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.AudioManager;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
-import android.os.Message;
+import android.os.*;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -28,22 +22,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.Toast;
-
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.google.android.material.tabs.TabLayout;
-import com.miguelcatalan.materialsearchview.MaterialSearchView;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
-
-import org.litepal.LitePal;
-import org.litepal.LitePalDB;
-
-import java.io.File;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -59,6 +37,11 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.palette.graphics.Palette;
 import androidx.viewpager.widget.ViewPager;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.google.android.material.tabs.TabLayout;
+import com.miguelcatalan.materialsearchview.MaterialSearchView;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
@@ -66,37 +49,35 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import jp.wasabeef.glide.transformations.BlurTransformation;
+import org.litepal.LitePal;
+import org.litepal.LitePalDB;
 import top.geek_studio.chenlongcould.geeklibrary.DialogUtil;
 import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
 import top.geek_studio.chenlongcould.geeklibrary.theme.Theme;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeUtils;
-import top.geek_studio.chenlongcould.musicplayer.App;
-import top.geek_studio.chenlongcould.musicplayer.DBArtSync;
-import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.GlideApp;
-import top.geek_studio.chenlongcould.musicplayer.MusicService;
-import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.*;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyPagerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter2AlbumList;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter2ArtistList;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityMainBinding;
-import top.geek_studio.chenlongcould.musicplayer.fragment.AlbumListFragment;
-import top.geek_studio.chenlongcould.musicplayer.fragment.ArtistListFragment;
-import top.geek_studio.chenlongcould.musicplayer.fragment.FileViewFragment;
-import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
-import top.geek_studio.chenlongcould.musicplayer.fragment.MusicListFragment;
-import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
+import top.geek_studio.chenlongcould.musicplayer.fragment.*;
 import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.model.ArtistItem;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.AlbumThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.ArtistThreadPool;
+import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
+
+import java.io.File;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -124,14 +105,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	 * default tab order is: 12345
 	 */
 	public static final String DEFAULT_TAB_ORDER = "12345";
-
-	/**
-	 * @see Message#what
-	 */
-	public static final int UP = 50070;
-	public static final int DOWN = 50071;
-	public static final int LOAD_INTO_NAV_IMAGE = 5003;
-	public static final int SET_SLIDE_TOUCH_ENABLE = 5004;
 
 	/**
 	 * 检测当前 slide 的位置.
@@ -202,15 +175,21 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	 */
 	public static void clearData() {
 
+		//lists
 		Data.sPlayOrderList.clear();
-		Data.sMusicItemsBackUp.clear();
 		Data.sMusicItems.clear();
 		Data.sAlbumItems.clear();
+		Data.sArtistItems.clear();
+		Data.sMusicItemsBackUp.clear();
 		Data.sAlbumItemsBackUp.clear();
+		Data.sArtistItemsBackUp.clear();
+
+		Data.S_HISTORY_PLAY.clear();
+		Data.S_TRASH_CAN_LIST.clear();
 		
 		App.clearDisposable();
 
-		if (Data.getCurrentCover() != null) {
+		if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
 			Data.getCurrentCover().recycle();
 		}
 	}
@@ -236,10 +215,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		if (Data.sMainRef != null) {
 			Data.sMainRef.clear();
 		}
+
 		Data.sTheme = null;
-		Data.sAlbumItems.clear();
-		Data.S_HISTORY_PLAY.clear();
-		Data.S_TRASH_CAN_LIST.clear();
 
 		mHandlerThread.quit();
 		mFragmentList.clear();
@@ -247,6 +224,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		AlbumThreadPool.finish();
 		ItemCoverThreadPool.finish();
 		ArtistThreadPool.finish();
+		CustomThreadPool.finish();
+
 		super.onDestroy();
 	}
 	
@@ -1250,7 +1229,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			@Override
 			public void onPanelSlide(View panel, float slideOffset) {
 
-				getMusicDetailFragment().getHandler().sendEmptyMessage(MusicDetailFragment.HandlerWhat.RECYCLER_SCROLL);
+				getMusicDetailFragment().getHandler().sendEmptyMessage(MusicDetailFragment.NotLeakHandler.RECYCLER_SCROLL);
 
 				CURRENT_SLIDE_OFFSET = slideOffset;
 
@@ -1465,6 +1444,16 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 ////////////get///////////////////////get///////////////////////get/////////////////
 
 	public final class NotLeakHandler extends Handler {
+
+		/**
+		 * @see Message#what
+		 */
+		public static final int UP = 50070;
+		public static final int DOWN = 50071;
+		public static final int LOAD_INTO_NAV_IMAGE = 5003;
+		public static final int SET_SLIDE_TOUCH_ENABLE = 5004;
+		public static final int SET_SLIDE_TOUCH_DISABLE = 5005;
+
 		@SuppressWarnings("unused")
 		private WeakReference<MainActivity> mWeakReference;
 
@@ -1501,6 +1490,10 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					mMainBinding.slidingLayout.setTouchEnabled(true);
 				}
 				break;
+
+				case SET_SLIDE_TOUCH_DISABLE: {
+					mMainBinding.slidingLayout.setTouchEnabled(false);
+				}
 				default:
 			}
 		}

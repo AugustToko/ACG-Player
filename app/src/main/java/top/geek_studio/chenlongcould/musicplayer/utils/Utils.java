@@ -12,14 +12,7 @@
 package top.geek_studio.chenlongcould.musicplayer.utils;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
-import android.content.ComponentName;
-import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -43,35 +36,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.Toast;
-
-import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.internal.NavigationMenuPresenter;
-import com.google.android.material.internal.NavigationMenuView;
-import com.google.android.material.navigation.NavigationView;
-
-import org.litepal.LitePal;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
-
-import androidx.annotation.ColorInt;
-import androidx.annotation.DrawableRes;
-import androidx.annotation.FloatRange;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
+import androidx.annotation.*;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
@@ -79,6 +44,11 @@ import androidx.core.content.FileProvider;
 import androidx.core.graphics.ColorUtils;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.internal.NavigationMenuPresenter;
+import com.google.android.material.internal.NavigationMenuView;
+import com.google.android.material.navigation.NavigationView;
+import org.litepal.LitePal;
 import top.geek_studio.chenlongcould.geeklibrary.widget.GkToolbar;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.MusicService;
@@ -90,6 +60,16 @@ import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
+
+import java.io.*;
+import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 @SuppressWarnings("WeakerAccess")
 public final class Utils {
@@ -569,7 +549,7 @@ public final class Utils {
 		public static void setPlayButtonNowPlaying() {
 			if (!Data.sActivities.isEmpty()) {
 				MainActivity activity = (MainActivity) Data.sActivities.get(0);
-				activity.getMusicDetailFragment().getHandler().sendEmptyMessage(MusicDetailFragment.HandlerWhat.SET_BUTTON_PLAY);
+				activity.getMusicDetailFragment().getHandler().sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
 				
 				if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.CurrentData.MODE_CAR)) {
 					Data.sCarViewActivity.getFragmentLandSpace().setButtonType("pause");
@@ -882,9 +862,9 @@ public final class Utils {
 		}
 		
 		/**
-		 * @param playBy play_type: previous, next, slide
+		 * @param playBy play_type: previous, next, slide (scroll album cover)
 		 */
-		public static void sendPlay(final Context context, final int receiveType, final String playBy, final String... other) {
+		public static void sendPlay(final Context context, final int receiveType, final String playBy) {
 			Intent intent = new Intent();
 			intent.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
 			intent.putExtra("play_type", receiveType);
@@ -966,7 +946,7 @@ public final class Utils {
 						Log.i("unzip: ", "=" + entry);
 						
 						int count;
-						byte data[] = new byte[BUFFER];
+						byte[] data = new byte[BUFFER];
 						strEntry = entry.getName();
 						
 						File entryFile = new File(targetDir + strEntry);

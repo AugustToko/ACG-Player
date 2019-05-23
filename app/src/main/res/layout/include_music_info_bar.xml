@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ *************************************************************
+  ~ 文件：include_music_info_bar.xml：app  项目：MusicPlayer
+  ~ 当前修改时间：2019年01月17日 17:31:46
+  ~ 上次修改时间：2019年01月17日 17:28:53
+  ~ 作者：chenlongcould
+  ~ Geek Studio
+  ~ Copyright (c) 2019
+  ~ *************************************************************
+  -->
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/current_info"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/current_info_bar_height"
+    app:layout_constraintBottom_toBottomOf="parent">
+
+    <ImageView
+            android:id="@+id/info_bar_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/current_info_background"
+            android:src="@color/activityDefaultColor"
+            android:scaleType="centerCrop" />
+
+    <ImageView
+            android:id="@+id/info_bar_clover"
+            android:layout_width="75dp"
+            android:layout_height="75dp"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_audiotrack_24px"
+            android:transitionName="@string/image_trans_album"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+            android:id="@+id/info_bar_album"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/album"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toStartOf="@+id/info_bar_fav_img"
+            app:layout_constraintStart_toEndOf="@+id/info_bar_clover"
+            app:layout_constraintTop_toBottomOf="@+id/info_bar_music_name"/>
+
+    <TextView
+            android:id="@+id/info_bar_music_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/music"
+            android:textColor="?android:textColorPrimary"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toStartOf="@+id/info_bar_fav_img"
+            app:layout_constraintStart_toEndOf="@+id/info_bar_clover"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+            android:id="@+id/info_bar_fav_img"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:clickable="true"
+            android:contentDescription="@string/play_status"
+            android:focusable="true"
+            android:scaleType="center"
+            android:src="@drawable/ic_favorite_border_white_24dp"
+            android:tint="#636363"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/info_bar_play_img"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+            android:id="@+id/info_bar_play_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            android:clickable="true"
+            android:contentDescription="@string/play_status"
+            android:focusable="true"
+            android:scaleType="center"
+            android:src="@drawable/ic_play_arrow_grey_600_24dp"
+            android:tint="#636363"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/current_info_bar_seek_height"
+            android:alpha="0.5"
+            android:background="#fff"
+            app:layout_constraintBottom_toBottomOf="@+id/info_bar_background"/>
+
+    <View
+            android:id="@+id/info_bar_seek"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/current_info_bar_seek_height"
+            android:background="@color/colorAccent"
+            app:layout_constraintBottom_toBottomOf="@+id/info_bar_background"
+            tools:layout_width="300dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
