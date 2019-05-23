@@ -574,7 +574,6 @@ public final class Utils {
 		
 		/**
 		 * 获取图片亮度
-		 *
 		 * @param bm bitmap
 		 */
 		public static int getBright(@NonNull Bitmap bm) {
@@ -596,11 +595,6 @@ public final class Utils {
 			return bright / count;
 		}
 
-//        public static boolean isColorLight(@ColorInt final int color) {
-//            double darkness = 1.0D - (0.299D * (double) Color.red(color) + 0.587D * (double) Color.green(color) + 0.114D * (double) Color.blue(color)) / 255.0D;
-//            return darkness < 0.4D;
-//        }
-		
 		/**
 		 * 判断颜色是不是亮色
 		 *

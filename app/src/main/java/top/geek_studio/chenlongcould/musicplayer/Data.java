@@ -63,7 +63,9 @@ public final class Data {
 	public static WeakReference<MainActivity> sMainRef;
 	/**
 	 * old
+	 * @deprecated
 	 */
+	@Deprecated
 	public static List<Activity> sActivities = new ArrayList<>();
 
 	/**
