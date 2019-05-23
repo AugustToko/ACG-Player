@@ -76,6 +76,11 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 	}
 
 	@Override
+	protected void setFragmentType(FragmentType fragmentType) {
+		fragmentType = FragmentType.MUSIC_DETAIL_FRAGMENT_LAND_SPACE;
+	}
+
+	@Override
 	public void onAttach(@NonNull Context context) {
 		super.onAttach(context);
 		mCarViewActivity = (CarViewActivity) context;

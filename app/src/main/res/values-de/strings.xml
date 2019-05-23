@@ -84,8 +84,7 @@
 	<string name="color_noti">Eingefärbt (für Android 7.0 und höher)</string>
 	<string name="set_noti_background_colorized">Benachrichtigungshintergrund farbig einstellen</string>
 	<string name="reload">Neu laden</string>
-	<string name="author">Autor</string>
-	<string name="thanks">Vielen Dank</string>
+    <string name="thanks">Vielen Dank</string>
 	<string name="set_status_bar_translucent">Statusleiste durchsichtig setzen</string>
 	<string name="set_status_bar_translucent_no_black_square_mask">Setze Statusleiste durchsichtig, keine schwarze Quadratmaske</string>
 	<string name="donate">Spenden</string>
@@ -96,4 +95,5 @@
 	<string name="open_blog">Öffne mein Blog</string>
 	<string name="play">abspielen</string>
 	<string name="trash_can">Mülleimer</string>
+    <string name="artist_layout">Artist layout</string>
 </resources>

@@ -12,22 +12,22 @@
 package top.geek_studio.chenlongcould.musicplayer.adapter;
 
 import android.util.Log;
-
-import java.util.List;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.PagerAdapter;
+import top.geek_studio.chenlongcould.musicplayer.fragment.BaseFragment;
+
+import java.util.List;
 
 public final class MyPagerAdapter extends FragmentStatePagerAdapter {
 
 	private static final String TAG = "MyPagerAdapter";
-	private List<Fragment> mFragmentList;
+	private List<BaseFragment> mFragmentList;
 	private List<String> mTitles;
 
-	public MyPagerAdapter(FragmentManager fm, List<Fragment> fragmentList, List<String> titles) {
+	public MyPagerAdapter(FragmentManager fm, List<BaseFragment> fragmentList, List<String> titles) {
 		super(fm);
 		mFragmentList = fragmentList;
 		mTitles = titles;

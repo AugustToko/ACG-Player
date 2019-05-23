@@ -1,14 +1,3 @@
-/*
- * ************************************************************
- * 文件：MusicService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月27日 13:11:38
- * 上次修改时间：2019年01月19日 14:07:05
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.musicplayer;
 
 import android.app.*;
@@ -49,7 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class MusicService extends Service {
 
 	/**
-	 * 最短播放时间为3000毫秒
+	 * 最短播放时间为 3000 毫秒
 	 */
 	public static final int MINIMUM_PLAY_TIME = 3000;
 	/**
@@ -71,14 +60,17 @@ public final class MusicService extends Service {
 	 * NotificationId
 	 */
 	private String mId = "Player";
-	private int mStartNotiId = 1;
+
+	private int mStartNotificationId = 1;
 
 	private boolean mColorized = true;
 
 	private PowerManager.WakeLock wakeLock;
+
 	private AtomicReference<MusicItem> mMusicItem = new AtomicReference<>(new MusicItem.Builder(-1, "null", "null").build());
 
 	private Bitmap mCurrentCover = null;
+
 	private final Binder mMusicBinder = new IMuiscService.Stub() {
 		@Override
 		public void playMusic() {
@@ -186,6 +178,7 @@ public final class MusicService extends Service {
 			return mMusicItem.get();
 		}
 	};
+
 	private AtomicBoolean mIsServiceDestroyed = new AtomicBoolean(false);
 
 	public MusicService() {
@@ -231,9 +224,9 @@ public final class MusicService extends Service {
 
 	private void startFN() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			startForeground(mStartNotiId, getChannelNotification(mMusicItem.get().getMusicName(), mMusicItem.get().getMusicAlbum(), mCurrentCover, this).build());
+			startForeground(mStartNotificationId, getChannelNotification(mMusicItem.get().getMusicName(), mMusicItem.get().getMusicAlbum(), mCurrentCover, this).build());
 		} else {
-			startForeground(mStartNotiId, getNotification25(mMusicItem.get().getMusicName(), mMusicItem.get().getMusicAlbum(), mCurrentCover, this).build());
+			startForeground(mStartNotificationId, getNotification25(mMusicItem.get().getMusicName(), mMusicItem.get().getMusicAlbum(), mCurrentCover, this).build());
 		}
 	}
 
@@ -310,8 +303,8 @@ public final class MusicService extends Service {
 	}
 
 	private NotificationCompat.Builder getNotification25(final String title, final String content, final @Nullable Bitmap cover, final Context context) {
-		Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
-		PendingIntent pi = PendingIntent.getActivity(context, 0, intent, 0);
+		final Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
+		final PendingIntent pi = PendingIntent.getActivity(context, 0, intent, 0);
 
 		@SuppressWarnings("UnnecessaryLocalVariable") NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), mId)
 				.setContentTitle(title)
@@ -328,15 +321,14 @@ public final class MusicService extends Service {
 
 	@Override
 	public void onDestroy() {
-		Log.d(TAG, "onDestroy: ");
-		mMediaPlayer.release();
 		stopForeground(true);
+		mMediaPlayer.release();
 		mIsServiceDestroyed.set(true);
+		wakeLock.release();
+		mMusicItem = null;
 		if (mCurrentCover != null) {
 			mCurrentCover.recycle();
 		}
-		wakeLock.release();
-		mMusicItem = null;
 		super.onDestroy();
 	}
 

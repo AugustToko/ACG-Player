@@ -178,4 +178,5 @@
     <string name="recyclerview_item_style">RecyclerView item style</string>
     <string name="set_recyclerview_item_style">Set recyclerView item style</string>
     <string name="show_detail">Show Detail</string>
+    <string name="artist_layout">Artist layout</string>
 </resources>

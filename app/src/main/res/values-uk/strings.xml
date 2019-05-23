@@ -97,4 +97,5 @@
 	<string name="open_blog">Відкрийте мій блог</string>
 	<string name="play">Грати</string>
 	<string name="trash_can">Смітник</string>
+    <string name="artist_layout">Artist layout</string>
 </resources>

@@ -98,4 +98,5 @@
 	<string name="play">遊びます</string>
 	<string name="trash_can">ごみ箱</string>
     <string name="minimum_time_play">最小再生時間</string>
+    <string name="artist_layout">Artist layout</string>
 </resources>

@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.fragment.BaseFragment;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
@@ -64,9 +65,8 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		Utils.Ui.setPlayButtonNowPlaying();
 
 		// FIXME: 2019/5/22 
-		((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment().setCurrentInfo
-				(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(),
-						cover);
+		((MusicDetailFragment) ((MainActivity) Data.sActivities.get(0)).getFragment(BaseFragment.FragmentType.MUSIC_DETAIL_FRAGMENT))
+				.setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), cover);
 
 		MusicDetailFragment.setSeekBar(0);         //防止seekBar跳动到Max
 		MainActivity.mHandler.sendEmptyMessage(MainActivity.NotLeakHandler.SET_SLIDE_TOUCH_ENABLE);
@@ -333,7 +333,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 				MusicDetailFragment.mHandler.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
 
 				// FIXME: 2019/5/22 
-				((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment().setCurrentInfo
+				((MusicDetailFragment) ((MainActivity) Data.sActivities.get(0)).getFragment(BaseFragment.FragmentType.MUSIC_DETAIL_FRAGMENT)).setCurrentInfo
 						(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(),
 								Utils.Audio.getCoverBitmap(context, Data.sCurrentMusicItem.getAlbumId()));
 
@@ -400,7 +400,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 			if (!Data.sActivities.isEmpty()) {
 
-				final MusicDetailFragment musicDetailFragment = ((MainActivity) Data.sActivities.get(0)).getMusicDetailFragment();
+				final MusicDetailFragment musicDetailFragment = ((MusicDetailFragment) ((MainActivity) Data.sActivities.get(0)).getFragment(BaseFragment.FragmentType.MUSIC_DETAIL_FRAGMENT));
 
 				final Bitmap cover = Utils.Audio.getCoverBitmap(musicDetailFragment.getContext(), Data.sNextWillPlayItem.getAlbumId());
 

@@ -32,7 +32,6 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.palette.graphics.Palette;
@@ -88,13 +87,12 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 	public static final String TAG = "MainActivity";
 
+	public static final char MUSIC_DETAIL_FRAGMENT_ID = '0';
 	public static final char MUSIC_LIST_FRAGMENT_ID = '1';
-
-	public static final String TAB_MUSIC = "1";
-	public static final String TAB_ALBUM = "2";
-	public static final String TAB_ARTIST = "3";
-	public static final String TAB_PLAYLIST = "4";
-	public static final String TAB_FILE = "5";
+	public static final char ALBUM_LIST_FRAGMENT_ID = '2';
+	public static final char ARTIST_LIST_FRAGMENT_ID = '3';
+	public static final char PLAYT_LIST_FRAGMENT_ID = '4';
+	public static final char FILE_LIST_FRAGMENT_ID = '5';
 
 	/**
 	 * 1 is MUSIC TAB
@@ -122,7 +120,14 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	/**
 	 * ALL FRAGMENTS
 	 */
-	private List<Fragment> mFragmentList = new ArrayList<>();
+	private List<BaseFragment> mFragmentList = new ArrayList<>();
+
+	private MusicDetailFragment musicDetailFragment;
+	private MusicListFragment musicListFragment;
+	private AlbumListFragment albumListFragment;
+	private ArtistListFragment artistListFragment;
+	private FileViewFragment fileViewFragment;
+	private PlayListFragment playListFragment;
 
 	/**
 	 * handler
@@ -140,11 +145,10 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	/**
 	 * ----------------- fragment(s) ----------------------
 	 */
-	private MusicDetailFragment mMusicDetailFragment;
 	private HandlerThread mHandlerThread;
 
 	private AlertDialog load;
-	
+
 	/**
 	 * onXXX
 	 * At Override
@@ -169,7 +173,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		loadData();
 
 	}
-	
+
 	/**
 	 * clearData data
 	 */
@@ -186,14 +190,14 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 		Data.S_HISTORY_PLAY.clear();
 		Data.S_TRASH_CAN_LIST.clear();
-		
+
 		App.clearDisposable();
 
 		if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
 			Data.getCurrentCover().recycle();
 		}
 	}
-	
+
 	@Override
 	protected void onDestroy() {
 		GlideApp.get(this).clearMemory();
@@ -228,13 +232,13 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 		super.onDestroy();
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
 
-		if (getMusicListFragment() != null) {
-			getMusicListFragment().getMusicListBinding().includeRecycler.recyclerView.scheduleLayoutAnimation();
+		if (musicListFragment != null) {
+			musicListFragment.getMusicListBinding().includeRecycler.recyclerView.scheduleLayoutAnimation();
 		}
 
 		//数据重载
@@ -248,13 +252,12 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			Data.sAlbumItemsBackUp.clear();
 			Data.sAlbumItems.clear();
 			Data.sArtistItems.clear();
-			
+
 			loadData();
 		}
 
 	}
-	
-	
+
 	@Override
 	public final void onBackPressed() {
 
@@ -270,9 +273,9 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		}
 
 		//2
-		if (getMusicDetailFragment() != null && getMusicDetailFragment().getSlidingUpPanelLayout() != null
-				&& getMusicDetailFragment().getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
-			getMusicDetailFragment().getSlidingUpPanelLayout().setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+		if (musicDetailFragment.getSlidingUpPanelLayout() != null
+				&& musicDetailFragment.getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+			musicDetailFragment.getSlidingUpPanelLayout().setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
 			return;
 		}
 
@@ -282,12 +285,10 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			return;
 		}
 
-		if (getFileViewerFragment() != null) {
-			File file = getFileViewerFragment().getCurrentFile();
-			if (file != null && !file.getPath().equals(Environment.getExternalStorageDirectory().getPath())) {
-				getFileViewerFragment().onBackPressed();
-				return;
-			}
+		final File file = fileViewFragment.getCurrentFile();
+		if (file != null && !file.getPath().equals(Environment.getExternalStorageDirectory().getPath())) {
+			fileViewFragment.onBackPressed();
+			return;
 		}
 
 		//4
@@ -336,10 +337,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.LINEAR_TYPE);
 					editor.apply();
 					mPagerAdapter.notifyDataSetChanged();
-					final AlbumListFragment albumListFragment = getAlbumListFragment();
-					if (albumListFragment != null) {
-						albumListFragment.setRecyclerViewData();
-					}
+					albumListFragment.setRecyclerViewData();
 				}
 				break;
 
@@ -348,10 +346,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					editor.apply();
 					mPagerAdapter.notifyDataSetChanged();
 
-					final AlbumListFragment albumListFragment = getAlbumListFragment();
-					if (albumListFragment != null) {
-						albumListFragment.setRecyclerViewData();
-					}
+					albumListFragment.setRecyclerViewData();
 				}
 				break;
 
@@ -359,10 +354,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					editor.putInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.LINEAR_TYPE);
 					editor.apply();
 					mPagerAdapter.notifyDataSetChanged();
-					final ArtistListFragment artistListFragment = getArtistFragment();
-					if (artistListFragment != null) {
-						artistListFragment.setRecyclerViewData();
-					}
+					artistListFragment.setRecyclerViewData();
 				}
 				break;
 
@@ -371,10 +363,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					editor.apply();
 					mPagerAdapter.notifyDataSetChanged();
 
-					final ArtistListFragment artistListFragment = getArtistFragment();
-					if (artistListFragment != null) {
-						artistListFragment.setRecyclerViewData();
-					}
+					artistListFragment.setRecyclerViewData();
 				}
 				break;
 
@@ -418,7 +407,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					ArrayList<MusicItem> helper = new ArrayList<>();
 
 					for (MusicItem item : Data.sMusicItems) {
-						for (int id : getMusicListFragment().getAdapter().getSelected()) {
+						for (int id : musicListFragment.getAdapter().getSelected()) {
 							if (id == item.getMusicID()) {
 								helper.add(item);
 							}
@@ -426,9 +415,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					}
 
 					Utils.DataSet.addListDialog(MainActivity.this, helper);
-					if (getMusicListFragment() != null) {
-						getMusicListFragment().getAdapter().clearSelection();
-					}
+					musicListFragment.getAdapter().clearSelection();
 				}
 				break;
 				case R.id.menu_toolbar_main_choose_share: {
@@ -444,7 +431,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 									.append("\r\n");
 
 							for (final MusicItem item : Data.sMusicItems) {
-								for (int id : getMusicListFragment().getAdapter().getSelected()) {
+								for (int id : musicListFragment.getAdapter().getSelected()) {
 									if (id == item.getMusicID()) {
 										content.append(item.getMusicName()).append("\r\n");
 										break;
@@ -488,7 +475,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				if (cursor != null && cursor.moveToFirst()) {
 					//没有歌曲直接退出app
 					if (cursor.getCount() == 0) {
-						emitter.onNext(-2);
+						emitter.onNext(-1);
 					} else {
 
 						final boolean skipShort = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
@@ -580,8 +567,17 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				load.dismiss();
 
 				if (result == -1) {
-					Utils.Ui.fastToast(MainActivity.this, "cursor is null or moveToFirst Fail");
-					mHandler.postDelayed(MainActivity.this::fullExit, 1000);
+//					Utils.Ui.fastToast(MainActivity.this, "cursor is null or moveToFirst Fail");
+					AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+					builder.setTitle("Error")
+							.setMessage("Can not find any music or the cursor is null, Will exit.")
+							.setCancelable(false)
+							.setNegativeButton("Exit", (dialog, which) -> {
+								dialog.cancel();
+								fullExit();
+//								mHandler.postDelayed(MainActivity.this::fullExit, 1000);
+							});
+					builder.show();
 					return;
 				}
 
@@ -629,11 +625,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		final String tabOrder = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
 
 		if (tabOrder.charAt(Values.CurrentData.CURRENT_PAGE_INDEX) == MUSIC_LIST_FRAGMENT_ID) {
-			final MusicListFragment musicListFragment = getMusicListFragment();
-			if (musicListFragment == null) {
-				return;
-			}
-
 			if (TextUtils.isEmpty(filterStr)) {
 				Data.sMusicItems.clear();
 				Data.sMusicItems.addAll(Data.sMusicItemsBackUp);
@@ -654,11 +645,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		}
 
 		if (tabOrder.charAt(Values.CurrentData.CURRENT_PAGE_INDEX) == '2') {
-			final AlbumListFragment albumListFragment = getAlbumListFragment();
-			if (albumListFragment == null) {
-				return;
-			}
-
 			if (TextUtils.isEmpty(filterStr)) {
 				Data.sAlbumItems.clear();
 				Data.sAlbumItems.addAll(Data.sAlbumItemsBackUp);
@@ -680,11 +666,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 		//artist
 		if (tabOrder.charAt(Values.CurrentData.CURRENT_PAGE_INDEX) == '3') {
-			final ArtistListFragment artistListFragment = getArtistFragment();
-			if (artistListFragment == null) {
-				return;
-			}
-
 			if (TextUtils.isEmpty(filterStr)) {
 				Data.sArtistItems.clear();
 				Data.sArtistItems.addAll(Data.sArtistItemsBackUp);
@@ -752,7 +733,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	 */
 	private void initFragmentData() {
 
-		String tabOrder = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+		final String tabOrder = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
 
 		assert tabOrder != null;
 
@@ -760,43 +741,48 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			if (c == '1') {
 				final String tab1 = getResources().getString(R.string.music);
 				mTitles.add(tab1);
-				mFragmentList.add(MusicListFragment.newInstance());
+				musicListFragment = MusicListFragment.newInstance();
+				mFragmentList.add(musicListFragment);
 				mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab1));
 			}
 
 			if (c == '2') {
 				final String tab2 = getResources().getString(R.string.album);
 				mTitles.add(tab2);
-				mFragmentList.add(AlbumListFragment.newInstance());
+				albumListFragment = AlbumListFragment.newInstance();
+				mFragmentList.add(albumListFragment);
 				mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab2));
 			}
 
 			if (c == '3') {
 				final String tab3 = getResources().getString(R.string.artist);
 				mTitles.add(tab3);
-				mFragmentList.add(ArtistListFragment.newInstance());
+				artistListFragment = ArtistListFragment.newInstance();
+				mFragmentList.add(artistListFragment);
 				mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab3));
 			}
 
 			if (c == '4') {
 				final String tab4 = getResources().getString(R.string.play_list);
 				mTitles.add(tab4);
-				mFragmentList.add(PlayListFragment.newInstance());
+				playListFragment = PlayListFragment.newInstance();
+				mFragmentList.add(playListFragment);
 				mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab4));
 			}
 
 			if (c == '5') {
 				final String tab5 = getResources().getString(R.string.tab_file);
 				mTitles.add(tab5);
-				mFragmentList.add(FileViewFragment.newInstance());
+				fileViewFragment = FileViewFragment.newInstance();
+				mFragmentList.add(fileViewFragment);
 				mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab5));
 			}
 		}
 
-		mMusicDetailFragment = MusicDetailFragment.newInstance();
+		musicDetailFragment = MusicDetailFragment.newInstance();
 		final FragmentManager fragmentManager = getSupportFragmentManager();
 		final FragmentTransaction transaction = fragmentManager.beginTransaction();
-		transaction.replace(R.id.frame_wait, mMusicDetailFragment);
+		transaction.replace(R.id.frame_wait, musicDetailFragment);
 		transaction.commit();
 
 		Values.CurrentData.CURRENT_PAGE_INDEX = 0;
@@ -806,6 +792,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		mMainBinding.viewPager.setOffscreenPageLimit(mTitles.size() > 1 ? mTitles.size() - 1 : 1);
 
 		inflateCommonMenu();
+
 		//hide
 		getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(false);
 		getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(false);
@@ -1038,7 +1025,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		}
 		Data.sMusicBinder = null;
 		clearData();
-		Data.HAS_PLAYED = false;
 		finish();
 	}
 
@@ -1162,9 +1148,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		mSearchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextSubmit(String query) {
-				if (getMusicListFragment() != null) {
-					getMusicListFragment().getMusicListBinding().includeRecycler.recyclerView.stopScroll();
-				}
+				musicListFragment.getMusicListBinding().includeRecycler.recyclerView.stopScroll();
 				return true;
 			}
 
@@ -1180,15 +1164,11 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			if (toolbarClicked) {
 				switch (Values.CurrentData.CURRENT_PAGE_INDEX) {
 					case 0: {
-						if (getMusicListFragment() != null) {
-							getMusicListFragment().getMusicListBinding().includeRecycler.recyclerView.smoothScrollToPosition(0);
-						}
+						musicListFragment.getMusicListBinding().includeRecycler.recyclerView.smoothScrollToPosition(0);
 					}
 					break;
 					case 1: {
-						if (getAlbumListFragment() != null) {
-							getAlbumListFragment().getRecyclerView().smoothScrollToPosition(0);
-						}
+						albumListFragment.getRecyclerView().smoothScrollToPosition(0);
 					}
 					break;
 					default:
@@ -1212,8 +1192,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		mNavHeaderImageView = mMainBinding.navigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
 
 		mNavHeaderImageView.setOnClickListener(v -> {
-			if (getMusicDetailFragment() != null && getMusicDetailFragment().getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
-				getMusicDetailFragment().getSlidingUpPanelLayout().setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+			if (musicDetailFragment.getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+				musicDetailFragment.getSlidingUpPanelLayout().setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
 				return;
 			}
 
@@ -1229,36 +1209,36 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			@Override
 			public void onPanelSlide(View panel, float slideOffset) {
 
-				getMusicDetailFragment().getHandler().sendEmptyMessage(MusicDetailFragment.NotLeakHandler.RECYCLER_SCROLL);
+				musicDetailFragment.getHandler().sendEmptyMessage(MusicDetailFragment.NotLeakHandler.RECYCLER_SCROLL);
 
 				CURRENT_SLIDE_OFFSET = slideOffset;
 
 				mMainBinding.mainBody.setTranslationY(0 - slideOffset * 120);
 
 				float current = 1 - slideOffset;
-				mMusicDetailFragment.getNowPlayingBody().setAlpha(current);
+				musicDetailFragment.getNowPlayingBody().setAlpha(current);
 
 				//在底部, 重置动画初始位置
 				if (current == 1) {
-					mMusicDetailFragment.setDefAnimation();
-					mMusicDetailFragment.clearAnimations();
+					musicDetailFragment.setDefAnimation();
+					musicDetailFragment.clearAnimations();
 					ANIMATION_FLAG = true;
 				}
 
 				if (current == 0) {
 					//隐藏BODY
-					mMusicDetailFragment.getNowPlayingBody().setVisibility(View.INVISIBLE);
+					musicDetailFragment.getNowPlayingBody().setVisibility(View.INVISIBLE);
 
 					//start animation
 					if (ANIMATION_FLAG) {
 						ANIMATION_FLAG = false;
-						getMusicDetailFragment().initAnimation();
+						musicDetailFragment.initAnimation();
 					}
 
 				} else {
 					mMainBinding.tabLayout.setVisibility(View.VISIBLE);
 					mMainBinding.tabLayout.setVisibility(View.VISIBLE);
-					mMusicDetailFragment.getNowPlayingBody().setVisibility(View.VISIBLE);
+					musicDetailFragment.getNowPlayingBody().setVisibility(View.VISIBLE);
 				}
 			}
 
@@ -1347,83 +1327,118 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		return mNavHeaderImageView;
 	}
 
+//	@Deprecated
+//	@Nullable
+//	public final MusicListFragment getMusicListFragment() {
+//		if (mFragmentList.size() == 0) {
+//			return null;
+//		}
+//
+//		final String order = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+//		if (order.contains(TAB_MUSIC)) {
+//			MusicListFragment musicListFragment = (MusicListFragment) mFragmentList.get(order.indexOf(TAB_MUSIC));
+//			if (musicListFragment != null) {
+//				return musicListFragment;
+//			}
+//		}
+//		return null;
+//	}
+//
+//	@Deprecated
+//	public final MusicDetailFragment getMusicDetailFragment() {
+//		return musicDetailFragment;
+//	}
+//
+//	@Deprecated
+//	@Nullable
+//	public final AlbumListFragment getAlbumListFragment() {
+//		if (mFragmentList.size() == 0) {
+//			return null;
+//		}
+//		String order = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+//
+//		if (order.contains(TAB_ALBUM)) {
+//			AlbumListFragment musicListFragment = (AlbumListFragment) mFragmentList.get(order.indexOf(TAB_ALBUM));
+//			if (musicListFragment != null) {
+//				return musicListFragment;
+//			}
+//		}
+//		return null;
+//	}
+//
+//	@Deprecated
+//	@Nullable
+//	public final PlayListFragment getPlayListFragment() {
+//		if (mFragmentList.size() == 0) {
+//			return null;
+//		}
+//		final String order = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+//		if (order.contains(TAB_PLAYLIST)) {
+//			PlayListFragment musicListFragment = (PlayListFragment) mFragmentList.get(order.indexOf(TAB_PLAYLIST));
+//			if (musicListFragment != null) {
+//				return musicListFragment;
+//			}
+//		}
+//		return null;
+//	}
+//
+//	@Deprecated
+//	@Nullable
+//	public final FileViewFragment getFileViewerFragment() {
+//		if (mFragmentList.size() == 0) {
+//			return null;
+//		}
+//		String order = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+//		if (order.contains(TAB_FILE)) {
+//			FileViewFragment musicListFragment = (FileViewFragment) mFragmentList.get(order.indexOf(TAB_FILE));
+//			if (musicListFragment != null) {
+//				return musicListFragment;
+//			}
+//		}
+//		return null;
+//	}
+//
+//	@Deprecated
+//	@Nullable
+//	public final ArtistListFragment getArtistFragment() {
+//		if (mFragmentList.size() == 0) {
+//			return null;
+//		}
+//		final String order = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+//		assert order != null;
+//		if (order.contains(TAB_ARTIST)) {
+//			ArtistListFragment fragment = (ArtistListFragment) mFragmentList.get(order.indexOf(TAB_ARTIST));
+//			if (fragment != null) {
+//				return fragment;
+//			}
+//		}
+//		return null;
+//	}
+
 	@Nullable
-	public final MusicListFragment getMusicListFragment() {
+	public final BaseFragment getFragment(final BaseFragment.FragmentType type) {
 		if (mFragmentList.size() == 0) {
 			return null;
 		}
 
-		final String order = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
-		if (order.contains(TAB_MUSIC)) {
-			MusicListFragment musicListFragment = (MusicListFragment) mFragmentList.get(order.indexOf(TAB_MUSIC));
-			if (musicListFragment != null) {
+		switch (type) {
+			case MUSIC_LIST_FRAGMENT: {
 				return musicListFragment;
 			}
-		}
-		return null;
-	}
-
-	public final MusicDetailFragment getMusicDetailFragment() {
-		return mMusicDetailFragment;
-	}
-
-	@Nullable
-	public final AlbumListFragment getAlbumListFragment() {
-		if (mFragmentList.size() == 0) {
-			return null;
-		}
-		String order = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
-
-		if (order.contains(TAB_ALBUM)) {
-			AlbumListFragment musicListFragment = (AlbumListFragment) mFragmentList.get(order.indexOf(TAB_ALBUM));
-			if (musicListFragment != null) {
-				return musicListFragment;
+			case ARTIST_FRAGMENT: {
+				return artistListFragment;
 			}
-		}
-		return null;
-	}
-
-	@Nullable
-	public final PlayListFragment getPlayListFragment() {
-		if (mFragmentList.size() == 0) {
-			return null;
-		}
-		final String order = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
-		if (order.contains(TAB_PLAYLIST)) {
-			PlayListFragment musicListFragment = (PlayListFragment) mFragmentList.get(order.indexOf(TAB_PLAYLIST));
-			if (musicListFragment != null) {
-				return musicListFragment;
+			case FILE_VIEW_FRAGMENT: {
+				return fileViewFragment;
 			}
-		}
-		return null;
-	}
-
-	@Nullable
-	public final FileViewFragment getFileViewerFragment() {
-		if (mFragmentList.size() == 0) {
-			return null;
-		}
-		String order = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
-		if (order.contains(TAB_FILE)) {
-			FileViewFragment musicListFragment = (FileViewFragment) mFragmentList.get(order.indexOf(TAB_FILE));
-			if (musicListFragment != null) {
-				return musicListFragment;
+			case PLAY_LIST_FRAGMENT: {
+				return playListFragment;
 			}
-		}
-		return null;
-	}
-
-	@Nullable
-	public final ArtistListFragment getArtistFragment() {
-		if (mFragmentList.size() == 0) {
-			return null;
-		}
-		final String order = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
-		assert order != null;
-		if (order.contains(TAB_ARTIST)) {
-			ArtistListFragment fragment = (ArtistListFragment) mFragmentList.get(order.indexOf(TAB_ARTIST));
-			if (fragment != null) {
-				return fragment;
+			case ALBUM_LIST_FRAGMENT: {
+				return albumListFragment;
+			}
+			case MUSIC_DETAIL_FRAGMENT: {
+				return musicDetailFragment;
 			}
 		}
 		return null;

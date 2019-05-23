@@ -12,17 +12,12 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
-
-import java.io.File;
-import java.lang.ref.WeakReference;
-
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -36,6 +31,9 @@ import top.geek_studio.chenlongcould.musicplayer.adapter.PlayListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentPlaylistBinding;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
+
+import java.io.File;
+import java.lang.ref.WeakReference;
 
 /**
  * @author chenlongcould
@@ -79,6 +77,11 @@ public final class PlayListFragment extends BaseFragment {
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(ItemChange.ACTION_REFRESH_LIST);
 		mBroadcastManager.registerReceiver(mRefreshReceiver, intentFilter);
+	}
+
+	@Override
+	protected void setFragmentType(FragmentType fragmentType) {
+		fragmentType = FragmentType.PLAY_LIST_FRAGMENT;
 	}
 
 	@Override

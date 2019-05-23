@@ -17,13 +17,11 @@ import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import org.jetbrains.annotations.NotNull;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import org.jetbrains.annotations.NotNull;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
@@ -45,7 +43,12 @@ public final class MusicListFragment extends BaseFragment {
 	public static MusicListFragment newInstance() {
 		return new MusicListFragment();
 	}
-	
+
+	@Override
+	protected void setFragmentType(FragmentType fragmentType) {
+		fragmentType = FragmentType.MUSIC_LIST_FRAGMENT;
+	}
+
 	@Override
 	public void onAttach(@NotNull Context context) {
 		super.onAttach(context);

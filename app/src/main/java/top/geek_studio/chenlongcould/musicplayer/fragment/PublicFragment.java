@@ -16,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import top.geek_studio.chenlongcould.musicplayer.R;
@@ -51,5 +50,10 @@ public class PublicFragment extends BaseFragment {
 	@Override
 	public void onActivityCreated(@Nullable Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+	}
+
+	@Override
+	protected void setFragmentType(FragmentType fragmentType) {
+		fragmentType = null;
 	}
 }

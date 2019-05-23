@@ -56,6 +56,7 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
+import top.geek_studio.chenlongcould.musicplayer.fragment.BaseFragment;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
@@ -549,7 +550,7 @@ public final class Utils {
 		public static void setPlayButtonNowPlaying() {
 			if (!Data.sActivities.isEmpty()) {
 				MainActivity activity = (MainActivity) Data.sActivities.get(0);
-				activity.getMusicDetailFragment().getHandler().sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
+				((MusicDetailFragment) activity.getFragment(BaseFragment.FragmentType.MUSIC_DETAIL_FRAGMENT)).getHandler().sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
 				
 				if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.CurrentData.MODE_CAR)) {
 					Data.sCarViewActivity.getFragmentLandSpace().setButtonType("pause");

@@ -135,4 +135,5 @@
     <string name="set_title_color">主要文字配色</string>
     <string name="set_recyclerview_item_style">设置recyclerView项目样式</string>
     <string name="recyclerview_item_style">RecyclerView项目样式</string>
+    <string name="artist_layout">艺术家布局</string>
 </resources>

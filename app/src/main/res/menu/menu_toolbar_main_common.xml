@@ -38,8 +38,8 @@
     </item>
 
     <item
-        android:id="@+id/menu_toolbar_artist_layout"
-        android:title="Artist layout">
+            android:id="@+id/menu_toolbar_artist_layout"
+            android:title="@string/artist_layout">
         <menu>
             <item
                 android:id="@+id/menu_toolbar_artist_linear"

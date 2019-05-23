@@ -10,22 +10,20 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.PublicActivity;
+import top.geek_studio.chenlongcould.musicplayer.fragment.BaseFragment;
 import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author chenlongcould
@@ -81,7 +79,7 @@ public final class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.
 						for (int i = 0; i < Data.sPlayListItems.size(); i++) {
 							if (Data.sPlayListItems.get(i).getId() == listItem.getId()) {
 								Data.sPlayListItems.remove(i);
-								mMainActivity.getPlayListFragment().getPlayListAdapter().notifyItemRemoved(i);
+								((PlayListFragment) mMainActivity.getFragment(BaseFragment.FragmentType.PLAY_LIST_FRAGMENT)).getPlayListAdapter().notifyItemRemoved(i);
 								break;
 							}
 						}

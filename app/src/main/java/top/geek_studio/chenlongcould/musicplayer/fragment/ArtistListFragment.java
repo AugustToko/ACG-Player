@@ -9,22 +9,19 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import org.jetbrains.annotations.NotNull;
-
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import org.jetbrains.annotations.NotNull;
 import top.geek_studio.chenlongcould.geeklibrary.DialogUtil;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
@@ -156,4 +153,8 @@ public final class ArtistListFragment extends BaseFragment {
 		return mAdapter2ArtistList;
 	}
 
+	@Override
+	protected void setFragmentType(FragmentType fragmentType) {
+		fragmentType = FragmentType.ARTIST_FRAGMENT;
+	}
 }

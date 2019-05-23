@@ -25,7 +25,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -45,7 +44,9 @@ import java.util.Date;
 import java.util.List;
 
 // FIXME: 2019/5/22 bugs...
-public final class FileViewFragment extends Fragment {
+public final class FileViewFragment extends BaseFragment {
+
+	public static final String TAG = "FileViewFragment";
 
 	private FragmentFileViewerBinding mFileViewerBinding;
 
@@ -61,6 +62,11 @@ public final class FileViewFragment extends Fragment {
 
 	public static FileViewFragment newInstance() {
 		return new FileViewFragment();
+	}
+
+	@Override
+	protected void setFragmentType(FragmentType fragmentType) {
+		fragmentType = FragmentType.FILE_VIEW_FRAGMENT;
 	}
 
 	@Override

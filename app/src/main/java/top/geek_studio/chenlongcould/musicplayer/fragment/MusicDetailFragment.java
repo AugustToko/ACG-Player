@@ -1521,6 +1521,11 @@ public final class MusicDetailFragment extends BaseFragment {
 		super.onDestroyView();
 	}
 
+	@Override
+	protected void setFragmentType(FragmentType fragmentType) {
+		fragmentType = FragmentType.MUSIC_DETAIL_FRAGMENT;
+	}
+
 	public final class NotLeakHandler extends Handler {
 
 		/**
