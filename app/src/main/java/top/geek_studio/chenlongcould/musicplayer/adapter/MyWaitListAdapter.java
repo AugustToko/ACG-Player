@@ -26,8 +26,8 @@ import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.AlbumDetailActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.activity.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
@@ -101,7 +101,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 				break;
 
 				case Menu.FIRST + 5: {
-					final Intent intent = new Intent(mMainActivity, PublicActivity.class);
+					final Intent intent = new Intent(mMainActivity, ListViewActivity.class);
 					intent.putExtra("start_by", "detail");
 					mMainActivity.startActivity(intent);
 				}

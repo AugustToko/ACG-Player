@@ -9,30 +9,21 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Toast;
-
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-
-import org.litepal.LitePal;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import org.litepal.LitePal;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.R;
@@ -44,6 +35,11 @@ import top.geek_studio.chenlongcould.musicplayer.misc.SimpleObservableScrollView
 import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * a activity that show Music Album Detail data
@@ -289,7 +285,7 @@ public final class AlbumDetailActivity extends BaseCompatActivity {
 		final View contentView = getWindow().getDecorView().findViewById(android.R.id.content);
 		contentView.post(() -> observableScrollViewCallbacks.onScrollChanged(-headerViewHeight, false, false));
 		mAlbumDetailBinding.recyclerView.setLayoutManager(new GridLayoutManager(AlbumDetailActivity.this, 1));
-		mAdapter = new MyRecyclerAdapter(this, mSongs, 0);
+		mAdapter = new MyRecyclerAdapter(this, mSongs, new MyRecyclerAdapter.Config(0, false));
 		mAlbumDetailBinding.recyclerView.setAdapter(mAdapter);
 		mAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
 			@Override

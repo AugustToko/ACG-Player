@@ -25,8 +25,8 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.activity.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.PlayListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentPlaylistBinding;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
@@ -143,26 +143,26 @@ public final class PlayListFragment extends BaseFragment {
 		mPlayListBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_playlist, container, false);
 
 		mPlayListBinding.addRecent.setOnClickListener(v -> {
-			Intent intent = new Intent(mMainActivity, PublicActivity.class);
-			intent.putExtra(PublicActivity.IntentTag.INTENT_START_BY, ACTION_ADD_RECENT);
+			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
+			intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, ACTION_ADD_RECENT);
 			startActivity(intent);
 		});
 
 		mPlayListBinding.favourite.setOnClickListener(v -> {
-			Intent intent = new Intent(mMainActivity, PublicActivity.class);
-			intent.putExtra(PublicActivity.IntentTag.INTENT_START_BY, ACTION_FAVOURITE);
+			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
+			intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, ACTION_FAVOURITE);
 			startActivity(intent);
 		});
 
 		mPlayListBinding.history.setOnClickListener(v -> {
-			Intent intent = new Intent(mMainActivity, PublicActivity.class);
-			intent.putExtra(PublicActivity.IntentTag.INTENT_START_BY, ACTION_HISTORY);
+			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
+			intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, ACTION_HISTORY);
 			startActivity(intent);
 		});
 
 		mPlayListBinding.trashCan.setOnClickListener(v -> {
-			Intent intent = new Intent(mMainActivity, PublicActivity.class);
-			intent.putExtra(PublicActivity.IntentTag.INTENT_START_BY, ACTION_TRASH_CAN);
+			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
+			intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, ACTION_TRASH_CAN);
 			startActivity(intent);
 		});
 

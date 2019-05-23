@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * @author chenlongcould
  */
+// FIXME: 2019/5/23 bugs... when broadcast dead, the action can not send
 public final class MusicService extends Service {
 
 	/**
@@ -74,8 +75,8 @@ public final class MusicService extends Service {
 	private final Binder mMusicBinder = new IMuiscService.Stub() {
 		@Override
 		public void playMusic() {
-			hasPlayed = true;
 			mMediaPlayer.start();
+			hasPlayed = true;
 			startFN();
 			PreferenceManager.getDefaultSharedPreferences(MusicService.this).edit().putInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, mMusicItem.get().getMusicID()).apply();
 		}
@@ -99,23 +100,29 @@ public final class MusicService extends Service {
 
 		@Override
 		public void resetMusic() {
+			/*
+			 * 记录播放信息
+			 * */
 			if (hasPlayed) {
 				final List<Detail> infos = LitePal.where("MusicId = ?", String.valueOf(mMusicItem.get().getMusicID())).find(Detail.class);
 				if (infos.size() > 0) {
 					Detail detail = infos.get(0);
-					detail.setPlayDuration(detail.getPlayDuration() + mMediaPlayer.getCurrentPosition());
 					if (mMediaPlayer.getCurrentPosition() < MINIMUM_PLAY_TIME) {
 						detail.setMinimumPlayTimes(detail.getMinimumPlayTimes() + 1);
+					} else {
+						detail.setPlayDuration(detail.getPlayDuration() + mMediaPlayer.getCurrentPosition());
 					}
+					detail.setPlayTimes(detail.getPlayTimes() + 1);
 					detail.save();
 				} else {
 					Detail detail = new Detail();
 					detail.setMusicId(mMusicItem.get().getMusicID());
 					if (mMediaPlayer.getCurrentPosition() < MINIMUM_PLAY_TIME) {
 						detail.setMinimumPlayTimes(detail.getMinimumPlayTimes() + 1);
+					} else {
+						detail.setPlayDuration(detail.getPlayDuration() + mMediaPlayer.getCurrentPosition());
 					}
-					detail.setPlayTimes(getCurrentPosition());
-					detail.setPlayDuration(detail.getPlayDuration() + mMediaPlayer.getCurrentPosition());
+					detail.setPlayTimes(detail.getPlayTimes() + 1);
 					detail.save();
 				}
 			}
@@ -169,7 +176,6 @@ public final class MusicService extends Service {
 				mMusicItem = new AtomicReference<>(item);
 				setDataSource(item.getMusicPath());
 			}
-
 			mCurrentCover = Utils.Audio.getCoverBitmap(MusicService.this, mMusicItem.get().getAlbumId());
 		}
 

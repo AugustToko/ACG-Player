@@ -15,8 +15,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.activity.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.fragment.BaseFragment;
 import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
@@ -52,7 +52,7 @@ public final class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.
 		ViewHolder holder = new ViewHolder(view);
 		
 		view.setOnClickListener(v -> {
-			Intent intent = new Intent(mMainActivity, PublicActivity.class);
+			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
 			intent.putExtra("start_by", PlayListFragment.ACTION_PLAY_LIST_ITEM);
 			intent.putExtra("play_list_name", mPlayListItems.get(holder.getAdapterPosition()).getName());
 			intent.putExtra("play_list_id", mPlayListItems.get(holder.getAdapterPosition()).getId());

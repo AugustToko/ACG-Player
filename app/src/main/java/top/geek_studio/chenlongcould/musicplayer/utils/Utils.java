@@ -17,6 +17,8 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
@@ -35,6 +37,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.annotation.*;
 import androidx.appcompat.app.AlertDialog;
@@ -344,6 +347,20 @@ public final class Utils {
 	public static final class Ui {
 		
 		private static final String TAG = "Ui";
+
+		public static void releaseImageViewResource(@NonNull ImageView imageView) {
+			final Drawable drawable = imageView.getDrawable();
+			if (drawable instanceof BitmapDrawable) {
+				BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+				Bitmap bitmap = bitmapDrawable.getBitmap();
+				if (bitmap != null && !bitmap.isRecycled()) {
+					bitmap.recycle();
+					Log.d(TAG, "releaseImageViewResource: released!");
+				} else {
+					Log.d(TAG, "releaseImageViewResource: bitmap is null or bitmap isRecycled.");
+				}
+			}
+		}
 		
 		/**
 		 * getAccentColor from {@link SharedPreferences}, default: {@link R.color#colorAccent}

@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.fragment.BaseFragment;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
@@ -38,6 +39,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 
 	public static final String INTENT_PLAY_TYPE = "play_type";
+
 	public static final String INTENT_ARGS = "args";
 
 	public static final String TYPE_NEXT = "next";
@@ -84,7 +86,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 	////////////////////////MEDIA CONTROL/////////////////////////////
 
 	public static void setDataSource(@NonNull final MusicItem item) {
-		Data.S_HISTORY_PLAY.add(item);
+		ListViewActivity.addToHistory(item);
 		try {
 			Data.sMusicBinder.setCurrentMusicData(item);
 		} catch (RemoteException e) {
@@ -262,25 +264,17 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 					break;
 				}
 
-				//检测前后播放
-				int targetIndex = 0;
-				if (intent.getStringExtra(INTENT_ARGS) != null) {
-					if (intent.getStringExtra(INTENT_ARGS).contains(TYPE_NEXT)) {
-						targetIndex = Values.CurrentData.CURRENT_MUSIC_INDEX + 1;
-						//超出范围自动跳转0
-						if (targetIndex > Data.sPlayOrderList.size() - 1) {
-							targetIndex = 0;
-						}
-					} else if (intent.getStringExtra(INTENT_ARGS).contains(TYPE_PREVIOUS)) {
-						targetIndex = Values.CurrentData.CURRENT_MUSIC_INDEX - 1;
-						if (targetIndex < 0) {
-							//超出范围超转最后
-							targetIndex = Data.sPlayOrderList.size() - 1;
-						}
+				int targetIndex = getIndex(intent.getStringExtra(INTENT_ARGS));
+
+				// 循环检测是否播放到 “垃圾桶” 中的歌曲，如是，则跳过
+				for (; ; ) {
+					if (Data.S_TRASH_CAN_LIST.contains(Data.sPlayOrderList.get(targetIndex))) {
+						targetIndex = getIndex(intent.getStringExtra(INTENT_ARGS));
+					} else {
+						Values.CurrentData.CURRENT_MUSIC_INDEX = targetIndex;
+						break;
 					}
 				}
-
-				Values.CurrentData.CURRENT_MUSIC_INDEX = targetIndex;
 
 				resetMusic();
 				setDataSource(Data.sPlayOrderList.get(targetIndex));
@@ -354,6 +348,29 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 	////////////////////////////////////////////////////////////////
 
+	/**
+	 * 获取下个播放的 index
+	 *
+	 * @param playType 播放的模式 (向前 或者 向后)
+	 */
+	private int getIndex(@NonNull String playType) {
+		int targetIndex = 0;
+		if (playType.contains(TYPE_NEXT)) {
+			targetIndex = Values.CurrentData.CURRENT_MUSIC_INDEX + 1;
+			//超出范围自动跳转0
+			if (targetIndex > Data.sPlayOrderList.size() - 1) {
+				targetIndex = 0;
+			}
+		} else if (playType.contains(TYPE_PREVIOUS)) {
+			targetIndex = Values.CurrentData.CURRENT_MUSIC_INDEX - 1;
+			if (targetIndex < 0) {
+				//超出范围超转最后
+				targetIndex = Data.sPlayOrderList.size() - 1;
+			}
+		}
+		return targetIndex;
+	}
+
 	public static void sureCar() {
 		//set data (image and name)
 		if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.CurrentData.MODE_CAR)) {
@@ -374,6 +391,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 	/**
 	 * 当下一首歌曲存在(被手动指定时), auto-next-play and next-play will call this method
 	 */
+	// FIXME: 2019/5/23 static context
 	public static class DoesHasNextPlay extends AsyncTask<Void, Void, Integer> {
 
 		@Override
@@ -442,8 +460,18 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 			//get data
 			final Random random = new Random();
-			final int index = random.nextInt(Data.sPlayOrderList.size());
-			Values.CurrentData.CURRENT_MUSIC_INDEX = index;
+			int index = random.nextInt(Data.sPlayOrderList.size());
+
+			// 循环检测是否播放到 “垃圾桶” 中的歌曲，如是，则跳过
+			for (; ; ) {
+				if (Data.S_TRASH_CAN_LIST.contains(Data.sPlayOrderList.get(index))) {
+					index = random.nextInt(Data.sPlayOrderList.size());
+				} else {
+					Values.CurrentData.CURRENT_MUSIC_INDEX = index;
+					break;
+				}
+			}
+
 			Data.sCurrentMusicItem = Data.sPlayOrderList.get(index);
 			setFlags(index);
 

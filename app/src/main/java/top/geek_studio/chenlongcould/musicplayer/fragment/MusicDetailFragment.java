@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -46,8 +45,8 @@ import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.AlbumDetailActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.activity.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyWaitListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.customView.AlbumImageView;
@@ -473,8 +472,8 @@ public final class MusicDetailFragment extends BaseFragment {
 				}
 				break;
 				case Menu.FIRST + 2: {
-					Intent intent = new Intent(mMainActivity, PublicActivity.class);
-					intent.putExtra(PublicActivity.IntentTag.INTENT_START_BY, "detail");
+					Intent intent = new Intent(mMainActivity, ListViewActivity.class);
+					intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, "detail");
 					startActivity(intent);
 				}
 				break;
@@ -1448,7 +1447,6 @@ public final class MusicDetailFragment extends BaseFragment {
 	 *
 	 * @param bitmap backgroundImage
 	 */
-	@SuppressLint("StaticFieldLeak")
 	private void setIconLightOrDark(@Nullable final Bitmap bitmap) {
 		if (bitmap != null) {
 			new AsyncTask<Void, Void, Integer>() {

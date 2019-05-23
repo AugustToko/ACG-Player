@@ -1,21 +1,14 @@
 package top.geek_studio.chenlongcould.musicplayer.activity;
 
 import android.database.Cursor;
-import android.os.Build;
-import android.os.Bundle;
+import android.os.*;
 import android.provider.MediaStore;
 import android.widget.Toast;
-
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.android.material.appbar.AppBarLayout;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -31,22 +24,44 @@ import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 /**
  * @author chenlongcould
  */
-public final class PublicActivity extends BaseCompatActivity {
+public final class ListViewActivity extends BaseCompatActivity {
 
-	public static final String TAG = "PublicActivity";
-	
+	public static final String TAG = "ListViewActivity";
+
 	/**
 	 * @deprecated use {@link IntentTag#INTENT_START_BY}
-	 * */
+	 */
 	@Deprecated
 	public static final String INTENT_START_BY = IntentTag.INTENT_START_BY;
-	
+
+	public static NotLeakHandler handler;
+
+	public static volatile boolean initDone = false;
+
+	/**
+	 * add music to history list
+	 */
+	public static void addToHistory(@NonNull MusicItem item) {
+		Data.sHistoryPlayed.add(item);
+		if (initDone) {
+			handler.sendEmptyMessage(NotLeakHandler.NOTIFICATION_ITEM_INSERT);
+		}
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		setContentView(R.layout.activity_add_recent);
+
+		handler = new NotLeakHandler(this, Looper.getMainLooper());
+
 		mRecyclerView = findViewById(R.id.activity_add_recent_recycler);
 		mAppBarLayout = findViewById(R.id.app_bar_layout);
 		mToolbar = findViewById(R.id.toolbar);
@@ -76,7 +91,7 @@ public final class PublicActivity extends BaseCompatActivity {
 						});
 					}
 
-					adapter = new MyRecyclerAdapter(this, musicItems);
+					adapter = new MyRecyclerAdapter(this, musicItems, new MyRecyclerAdapter.Config(0, false));
 					mRecyclerView.setAdapter(adapter);
 				}
 				break;
@@ -138,7 +153,7 @@ public final class PublicActivity extends BaseCompatActivity {
 										if (i != 0) {
 											return;
 										}
-										adapter = new MyRecyclerAdapter(PublicActivity.this, mMusicItemList);
+										adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList, new MyRecyclerAdapter.Config(0, true));
 										mRecyclerView.setAdapter(adapter);
 									});
 						}
@@ -203,7 +218,7 @@ public final class PublicActivity extends BaseCompatActivity {
 								if (i != 0) {
 									return;
 								}
-								adapter = new MyRecyclerAdapter(PublicActivity.this, mMusicItemList);
+								adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList, new MyRecyclerAdapter.Config(0, true));
 								mRecyclerView.setAdapter(adapter);
 							});
 				}
@@ -211,43 +226,47 @@ public final class PublicActivity extends BaseCompatActivity {
 
 				case PlayListFragment.ACTION_HISTORY: {
 					mToolbar.setTitle(getString(R.string.history));
-					mRecyclerView.setAdapter(new MyRecyclerAdapter(PublicActivity.this, Data.S_HISTORY_PLAY));
+					adapter = new MyRecyclerAdapter(ListViewActivity.this, Data.sHistoryPlayed, new MyRecyclerAdapter.Config(0, false));
+					mRecyclerView.setAdapter(adapter);
 				}
 				break;
 
 				case PlayListFragment.ACTION_TRASH_CAN: {
 					mToolbar.setTitle(getString(R.string.trash_can));
-					mRecyclerView.setAdapter(new MyRecyclerAdapter(PublicActivity.this, Data.S_TRASH_CAN_LIST));
+					adapter = new MyRecyclerAdapter(ListViewActivity.this, Data.S_TRASH_CAN_LIST, new MyRecyclerAdapter.Config(0, false));
+					mRecyclerView.setAdapter(adapter);
 				}
 				break;
 				default:
 			}
+
+			initDone = true;
 		}
 
 	}
-	
+
 	private AppBarLayout mAppBarLayout;
 	private Toolbar mToolbar;
 	private RecyclerView mRecyclerView;
 	private MyRecyclerAdapter adapter;
-	
+
 	/**
 	 * 保存播放列表下的Music (如果当前type是play_list_item的话 {@link #mType} )
 	 */
 	private List<MusicItem> mMusicItemList = new ArrayList<>();
-	
+
 	/**
 	 * save current playlist name, if current type is play_list_item {@link #mType}
 	 */
 	private String currentListName;
-	
+
 	/**
 	 * different type enter different UI(Activity)
 	 */
 	private String mType;
-	
+
 	private Disposable mDisposable;
-	
+
 	@Override
 	public void inflateCommonMenu() {
 		mToolbar.getMenu().clear();
@@ -256,7 +275,7 @@ public final class PublicActivity extends BaseCompatActivity {
 			switch (item.getItemId()) {
 				case R.id.menu_public_random: {
 					Data.sNextWillPlayItem = mMusicItemList.get(new Random().nextInt(mMusicItemList.size()));
-					Utils.SendSomeThing.sendPlay(PublicActivity.this, ReceiverOnMusicPlay.ReceiveType.RECEIVE_TYPE_COMMON, ReceiverOnMusicPlay.TYPE_NEXT);
+					Utils.SendSomeThing.sendPlay(ListViewActivity.this, ReceiverOnMusicPlay.ReceiveType.RECEIVE_TYPE_COMMON, ReceiverOnMusicPlay.TYPE_NEXT);
 				}
 				break;
 
@@ -269,7 +288,7 @@ public final class PublicActivity extends BaseCompatActivity {
 			return true;
 		});
 	}
-	
+
 	@Override
 	protected void onDestroy() {
 		if (mDisposable != null && !mDisposable.isDisposed()) {
@@ -277,12 +296,12 @@ public final class PublicActivity extends BaseCompatActivity {
 		}
 		super.onDestroy();
 	}
-	
+
 	@Override
 	public String getActivityTAG() {
 		return TAG;
 	}
-	
+
 	public interface IntentTag {
 		String INTENT_START_BY = "start_by";
 	}
@@ -292,7 +311,7 @@ public final class PublicActivity extends BaseCompatActivity {
 		mToolbar.getMenu().clear();
 		mToolbar.inflateMenu(R.menu.menu_toolbar_main_choose);
 	}
-	
+
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
@@ -304,5 +323,32 @@ public final class PublicActivity extends BaseCompatActivity {
 
 	public MyRecyclerAdapter getAdapter() {
 		return adapter;
+	}
+
+	public final class NotLeakHandler extends Handler {
+
+		/**
+		 * @see Message#what
+		 */
+		public static final int NOTIFICATION_ITEM_INSERT = 990;
+
+		@SuppressWarnings("unused")
+		private WeakReference<ListViewActivity> mWeakReference;
+
+		NotLeakHandler(ListViewActivity activity, Looper looper) {
+			super(looper);
+			mWeakReference = new WeakReference<>(activity);
+		}
+
+		@Override
+		public final void handleMessage(Message msg) {
+			switch (msg.what) {
+				case NOTIFICATION_ITEM_INSERT: {
+					adapter.notifyItemInserted(Data.sHistoryPlayed.size() - 1);
+				}
+				break;
+			}
+		}
+
 	}
 }

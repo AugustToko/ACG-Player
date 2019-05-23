@@ -82,6 +82,7 @@ public interface Values {
 		 */
 		String TIP_NOTICE_DROP_TRASH = "TIP_NOTICE_DROP_TRASH";
 
+		@Deprecated
 		String RECYCLER_VIEW_ITEM_STYLE = "RECYCLER_VIEW_ITEM_STYLE";
 
 		/**

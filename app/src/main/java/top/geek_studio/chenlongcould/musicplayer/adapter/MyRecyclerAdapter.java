@@ -61,8 +61,8 @@ import top.geek_studio.chenlongcould.geeklibrary.HttpUtil;
 import top.geek_studio.chenlongcould.musicplayer.*;
 import top.geek_studio.chenlongcould.musicplayer.activity.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.BaseCompatActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.activity.PublicActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
@@ -105,24 +105,16 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 	private ArrayList<ItemHolder> mViewHolders = new ArrayList<>();
 
-	private int mStyleId = 0;
-
 	private ArrayList<Integer> mSelected = new ArrayList<>();
+
 	private boolean isChoose = false;
 
-	public MyRecyclerAdapter(BaseCompatActivity activity, List<MusicItem> musicItems, int... styleId) {
+	private Config mConfig;
+
+	public MyRecyclerAdapter(BaseCompatActivity activity, List<MusicItem> musicItems, @NonNull Config config) {
 		mActivity = activity;
 		mMusicItems = musicItems;
-
-		if (styleId != null && styleId.length != 0) {
-			mStyleId = styleId[0];
-		}
-	}
-
-	@NonNull
-	@Override
-	public String getSectionName(int position) {
-		return String.valueOf(mMusicItems.get(position).getMusicName().charAt(0));
+		mConfig = config;
 	}
 
 	@NonNull
@@ -142,7 +134,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		if (itemType == MOD_TYPE && mActivity.getActivityTAG().equals(MainActivity.TAG)) {
 
 			//style switch
-			switch (mStyleId) {
+			switch (mConfig.styleId) {
 				case 1: {
 					view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_list_item_mod_style_1, viewGroup, false);
 					holder = new ModHolderS1(view);
@@ -159,7 +151,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 			holder.itemView.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mActivity, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, "null"));
 
 		} else {
-			switch (mStyleId) {
+			switch (mConfig.styleId) {
 				case 1: {
 					view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_list_item_style_1, viewGroup, false);
 					holder = new ItemHolderS1(view);
@@ -305,7 +297,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 				}
 				break;
 
-				/* in PublicActivity */
+				/* in ListViewActivity */
 				case Menu.FIRST + 3: {
 
 				}
@@ -329,8 +321,8 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 				break;
 
 				case Menu.FIRST + 5: {
-					Intent intent = new Intent(mActivity, PublicActivity.class);
-					intent.putExtra(PublicActivity.INTENT_START_BY, "detail");
+					Intent intent = new Intent(mActivity, ListViewActivity.class);
+					intent.putExtra(ListViewActivity.INTENT_START_BY, "detail");
 					mActivity.startActivity(intent);
 				}
 				break;
@@ -395,12 +387,20 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		return holder;
 	}
 
+	@NonNull
+	@Override
+	public String getSectionName(int position) {
+		return String.valueOf(mMusicItems.get(position).getMusicName().charAt(0));
+	}
+
 	@Override
 	public void onViewRecycled(@NonNull ViewHolder holder) {
 		super.onViewRecycled(holder);
 		if (holder instanceof ItemHolder) {
 			ItemHolder itemHolder = ((ItemHolder) holder);
 			itemHolder.mCoverReference.get().setTag(R.string.key_id_1, null);
+			GlideApp.with(mActivity).clear(itemHolder.mCoverReference.get());
+			GlideApp.get(mActivity).clearMemory();
 		}
 	}
 
@@ -439,8 +439,10 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 //						.subscribe(integer -> Utils.SendSomeThing.sendPlay(mActivity, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, integer.toString()), Throwable::printStackTrace);
 //				Data.sDisposables.add(disposable);
 
-				Data.sCurrentMusicItem = Data.sMusicItems.get(holder.getAdapterPosition());
-				Values.CurrentData.CURRENT_MUSIC_INDEX = Data.sPlayOrderList.indexOf(Data.sCurrentMusicItem);
+				Data.sCurrentMusicItem = mMusicItems.get(holder.getAdapterPosition());
+				if (mConfig.recordIndex) {
+					Values.CurrentData.CURRENT_MUSIC_INDEX = Data.sPlayOrderList.indexOf(Data.sCurrentMusicItem);
+				}
 				Utils.SendSomeThing.sendPlay(mActivity, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, "null");
 
 //				ItemCoverThreadPool.post(() -> {
@@ -482,7 +484,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 			albumLoader(mActivity, holder.mCoverReference.get(), mMusicItems.get(i).getAlbumId()
 					, mMusicItems.get(i).getArtist(), mMusicItems.get(i).getMusicAlbum());
 
-			switch (mStyleId) {
+			switch (mConfig.styleId) {
 				case 1: {
 					ItemHolderS1 holderS1 = (ItemHolderS1) holder;
 					final Bitmap bitmap = Utils.Ui.readBitmapFromFile(Utils.Audio.getCoverPath(mActivity, mMusicItems.get(i).getAlbumId()), 50, 50);
@@ -510,9 +512,9 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 	/**
 	 * loader
 	 * load image to imageView (net, defDB, customDB, defAlbum)
-	 *
+	 * <p>
 	 * 1. DEFAULT DB {@link MediaStore.Audio.Albums#EXTERNAL_CONTENT_URI}
-	 *
+	 * <p>
 	 * 2. NET WORK <a href="http://ws.audioscrobbler.com"/>
 	 */
 	private void albumLoader(@NonNull final Context activity, @NonNull final ImageView imageView, final int albumId, @NonNull final String artist, @NonNull final String albumName) {
@@ -682,10 +684,18 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 	}
 
 	/**
+	 * file type for AlbumCover or ArtistCover
+	 */
+	private interface FileType {
+		String PNG = "png";
+		String JPG = "jpg";
+		String GIF = "gif";
+	}
+
+	/**
 	 * check the cacheImage exists
 	 *
 	 * @param id the AlbumId
-	 *
 	 * @return if exists return the path else return null;
 	 */
 	private String ifExists(int id) {
@@ -709,12 +719,33 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 	}
 
 	/**
-	 * file type for AlbumCover or ArtistCover
+	 * config for {@link MyRecyclerAdapter}
 	 * */
-	private interface FileType {
-		String PNG = "png";
-		String JPG = "jpg";
-		String GIF = "gif";
+	public static class Config {
+		/**
+		 * 样式id
+		 * <p>
+		 * 1: 带随机播放item
+		 * 0：default
+		 */
+		int styleId = 0;
+		boolean recordIndex = true;
+
+		public Config() {
+		}
+
+		public Config(int styleId) {
+			this.styleId = styleId;
+		}
+
+		public Config(boolean recordIndex) {
+			this.recordIndex = recordIndex;
+		}
+
+		public Config(int styleId, boolean recordIndex) {
+			this.styleId = styleId;
+			this.recordIndex = recordIndex;
+		}
 	}
 
 	/**
@@ -799,7 +830,6 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 	}
 
 	class ViewHolder extends RecyclerView.ViewHolder {
-
 		ViewHolder(@NonNull View itemView) {
 			super(itemView);
 		}

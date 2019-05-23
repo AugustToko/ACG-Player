@@ -68,7 +68,7 @@ public final class ArtistListFragment extends BaseFragment {
 	}
 
 	private void initArtistData() {
-		
+
 		final AlertDialog load = DialogUtil.getLoadingDialog(mMainActivity, "Loading");
 		load.show();
 
@@ -129,15 +129,23 @@ public final class ArtistListFragment extends BaseFragment {
 			int type = mDef.getInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.GRID_TYPE);
 			switch (type) {
 				case MyRecyclerAdapter2ArtistList.LINEAR_TYPE: {
-					mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+					final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mMainActivity);
+					linearLayoutManager.setItemPrefetchEnabled(true);
+					linearLayoutManager.setInitialPrefetchItemCount(6);
+					mRecyclerView.setLayoutManager(linearLayoutManager);
 				}
 				break;
 				case MyRecyclerAdapter2ArtistList.GRID_TYPE: {
-					mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2)));
+					final GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity()
+							, mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2));
+					gridLayoutManager.setItemPrefetchEnabled(true);
+					gridLayoutManager.setInitialPrefetchItemCount(6);
+					mRecyclerView.setLayoutManager(gridLayoutManager);
 				}
 				break;
-				default:
+				default: {
 					mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+				}
 			}
 
 			mAdapter2ArtistList = new MyRecyclerAdapter2ArtistList(mMainActivity, Data.sArtistItems, type);

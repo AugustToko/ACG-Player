@@ -169,6 +169,8 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 								+ "&api_key="
 								+ App.LAST_FM_KEY;
 
+						Log.v(TAG, "dataSet: request is: " + request);
+
 						HttpUtil.sedOkHttpRequest(request, new Callback() {
 							@Override
 							public void onFailure(@NotNull Call call, @NotNull IOException e) {

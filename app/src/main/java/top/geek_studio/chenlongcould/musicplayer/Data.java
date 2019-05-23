@@ -46,11 +46,13 @@ public final class Data {
 	/**
 	 * 存储播放历史(序列) default...
 	 */
-	public final static List<MusicItem> S_HISTORY_PLAY = new ArrayList<>();
+	public final static List<MusicItem> sHistoryPlayed = new ArrayList<>();
+
 	/**
-	 * 垃圾箱(dislike)
+	 * 垃圾箱 (dislike)
 	 */
 	public final static List<MusicItem> S_TRASH_CAN_LIST = new ArrayList<>();
+
 	public final static SimpleDateFormat S_SIMPLE_DATE_FORMAT = new SimpleDateFormat("mm:ss", Locale.CHINESE);
 	public final static SimpleDateFormat S_SIMPLE_DATE_FORMAT_FILE = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINESE);
 	public volatile static boolean HAS_BIND = false;
@@ -63,6 +65,7 @@ public final class Data {
 	public static WeakReference<MainActivity> sMainRef;
 	/**
 	 * old
+	 *
 	 * @deprecated
 	 */
 	@Deprecated
@@ -73,6 +76,7 @@ public final class Data {
 	 */
 	public static List<MusicItem> sMusicItems = new ArrayList<>();
 	public static List<MusicItem> sMusicItemsBackUp = new ArrayList<>();
+	@Deprecated
 	public static CarViewActivity sCarViewActivity = null;
 	public static List<AlbumItem> sAlbumItems = new ArrayList<>();
 	public static List<AlbumItem> sAlbumItemsBackUp = new ArrayList<>();
@@ -109,11 +113,13 @@ public final class Data {
 
 		}
 	};
-	private static RecyclerView.ItemDecoration mItemDecoration;
+
 	/**
 	 * save temp bitmap
 	 */
 	private static Bitmap sCurrentCover = null;
+
+	private static RecyclerView.ItemDecoration mItemDecoration;
 
 	public static RecyclerView.ItemDecoration getItemDecoration(Context context) {
 		if (mItemDecoration == null) {

@@ -74,8 +74,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.PublicActivity"
-            android:exported="false" />
+                android:name=".activity.ListViewActivity"
+                android:exported="false" />
         <activity
             android:name=".activity.AlbumDetailActivity"
             android:exported="false"
@@ -141,15 +141,6 @@
                 <action android:name="top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay" />
             </intent-filter>
         </receiver>
-        <!--<receiver-->
-        <!--android:name=".broadcast.ReceiverOnMusicPause"-->
-        <!--android:enabled="true"-->
-        <!--android:exported="true"-->
-        <!--android:permission="top.geek_studio.chenlongcould.musicplayer.broadcast">-->
-        <!--<intent-filter>-->
-        <!--<action android:name="top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPause" />-->
-        <!--</intent-filter>-->
-        <!--</receiver>-->
         <receiver
             android:name=".broadcast.MyHeadSetPlugReceiver"
             android:enabled="true"

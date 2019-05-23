@@ -51,8 +51,8 @@ public final class AlbumListFragment extends BaseFragment {
 	private RecyclerView mRecyclerView;
 	
 	private MainActivity mMainActivity;
-	
-	private MyRecyclerAdapter2AlbumList mAdapter2AlbumList;
+
+	private MyRecyclerAdapter2AlbumList mAdapter2AlbumListAdapter;
 	
 	public static AlbumListFragment newInstance() {
 		return new AlbumListFragment();
@@ -148,18 +148,24 @@ public final class AlbumListFragment extends BaseFragment {
 			int type = mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
 			switch (type) {
 				case MyRecyclerAdapter2AlbumList.LINEAR_TYPE: {
-					mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+					LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mMainActivity);
+					linearLayoutManager.setItemPrefetchEnabled(true);
+					linearLayoutManager.setInitialPrefetchItemCount(6);
+					mRecyclerView.setLayoutManager(linearLayoutManager);
 				}
 				break;
 				case MyRecyclerAdapter2AlbumList.GRID_TYPE: {
-					mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2)));
+					GridLayoutManager gridLayoutManager = new GridLayoutManager(mMainActivity, mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2));
+					gridLayoutManager.setItemPrefetchEnabled(true);
+					gridLayoutManager.setInitialPrefetchItemCount(6);
+					mRecyclerView.setLayoutManager(gridLayoutManager);
 				}
 				break;
 				default:
 			}
-			
-			mAdapter2AlbumList = new MyRecyclerAdapter2AlbumList(mMainActivity, Data.sAlbumItems, type);
-			mRecyclerView.setAdapter(mAdapter2AlbumList);
+
+			mAdapter2AlbumListAdapter = new MyRecyclerAdapter2AlbumList(mMainActivity, Data.sAlbumItems, type);
+			mRecyclerView.setAdapter(mAdapter2AlbumListAdapter);
 		}
 	}
 	
@@ -168,7 +174,7 @@ public final class AlbumListFragment extends BaseFragment {
 	}
 	
 	public MyRecyclerAdapter2AlbumList getAdapter2AlbumList() {
-		return mAdapter2AlbumList;
+		return mAdapter2AlbumListAdapter;
 	}
 	
 }
