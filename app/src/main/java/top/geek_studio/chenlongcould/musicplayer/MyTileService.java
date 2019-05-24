@@ -1,14 +1,3 @@
-/*
- * ************************************************************
- * 文件：MyTileService.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月18日 18:58:29
- * 上次修改时间：2019年01月18日 18:57:39
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.musicplayer;
 
 import android.content.Intent;
@@ -24,10 +13,6 @@ import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.util.Log;
 import android.widget.Toast;
-
-import java.io.File;
-import java.util.Collections;
-
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import io.reactivex.Observable;
@@ -39,6 +24,9 @@ import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
+
+import java.io.File;
+import java.util.Collections;
 
 /**
  * @author chenlongcould

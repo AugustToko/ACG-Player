@@ -1,14 +1,3 @@
-/*
- * ************************************************************
- * 文件：MyRecyclerAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月27日 13:11:38
- * 上次修改时间：2019年01月27日 13:08:44
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.musicplayer.adapter;
 
 import android.animation.Animator;
@@ -84,7 +73,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 	private static final String TAG = "MyRecyclerAdapter";
 
 	/**
-	 * @see R.layout#recycler_music_list_item_mod
+	 * @see top.geek_studio.chenlongcould.musicplayer.R.layout#recycler_music_list_item_mod
 	 */
 	private static final int MOD_TYPE = -1;
 
@@ -423,7 +412,6 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 				mSelected.add(mMusicItems.get(holder.getAdapterPosition()).getMusicID());
 				((ItemHolder) holder).mBody.setBackgroundColor(Utils.Ui.getAccentColor(mActivity));
 			} else {
-
 //				//在通常模式（非多选）下
 //				final Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
 //

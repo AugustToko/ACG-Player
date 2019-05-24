@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -24,6 +23,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -50,6 +50,7 @@ import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyWaitListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.customView.AlbumImageView;
+import top.geek_studio.chenlongcould.musicplayer.customView.PlayPauseDrawable;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
@@ -96,7 +97,7 @@ public final class MusicDetailFragment extends BaseFragment {
 
 	private TextView mInfoBarAlbumText;
 
-	private ImageView mInfoBarPlayStatusImage;
+//	private ImageView mInfoBarPlayStatusImage;
 
 	private ImageView mInfoBarBackgroundImage;
 
@@ -107,6 +108,8 @@ public final class MusicDetailFragment extends BaseFragment {
 	private HandlerThread mHandlerThread;
 
 	private FloatingActionButton mPlayButton;
+
+	private PlayPauseDrawable mPlayPauseDrawable;
 
 	private ImageButton mNextButton;
 
@@ -201,6 +204,9 @@ public final class MusicDetailFragment extends BaseFragment {
 	 */
 	private void initView(View view) {
 
+		mPlayPauseDrawable = new PlayPauseDrawable(mMainActivity);
+		mPlayPauseDrawable.setPause(true);
+
 		//get Default values
 		ImageView.ScaleType scaleType = mPlayButton.getScaleType();
 		defXScale = mPlayButton.getScaleX();
@@ -210,6 +216,9 @@ public final class MusicDetailFragment extends BaseFragment {
 		mMusicAlbumImageOth2.setX(mMusicAlbumImage.getWidth() * 2);
 		mMusicAlbumImageOth2.setVisibility(View.GONE);
 		mMusicAlbumImageOth3.setVisibility(View.GONE);
+
+		mPlayButton.setImageDrawable(mPlayPauseDrawable);
+		mPlayButton.setColorFilter(Color.BLACK);
 
 		mInfoBarInfoSeek.setBackgroundColor(Utils.Ui.getAccentColor(mMainActivity));
 
@@ -328,6 +337,7 @@ public final class MusicDetailFragment extends BaseFragment {
 								if (finalNexItem != null) {
 									bitmap = Utils.Audio.getCoverBitmap(mMainActivity, finalNexItem.getAlbumId());
 								}
+								//TODO use Util.UI.releaseImageViewResource
 								GlideApp.with(MusicDetailFragment.this)
 										.load(finalNexItem == null ? R.drawable.default_album_art : bitmap)
 										.into(mMusicAlbumImage);
@@ -669,8 +679,6 @@ public final class MusicDetailFragment extends BaseFragment {
 					mCurrentAlbumNameText.setText(item.getMusicAlbum());
 
 					Bitmap bitmap = Utils.Audio.getCoverBitmap(getContext(), item.getAlbumId());
-					mInfoBarPlayStatusImage.setImageResource(R.drawable.ic_pause_black_24dp);
-					mPlayButton.setImageResource(R.drawable.ic_pause_black_24dp);
 
 					setSlideInfoBar(item.getMusicName(), item.getMusicAlbum(), bitmap);
 					setCurrentInfo(item.getMusicName(), item.getMusicAlbum(), bitmap);
@@ -678,7 +686,7 @@ public final class MusicDetailFragment extends BaseFragment {
 					mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
 
 				} else {
-
+					//??
 				}
 			} catch (RemoteException e) {
 				e.printStackTrace();
@@ -756,7 +764,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		 * init view animation
 		 * */
 		//default type is common, but the random button alpha is 1f(it means this button is on), so set animate
-		if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM)) {
+		if (Values.TYPE_RANDOM.equals(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
 			final ValueAnimator animator = new ValueAnimator();
 			animator.setDuration(300);
 			animator.setFloatValues(0f, 1f);
@@ -1017,7 +1025,6 @@ public final class MusicDetailFragment extends BaseFragment {
 		mMusicAlbumImageOth3 = view.findViewById(R.id.activity_music_detail_album_image_3);
 		mInfoBarAlbumText = view.findViewById(R.id.info_bar_album);
 		mNowPlayingBody = view.findViewById(R.id.current_info);
-		mInfoBarPlayStatusImage = view.findViewById(R.id.info_bar_play_img);
 		mInfoBarFavButton = view.findViewById(R.id.info_bar_fav_img);
 		mInfoBarBackgroundImage = view.findViewById(R.id.info_bar_background);
 		mInfoBarSongText = view.findViewById(R.id.info_bar_music_name);
@@ -1069,32 +1076,32 @@ public final class MusicDetailFragment extends BaseFragment {
 	 * the action drop to crash
 	 */
 	private void dropToTrash(@Nullable MusicItem item) {
-		if (item != null) {
-			if (PreferenceManager.getDefaultSharedPreferences(mMainActivity).getBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, true)) {
-				final AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
-				builder.setTitle(getString(R.string.sure_int));
-				builder.setMessage(getString(R.string.drop_to_trash_can));
-				final FrameLayout frameLayout = new FrameLayout(mMainActivity);
-				final CheckBox checkBox = new CheckBox(mMainActivity);
-				checkBox.setText(getString(R.string.do_not_show_again));
-				frameLayout.addView(checkBox);
-				final FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-				params.leftMargin = (int) mMainActivity.getResources().getDimension(R.dimen.margin_16);
-				checkBox.setLayoutParams(params);
-				builder.setView(frameLayout);
-				builder.setCancelable(true);
-				builder.setNegativeButton(getString(R.string.sure), (dialog, which) -> {
-					if (checkBox.isChecked()) {
-						PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit().putBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, false).apply();
-					}
-					Data.S_TRASH_CAN_LIST.add(item);
-					dialog.dismiss();
-				});
-				builder.setPositiveButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
-				builder.show();
-			} else {
+		if (item == null) return;
+
+		if (PreferenceManager.getDefaultSharedPreferences(mMainActivity).getBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, true)) {
+			final AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
+			builder.setTitle(getString(R.string.sure_int));
+			builder.setMessage(getString(R.string.drop_to_trash_can));
+			final FrameLayout frameLayout = new FrameLayout(mMainActivity);
+			final CheckBox checkBox = new CheckBox(mMainActivity);
+			checkBox.setText(getString(R.string.do_not_show_again));
+			frameLayout.addView(checkBox);
+			final FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+			params.leftMargin = (int) mMainActivity.getResources().getDimension(R.dimen.margin_16);
+			checkBox.setLayoutParams(params);
+			builder.setView(frameLayout);
+			builder.setCancelable(true);
+			builder.setNegativeButton(getString(R.string.sure), (dialog, which) -> {
+				if (checkBox.isChecked()) {
+					PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit().putBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, false).apply();
+				}
 				Data.S_TRASH_CAN_LIST.add(item);
-			}
+				dialog.dismiss();
+			});
+			builder.setPositiveButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
+			builder.show();
+		} else {
+			Data.S_TRASH_CAN_LIST.add(item);
 		}
 	}
 
@@ -1191,7 +1198,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		mRandomButton.setOnClickListener(v -> {
 			mRandomButton.clearAnimation();
 			final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit();
-			if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM)) {
+			if (Values.TYPE_RANDOM.equals(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
 				editor.putString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).apply();
 				final ValueAnimator animator = new ValueAnimator();
 				animator.setFloatValues(1f, 0.3f);
@@ -1289,14 +1296,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		mMenuButton.setOnClickListener(v -> mPopupMenu.show());
 
 		//just pause or play
-		mPlayButton.setOnClickListener(v -> {
-			if (ReceiverOnMusicPlay.isPlayingMusic()) {
-				Utils.SendSomeThing.sendPause(mMainActivity);
-			} else {
-				ReceiverOnMusicPlay.playMusic();
-				Utils.Ui.setPlayButtonNowPlaying();
-			}
-		});
+		mPlayButton.setOnClickListener(v -> clickPlayButton());
 
 		mNextButton.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mMainActivity, 6, ReceiverOnMusicPlay.TYPE_NEXT));
 
@@ -1315,7 +1315,6 @@ public final class MusicDetailFragment extends BaseFragment {
 		});
 
 		mPreviousButton.setOnClickListener(v -> {
-
 			//当进度条大于播放总长 1/20 那么重新播放该歌曲
 			//noinspection AlibabaUndefineMagicConstant
 			if (ReceiverOnMusicPlay.getCurrentPosition() > ReceiverOnMusicPlay.getDuration() / 20 || Values.CurrentData.CURRENT_MUSIC_INDEX == 0) {
@@ -1340,19 +1339,6 @@ public final class MusicDetailFragment extends BaseFragment {
 			return true;
 		});
 
-		mInfoBarPlayStatusImage.setOnClickListener(v -> {
-			//判断是否播放过, 如没有默认随机播放
-			if (Data.HAS_PLAYED) {
-				if (ReceiverOnMusicPlay.isPlayingMusic()) {
-					Utils.SendSomeThing.sendPause(mMainActivity);
-				} else {
-					Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_NOTIFICATION_RESUME, null);
-				}
-			} else {
-				Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, TAG);
-			}
-		});
-
 		mInfoBarFavButton.setOnClickListener(v -> {
 			MusicUtil.toggleFavorite(mMainActivity, ReceiverOnMusicPlay.getCurrentItem());
 			updateFav(ReceiverOnMusicPlay.getCurrentItem());
@@ -1366,6 +1352,22 @@ public final class MusicDetailFragment extends BaseFragment {
 				Utils.Ui.fastToast(mMainActivity, "No music playing.");
 			}
 		});
+	}
+
+	private void clickPlayButton() {
+		// 判断是否播放过, 如没有默认随机播放
+		if (Data.HAS_PLAYED) {
+			if (ReceiverOnMusicPlay.isPlayingMusic()) {
+				Utils.SendSomeThing.sendPause(mMainActivity);
+				mHandler.sendEmptyMessage(NotLeakHandler.SET_BUTTON_PAUSE);
+			} else {
+				Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_NOTIFICATION_RESUME, null);
+				mHandler.sendEmptyMessage(NotLeakHandler.SET_BUTTON_PLAY);
+			}
+		} else {
+			Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, TAG);
+			mHandler.sendEmptyMessage(NotLeakHandler.SET_BUTTON_PLAY);
+		}
 	}
 
 	/**
@@ -1390,7 +1392,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		anim.start();
 	}
 
-	public final void setCurrentInfoWithoutMainImage(@NonNull final String name, @NonNull final String albumName, final Bitmap cover) {
+	private void setCurrentInfoWithoutMainImage(@NonNull final String name, @NonNull final String albumName, final Bitmap cover) {
 		mMainActivity.runOnUiThread(() -> {
 			mCurrentMusicNameText.setText(name);
 			mCurrentAlbumNameText.setText(albumName);
@@ -1469,7 +1471,6 @@ public final class MusicDetailFragment extends BaseFragment {
 							@ColorInt int val = (int) animation.getAnimatedValue();
 							mInfoBarSongText.setTextColor(val);
 							mInfoBarAlbumText.setTextColor(val);
-							mInfoBarPlayStatusImage.setColorFilter(val);
 							mInfoBarFavButton.setColorFilter(val);
 
 							mRandomButton.setColorFilter(val);
@@ -1492,7 +1493,6 @@ public final class MusicDetailFragment extends BaseFragment {
 							@ColorInt int val = (int) animation.getAnimatedValue();
 							mInfoBarSongText.setTextColor(val);
 							mInfoBarAlbumText.setTextColor(val);
-							mInfoBarPlayStatusImage.setColorFilter(val);
 							mInfoBarFavButton.setColorFilter(val);
 
 							mRandomButton.setColorFilter(val);
@@ -1524,6 +1524,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		fragmentType = FragmentType.MUSIC_DETAIL_FRAGMENT;
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	public final class NotLeakHandler extends Handler {
 
 		/**
@@ -1633,26 +1634,12 @@ public final class MusicDetailFragment extends BaseFragment {
 				break;
 
 				case SET_BUTTON_PLAY: {
-					mWeakReference.get().runOnUiThread(() -> {
-						GlideApp.with(mMainActivity)
-								.load(R.drawable.ic_pause_black_24dp)
-								.into(mInfoBarPlayStatusImage);
-						GlideApp.with(mMainActivity)
-								.load(R.drawable.ic_pause_black_24dp)
-								.into(mPlayButton);
-					});
+					mWeakReference.get().runOnUiThread(() -> mPlayPauseDrawable.setPause(true));
 				}
 				break;
 
 				case SET_BUTTON_PAUSE: {
-					mWeakReference.get().runOnUiThread(() -> {
-						GlideApp.with(mMainActivity)
-								.load(R.drawable.ic_play_arrow_grey_600_24dp)
-								.into(mInfoBarPlayStatusImage);
-						GlideApp.with(mMainActivity)
-								.load(R.drawable.ic_play_arrow_grey_600_24dp)
-								.into(mPlayButton);
-					});
+					mWeakReference.get().runOnUiThread(() -> mPlayPauseDrawable.setPlay(true));
 				}
 				break;
 
@@ -1674,7 +1661,9 @@ public final class MusicDetailFragment extends BaseFragment {
 				}
 				break;
 
-				default:
+				default: {
+
+				}
 			}
 		}
 	}

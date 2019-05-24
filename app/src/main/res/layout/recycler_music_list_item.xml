@@ -30,7 +30,7 @@
             android:foreground="?attr/selectableItemBackground"
             app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/recycler_item_album_image"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
@@ -44,7 +44,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 android:src="@drawable/default_album_art" />
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/recycler_item_music_type_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -57,7 +57,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/recycler_item_music_name"
                 tools:text="@string/app_name" />
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/recycler_item_music_album_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -72,7 +72,7 @@
                 app:layout_constraintStart_toStartOf="@+id/recycler_item_music_name"
                 app:layout_constraintTop_toBottomOf="@+id/recycler_item_music_name" />
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/recycler_item_music_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -88,7 +88,7 @@
                 app:layout_constraintStart_toEndOf="@+id/recycler_item_album_image"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/recycler_item_music_duration"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

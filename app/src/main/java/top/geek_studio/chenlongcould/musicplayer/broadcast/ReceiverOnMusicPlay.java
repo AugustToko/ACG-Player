@@ -64,7 +64,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		Data.sCurrentMusicItem = Data.sPlayOrderList.get(targetIndex);
 		final Bitmap cover = Utils.Audio.getCoverBitmap(context, Data.sCurrentMusicItem.getAlbumId());
 		MusicDetailFragment.mHandler.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
-		Utils.Ui.setPlayButtonNowPlaying();
+		MusicDetailFragment.mHandler.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
 
 		// FIXME: 2019/5/22 
 		((MusicDetailFragment) ((MainActivity) Data.sActivities.get(0)).getFragment(BaseFragment.FragmentType.MUSIC_DETAIL_FRAGMENT))
@@ -219,7 +219,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		switch (type) {
 			//clicked by notif, just resume play
 			case CASE_TYPE_NOTIFICATION_RESUME: {
-				Utils.Ui.setPlayButtonNowPlaying();
+				MusicDetailFragment.mHandler.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
 				playMusic();
 			}
 			break;
@@ -291,7 +291,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 					final String albumName = Data.sPlayOrderList.get(targetIndex).getMusicAlbum();
 					final Bitmap cover = Utils.Audio.getCoverBitmap(context, Data.sPlayOrderList.get(targetIndex).getAlbumId());
 
-					Utils.Ui.setPlayButtonNowPlaying();
+					MusicDetailFragment.mHandler.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
 
 					//set music data
 					final Message message = Message.obtain();
@@ -323,7 +323,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 				sureCar();
 
-				Utils.Ui.setPlayButtonNowPlaying();
+				MusicDetailFragment.mHandler.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
 				MusicDetailFragment.mHandler.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
 
 				// FIXME: 2019/5/22 
@@ -426,7 +426,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 				sureCar();
 
-				Utils.Ui.setPlayButtonNowPlaying();
+				MusicDetailFragment.mHandler.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
 				musicDetailFragment.setCurrentInfo(Data.sNextWillPlayItem.getMusicName(), Data.sNextWillPlayItem.getMusicAlbum(), cover);
 
 				MusicDetailFragment.setSeekBar(0);         //防止seekBar跳动到Max

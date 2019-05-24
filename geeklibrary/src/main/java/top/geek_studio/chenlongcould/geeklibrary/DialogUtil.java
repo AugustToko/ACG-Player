@@ -11,7 +11,6 @@
 
 package top.geek_studio.chenlongcould.geeklibrary;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,7 +23,6 @@ public class DialogUtil {
     /**
      * @param context context
      * @param aTitle  theTitle
-     * @return {@link AlertDialog.Builder}
      */
     public static androidx.appcompat.app.AlertDialog getLoadingDialog(Context context, String... aTitle) {
         androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);

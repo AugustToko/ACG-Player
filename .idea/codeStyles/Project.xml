@@ -5,11 +5,15 @@
       <option name="LAYOUT_SETTINGS">
         <value>
           <option name="WRAP_ATTRIBUTES" value="1" />
+          <option name="INSERT_LINE_BREAK_BEFORE_NAMESPACE_DECLARATION" value="true" />
+          <option name="INSERT_LINE_BREAK_AFTER_LAST_ATTRIBUTE" value="true" />
         </value>
       </option>
       <option name="MANIFEST_SETTINGS">
         <value>
           <option name="WRAP_ATTRIBUTES" value="1" />
+          <option name="INSERT_LINE_BREAK_BEFORE_NAMESPACE_DECLARATION" value="true" />
+          <option name="INSERT_LINE_BREAK_AFTER_LAST_ATTRIBUTE" value="true" />
         </value>
       </option>
       <option name="VALUE_RESOURCE_FILE_SETTINGS">
@@ -20,9 +24,14 @@
       <option name="OTHER_SETTINGS">
         <value>
           <option name="WRAP_ATTRIBUTES" value="1" />
+          <option name="INSERT_LINE_BREAK_BEFORE_NAMESPACE_DECLARATION" value="true" />
+          <option name="INSERT_LINE_BREAK_AFTER_LAST_ATTRIBUTE" value="true" />
         </value>
       </option>
     </AndroidXmlCodeStyleSettings>
+    <XML>
+      <option name="XML_SPACE_INSIDE_EMPTY_TAG" value="true" />
+    </XML>
     <codeStyleSettings language="JAVA">
       <indentOptions>
         <option name="USE_TAB_CHARACTER" value="true" />

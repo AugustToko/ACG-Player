@@ -1,14 +1,3 @@
-/*
- * ************************************************************
- * 文件：MyRecyclerAdapter2AlbumList.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月27日 13:11:38
- * 上次修改时间：2019年01月27日 13:08:44
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.musicplayer.adapter;
 
 import android.content.Intent;
@@ -80,8 +69,10 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 	public void onViewRecycled(@NonNull ViewHolder holder) {
 		holder.mArtistImage.setTag(R.string.key_id_2, -1);
 		GlideApp.with(mMainActivity).clear(holder.mArtistImage);
+		GlideApp.get(mMainActivity).clearMemory();
 		holder.mView.setBackgroundColor(ContextCompat.getColor(mMainActivity, R.color.notVeryBlack));
 		holder.mArtistText.setTextColor(ContextCompat.getColor(mMainActivity, R.color.notVeryWhite));
+		holder.debugInfo.setText("");
 	}
 
 	@NonNull
@@ -118,10 +109,10 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 		viewHolder.mArtistText.setText(mArtistItems.get(i).getArtistName());
 		viewHolder.mArtistImage.setTag(R.string.key_id_2, i);
-		dataSet(i, viewHolder.mArtistImage, viewHolder.mArtistText, viewHolder.mView);
+		dataSet(i, viewHolder.mArtistImage, viewHolder.mArtistText, viewHolder.mView, viewHolder.debugInfo);
 	}
 
-	private void dataSet(final int index, final ImageView imageView, final TextView textView, final View view) {
+	private void dataSet(final int index, final ImageView imageView, final TextView textView, final View view, final TextView debugText) {
 		AlbumThreadPool.post(() -> {
 
 			final ArtistItem artistItem = mArtistItems.get(index);
@@ -144,7 +135,8 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 
 				if (TextUtils.isEmpty(path) || path.toLowerCase().equals("null") || path.toLowerCase().equals("none")) {
 
-					String mayPath = ifExists(artistId);
+					final String mayPath = ifExists(artistId);
+
 					if (mayPath != null) {
 						Log.d(TAG, "onBindViewHolder: (in CUSTOM_DB) DB not ability, path is ability, save in db and loading...");
 
@@ -159,6 +151,9 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 									.diskCacheStrategy(DiskCacheStrategy.NONE)
 									.into(imageView));
 							setUpTagColor(mayPath, textView, view);
+
+							// TODO: 2019/5/24 debug
+							debugText.setText(mayPath);
 						}
 
 					} else {
@@ -211,14 +206,13 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 
 															if (verify(imageView, index)) {
 																Log.d(TAG, "onDownloadSuccess: loading,,," + " albumName is: " + artistName);
-																setUpTagColor(newPath, textView, view);
 																imageView.post(() -> GlideApp.with(mMainActivity)
 																		.load(file)
 																		.placeholder(R.drawable.default_album_art)
 																		.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
 																		.diskCacheStrategy(DiskCacheStrategy.NONE)
 																		.into(imageView));
-//                                                                viewHolder.mArtistImage.setTag(R.string.key_id_2, null);
+																setUpTagColor(newPath, textView, view);
 															}
 														}
 
@@ -248,7 +242,6 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 							}
 						});
 					}
-
 				} else {
 					File file = new File(path);
 					if (file.exists()) {
@@ -267,7 +260,7 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 
 					} else {
 						Log.d(TAG, "onBindViewHolder: already in DB but not a file path");
-						//TODO 存在于数据库 但 路径失效了
+						// 存在于数据库 但 路径失效了
 						loadDEF(imageView, view, textView, index);
 					}
 				}
@@ -278,6 +271,7 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 		});
 	}
 
+	@Nullable
 	private String ifExists(int artistId) {
 		String mayPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath()
 				+ File.separatorChar + "ArtistCovers"
@@ -399,116 +393,6 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 		return String.valueOf(mArtistItems.get(position).getArtistName().charAt(0));
 	}
 
-//    static class MyTask extends AsyncTask<Void, Void, String> {
-//
-//        private static final String TAG = "MyTask";
-//
-//        private final WeakReference<MainActivity> mContextWeakReference;
-//
-//        private final WeakReference<ViewHolder> mViewHolderWeakReference;
-//
-//        private final int mPosition;
-//
-//        MyTask(ViewHolder holder, MainActivity context, int position) {
-//            mContextWeakReference = new WeakReference<>(context);
-//            mViewHolderWeakReference = new WeakReference<>(holder);
-//            mPosition = position;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(String albumArt) {
-//            if (mViewHolderWeakReference.get() == null) {
-//                return;
-//            }
-//
-//            if (albumArt == null) {
-//                GlideApp.with(mContextWeakReference.get())
-//                        .load(R.drawable.ic_audiotrack_24px)
-//                        .into(mViewHolderWeakReference.get().mArtistImage);
-//                return;
-//            }
-//
-//            final File file = new File(albumArt);
-//            if (file.exists()) {
-//                final Bitmap bitmap = Utils.Ui.readBitmapFromFile(albumArt, 100, 100);
-//
-//                //...mode set
-//                switch (mType) {
-//                    case GRID_TYPE: {
-//
-//                        //color set (album tag)
-//                        Palette.from(bitmap).generate(p -> {
-//                            if (p != null) {
-//                                @ColorInt int color = p.getVibrantColor(ContextCompat.getColor(mContextWeakReference.get(), R.color.notVeryBlack));
-//                                if (Utils.Ui.isColorLight(color)) {
-//                                    mViewHolderWeakReference.get().mArtistText.setTextColor(ContextCompat.getColor(mContextWeakReference.get(), R.color.notVeryBlack));
-//                                } else {
-//                                    mViewHolderWeakReference.get().mArtistText.setTextColor(ContextCompat.getColor(mContextWeakReference.get(), R.color.notVeryWhite));
-//                                }
-//                                mViewHolderWeakReference.get().mView.setBackgroundColor(color);
-//
-//                                bitmap.recycle();
-//                            } else {
-//                                mViewHolderWeakReference.get().mView.setBackgroundColor(ContextCompat.getColor(mContextWeakReference.get(), R.color.notVeryBlack));
-//                            }
-//                        });
-//                    }
-//                    break;
-//                }
-//
-//                GlideApp.with(mContextWeakReference.get())
-//                        .load(albumArt)
-//                        .transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-//                        .centerCrop()
-//                        .into(mViewHolderWeakReference.get().mArtistImage);
-//            } else {
-//                GlideApp.with(mContextWeakReference.get())
-//                        .load(R.drawable.ic_audiotrack_24px)
-//                        .into(mViewHolderWeakReference.get().mArtistImage);
-//                Log.e(TAG, "onPostExecute: file not exits");
-//            }
-//
-//            mViewHolderWeakReference.get().mArtistImage.setTag(R.string.key_id_1, null);
-//
-//            cancel(true);
-//        }
-//
-//        @Override
-//        protected String doInBackground(Void... voids) {
-//
-//            //根据position判断是否为复用ViewHolder
-//            if (mViewHolderWeakReference.get() == null) {
-//                return "null";
-//            }
-//
-//            final ImageView imageView = mViewHolderWeakReference.get().mArtistImage;
-//
-//            if (imageView == null || imageView.getTag(R.string.key_id_1) == null) {
-//                Log.e(TAG, "doInBackground: key null------------------skip");
-//                return null;
-//            }
-//
-//            if (((int) imageView.getTag(R.string.key_id_1)) != mPosition - 1) {
-//                GlideApp.with(mContextWeakReference.get()).clearData(imageView);
-//                Log.e(TAG, "doInBackground: key error------------------skip");
-//                return null;
-//            }
-//
-//            String img = "null";
-//            Cursor cursor = mContextWeakReference.get().getContentResolver().query(Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + mPosition),
-//                    new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
-//            if (cursor != null) {
-//                cursor.moveToFirst();
-//                if (cursor.getCount() == 0) {
-//                    return "null";
-//                }
-//                img = cursor.getString(0);
-//                cursor.close();
-//            }
-//            return img;
-//        }
-//    }
-
 	class ViewHolder extends RecyclerView.ViewHolder {
 
 		View mUView;
@@ -519,11 +403,14 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 
 		View mView;
 
+		TextView debugInfo;
+
 		ViewHolder(@NonNull View itemView) {
 			super(itemView);
 			mArtistText = itemView.findViewById(R.id.recycler_item_song_album_name);
 			mArtistImage = itemView.findViewById(R.id.recycler_item_album_image);
 			mUView = itemView.findViewById(R.id.u_view);
+			debugInfo = itemView.findViewById(R.id.debug_text);
 			itemView.setBackground(null);//新增代码
 
 			switch (mType) {

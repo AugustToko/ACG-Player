@@ -1,14 +1,3 @@
-/*
- * ************************************************************
- * 文件：OpenFile.java  模块：geeklibrary  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:47
- * 上次修改时间：2019年01月17日 17:29:00
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.geeklibrary;
 
 import android.Manifest;
@@ -18,12 +7,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.widget.Toast;
-
-import java.io.File;
-
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
+
+import java.io.File;
 
 /**
  * @author chenlongcould
@@ -44,7 +32,7 @@ public class OpenFile {
             return null;
         }
         /* 取得扩展名 */
-        String end = file.getName().substring(file.getName().lastIndexOf(".") + 1, file.getName().length()).toLowerCase();
+		String end = file.getName().substring(file.getName().lastIndexOf(".") + 1).toLowerCase();
         /* 依扩展名的类型决定MimeType */
         switch (end) {
             case "m4a":

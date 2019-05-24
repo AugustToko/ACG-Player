@@ -20,7 +20,7 @@
         android:layout_height="match_parent"
         android:gravity="center">
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/activity_music_detail_primary_background_down"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -30,7 +30,7 @@
             app:layout_constraintTop_toBottomOf="@+id/out_slide"
             android:src="@color/colorPrimary" />
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/activity_music_detail_primary_background_up"
             android:layout_width="0dp"
             android:layout_height="0dp"

@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="30dp">
 
-        <SeekBar
+        <androidx.appcompat.widget.AppCompatSeekBar
             android:id="@+id/seekBar"
             android:layout_width="0dp"
             android:layout_height="20dp"
@@ -31,7 +31,7 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:progress="30" />
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/left_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -48,7 +48,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/seekBar" />
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/right_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

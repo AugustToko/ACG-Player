@@ -1,14 +1,3 @@
-/*
- * ************************************************************
- * 文件：SettingsActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:29:00
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.musicplayer.activity;
 
 import android.animation.ArgbEvaluator;
@@ -17,54 +6,36 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Environment;
-import android.os.RemoteException;
+import android.os.*;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Switch;
-import android.widget.Toast;
-
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.google.android.material.appbar.AppBarLayout;
-import com.jrummyapps.android.colorpicker.ColorPickerDialog;
-import com.jrummyapps.android.colorpicker.ColorPickerDialogListener;
-
-import org.litepal.LitePal;
-import org.litepal.LitePalDB;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
+import android.widget.*;
 import androidx.annotation.ColorInt;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.google.android.material.appbar.AppBarLayout;
+import com.jrummyapps.android.colorpicker.ColorPickerDialog;
+import com.jrummyapps.android.colorpicker.ColorPickerDialogListener;
+import org.litepal.LitePal;
+import org.litepal.LitePalDB;
 import top.geek_studio.chenlongcould.geeklibrary.DialogUtil;
-import top.geek_studio.chenlongcould.musicplayer.DBArtSync;
-import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.GlideApp;
-import top.geek_studio.chenlongcould.musicplayer.MusicService;
-import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.*;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivitySettingsBinding;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
-import static top.geek_studio.chenlongcould.musicplayer.Values.SharedPrefsTag.HIDE_SHORT_SONG;
-import static top.geek_studio.chenlongcould.musicplayer.Values.SharedPrefsTag.NOTIFICATION_COLORIZED;
-import static top.geek_studio.chenlongcould.musicplayer.Values.SharedPrefsTag.USE_NET_WORK_ALBUM;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import static top.geek_studio.chenlongcould.musicplayer.Values.SharedPrefsTag.*;
 
 /**
  * @author chenlongcould

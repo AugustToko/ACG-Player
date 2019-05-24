@@ -19,7 +19,7 @@
         android:background="?android:attr/selectableItemBackground"
         android:gravity="center_vertical">
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/ico"
             android:layout_width="20dp"
             android:layout_height="20dp"
@@ -35,7 +35,7 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@drawable/ic_info_outline_black_24dp" />
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/sub_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -49,7 +49,7 @@
             app:layout_constraintStart_toStartOf="@+id/main_text"
             tools:text="1.0" />
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/main_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
