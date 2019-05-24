@@ -72,7 +72,7 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 		GlideApp.get(mMainActivity).clearMemory();
 		holder.mView.setBackgroundColor(ContextCompat.getColor(mMainActivity, R.color.notVeryBlack));
 		holder.mArtistText.setTextColor(ContextCompat.getColor(mMainActivity, R.color.notVeryWhite));
-		holder.debugInfo.setText("");
+//		holder.debugInfo.setText("");
 	}
 
 	@NonNull
@@ -153,7 +153,7 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 							setUpTagColor(mayPath, textView, view);
 
 							// TODO: 2019/5/24 debug
-							debugText.setText(mayPath);
+//							debugText.setText(mayPath);
 						}
 
 					} else {

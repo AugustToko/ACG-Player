@@ -1,11 +1,11 @@
 package top.geek_studio.chenlongcould.musicplayer;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.os.IBinder;
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,14 +14,12 @@ import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.geeklibrary.recycler_tools.RecycleViewDivider;
 import top.geek_studio.chenlongcould.geeklibrary.theme.Theme;
 import top.geek_studio.chenlongcould.musicplayer.activity.CarViewActivity;
-import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.MyHeadSetPlugReceiver;
 import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.model.ArtistItem;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
 
-import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,14 +49,6 @@ public final class Data {
 	@Deprecated
 	public volatile static boolean HAS_PLAYED = false;
 	public static ArrayList<Disposable> sDisposables = new ArrayList<>();
-	public static WeakReference<MainActivity> sMainRef;
-	/**
-	 * old
-	 *
-	 * @deprecated
-	 */
-	@Deprecated
-	public static List<Activity> sActivities = new ArrayList<>();
 
 	/**
 	 * data
@@ -118,19 +108,11 @@ public final class Data {
 		return mItemDecoration;
 	}
 
-	/**
-	 * init Data {@link MainActivity}
-	 */
-	public static void init(final MainActivity activity) {
-		sMainRef = new WeakReference<>(activity);
-		sActivities.add(sMainRef.get());
-	}
-
 	public static Bitmap getCurrentCover() {
 		return sCurrentCover;
 	}
 
-	public static void setCurrentCover(Bitmap currentCover) {
+	public static void setCurrentCover(@NonNull final Bitmap currentCover) {
 		sCurrentCover = currentCover;
 	}
 

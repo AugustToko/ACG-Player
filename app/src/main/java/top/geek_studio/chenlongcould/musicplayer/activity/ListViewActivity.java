@@ -344,7 +344,9 @@ public final class ListViewActivity extends BaseCompatActivity {
 		public final void handleMessage(Message msg) {
 			switch (msg.what) {
 				case NOTIFICATION_ITEM_INSERT: {
-					adapter.notifyItemInserted(Data.sHistoryPlayed.size() - 1);
+					if (adapter != null) {
+						adapter.notifyItemInserted(Data.sHistoryPlayed.size() - 1);
+					}
 				}
 				break;
 			}

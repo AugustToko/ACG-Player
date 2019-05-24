@@ -1,17 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-  ~ *************************************************************
-  ~ 文件：menu_nav.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月17日 17:31:46
-  ~ 上次修改时间：2019年01月17日 17:28:52
-  ~ 作者：chenlongcould
-  ~ Geek Studio
-  ~ Copyright (c) 2019
-  ~ *************************************************************
-  -->
-
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:showIn="navigation_view">
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        >
     <group android:id="@+id/group_1">
         <item
             android:id="@+id/car_mode"
@@ -33,9 +23,11 @@
                 android:icon="@drawable/ic_settings_black_24dp"
                 android:title="@string/settings" />
             <item
-                android:id="@+id/menu_nav_ad"
-                android:icon="@drawable/ic_attach_money_black_24dp"
-                android:title="@string/donate" />
+                    android:id="@+id/menu_nav_ad"
+                    android:icon="@drawable/ic_attach_money_black_24dp"
+                    android:title="@string/donate"
+                    android:visible="false"
+                    />
             <item
                 android:id="@+id/menu_nav_about"
                 android:icon="@drawable/ic_info_outline_white_24dp"
@@ -44,11 +36,13 @@
                 android:id="@+id/menu_nav_exit"
                 android:icon="@drawable/ic_exit_to_app_black_24dp"
                 android:title="@string/exit" />
+            <!--todo debug option-->
             <item
-                android:id="@+id/debug"
-                android:icon="@drawable/ic_info_outline_white_24dp"
-                android:title="DEBUG"
-                android:visible="true" />
+                    android:id="@+id/debug"
+                    android:icon="@drawable/ic_info_outline_white_24dp"
+                    android:title="DEBUG"
+                    android:visible="false"
+                    />
         </menu>
 
     </item>

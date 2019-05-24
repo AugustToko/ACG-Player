@@ -61,7 +61,7 @@ public final class MusicListFragment extends BaseFragment {
 		linearLayoutManager.setInitialPrefetchItemCount(6);
 		mMusicListBinding.includeRecycler.recyclerView.setLayoutManager(linearLayoutManager);
 		mMusicListBinding.includeRecycler.recyclerView.setHasFixedSize(true);
-		adapter = new MyRecyclerAdapter(mActivity, Data.sMusicItems, new MyRecyclerAdapter.Config(0, false));
+		adapter = new MyRecyclerAdapter(mActivity, Data.sMusicItems, new MyRecyclerAdapter.Config(0, true));
 		mMusicListBinding.includeRecycler.recyclerView.setAdapter(adapter);
 
 		return mMusicListBinding.getRoot();

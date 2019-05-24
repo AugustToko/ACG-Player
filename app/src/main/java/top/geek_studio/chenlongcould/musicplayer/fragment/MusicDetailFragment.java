@@ -79,7 +79,25 @@ public final class MusicDetailFragment extends BaseFragment {
 	/**
 	 * Handler
 	 */
-	public static NotLeakHandler mHandler = null;
+	private static NotLeakHandler mHandler = null;
+
+	public static boolean sendMessage(@NonNull Message message) {
+		boolean result = false;
+		if (mHandler != null) {
+			mHandler.sendMessage(message);
+			result = true;
+		}
+		return result;
+	}
+
+	public static boolean sendEmptyMessage(int what) {
+		boolean result = false;
+		if (mHandler != null) {
+			mHandler.sendEmptyMessage(what);
+			result = true;
+		}
+		return result;
+	}
 
 	private ImageView mBGup;
 
@@ -505,7 +523,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		});
 
 		mCurrentInfoBody.setOnLongClickListener(v -> {
-			dropToTrash(ReceiverOnMusicPlay.getCurrentItem());
+			P.dropToTrash(mMainActivity, ReceiverOnMusicPlay.getCurrentItem());
 			return true;
 		});
 
@@ -730,10 +748,6 @@ public final class MusicDetailFragment extends BaseFragment {
 
 	public final void setCurrentInfo(@NonNull final String name, @NonNull final String albumName, final Bitmap cover) {
 		mMainActivity.runOnUiThread(() -> {
-			if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
-				Data.getCurrentCover().recycle();
-			}
-
 			setSlideInfoBar(name, albumName, cover);
 
 			mCurrentMusicNameText.setText(name);
@@ -1061,7 +1075,7 @@ public final class MusicDetailFragment extends BaseFragment {
 				}
 				break;
 				case R.id.menu_toolbar_trash_can: {
-					dropToTrash(ReceiverOnMusicPlay.getCurrentItem());
+					P.dropToTrash(mMainActivity, Data.sCurrentMusicItem);
 				}
 				break;
 				default:
@@ -1073,36 +1087,42 @@ public final class MusicDetailFragment extends BaseFragment {
 	}
 
 	/**
-	 * the action drop to crash
-	 */
-	private void dropToTrash(@Nullable MusicItem item) {
-		if (item == null) return;
+	 * TODO will use mvp
+	 * */
+	static class P {
+		/**
+		 * the action drop to crash
+		 */
+		public static void dropToTrash(@NonNull Context context, @Nullable MusicItem item) {
+			if (item == null) return;
 
-		if (PreferenceManager.getDefaultSharedPreferences(mMainActivity).getBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, true)) {
-			final AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
-			builder.setTitle(getString(R.string.sure_int));
-			builder.setMessage(getString(R.string.drop_to_trash_can));
-			final FrameLayout frameLayout = new FrameLayout(mMainActivity);
-			final CheckBox checkBox = new CheckBox(mMainActivity);
-			checkBox.setText(getString(R.string.do_not_show_again));
-			frameLayout.addView(checkBox);
-			final FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-			params.leftMargin = (int) mMainActivity.getResources().getDimension(R.dimen.margin_16);
-			checkBox.setLayoutParams(params);
-			builder.setView(frameLayout);
-			builder.setCancelable(true);
-			builder.setNegativeButton(getString(R.string.sure), (dialog, which) -> {
-				if (checkBox.isChecked()) {
-					PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit().putBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, false).apply();
-				}
+			if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, true)) {
+				final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+				builder.setTitle(context.getString(R.string.sure_int));
+				builder.setMessage(context.getString(R.string.drop_to_trash_can));
+				final FrameLayout frameLayout = new FrameLayout(context);
+				final CheckBox checkBox = new CheckBox(context);
+				checkBox.setText(context.getString(R.string.do_not_show_again));
+				frameLayout.addView(checkBox);
+				final FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+				params.leftMargin = (int) context.getResources().getDimension(R.dimen.margin_16);
+				checkBox.setLayoutParams(params);
+				builder.setView(frameLayout);
+				builder.setCancelable(true);
+				builder.setNegativeButton(context.getString(R.string.sure), (dialog, which) -> {
+					if (checkBox.isChecked()) {
+						PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, false).apply();
+					}
+					Data.S_TRASH_CAN_LIST.add(item);
+					dialog.dismiss();
+				});
+				builder.setPositiveButton(context.getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
+				builder.show();
+			} else {
 				Data.S_TRASH_CAN_LIST.add(item);
-				dialog.dismiss();
-			});
-			builder.setPositiveButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
-			builder.show();
-		} else {
-			Data.S_TRASH_CAN_LIST.add(item);
+			}
 		}
+
 	}
 
 	private void setClickListener() {
@@ -1538,10 +1558,12 @@ public final class MusicDetailFragment extends BaseFragment {
 		public static final int setCurrentInfoWithoutMainImage = 60;
 		private static final int SEEK_BAR_UPDATE = 53;        //just for this
 
+		public static final int SET_CURRENT_DATA = 55;
+
 		private WeakReference<MainActivity> mWeakReference;
 
-		NotLeakHandler(MainActivity activity, Looper looper) {
-			super(looper);
+		NotLeakHandler(@NonNull MainActivity activity, @Nullable Looper looper) {
+			super(looper == null ? Looper.myLooper() : looper);
 			mWeakReference = new WeakReference<>(activity);
 		}
 
@@ -1585,7 +1607,10 @@ public final class MusicDetailFragment extends BaseFragment {
 									mSeekBar.setProgress(ReceiverOnMusicPlay.getCurrentPosition());
 								}
 
-								mInfoBarInfoSeek.getLayoutParams().width = mCurrentInfoBody.getWidth() * ReceiverOnMusicPlay.getCurrentPosition() / ReceiverOnMusicPlay.getDuration();
+								int duration = ReceiverOnMusicPlay.getDuration();
+
+								mInfoBarInfoSeek.getLayoutParams().width = mCurrentInfoBody.getWidth()
+										* ReceiverOnMusicPlay.getCurrentPosition() / ReceiverOnMusicPlay.getDuration();
 								mInfoBarInfoSeek.setLayoutParams(mInfoBarInfoSeek.getLayoutParams());
 								mInfoBarInfoSeek.requestLayout();
 								mLeftTime.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(ReceiverOnMusicPlay.getCurrentPosition()))));
@@ -1660,6 +1685,10 @@ public final class MusicDetailFragment extends BaseFragment {
 					data.clear();
 				}
 				break;
+
+				case SET_CURRENT_DATA: {
+					setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
+				}
 
 				default: {
 

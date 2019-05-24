@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
-//apply plugin: 'io.fabric'
+apply plugin: 'io.fabric'
 
 android {
     signingConfigs {
         config {
             keyAlias 'chenlongcould'
             keyPassword '18551348272Chen'
-            storeFile file('C:\\Users\\dell\\Desktop\\AndroidStudio_KEY_Store\\chenlongcould.jks')
+//            storeFile file('C:\\Users\\dell\\Desktop\\AndroidStudio_KEY_Store\\chenlongcould.jks')
             storePassword '18551348272Chen'
         }
     }
@@ -33,7 +33,10 @@ android {
             renderscriptOptimLevel 5
             pseudoLocalesEnabled false
             applicationIdSuffix '.Common'
-            proguardFile 'C:/Users/chenlongcould/AndroidStudioProjects/MusicPlayer/app/proguard-rules.pro'
+//            proguardFile 'C:/Users/chenlongcould/AndroidStudioProjects/MusicPlayer/app/proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled = true
         }
     }
     android.applicationVariants.all { variant ->
@@ -101,12 +104,12 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:16.0.9'
     implementation 'com.google.firebase:firebase-auth:17.0.0'
     //crash
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.0'
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
     //    implementation 'com.google.firebase:firebase-perf:16.2.3'
     //remote
     implementation 'com.google.firebase:firebase-config:17.0.0'
     //admob
-    implementation 'com.google.android.gms:play-services-ads:17.2.0'
+    implementation 'com.google.android.gms:play-services-ads:17.2.1'
     implementation 'com.squareup.okhttp3:okhttp:4.0.0-alpha01'
     implementation 'org.jsoup:jsoup:1.12.1'
     implementation project(path: ':geeklibrary')

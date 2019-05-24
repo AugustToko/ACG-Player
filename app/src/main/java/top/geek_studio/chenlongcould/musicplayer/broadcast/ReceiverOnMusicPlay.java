@@ -16,7 +16,6 @@ import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.fragment.BaseFragment;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
@@ -51,28 +50,35 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 	 */
 	public static AtomicBoolean READY = new AtomicBoolean(true);
 
-	/**
-	 * setButtonPlay
-	 * setSeekBarColor
-	 * setSeekBarPosition
-	 * setSlideBar
-	 *
-	 * @param context     context
-	 * @param targetIndex index
-	 */
-	private static void setUIMusicData(final Context context, final int targetIndex) {
-		Data.sCurrentMusicItem = Data.sPlayOrderList.get(targetIndex);
-		final Bitmap cover = Utils.Audio.getCoverBitmap(context, Data.sCurrentMusicItem.getAlbumId());
-		MusicDetailFragment.mHandler.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
-		MusicDetailFragment.mHandler.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
+	public static final Object object = new Object();
 
-		// FIXME: 2019/5/22 
-		((MusicDetailFragment) ((MainActivity) Data.sActivities.get(0)).getFragment(BaseFragment.FragmentType.MUSIC_DETAIL_FRAGMENT))
-				.setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), cover);
-
-		MusicDetailFragment.setSeekBar(0);         //防止seekBar跳动到Max
-		MainActivity.mHandler.sendEmptyMessage(MainActivity.NotLeakHandler.SET_SLIDE_TOUCH_ENABLE);
-	}
+//	/**
+//	 * setButtonPlay
+//	 * setSeekBarColor
+//	 * setSeekBarPosition
+//	 * setSlideBar
+//	 *
+//	 * @param context     context
+//	 * @param targetIndex index
+//	 */
+//	private static void setUIMusicData(final Context context, final int targetIndex) {
+//		Data.sCurrentMusicItem = Data.sPlayOrderList.get(targetIndex);
+//		final Bitmap cover = Utils.Audio.getCoverBitmap(context, Data.sCurrentMusicItem.getAlbumId());
+//		MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
+//		MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
+//
+//		final Message message = Message.obtain();
+//		message.what = MusicDetailFragment.NotLeakHandler.SET_CURRENT_DATA;
+//		message.obj = cover;
+//		final Bundle bundle = new Bundle();
+//		bundle.putString("name", Data.sCurrentMusicItem.getMusicName());
+//		bundle.putString("albumName", Data.sCurrentMusicItem.getMusicAlbum());
+//		message.setData(bundle);
+//		MusicDetailFragment.sendMessage(message);
+//
+//		MusicDetailFragment.setSeekBar(0);         //防止seekBar跳动到Max
+//		MainActivity.sendEmptyMessage(MainActivity.NotLeakHandler.SET_SLIDE_TOUCH_ENABLE);
+//	}
 
 	/**
 	 * setFlags
@@ -85,7 +91,11 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 	////////////////////////MEDIA CONTROL/////////////////////////////
 
-	public static void setDataSource(@NonNull final MusicItem item) {
+	public synchronized static void setDataSource(@NonNull final MusicItem item) {
+		if (Data.sMusicBinder == null) {
+			Log.d(TAG, "resetMusic: MusicBinder is null.");
+			return;
+		}
 		ListViewActivity.addToHistory(item);
 		try {
 			Data.sMusicBinder.setCurrentMusicData(item);
@@ -94,7 +104,11 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		}
 	}
 
-	public static void playMusic() {
+	public synchronized static void playMusic() {
+		if (Data.sMusicBinder == null) {
+			Log.d(TAG, "resetMusic: MusicBinder is null.");
+			return;
+		}
 		try {
 			Data.sMusicBinder.playMusic();
 			Data.HAS_PLAYED = true;
@@ -108,7 +122,11 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		}
 	}
 
-	public static void pauseMusic() {
+	public synchronized static void pauseMusic() {
+		if (Data.sMusicBinder == null) {
+			Log.d(TAG, "resetMusic: MusicBinder is null.");
+			return;
+		}
 		try {
 			Data.sMusicBinder.pauseMusic();
 		} catch (RemoteException e) {
@@ -116,7 +134,11 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		}
 	}
 
-	public static void resetMusic() {
+	public synchronized static void resetMusic() {
+		if (Data.sMusicBinder == null) {
+			Log.d(TAG, "resetMusic: MusicBinder is null.");
+			return;
+		}
 		try {
 			Data.sMusicBinder.resetMusic();
 		} catch (RemoteException e) {
@@ -124,7 +146,11 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		}
 	}
 
-	public static void prepare() {
+	public synchronized static void prepare() {
+		if (Data.sMusicBinder == null) {
+			Log.d(TAG, "resetMusic: MusicBinder is null.");
+			return;
+		}
 		try {
 			Data.sMusicBinder.prepare();
 		} catch (RemoteException e) {
@@ -137,16 +163,27 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		}
 	}
 
-	public static int getDuration() {
+	public synchronized static int getDuration() {
+		int duration = 1;
+		if (Data.sMusicBinder == null) {
+			Log.d(TAG, "resetMusic: MusicBinder is null.");
+			return duration;
+		}
 		try {
-			return Data.sMusicBinder.getDuration();
+			duration = Data.sMusicBinder.getDuration();
+			//issue: duration may br zero, if quick click "fast play" button
+			return duration == 0 ? 1 : duration;
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
-		return -1;
+		return duration;
 	}
 
-	public static boolean isPlayingMusic() {
+	public synchronized static boolean isPlayingMusic() {
+		if (Data.sMusicBinder == null) {
+			Log.d(TAG, "resetMusic: MusicBinder is null.");
+			return false;
+		}
 		try {
 			return Data.sMusicBinder.isPlayingMusic();
 		} catch (RemoteException e) {
@@ -155,7 +192,11 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		return false;
 	}
 
-	public static int getCurrentPosition() {
+	public synchronized static int getCurrentPosition() {
+		if (Data.sMusicBinder == null) {
+			Log.d(TAG, "resetMusic: MusicBinder is null.");
+			return 0;
+		}
 		try {
 			return Data.sMusicBinder.getCurrentPosition();
 		} catch (RemoteException e) {
@@ -164,7 +205,11 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		return 0;
 	}
 
-	public static void seekTo(int nowPosition) {
+	public synchronized static void seekTo(int nowPosition) {
+		if (Data.sMusicBinder == null) {
+			Log.d(TAG, "resetMusic: MusicBinder is null.");
+			return;
+		}
 		try {
 			Data.sMusicBinder.seekTo(nowPosition);
 		} catch (RemoteException e) {
@@ -173,7 +218,11 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 	}
 
 	@SuppressWarnings("unused")
-	public static void stopMusic() {
+	public synchronized static void stopMusic() {
+		if (Data.sMusicBinder == null) {
+			Log.d(TAG, "resetMusic: MusicBinder is null.");
+			return;
+		}
 		try {
 			Data.sMusicBinder.stopMusic();
 		} catch (RemoteException e) {
@@ -182,7 +231,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 	}
 
 	@SuppressWarnings("unused")
-	public static void setMusicItem(final MusicItem item) {
+	public synchronized static void setMusicItem(final MusicItem item) {
 		if (Data.sMusicBinder != null) {
 			try {
 				Data.sMusicBinder.setCurrentMusicData(item);
@@ -193,15 +242,15 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 	}
 
 	@Nullable
-	public static MusicItem getCurrentItem() {
-		if (Data.sMusicBinder != null) {
-			try {
-				return Data.sMusicBinder.getCurrentItem();
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
-		} else {
+	public synchronized static MusicItem getCurrentItem() {
+		if (Data.sMusicBinder == null) {
+			Log.d(TAG, "resetMusic: MusicBinder is null.");
 			return null;
+		}
+		try {
+			return Data.sMusicBinder.getCurrentItem();
+		} catch (RemoteException e) {
+			e.printStackTrace();
 		}
 		return null;
 	}
@@ -210,6 +259,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
+
 		Log.d(TAG, "onReceive: done");
 
 		final int type = intent.getIntExtra(INTENT_PLAY_TYPE, 0);
@@ -219,7 +269,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		switch (type) {
 			//clicked by notif, just resume play
 			case CASE_TYPE_NOTIFICATION_RESUME: {
-				MusicDetailFragment.mHandler.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
+				MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
 				playMusic();
 			}
 			break;
@@ -227,16 +277,60 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 			//pause music
 			case -1: {
 				pauseMusic();
-				MusicDetailFragment.mHandler.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PAUSE);
+				MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PAUSE);
 			}
 			break;
 
 			//Type Random (play)
 			case CASE_TYPE_SHUFFLE: {
-				if (!READY.get()) {
-					break;
+
+				if (Data.sPlayOrderList.isEmpty()) {
+					return;
 				}
-				new FastShufflePlayback(context).execute();
+
+				resetMusic();
+
+				//get data
+				final Random random = new Random();
+				int index = random.nextInt(Data.sPlayOrderList.size());
+
+				// 循环检测是否播放到 “垃圾桶” 中的歌曲，如是，则跳过
+				for (; ; ) {
+					if (Data.S_TRASH_CAN_LIST.contains(Data.sPlayOrderList.get(index))) {
+						index = random.nextInt(Data.sPlayOrderList.size());
+					} else {
+						Values.CurrentData.CURRENT_MUSIC_INDEX = index;
+						break;
+					}
+				}
+
+				Data.sCurrentMusicItem = Data.sPlayOrderList.get(index);
+				setFlags(index);
+
+				setDataSource(Data.sCurrentMusicItem);
+				prepare();
+				playMusic();
+
+				final Bitmap cover = Utils.Audio.getCoverBitmap(context, Data.sCurrentMusicItem.getAlbumId());
+				Data.setCurrentCover(cover);
+
+//				MusicDetailFragment.setSeekBar(0);         //防止seekBar跳动到Max
+				MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
+				MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
+				MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_CURRENT_DATA);
+
+//				final Message message = Message.obtain();
+//				message.what = MusicDetailFragment.NotLeakHandler.SET_CURRENT_DATA;
+//				message.obj = cover;
+//				final Bundle bundle = new Bundle();
+//				bundle.putString("name", Data.sCurrentMusicItem.getMusicName());
+//				bundle.putString("albumName", Data.sCurrentMusicItem.getMusicAlbum());
+//				message.setData(bundle);
+//				MusicDetailFragment.sendMessage(message);
+
+
+				sureCar();
+
 			}
 			break;
 
@@ -247,7 +341,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 				//检测是否指定下一首播放
 				if (Data.sNextWillPlayItem != null) {
-					new DoesHasNextPlay().execute();
+					new DoesHasNextPlay(context).execute();
 					break;
 				}
 
@@ -264,6 +358,8 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 					break;
 				}
 
+				resetMusic();
+
 				int targetIndex = getIndex(intent.getStringExtra(INTENT_ARGS));
 
 				// 循环检测是否播放到 “垃圾桶” 中的歌曲，如是，则跳过
@@ -276,12 +372,16 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 					}
 				}
 
-				resetMusic();
-				setDataSource(Data.sPlayOrderList.get(targetIndex));
+				Data.sCurrentMusicItem = Data.sPlayOrderList.get(targetIndex);
+
+				setDataSource(Data.sCurrentMusicItem);
 				prepare();
 				playMusic();
 
 				setFlags(targetIndex);
+
+				final Bitmap cover = Utils.Audio.getCoverBitmap(context, Data.sCurrentMusicItem.getAlbumId());
+				Data.setCurrentCover(cover);
 
 				//load data
 
@@ -289,32 +389,31 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 				if (intent.getStringExtra(INTENT_ARGS) != null && intent.getStringExtra(INTENT_ARGS).contains(TYPE_SLIDE)) {
 					final String musicName = Data.sPlayOrderList.get(targetIndex).getMusicName();
 					final String albumName = Data.sPlayOrderList.get(targetIndex).getMusicAlbum();
-					final Bitmap cover = Utils.Audio.getCoverBitmap(context, Data.sPlayOrderList.get(targetIndex).getAlbumId());
 
-					MusicDetailFragment.mHandler.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
-
+					MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
 					//set music data
 					final Message message = Message.obtain();
+					message.what = MusicDetailFragment.NotLeakHandler.setCurrentInfoWithoutMainImage;
 					final Bundle bundle = new Bundle();
 					bundle.putString("name", musicName);
 					bundle.putString("albumName", albumName);
 					message.setData(bundle);
 					message.obj = cover;
-					MusicDetailFragment.mHandler.sendMessage(message);
-					//防止seekBar跳动到Max
-					MusicDetailFragment.setSeekBar(0);
-
+					MusicDetailFragment.sendMessage(message);
 				} else {
-					setUIMusicData(context, targetIndex);
+					MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
+					MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
+					MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_CURRENT_DATA);
 				}
 				sureCar();
-
-
 			}
 			break;
 
 			//by MusicListFragment item click
 			case CASE_TYPE_ITEM_CLICK: {
+
+				Data.setCurrentCover(Utils.Audio.getCoverBitmap(context, Data.sCurrentMusicItem.getAlbumId()));
+
 				//set current data
 				resetMusic();
 				setDataSource(Data.sCurrentMusicItem);
@@ -323,15 +422,9 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 				sureCar();
 
-				MusicDetailFragment.mHandler.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
-				MusicDetailFragment.mHandler.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
-
-				// FIXME: 2019/5/22 
-				((MusicDetailFragment) ((MainActivity) Data.sActivities.get(0)).getFragment(BaseFragment.FragmentType.MUSIC_DETAIL_FRAGMENT)).setCurrentInfo
-						(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(),
-								Utils.Audio.getCoverBitmap(context, Data.sCurrentMusicItem.getAlbumId()));
-
-				MainActivity.mHandler.sendEmptyMessage(MainActivity.NotLeakHandler.SET_SLIDE_TOUCH_ENABLE);
+				MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
+				MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
+				MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_CURRENT_DATA);
 
 			}
 			break;
@@ -340,9 +433,8 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 		///////////////////////////AFTER PLAYER SET/////////////////////////////////////////
 
-		MusicDetailFragment.mHandler.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.RECYCLER_SCROLL);
-
-		MainActivity.mHandler.sendEmptyMessage(MainActivity.NotLeakHandler.SET_SLIDE_TOUCH_ENABLE);
+		MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.RECYCLER_SCROLL);
+		MainActivity.sendEmptyMessage(MainActivity.NotLeakHandler.SET_SLIDE_TOUCH_ENABLE);
 
 	}
 
@@ -391,13 +483,20 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 	/**
 	 * 当下一首歌曲存在(被手动指定时), auto-next-play and next-play will call this method
 	 */
-	// FIXME: 2019/5/23 static context
+// FIXME: 2019/5/23 static context
 	public static class DoesHasNextPlay extends AsyncTask<Void, Void, Integer> {
+
+		private WeakReference<Context> mContext;
+
+		public DoesHasNextPlay(@NonNull Context context) {
+			mContext = new WeakReference<>(context);
+		}
 
 		@Override
 		protected Integer doInBackground(Void... voids) {
 
 			if (Data.sNextWillPlayItem != null) {
+				Data.sCurrentMusicItem = Data.sNextWillPlayItem;
 				resetMusic();
 				ReceiverOnMusicPlay.setDataSource(Data.sNextWillPlayItem);
 				prepare();
@@ -405,6 +504,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 			} else {
 				return -1;
 			}
+
 			return 0;
 		}
 
@@ -416,88 +516,75 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 				return;
 			}
 
-			if (!Data.sActivities.isEmpty()) {
+			final Bitmap cover = Utils.Audio.getCoverBitmap(mContext.get(), Data.sNextWillPlayItem.getAlbumId());
+			Data.setCurrentCover(cover);
 
-				final MusicDetailFragment musicDetailFragment = ((MusicDetailFragment) ((MainActivity) Data.sActivities.get(0)).getFragment(BaseFragment.FragmentType.MUSIC_DETAIL_FRAGMENT));
+			MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
+			MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
+			MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_CURRENT_DATA);
 
-				final Bitmap cover = Utils.Audio.getCoverBitmap(musicDetailFragment.getContext(), Data.sNextWillPlayItem.getAlbumId());
-
-				Data.setCurrentCover(cover);
-
-				sureCar();
-
-				MusicDetailFragment.mHandler.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
-				musicDetailFragment.setCurrentInfo(Data.sNextWillPlayItem.getMusicName(), Data.sNextWillPlayItem.getMusicAlbum(), cover);
-
-				MusicDetailFragment.setSeekBar(0);         //防止seekBar跳动到Max
-			}
+			sureCar();
 
 			Data.sNextWillPlayItem = null;
 		}
 	}
 
-	/**
-	 * play_type: random (by nextButton or auto-next)
-	 * just make a random Index (data by {@link Data#sPlayOrderList})
-	 */
-	public static class FastShufflePlayback extends AsyncTask<String, Void, Integer> {
-
-		private WeakReference<Context> mContext;
-
-		FastShufflePlayback(final Context context) {
-			mContext = new WeakReference<>(context);
-		}
-
-		@Override
-		protected Integer doInBackground(String... strings) {
-			if (Data.sPlayOrderList.isEmpty()) {
-				return -1;
-			}
-
-			READY.set(false);
-
-			resetMusic();
-
-			//get data
-			final Random random = new Random();
-			int index = random.nextInt(Data.sPlayOrderList.size());
-
-			// 循环检测是否播放到 “垃圾桶” 中的歌曲，如是，则跳过
-			for (; ; ) {
-				if (Data.S_TRASH_CAN_LIST.contains(Data.sPlayOrderList.get(index))) {
-					index = random.nextInt(Data.sPlayOrderList.size());
-				} else {
-					Values.CurrentData.CURRENT_MUSIC_INDEX = index;
-					break;
-				}
-			}
-
-			Data.sCurrentMusicItem = Data.sPlayOrderList.get(index);
-			setFlags(index);
-
-			setDataSource(Data.sCurrentMusicItem);
-			prepare();
-			playMusic();
-
-			return index;
-		}
-
-		@Override
-		protected void onPostExecute(Integer result) {
-			if (result < 0) {
-				return;
-			}
-
-			setUIMusicData(mContext.get(), result);
-			sureCar();
-
-			READY.set(true);
-		}
-
-		@Override
-		protected void onCancelled() {
-			READY.set(true);
-		}
-	}
+//	/**
+//	 * play_type: random (by nextButton or auto-next)
+//	 * just make a random Index (data by {@link Data#sPlayOrderList})
+//	 */
+//	public static class FastShufflePlayback extends AsyncTask<String, Void, Integer> {
+//
+//		private WeakReference<Context> mContext;
+//
+//		FastShufflePlayback(final Context context) {
+//			mContext = new WeakReference<>(context);
+//		}
+//
+//		@Override
+//		protected Integer doInBackground(String... strings) {
+//			if (Data.sPlayOrderList.isEmpty()) {
+//				return -1;
+//			}
+//			resetMusic();
+//
+//			//get data
+//			final Random random = new Random();
+//			int index = random.nextInt(Data.sPlayOrderList.size());
+//
+//			// 循环检测是否播放到 “垃圾桶” 中的歌曲，如是，则跳过
+//			for (; ; ) {
+//				if (Data.S_TRASH_CAN_LIST.contains(Data.sPlayOrderList.get(index))) {
+//					index = random.nextInt(Data.sPlayOrderList.size());
+//				} else {
+//					Values.CurrentData.CURRENT_MUSIC_INDEX = index;
+//					break;
+//				}
+//			}
+//
+//			Data.sCurrentMusicItem = Data.sPlayOrderList.get(index);
+//			setFlags(index);
+//
+//			setDataSource(Data.sCurrentMusicItem);
+//			prepare();
+//			playMusic();
+//
+//			return index;
+//		}
+//
+//		@Override
+//		protected void onPostExecute(Integer result) {
+//			if (result < 0) {
+//				return;
+//			}
+//
+//			setUIMusicData(mContext.get(), result);
+//			sureCar();
+//		}
+//
+//		@Override
+//		protected void onCancelled() {
+//		}
+//	}
 
 }

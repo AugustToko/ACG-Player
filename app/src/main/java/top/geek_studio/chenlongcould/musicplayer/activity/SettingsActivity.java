@@ -150,7 +150,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 		}
 	};
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		mSettingsBinding = DataBindingUtil.setContentView(this, R.layout.activity_settings);
@@ -525,7 +525,16 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 				builder.setNegativeButton(getString(R.string.done), (dialog, which) -> {
 					MainActivity.NEED_RELOAD = true;
-					LitePal.deleteAll(MyBlackPath.class);
+					/*
+					 * if double click, will throw
+					 * no such table: myblackpath (code 1 SQLITE_ERROR):
+					 * , while compiling: DELETE FROM myblackpath
+					 * */
+					try {
+						LitePal.deleteAll(MyBlackPath.class);
+					} catch (Exception e) {
+						Log.d(TAG, "onCreate: " + e.getMessage());
+					}
 
 					//add to db
 					for (String path : data) {
@@ -606,7 +615,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 		mSettingsBinding.itemCleanArtist.setOnClickListener(v -> clearArtists());
 	}
-	
+
 	@Override
 	public String getActivityTAG() {
 		return TAG;

@@ -81,7 +81,13 @@ public final class AlbumDetailActivity extends BaseCompatActivity {
 	 */
 	
 	private List<MusicItem> mSongs = new ArrayList<>();
+
 	private List<Disposable> mDisposables = new ArrayList<>();
+
+
+	private String intentAlbumId = "0";
+
+	private List<CustomAlbumPath> paths;
 	
 	@Override
 	public void inflateCommonMenu() {
@@ -115,10 +121,6 @@ public final class AlbumDetailActivity extends BaseCompatActivity {
 			return true;
 		});
 	}
-	
-	private String intentAlbumId = "0";
-	
-	private List<CustomAlbumPath> paths;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -157,11 +159,15 @@ public final class AlbumDetailActivity extends BaseCompatActivity {
 		if (intent == null) {
 			return;
 		}
-		
-		final String key = intent.getStringExtra(IntentKey.ALBUM_NAME);
-		mAlbumDetailBinding.toolbar.setTitle(key);
-		
-		intentAlbumId = String.valueOf(intent.getIntExtra(IntentKey.ID, Integer.parseInt(AlbumItem.DEFAULT_ALBUM_ID)));
+
+		final String albumTitle = intent.getStringExtra(IntentKey.ALBUM_NAME);
+		mAlbumDetailBinding.toolbar.setTitle(albumTitle);
+		int sourceAlbumId = intent.getIntExtra(IntentKey.ID, -1);
+		if (sourceAlbumId == -1) {
+			Toast.makeText(this, "When get your album id there was an error.", Toast.LENGTH_SHORT).show();
+			finish();
+		}
+		intentAlbumId = String.valueOf(sourceAlbumId);
 		paths = LitePal.where("mAlbumId = ?", intentAlbumId).find(CustomAlbumPath.class);
 		
 		setupView(intent);
@@ -175,7 +181,7 @@ public final class AlbumDetailActivity extends BaseCompatActivity {
 			List<String> mMusicIds = new ArrayList<>();
 			//根据Album名称查music ID
 			final Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-					new String[]{MediaStore.Audio.Media._ID}, MediaStore.Audio.Media.ALBUM + " = ?", new String[]{key}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+					new String[]{MediaStore.Audio.Media._ID}, MediaStore.Audio.Media.ALBUM + " = ?", new String[]{albumTitle}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
 			if (cursor != null && cursor.getCount() > 0) {
 				cursor.moveToFirst();
 				do {
@@ -269,8 +275,8 @@ public final class AlbumDetailActivity extends BaseCompatActivity {
 				mAdapter.notifyDataSetChanged();
 			}
 		});
-		
-		showInfoText(key);
+
+		showInfoText(albumTitle);
 	}
 	
 	/**
@@ -377,8 +383,12 @@ public final class AlbumDetailActivity extends BaseCompatActivity {
 	
 	private void setupAlbumCover(Intent intent) {
 		//获取MainAlbum图像
-		int id = intent.getIntExtra("_id", -1);
-		Bitmap bitmap = Utils.Audio.getCoverBitmap(this, id);
+		int id = intent.getIntExtra(IntentKey.ID, -1);
+		if (id == -1) {
+			Toast.makeText(this, "Can not set up album cover.", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		final Bitmap bitmap = Utils.Audio.getCoverBitmap(this, id);
 		if (bitmap != null) {
 			toolbarColor = Palette.from(bitmap).generate().getVibrantColor(Utils.Ui.getPrimaryColor(this));
 		} else {

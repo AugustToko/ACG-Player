@@ -276,7 +276,10 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 			switch (item.getItemId()) {
 				//noinspection PointlessArithmeticExpression
 				case Menu.FIRST + 0: {
-					Data.sNextWillPlayItem = mMusicItems.get(holder.getAdapterPosition());
+					final MusicItem target = mMusicItems.get(holder.getAdapterPosition());
+					if (!target.equals(Data.sNextWillPlayItem)) {
+						Data.sNextWillPlayItem = target;
+					}
 				}
 				break;
 
@@ -296,14 +299,16 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 					final String albumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
 					final Cursor cursor = mActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
 							MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum()}, null);
-					if (cursor != null) {
-						final Intent intent = new Intent(mActivity, AlbumDetailActivity.class);
-						intent.putExtra("key", albumName);
-						cursor.moveToFirst();
+					if (cursor != null && cursor.getCount() < 0) {
 						int id = Integer.parseInt(cursor.getString(0));
-						intent.putExtra("_id", id);
+						final Intent intent = new Intent(mActivity, AlbumDetailActivity.class);
+						intent.putExtra(AlbumDetailActivity.IntentKey.ALBUM_NAME, albumName);
+						cursor.moveToFirst();
+						intent.putExtra(AlbumDetailActivity.IntentKey.ID, id);
 						mActivity.startActivity(intent);
 						cursor.close();
+					} else {
+						Toast.makeText(mActivity, "Cursor error.", Toast.LENGTH_SHORT).show();
 					}
 
 				}
@@ -319,7 +324,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 				//share
 				case Menu.FIRST + 6: {
 					Intent intent = new Intent(Intent.ACTION_SEND);
-					Log.d(TAG, "onCreateViewHolder: share: " + new File(mMusicItems.get(holder.getAdapterPosition()).getMusicPath()).exists());
+//					Log.d(TAG, "onCreateViewHolder: share: " + new File(mMusicItems.get(holder.getAdapterPosition()).getMusicPath()).exists());
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 						intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(mActivity, mActivity.getApplicationContext().getPackageName(), new File(mMusicItems.get(holder.getAdapterPosition()).getMusicPath())));
 						intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -327,6 +332,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 					} else {
 						intent.setDataAndType(Uri.fromFile(new File(mMusicItems.get(holder.getAdapterPosition()).getMusicPath())), "audio/*");
 					}
+
 					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 					/*

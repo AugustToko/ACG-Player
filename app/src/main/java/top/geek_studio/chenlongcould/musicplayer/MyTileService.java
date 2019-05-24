@@ -20,7 +20,6 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
@@ -214,10 +213,6 @@ public final class MyTileService extends TileService {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}
-
-		if (Data.sActivities.size() == 0) {
-			MainActivity.clearData();
 		}
 
 		super.onDestroy();

@@ -17,9 +17,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
-
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import top.geek_studio.chenlongcould.musicplayer.Data;
@@ -30,7 +28,7 @@ import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragmentLan
 /**
  * @author chenlongcould
  */
-public final class CarViewActivity extends AppCompatActivity {
+public final class CarViewActivity extends BaseCompatActivity {
 
 	private static final int UI_ANIMATION_DELAY = 300;
 	private static final String TAG = "CarViewActivity";
@@ -96,7 +94,22 @@ public final class CarViewActivity extends AppCompatActivity {
 			mHideHandler.postDelayed(mHideRunnable, 100);
 		}
 	}
-	
+
+	@Override
+	public String getActivityTAG() {
+		return TAG;
+	}
+
+	@Override
+	public void inflateCommonMenu() {
+
+	}
+
+	@Override
+	public void inflateChooseMenu() {
+
+	}
+
 	@Override
 	protected void onDestroy() {
 		Log.d(TAG, "onDestroy: ");

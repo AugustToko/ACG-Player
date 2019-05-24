@@ -1,14 +1,3 @@
-/*
- * ************************************************************
- * 文件：MyWaitListAdapter.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月18日 18:58:29
- * 上次修改时间：2019年01月18日 12:11:18
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.musicplayer.adapter;
 
 import android.content.Intent;
@@ -26,8 +15,8 @@ import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.AlbumDetailActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.BaseCompatActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity;
-import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
@@ -43,13 +32,13 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 	 */
 	private List<MusicItem> mMusicItems;
 
-	private MainActivity mMainActivity;
+	private BaseCompatActivity mContext;
 
 	private ViewHolder currentBind;
 
-	public MyWaitListAdapter(MainActivity mainActivity, List<MusicItem> musicItems) {
+	public MyWaitListAdapter(BaseCompatActivity context, List<MusicItem> musicItems) {
 		mMusicItems = musicItems;
-		mMainActivity = mainActivity;
+		mContext = context;
 	}
 
 	@NonNull
@@ -76,18 +65,17 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 				break;
 
 				case Menu.FIRST + 2: {
-					Utils.DataSet.addListDialog(mMainActivity, mMusicItems.get(holder.getAdapterPosition()));
+					Utils.DataSet.addListDialog(mContext, mMusicItems.get(holder.getAdapterPosition()));
 				}
 				break;
 
 				// TODO: 2018/11/30 to new
 				case Menu.FIRST + 4: {
 					final String albumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
-					final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
+					final Cursor cursor = mContext.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
 							MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum()}, null);
 					//int MainActivity
-					final MainActivity mainActivity = (MainActivity) Data.sActivities.get(0);
-					final Intent intent = new Intent(mainActivity, AlbumDetailActivity.class);
+					final Intent intent = new Intent(mContext, AlbumDetailActivity.class);
 					intent.putExtra("key", albumName);
 					if (cursor != null) {
 						cursor.moveToFirst();
@@ -95,15 +83,15 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 						intent.putExtra("_id", id);
 						cursor.close();
 					}
-					mMainActivity.startActivity(intent);
+					mContext.startActivity(intent);
 
 				}
 				break;
 
 				case Menu.FIRST + 5: {
-					final Intent intent = new Intent(mMainActivity, ListViewActivity.class);
+					final Intent intent = new Intent(mContext, ListViewActivity.class);
 					intent.putExtra("start_by", "detail");
-					mMainActivity.startActivity(intent);
+					mContext.startActivity(intent);
 				}
 				break;
 			}
@@ -135,7 +123,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 			Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
 			Data.sCurrentMusicItem = Data.sPlayOrderList.get(holder.getAdapterPosition());
 
-			Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, "null");
+			Utils.SendSomeThing.sendPlay(mContext, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, "null");
 
 //				for (int i = 0; i < Data.sMusicItems.size(); i++) {
 //					MusicItem item = Data.sMusicItems.get(i);
@@ -145,7 +133,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 //				}
 
 //			}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
-//					.subscribe(integer -> Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, integer.toString()), Throwable::printStackTrace);
+//					.subscribe(integer -> Utils.SendSomeThing.sendPlay(mContext, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, integer.toString()), Throwable::printStackTrace);
 //			Data.sDisposables.add(disposable);
 		});
 	}
@@ -208,7 +196,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 			mExtName = itemView.findViewById(R.id.item_in_detail_ext);
 			mItemMenuButton = itemView.findViewById(R.id.item_menu);
 
-			mPopupMenu = new PopupMenu(mMainActivity, mItemMenuButton);
+			mPopupMenu = new PopupMenu(mContext, mItemMenuButton);
 			mMenu = mPopupMenu.getMenu();
 
 			//noinspection PointlessArithmeticExpression
@@ -217,7 +205,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 			mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, "查看专辑");
 			mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, "详细信息");
 
-			MenuInflater menuInflater = Data.sActivities.get(0).getMenuInflater();
+			MenuInflater menuInflater = mContext.getMenuInflater();
 			menuInflater.inflate(R.menu.recycler_song_item_menu, mMenu);
 		}
 	}

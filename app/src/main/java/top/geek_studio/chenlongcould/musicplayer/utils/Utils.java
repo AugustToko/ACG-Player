@@ -567,6 +567,8 @@ public final class Utils {
 		 * @param bm bitmap
 		 */
 		public static int getBright(@NonNull Bitmap bm) {
+			if (bm.isRecycled()) return 0;
+
 			int width = bm.getWidth() / 4;
 			int height = bm.getHeight() / 4;
 			int r, g, b;

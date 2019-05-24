@@ -30,6 +30,8 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.SeekBar;
+import android.widget.Toast;
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -42,11 +44,11 @@ import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.CarViewActivity;
-import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyWaitListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentMusicDetailLandspaceBinding;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
+import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.lang.ref.WeakReference;
@@ -95,7 +97,7 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 
 		mLinearLayoutManager = new LinearLayoutManager(mCarViewActivity);
 		mRecyclerView = mMusicDetail2Binding.getRoot().findViewById(R.id.recycler_view);
-		mWaitListAdapter = new MyWaitListAdapter((MainActivity) Data.sActivities.get(0), Data.sPlayOrderList);
+		mWaitListAdapter = new MyWaitListAdapter(mCarViewActivity, Data.sPlayOrderList);
 		mRecyclerView.setLayoutManager(mLinearLayoutManager);
 		mRecyclerView.setAdapter(mWaitListAdapter);
 
@@ -114,6 +116,19 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 				}
 
 				case R.id.menu_toolbar_debug: {
+					//TODO debug
+				}
+				break;
+
+				case R.id.menu_toolbar_love: {
+					MusicUtil.toggleFavorite(mCarViewActivity, ReceiverOnMusicPlay.getCurrentItem());
+					updateFav(ReceiverOnMusicPlay.getCurrentItem());
+					Toast.makeText(mCarViewActivity, getString(R.string.done), Toast.LENGTH_SHORT).show();
+				}
+				break;
+
+				case R.id.menu_toolbar_trash_can: {
+					MusicDetailFragment.P.dropToTrash(mCarViewActivity, Data.sCurrentMusicItem);
 				}
 				break;
 				default:
@@ -418,7 +433,24 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 			mMusicDetail2Binding.waitPlayBodyUp.requestLayout();
 		});
 
+		// update at the beginning
+		updateFav(Data.sCurrentMusicItem);
+
 		return mMusicDetail2Binding.getRoot();
+	}
+
+	/**
+	 * update Favourite music icon
+	 *
+	 * @see MusicDetailFragment#updateFav(MusicItem)
+	 * <p>
+	 * TODO merge MusicDetailFragment#updateFav
+	 */
+	private void updateFav(@Nullable MusicItem item) {
+		if (item != null) {
+			@DrawableRes int id = MusicUtil.isFavorite(mCarViewActivity, item) ? R.drawable.ic_favorite_white_24dp : R.drawable.ic_favorite_border_white_24dp;
+			getMusicDetail2Binding().toolbar.getMenu().findItem(R.id.menu_toolbar_love).setIcon(id);
+		}
 	}
 
 	@Override

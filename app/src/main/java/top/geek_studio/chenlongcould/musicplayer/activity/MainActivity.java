@@ -23,6 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -133,7 +134,25 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	/**
 	 * handler
 	 */
-	public static NotLeakHandler mHandler = null;
+	private static NotLeakHandler mHandler = null;
+
+	public static boolean sendMessage(@NonNull Message message) {
+		boolean result = false;
+		if (mHandler != null) {
+			mHandler.sendMessage(message);
+			result = true;
+		}
+		return result;
+	}
+
+	public static boolean sendEmptyMessage(int what) {
+		boolean result = false;
+		if (mHandler != null) {
+			mHandler.sendEmptyMessage(what);
+			result = true;
+		}
+		return result;
+	}
 
 	private ActivityMainBinding mMainBinding;
 	private ActionBarDrawerToggle mDrawerToggle;
@@ -180,7 +199,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		Data.init(this);
 
 		mMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 		initView();
@@ -215,10 +233,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		}
 
 		Data.HAS_BIND = false;
-		Data.sActivities.clear();
-		if (Data.sMainRef != null) {
-			Data.sMainRef.clear();
-		}
 
 		Data.sTheme = null;
 
@@ -329,7 +343,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				/*--------------- 快速 随机 播放 ----------------*/
 				case R.id.menu_toolbar_fast_play: {
 					//just fast random play, without change Data.sPlayOrderList
-					Utils.SendSomeThing.sendPlay(MainActivity.this, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, TAG);
+					Utils.SendSomeThing.sendPlay(this, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, "null");
 				}
 				break;
 
