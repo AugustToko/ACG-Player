@@ -675,6 +675,9 @@ public final class SettingsActivity extends BaseCompatActivity {
 		} else {
 			mSettingsBinding.albumSwitch.setChecked(false);
 		}
+
+		mSettingsBinding.textDHideShort.setText(getString(R.string.skip_songs_that_are_less_than_the_minimum_duration
+				, MainActivity.DEFAULT_SHORT_DURATION));
 	}
 
 	@Override

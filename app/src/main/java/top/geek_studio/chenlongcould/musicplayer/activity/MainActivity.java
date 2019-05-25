@@ -97,6 +97,11 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	public static final char FILE_LIST_FRAGMENT_ID = '5';
 
 	/**
+	 * skip short song (if below 20s)
+	 */
+	public static final int DEFAULT_SHORT_DURATION = 20;
+
+	/**
 	 * 1 is MUSIC TAB
 	 * 2 is ALBUM TAB
 	 * 3 is ARTIST TAB
@@ -513,7 +518,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 								continue;
 							}
 
-							if (skipShort && duration < 20) {
+							if (skipShort && duration < DEFAULT_SHORT_DURATION) {
 								continue;
 							}
 

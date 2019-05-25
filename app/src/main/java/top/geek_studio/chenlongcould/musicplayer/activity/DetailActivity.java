@@ -1,20 +1,16 @@
 package top.geek_studio.chenlongcould.musicplayer.activity;
 
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
-
+import androidx.annotation.ColorInt;
+import androidx.databinding.DataBindingUtil;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-
 import org.litepal.LitePal;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import androidx.databinding.DataBindingUtil;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.R;
@@ -23,19 +19,27 @@ import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityInfoDetailB
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 public final class DetailActivity extends BaseCompatActivity {
 
 	public static final String TAG = "DetailActivity";
+
+	private ActivityInfoDetailBinding detailBinding;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
-		final ActivityInfoDetailBinding detailBinding = DataBindingUtil.setContentView(this, R.layout.activity_info_detail);
+		detailBinding = DataBindingUtil.setContentView(this, R.layout.activity_info_detail);
 		super.initView(detailBinding.toolbar, detailBinding.appbar);
 		super.onCreate(savedInstanceState);
 
 		setSupportActionBar(detailBinding.toolbar);
 		detailBinding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
+
+		initStyle();
 
 		List<Detail> infos = LitePal.findAll(Detail.class);
 
@@ -157,8 +161,11 @@ public final class DetailActivity extends BaseCompatActivity {
 		}
 
 		FloatingActionButton fab = findViewById(R.id.fab);
-		fab.setOnClickListener(view -> Snackbar.make(view, "Clear Data?", Snackbar.LENGTH_LONG)
-				.setAction(getString(R.string.sure), v -> LitePal.deleteAll(Detail.class)).show());
+		fab.setOnClickListener(view -> Snackbar.make(view, "Clear?", Snackbar.LENGTH_LONG)
+				.setAction(getString(R.string.sure), v -> {
+					LitePal.deleteAll(Detail.class);
+					recreate();
+				}).show());
 	}
 	
 	@Override
@@ -174,5 +181,13 @@ public final class DetailActivity extends BaseCompatActivity {
 	@Override
 	public void inflateChooseMenu() {
 
+	}
+
+	@Override
+	public void initStyle() {
+		super.initStyle();
+		@ColorInt int accentColor = Utils.Ui.getAccentColor(this);
+		detailBinding.fab.setSupportBackgroundTintList(ColorStateList.valueOf(accentColor));
+		detailBinding.fab.setColorFilter(Utils.Ui.isColorLight(accentColor) ? Color.BLACK : Color.WHITE);
 	}
 }

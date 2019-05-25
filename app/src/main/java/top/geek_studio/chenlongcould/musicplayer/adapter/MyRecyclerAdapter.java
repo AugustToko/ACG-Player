@@ -2,6 +2,8 @@ package top.geek_studio.chenlongcould.musicplayer.adapter;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -19,13 +21,11 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.*;
 import android.view.animation.OvershootInterpolator;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
@@ -50,7 +50,6 @@ import top.geek_studio.chenlongcould.geeklibrary.HttpUtil;
 import top.geek_studio.chenlongcould.musicplayer.*;
 import top.geek_studio.chenlongcould.musicplayer.activity.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.BaseCompatActivity;
-import top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
@@ -264,9 +263,8 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		holder.mButton3.setOnClickListener(v -> Utils.Audio.setRingtone(mActivity, mMusicItems.get(holder.getAdapterPosition()).getMusicID()));
 		holder.mButton4.setOnClickListener(v -> mActivity.startActivity(Intent.createChooser(Utils.Audio.createShareSongFileIntent(mMusicItems.get(holder.getAdapterPosition()), mActivity), null)));
 
-		holder.mItemMenuButton.setOnClickListener(v -> {
-			holder.mPopupMenu.show();
-		});
+		holder.mItemMenuButton.setOnClickListener(v -> holder.mPopupMenu.show());
+
 		holder.mPopupMenu.setOnMenuItemClickListener(item -> {
 
 			@SuppressWarnings("UnnecessaryLocalVariable") int index = holder.getAdapterPosition();
@@ -295,36 +293,48 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 				}
 				break;
 
+				// show album
 				case Menu.FIRST + 4: {
 					final String albumName = mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum();
 					final Cursor cursor = mActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
-							MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum()}, null);
-					if (cursor != null && cursor.getCount() < 0) {
+							MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{albumName}, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
+					if (cursor != null && cursor.getCount() > 0) {
+						cursor.moveToFirst();
 						int id = Integer.parseInt(cursor.getString(0));
+						cursor.close();
+
 						final Intent intent = new Intent(mActivity, AlbumDetailActivity.class);
 						intent.putExtra(AlbumDetailActivity.IntentKey.ALBUM_NAME, albumName);
-						cursor.moveToFirst();
 						intent.putExtra(AlbumDetailActivity.IntentKey.ID, id);
 						mActivity.startActivity(intent);
-						cursor.close();
 					} else {
-						Toast.makeText(mActivity, "Cursor error.", Toast.LENGTH_SHORT).show();
+						Toast.makeText(mActivity, "Cursor error, please check your MediaStore.", Toast.LENGTH_SHORT).show();
 					}
 
 				}
 				break;
 
+				// show song detail
 				case Menu.FIRST + 5: {
-					Intent intent = new Intent(mActivity, ListViewActivity.class);
-					intent.putExtra(ListViewActivity.INTENT_START_BY, "detail");
-					mActivity.startActivity(intent);
+					final List<String> data = Utils.Audio.extractMetadata(mMusicItems.get(holder.getAdapterPosition()));
+					ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(mActivity, android.R.layout.simple_list_item_1
+							, data);
+					AlertDialog.Builder builder = new AlertDialog.Builder(mActivity)
+							.setTitle(mActivity.getString(R.string.detail))
+							.setAdapter(arrayAdapter, (dialog, which) -> {
+								final ClipboardManager clipboardManager = (ClipboardManager) mActivity.getSystemService(Context.CLIPBOARD_SERVICE);
+								final ClipData clipData = new ClipData("Copied by song detail", new String[]{"text"}, new ClipData.Item(data.get(which).split(":")[1]));
+								clipboardManager.setPrimaryClip(clipData);
+							})
+							.setCancelable(false)
+							.setNegativeButton(mActivity.getString(R.string.done), (dialog, which) -> dialog.dismiss());
+					builder.show();
 				}
 				break;
 
 				//share
 				case Menu.FIRST + 6: {
 					Intent intent = new Intent(Intent.ACTION_SEND);
-//					Log.d(TAG, "onCreateViewHolder: share: " + new File(mMusicItems.get(holder.getAdapterPosition()).getMusicPath()).exists());
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 						intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(mActivity, mActivity.getApplicationContext().getPackageName(), new File(mMusicItems.get(holder.getAdapterPosition()).getMusicPath())));
 						intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -418,20 +428,6 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 				mSelected.add(mMusicItems.get(holder.getAdapterPosition()).getMusicID());
 				((ItemHolder) holder).mBody.setBackgroundColor(Utils.Ui.getAccentColor(mActivity));
 			} else {
-//				//在通常模式（非多选）下
-//				final Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
-//
-//					//设置全局ITEM
-//					for (int i = 0; i < Data.sMusicItems.size(); i++) {
-//						final MusicItem item = Data.sMusicItems.get(i);
-//						if (item.getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
-//							observableEmitter.onNext(i);
-//							break;
-//						}
-//					}
-//				}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
-//						.subscribe(integer -> Utils.SendSomeThing.sendPlay(mActivity, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, integer.toString()), Throwable::printStackTrace);
-//				Data.sDisposables.add(disposable);
 
 				Data.sCurrentMusicItem = mMusicItems.get(holder.getAdapterPosition());
 				if (mConfig.recordIndex) {
@@ -439,15 +435,6 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 				}
 				Utils.SendSomeThing.sendPlay(mActivity, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, "null");
 
-//				ItemCoverThreadPool.post(() -> {
-//					//因为mMusicItems 与 Data.sPlayOrderList 不同步, 所以需要转换index
-//					//MUSIC INDEX
-//					for (int i = 0; i < Data.sPlayOrderList.size(); i++) {
-//						if (Data.sPlayOrderList.get(i).getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
-//							Values.CurrentData.CURRENT_MUSIC_INDEX = i;
-//						}
-//					}
-//				});
 			}
 		});
 	}
@@ -911,8 +898,6 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 			mRandomItem = itemView.findViewById(R.id.random_play_item);
 		}
 	}
-
-///////////////////////////////////////////
 
 	class ItemHolderS1 extends ItemHolder {
 

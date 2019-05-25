@@ -1,13 +1,18 @@
 package top.geek_studio.chenlongcould.musicplayer.adapter;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.provider.MediaStore;
 import android.view.*;
+import android.widget.ArrayAdapter;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.RecyclerView;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
@@ -16,7 +21,6 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.BaseCompatActivity;
-import top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
@@ -89,9 +93,19 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 				break;
 
 				case Menu.FIRST + 5: {
-					final Intent intent = new Intent(mContext, ListViewActivity.class);
-					intent.putExtra("start_by", "detail");
-					mContext.startActivity(intent);
+					final List<String> data = Utils.Audio.extractMetadata(mMusicItems.get(holder.getAdapterPosition()));
+					ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(mContext, android.R.layout.simple_list_item_1
+							, data);
+					AlertDialog.Builder builder = new AlertDialog.Builder(mContext)
+							.setTitle(mContext.getString(R.string.detail))
+							.setAdapter(arrayAdapter, (dialog, which) -> {
+								final ClipboardManager clipboardManager = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
+								final ClipData clipData = new ClipData("Copied by song detail", new String[]{"text"}, new ClipData.Item(data.get(which).split(":")[1]));
+								clipboardManager.setPrimaryClip(clipData);
+							})
+							.setCancelable(false)
+							.setNegativeButton(mContext.getString(R.string.done), (dialog, which) -> dialog.dismiss());
+					builder.show();
 				}
 				break;
 			}
@@ -111,30 +125,11 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
 	private void onMusicItemClick(View view, ViewHolder holder) {
 		view.setOnClickListener(v -> {
-//			final Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
-
-			//因为mMusicItems 与 Data.sPlayOrderList 同步, 所以无需转换index
-//                for (int i = 0; i < Data.sPlayOrderList.size(); i++) {
-//                    if (Data.sPlayOrderList.get(i).getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
-//                        Values.CurrentData.CURRENT_MUSIC_INDEX = i;
-//                    }
-//                }
 
 			Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
 			Data.sCurrentMusicItem = Data.sPlayOrderList.get(holder.getAdapterPosition());
 
 			Utils.SendSomeThing.sendPlay(mContext, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, "null");
-
-//				for (int i = 0; i < Data.sMusicItems.size(); i++) {
-//					MusicItem item = Data.sMusicItems.get(i);
-//					if (item.getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
-//						observableEmitter.onNext(i);
-//					}
-//				}
-
-//			}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
-//					.subscribe(integer -> Utils.SendSomeThing.sendPlay(mContext, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, integer.toString()), Throwable::printStackTrace);
-//			Data.sDisposables.add(disposable);
 		});
 	}
 
@@ -200,10 +195,10 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 			mMenu = mPopupMenu.getMenu();
 
 			//noinspection PointlessArithmeticExpression
-			mMenu.add(Menu.NONE, Menu.FIRST + 0, 0, "下一首播放");
-			mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, "加入播放列表");
-			mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, "查看专辑");
-			mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, "详细信息");
+			mMenu.add(Menu.NONE, Menu.FIRST + 0, 0, mContext.getString(R.string.next_play));
+			mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, mContext.getString(R.string.add_to_playlist));
+			mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, mContext.getString(R.string.show_album));
+			mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, mContext.getString(R.string.more_info));
 
 			MenuInflater menuInflater = mContext.getMenuInflater();
 			menuInflater.inflate(R.menu.recycler_song_item_menu, mMenu);

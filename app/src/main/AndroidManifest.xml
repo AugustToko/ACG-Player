@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="top.geek_studio.chenlongcould.musicplayer"
-    tools:ignore="InnerclassSeparator">
+<manifest
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        package="top.geek_studio.chenlongcould.musicplayer"
+        tools:ignore="InnerclassSeparator"
+        >
 
     <permission
-        android:name="top.geek_studio.chenlongcould.musicplayer.broadcast"
-        android:protectionLevel="signature" />
+            android:name="top.geek_studio.chenlongcould.musicplayer.broadcast"
+            android:protectionLevel="signature"
+            />
     <permission
-        android:name="top.geek_studio.chenlongcould.musicplayer.MusicService"
-        android:protectionLevel="signature" />
+            android:name="top.geek_studio.chenlongcould.musicplayer.MusicService"
+            android:protectionLevel="signature"
+            />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -21,50 +25,63 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
-        android:name=".App"
-        android:allowBackup="false"
-        android:fullBackupContent="@xml/backup_descriptor"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:largeHeap="true"
-        android:networkSecurityConfig="@xml/network_security_config"
-        android:persistent="true"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:screenOrientation="portrait"
-        android:theme="@style/LightTheme"
-        tools:replace="android:allowBackup"
-        tools:targetApi="n">
-        <activity android:name=".activity.Test2Activity"></activity>
+            android:name=".App"
+            android:allowBackup="false"
+            android:fullBackupContent="@xml/backup_descriptor"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/app_name"
+            android:largeHeap="true"
+            android:networkSecurityConfig="@xml/network_security_config"
+            android:persistent="true"
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:screenOrientation="portrait"
+            android:theme="@style/LightTheme"
+            tools:replace="android:allowBackup"
+            tools:targetApi="n"
+            >
         <activity
-            android:name=".activity.ScrollingActivity"
-            android:label="@string/title_activity_scrolling"
-            android:theme="@style/LightTheme.NoActionBar" />
+                android:name=".activity.SongDetailActivity"
+                android:label="@string/title_activity_song_detail"
+                android:theme="@style/LightTheme.NoActionBar"
+                >
+        </activity>
+        <activity android:name=".activity.Test2Activity" />
+        <activity
+                android:name=".activity.ScrollingActivity"
+                android:label="@string/title_activity_scrolling"
+                android:theme="@style/LightTheme.NoActionBar"
+                />
 
         <receiver
-            android:name=".broadcast.NotificationBroadcast"
-            android:enabled="true"
-            android:exported="true"
-            android:permission="top.geek_studio.chenlongcould.musicplayer.BroadCasts"
-            android:process=":musicService" />
+                android:name=".broadcast.NotificationBroadcast"
+                android:enabled="true"
+                android:exported="true"
+                android:permission="top.geek_studio.chenlongcould.musicplayer.BroadCasts"
+                android:process=":musicService"
+                />
 
         <service
-            android:name=".DBArtSync"
-            android:exported="false" />
+                android:name=".DBArtSync"
+                android:exported="false"
+                />
 
         <activity
-            android:name=".activity.DetailActivity"
-            android:label="@string/title_activity_detail"
-            android:theme="@style/LightTheme.NoActionBar" />
+                android:name=".activity.DetailActivity"
+                android:label="@string/title_activity_detail"
+                android:theme="@style/LightTheme.NoActionBar"
+                />
         <activity
-            android:name=".activity.MainActivity"
-            android:launchMode="singleTask"
-            android:theme="@style/LightTheme"
-            android:windowSoftInputMode="stateHidden|adjustPan" />
+                android:name=".activity.MainActivity"
+                android:launchMode="singleTask"
+                android:theme="@style/LightTheme"
+                android:windowSoftInputMode="stateHidden|adjustPan"
+                />
         <activity
-            android:name=".activity.SplashActivity"
-            android:exported="true"
-            android:launchMode="singleTask"
-            android:theme="@style/SplashActivityTheme">
+                android:name=".activity.SplashActivity"
+                android:exported="true"
+                android:launchMode="singleTask"
+                android:theme="@style/SplashActivityTheme"
+                >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
@@ -75,85 +92,100 @@
         </activity>
         <activity
                 android:name=".activity.ListViewActivity"
-                android:exported="false" />
+                android:exported="false"
+                />
         <activity
-            android:name=".activity.AlbumDetailActivity"
-            android:exported="false"
-            android:launchMode="singleTask" />
+                android:name=".activity.AlbumDetailActivity"
+                android:exported="false"
+                android:launchMode="singleTask"
+                />
         <activity
-            android:name=".activity.SettingsActivity"
-            android:exported="false"
-            android:launchMode="singleTask" />
+                android:name=".activity.SettingsActivity"
+                android:exported="false"
+                android:launchMode="singleTask"
+                />
         <activity
-            android:name=".activity.AboutLicActivity"
-            android:exported="false"
-            android:launchMode="singleTask" />
+                android:name=".activity.AboutLicActivity"
+                android:exported="false"
+                android:launchMode="singleTask"
+                />
         <activity
-            android:name=".activity.CarViewActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/title_activity_car_view"
-            android:theme="@style/FullscreenTheme" />
+                android:name=".activity.CarViewActivity"
+                android:configChanges="orientation|keyboardHidden|screenSize"
+                android:label="@string/title_activity_car_view"
+                android:theme="@style/FullscreenTheme"
+                />
         <activity
-            android:name=".activity.ThemeActivity"
-            android:label="@string/title_activity_theme"
-            android:launchMode="singleTask" />
+                android:name=".activity.ThemeActivity"
+                android:label="@string/title_activity_theme"
+                android:launchMode="singleTask"
+                />
         <activity android:name=".activity.TestActivity" />
         <activity
-            android:name=".activity.AboutActivity"
-            android:exported="false"
-            android:launchMode="singleTask" />
+                android:name=".activity.AboutActivity"
+                android:exported="false"
+                android:launchMode="singleTask"
+                />
         <activity
-            android:name=".activity.ArtistDetailActivity"
-            android:exported="false"
-            android:launchMode="singleTask" />
+                android:name=".activity.ArtistDetailActivity"
+                android:exported="false"
+                android:launchMode="singleTask"
+                />
 
         <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}"
-            android:exported="false"
-            android:grantUriPermissions="true">
+                android:name="androidx.core.content.FileProvider"
+                android:authorities="${applicationId}"
+                android:exported="false"
+                android:grantUriPermissions="true"
+                >
             <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_path" />
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/file_path"
+                    />
         </provider>
 
         <service
-            android:name=".MyTileService"
-            android:icon="@drawable/ic_audiotrack_24px"
-            android:label="@string/fast_play"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+                android:name=".MyTileService"
+                android:icon="@drawable/ic_audiotrack_24px"
+                android:label="@string/fast_play"
+                android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+                >
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
         <service
-            android:name=".MusicService"
-            android:enabled="true"
-            android:exported="false"
-            android:process=":musicService" />
+                android:name=".MusicService"
+                android:enabled="true"
+                android:exported="false"
+                android:process=":musicService"
+                />
 
         <receiver
-            android:name=".broadcast.ReceiverOnMusicPlay"
-            android:enabled="true"
-            android:exported="true"
-            android:permission="top.geek_studio.chenlongcould.musicplayer.broadcast">
+                android:name=".broadcast.ReceiverOnMusicPlay"
+                android:enabled="true"
+                android:exported="true"
+                android:permission="top.geek_studio.chenlongcould.musicplayer.broadcast"
+                >
             <intent-filter>
                 <action android:name="top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay" />
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".broadcast.MyHeadSetPlugReceiver"
-            android:enabled="true"
-            android:exported="true"
-            android:permission="top.geek_studio.chenlongcould.musicplayer.broadcast">
+                android:name=".broadcast.MyHeadSetPlugReceiver"
+                android:enabled="true"
+                android:exported="true"
+                android:permission="top.geek_studio.chenlongcould.musicplayer.broadcast"
+                >
             <intent-filter>
                 <action android:name="android.intent.action.HEADSET_PLUG" />
             </intent-filter>
         </receiver>
 
         <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-1302949087387063~1079129255" />
+                android:name="com.google.android.gms.ads.APPLICATION_ID"
+                android:value="ca-app-pub-1302949087387063~1079129255"
+                />
     </application>
 
 </manifest>

@@ -76,10 +76,10 @@ public final class AlbumDetailActivity extends BaseCompatActivity {
 	
 	@ColorInt
 	private int toolbarColor;
+
 	/**
 	 * ------------- data ---------------
 	 */
-	
 	private List<MusicItem> mSongs = new ArrayList<>();
 
 	private List<Disposable> mDisposables = new ArrayList<>();

@@ -11,9 +11,10 @@
     <item android:title="@string/more_info">
         <menu>
             <item
-                android:id="@+id/menu_nav_detail_info"
-                android:icon="@drawable/ic_data_usage_black_24dp"
-                android:title="数据概览" />
+                    android:id="@+id/menu_nav_detail_info"
+                    android:icon="@drawable/ic_data_usage_black_24dp"
+                    android:title="@string/data_overview"
+                    />
         </menu>
     </item>
     <item android:title="@string/other">

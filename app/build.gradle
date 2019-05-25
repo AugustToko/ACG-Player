@@ -33,7 +33,6 @@ android {
             renderscriptOptimLevel 5
             pseudoLocalesEnabled false
             applicationIdSuffix '.Common'
-//            proguardFile 'C:/Users/chenlongcould/AndroidStudioProjects/MusicPlayer/app/proguard-rules.pro'
         }
         debug {
             minifyEnabled = true
@@ -61,19 +60,6 @@ android {
     }
     productFlavors {
     }
-//    dependencies {
-//        def nav_version = "1.0.0-beta02"
-//
-//        implementation "android.arch.navigation:navigation-fragment:$nav_version"
-//        // use -ktx for Kotlin
-//        implementation "android.arch.navigation:navigation-ui:$nav_version" // use -ktx for Kotlin
-//    }
-
-//    externalNativeBuild {
-//        cmake {
-//            path "src/main/cpp/CMakeLists.txt"
-//        }
-//    }
 }
 
 dependencies {

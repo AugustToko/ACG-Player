@@ -69,7 +69,48 @@ public final class Utils {
 	public static final class Audio {
 
 		public static final String NONE = "NONE";
-		private final static MediaMetadataRetriever sMediaMetadataRetriever = new MediaMetadataRetriever();
+
+		@NonNull
+		public static List<String> extractMetadata(@NonNull MusicItem item) {
+			final List<String> temp = new ArrayList<>();
+
+			final MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+			retriever.setDataSource(item.getMusicPath());
+
+			temp.add("Title: " + item.getMusicName());
+			temp.add("Path: " + item.getMusicPath());
+			temp.add("Media type: " + item.getMimeName());
+			temp.add("Album: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM));
+			temp.add("AlbumArtist: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST));
+			temp.add("Artist: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
+			temp.add("year: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR));
+			temp.add("Author: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_AUTHOR));
+			temp.add("Bitrate: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE));
+			temp.add("CD track number: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER));
+			temp.add("COMPILATION: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_COMPILATION));
+			temp.add("COMPOSER: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_COMPOSER));
+			temp.add("Date: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE));
+			temp.add("Disc number: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER));
+			temp.add("Duration: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+			temp.add("Genre: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE));
+			temp.add("Writer: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_WRITER));
+
+			final List<String> data = new ArrayList<>();
+
+			for (int i = 0; i < temp.size() - 1; i++) {
+				String s = temp.get(i);
+				if (s != null) {
+					data.add(s);
+				} else {
+					data.add("None");
+				}
+			}
+
+			temp.clear();
+			retriever.release();
+
+			return data;
+		}
 
 		public static void openEqualizer(@NonNull final Activity activity, int id) {
 			if (id == AudioEffect.ERROR_BAD_VALUE) {
@@ -91,8 +132,11 @@ public final class Utils {
 		 *
 		 * @param mediaUri mp3 path
 		 */
+		@Deprecated
 		@NonNull
 		private static Bitmap getMp3CoverByMeta(@NonNull Context context, final String mediaUri) {
+
+			final MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
 
 			if (mediaUri == null) {
 				return BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px);
@@ -103,8 +147,9 @@ public final class Utils {
 				return BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px);
 			}
 
-			sMediaMetadataRetriever.setDataSource(mediaUri);
-			byte[] picture = sMediaMetadataRetriever.getEmbeddedPicture();
+			mediaMetadataRetriever.setDataSource(mediaUri);
+			byte[] picture = mediaMetadataRetriever.getEmbeddedPicture();
+			mediaMetadataRetriever.release();
 
 			if (picture != null) {
 				return BitmapFactory.decodeByteArray(picture, 0, picture.length);
@@ -204,7 +249,10 @@ public final class Utils {
 		 *
 		 * @param mediaUri mp3 path
 		 */
+		@Deprecated
 		private static Bitmap path2CoverByMeta(final String mediaUri, Context context) {
+
+			MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
 
 			if (mediaUri == null)
 				return getDrawableBitmap(context, R.drawable.default_album_art);
@@ -216,8 +264,8 @@ public final class Utils {
 			if (file.isDirectory() || !file.exists())
 				return getDrawableBitmap(context, R.drawable.default_album_art);
 
-			sMediaMetadataRetriever.setDataSource(mediaUri);
-			byte[] picture = sMediaMetadataRetriever.getEmbeddedPicture();
+			mediaMetadataRetriever.setDataSource(mediaUri);
+			byte[] picture = mediaMetadataRetriever.getEmbeddedPicture();
 
 			if (picture != null)
 				return BitmapFactory.decodeByteArray(picture, 0, picture.length);
@@ -229,7 +277,9 @@ public final class Utils {
 		 * may call from {@link MusicService}
 		 */
 		@Nullable
+		@Deprecated
 		private static byte[] path2CoverByteByMeta(final String path, Context context) {
+			MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
 			final Bitmap bitmap = getDrawableBitmap(context, R.drawable.default_album_art);
 			final File file = new File(path);
 
@@ -242,8 +292,8 @@ public final class Utils {
 				}
 			}
 
-			sMediaMetadataRetriever.setDataSource(path);
-			byte[] cover = sMediaMetadataRetriever.getEmbeddedPicture();
+			mediaMetadataRetriever.setDataSource(path);
+			byte[] cover = mediaMetadataRetriever.getEmbeddedPicture();
 
 			if (cover == null) {
 				if (bitmap != null)
