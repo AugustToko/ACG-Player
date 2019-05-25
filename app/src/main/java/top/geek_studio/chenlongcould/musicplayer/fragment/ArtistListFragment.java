@@ -81,8 +81,9 @@ public final class ArtistListFragment extends BaseFragment {
 					do {
 						String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
 						String albumId = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID));
-						Data.sArtistItems.add(new ArtistItem(albumName, Integer.parseInt(albumId)));
-						Data.sArtistItemsBackUp.add(new ArtistItem(albumName, Integer.parseInt(albumId)));
+						final ArtistItem artistItem = new ArtistItem(albumName, Integer.parseInt(albumId));
+						Data.sArtistItems.add(artistItem);
+						Data.sArtistItemsBackUp.add(artistItem);
 					} while (cursor.moveToNext());
 
 					cursor.close();

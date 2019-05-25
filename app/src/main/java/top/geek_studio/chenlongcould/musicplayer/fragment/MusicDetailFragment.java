@@ -679,6 +679,8 @@ public final class MusicDetailFragment extends BaseFragment {
 
 		initView(view);
 
+		preLoad();
+
 		//init seekBar
 		mHandler.sendEmptyMessage(NotLeakHandler.INIT_SEEK_BAR);
 		//let seekBar loop update
@@ -686,38 +688,23 @@ public final class MusicDetailFragment extends BaseFragment {
 		//scroll to the position{@Values.CurrentData.CURRENT_MUSIC_INDEX}
 		mHandler.sendEmptyMessage(NotLeakHandler.RECYCLER_SCROLL);
 
-		// FIXME: 2019/5/22 bugs...
-		if (Data.sMusicBinder != null) {
-			//检测后台播放
-			try {
+		return view;
+	}
 
-				MusicItem item = Data.sMusicBinder.getCurrentItem();
-				if (item.getMusicID() != -1) {
-					mCurrentMusicNameText.setText(item.getMusicName());
-					mCurrentAlbumNameText.setText(item.getMusicAlbum());
-
-					Bitmap bitmap = Utils.Audio.getCoverBitmap(getContext(), item.getAlbumId());
-
-					setSlideInfoBar(item.getMusicName(), item.getMusicAlbum(), bitmap);
-					setCurrentInfo(item.getMusicName(), item.getMusicAlbum(), bitmap);
-
-					mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
-
-				} else {
-					//??
-				}
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
-
+	/**
+	 * preLoad data
+	 */
+	private void preLoad() {
+		MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
+		if (item != null && item.getMusicID() != -1) {
+			final Bitmap cover = Utils.Audio.getCoverBitmap(getContext(), item.getAlbumId());
+			setCurrentInfo(item.getMusicName(), item.getMusicAlbum(), cover);
 		} else {
 			if (Data.sCurrentMusicItem.getMusicID() != -1) {
 				final Bitmap cover = Utils.Audio.getCoverBitmap(getContext(), Data.sCurrentMusicItem.getAlbumId());
 				setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), cover);
 			}
 		}
-
-		return view;
 	}
 
 	public final ConstraintLayout getNowPlayingBody() {
@@ -1248,15 +1235,19 @@ public final class MusicDetailFragment extends BaseFragment {
 				});
 				animator.start();
 
-				final MusicItem item = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX);
-
 				Data.sPlayOrderList.clear();
-				Data.sPlayOrderList.addAll(Data.sMusicItems);
+				Data.sPlayOrderList.addAll(Data.sMusicItemsBackUp);
 
-				for (int i = 0; i < Data.sMusicItems.size(); i++) {
-					if (Data.sPlayOrderList.get(i).getMusicID() == item.getMusicID()) {
-						Values.CurrentData.CURRENT_MUSIC_INDEX = i;
+				// 重新定位 item
+				final MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
+				if (item != null) {
+					for (int i = 0; i < Data.sMusicItems.size(); i++) {
+						if (Data.sPlayOrderList.get(i).getMusicID() == item.getMusicID()) {
+							Values.CurrentData.CURRENT_MUSIC_INDEX = i;
+						}
 					}
+				} else {
+					Values.CurrentData.CURRENT_MUSIC_INDEX = 0;
 				}
 
 				mMyWaitListAdapter.notifyDataSetChanged();

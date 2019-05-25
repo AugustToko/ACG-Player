@@ -7,7 +7,7 @@ android {
         config {
             keyAlias 'chenlongcould'
             keyPassword '18551348272Chen'
-//            storeFile file('C:\\Users\\dell\\Desktop\\AndroidStudio_KEY_Store\\chenlongcould.jks')
+            storeFile file('C:\\Users\\chenlong\\Desktop\\AndroidStudio_KEY_Store\\chenlongcould.jks')
             storePassword '18551348272Chen'
         }
     }
@@ -28,7 +28,8 @@ android {
         release {
             minifyEnabled true
             shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles 'proguard-rules.pro'
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.config
             renderscriptOptimLevel 5
             pseudoLocalesEnabled false
@@ -36,6 +37,8 @@ android {
         }
         debug {
             minifyEnabled = true
+            proguardFiles 'proguard-rules.pro'
+            zipAlignEnabled = false
         }
     }
     android.applicationVariants.all { variant ->
@@ -96,7 +99,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-config:17.0.0'
     //admob
     implementation 'com.google.android.gms:play-services-ads:17.2.1'
+    //okhttp
     implementation 'com.squareup.okhttp3:okhttp:4.0.0-alpha01'
+    implementation 'com.squareup.okio:okio:1.17.2'
     implementation 'org.jsoup:jsoup:1.12.1'
     implementation project(path: ':geeklibrary')
     implementation 'android.arch.navigation:navigation-fragment:1.0.0'

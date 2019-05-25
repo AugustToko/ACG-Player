@@ -1,20 +1,9 @@
-/*
- * ************************************************************
- * 文件：HttpUtil.java  模块：geeklibrary  项目：MusicPlayer
- * 当前修改时间：2019年01月27日 13:11:38
- * 上次修改时间：2019年01月19日 12:17:57
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.geeklibrary;
-
-import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author chenlongcould

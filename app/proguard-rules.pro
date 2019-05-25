@@ -33,11 +33,8 @@
 
 #将文件来源重命名为“SourceFile”字符串
 -renamesourcefileattribute SourceFile
-#保留行号
--keepattributes SourceFile,LineNumberTable
-#保持泛型
--keepattributes Signature
-
+#保持泛型,保留行号
+-keepattributes Signature,Expections,InnerClasses,Deprecated,SourceFile,LineNumberTable
 #保持所有实现 Serializable 接口的类成员
 -keepclassmembers class * implements java.io.Serializable {
     static final long serialVersionUID;
@@ -90,8 +87,8 @@
 
 # okio
 -keep class sun.misc.Unsafe { *; }
+-keep class okio.**{*;}
 -dontwarn java.nio.file.*
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
--keep class okio.**{*;}
 -dontwarn okio.**
 #------------------okhttp

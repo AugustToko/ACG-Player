@@ -410,146 +410,141 @@ public final class SettingsActivity extends BaseCompatActivity {
 		});
 
 		mSettingsBinding.itemBlacklist.setOnClickListener(v -> {
-			if (!DBArtSync.WORKING) {
-				LitePalDB blackList = new LitePalDB("BlackList", 1);
-				blackList.addClassName(MyBlackPath.class.getName());
-				LitePal.use(blackList);
+			LitePalDB blackList = new LitePalDB("BlackList", 1);
+			blackList.addClassName(MyBlackPath.class.getName());
+			LitePal.use(blackList);
 
-				ArrayList<String> data = new ArrayList<>();
-				List<MyBlackPath> lists = LitePal.findAll(MyBlackPath.class);
-				for (MyBlackPath path : lists) {
-					data.add(path.getDirPath());
+			ArrayList<String> data = new ArrayList<>();
+			List<MyBlackPath> lists = LitePal.findAll(MyBlackPath.class);
+			for (MyBlackPath path : lists) {
+				data.add(path.getDirPath());
+			}
+
+			AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
+			builder.setTitle(getString(R.string.black_list));
+			builder.setCancelable(false);
+			ArrayAdapter<String> blackPathAdapter = new ArrayAdapter<>(SettingsActivity.this, android.R.layout.simple_list_item_1, data);
+			//item on click
+			builder.setAdapter(blackPathAdapter, (dialog, index) -> {
+				AlertDialog.Builder rmBuilder = new AlertDialog.Builder(SettingsActivity.this);
+				rmBuilder.setTitle(getString(R.string.remove_frome_black_list));
+				rmBuilder.setMessage("Remove " + blackPathAdapter.getItem(index) + " from blacklist?");
+				rmBuilder.setPositiveButton(getString(R.string.remove), (dialog16, which) -> {
+					data.remove(index);
+					blackPathAdapter.notifyDataSetChanged();
+					dialog16.dismiss();
+					builder.show();
+				});
+				rmBuilder.setNeutralButton(getString(R.string.cancel), (dialog15, which) -> {
+					data.clear();
+					blackPathAdapter.notifyDataSetChanged();
+					dialog15.dismiss();
+					builder.show();
+				});
+				rmBuilder.show();
+			});
+
+			builder.setNeutralButton(getString(R.string.clear), (dialog, which) -> {
+				AlertDialog.Builder sureBuilder = new AlertDialog.Builder(SettingsActivity.this);
+				sureBuilder.setTitle(getString(R.string.are_u_sure));
+				sureBuilder.setCancelable(false);
+				sureBuilder.setNegativeButton(getString(R.string.sure), (dialog14, which13) -> {
+					data.clear();
+					blackPathAdapter.notifyDataSetChanged();
+					dialog14.dismiss();
+					builder.show();
+				});
+				sureBuilder.setPositiveButton(getString(R.string.cancel), (dialog13, which12) -> {
+					dialog13.dismiss();
+					builder.show();
+				});
+				sureBuilder.show();
+			});
+			builder.setPositiveButton(getString(R.string.add), (dialog, which) -> {
+				AlertDialog.Builder dirBuilder = new AlertDialog.Builder(SettingsActivity.this);
+				dirBuilder.setCancelable(false);
+				File sdcard = Environment.getExternalStorageDirectory();
+				final File[] currentDir = {sdcard};
+				dirBuilder.setTitle(sdcard.getPath());
+
+				List<String> pathList = new ArrayList<>();
+
+				//sort
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+					pathList.sort(String::compareTo);
 				}
 
-				AlertDialog.Builder builder = new AlertDialog.Builder(SettingsActivity.this);
-				builder.setTitle(getString(R.string.black_list));
-				builder.setCancelable(false);
-				ArrayAdapter<String> blackPathAdapter = new ArrayAdapter<>(SettingsActivity.this, android.R.layout.simple_list_item_1, data);
-				//item on click
-				builder.setAdapter(blackPathAdapter, (dialog, index) -> {
-					AlertDialog.Builder rmBuilder = new AlertDialog.Builder(SettingsActivity.this);
-					rmBuilder.setTitle(getString(R.string.remove_frome_black_list));
-					rmBuilder.setMessage("Remove " + blackPathAdapter.getItem(index) + " from blacklist?");
-					rmBuilder.setPositiveButton(getString(R.string.remove), (dialog16, which) -> {
-						data.remove(index);
-						blackPathAdapter.notifyDataSetChanged();
-						dialog16.dismiss();
-						builder.show();
-					});
-					rmBuilder.setNeutralButton(getString(R.string.cancel), (dialog15, which) -> {
-						data.clear();
-						blackPathAdapter.notifyDataSetChanged();
-						dialog15.dismiss();
-						builder.show();
-					});
-					rmBuilder.show();
-				});
+				for (File file : sdcard.listFiles()) {
+					if (file.isFile()) {
+						continue;
+					}
+					pathList.add(file.getName());
+				}
 
-				builder.setNeutralButton(getString(R.string.clear), (dialog, which) -> {
-					AlertDialog.Builder sureBuilder = new AlertDialog.Builder(SettingsActivity.this);
-					sureBuilder.setTitle(getString(R.string.are_u_sure));
-					sureBuilder.setCancelable(false);
-					sureBuilder.setNegativeButton(getString(R.string.sure), (dialog14, which13) -> {
-						data.clear();
-						blackPathAdapter.notifyDataSetChanged();
-						dialog14.dismiss();
-						builder.show();
-					});
-					sureBuilder.setPositiveButton(getString(R.string.cancel), (dialog13, which12) -> {
-						dialog13.dismiss();
-						builder.show();
-					});
-					sureBuilder.show();
-				});
-				builder.setPositiveButton(getString(R.string.add), (dialog, which) -> {
-					AlertDialog.Builder dirBuilder = new AlertDialog.Builder(SettingsActivity.this);
-					dirBuilder.setCancelable(false);
-					File sdcard = Environment.getExternalStorageDirectory();
-					final File[] currentDir = {sdcard};
-					dirBuilder.setTitle(sdcard.getPath());
+				ArrayAdapter<String> pathAdapter = new ArrayAdapter<>(SettingsActivity.this, android.R.layout.simple_list_item_1, pathList);
+				dirBuilder.setAdapter(pathAdapter, (dialog1, index) -> {
+					if (!currentDir[0].getAbsolutePath().equals(sdcard.getAbsolutePath()) && index == 0) {
+						if (currentDir[0].getParentFile() != null) {
+							currentDir[0] = currentDir[0].getParentFile();
 
-					List<String> pathList = new ArrayList<>();
+						}
+					} else {
+						currentDir[0] = new File(currentDir[0].getAbsolutePath() + "/" + pathList.get(index));
+					}
+					Log.d(TAG, "onClick: " + currentDir[0].getAbsolutePath());
+					pathList.clear();
+
+					if (!currentDir[0].getAbsolutePath().equals(sdcard.getAbsolutePath())) {
+						pathList.add("...");
+					}
+
+					for (File f : currentDir[0].listFiles()) {
+						if (f.isFile()) {
+							continue;
+						}
+						pathList.add(f.getName());
+					}
 
 					//sort
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 						pathList.sort(String::compareTo);
 					}
-
-					for (File file : sdcard.listFiles()) {
-						if (file.isFile()) {
-							continue;
-						}
-						pathList.add(file.getName());
-					}
-
-					ArrayAdapter<String> pathAdapter = new ArrayAdapter<>(SettingsActivity.this, android.R.layout.simple_list_item_1, pathList);
-					dirBuilder.setAdapter(pathAdapter, (dialog1, index) -> {
-						if (!currentDir[0].getAbsolutePath().equals(sdcard.getAbsolutePath()) && index == 0) {
-							if (currentDir[0].getParentFile() != null) {
-								currentDir[0] = currentDir[0].getParentFile();
-
-							}
-						} else {
-							currentDir[0] = new File(currentDir[0].getAbsolutePath() + "/" + pathList.get(index));
-						}
-						Log.d(TAG, "onClick: " + currentDir[0].getAbsolutePath());
-						pathList.clear();
-
-						if (!currentDir[0].getAbsolutePath().equals(sdcard.getAbsolutePath())) {
-							pathList.add("...");
-						}
-
-						for (File f : currentDir[0].listFiles()) {
-							if (f.isFile()) {
-								continue;
-							}
-							pathList.add(f.getName());
-						}
-
-						//sort
-						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-							pathList.sort(String::compareTo);
-						}
-						pathAdapter.notifyDataSetChanged();
-						dirBuilder.show();
-					});
-					dirBuilder.setPositiveButton(getString(R.string.confirm), (dialog12, which1) -> {
-						data.add(currentDir[0].getAbsolutePath());
-
-						blackPathAdapter.notifyDataSetChanged();
-						dialog12.dismiss();
-						builder.show();
-					});
+					pathAdapter.notifyDataSetChanged();
 					dirBuilder.show();
 				});
+				dirBuilder.setPositiveButton(getString(R.string.confirm), (dialog12, which1) -> {
+					data.add(currentDir[0].getAbsolutePath());
 
-				builder.setNegativeButton(getString(R.string.done), (dialog, which) -> {
-					MainActivity.NEED_RELOAD = true;
-					/*
-					 * if double click, will throw
-					 * no such table: myblackpath (code 1 SQLITE_ERROR):
-					 * , while compiling: DELETE FROM myblackpath
-					 * */
-					try {
-						LitePal.deleteAll(MyBlackPath.class);
-					} catch (Exception e) {
-						Log.d(TAG, "onCreate: " + e.getMessage());
-					}
-
-					//add to db
-					for (String path : data) {
-						MyBlackPath blackPath = new MyBlackPath();
-						blackPath.setDirPath(path);
-						blackPath.save();
-					}
-					LitePal.useDefault();
-					dialog.dismiss();
+					blackPathAdapter.notifyDataSetChanged();
+					dialog12.dismiss();
+					builder.show();
 				});
+				dirBuilder.show();
+			});
 
-				builder.show();
-			} else {
-				Toast.makeText(this, "Background data syncing..., wait", Toast.LENGTH_SHORT).show();
-			}
+			builder.setNegativeButton(getString(R.string.done), (dialog, which) -> {
+				/*
+				 * if double click, will throw
+				 * no such table: myblackpath (code 1 SQLITE_ERROR):
+				 * , while compiling: DELETE FROM myblackpath
+				 * */
+				try {
+					LitePal.deleteAll(MyBlackPath.class);
+				} catch (Exception e) {
+					Log.d(TAG, "onCreate: " + e.getMessage());
+				}
+
+				//add to db
+				for (String path : data) {
+					MyBlackPath blackPath = new MyBlackPath();
+					blackPath.setDirPath(path);
+					blackPath.save();
+				}
+				LitePal.useDefault();
+				dialog.dismiss();
+			});
+
+			builder.show();
 		});
 
 		mSettingsBinding.itemAlbumData.setOnClickListener(v -> {
@@ -594,13 +589,11 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 			s0.setOnClickListener(v1 -> {
 				PreferenceManager.getDefaultSharedPreferences(SettingsActivity.this).edit().putInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 0).apply();
-				MainActivity.NEED_RELOAD = true;
 				Toast.makeText(this, "Select style 0", Toast.LENGTH_SHORT).show();
 			});
 
 			s1.setOnClickListener(v1 -> {
 				PreferenceManager.getDefaultSharedPreferences(SettingsActivity.this).edit().putInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 1).apply();
-				MainActivity.NEED_RELOAD = true;
 				Toast.makeText(this, "Select style 1", Toast.LENGTH_SHORT).show();
 			});
 

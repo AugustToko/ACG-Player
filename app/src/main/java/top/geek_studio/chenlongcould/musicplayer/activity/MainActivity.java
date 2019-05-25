@@ -99,7 +99,9 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	/**
 	 * skip short song (if below 20s)
 	 */
-	public static final int DEFAULT_SHORT_DURATION = 20;
+	public static final int DEFAULT_SHORT_DURATION = 20000;
+
+	public static boolean LOADING_DATA = false;
 
 	/**
 	 * 1 is MUSIC TAB
@@ -120,7 +122,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	public static float CURRENT_SLIDE_OFFSET = 1;
 
 	public static boolean ANIMATION_FLAG = true;
-	public static boolean NEED_RELOAD = false;
 	private final ArrayList<String> mTitles = new ArrayList<>();
 	private boolean toolbarClicked = false;
 	private boolean backPressed = false;
@@ -213,12 +214,33 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		mHandlerThread.start();
 		mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
 
+		//service
+		final Intent intent = new Intent(MainActivity.this, MusicService.class);
+		startService(intent);
+		Data.HAS_BIND = bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
+
 		//监听耳机(有线或无线)的插拔动作, 拔出暂停音乐
 		final IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
 		intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
 		registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
 
 		loadData();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		if (getIntent().getStringExtra(Values.IntentTAG.SHORTCUT_TYPE) != null) {
+			switch (getIntent().getStringExtra("SHORTCUT_TYPE")) {
+				case App.SHORTCUT_RANDOM: {
+					Utils.SendSomeThing.sendPlay(MainActivity.this, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, null);
+				}
+				break;
+				default:
+					break;
+			}
+		}
 	}
 
 	@Override
@@ -250,31 +272,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		CustomThreadPool.finish();
 
 		super.onDestroy();
-	}
-
-	@Override
-	protected void onResume() {
-		super.onResume();
-
-		if (musicListFragment != null) {
-			musicListFragment.getMusicListBinding().includeRecycler.recyclerView.scheduleLayoutAnimation();
-		}
-
-		//数据重载
-		if (NEED_RELOAD) {
-			mFragmentList.clear();
-			mTitles.clear();
-			mMainBinding.tabLayout.removeAllTabs();
-			Data.sMusicItems.clear();
-			Data.sPlayOrderList.clear();
-			Data.sMusicItemsBackUp.clear();
-			Data.sAlbumItemsBackUp.clear();
-			Data.sAlbumItems.clear();
-			Data.sArtistItems.clear();
-
-			loadData();
-		}
-
 	}
 
 	@Override
@@ -387,7 +384,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				break;
 
 				case R.id.menu_toolbar_reload: {
-					reload();
+					reloadAll();
 				}
 				break;
 				default:
@@ -397,19 +394,23 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	}
 
 	/**
-	 * reload data, like first enter app
+	 * reloadAll data, like first enter app
 	 */
-	private void reload() {
-		mFragmentList.clear();
-		mTitles.clear();
-		mMainBinding.tabLayout.removeAllTabs();
-		Data.sMusicItems.clear();
-		Data.sPlayOrderList.clear();
-		Data.sMusicItemsBackUp.clear();
-		Data.sAlbumItemsBackUp.clear();
-		Data.sAlbumItems.clear();
+	// FIXME: 2019/5/25 all
+	private void reloadAll() {
+//		Data.sPlayOrderList.clear();
+//		Data.sAlbumItemsBackUp.clear();
+//		Data.sAlbumItems.clear();
+//		Data.sArtistItems.clear();
+//		Data.sArtistItemsBackUp.clear();
+		reloadMusicItems();
+	}
 
-		loadData();
+	private void reloadMusicItems() {
+		Data.sMusicItems.clear();
+		Data.sMusicItemsBackUp.clear();
+		loadDataSource();
+		musicListFragment.getAdapter().notifyDataSetChanged();
 	}
 
 	/**
@@ -472,109 +473,111 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		});
 	}
 
+	private boolean loadDataSource() {
+		boolean result = false;
+		if (Data.sMusicItems.isEmpty()) {
+			/*---------------------- init Data!!!! -------------------*/
+			final Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+			if (cursor != null && cursor.moveToFirst()) {
+				//没有歌曲直接退出app
+				if (cursor.getCount() == 0) {
+					return result;
+				} else {
+
+					final boolean skipShort = PreferenceManager.getDefaultSharedPreferences(this)
+							.getBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
+
+					final LitePalDB blackList = new LitePalDB("BlackList", 1);
+					blackList.addClassName(MyBlackPath.class.getName());
+					LitePal.use(blackList);
+					List<MyBlackPath> lists = LitePal.findAll(MyBlackPath.class);
+					LitePal.useDefault();
+
+					do {
+						final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+						boolean skip = false;
+
+						for (int i = 0; i < lists.size(); i++) {
+							MyBlackPath bp = lists.get(i);
+							if (path.contains(bp.getDirPath())) {
+								skip = true;
+								lists.remove(bp);
+								break;
+							}
+							lists.remove(bp);
+						}
+
+						if (skip) {
+							Log.d(TAG, "loadData: skip the song that in the blacklist");
+							continue;
+						}
+
+						final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+						if (skipShort && duration <= DEFAULT_SHORT_DURATION) {
+							Log.d(TAG, "loadDataSource: the music-file duration is " + duration + " (too short), skip...");
+							continue;
+						}
+
+						final String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+						final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+						final String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+						final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+						final int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
+						final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+						final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
+						final int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+						final int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID));
+
+						final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
+								.musicAlbum(albumName)
+								.addTime((int) addTime)
+								.artist(artist)
+								.duration(duration)
+								.mimeName(mimeType)
+								.size(size)
+								.addAlbumId(albumId)
+								.addArtistId(artistId);
+
+						if (Data.sCurrentMusicItem.getMusicID() == -1 && PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, -1) == id) {
+							Data.sCurrentMusicItem = builder.build();
+							Log.d(TAG, "onNext: the last data: name: " + Data.sCurrentMusicItem.getMusicName());
+						}
+						final MusicItem item = builder.build();
+						Data.sMusicItems.add(item);
+						Data.sMusicItemsBackUp.add(item);
+						Data.sPlayOrderList.add(item);
+					}
+					while (cursor.moveToNext());
+					Log.i(Values.TAG_UNIVERSAL_ONE, "onCreate: The MusicData load done.");
+					cursor.close();
+
+					if (PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM)) {
+						Collections.shuffle(Data.sPlayOrderList);
+					}
+					result = true;
+				}
+			} else {
+				//cursor null or getCount == 0
+				return result;
+			}
+		} else {
+			//already has data -> initFragment
+			result = true;
+		}
+
+		return result;
+	}
+
 	private void loadData() {
 		load = DialogUtil.getLoadingDialog(this, "Loading...");
 		load.show();
 
 		Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
-			final LitePalDB blackList = new LitePalDB("BlackList", 1);
-			blackList.addClassName(MyBlackPath.class.getName());
-			LitePal.use(blackList);
-
-			ArrayList<String> data = new ArrayList<>();
-			List<MyBlackPath> lists = LitePal.findAll(MyBlackPath.class);
-			for (MyBlackPath path : lists) {
-				data.add(path.getDirPath());
-			}
-			LitePal.useDefault();
-
-			if (Data.sMusicItems.isEmpty()) {
-				/*---------------------- init Data!!!! -------------------*/
-				final Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-				if (cursor != null && cursor.moveToFirst()) {
-					//没有歌曲直接退出app
-					if (cursor.getCount() == 0) {
-						emitter.onNext(-1);
-					} else {
-
-						final boolean skipShort = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
-
-						do {
-							final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-							boolean skip = false;
-							for (String bl : data) {
-								if (path.contains(bl)) {
-									skip = true;
-									break;
-								}
-							}
-							if (skip) {
-								continue;
-							}
-
-							final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-							if (duration <= 0) {
-								Log.d(TAG, "onCreate: the music-file duration is " + duration + ", skip...");
-								continue;
-							}
-
-							if (skipShort && duration < DEFAULT_SHORT_DURATION) {
-								continue;
-							}
-
-							final String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
-							final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-							final String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
-							final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
-							final int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-							final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-							final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
-							final int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
-							final int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID));
-
-							final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
-									.musicAlbum(albumName)
-									.addTime((int) addTime)
-									.artist(artist)
-									.duration(duration)
-									.mimeName(mimeType)
-									.size(size)
-									.addAlbumId(albumId)
-									.addArtistId(artistId);
-
-							if (Data.sCurrentMusicItem.getMusicID() == -1 && PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, -99) == id) {
-								Data.sCurrentMusicItem = builder.build();
-								Log.d(TAG, "onNext: the last data: name: " + Data.sCurrentMusicItem.getMusicName());
-							}
-
-							Data.sMusicItems.add(builder.build());
-							Data.sMusicItemsBackUp.add(builder.build());
-							Data.sPlayOrderList.add(builder.build());
-						}
-						while (cursor.moveToNext());
-						NEED_RELOAD = false;
-						Log.i(Values.TAG_UNIVERSAL_ONE, "onCreate: The MusicData load done.");
-						cursor.close();
-
-						//sync
-						DBArtSync.startActionSyncAlbum(this);
-						DBArtSync.startActionSyncArtist(this);
-
-						if (PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM)) {
-							Collections.shuffle(Data.sPlayOrderList);
-						}
-
-						emitter.onNext(0);
-					}
-				} else {
-					//cursor null or getCount == 0
-					emitter.onNext(-1);
-				}
+			if (!loadDataSource()) {
+				emitter.onNext(-1);
 			} else {
-				//already has data -> initFragment
 				emitter.onNext(0);
 			}
-
 		}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Integer>() {
 			@Override
 			public final void onSubscribe(Disposable disposable) {
@@ -584,9 +587,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			@Override
 			public final void onNext(Integer result) {
 				load.dismiss();
-
 				if (result == -1) {
-//					Utils.Ui.fastToast(MainActivity.this, "cursor is null or moveToFirst Fail");
 					AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 					builder.setTitle("Error")
 							.setMessage("Can not find any music or the cursor is null, Will exit.")
@@ -594,30 +595,14 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 							.setNegativeButton("Exit", (dialog, which) -> {
 								dialog.cancel();
 								fullExit();
-//								mHandler.postDelayed(MainActivity.this::fullExit, 1000);
 							});
 					builder.show();
 					return;
 				}
 
-				if (getIntent().getStringExtra(Values.IntentTAG.SHORTCUT_TYPE) != null) {
-					switch (getIntent().getStringExtra("SHORTCUT_TYPE")) {
-						case App.SHORTCUT_RANDOM: {
-							Utils.SendSomeThing.sendPlay(MainActivity.this, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, null);
-						}
-						break;
-						default:
-							break;
-					}
-				}
-
-				initFragmentData();
 				setSubtitle(Data.sPlayOrderList.size() + " Songs");
 
-				//service
-				final Intent intent = new Intent(MainActivity.this, MusicService.class);
-				startService(intent);
-				Data.HAS_BIND = bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
+				initFragmentData();
 			}
 
 			@Override
@@ -630,6 +615,9 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			@Override
 			public final void onComplete() {
 				load.dismiss();
+				//sync
+				DBArtSync.startActionSyncAlbum(MainActivity.this);
+				DBArtSync.startActionSyncArtist(MainActivity.this);
 			}
 		});
 

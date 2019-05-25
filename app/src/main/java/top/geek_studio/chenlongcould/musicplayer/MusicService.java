@@ -280,7 +280,7 @@ public final class MusicService extends Service {
 				.setContentIntent(pi)
 				.setVisibility(Notification.VISIBILITY_PUBLIC)
 				.setAutoCancel(false)
-				.setOngoing(true);
+				.setOngoing(mMediaPlayer.isPlaying());
 
 		if (mMediaPlayer.isPlaying()) {
 			Notification.Action[] actions = {
@@ -321,7 +321,8 @@ public final class MusicService extends Service {
 				.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
 				.setPriority(NotificationCompat.PRIORITY_DEFAULT)
 				.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-				.setAutoCancel(false);
+				.setAutoCancel(false)
+				.setOngoing(mMediaPlayer.isPlaying());
 		return builder;
 	}
 

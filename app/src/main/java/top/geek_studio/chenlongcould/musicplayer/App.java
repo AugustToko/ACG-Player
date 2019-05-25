@@ -12,23 +12,20 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-
-import org.litepal.LitePal;
-
-import java.io.File;
-import java.util.Collections;
-import java.util.List;
-
 import io.reactivex.disposables.Disposable;
+import org.litepal.LitePal;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
+
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author chenlongcould
@@ -63,7 +60,6 @@ public final class App extends Application {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		
 		LitePal.initialize(this);
 		
 		String processName = getProcessName(this);
@@ -93,7 +89,6 @@ public final class App extends Application {
 				mShortcutManager = getSystemService(ShortcutManager.class);
 				getNewShortcutInfo();
 			}
-			
 		}
 		
 	}

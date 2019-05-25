@@ -6,9 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.provider.MediaStore;
 import android.util.Log;
-
 import org.litepal.LitePal;
-
 import top.geek_studio.chenlongcould.musicplayer.database.ArtistArtPath;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 
@@ -22,14 +20,6 @@ public final class DBArtSync extends IntentService {
 	private static final String ACTON_SYNC_ALBUM = "top.geek_studio.chenlongcould.musicplayer.action.SyncAlbum";
 
 	private static final String ACTON_SYNC_ARTIST = "top.geek_studio.chenlongcould.musicplayer.action.SyncArtist";
-
-	public static int CURRENT_POSITION_ALBUM = 0;
-
-	public static int CURRENT_POSITION_ARTIST = 0;
-
-//    public static int TOTAL_COUNT = -1;
-
-	public static boolean WORKING = false;
 
 	public DBArtSync() {
 		super("DBArtSync");
@@ -55,16 +45,13 @@ public final class DBArtSync extends IntentService {
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		WORKING = true;
 		if (intent != null) {
 			final String action = intent.getAction();
 			if (ACTON_SYNC_ALBUM.equals(action)) {
-				Log.d(TAG, "onHandleIntent: do album " + Thread.currentThread().getName());
 				handleActionSyncAlbum();
 			}
 
 			if (ACTON_SYNC_ARTIST.equals(action)) {
-				Log.d(TAG, "onHandleIntent: do artist " + Thread.currentThread().getName());
 				handleActionSyncArtist();
 			}
 		}
@@ -75,8 +62,6 @@ public final class DBArtSync extends IntentService {
 		if (cursor != null && cursor.moveToFirst()) {
 			LitePal.useDefault();
 			do {
-				CURRENT_POSITION_ALBUM++;
-
 				int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID));
 
 				if (LitePal.where("mAlbumId = ?", String.valueOf(albumId)).find(CustomAlbumPath.class).size() == 0) {
@@ -90,7 +75,6 @@ public final class DBArtSync extends IntentService {
 
 			} while (cursor.moveToNext());
 			cursor.close();
-			WORKING = false;
 		}
 	}
 
@@ -99,8 +83,6 @@ public final class DBArtSync extends IntentService {
 		if (cursor != null && cursor.moveToFirst()) {
 			LitePal.useDefault();
 			do {
-				CURRENT_POSITION_ARTIST++;
-
 				int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID));
 
 				if (LitePal.where("mArtistId = ?", String.valueOf(artistId)).find(ArtistArtPath.class).size() == 0) {
@@ -114,13 +96,6 @@ public final class DBArtSync extends IntentService {
 
 			} while (cursor.moveToNext());
 			cursor.close();
-			WORKING = false;
 		}
-	}
-
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		WORKING = false;
 	}
 }

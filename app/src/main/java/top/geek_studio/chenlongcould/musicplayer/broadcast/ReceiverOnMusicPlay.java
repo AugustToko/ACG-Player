@@ -52,34 +52,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 	public static final Object object = new Object();
 
-//	/**
-//	 * setButtonPlay
-//	 * setSeekBarColor
-//	 * setSeekBarPosition
-//	 * setSlideBar
-//	 *
-//	 * @param context     context
-//	 * @param targetIndex index
-//	 */
-//	private static void setUIMusicData(final Context context, final int targetIndex) {
-//		Data.sCurrentMusicItem = Data.sPlayOrderList.get(targetIndex);
-//		final Bitmap cover = Utils.Audio.getCoverBitmap(context, Data.sCurrentMusicItem.getAlbumId());
-//		MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
-//		MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
-//
-//		final Message message = Message.obtain();
-//		message.what = MusicDetailFragment.NotLeakHandler.SET_CURRENT_DATA;
-//		message.obj = cover;
-//		final Bundle bundle = new Bundle();
-//		bundle.putString("name", Data.sCurrentMusicItem.getMusicName());
-//		bundle.putString("albumName", Data.sCurrentMusicItem.getMusicAlbum());
-//		message.setData(bundle);
-//		MusicDetailFragment.sendMessage(message);
-//
-//		MusicDetailFragment.setSeekBar(0);         //防止seekBar跳动到Max
-//		MainActivity.sendEmptyMessage(MainActivity.NotLeakHandler.SET_SLIDE_TOUCH_ENABLE);
-//	}
-
 	/**
 	 * setFlags
 	 *
