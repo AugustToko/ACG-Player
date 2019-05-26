@@ -267,9 +267,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 		holder.mPopupMenu.setOnMenuItemClickListener(item -> {
 
-			@SuppressWarnings("UnnecessaryLocalVariable") int index = holder.getAdapterPosition();
-
-			Values.CurrentData.CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = index;
+			Values.CurrentData.CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = holder.getAdapterPosition();
 
 			switch (item.getItemId()) {
 				//noinspection PointlessArithmeticExpression
@@ -319,12 +317,13 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 					final List<String> data = Utils.Audio.extractMetadata(mMusicItems.get(holder.getAdapterPosition()));
 					ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(mActivity, android.R.layout.simple_list_item_1
 							, data);
-					AlertDialog.Builder builder = new AlertDialog.Builder(mActivity)
+					final AlertDialog.Builder builder = new AlertDialog.Builder(mActivity)
 							.setTitle(mActivity.getString(R.string.detail))
 							.setAdapter(arrayAdapter, (dialog, which) -> {
 								final ClipboardManager clipboardManager = (ClipboardManager) mActivity.getSystemService(Context.CLIPBOARD_SERVICE);
 								final ClipData clipData = new ClipData("Copied by song detail", new String[]{"text"}, new ClipData.Item(data.get(which).split(":")[1]));
 								clipboardManager.setPrimaryClip(clipData);
+								Toast.makeText(mActivity, "Copied!", Toast.LENGTH_SHORT).show();
 							})
 							.setCancelable(false)
 							.setNegativeButton(mActivity.getString(R.string.done), (dialog, which) -> dialog.dismiss());

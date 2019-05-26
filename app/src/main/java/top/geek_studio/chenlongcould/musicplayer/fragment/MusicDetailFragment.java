@@ -1411,7 +1411,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		});
 	}
 
-	public final NotLeakHandler getHandler() {
+	public static NotLeakHandler getHandler() {
 		return mHandler;
 	}
 

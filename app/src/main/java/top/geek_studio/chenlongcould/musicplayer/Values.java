@@ -20,8 +20,8 @@ public interface Values {
 	/**
 	 * permission RequestCode
 	 */
-	int REQUEST_WRITE_EXTERNAL_STORAGE = 60;
-	int MAX_HEIGHT_AND_WIDTH = 100;
+	byte REQUEST_WRITE_EXTERNAL_STORAGE = 60;
+	byte MAX_HEIGHT_AND_WIDTH = 100;
 
 	/**
 	 * sharedPrefs tag

@@ -14,6 +14,8 @@ package top.geek_studio.chenlongcould.musicplayer.activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -25,6 +27,8 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragmentLandSpace;
 
+import java.lang.ref.WeakReference;
+
 /**
  * @author chenlongcould
  */
@@ -32,7 +36,7 @@ public final class CarViewActivity extends BaseCompatActivity {
 
 	private static final int UI_ANIMATION_DELAY = 300;
 	private static final String TAG = "CarViewActivity";
-	private final Handler mHideHandler = new Handler();
+	private static Handler mHideHandler;
 	private final Runnable mShowPart2Runnable = () -> {
 		// Delayed display of UI elements
 		ActionBar actionBar = getSupportActionBar();
@@ -42,6 +46,7 @@ public final class CarViewActivity extends BaseCompatActivity {
 	};
 	private boolean backPressed = false;
 	private View mContentView;
+
 	private final Runnable mHidePart2Runnable = new Runnable() {
 		@Override
 		public void run() {
@@ -62,30 +67,16 @@ public final class CarViewActivity extends BaseCompatActivity {
 	private final Runnable mHideRunnable = this::hide;
 
 	private MusicDetailFragmentLandSpace mFragmentLandSpace;
-	
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		Values.CurrentData.CURRENT_UI_MODE = Values.CurrentData.MODE_CAR;
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.activity_car_view);
-
-		Data.sCarViewActivity = this;
-
-		mVisible = true;
-		mContentView = findViewById(R.id.fullscreen_content);
-
-		// Set up the user interaction to manually show or hide the system UI.
-		mContentView.setOnClickListener(view -> toggle());
-
-		mFragmentLandSpace = MusicDetailFragmentLandSpace.newInstance();
-		final FragmentManager fragmentManager = getSupportFragmentManager();
-		final FragmentTransaction transaction = fragmentManager.beginTransaction();
-		transaction.replace(R.id.frag_land_space, mFragmentLandSpace);
-		transaction.commit();
+	public static boolean sendEmptyMessage(final int what) {
+		boolean result = false;
+		if (mHideHandler != null) {
+			mHideHandler.sendEmptyMessage(what);
+			result = true;
+		}
+		return result;
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -111,13 +102,28 @@ public final class CarViewActivity extends BaseCompatActivity {
 	}
 
 	@Override
-	protected void onDestroy() {
-		Log.d(TAG, "onDestroy: ");
-		super.onDestroy();
-	}
-	
-	public MusicDetailFragmentLandSpace getFragmentLandSpace() {
-		return mFragmentLandSpace;
+	protected void onCreate(Bundle savedInstanceState) {
+		Values.CurrentData.CURRENT_UI_MODE = Values.CurrentData.MODE_CAR;
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+		super.onCreate(savedInstanceState);
+
+		mHideHandler = new NotLeakHandler(this, Looper.myLooper());
+
+		setContentView(R.layout.activity_car_view);
+
+		Data.sCarViewActivity = this;
+
+		mVisible = true;
+		mContentView = findViewById(R.id.fullscreen_content);
+
+		// Set up the user interaction to manually show or hide the system UI.
+		mContentView.setOnClickListener(view -> toggle());
+
+		mFragmentLandSpace = MusicDetailFragmentLandSpace.newInstance();
+		final FragmentManager fragmentManager = getSupportFragmentManager();
+		final FragmentTransaction transaction = fragmentManager.beginTransaction();
+		transaction.replace(R.id.frag_land_space, mFragmentLandSpace);
+		transaction.commit();
 	}
 
 	@Override
@@ -187,4 +193,27 @@ public final class CarViewActivity extends BaseCompatActivity {
 		Log.d(TAG, "finalize: ");
 		super.finalize();
 	}
+
+	public static final class NotLeakHandler extends Handler {
+
+		public static final byte SET_DATA = 0;
+		private WeakReference<CarViewActivity> mWeakReference;
+
+		NotLeakHandler(CarViewActivity activity, Looper looper) {
+			super(looper);
+			mWeakReference = new WeakReference<>(activity);
+		}
+
+		@Override
+		public final void handleMessage(Message msg) {
+			switch (msg.what) {
+				case SET_DATA: {
+					mWeakReference.get().mFragmentLandSpace.setData();
+				}
+				break;
+			}
+		}
+
+	}
+
 }

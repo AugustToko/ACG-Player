@@ -111,7 +111,7 @@ public final class SplashActivity extends AppCompatActivity {
 		}
 
 		if (initPermission()) {
-			new Handler().postDelayed(this::initDone, 1000);
+			new Handler().post(this::initDone);
 		}
 	}
 

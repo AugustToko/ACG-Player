@@ -19,7 +19,6 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
-import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
@@ -37,15 +36,27 @@ public final class ListViewActivity extends BaseCompatActivity {
 
 	public static final String TAG = "ListViewActivity";
 
-	/**
-	 * @deprecated use {@link IntentTag#INTENT_START_BY}
-	 */
-	@Deprecated
-	public static final String INTENT_START_BY = IntentTag.INTENT_START_BY;
-
 	public static NotLeakHandler handler;
 
 	public static volatile boolean initDone = false;
+
+	private AppBarLayout mAppBarLayout;
+	private Toolbar mToolbar;
+	private RecyclerView mRecyclerView;
+	private MyRecyclerAdapter adapter;
+	/**
+	 * 保存播放列表下的Music (如果当前type是play_list_item的话 {@link #mType} )
+	 */
+	private List<MusicItem> mMusicItemList = new ArrayList<>();
+	/**
+	 * save current playlist name, if current type is play_list_item {@link #mType}
+	 */
+	private String currentListName;
+	/**
+	 * different type enter different UI(Activity)
+	 */
+	private String mType;
+	private Disposable mDisposable;
 
 	/**
 	 * add music to history list
@@ -75,16 +86,16 @@ public final class ListViewActivity extends BaseCompatActivity {
 		mToolbar.setNavigationOnClickListener(v -> onBackPressed());
 		mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-		mType = getIntent().getStringExtra(INTENT_START_BY);
+		mType = getIntent().getStringExtra(IntentTag.INTENT_START_BY);
 
 		if (mType != null) {
 			switch (mType) {
-				case PlayListFragment.ACTION_ADD_RECENT: {
+				case FragmentType.ACTION_ADD_RECENT: {
 					mToolbar.setTitle(getResources().getString(R.string.add_recent));
 
-					ArrayList<MusicItem> musicItems = new ArrayList<>(Data.sMusicItems);
+					mMusicItemList.addAll(Data.sMusicItems);
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-						musicItems.sort((o1, o2) -> {
+						mMusicItemList.sort((o1, o2) -> {
 							if (o1 == null || o2 == null) {
 								return 0;
 							}
@@ -92,12 +103,12 @@ public final class ListViewActivity extends BaseCompatActivity {
 						});
 					}
 
-					adapter = new MyRecyclerAdapter(this, musicItems, new MyRecyclerAdapter.Config(0, false));
+					adapter = new MyRecyclerAdapter(this, mMusicItemList, new MyRecyclerAdapter.Config(0, false));
 					mRecyclerView.setAdapter(adapter);
 				}
 				break;
 
-				case PlayListFragment.ACTION_FAVOURITE: {
+				case FragmentType.ACTION_FAVOURITE: {
 					mToolbar.setTitle(getResources().getString(R.string.my_favourite));
 
 					final PlayListItem playListItem = MusicUtil.getFavoritesPlaylist(this);
@@ -165,7 +176,7 @@ public final class ListViewActivity extends BaseCompatActivity {
 				break;
 
 				//点击播放列表中的一项
-				case PlayListFragment.ACTION_PLAY_LIST_ITEM: {
+				case FragmentType.ACTION_PLAY_LIST_ITEM: {
 					mToolbar.setTitle(getIntent().getStringExtra("play_list_name"));
 
 					currentListName = getIntent().getStringExtra("play_list_name");
@@ -225,48 +236,27 @@ public final class ListViewActivity extends BaseCompatActivity {
 				}
 				break;
 
-				case PlayListFragment.ACTION_HISTORY: {
+				case FragmentType.ACTION_HISTORY: {
 					mToolbar.setTitle(getString(R.string.history));
-					adapter = new MyRecyclerAdapter(ListViewActivity.this, Data.sHistoryPlayed, new MyRecyclerAdapter.Config(0, false));
+					mMusicItemList.addAll(Data.sHistoryPlayed);
+					adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList, new MyRecyclerAdapter.Config(0, false));
 					mRecyclerView.setAdapter(adapter);
 				}
 				break;
 
-				case PlayListFragment.ACTION_TRASH_CAN: {
+				case FragmentType.ACTION_TRASH_CAN: {
 					mToolbar.setTitle(getString(R.string.trash_can));
-					adapter = new MyRecyclerAdapter(ListViewActivity.this, Data.S_TRASH_CAN_LIST, new MyRecyclerAdapter.Config(0, false));
+					mMusicItemList.addAll(Data.S_TRASH_CAN_LIST);
+					adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList, new MyRecyclerAdapter.Config(0, false));
 					mRecyclerView.setAdapter(adapter);
 				}
 				break;
 				default:
 			}
-
 			initDone = true;
 		}
 
 	}
-
-	private AppBarLayout mAppBarLayout;
-	private Toolbar mToolbar;
-	private RecyclerView mRecyclerView;
-	private MyRecyclerAdapter adapter;
-
-	/**
-	 * 保存播放列表下的Music (如果当前type是play_list_item的话 {@link #mType} )
-	 */
-	private List<MusicItem> mMusicItemList = new ArrayList<>();
-
-	/**
-	 * save current playlist name, if current type is play_list_item {@link #mType}
-	 */
-	private String currentListName;
-
-	/**
-	 * different type enter different UI(Activity)
-	 */
-	private String mType;
-
-	private Disposable mDisposable;
 
 	@Override
 	public void inflateCommonMenu() {
@@ -300,6 +290,11 @@ public final class ListViewActivity extends BaseCompatActivity {
 			mDisposable.dispose();
 		}
 
+		mType = null;
+		adapter = null;
+		mRecyclerView = null;
+		mMusicItemList.clear();
+
 		// FIXME: 2019/5/26 当音乐播放玩去list中寻找下个，但是list正在进行操作，可能会报越界错误
 		Data.sPlayOrderList.clear();
 		Data.sPlayOrderList.addAll(Data.sPlayOrderListBackup);
@@ -309,6 +304,15 @@ public final class ListViewActivity extends BaseCompatActivity {
 			}
 		}
 		super.onDestroy();
+	}
+
+
+	public interface FragmentType {
+		String ACTION_ADD_RECENT = "add recent";
+		String ACTION_FAVOURITE = "favourite music";
+		String ACTION_HISTORY = "play history";
+		String ACTION_TRASH_CAN = "trash can";
+		String ACTION_PLAY_LIST_ITEM = "play_list_item";
 	}
 
 	@Override
@@ -339,7 +343,7 @@ public final class ListViewActivity extends BaseCompatActivity {
 		return adapter;
 	}
 
-	public final class NotLeakHandler extends Handler {
+	public static final class NotLeakHandler extends Handler {
 
 		/**
 		 * @see Message#what
@@ -358,8 +362,14 @@ public final class ListViewActivity extends BaseCompatActivity {
 		public final void handleMessage(Message msg) {
 			switch (msg.what) {
 				case NOTIFICATION_ITEM_INSERT: {
-					if (adapter != null) {
-//						adapter.notifyItemInserted(Data.sHistoryPlayed.size() - 1);
+					// 只有在历史页面才更新
+					// FIXME: 2019/5/26 crash: 播放列表中随机播放几次 然后退出进入MusicDetailFrag 快速点击下个 crash.
+					try {
+						if (mWeakReference.get().adapter != null && FragmentType.ACTION_HISTORY.equals(mWeakReference.get().mType)) {
+							mWeakReference.get().adapter.notifyItemInserted(Data.sHistoryPlayed.size() - 1);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
 				}
 				break;

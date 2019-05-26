@@ -101,8 +101,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	 */
 	public static final int DEFAULT_SHORT_DURATION = 20000;
 
-	public static boolean LOADING_DATA = false;
-
 	/**
 	 * 1 is MUSIC TAB
 	 * 2 is ALBUM TAB
@@ -1370,7 +1368,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		return null;
 	}
 
-	public final NotLeakHandler getHandler() {
+	public static NotLeakHandler getHandler() {
 		return mHandler;
 	}
 
@@ -1384,7 +1382,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 ////////////get///////////////////////get///////////////////////get/////////////////
 
-	public final class NotLeakHandler extends Handler {
+	public static final class NotLeakHandler extends Handler {
 
 		/**
 		 * @see Message#what
@@ -1395,7 +1393,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		public static final int SET_SLIDE_TOUCH_ENABLE = 5004;
 		public static final int SET_SLIDE_TOUCH_DISABLE = 5005;
 
-		@SuppressWarnings("unused")
 		private WeakReference<MainActivity> mWeakReference;
 
 		NotLeakHandler(MainActivity activity, Looper looper) {
@@ -1413,27 +1410,27 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 								.load(cover == null ? R.drawable.ic_audiotrack_24px : cover)
 								.transition(DrawableTransitionOptions.withCrossFade())
 								.diskCacheStrategy(DiskCacheStrategy.NONE)
-								.into(mNavHeaderImageView);
+								.into(mWeakReference.get().mNavHeaderImageView);
 					});
 				}
 				break;
 				case UP: {
-					mMainBinding.slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+					mWeakReference.get().getMainBinding().slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
 				}
 				break;
 
 				case DOWN: {
-					mMainBinding.slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+					mWeakReference.get().getMainBinding().slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
 				}
 				break;
 
 				case SET_SLIDE_TOUCH_ENABLE: {
-					mMainBinding.slidingLayout.setTouchEnabled(true);
+					mWeakReference.get().getMainBinding().slidingLayout.setTouchEnabled(true);
 				}
 				break;
 
 				case SET_SLIDE_TOUCH_DISABLE: {
-					mMainBinding.slidingLayout.setTouchEnabled(false);
+					mWeakReference.get().getMainBinding().slidingLayout.setTouchEnabled(false);
 				}
 				default:
 			}

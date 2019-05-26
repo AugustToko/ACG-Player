@@ -15,6 +15,7 @@
     <option name="id" value="Android" />
   </component>
   <component name="StateStore">
+    <option name="mTargetDirectory" value="Current Path" />
     <option name="mFastbootTarget" value="boot" />
   </component>
 </project>

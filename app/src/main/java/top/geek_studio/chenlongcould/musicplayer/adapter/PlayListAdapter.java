@@ -53,7 +53,7 @@ public final class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.
 		
 		view.setOnClickListener(v -> {
 			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
-			intent.putExtra("start_by", PlayListFragment.ACTION_PLAY_LIST_ITEM);
+			intent.putExtra("start_by", ListViewActivity.FragmentType.ACTION_PLAY_LIST_ITEM);
 			intent.putExtra("play_list_name", mPlayListItems.get(holder.getAdapterPosition()).getName());
 			intent.putExtra("play_list_id", mPlayListItems.get(holder.getAdapterPosition()).getId());
 			mMainActivity.startActivity(intent);

@@ -127,7 +127,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 		view.setOnClickListener(v -> {
 
 			Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
-			Data.sCurrentMusicItem = Data.sPlayOrderList.get(holder.getAdapterPosition());
+			Data.sCurrentMusicItem = mMusicItems.get(holder.getAdapterPosition());
 
 			Utils.SendSomeThing.sendPlay(mContext, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, "null");
 		});
