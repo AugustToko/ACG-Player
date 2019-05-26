@@ -30,7 +30,6 @@ import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.PlayListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentPlaylistBinding;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
-import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -98,19 +97,17 @@ public final class PlayListFragment extends BaseFragment {
 	 * load data
 	 */
 	private void initData() {
-		final PlayListItem item = MusicUtil.getFavoritesPlaylist(mMainActivity);
-
-		Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+		final Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
 			Data.sPlayListItems.clear();
 			Cursor cursor = mMainActivity.getContentResolver()
 					.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null);
 			if (cursor != null && cursor.moveToFirst()) {
 				do {
 					final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists._ID));
-					if (item != null && item.getId() == id) {
-						//匹配到喜爱列表 跳过
-						continue;
-					}
+//					if (item != null && item.getId() == id) {
+//						//匹配到喜爱列表 跳过
+//						continue;
+//					}
 					final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.NAME));
 					final String filePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATA));
 					final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATE_ADDED));

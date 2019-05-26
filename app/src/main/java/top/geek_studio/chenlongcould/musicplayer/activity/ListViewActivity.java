@@ -16,6 +16,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
@@ -26,8 +27,8 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 /**
  * @author chenlongcould
@@ -274,8 +275,12 @@ public final class ListViewActivity extends BaseCompatActivity {
 		mToolbar.setOnMenuItemClickListener(item -> {
 			switch (item.getItemId()) {
 				case R.id.menu_public_random: {
-					Data.sNextWillPlayItem = mMusicItemList.get(new Random().nextInt(mMusicItemList.size()));
-					Utils.SendSomeThing.sendPlay(ListViewActivity.this, ReceiverOnMusicPlay.ReceiveType.RECEIVE_TYPE_COMMON, ReceiverOnMusicPlay.TYPE_NEXT);
+					Data.sPlayOrderListBackup.addAll(Data.sPlayOrderList);
+					Data.sPlayOrderList.clear();
+					Data.sPlayOrderList.addAll(mMusicItemList);
+					Collections.shuffle(Data.sPlayOrderList);
+					Values.CurrentData.CURRENT_MUSIC_INDEX = 0;
+					Utils.SendSomeThing.sendPlay(this, ReceiverOnMusicPlay.ReceiveType.RECEIVE_TYPE_COMMON, ReceiverOnMusicPlay.TYPE_NEXT);
 				}
 				break;
 
@@ -293,6 +298,15 @@ public final class ListViewActivity extends BaseCompatActivity {
 	protected void onDestroy() {
 		if (mDisposable != null && !mDisposable.isDisposed()) {
 			mDisposable.dispose();
+		}
+
+		// FIXME: 2019/5/26 当音乐播放玩去list中寻找下个，但是list正在进行操作，可能会报越界错误
+		Data.sPlayOrderList.clear();
+		Data.sPlayOrderList.addAll(Data.sPlayOrderListBackup);
+		for (final MusicItem item : Data.sPlayOrderList) {
+			if (item.getMusicID() == Data.sCurrentMusicItem.getMusicID()) {
+				Values.CurrentData.CURRENT_MUSIC_INDEX = Data.sPlayOrderList.indexOf(item);
+			}
 		}
 		super.onDestroy();
 	}
@@ -345,7 +359,7 @@ public final class ListViewActivity extends BaseCompatActivity {
 			switch (msg.what) {
 				case NOTIFICATION_ITEM_INSERT: {
 					if (adapter != null) {
-						adapter.notifyItemInserted(Data.sHistoryPlayed.size() - 1);
+//						adapter.notifyItemInserted(Data.sHistoryPlayed.size() - 1);
 					}
 				}
 				break;

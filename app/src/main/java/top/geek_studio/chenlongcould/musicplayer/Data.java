@@ -60,6 +60,11 @@ public final class Data {
 	public static List<AlbumItem> sAlbumItems = new ArrayList<>();
 	public static List<AlbumItem> sAlbumItemsBackUp = new ArrayList<>();
 	public static List<MusicItem> sPlayOrderList = new ArrayList<>();
+
+	/**
+	 * for {@link top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity}
+	 */
+	public static List<MusicItem> sPlayOrderListBackup = new ArrayList<>();
 	public static List<PlayListItem> sPlayListItems = new ArrayList<>();
 	public static List<ArtistItem> sArtistItems = new ArrayList<>();
 	public static List<ArtistItem> sArtistItemsBackUp = new ArrayList<>();

@@ -546,6 +546,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 						Data.sMusicItems.add(item);
 						Data.sMusicItemsBackUp.add(item);
 						Data.sPlayOrderList.add(item);
+						Data.sPlayOrderListBackup.add(item);
 					}
 					while (cursor.moveToNext());
 					Log.i(Values.TAG_UNIVERSAL_ONE, "onCreate: The MusicData load done.");
