@@ -17,6 +17,7 @@ import android.os.Environment;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.*;
@@ -260,7 +261,20 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		// TODO: 2018/12/5 button
 		holder.mButton1.setOnClickListener(v -> Toast.makeText(mActivity, "1", Toast.LENGTH_SHORT).show());
 		holder.mButton2.setOnClickListener(v -> Toast.makeText(mActivity, "2", Toast.LENGTH_SHORT).show());
-		holder.mButton3.setOnClickListener(v -> Utils.Audio.setRingtone(mActivity, mMusicItems.get(holder.getAdapterPosition()).getMusicID()));
+		holder.mButton3.setOnClickListener(v -> {
+
+			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+				if (!Settings.System.canWrite(mActivity)) {
+					Intent intent = null;
+					intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS, Uri.parse("package:" + mActivity.getPackageName()));
+					mActivity.startActivityForResult(intent, Values.REQUEST_WRITE_EXTERNAL_STORAGE);
+				} else {
+					Utils.Audio.setRingtone(mActivity, mMusicItems.get(holder.getAdapterPosition()).getMusicID());
+				}
+			} else {
+				Utils.Audio.setRingtone(mActivity, mMusicItems.get(holder.getAdapterPosition()).getMusicID());
+			}
+		});
 		holder.mButton4.setOnClickListener(v -> mActivity.startActivity(Intent.createChooser(Utils.Audio.createShareSongFileIntent(mMusicItems.get(holder.getAdapterPosition()), mActivity), null)));
 
 		holder.mItemMenuButton.setOnClickListener(v -> holder.mPopupMenu.show());

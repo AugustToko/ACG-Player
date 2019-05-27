@@ -6,20 +6,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.databinding.DataBindingUtil;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
-
-import java.io.IOException;
-
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 import top.geek_studio.chenlongcould.geeklibrary.DialogUtil;
 import top.geek_studio.chenlongcould.geeklibrary.HttpUtil;
 import top.geek_studio.chenlongcould.musicplayer.App;
@@ -28,6 +23,8 @@ import top.geek_studio.chenlongcould.musicplayer.databinding.AboutDulTextBinding
 import top.geek_studio.chenlongcould.musicplayer.databinding.AboutSingleTextBinding;
 import top.geek_studio.chenlongcould.musicplayer.databinding.AboutThanksBinding;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityAboutAppBinding;
+
+import java.io.IOException;
 
 /**
  * @author chenlongcould
@@ -50,12 +47,39 @@ public class AboutActivity extends BaseCompatActivity {
 		@SuppressWarnings("unused") final AboutThanksBinding thanksBinding = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_thanks, (ViewGroup) mAppBinding.getRoot(), false);
 
 		setUpVersion();
+		setUpLicense();
+		setUpShare();
+		setUpIssue();
+		setUpPrivacyPolicy();
+
 		setUpAuthor();
 		setUpWeb();
 		setUpUpdate();
 		setUpMail();
-		setUpLicense();
-		setUpShare();
+	}
+
+	private void setUpPrivacyPolicy() {
+		final AboutDulTextBinding privacy = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_dul_text, (ViewGroup) mAppBinding.getRoot(), false);
+		privacy.ico.setBackgroundResource(R.drawable.ic_announcement_black_24dp);
+		privacy.mainText.setText(getString(R.string.privacy_policy));
+		privacy.subText.setText(getString(R.string.click_to_learn_more));
+		privacy.getRoot().setOnClickListener(v -> {
+			Uri uri = Uri.parse(App.PRIVACY_POLICY_URL);
+			startActivity(new Intent(Intent.ACTION_VIEW, uri));
+		});
+		mAppBinding.card1.addView(privacy.getRoot());
+	}
+
+	private void setUpIssue() {
+		final AboutDulTextBinding binding = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_dul_text, (ViewGroup) mAppBinding.getRoot(), false);
+		binding.ico.setBackgroundResource(R.drawable.ic_bug_report_black_24dp);
+		binding.mainText.setText(getString(R.string.bug_report_or_feature_request));
+		binding.subText.setText(App.ISSUE_URL);
+		binding.getRoot().setOnClickListener(v -> {
+			Uri uri = Uri.parse(App.ISSUE_URL);
+			startActivity(new Intent(Intent.ACTION_VIEW, uri));
+		});
+		mAppBinding.card1.addView(binding.getRoot());
 	}
 	
 	private void setUpVersion() {
@@ -83,7 +107,7 @@ public class AboutActivity extends BaseCompatActivity {
 		web.ico.setImageResource(R.drawable.ic_open_in_browser_black_24dp);
 		web.mainText.setText(getString(R.string.open_blog));
 		web.subText.setText(App.MY_WEB_SITE);
-		web.aboutItemVer.setOnClickListener(v -> {
+		web.body.setOnClickListener(v -> {
 			Uri uri = Uri.parse(App.MY_WEB_SITE);
 			startActivity(new Intent(Intent.ACTION_VIEW, uri));
 		});

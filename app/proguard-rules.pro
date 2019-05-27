@@ -76,19 +76,19 @@
 -dontwarn com.squareup.haha.**
 -dontwarn top.geek_studio.chenlongcould.geeklibrary.**
 
+-dontwarn java.nio.file.*
+
+
 #------------------okhttp
 -dontwarn com.squareup.okhttp.**
--keep class com.squareup.okhttp.**{*;}
-
-# okhttp
--keep class okhttp3.** { *; }
--keep interface okhttp3.** { *; }
 -dontwarn okhttp3.**
-
-# okio
--keep class sun.misc.Unsafe { *; }
--keep class okio.**{*;}
--dontwarn java.nio.file.*
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
 -dontwarn okio.**
+
+-keep class com.squareup.okhttp.**{*;}
+-keep class sun.misc.Unsafe { *; }
+-keep class okio.**{*;}
+-keep class okhttp3.** { *; }
+-keep interface okhttp3.** { *; }
+
 #------------------okhttp

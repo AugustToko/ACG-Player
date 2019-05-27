@@ -21,6 +21,8 @@ public interface Values {
 	 * permission RequestCode
 	 */
 	byte REQUEST_WRITE_EXTERNAL_STORAGE = 60;
+	byte REQUEST_WRITE_SETTINGS = 61;
+
 	byte MAX_HEIGHT_AND_WIDTH = 100;
 
 	/**

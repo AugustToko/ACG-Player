@@ -10,9 +10,9 @@ import java.util.concurrent.TimeUnit;
  */
 public final class HttpUtil {
 
-    /**
-     * sample okHttp util
-     */
+	/**
+	 * sample okHttp util
+	 */
 	public static void sedOkHttpRequest(String address, okhttp3.Callback callback) {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .retryOnConnectionFailure(false)
@@ -22,5 +22,13 @@ public final class HttpUtil {
         Request request = new Request.Builder().url(address).build();
         //处理服务器响应
         okHttpClient.newCall(request).enqueue(callback);
-    }
+
+//		OkHttpClient client = new OkHttpClient();
+//
+//		Request request = new Request.Builder()
+//				.url(address)
+//				.build();
+//		client.newCall(request).enqueue(callback);
+
+	}
 }

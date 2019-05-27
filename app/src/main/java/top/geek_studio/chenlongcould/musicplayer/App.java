@@ -34,7 +34,9 @@ public final class App extends Application {
 	
 	public static final String SHORT_CUT_ID_1 = "id1";
 	public static final String LAST_FM_KEY = "726e129841377374f2c8c804facb6d11";
-	public static final String MY_WEB_SITE = "https://blog.geek-studio.top/";
+	public static final String MY_WEB_SITE = "http://www.geek-cloud.top/";
+	public static final String PRIVACY_POLICY_URL = "https://github.com/AugustToko/ACG-Player/blob/master/Privacy%20policy.md";
+	public static final String ISSUE_URL = "https://github.com/AugustToko/ACG-Player/issues/new/choose";
 	public static final String VERSION_CODE = "ver_code";
 	public static final int VER_CODE = 74;
 	public static final String SHORTCUT_RANDOM = "SHORTCUT_RANDOM";

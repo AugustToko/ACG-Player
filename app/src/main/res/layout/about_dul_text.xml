@@ -12,12 +12,12 @@
 <layout xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/about_item_ver"
-        android:layout_width="match_parent"
-        android:layout_height="55dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:gravity="center_vertical">
+                                                       xmlns:tools="http://schemas.android.com/tools"
+                                                       android:id="@+id/body"
+                                                       android:layout_width="match_parent"
+                                                       android:layout_height="55dp"
+                                                       android:background="?android:attr/selectableItemBackground"
+                                                       android:gravity="center_vertical">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/ico"
@@ -36,32 +36,34 @@
             tools:src="@drawable/ic_info_outline_black_24dp" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/sub_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
-            android:textColor="#7c7c7c"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/main_text"
-            tools:text="1.0" />
+                android:id="@+id/sub_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:textColor="#7c7c7c"
+                android:textSize="12sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/main_text"
+                tools:text="1.0" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/main_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="36dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:textColor="?android:textColorPrimary"
-            android:textSize="18sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/ico"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="版本" />
+                android:id="@+id/main_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="36dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:textColor="?android:textColorPrimary"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/ico"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="版本" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

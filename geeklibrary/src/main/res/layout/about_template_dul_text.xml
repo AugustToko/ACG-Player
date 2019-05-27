@@ -12,12 +12,12 @@
 <layout xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/about_item_ver"
-        android:layout_width="match_parent"
-        android:layout_height="55dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:gravity="center_vertical">
+                                                       xmlns:tools="http://schemas.android.com/tools"
+                                                       android:id="@+id/body"
+                                                       android:layout_width="match_parent"
+                                                       android:layout_height="55dp"
+                                                       android:background="?android:attr/selectableItemBackground"
+                                                       android:gravity="center_vertical">
 
         <ImageView
             android:id="@+id/ico"

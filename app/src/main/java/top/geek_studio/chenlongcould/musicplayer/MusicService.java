@@ -14,7 +14,6 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -127,6 +126,8 @@ public final class MusicService extends Service {
 				}
 			}
 
+			stopForeground(true);
+
 			mMediaPlayer.reset();
 		}
 
@@ -204,7 +205,6 @@ public final class MusicService extends Service {
 
 	@Override
 	public void onCreate() {
-		Log.d(TAG, "onCreate: do it");
 		final PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
 		wakeLock.setReferenceCounted(false);
@@ -280,7 +280,7 @@ public final class MusicService extends Service {
 				.setContentIntent(pi)
 				.setVisibility(Notification.VISIBILITY_PUBLIC)
 				.setAutoCancel(false)
-				.setOngoing(mMediaPlayer.isPlaying());
+				.setOngoing(true);
 
 		if (mMediaPlayer.isPlaying()) {
 			Notification.Action[] actions = {
@@ -322,7 +322,7 @@ public final class MusicService extends Service {
 				.setPriority(NotificationCompat.PRIORITY_DEFAULT)
 				.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 				.setAutoCancel(false)
-				.setOngoing(mMediaPlayer.isPlaying());
+				.setOngoing(true);
 		return builder;
 	}
 

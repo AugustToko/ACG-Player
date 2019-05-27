@@ -6,14 +6,14 @@
     "apkData": {
       "type": "MAIN",
       "splits": [],
-      "versionCode": 90,
-      "versionName": "2.6.3.1(20190526)",
+      "versionCode": 92,
+      "versionName": "2.6.3.5(20190527)",
       "enabled": true,
-      "outputFile": "app-release_20190526_2.6.3.1(20190526)_(90).apk",
+      "outputFile": "app-release_20190527_2.6.3.5(20190527)_(92).apk",
       "fullName": "release",
       "baseName": "release"
     },
-    "path": "app-release_20190526_2.6.3.1(20190526)_(90).apk",
+    "path": "app-release_20190527_2.6.3.5(20190527)_(92).apk",
     "properties": {}
   }
 ]

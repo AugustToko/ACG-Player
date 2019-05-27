@@ -23,6 +23,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="top.geek_studio.chenlongcould.musicplayer.Service.MyMusicService" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
 
     <application
             android:name=".App"
@@ -39,12 +40,6 @@
             tools:replace="android:allowBackup"
             tools:targetApi="n"
             >
-        <activity
-                android:name=".activity.SongDetailActivity"
-                android:label="@string/title_activity_song_detail"
-                android:theme="@style/LightTheme.NoActionBar"
-                >
-        </activity>
         <activity android:name=".activity.Test2Activity" />
         <activity
                 android:name=".activity.ScrollingActivity"
@@ -75,7 +70,54 @@
                 android:launchMode="singleTask"
                 android:theme="@style/LightTheme"
                 android:windowSoftInputMode="stateHidden|adjustPan"
-                />
+                >
+            <intent-filter>
+                <action android:name="android.intent.action.MUSIC_PLAYER" />
+                <category android:name="android.intent.category.APP_MUSIC" />
+
+            </intent-filter>
+
+            <!--content-->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="content" />
+                <data android:mimeType="audio/*" />
+                <data android:mimeType="application/ogg" />
+                <data android:mimeType="application/x-ogg" />
+                <data android:mimeType="application/itunes" />
+            </intent-filter>
+
+            <!--file-->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="file" />
+                <data android:mimeType="audio/*" />
+                <data android:mimeType="application/ogg" />
+                <data android:mimeType="application/x-ogg" />
+                <data android:mimeType="application/itunes" />
+            </intent-filter>
+
+            <!--http-->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="http" />
+                <data android:mimeType="audio/*" />
+                <data android:mimeType="application/ogg" />
+                <data android:mimeType="application/x-ogg" />
+                <data android:mimeType="application/itunes" />
+            </intent-filter>
+
+        </activity>
         <activity
                 android:name=".activity.SplashActivity"
                 android:exported="true"
@@ -84,7 +126,6 @@
                 >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.DEFAULT" />

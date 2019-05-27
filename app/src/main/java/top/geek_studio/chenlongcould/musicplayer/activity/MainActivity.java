@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.*;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
@@ -223,6 +224,29 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
 
 		loadData();
+
+	}
+
+	/**
+	 * check if open file, uri, http or others.
+	 */
+	private void receivedIntentCheck(@Nullable Intent intent) {
+		if (intent == null) {
+			return;
+		}
+
+		Uri uri = intent.getData();
+		String mimeType = intent.getType();
+		String action = intent.getAction();
+
+		Log.d(TAG, "receivedIntentCheck: " + uri);
+		Log.d(TAG, "receivedIntentCheck: " + mimeType);
+	}
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		receivedIntentCheck(intent);
 	}
 
 	@Override
@@ -287,7 +311,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		}
 
 		//2
-		if (musicDetailFragment.getSlidingUpPanelLayout() != null
+		if (musicDetailFragment != null && musicDetailFragment.getSlidingUpPanelLayout() != null
 				&& musicDetailFragment.getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
 			musicDetailFragment.getSlidingUpPanelLayout().setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
 			return;
@@ -299,12 +323,13 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			return;
 		}
 
-		final File file = fileViewFragment.getCurrentFile();
-		if (file != null && !file.getPath().equals(Environment.getExternalStorageDirectory().getPath())) {
-			fileViewFragment.onBackPressed();
-			return;
+		if (fileViewFragment != null) {
+			final File file = fileViewFragment.getCurrentFile();
+			if (file != null && !file.getPath().equals(Environment.getExternalStorageDirectory().getPath())) {
+				fileViewFragment.onBackPressed();
+				return;
+			}
 		}
-
 		//4
 		if (backPressed) {
 			finish();
@@ -591,9 +616,9 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					builder.setTitle("Error")
 							.setMessage("Can not find any music or the cursor is null, Will exit.")
 							.setCancelable(false)
-							.setNegativeButton("Exit", (dialog, which) -> {
+							.setNegativeButton("OK", (dialog, which) -> {
 								dialog.cancel();
-								fullExit();
+//								fullExit();
 							});
 					builder.show();
 					return;
@@ -602,21 +627,22 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				setSubtitle(Data.sPlayOrderList.size() + " Songs");
 
 				initFragmentData();
+
+				DBArtSync.startActionSyncAlbum(MainActivity.this);
+				DBArtSync.startActionSyncArtist(MainActivity.this);
+
+				receivedIntentCheck(getIntent());
 			}
 
 			@Override
 			public final void onError(Throwable throwable) {
 				load.dismiss();
 				Toast.makeText(MainActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
-				fullExit();
+//				fullExit();
 			}
 
 			@Override
 			public final void onComplete() {
-				load.dismiss();
-				//sync
-				DBArtSync.startActionSyncAlbum(MainActivity.this);
-				DBArtSync.startActionSyncArtist(MainActivity.this);
 			}
 		});
 

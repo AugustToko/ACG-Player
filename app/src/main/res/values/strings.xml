@@ -181,4 +181,7 @@
     <string name="artist_layout">Artist layout</string>
     <string name="title_activity_song_detail">SongDetailActivity</string>
     <string name="detail">Detail</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="click_to_learn_more">Click to learn more</string>
+    <string name="bug_report_or_feature_request">Bug report or Feature request</string>
 </resources>
