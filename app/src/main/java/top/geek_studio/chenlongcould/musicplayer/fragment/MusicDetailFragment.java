@@ -1070,46 +1070,7 @@ public final class MusicDetailFragment extends BaseFragment {
 			return false;
 		});
 
-		mToolbar.setNavigationOnClickListener(v -> mMainActivity.getHandler().sendEmptyMessage(MainActivity.NotLeakHandler.DOWN));
-	}
-
-	/**
-	 * TODO will use mvp
-	 * */
-	static class P {
-		/**
-		 * the action drop to crash
-		 */
-		public static void dropToTrash(@NonNull Context context, @Nullable MusicItem item) {
-			if (item == null) return;
-
-			if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, true)) {
-				final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-				builder.setTitle(context.getString(R.string.sure_int));
-				builder.setMessage(context.getString(R.string.drop_to_trash_can));
-				final FrameLayout frameLayout = new FrameLayout(context);
-				final CheckBox checkBox = new CheckBox(context);
-				checkBox.setText(context.getString(R.string.do_not_show_again));
-				frameLayout.addView(checkBox);
-				final FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-				params.leftMargin = (int) context.getResources().getDimension(R.dimen.margin_16);
-				checkBox.setLayoutParams(params);
-				builder.setView(frameLayout);
-				builder.setCancelable(true);
-				builder.setNegativeButton(context.getString(R.string.sure), (dialog, which) -> {
-					if (checkBox.isChecked()) {
-						PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, false).apply();
-					}
-					Data.S_TRASH_CAN_LIST.add(item);
-					dialog.dismiss();
-				});
-				builder.setPositiveButton(context.getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
-				builder.show();
-			} else {
-				Data.S_TRASH_CAN_LIST.add(item);
-			}
-		}
-
+		mToolbar.setNavigationOnClickListener(v -> MainActivity.getHandler().sendEmptyMessage(MainActivity.NotLeakHandler.DOWN));
 	}
 
 	private void setClickListener() {
@@ -1356,13 +1317,46 @@ public final class MusicDetailFragment extends BaseFragment {
 			Toast.makeText(mMainActivity, getString(R.string.done), Toast.LENGTH_SHORT).show();
 		});
 
-		mNowPlayingBody.setOnClickListener(v -> {
-			if (Data.HAS_PLAYED) {
-				mMainActivity.getHandler().sendEmptyMessage(MainActivity.NotLeakHandler.UP);
+		mNowPlayingBody.setOnClickListener(v -> MainActivity.getHandler().sendEmptyMessage(MainActivity.NotLeakHandler.UP));
+	}
+
+	/**
+	 * TODO will use mvp
+	 */
+	static class P {
+		/**
+		 * the action drop to crash
+		 */
+		public static void dropToTrash(@NonNull Context context, @Nullable MusicItem item) {
+			if (item == null) return;
+
+			if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, true)) {
+				final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+				builder.setTitle(context.getString(R.string.sure_int));
+				builder.setMessage(context.getString(R.string.drop_to_trash_can));
+				final FrameLayout frameLayout = new FrameLayout(context);
+				final CheckBox checkBox = new CheckBox(context);
+				checkBox.setText(context.getString(R.string.do_not_show_again));
+				frameLayout.addView(checkBox);
+				final FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+				params.leftMargin = (int) context.getResources().getDimension(R.dimen.margin_16);
+				checkBox.setLayoutParams(params);
+				builder.setView(frameLayout);
+				builder.setCancelable(true);
+				builder.setNegativeButton(context.getString(R.string.sure), (dialog, which) -> {
+					if (checkBox.isChecked()) {
+						PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, false).apply();
+					}
+					Data.S_TRASH_CAN_LIST.add(item);
+					dialog.dismiss();
+				});
+				builder.setPositiveButton(context.getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
+				builder.show();
 			} else {
-				Utils.Ui.fastToast(mMainActivity, "No music playing.");
+				Data.S_TRASH_CAN_LIST.add(item);
 			}
-		});
+		}
+
 	}
 
 	private void clickPlayButton() {
