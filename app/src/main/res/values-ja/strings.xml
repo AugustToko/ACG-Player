@@ -13,8 +13,7 @@
 	<string name="music">音楽</string>
 	<string name="play_list">プレイリスト</string>
 	<string name="add_recent">最近追加</string>
-	<string name="my_favourite">私のお気に入り</string>
-	<string name="color_accent">色のアクセント</string>
+    <string name="color_accent">色のアクセント</string>
 	<string name="colorprimarydark">カラープライマリダーク</string>
 	<string name="settings">設定</string>
 	<string name="about">約</string>

@@ -50,8 +50,6 @@ public final class FileViewFragment extends BaseFragment {
 
 	private FragmentFileViewerBinding mFileViewerBinding;
 
-	private boolean HAS_LOAD = false;
-
 	private MainActivity mMainActivity;
 
 	private List<File> mFileItems = new ArrayList<>();
@@ -70,6 +68,22 @@ public final class FileViewFragment extends BaseFragment {
 	}
 
 	@Override
+	public void reloadData() {
+		mFileItems.clear();
+		initData();
+	}
+
+	public void initData() {
+		final File file = Environment.getExternalStorageDirectory();
+		mFileItems.addAll(new ArrayList<>(Arrays.asList(file.listFiles())));
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+			mFileItems.sort(File::compareTo);
+		}
+		mCurrentFile = file;
+		mMyAdapter.notifyDataSetChanged();
+	}
+
+	@Override
 	public void onAttach(@NotNull Context context) {
 		super.onAttach(context);
 		mMainActivity = (MainActivity) context;
@@ -81,19 +95,10 @@ public final class FileViewFragment extends BaseFragment {
 		mFileViewerBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_file_viewer, container, false);
 		mFileViewerBinding.includeRecyclerView.recyclerView.setLayoutManager(new LinearLayoutManager(mMainActivity));
 		mFileViewerBinding.includeRecyclerView.recyclerView.addItemDecoration(new DividerItemDecoration(mMainActivity, DividerItemDecoration.VERTICAL));
-
-		if (!HAS_LOAD) {
-			final File file = Environment.getExternalStorageDirectory();
-			mFileItems.addAll(new ArrayList<>(Arrays.asList(file.listFiles())));
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-				mFileItems.sort(File::compareTo);
-			}
-			mCurrentFile = file;
-		}
-
 		mMyAdapter = new MyAdapter(mFileItems);
 		mFileViewerBinding.includeRecyclerView.recyclerView.setAdapter(mMyAdapter);
-		HAS_LOAD = true;
+
+		initData();
 
 		return mFileViewerBinding.getRoot();
 	}

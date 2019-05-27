@@ -150,7 +150,13 @@ public interface Values {
 		public static final String MODE_CAR = "car";
 	}
 
-	final class Style {
+	/**
+	 * 对于 {@link top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment} 中的背景进行样式设定
+	 *
+	 * @deprecated use {@link top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment.BackgroundStyle}
+	 */
+	@Deprecated
+	final class BackgroundStyle {
 		public static final String STYLE_BACKGROUND_BLUR = "BLUR";
 		public static final String STYLE_BACKGROUND_AUTO_COLOR = "AUTO_COLOR";
 

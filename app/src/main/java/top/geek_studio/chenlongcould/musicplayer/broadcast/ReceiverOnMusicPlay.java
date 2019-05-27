@@ -47,7 +47,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 	////////////////////////MEDIA CONTROL/////////////////////////////
 
-	public static void setDataSource(@NonNull final MusicItem item) {
+	public synchronized static void setDataSource(@NonNull final MusicItem item) {
 		if (Data.sMusicBinder == null) {
 			Log.d(TAG, "MusicBinder is null.");
 			return;
@@ -66,7 +66,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		}
 	}
 
-	public static void playMusic() {
+	public synchronized static void playMusic() {
 		if (Data.sMusicBinder == null) {
 			Log.d(TAG, "MusicBinder is null.");
 			return;
@@ -83,7 +83,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		}
 	}
 
-	public static void pauseMusic() {
+	public synchronized static void pauseMusic() {
 		if (Data.sMusicBinder == null) {
 			Log.d(TAG, "MusicBinder is null.");
 			return;
@@ -96,7 +96,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		}
 	}
 
-	public static void resetMusic(String... args) {
+	public synchronized static void resetMusic(String... args) {
 		if (args != null && args.length > 0) {
 			Log.d(TAG, "resetMusic: args: " + Arrays.toString(args));
 		}
@@ -117,7 +117,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		}
 	}
 
-	public static void prepare() {
+	public synchronized static void prepare() {
 		if (Data.sMusicBinder == null) {
 			Log.d(TAG, "MusicBinder is null.");
 			return;
@@ -192,7 +192,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 	}
 
 	@SuppressWarnings("unused")
-	public static void stopMusic() {
+	public synchronized static void stopMusic() {
 		if (Data.sMusicBinder == null) {
 			Log.d(TAG, "MusicBinder is null.");
 			return;
@@ -206,7 +206,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 	}
 
 	@SuppressWarnings("unused")
-	public static void setMusicItem(final MusicItem item) {
+	public synchronized static void setMusicItem(final MusicItem item) {
 		if (Data.sMusicBinder != null) {
 			try {
 				Data.sMusicBinder.setCurrentMusicData(item);
@@ -232,7 +232,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		return null;
 	}
 
-	public static void sureCar() {
+	public synchronized static void sureCar() {
 		//set data (image and name)
 		if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.UIMODE.MODE_CAR)) {
 			CarViewActivity.sendEmptyMessage(CarViewActivity.NotLeakHandler.SET_DATA);
@@ -246,7 +246,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 	 *
 	 * @param playType 播放的模式 (向前 或者 向后)
 	 */
-	private int getIndex(@NonNull String playType) {
+	public synchronized int getIndex(@NonNull String playType) {
 		int targetIndex = 0;
 		if (playType.contains(TYPE_NEXT)) {
 			targetIndex = Values.CurrentData.CURRENT_MUSIC_INDEX + 1;
@@ -317,7 +317,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 					prepare();
 					playMusic();
 
-					final Bitmap cover = Utils.Audio.getCoverBitmap(context, Data.sCurrentMusicItem.getAlbumId());
+					final Bitmap cover = Utils.Audio.getCoverBitmapFull(context, Data.sCurrentMusicItem.getAlbumId());
 					Data.setCurrentCover(cover);
 
 					MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
@@ -341,7 +341,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 						prepare();
 						playMusic();
 
-						final Bitmap cover = Utils.Audio.getCoverBitmap(context, Data.sNextWillPlayItem.getAlbumId());
+						final Bitmap cover = Utils.Audio.getCoverBitmapFull(context, Data.sNextWillPlayItem.getAlbumId());
 						Data.setCurrentCover(cover);
 
 						MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
@@ -387,7 +387,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 					prepare();
 					playMusic();
 
-					final Bitmap cover = Utils.Audio.getCoverBitmap(context, Data.sCurrentMusicItem.getAlbumId());
+					final Bitmap cover = Utils.Audio.getCoverBitmapFull(context, Data.sCurrentMusicItem.getAlbumId());
 					Data.setCurrentCover(cover);
 
 					//load data
@@ -419,7 +419,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 				//by MusicListFragment item click
 				case CASE_TYPE_ITEM_CLICK: {
 
-					Data.setCurrentCover(Utils.Audio.getCoverBitmap(context, Data.sCurrentMusicItem.getAlbumId()));
+					Data.setCurrentCover(Utils.Audio.getCoverBitmapFull(context, Data.sCurrentMusicItem.getAlbumId()));
 
 					//set current data
 					resetMusic();

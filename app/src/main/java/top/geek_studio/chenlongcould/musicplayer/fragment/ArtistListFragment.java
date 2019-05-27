@@ -55,16 +55,40 @@ public final class ArtistListFragment extends BaseFragment {
 
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.fragment_album_list, container, false);
-	}
+		View view = inflater.inflate(R.layout.fragment_album_list, container, false);
+		mRecyclerView = view.findViewById(R.id.recycler_view);
+		mRecyclerView.setHasFixedSize(true);
 
-	@Override
-	public void setUserVisibleHint(boolean isVisibleToUser) {
-		if (isVisibleToUser) {
-			if (Data.sArtistItems.size() == 0) {
-				initArtistData();
+		//get type
+		final SharedPreferences mDef = PreferenceManager.getDefaultSharedPreferences(getActivity());
+		int type = mDef.getInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.GRID_TYPE);
+		switch (type) {
+			case MyRecyclerAdapter2ArtistList.LINEAR_TYPE: {
+				final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mMainActivity);
+				linearLayoutManager.setItemPrefetchEnabled(true);
+				linearLayoutManager.setInitialPrefetchItemCount(6);
+				mRecyclerView.setLayoutManager(linearLayoutManager);
+			}
+			break;
+			case MyRecyclerAdapter2ArtistList.GRID_TYPE: {
+				final GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity()
+						, mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2));
+				gridLayoutManager.setItemPrefetchEnabled(true);
+				gridLayoutManager.setInitialPrefetchItemCount(6);
+				mRecyclerView.setLayoutManager(gridLayoutManager);
+			}
+			break;
+			default: {
+				mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 			}
 		}
+
+		mAdapter2ArtistList = new MyRecyclerAdapter2ArtistList(mMainActivity, Data.sArtistItems, type);
+		mRecyclerView.setAdapter(mAdapter2ArtistList);
+
+		initArtistData();
+
+		return view;
 	}
 
 	private void initArtistData() {
@@ -109,49 +133,10 @@ public final class ArtistListFragment extends BaseFragment {
 
 					@Override
 					public void onComplete() {
-						setRecyclerViewData();
 						mMainActivity.getMainBinding().toolBar.setSubtitle(Data.sArtistItems.size() + " Artists");
 						load.dismiss();
 					}
 				});
-	}
-
-	/**
-	 * by firstStartApp, change Layout...
-	 */
-	public void setRecyclerViewData() {
-
-		if (getView() != null) {
-			mRecyclerView = getView().findViewById(R.id.recycler_view);
-			mRecyclerView.setHasFixedSize(true);
-
-			//get type
-			final SharedPreferences mDef = PreferenceManager.getDefaultSharedPreferences(getActivity());
-			int type = mDef.getInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.GRID_TYPE);
-			switch (type) {
-				case MyRecyclerAdapter2ArtistList.LINEAR_TYPE: {
-					final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mMainActivity);
-					linearLayoutManager.setItemPrefetchEnabled(true);
-					linearLayoutManager.setInitialPrefetchItemCount(6);
-					mRecyclerView.setLayoutManager(linearLayoutManager);
-				}
-				break;
-				case MyRecyclerAdapter2ArtistList.GRID_TYPE: {
-					final GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity()
-							, mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2));
-					gridLayoutManager.setItemPrefetchEnabled(true);
-					gridLayoutManager.setInitialPrefetchItemCount(6);
-					mRecyclerView.setLayoutManager(gridLayoutManager);
-				}
-				break;
-				default: {
-					mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-				}
-			}
-
-			mAdapter2ArtistList = new MyRecyclerAdapter2ArtistList(mMainActivity, Data.sArtistItems, type);
-			mRecyclerView.setAdapter(mAdapter2ArtistList);
-		}
 	}
 
 	public RecyclerView getRecyclerView() {
@@ -165,5 +150,12 @@ public final class ArtistListFragment extends BaseFragment {
 	@Override
 	protected void setFragmentType(FragmentType fragmentType) {
 		fragmentType = FragmentType.ARTIST_FRAGMENT;
+	}
+
+	@Override
+	public void reloadData() {
+		Data.sArtistItems.clear();
+		Data.sArtistItemsBackUp.clear();
+		initArtistData();
 	}
 }

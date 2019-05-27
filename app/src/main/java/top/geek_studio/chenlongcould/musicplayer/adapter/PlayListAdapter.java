@@ -1,7 +1,6 @@
 package top.geek_studio.chenlongcould.musicplayer.adapter;
 
 import android.content.Intent;
-import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -64,7 +63,8 @@ public final class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.
 			holder.mPopupMenu.show();
 			return true;
 		});
-		
+
+		// TODO: 2019/5/27
 		holder.mPopupMenu.setOnMenuItemClickListener(item -> {
 			switch (item.getItemId()) {
 				
@@ -108,6 +108,9 @@ public final class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 		viewHolder.mPlayListName.setText(mPlayListItems.get(i).getName());
+		if (mPlayListItems.get(i).getName().equals(mMainActivity.getString(R.string.favorites))) {
+			viewHolder.mPopupMenu.getMenu().removeItem(Menu.FIRST + 5);
+		}
 	}
 	
 	@Override
@@ -132,12 +135,14 @@ public final class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.
 			
 			mPopupMenu = new PopupMenu(mMainActivity, mItemMenu);
 			mMenu = mPopupMenu.getMenu();
-			
-			Resources resources = mMainActivity.getResources();
-			
-			mMenu.add(Menu.NONE, Menu.FIRST, 0, resources.getString(R.string.del));
-			mMenu.add(Menu.NONE, Menu.FIRST + 1, 0, resources.getString(R.string.save_as));
-			mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, resources.getString(R.string.play));
+
+			mMenu.add(Menu.NONE, Menu.FIRST, 0, mMainActivity.getString(R.string.del));
+			mMenu.add(Menu.NONE, Menu.FIRST + 1, 0, mMainActivity.getString(R.string.save_as) + "M3U");
+			mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, mMainActivity.getString(R.string.play));
+			mMenu.add(Menu.NONE, Menu.FIRST + 3, 0, "Duplicate");
+			mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, "Shuffle Playback");
+			mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, "Rename");
+			mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, "Clear this play list");
 		}
 	}
 }

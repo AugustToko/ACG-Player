@@ -1,10 +1,6 @@
 package top.geek_studio.chenlongcould.musicplayer.utils;
 
-import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.Intent;
+import android.content.*;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
@@ -14,20 +10,20 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
 import top.geek_studio.chenlongcould.geeklibrary.Private;
 import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
 import top.geek_studio.chenlongcould.musicplayer.model.Playlist;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * @author Karim Abou Zeid (kabouzeid)
@@ -280,6 +276,7 @@ public class MusicUtil {
 	}
 
 	public static void toggleFavorite(@NonNull final Context context, @Nullable final MusicItem song) {
+		PlayListFragment.reloadDataByHandler();
 		if (song != null) {
 			if (isFavorite(context, song)) {
 				PlayListItem item = getFavoritesPlaylist(context);

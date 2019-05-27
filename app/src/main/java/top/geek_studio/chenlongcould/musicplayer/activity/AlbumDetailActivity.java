@@ -388,7 +388,7 @@ public final class AlbumDetailActivity extends BaseCompatActivity {
 			Toast.makeText(this, "Can not set up album cover.", Toast.LENGTH_SHORT).show();
 			return;
 		}
-		final Bitmap bitmap = Utils.Audio.getCoverBitmap(this, id);
+		final Bitmap bitmap = Utils.Audio.getCoverBitmapFull(this, id);
 		if (bitmap != null) {
 			toolbarColor = Palette.from(bitmap).generate().getVibrantColor(Utils.Ui.getPrimaryColor(this));
 		} else {

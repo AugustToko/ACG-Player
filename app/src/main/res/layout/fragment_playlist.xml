@@ -112,105 +112,105 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/line_color"
-            app:layout_constraintTop_toBottomOf="@+id/add_recent" />
+        <!--<View-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="1dp"-->
+        <!--android:background="@color/line_color"-->
+        <!--app:layout_constraintTop_toBottomOf="@+id/add_recent" />-->
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/favourite"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:background="@drawable/my_ripple_mask">
+        <!--<androidx.constraintlayout.widget.ConstraintLayout-->
+        <!--android:id="@+id/favourite"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="60dp"-->
+        <!--android:background="@drawable/my_ripple_mask">-->
 
-            <ImageView
-                android:id="@+id/fav_image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
-                android:contentDescription="@string/app_name"
-                android:src="@drawable/ic_trending_up_grey_600_24dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <!--<ImageView-->
+        <!--android:id="@+id/fav_image"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="center_vertical"-->
+        <!--android:layout_marginStart="16dp"-->
+        <!--android:layout_marginTop="10dp"-->
+        <!--android:layout_marginBottom="10dp"-->
+        <!--android:contentDescription="@string/app_name"-->
+        <!--android:src="@drawable/ic_trending_up_grey_600_24dp"-->
+        <!--app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--app:layout_constraintStart_toStartOf="parent"-->
+        <!--app:layout_constraintTop_toTopOf="parent" />-->
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/fragment_play_list_play_history_menu"
-                app:layout_constraintStart_toEndOf="@+id/fav_image"
-                app:layout_constraintTop_toTopOf="parent">
+        <!--<androidx.constraintlayout.widget.ConstraintLayout-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginStart="16dp"-->
+        <!--android:layout_marginTop="8dp"-->
+        <!--android:layout_marginEnd="16dp"-->
+        <!--android:layout_marginBottom="8dp"-->
+        <!--app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--app:layout_constraintEnd_toStartOf="@+id/fragment_play_list_play_history_menu"-->
+        <!--app:layout_constraintStart_toEndOf="@+id/fav_image"-->
+        <!--app:layout_constraintTop_toTopOf="parent">-->
 
-                <TextView
-                    android:id="@+id/favourite_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="@string/app_name"
-                    android:textSize="12sp"
-                    android:visibility="gone"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/favourite_name" />
+        <!--<TextView-->
+        <!--android:id="@+id/favourite_text"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginTop="4dp"-->
+        <!--android:text="@string/app_name"-->
+        <!--android:textSize="12sp"-->
+        <!--android:visibility="gone"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--app:layout_constraintTop_toBottomOf="@+id/favourite_name" />-->
 
-                <TextView
-                    android:id="@+id/favourite_text_2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginEnd="8dp"
-                    android:maxLines="1"
-                    android:text="@string/app_name"
-                    android:textSize="12sp"
-                    android:visibility="gone"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/favourite_name" />
+        <!--<TextView-->
+        <!--android:id="@+id/favourite_text_2"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_marginTop="4dp"-->
+        <!--android:layout_marginEnd="8dp"-->
+        <!--android:maxLines="1"-->
+        <!--android:text="@string/app_name"-->
+        <!--android:textSize="12sp"-->
+        <!--android:visibility="gone"-->
+        <!--app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--app:layout_constraintStart_toStartOf="parent"-->
+        <!--app:layout_constraintTop_toBottomOf="@+id/favourite_name" />-->
 
-                <TextView
-                    android:id="@+id/favourite_name"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginBottom="0dp"
-                    android:maxLines="1"
-                    android:text="@string/fav"
-                    android:textColor="?android:textColorPrimary"
-                    android:textSize="18sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+        <!--<TextView-->
+        <!--android:id="@+id/favourite_name"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginStart="8dp"-->
+        <!--android:layout_marginBottom="0dp"-->
+        <!--android:maxLines="1"-->
+        <!--android:text="@string/fav"-->
+        <!--android:textColor="?android:textColorPrimary"-->
+        <!--android:textSize="18sp"-->
+        <!--app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--app:layout_constraintStart_toStartOf="parent"-->
+        <!--app:layout_constraintTop_toTopOf="parent" />-->
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+        <!--</androidx.constraintlayout.widget.ConstraintLayout>-->
 
-            <ImageView
-                android:id="@+id/fragment_play_list_play_history_menu"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="8dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"
-                android:contentDescription="@string/menu_button"
-                android:focusable="true"
-                android:src="@drawable/ic_more_vert_24px"
-                android:tint="#636363"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <!--<ImageView-->
+        <!--android:id="@+id/fragment_play_list_play_history_menu"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginTop="8dp"-->
+        <!--android:layout_marginEnd="16dp"-->
+        <!--android:layout_marginBottom="8dp"-->
+        <!--android:background="?android:attr/selectableItemBackground"-->
+        <!--android:clickable="true"-->
+        <!--android:contentDescription="@string/menu_button"-->
+        <!--android:focusable="true"-->
+        <!--android:src="@drawable/ic_more_vert_24px"-->
+        <!--android:tint="#636363"-->
+        <!--android:visibility="gone"-->
+        <!--app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--app:layout_constraintTop_toTopOf="parent" />-->
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <!--</androidx.constraintlayout.widget.ConstraintLayout>-->
 
         <View
             android:layout_width="match_parent"

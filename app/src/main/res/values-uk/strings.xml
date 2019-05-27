@@ -13,8 +13,7 @@
 	<string name="music">Музика</string>
 	<string name="play_list">Список відтворення</string>
 	<string name="add_recent">Додати останні</string>
-	<string name="my_favourite">Мій улюблений</string>
-	<string name="color_accent">Акцент кольору</string>
+    <string name="color_accent">Акцент кольору</string>
 	<string name="colorprimarydark">Колір Первинний Темний</string>
 	<string name="settings">Налаштування</string>
 	<string name="about">Про</string>

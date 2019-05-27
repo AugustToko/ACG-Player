@@ -40,4 +40,6 @@ public abstract class BaseFragment extends Fragment {
 		ARTIST_FRAGMENT,
 		FILE_VIEW_FRAGMENT
 	}
+
+	public abstract void reloadData();
 }

@@ -56,4 +56,9 @@ public class PublicFragment extends BaseFragment {
 	protected void setFragmentType(FragmentType fragmentType) {
 		fragmentType = null;
 	}
+
+	@Override
+	public void reloadData() {
+		//.
+	}
 }

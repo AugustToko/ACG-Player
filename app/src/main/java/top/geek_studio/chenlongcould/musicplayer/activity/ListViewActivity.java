@@ -3,7 +3,6 @@ package top.geek_studio.chenlongcould.musicplayer.activity;
 import android.database.Cursor;
 import android.os.*;
 import android.provider.MediaStore;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,8 +19,6 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
-import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
-import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.lang.ref.WeakReference;
@@ -107,73 +104,72 @@ public final class ListViewActivity extends BaseCompatActivity {
 					mRecyclerView.setAdapter(adapter);
 				}
 				break;
-
-				case FragmentType.ACTION_FAVOURITE: {
-					mToolbar.setTitle(getResources().getString(R.string.my_favourite));
-
-					final PlayListItem playListItem = MusicUtil.getFavoritesPlaylist(this);
-
-					if (playListItem != null) {
-						int id = playListItem.getId();
-						if (id != -1) {
-							mDisposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
-								//data
-
-								//get musicId in PlayList
-								final Cursor cursor = getContentResolver().query(MediaStore.Audio.Playlists.Members.getContentUri("external", id)
-										, null, null, null, MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
-								if (cursor != null && cursor.moveToFirst()) {
-									cursor.moveToFirst();
-									do {
-
-										//search music (with audioId)
-										int audioId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID));
-										Cursor cursor1 = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, MediaStore.MediaColumns._ID + " = ?", new String[]{String.valueOf(audioId)}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-										if (cursor1 != null && cursor1.moveToFirst()) {
-											do {
-												final String mimeType = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.MediaColumns.MIME_TYPE));
-												final String name = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.MediaColumns.TITLE));
-												final String albumName = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
-												final int musicId = cursor1.getInt(cursor1.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
-												final int size = (int) cursor1.getLong(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-												final int duration = cursor1.getInt(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-												final String artist = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-												final long addTime = cursor1.getLong(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
-												final int albumId = cursor1.getInt(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
-												final String path = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-
-												final MusicItem.Builder builder = new MusicItem.Builder(musicId, name, path)
-														.musicAlbum(albumName)
-														.addTime((int) addTime)
-														.artist(artist)
-														.duration(duration)
-														.mimeName(mimeType)
-														.size(size)
-														.addAlbumId(albumId);
-												mMusicItemList.add(builder.build());
-											} while (cursor1.moveToNext());
-											cursor1.close();
-										}
-
-									} while (cursor.moveToNext());
-									cursor.close();
-								}
-
-								observableEmitter.onNext(0);
-							}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
-									.subscribe(i -> {
-										if (i != 0) {
-											return;
-										}
-										adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList, new MyRecyclerAdapter.Config(0, true));
-										mRecyclerView.setAdapter(adapter);
-									});
-						}
-					} else {
-						Toast.makeText(this, "ID is null...", Toast.LENGTH_SHORT).show();
-					}
-				}
-				break;
+//				case FragmentType.ACTION_FAVOURITE: {
+//					mToolbar.setTitle(getResources().getString(R.string.my_favourite));
+//
+//					final PlayListItem playListItem = MusicUtil.getFavoritesPlaylist(this);
+//
+//					if (playListItem != null) {
+//						int id = playListItem.getId();
+//						if (id != -1) {
+//							mDisposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
+//								//data
+//
+//								//get musicId in PlayList
+//								final Cursor cursor = getContentResolver().query(MediaStore.Audio.Playlists.Members.getContentUri("external", id)
+//										, null, null, null, MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
+//								if (cursor != null && cursor.moveToFirst()) {
+//									cursor.moveToFirst();
+//									do {
+//
+//										//search music (with audioId)
+//										int audioId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID));
+//										Cursor cursor1 = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, MediaStore.MediaColumns._ID + " = ?", new String[]{String.valueOf(audioId)}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+//										if (cursor1 != null && cursor1.moveToFirst()) {
+//											do {
+//												final String mimeType = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.MediaColumns.MIME_TYPE));
+//												final String name = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.MediaColumns.TITLE));
+//												final String albumName = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+//												final int musicId = cursor1.getInt(cursor1.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+//												final int size = (int) cursor1.getLong(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
+//												final int duration = cursor1.getInt(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+//												final String artist = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+//												final long addTime = cursor1.getLong(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
+//												final int albumId = cursor1.getInt(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+//												final String path = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+//
+//												final MusicItem.Builder builder = new MusicItem.Builder(musicId, name, path)
+//														.musicAlbum(albumName)
+//														.addTime((int) addTime)
+//														.artist(artist)
+//														.duration(duration)
+//														.mimeName(mimeType)
+//														.size(size)
+//														.addAlbumId(albumId);
+//												mMusicItemList.add(builder.build());
+//											} while (cursor1.moveToNext());
+//											cursor1.close();
+//										}
+//
+//									} while (cursor.moveToNext());
+//									cursor.close();
+//								}
+//
+//								observableEmitter.onNext(0);
+//							}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+//									.subscribe(i -> {
+//										if (i != 0) {
+//											return;
+//										}
+//										adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList, new MyRecyclerAdapter.Config(0, true));
+//										mRecyclerView.setAdapter(adapter);
+//									});
+//						}
+//					} else {
+//						Toast.makeText(this, "ID is null...", Toast.LENGTH_SHORT).show();
+//					}
+//				}
+//				break;
 
 				//点击播放列表中的一项
 				case FragmentType.ACTION_PLAY_LIST_ITEM: {

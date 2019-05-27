@@ -13,8 +13,7 @@
 	<string name="music">音乐</string>
 	<string name="play_list">播放列表</string>
 	<string name="add_recent">添加最近</string>
-	<string name="my_favourite">我的最爱</string>
-	<string name="color_accent">色彩强调</string>
+    <string name="color_accent">色彩强调</string>
 	<string name="colorprimarydark">彩色原色黑暗</string>
 	<string name="settings">设置</string>
 	<string name="about">关于</string>

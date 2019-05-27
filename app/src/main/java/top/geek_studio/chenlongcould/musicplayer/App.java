@@ -19,8 +19,6 @@ import io.reactivex.disposables.Disposable;
 import org.litepal.LitePal;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
-import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.io.File;
@@ -78,15 +76,10 @@ public final class App extends Application {
 			final SharedPreferences.Editor verEdit = PreferenceManager.getDefaultSharedPreferences(this).edit();
 			verEdit.putLong(VERSION_CODE, VER_CODE);
 			verEdit.apply();
-			
-			Values.Style.DETAIL_BACKGROUND = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_BLUR);
-			
-			//init favourite
-			if (MusicUtil.getFavoritesPlaylist(this) == null) {
-				Log.d(TAG, "onCreate: CREATING FAV_LIST");
-				PlayListsUtil.createPlaylist(this, getString(R.string.favorites));
-			}
-			
+
+			Values.BackgroundStyle.DETAIL_BACKGROUND = PreferenceManager.getDefaultSharedPreferences(this)
+					.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.BackgroundStyle.STYLE_BACKGROUND_BLUR);
+
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
 				mShortcutManager = getSystemService(ShortcutManager.class);
 				getNewShortcutInfo();

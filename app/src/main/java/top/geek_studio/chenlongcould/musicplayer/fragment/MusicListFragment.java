@@ -48,6 +48,11 @@ public final class MusicListFragment extends BaseFragment {
 	}
 
 	@Override
+	public void reloadData() {
+		mActivity.reloadMusicItems();
+	}
+
+	@Override
 	public void onAttach(@NotNull Context context) {
 		super.onAttach(context);
 		mActivity = (MainActivity) getActivity();

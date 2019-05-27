@@ -283,15 +283,15 @@ public final class SettingsActivity extends BaseCompatActivity {
 //        setNightOpt.setOnClickListener(v -> {
 //
 //            SharedPreferences.Editor editor = mDefPrefs.edit();
-//            if (Values.Style.NIGHT_MODE) {
+//            if (Values.BackgroundStyle.NIGHT_MODE) {
 //                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false);
 //                mNightSwitch.setChecked(false);
-//                Values.Style.NIGHT_MODE = false;
+//                Values.BackgroundStyle.NIGHT_MODE = false;
 //                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 //            } else {
 //                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, true);
 //                mNightSwitch.setChecked(true);
-//                Values.Style.NIGHT_MODE = true;
+//                Values.BackgroundStyle.NIGHT_MODE = true;
 //                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
 //            }
 //            editor.apply();
@@ -305,11 +305,11 @@ public final class SettingsActivity extends BaseCompatActivity {
 //            SharedPreferences.Editor editor = mDefPrefs.edit();
 //            if (isChecked) {
 //                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, true);
-//                Values.Style.NIGHT_MODE = true;
+//                Values.BackgroundStyle.NIGHT_MODE = true;
 //                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
 //            } else {
 //                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false);
-//                Values.Style.NIGHT_MODE = false;
+//                Values.BackgroundStyle.NIGHT_MODE = false;
 //                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 //            }
 //            editor.apply();
@@ -321,14 +321,14 @@ public final class SettingsActivity extends BaseCompatActivity {
 		styleOpt.setOnClickListener(v -> {
 
 			SharedPreferences.Editor editor = mDefPrefs.edit();
-			if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
-				Values.Style.DETAIL_BACKGROUND = Values.Style.STYLE_BACKGROUND_AUTO_COLOR;
+			if (Values.BackgroundStyle.DETAIL_BACKGROUND.equals(Values.BackgroundStyle.STYLE_BACKGROUND_BLUR)) {
+				Values.BackgroundStyle.DETAIL_BACKGROUND = Values.BackgroundStyle.STYLE_BACKGROUND_AUTO_COLOR;
 				mStyleSwitch.setChecked(false);
-				editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_AUTO_COLOR);
+				editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.BackgroundStyle.STYLE_BACKGROUND_AUTO_COLOR);
 			} else {
-				Values.Style.DETAIL_BACKGROUND = Values.Style.STYLE_BACKGROUND_BLUR;
+				Values.BackgroundStyle.DETAIL_BACKGROUND = Values.BackgroundStyle.STYLE_BACKGROUND_BLUR;
 				mStyleSwitch.setChecked(true);
-				editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_BLUR);
+				editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.BackgroundStyle.STYLE_BACKGROUND_BLUR);
 			}
 			editor.apply();
 
@@ -339,12 +339,12 @@ public final class SettingsActivity extends BaseCompatActivity {
 //        mStyleSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
 //            SharedPreferences.Editor editor = mDefPrefs.edit();
 //            mStyleSwitch.setChecked(isChecked);
-//            if (Values.Style.DETAIL_BACKGROUND.equals(Values.Style.STYLE_BACKGROUND_BLUR)) {
+//            if (Values.BackgroundStyle.DETAIL_BACKGROUND.equals(Values.BackgroundStyle.STYLE_BACKGROUND_BLUR)) {
 //                mStyleSwitch.setChecked(false);
-//                editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_AUTO_COLOR);
+//                editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.BackgroundStyle.STYLE_BACKGROUND_AUTO_COLOR);
 //            } else {
 //                mStyleSwitch.setChecked(true);
-//                editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_BLUR);
+//                editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.BackgroundStyle.STYLE_BACKGROUND_BLUR);
 //            }
 //            editor.apply();
 //        });
@@ -636,38 +636,21 @@ public final class SettingsActivity extends BaseCompatActivity {
 	 * setup imageViews
 	 */
 	private void initPreView() {
-//		mNightSwitch.setChecked(Values.Style.NIGHT_MODE);
+//		mNightSwitch.setChecked(Values.BackgroundStyle.NIGHT_MODE);
 
-		//noinspection ConstantConditions
-		if (mDefPrefs.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.Style.STYLE_BACKGROUND_BLUR).equals(Values.Style.STYLE_BACKGROUND_AUTO_COLOR)) {
-			mStyleSwitch.setChecked(false);
-		} else {
-			mStyleSwitch.setChecked(true);
-		}
+		mStyleSwitch.setChecked(Values.BackgroundStyle.STYLE_BACKGROUND_AUTO_COLOR.equals(mDefPrefs
+				.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.BackgroundStyle.STYLE_BACKGROUND_BLUR)));
 
-		if (mDefPrefs.getBoolean(NOTIFICATION_COLORIZED, true)) {
-			mSettingsBinding.colorNotiSwitch.setChecked(true);
-		} else {
-			mSettingsBinding.colorNotiSwitch.setChecked(false);
-		}
+		mSettingsBinding.colorNotiSwitch.setChecked(mDefPrefs.getBoolean(NOTIFICATION_COLORIZED, true));
 
-		if (mDefPrefs.getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false)) {
-			mSettingsBinding.colorStatusSwitch.setChecked(true);
-		} else {
-			mSettingsBinding.colorStatusSwitch.setChecked(false);
-		}
+		mSettingsBinding.colorStatusSwitch.setChecked(mDefPrefs.getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false));
 
-		if (mDefPrefs.getBoolean(HIDE_SHORT_SONG, true)) {
-			mSettingsBinding.filterSwitch.setChecked(true);
-		} else {
-			mSettingsBinding.filterSwitch.setChecked(false);
-		}
+		mSettingsBinding.filterSwitch.setChecked(mDefPrefs.getBoolean(HIDE_SHORT_SONG, true));
 
-		if (mDefPrefs.getBoolean(USE_NET_WORK_ALBUM, false)) {
-			mSettingsBinding.albumSwitch.setChecked(true);
-		} else {
-			mSettingsBinding.albumSwitch.setChecked(false);
-		}
+		mSettingsBinding.albumSwitch.setChecked(mDefPrefs.getBoolean(USE_NET_WORK_ALBUM, false));
+
+		mStyleSwitch.setChecked(Values.BackgroundStyle.STYLE_BACKGROUND_BLUR.equals(mDefPrefs
+				.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.BackgroundStyle.STYLE_BACKGROUND_BLUR)));
 
 		mSettingsBinding.textDHideShort.setText(getString(R.string.skip_songs_that_are_less_than_the_minimum_duration
 				, MainActivity.DEFAULT_SHORT_DURATION));

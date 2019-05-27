@@ -13,8 +13,7 @@
 	<string name="music">Musik</string>
 	<string name="play_list">Wiedergabeliste</string>
 	<string name="add_recent">Zuletzt hinzufügen</string>
-	<string name="my_favourite">Mein Lieblings</string>
-	<string name="color_accent">Farbakzent</string>
+    <string name="color_accent">Farbakzent</string>
 	<string name="colorprimarydark">Farbe primär dunkel</string>
 	<string name="settings">die Einstellungen</string>
 	<string name="about">Über</string>

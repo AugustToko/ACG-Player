@@ -83,6 +83,11 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 	}
 
 	@Override
+	public void reloadData() {
+		// needn't
+	}
+
+	@Override
 	public void onAttach(@NonNull Context context) {
 		super.onAttach(context);
 		mCarViewActivity = (CarViewActivity) context;
@@ -111,8 +116,9 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 
 				case R.id.menu_toolbar_eq: {
 					MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
-					if (item != null)
+					if (item != null) {
 						Utils.Audio.openEqualizer(mCarViewActivity, item.getAlbumId());
+					}
 				}
 
 				case R.id.menu_toolbar_debug: {

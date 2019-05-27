@@ -31,7 +31,6 @@
     <string name="music">Music</string>
     <string name="play_list">Play List</string>
     <string name="add_recent">Add Recent</string>
-    <string name="my_favourite">My Favourite</string>
 
     <string name="image_trans_album" translatable="false">image trans album</string>
     <string name="color_accent">Color Accent</string>
@@ -184,4 +183,5 @@
     <string name="privacy_policy">Privacy Policy</string>
     <string name="click_to_learn_more">Click to learn more</string>
     <string name="bug_report_or_feature_request">Bug report or Feature request</string>
+    <string name="data_overview_empty">The database is currently empty and you can play some songs so we can collect your playback information.</string>
 </resources>

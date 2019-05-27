@@ -64,6 +64,13 @@ public final class AlbumListFragment extends BaseFragment {
 	}
 
 	@Override
+	public void reloadData() {
+		Data.sAlbumItems.clear();
+		Data.sAlbumItemsBackUp.clear();
+		initAlbumData();
+	}
+
+	@Override
 	public void onAttach(@NotNull Context context) {
 		super.onAttach(context);
 		mMainActivity = (MainActivity) getActivity();

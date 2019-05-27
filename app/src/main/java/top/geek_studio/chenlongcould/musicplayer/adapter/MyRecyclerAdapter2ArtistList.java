@@ -70,7 +70,9 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 		holder.mArtistImage.setTag(R.string.key_id_2, -1);
 		GlideApp.with(mMainActivity).clear(holder.mArtistImage);
 		GlideApp.get(mMainActivity).clearMemory();
-		holder.mView.setBackgroundColor(ContextCompat.getColor(mMainActivity, R.color.notVeryBlack));
+		if (mType == GRID_TYPE) {
+			holder.mView.setBackgroundColor(ContextCompat.getColor(mMainActivity, R.color.notVeryBlack));
+		}
 		holder.mArtistText.setTextColor(ContextCompat.getColor(mMainActivity, R.color.notVeryWhite));
 //		holder.debugInfo.setText("");
 	}

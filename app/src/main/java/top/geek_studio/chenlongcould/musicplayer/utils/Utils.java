@@ -160,8 +160,9 @@ public final class Utils {
 
 		/**
 		 * this
+		 * full
 		 */
-		public static Bitmap getCoverBitmap(Context context, int albumId) {
+		public static Bitmap getCoverBitmapFull(Context context, int albumId) {
 			return path2CoverByDB(context, getCoverPath(context, albumId));
 		}
 

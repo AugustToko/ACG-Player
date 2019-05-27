@@ -90,12 +90,12 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 	public static final String TAG = "MainActivity";
 
-	public static final char MUSIC_DETAIL_FRAGMENT_ID = '0';
 	public static final char MUSIC_LIST_FRAGMENT_ID = '1';
 	public static final char ALBUM_LIST_FRAGMENT_ID = '2';
 	public static final char ARTIST_LIST_FRAGMENT_ID = '3';
 	public static final char PLAYT_LIST_FRAGMENT_ID = '4';
 	public static final char FILE_LIST_FRAGMENT_ID = '5';
+	public static final char MUSIC_DETAIL_FRAGMENT_ID = '6';
 
 	/**
 	 * skip short song (if below 20s)
@@ -103,11 +103,12 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	public static final int DEFAULT_SHORT_DURATION = 20000;
 
 	/**
-	 * 1 is MUSIC TAB
+	 * 1 is MUSIC_LIST TAB
 	 * 2 is ALBUM TAB
 	 * 3 is ARTIST TAB
 	 * 4 is PLAYLIST TAB
 	 * 5 is FILE MANAGER TAB
+	 *
 	 * default tab order is: 12345
 	 */
 	public static final String DEFAULT_TAB_ORDER = "12345";
@@ -136,11 +137,14 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	private FileViewFragment fileViewFragment;
 	private PlayListFragment playListFragment;
 
+	private BaseFragment mCurrentShowedFragment;
+
 	/**
 	 * handler
 	 */
 	private static NotLeakHandler mHandler = null;
 
+	@SuppressWarnings("unused")
 	public static boolean sendMessage(@NonNull Message message) {
 		boolean result = false;
 		if (mHandler != null) {
@@ -150,6 +154,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		return result;
 	}
 
+	@SuppressWarnings("UnusedReturnValue")
 	public static boolean sendEmptyMessage(int what) {
 		boolean result = false;
 		if (mHandler != null) {
@@ -254,6 +259,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		super.onResume();
 
 		if (getIntent().getStringExtra(Values.IntentTAG.SHORTCUT_TYPE) != null) {
+			//noinspection SwitchStatementWithTooFewBranches
 			switch (getIntent().getStringExtra("SHORTCUT_TYPE")) {
 				case App.SHORTCUT_RANDOM: {
 					Utils.SendSomeThing.sendPlay(MainActivity.this, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, null);
@@ -393,7 +399,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					editor.putInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.LINEAR_TYPE);
 					editor.apply();
 					mPagerAdapter.notifyDataSetChanged();
-					artistListFragment.setRecyclerViewData();
 				}
 				break;
 
@@ -401,13 +406,11 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					editor.putInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.GRID_TYPE);
 					editor.apply();
 					mPagerAdapter.notifyDataSetChanged();
-
-					artistListFragment.setRecyclerViewData();
 				}
 				break;
 
 				case R.id.menu_toolbar_reload: {
-					reloadAll();
+					mCurrentShowedFragment.reloadData();
 				}
 				break;
 				default:
@@ -416,20 +419,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		});
 	}
 
-	/**
-	 * reloadAll data, like first enter app
-	 */
-	// FIXME: 2019/5/25 all
-	private void reloadAll() {
-//		Data.sPlayOrderList.clear();
-//		Data.sAlbumItemsBackUp.clear();
-//		Data.sAlbumItems.clear();
-//		Data.sArtistItems.clear();
-//		Data.sArtistItemsBackUp.clear();
-		reloadMusicItems();
-	}
-
-	private void reloadMusicItems() {
+	public void reloadMusicItems() {
 		Data.sMusicItems.clear();
 		Data.sMusicItemsBackUp.clear();
 		loadDataSource();
@@ -497,14 +487,14 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	}
 
 	private boolean loadDataSource() {
-		boolean result = false;
+		//noinspection StatementWithEmptyBody
 		if (Data.sMusicItems.isEmpty()) {
 			/*---------------------- init Data!!!! -------------------*/
 			final Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
 			if (cursor != null && cursor.moveToFirst()) {
 				//没有歌曲直接退出app
 				if (cursor.getCount() == 0) {
-					return result;
+					return false;
 				} else {
 
 					final boolean skipShort = PreferenceManager.getDefaultSharedPreferences(this)
@@ -575,21 +565,18 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					Log.i(Values.TAG_UNIVERSAL_ONE, "onCreate: The MusicData load done.");
 					cursor.close();
 
-					if (PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM)) {
+					if (Values.TYPE_RANDOM.equals(PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
 						Collections.shuffle(Data.sPlayOrderList);
 					}
-					result = true;
 				}
 			} else {
 				//cursor null or getCount == 0
-				return result;
+				return false;
 			}
 		} else {
-			//already has data -> initFragment
-			result = true;
+			// already have data
 		}
-
-		return result;
+		return true;
 	}
 
 	private void loadData() {
@@ -655,6 +642,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	 */
 	private void filterData(String filterStr) {
 		final String tabOrder = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+		assert tabOrder != null;
 
 		if (tabOrder.charAt(Values.CurrentData.CURRENT_PAGE_INDEX) == MUSIC_LIST_FRAGMENT_ID) {
 			if (TextUtils.isEmpty(filterStr)) {
@@ -734,7 +722,9 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 						builder.setPositiveButton(getString(R.string.sure), (dialog, which) -> {
 							final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 							final SharedPreferences.Editor editor = preferences.edit();
-							final StringBuilder currentOrder = new StringBuilder(preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER));
+							final String tabOrder = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+							assert tabOrder != null;
+							final StringBuilder currentOrder = new StringBuilder(tabOrder);
 							currentOrder.deleteCharAt(pos);
 							editor.putString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, currentOrder.toString());
 
@@ -825,13 +815,10 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 		inflateCommonMenu();
 
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				//hide
-				getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(false);
-				getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(false);
-			}
+		runOnUiThread(() -> {
+			//hide
+			getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(false);
+			getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(false);
 		});
 
 		setTabLongClickListener();
@@ -845,6 +832,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		mMainBinding.tabLayout.addTab(addTab, position);
 
 		final PopupMenu popupMenu = new PopupMenu(this, addTab.view);
+		//noinspection PointlessArithmeticExpression
 		popupMenu.getMenu().add(Menu.NONE, Menu.FIRST + 0, 0, getString(R.string.tab_music));
 		popupMenu.getMenu().add(Menu.NONE, Menu.FIRST + 1, 0, getString(R.string.tab_album));
 		popupMenu.getMenu().add(Menu.NONE, Menu.FIRST + 2, 0, getString(R.string.tab_artist));
@@ -861,7 +849,9 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			switch (item.getItemId()) {
 
 				case Menu.FIRST: {
-					if (!PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER).contains("1")) {
+					//noinspection ConstantConditions
+					if (!PreferenceManager.getDefaultSharedPreferences(MainActivity.this)
+							.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER).contains("1")) {
 						final String tab1 = getResources().getString(R.string.music);
 						mTitles.add(tab1);
 						mFragmentList.add(MusicListFragment.newInstance());
@@ -873,7 +863,9 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				break;
 
 				case Menu.FIRST + 1: {
-					if (!PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER).contains("2")) {
+					//noinspection ConstantConditions
+					if (!PreferenceManager.getDefaultSharedPreferences(MainActivity.this)
+							.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER).contains("2")) {
 						final String tab2 = getResources().getString(R.string.album);
 						mTitles.add(tab2);
 						mFragmentList.add(AlbumListFragment.newInstance());
@@ -885,7 +877,9 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				break;
 
 				case Menu.FIRST + 2: {
-					if (!PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER).contains("3")) {
+					//noinspection ConstantConditions
+					if (!PreferenceManager.getDefaultSharedPreferences(MainActivity.this)
+							.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER).contains("3")) {
 						final String tab3 = getResources().getString(R.string.artist);
 						mTitles.add(tab3);
 						mFragmentList.add(ArtistListFragment.newInstance());
@@ -897,7 +891,9 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				break;
 
 				case Menu.FIRST + 3: {
-					if (!PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER).contains("4")) {
+					//noinspection ConstantConditions
+					if (!PreferenceManager.getDefaultSharedPreferences(MainActivity.this)
+							.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER).contains("4")) {
 						final String tab4 = getResources().getString(R.string.play_list);
 						mTitles.add(tab4);
 						mFragmentList.add(PlayListFragment.newInstance());
@@ -909,7 +905,9 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				break;
 
 				case Menu.FIRST + 4: {
-					if (!PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER).contains("5")) {
+					//noinspection ConstantConditions
+					if (!PreferenceManager.getDefaultSharedPreferences(MainActivity.this)
+							.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER).contains("5")) {
 						final String tab5 = getResources().getString(R.string.tab_file);
 						mTitles.add(tab5);
 						mFragmentList.add(FileViewFragment.newInstance());
@@ -965,9 +963,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			return true;
 		});
 
-		((LinearLayout) addTab.view).setOnClickListener(v -> {
-			popupMenu.show();
-		});
+		((LinearLayout) addTab.view).setOnClickListener(v -> popupMenu.show());
 
 		mMainBinding.viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
 			@Override
@@ -986,6 +982,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 				String order = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
 				if (order.charAt(i) == '1') {
+					mCurrentShowedFragment = musicListFragment;
+
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false);
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false);
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true);
@@ -993,6 +991,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				}
 
 				if (order.charAt(i) == '2') {
+					mCurrentShowedFragment = albumListFragment;
+
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), true);
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false);
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true);
@@ -1000,6 +1000,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				}
 
 				if (order.charAt(i) == '3') {
+					mCurrentShowedFragment = artistListFragment;
+
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false);
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), true);
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true);
@@ -1008,6 +1010,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 				//playlist
 				if (order.charAt(i) == '4') {
+					mCurrentShowedFragment = playListFragment;
+
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false);
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false);
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), false);
@@ -1016,6 +1020,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 				//fileviewer
 				if (order.charAt(i) == '5') {
+					mCurrentShowedFragment = fileViewFragment;
+
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false);
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false);
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), false);
@@ -1247,7 +1253,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			@Override
 			public void onPanelSlide(View panel, float slideOffset) {
 
-				musicDetailFragment.getHandler().sendEmptyMessage(MusicDetailFragment.NotLeakHandler.RECYCLER_SCROLL);
+				MusicDetailFragment.getHandler().sendEmptyMessage(MusicDetailFragment.NotLeakHandler.RECYCLER_SCROLL);
 
 				CURRENT_SLIDE_OFFSET = slideOffset;
 
@@ -1289,17 +1295,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				}
 			}
 		});
-
-		//First no music no slide
-		if (Data.sMusicBinder != null) {
-			if (Data.HAS_PLAYED) {
-				mMainBinding.slidingLayout.setTouchEnabled(true);
-			} else {
-				mMainBinding.slidingLayout.setTouchEnabled(false);
-			}
-		} else {
-			mMainBinding.slidingLayout.setTouchEnabled(false);
-		}
 
 		mMainBinding.navigationView.setNavigationItemSelectedListener(menuItem -> {
 			switch (menuItem.getItemId()) {

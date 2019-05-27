@@ -3,12 +3,14 @@ package top.geek_studio.chenlongcould.musicplayer.activity;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
-import android.widget.Toast;
+import android.view.ViewGroup;
+import android.widget.TextView;
 import androidx.annotation.ColorInt;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.databinding.DataBindingUtil;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import org.litepal.LitePal;
 import top.geek_studio.chenlongcould.musicplayer.Data;
@@ -123,7 +125,7 @@ public final class DetailActivity extends BaseCompatActivity {
 				detailBinding.includeContent.includeItemPlayDuration.recyclerItemMusicDuration.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(itemDuration.getDuration()))));
 				final String prefix = itemDuration.getMusicPath().substring(itemDuration.getMusicPath().lastIndexOf(".") + 1);
 				detailBinding.includeContent.includeItemPlayDuration.recyclerItemMusicTypeName.setText(prefix);
-				GlideApp.with(this).load(Utils.Audio.getCoverBitmap(this, itemDuration.getAlbumId()))
+				GlideApp.with(this).load(Utils.Audio.getCoverBitmapFull(this, itemDuration.getAlbumId()))
 						.diskCacheStrategy(DiskCacheStrategy.NONE)
 						.into(detailBinding.includeContent.includeItemPlayDuration.recyclerItemAlbumImage);
 
@@ -136,7 +138,7 @@ public final class DetailActivity extends BaseCompatActivity {
 				detailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMusicDuration.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(itemMinimum.getDuration()))));
 				final String prefix = itemMinimum.getMusicPath().substring(itemMinimum.getMusicPath().lastIndexOf(".") + 1);
 				detailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMusicTypeName.setText(prefix);
-				GlideApp.with(this).load(Utils.Audio.getCoverBitmap(this, itemMinimum.getAlbumId()))
+				GlideApp.with(this).load(Utils.Audio.getCoverBitmapFull(this, itemMinimum.getAlbumId()))
 						.diskCacheStrategy(DiskCacheStrategy.NONE)
 						.into(detailBinding.includeContent.includeItemPlayMinitimes.recyclerItemAlbumImage);
 
@@ -149,7 +151,7 @@ public final class DetailActivity extends BaseCompatActivity {
 				detailBinding.includeContent.includeItemPlaytimes.recyclerItemMusicDuration.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(itemTimes.getDuration()))));
 				final String prefix = itemTimes.getMusicPath().substring(itemTimes.getMusicPath().lastIndexOf(".") + 1);
 				detailBinding.includeContent.includeItemPlaytimes.recyclerItemMusicTypeName.setText(prefix);
-				GlideApp.with(this).load(Utils.Audio.getCoverBitmap(this, itemTimes.getAlbumId()))
+				GlideApp.with(this).load(Utils.Audio.getCoverBitmapFull(this, itemTimes.getAlbumId()))
 						.diskCacheStrategy(DiskCacheStrategy.NONE)
 						.into(detailBinding.includeContent.includeItemPlaytimes.recyclerItemAlbumImage);
 
@@ -157,11 +159,20 @@ public final class DetailActivity extends BaseCompatActivity {
 			}
 
 		} else {
-			Toast.makeText(this, "Database is empty!", Toast.LENGTH_SHORT).show();
+//			Toast.makeText(this, "Database is empty!", Toast.LENGTH_SHORT).show();
+			ViewGroup group = (ViewGroup) detailBinding.getRoot();
+			group.removeView(detailBinding.includeContent.body);
+			TextView textView = new TextView(this);
+			textView.setText(getString(R.string.data_overview_empty));
+			textView.setGravity(Gravity.CENTER);
+			textView.setTextSize(30);
+			group.addView(textView);
+			CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) textView.getLayoutParams();
+			params.gravity = Gravity.CENTER;
+			textView.setLayoutParams(params);
 		}
 
-		FloatingActionButton fab = findViewById(R.id.fab);
-		fab.setOnClickListener(view -> Snackbar.make(view, "Clear?", Snackbar.LENGTH_LONG)
+		detailBinding.fab.setOnClickListener(view -> Snackbar.make(view, "Clear?", Snackbar.LENGTH_LONG)
 				.setAction(getString(R.string.sure), v -> {
 					LitePal.deleteAll(Detail.class);
 					recreate();

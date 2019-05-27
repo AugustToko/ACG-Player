@@ -41,11 +41,10 @@ public final class PlayListFragment extends BaseFragment {
 
 	public static final String TAG = "PlayListFragment";
 
-	public static final int RE_LOAD_PLAY_LIST = 80001;
 	private LocalBroadcastManager mBroadcastManager;
 	private FragmentPlaylistBinding mPlayListBinding;
 	private MainActivity mMainActivity;
-	private Handler mHandler;
+	private static Handler mHandler;
 	private PlayListAdapter mPlayListAdapter;
 	private BroadcastReceiver mRefreshReceiver = new BroadcastReceiver() {
 		@Override
@@ -130,6 +129,24 @@ public final class PlayListFragment extends BaseFragment {
 		Data.sDisposables.add(disposable);
 	}
 
+	public static Handler getHandler() {
+		return mHandler;
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		mBroadcastManager.unregisterReceiver(mRefreshReceiver);
+	}
+
+	public PlayListAdapter getPlayListAdapter() {
+		return mPlayListAdapter;
+	}
+
+	public static void reloadDataByHandler() {
+		mHandler.sendEmptyMessage(NotLeakHandler.RE_LOAD_PLAY_LIST);
+	}
+
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		mPlayListBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_playlist, container, false);
@@ -140,11 +157,11 @@ public final class PlayListFragment extends BaseFragment {
 			startActivity(intent);
 		});
 
-		mPlayListBinding.favourite.setOnClickListener(v -> {
-			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
-			intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, ListViewActivity.FragmentType.ACTION_FAVOURITE);
-			startActivity(intent);
-		});
+//		mPlayListBinding.favourite.setOnClickListener(v -> {
+//			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
+//			intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, ListViewActivity.FragmentType.ACTION_FAVOURITE);
+//			startActivity(intent);
+//		});
 
 		mPlayListBinding.history.setOnClickListener(v -> {
 			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
@@ -159,7 +176,7 @@ public final class PlayListFragment extends BaseFragment {
 		});
 
 		mPlayListBinding.recentName.setTextColor(ContextCompat.getColor(mMainActivity, R.color.title_color));
-		mPlayListBinding.favouriteName.setTextColor(ContextCompat.getColor(mMainActivity, R.color.title_color));
+//		mPlayListBinding.favouriteName.setTextColor(ContextCompat.getColor(mMainActivity, R.color.title_color));
 		mPlayListBinding.historyName.setTextColor(ContextCompat.getColor(mMainActivity, R.color.title_color));
 
 		mPlayListBinding.recyclerView.setLayoutManager(new LinearLayoutManager(mMainActivity));
@@ -171,17 +188,8 @@ public final class PlayListFragment extends BaseFragment {
 	}
 
 	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		mBroadcastManager.unregisterReceiver(mRefreshReceiver);
-	}
-
-	public PlayListAdapter getPlayListAdapter() {
-		return mPlayListAdapter;
-	}
-
-	public Handler getHandler() {
-		return mHandler;
+	public void reloadData() {
+		mHandler.sendEmptyMessage(NotLeakHandler.RE_LOAD_PLAY_LIST);
 	}
 
 	/**
@@ -197,6 +205,8 @@ public final class PlayListFragment extends BaseFragment {
 	private static class NotLeakHandler extends Handler {
 		
 		private WeakReference<PlayListFragment> mWeakReference;
+
+		public static final int RE_LOAD_PLAY_LIST = 80001;
 
 		NotLeakHandler(PlayListFragment fragment) {
 			mWeakReference = new WeakReference<>(fragment);
