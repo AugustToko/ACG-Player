@@ -18,7 +18,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.RemoteException;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
@@ -52,6 +51,7 @@ import top.geek_studio.chenlongcould.musicplayer.activity.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
+import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -154,7 +154,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 		} else {
 			Log.d(TAG, "albumLoader: the album id DEFAULT_DB is NOT ability, loading from {network or diskCache}");
 			//检查是否勾选了网络Album
-			if (PreferenceManager.getDefaultSharedPreferences(activity).getBoolean(Values.SharedPrefsTag.USE_NET_WORK_ALBUM, false)) {
+			if (PreferenceUtil.getDefault(activity).getBoolean(Values.SharedPrefsTag.USE_NET_WORK_ALBUM, false)) {
 				final List<CustomAlbumPath> customs = LitePal.where("mAlbumId = ?", String.valueOf(albumId)).find(CustomAlbumPath.class);
 
 				//检测DB是否准备完成(IntentService 是否完成)

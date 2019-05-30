@@ -22,7 +22,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -207,9 +206,9 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 			animator.setDuration(300);
 			mMusicDetail2Binding.includePlayerControlCar.repeatButton.clearAnimation();
 			//noinspection ConstantConditions
-			switch (PreferenceManager.getDefaultSharedPreferences(mCarViewActivity).getString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE)) {
+			switch (preferences.getString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE)) {
 				case MusicService.PlayType.REPEAT_NONE: {
-					PreferenceManager.getDefaultSharedPreferences(mCarViewActivity).edit().putString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_LIST).apply();
+					preferences.edit().putString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_LIST).apply();
 					mMusicDetail2Binding.includePlayerControlCar.repeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
 					animator.setFloatValues(0.3f, 1f);
 					animator.addUpdateListener(animation -> mMusicDetail2Binding.includePlayerControlCar.repeatButton.setAlpha((Float) animation.getAnimatedValue()));
@@ -239,12 +238,12 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 					break;
 				}
 				case MusicService.PlayType.REPEAT_LIST: {
-					PreferenceManager.getDefaultSharedPreferences(mCarViewActivity).edit().putString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_ONE).apply();
+					preferences.edit().putString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_ONE).apply();
 					mMusicDetail2Binding.includePlayerControlCar.repeatButton.setImageResource(R.drawable.ic_repeat_one_white_24dp);
 				}
 				break;
 				case MusicService.PlayType.REPEAT_ONE: {
-					PreferenceManager.getDefaultSharedPreferences(mCarViewActivity).edit().putString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE).apply();
+					preferences.edit().putString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE).apply();
 					mMusicDetail2Binding.includePlayerControlCar.repeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
 					animator.setFloatValues(1f, 0.3f);
 					animator.addUpdateListener(animation -> mMusicDetail2Binding.includePlayerControlCar.repeatButton.setAlpha((Float) animation.getAnimatedValue()));
@@ -281,8 +280,8 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 
 		mMusicDetail2Binding.includePlayerControlCar.randomButton.setOnClickListener(v -> {
 			mMusicDetail2Binding.includePlayerControlCar.randomButton.clearAnimation();
-			final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(mCarViewActivity).edit();
-			if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM)) {
+			final SharedPreferences.Editor editor = preferences.edit();
+			if (preferences.getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM)) {
 				final ValueAnimator animator = new ValueAnimator();
 				animator.setFloatValues(1f, 0.3f);
 				animator.setDuration(300);

@@ -18,11 +18,11 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -40,6 +40,7 @@ import com.google.android.material.appbar.AppBarLayout;
 import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
 import top.geek_studio.chenlongcould.geeklibrary.widget.GkToolbar;
 import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.lang.reflect.Field;
@@ -51,6 +52,8 @@ import java.lang.reflect.Field;
 public abstract class BaseCompatActivity extends AppCompatActivity implements IStyle {
 
 	private static final String TAG = "BaseCompatActivity";
+
+	protected SharedPreferences preferences;
 
 	/**
 	 * @deprecated use {@link GkToolbar}
@@ -69,6 +72,8 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 
+		preferences = PreferenceUtil.getDefault(this);
+
 		//print TAG
 		Log.d(TAG, "onCreate: " + getActivityTAG());
 
@@ -78,7 +83,7 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 		initStyle();
 
 		//设置状态栏是否全透明
-		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false)) {
+		if (preferences.getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false)) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 				Window window = getWindow();
 				window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS

@@ -13,7 +13,6 @@ import android.graphics.drawable.Icon;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.*;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import androidx.annotation.NonNull;
@@ -28,6 +27,7 @@ import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.Detail;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
+import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.io.IOException;
@@ -48,6 +48,62 @@ public final class MusicService extends Service {
 	private static final String TAG = "MusicService";
 
 	public static final String ACG_PLAYER_PACKAGE_NAME = "top.geek_studio.chenlongcould.musicplayer.Common";
+
+	@Override
+	public void onCreate() {
+		serviceWeakReference = new WeakReference<>(this);
+		final PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+		wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
+		wakeLock.setReferenceCounted(false);
+
+		MusicControl.mediaPlayer.setOnCompletionListener(mp -> {
+			switch (PreferenceUtil.getDefault(this).getString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE)) {
+				case PlayType.REPEAT_LIST: {
+					// TODO: 2019/5/30
+				}
+				break;
+
+				case PlayType.REPEAT_NONE: {
+					if (ItemList.CURRENT_MUSIC_INDEX != ItemList.playOrderList.size()) {
+						Intent intent = new Intent(ServiceActions.ACTION_PN);
+						intent.putExtra("pnType", ServiceActions.ACTION_PN_NEXT);
+						ReceiverOnMusicPlay.startService(this, intent);
+					}
+				}
+				break;
+
+				case PlayType.REPEAT_ONE: {
+					MusicControl.seekTo(0);
+					MusicControl.playMusic();
+				}
+				break;
+			}
+		});
+
+		MusicControl.mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+			mp.reset();
+			return true;
+		});
+
+		//Notification
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+			NotificationChannel channel = new NotificationChannel(mId, "Now playing", NotificationManager.IMPORTANCE_DEFAULT);
+			channel.setDescription("playing_notification_description");
+			channel.enableLights(false);
+			channel.enableVibration(false);
+			channel.setShowBadge(false);
+			channel.setSound(null, null);
+			((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).createNotificationChannel(channel);
+		}
+
+		loadDataSource();
+
+		//监听耳机(有线或无线)的插拔动作, 拔出暂停音乐
+		final IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+		intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
+		registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
+	}
+
 	/**
 	 * 最短播放时间为 3000 毫秒
 	 */
@@ -122,69 +178,11 @@ public final class MusicService extends Service {
 	 */
 	private String mId = "Player";
 	private int mStartNotificationId = 1;
-	private boolean mColorized = true;
 	private PowerManager.WakeLock wakeLock;
 
 
 	public MusicService() {
 		Log.d(TAG, "MusicService: ");
-	}
-
-	@Override
-	public void onCreate() {
-		serviceWeakReference = new WeakReference<>(this);
-		final PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-		wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
-		wakeLock.setReferenceCounted(false);
-
-		MusicControl.mediaPlayer.setOnCompletionListener(mp -> {
-			switch (PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE)) {
-				case PlayType.REPEAT_LIST: {
-					// TODO: 2019/5/30
-				}
-				break;
-
-				case PlayType.REPEAT_NONE: {
-					if (ItemList.CURRENT_MUSIC_INDEX != ItemList.playOrderList.size()) {
-						Intent intent = new Intent(ServiceActions.ACTION_PN);
-						intent.putExtra("pnType", ServiceActions.ACTION_PN_NEXT);
-						ReceiverOnMusicPlay.startService(this, intent);
-					}
-				}
-				break;
-
-				case PlayType.REPEAT_ONE: {
-					MusicControl.seekTo(0);
-					MusicControl.playMusic();
-				}
-				break;
-			}
-		});
-
-		MusicControl.mediaPlayer.setOnErrorListener((mp, what, extra) -> {
-			mp.reset();
-			return true;
-		});
-
-		//Notification
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-			NotificationChannel channel = new NotificationChannel(mId, "Now playing", NotificationManager.IMPORTANCE_DEFAULT);
-			channel.setDescription("playing_notification_description");
-			channel.enableLights(false);
-			channel.enableVibration(false);
-			channel.setShowBadge(false);
-			channel.setSound(null, null);
-			((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).createNotificationChannel(channel);
-		}
-
-		loadDataSource();
-
-		mColorized = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true);
-
-		//监听耳机(有线或无线)的插拔动作, 拔出暂停音乐
-		final IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-		intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
-		registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
 	}
 
 	@Override
@@ -261,17 +259,15 @@ public final class MusicService extends Service {
 						break;
 					}
 
-					Log.d(TAG, "onStartCommand: REPEAT MODE: " + PreferenceManager.getDefaultSharedPreferences(this)
+					Log.d(TAG, "onStartCommand: REPEAT MODE: " + PreferenceUtil.getDefault(this)
 							.getString(Values.SharedPrefsTag.PLAY_TYPE, PlayType.REPEAT_NONE));
 
 					//检测循环
 					// NO UI UPDATE
-					if (PlayType.REPEAT_ONE.equals(PreferenceManager.getDefaultSharedPreferences(this)
+					if (PlayType.REPEAT_ONE.equals(PreferenceUtil.getDefault(this)
 							.getString(Values.SharedPrefsTag.PLAY_TYPE, PlayType.REPEAT_NONE))) {
 						MusicControl.seekTo(0);
 						MusicControl.playMusic();
-						Log.d(TAG, "onStartCommand: REPEAT MODE: " + PreferenceManager.getDefaultSharedPreferences(this)
-								.getString(Values.SharedPrefsTag.PLAY_TYPE, PlayType.REPEAT_NONE));
 						break;
 					}
 
@@ -284,11 +280,7 @@ public final class MusicService extends Service {
 						break;
 					}
 
-					Log.d(TAG, "onStartCommand: PN TYPE: " + pnType);
-
 					ItemList.CURRENT_MUSIC_INDEX = getIndex(pnType);
-
-					Log.d(TAG, "onStartCommand: index: " + ItemList.CURRENT_MUSIC_INDEX);
 
 					// 循环检测是否播放到 “垃圾桶” 中的歌曲，如是，则跳过
 					for (; ; ) {
@@ -351,7 +343,6 @@ public final class MusicService extends Service {
 			}
 
 			if (flashMode != -1) {
-				Log.d(TAG, "onStartCommand: flash mode is not -1, send broadcast...");
 				updateUI.putExtra("play_type", flashMode);
 				updateUI.putExtra("item", mMusicItem.get());
 				sendBroadcast(updateUI, Values.Permission.BROAD_CAST);
@@ -359,41 +350,6 @@ public final class MusicService extends Service {
 		}
 
 		return START_STICKY;
-	}
-
-	/**
-	 * 获取下个播放的 index
-	 *
-	 * @param playType 播放的模式 (向前 或者 向后)
-	 */
-	public int getIndex(@NonNull String playType) {
-		int targetIndex = 0;
-		if (playType.contains(ServiceActions.ACTION_PN_NEXT)) {
-			targetIndex = ItemList.CURRENT_MUSIC_INDEX + 1;
-			//超出范围自动跳转0
-			if (targetIndex > ItemList.playOrderList.size() - 1) {
-				targetIndex = 0;
-			}
-		} else if (playType.contains(ServiceActions.ACTION_PN_PREVIOUS)) {
-			targetIndex = ItemList.CURRENT_MUSIC_INDEX - 1;
-			if (targetIndex < 0) {
-				//超出范围超转最后
-				targetIndex = ItemList.playOrderList.size() - 1;
-			}
-		}
-		return targetIndex;
-	}
-
-	@Override
-	public IBinder onBind(Intent intent) {
-		Log.d(TAG, "onBind: ");
-		return mMusicBinder;
-	}
-
-	private PendingIntent buildPendingIntent(Context context, final String action, final ComponentName serviceName) {
-		Intent intent = new Intent(action);
-		intent.setComponent(serviceName);
-		return PendingIntent.getService(context, 0, intent, 0);
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.O)
@@ -464,67 +420,44 @@ public final class MusicService extends Service {
 			builder.setColor(Color.WHITE);
 		}
 
-		builder.setColorized(mColorized);
+		builder.setColorized(PreferenceUtil.getDefault(this).getBoolean(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true));
 
 		return builder;
 	}
 
-	private NotificationCompat.Builder getNotification25(final String title, final String content, final @Nullable Bitmap cover, final Context context) {
-		final Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
-		final PendingIntent pi = PendingIntent.getActivity(context, 0, intent, 0);
-
-		@SuppressWarnings("UnnecessaryLocalVariable") NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), mId)
-				.setContentTitle(title)
-				.setContentText(content)
-				.setSmallIcon(R.drawable.ic_audiotrack_24px)
-				.setLargeIcon(cover == null ? BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px) : cover)
-				.setContentIntent(pi)
-				.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-				.setPriority(NotificationCompat.PRIORITY_DEFAULT)
-				.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-				.setAutoCancel(false)
-				.setWhen(System.currentTimeMillis())
-				.setOngoing(true);
-		return builder;
-	}
-
-	private void startFN() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			startForeground(mStartNotificationId, getChannelNotification(mMusicItem.get().getMusicName(), mMusicItem.get().getMusicAlbum(), ItemList.mCurrentCover, this).build());
-		} else {
-			startForeground(mStartNotificationId, getNotification25(mMusicItem.get().getMusicName(), mMusicItem.get().getMusicAlbum(), ItemList.mCurrentCover, this).build());
+	/**
+	 * 获取下个播放的 index
+	 *
+	 * @param playType 播放的模式 (向前 或者 向后)
+	 */
+	public int getIndex(@NonNull String playType) {
+		int targetIndex = 0;
+		if (playType.contains(ServiceActions.ACTION_PN_NEXT)) {
+			targetIndex = ItemList.CURRENT_MUSIC_INDEX + 1;
+			//超出范围自动跳转0
+			if (targetIndex > ItemList.playOrderList.size() - 1) {
+				targetIndex = 0;
+			}
+		} else if (playType.contains(ServiceActions.ACTION_PN_PREVIOUS)) {
+			targetIndex = ItemList.CURRENT_MUSIC_INDEX - 1;
+			if (targetIndex < 0) {
+				//超出范围超转最后
+				targetIndex = ItemList.playOrderList.size() - 1;
+			}
 		}
+		return targetIndex;
 	}
 
 	@Override
-	public void onDestroy() {
-		stopForeground(true);
-		MusicControl.mediaPlayer.release();
-		mIsServiceDestroyed.set(true);
-		wakeLock.release();
-		mMusicItem = null;
-		if (ItemList.mCurrentCover != null && !ItemList.mCurrentCover.isRecycled()) {
-			ItemList.mCurrentCover.recycle();
-		}
-
-		try {
-			unregisterReceiver(Data.mMyHeadSetPlugReceiver);
-		} catch (Exception e) {
-			Log.d(TAG, "onDestroy: " + e.getMessage());
-		}
-
-		super.onDestroy();
+	public IBinder onBind(Intent intent) {
+		Log.d(TAG, "onBind: ");
+		return mMusicBinder;
 	}
 
-	private void shuffleList(long seed) {
-		if (seed == 0) {
-			ItemList.playOrderList.clear();
-			ItemList.playOrderList.addAll(ItemList.musicItems);
-		} else {
-			Collections.shuffle(ItemList.playOrderList, new Random(seed));
-		}
-
-		Log.d(TAG, "shuffleList: " + ItemList.playOrderList.toString());
+	private PendingIntent buildPendingIntent(Context context, final String action, final ComponentName serviceName) {
+		Intent intent = new Intent(action);
+		intent.setComponent(serviceName);
+		return PendingIntent.getService(context, 0, intent, 0);
 	}
 
 	private void loadDataSource() {
@@ -536,7 +469,7 @@ public final class MusicService extends Service {
 		if (cursor != null && cursor.moveToFirst()) {
 			//没有歌曲直接退出app
 
-			final boolean skipShort = PreferenceManager.getDefaultSharedPreferences(this)
+			final boolean skipShort = PreferenceUtil.getDefault(this)
 					.getBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
 
 			final LitePalDB blackList = new LitePalDB("BlackList", 1);
@@ -598,6 +531,66 @@ public final class MusicService extends Service {
 			while (cursor.moveToNext());
 			cursor.close();
 		}
+	}
+
+	private NotificationCompat.Builder getNotification25(final String title, final String content, final @Nullable Bitmap cover, final Context context) {
+		final Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
+		final PendingIntent pi = PendingIntent.getActivity(context, 0, intent, 0);
+
+		@SuppressWarnings("UnnecessaryLocalVariable") NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), mId)
+				.setContentTitle(title)
+				.setContentText(content)
+				.setSmallIcon(R.drawable.ic_audiotrack_24px)
+				.setLargeIcon(cover == null ? BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px) : cover)
+				.setContentIntent(pi)
+				.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+				.setPriority(NotificationCompat.PRIORITY_DEFAULT)
+				.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+				.setAutoCancel(false)
+				.setWhen(System.currentTimeMillis())
+				.setOngoing(true);
+		return builder;
+	}
+
+	private void startFN() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			startForeground(mStartNotificationId, getChannelNotification(mMusicItem.get().getMusicName(), mMusicItem.get().getMusicAlbum(), ItemList.mCurrentCover, this).build());
+		} else {
+			startForeground(mStartNotificationId, getNotification25(mMusicItem.get().getMusicName(), mMusicItem.get().getMusicAlbum(), ItemList.mCurrentCover, this).build());
+		}
+	}
+
+	@Override
+	public void onDestroy() {
+		stopForeground(true);
+		MusicControl.mediaPlayer.release();
+		mIsServiceDestroyed.set(true);
+		wakeLock.release();
+		mMusicItem = null;
+		if (ItemList.mCurrentCover != null && !ItemList.mCurrentCover.isRecycled()) {
+			ItemList.mCurrentCover.recycle();
+		}
+
+		try {
+			unregisterReceiver(Data.mMyHeadSetPlugReceiver);
+		} catch (Exception e) {
+			Log.d(TAG, "onDestroy: " + e.getMessage());
+		}
+
+		super.onDestroy();
+	}
+
+	private void shuffleList(long seed) {
+		if (seed == 0) {
+			ItemList.playOrderList.clear();
+			ItemList.playOrderList.addAll(ItemList.musicItems);
+		} else {
+			Collections.shuffle(ItemList.playOrderList, new Random(seed));
+		}
+	}
+
+	static class Config {
+
 	}
 
 	public interface PlayType {
@@ -721,7 +714,7 @@ public final class MusicService extends Service {
 			serviceWeakReference.get().startFN();
 			// update last played
 			if (mMusicItem.get() != null) {
-				PreferenceManager.getDefaultSharedPreferences(serviceWeakReference.get()).edit()
+				PreferenceUtil.getDefault(serviceWeakReference.get()).edit()
 						.putInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, mMusicItem.get().getMusicID()).apply();
 			}
 		}

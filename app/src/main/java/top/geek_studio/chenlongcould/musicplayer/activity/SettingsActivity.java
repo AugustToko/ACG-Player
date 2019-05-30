@@ -69,12 +69,10 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 	private AppBarLayout mAppBarLayout;
 
-	private SharedPreferences mDefPrefs;
-
 	private ColorPickerDialogListener pickerDialogListener = new ColorPickerDialogListener() {
 		@Override
 		public void onColorSelected(int dialogId, @ColorInt int color) {
-			SharedPreferences.Editor editor = mDefPrefs.edit();
+			SharedPreferences.Editor editor = preferences.edit();
 			switch (dialogId) {
 
 				/*
@@ -82,7 +80,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 				 * */
 				case PRIMARY: {
 					mPrimaryImage.clearAnimation();
-					ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, R.color.colorPrimary), color);
+					ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), preferences.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, R.color.colorPrimary), color);
 					animator.setDuration(300);
 					animator.addUpdateListener(animation -> {
 						mPrimaryImage.setBackgroundColor((Integer) animation.getAnimatedValue());
@@ -104,7 +102,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 				 * */
 				case PRIMARY_DARK: {
 					mPrimaryDarkImage.clearAnimation();
-					ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, R.color.colorPrimaryDark), color);
+					ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), preferences.getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, R.color.colorPrimaryDark), color);
 					animator.setDuration(300);
 					animator.addUpdateListener(animation -> {
 						mPrimaryDarkImage.setBackgroundColor((Integer) animation.getAnimatedValue());
@@ -129,7 +127,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 				case TITLE: {
 					mTitleImage.clearAnimation();
-					ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.SharedPrefsTag.TITLE_COLOR, R.color.def_over_title_color), color);
+					ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), preferences.getInt(Values.SharedPrefsTag.TITLE_COLOR, R.color.def_over_title_color), color);
 					animator.setDuration(300);
 					animator.addUpdateListener(animation -> {
 						mTitleImage.setBackgroundColor((Integer) animation.getAnimatedValue());
@@ -156,45 +154,43 @@ public final class SettingsActivity extends BaseCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		mSettingsBinding = DataBindingUtil.setContentView(this, R.layout.activity_settings);
 
-		mDefPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-
-		//find xx
-		final ConstraintLayout primaryOpt = findViewById(R.id.primer_color_option);
-		final ConstraintLayout primaryDarkOpt = findViewById(R.id.primer_color_dark_option);
-		final ConstraintLayout accentOpt = findViewById(R.id.accent_color_option);
-		final ConstraintLayout titleOpt = findViewById(R.id.title_color);
-
 		mPrimaryImage = findViewById(R.id.activity_settings_preview_primary);
 		mPrimaryDarkImage = findViewById(R.id.activity_settings_preview_primary_dark);
 		mAccentImage = findViewById(R.id.activity_settings_preview_acc);
 		mTitleImage = findViewById(R.id.activity_settings_preview_title);
 		mToolbar = findViewById(R.id.activity_settings_toolbar);
 		mAppBarLayout = findViewById(R.id.activity_settings_appbar);
-//        final ConstraintLayout setNightOpt = findViewById(R.id.night_style);
-		final ConstraintLayout styleOpt = findViewById(R.id.detail_background_style);
 		mStyleSwitch = findViewById(R.id.activity_settings_style_switch);
+
+		super.initView(mToolbar, mAppBarLayout);
+		super.onCreate(savedInstanceState);
+
+		//find xx
+		final ConstraintLayout primaryOpt = findViewById(R.id.primer_color_option);
+		final ConstraintLayout primaryDarkOpt = findViewById(R.id.primer_color_dark_option);
+		final ConstraintLayout accentOpt = findViewById(R.id.accent_color_option);
+		final ConstraintLayout titleOpt = findViewById(R.id.title_color);
+		final ConstraintLayout styleOpt = findViewById(R.id.detail_background_style);
 
 		ConstraintLayout constraintLayout = findViewById(R.id.theme_settings);
 		constraintLayout.setOnClickListener(v -> startActivity(new Intent(SettingsActivity.this, ThemeActivity.class)));
 
 		inflateCommonMenu();
 
-		super.initView(mToolbar, mAppBarLayout);
-		super.onCreate(savedInstanceState);
 		initPreView();
 
 		mToolbar.setOnMenuItemClickListener(menuItem -> {
 			switch (menuItem.getItemId()) {
 				case R.id.menu_toolbar_settings_reset: {
 
-					SharedPreferences.Editor editor = mDefPrefs.edit();
+					SharedPreferences.Editor editor = preferences.edit();
 					editor.putInt(Values.SharedPrefsTag.ACCENT_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorAccent));
 					editor.putInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimary));
 					editor.putInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark));
 					editor.apply();
 
 					clearAnimation();
-					ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimary)), ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimary));
+					ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), preferences.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimary)), ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimary));
 					animator.setDuration(300);
 					animator.addUpdateListener(animation -> {
 						mPrimaryImage.setBackgroundColor((Integer) animation.getAnimatedValue());
@@ -202,14 +198,14 @@ public final class SettingsActivity extends BaseCompatActivity {
 						mToolbar.setBackgroundColor((Integer) animation.getAnimatedValue());
 					});
 
-					ValueAnimator animator2 = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark)), ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark));
+					ValueAnimator animator2 = ValueAnimator.ofObject(new ArgbEvaluator(), preferences.getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark)), ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark));
 					animator2.setDuration(300);
 					animator2.addUpdateListener(animation -> {
 						mPrimaryDarkImage.setBackgroundColor((Integer) animator2.getAnimatedValue());
 						getWindow().setNavigationBarColor((Integer) animator2.getAnimatedValue());
 					});
 
-					ValueAnimator animator3 = ValueAnimator.ofObject(new ArgbEvaluator(), mDefPrefs.getInt(Values.SharedPrefsTag.ACCENT_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorAccent)), ContextCompat.getColor(SettingsActivity.this, R.color.colorAccent));
+					ValueAnimator animator3 = ValueAnimator.ofObject(new ArgbEvaluator(), preferences.getInt(Values.SharedPrefsTag.ACCENT_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorAccent)), ContextCompat.getColor(SettingsActivity.this, R.color.colorAccent));
 					animator3.setDuration(300);
 					animator3.addUpdateListener(animation -> mAccentImage.setBackgroundColor((Integer) animator3.getAnimatedValue()));
 
@@ -228,7 +224,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 		mToolbar.setNavigationOnClickListener(v -> onBackPressed());
 
 		primaryOpt.setOnClickListener(v -> {
-			ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, Color.parseColor("#008577")))
+			ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(preferences.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, Color.parseColor("#008577")))
 					.setDialogTitle(R.string.color_picker)
 					.setDialogType(ColorPickerDialog.TYPE_PRESETS)
 					.setShowAlphaSlider(false)
@@ -241,7 +237,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 		});
 
 		primaryDarkOpt.setOnClickListener(v -> {
-			ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")))
+			ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(preferences.getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, Color.parseColor("#00574B")))
 					.setDialogTitle(R.string.color_picker)
 					.setDialogType(ColorPickerDialog.TYPE_PRESETS)
 					.setShowAlphaSlider(true)
@@ -254,7 +250,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 		});
 
 		accentOpt.setOnClickListener(v -> {
-			ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.SharedPrefsTag.ACCENT_COLOR, Color.parseColor("#D81B60")))
+			ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(preferences.getInt(Values.SharedPrefsTag.ACCENT_COLOR, Color.parseColor("#D81B60")))
 					.setDialogTitle(R.string.color_picker)
 					.setDialogType(ColorPickerDialog.TYPE_PRESETS)
 					.setShowAlphaSlider(true)
@@ -268,7 +264,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 
 		titleOpt.setOnClickListener(v -> {
-			ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(mDefPrefs.getInt(Values.SharedPrefsTag.TITLE_COLOR, Color.parseColor("#FFFFFF")))
+			ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(preferences.getInt(Values.SharedPrefsTag.TITLE_COLOR, Color.parseColor("#FFFFFF")))
 					.setDialogTitle(R.string.color_picker)
 					.setDialogType(ColorPickerDialog.TYPE_PRESETS)
 					.setShowAlphaSlider(true)
@@ -283,7 +279,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 //        setNightOpt.setOnClickListener(v -> {
 //
-//            SharedPreferences.Editor editor = mDefPrefs.edit();
+//            SharedPreferences.Editor editor = preferences.edit();
 //            if (Values.BackgroundStyle.NIGHT_MODE) {
 //                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, false);
 //                mNightSwitch.setChecked(false);
@@ -297,13 +293,13 @@ public final class SettingsActivity extends BaseCompatActivity {
 //            }
 //            editor.apply();
 //
-//            Utils.Ui.inDayNightSet(mDefPrefs);
+//            Utils.Ui.inDayNightSet(preferences);
 //        });
 
 //        //night opt
 //        mNightSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
 //
-//            SharedPreferences.Editor editor = mDefPrefs.edit();
+//            SharedPreferences.Editor editor = preferences.edit();
 //            if (isChecked) {
 //                editor.putBoolean(Values.SharedPrefsTag.AUTO_NIGHT_MODE, true);
 //                Values.BackgroundStyle.NIGHT_MODE = true;
@@ -315,13 +311,13 @@ public final class SettingsActivity extends BaseCompatActivity {
 //            }
 //            editor.apply();
 //
-//            Utils.Ui.inDayNightSet(mDefPrefs);
+//            Utils.Ui.inDayNightSet(preferences);
 //
 //        });
 
 		styleOpt.setOnClickListener(v -> {
 
-			SharedPreferences.Editor editor = mDefPrefs.edit();
+			SharedPreferences.Editor editor = preferences.edit();
 			if (Values.BackgroundStyle.DETAIL_BACKGROUND.equals(Values.BackgroundStyle.STYLE_BACKGROUND_BLUR)) {
 				Values.BackgroundStyle.DETAIL_BACKGROUND = Values.BackgroundStyle.STYLE_BACKGROUND_AUTO_COLOR;
 				mStyleSwitch.setChecked(false);
@@ -338,7 +334,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 		mStyleSwitch.setClickable(false);
 
 //        mStyleSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-//            SharedPreferences.Editor editor = mDefPrefs.edit();
+//            SharedPreferences.Editor editor = preferences.edit();
 //            mStyleSwitch.setChecked(isChecked);
 //            if (Values.BackgroundStyle.DETAIL_BACKGROUND.equals(Values.BackgroundStyle.STYLE_BACKGROUND_BLUR)) {
 //                mStyleSwitch.setChecked(false);
@@ -351,9 +347,9 @@ public final class SettingsActivity extends BaseCompatActivity {
 //        });
 
 		mSettingsBinding.colorNoti.setOnClickListener(v -> {
-			final SharedPreferences.Editor editor = mDefPrefs.edit();
+			final SharedPreferences.Editor editor = preferences.edit();
 			final Intent intent = new Intent(this, MusicService.class);
-			if (mDefPrefs.getBoolean(NOTIFICATION_COLORIZED, true)) {
+			if (preferences.getBoolean(NOTIFICATION_COLORIZED, true)) {
 				editor.putBoolean(NOTIFICATION_COLORIZED, false);
 				if (editor.commit()) {
 					mSettingsBinding.colorNotiSwitch.setChecked(false);
@@ -388,8 +384,8 @@ public final class SettingsActivity extends BaseCompatActivity {
 		});
 
 		mSettingsBinding.statusColor.setOnClickListener(v -> {
-			final SharedPreferences.Editor editor = mDefPrefs.edit();
-			if (mDefPrefs.getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false)) {
+			final SharedPreferences.Editor editor = preferences.edit();
+			if (preferences.getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false)) {
 				editor.putBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false);
 				mSettingsBinding.colorStatusSwitch.setChecked(false);
 			} else {
@@ -400,8 +396,8 @@ public final class SettingsActivity extends BaseCompatActivity {
 		});
 
 		mSettingsBinding.hideShort.setOnClickListener(v -> {
-			final SharedPreferences.Editor editor = mDefPrefs.edit();
-			if (mDefPrefs.getBoolean(HIDE_SHORT_SONG, true)) {
+			final SharedPreferences.Editor editor = preferences.edit();
+			if (preferences.getBoolean(HIDE_SHORT_SONG, true)) {
 				editor.putBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, false);
 				mSettingsBinding.filterSwitch.setChecked(false);
 			} else {
@@ -550,8 +546,8 @@ public final class SettingsActivity extends BaseCompatActivity {
 		});
 
 		mSettingsBinding.itemAlbumData.setOnClickListener(v -> {
-			final SharedPreferences.Editor editor = mDefPrefs.edit();
-			if (mDefPrefs.getBoolean(USE_NET_WORK_ALBUM, false)) {
+			final SharedPreferences.Editor editor = preferences.edit();
+			if (preferences.getBoolean(USE_NET_WORK_ALBUM, false)) {
 				editor.putBoolean(Values.SharedPrefsTag.USE_NET_WORK_ALBUM, false);
 				mSettingsBinding.albumSwitch.setChecked(false);
 			} else {
@@ -640,18 +636,18 @@ public final class SettingsActivity extends BaseCompatActivity {
 	private void initPreView() {
 //		mNightSwitch.setChecked(Values.BackgroundStyle.NIGHT_MODE);
 
-		mStyleSwitch.setChecked(Values.BackgroundStyle.STYLE_BACKGROUND_AUTO_COLOR.equals(mDefPrefs
+		mStyleSwitch.setChecked(Values.BackgroundStyle.STYLE_BACKGROUND_AUTO_COLOR.equals(preferences
 				.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.BackgroundStyle.STYLE_BACKGROUND_BLUR)));
 
-		mSettingsBinding.colorNotiSwitch.setChecked(mDefPrefs.getBoolean(NOTIFICATION_COLORIZED, true));
+		mSettingsBinding.colorNotiSwitch.setChecked(preferences.getBoolean(NOTIFICATION_COLORIZED, true));
 
-		mSettingsBinding.colorStatusSwitch.setChecked(mDefPrefs.getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false));
+		mSettingsBinding.colorStatusSwitch.setChecked(preferences.getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false));
 
-		mSettingsBinding.filterSwitch.setChecked(mDefPrefs.getBoolean(HIDE_SHORT_SONG, true));
+		mSettingsBinding.filterSwitch.setChecked(preferences.getBoolean(HIDE_SHORT_SONG, true));
 
-		mSettingsBinding.albumSwitch.setChecked(mDefPrefs.getBoolean(USE_NET_WORK_ALBUM, false));
+		mSettingsBinding.albumSwitch.setChecked(preferences.getBoolean(USE_NET_WORK_ALBUM, false));
 
-		mStyleSwitch.setChecked(Values.BackgroundStyle.STYLE_BACKGROUND_BLUR.equals(mDefPrefs
+		mStyleSwitch.setChecked(Values.BackgroundStyle.STYLE_BACKGROUND_BLUR.equals(preferences
 				.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.BackgroundStyle.STYLE_BACKGROUND_BLUR)));
 
 		mSettingsBinding.textDHideShort.setText(getString(R.string.skip_songs_that_are_less_than_the_minimum_duration

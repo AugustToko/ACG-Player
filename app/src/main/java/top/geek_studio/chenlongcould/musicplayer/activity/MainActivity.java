@@ -12,7 +12,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.*;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
@@ -73,6 +72,7 @@ import top.geek_studio.chenlongcould.musicplayer.threadPool.AlbumThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.ArtistThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.ItemCoverThreadPool;
+import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.io.File;
@@ -88,6 +88,26 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 	public static final String TAG = "MainActivity";
+
+	public ServiceConnection sServiceConnection = new ServiceConnection() {
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			Data.sMusicBinder = IMuiscService.Stub.asInterface(service);
+
+			if (Data.sMusicBinder != null && Data.sCurrentMusicItem.getMusicID() != -1) {
+				try {
+					Data.sMusicBinder.setCurrentMusicData(Data.sCurrentMusicItem);
+				} catch (RemoteException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+
+		}
+	};
 
 	public static final char MUSIC_LIST_FRAGMENT_ID = '1';
 	public static final char ALBUM_LIST_FRAGMENT_ID = '2';
@@ -163,25 +183,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		return result;
 	}
 
-	public ServiceConnection sServiceConnection = new ServiceConnection() {
-		@Override
-		public void onServiceConnected(ComponentName name, IBinder service) {
-			Data.sMusicBinder = IMuiscService.Stub.asInterface(service);
-
-			if (Data.sCurrentMusicItem.getMusicID() != -1) {
-				try {
-					Data.sMusicBinder.setCurrentMusicData(Data.sCurrentMusicItem);
-				} catch (RemoteException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName name) {
-
-		}
-	};
+	private SharedPreferences preferences;
 
 	private ActivityMainBinding mMainBinding;
 	private ActionBarDrawerToggle mDrawerToggle;
@@ -228,6 +230,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+
+		preferences = PreferenceUtil.getDefault(this);
 
 		mMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 		initView();
@@ -365,7 +369,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		mSearchView.setMenuItem(searchItem);
 
 		toolbar.setOnMenuItemClickListener(item -> {
-			final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+			final SharedPreferences.Editor editor = preferences.edit();
 
 			switch (item.getItemId()) {
 				case R.id.menu_toolbar_exit: {
@@ -501,7 +505,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					return false;
 				} else {
 
-					final boolean skipShort = PreferenceManager.getDefaultSharedPreferences(this)
+					final boolean skipShort = preferences
 							.getBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
 
 					final LitePalDB blackList = new LitePalDB("BlackList", 1);
@@ -555,7 +559,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 								.addAlbumId(albumId)
 								.addArtistId(artistId);
 
-						if (Data.sCurrentMusicItem.getMusicID() == -1 && PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, -1) == id) {
+						if (Data.sCurrentMusicItem.getMusicID() == -1 && preferences.getInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, -1) == id) {
 							Data.sCurrentMusicItem = builder.build();
 						}
 
@@ -613,7 +617,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				//service
 				final Intent intent = new Intent(MainActivity.this, MusicService.class);
 				//init service and shuffle list
-				if (Values.TYPE_RANDOM.equals(PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
+				if (Values.TYPE_RANDOM.equals(preferences.getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
 					long seed = Data.shuffleList(Data.sPlayOrderList);
 					intent.setAction(MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
 					intent.putExtra("random_seed", seed);
@@ -649,7 +653,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	 * @param filterStr fileName
 	 */
 	private void filterData(String filterStr) {
-		final String tabOrder = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+		final String tabOrder = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
 		assert tabOrder != null;
 
 		if (tabOrder.charAt(Values.CurrentData.CURRENT_PAGE_INDEX) == MUSIC_LIST_FRAGMENT_ID) {
@@ -728,7 +732,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 						builder.setMessage(getString(R.string.close_the_tab_x_int, tab.getText()));
 						builder.setCancelable(true);
 						builder.setPositiveButton(getString(R.string.sure), (dialog, which) -> {
-							final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 							final SharedPreferences.Editor editor = preferences.edit();
 							final String tabOrder = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
 							assert tabOrder != null;
@@ -763,7 +766,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	 */
 	private void initFragmentData() {
 
-		final String tabOrder = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+		final String tabOrder = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
 
 		assert tabOrder != null;
 
@@ -858,7 +861,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 				case Menu.FIRST: {
 					//noinspection ConstantConditions
-					if (!PreferenceManager.getDefaultSharedPreferences(MainActivity.this)
+					if (!preferences
 							.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER).contains("1")) {
 						final String tab1 = getResources().getString(R.string.music);
 						mTitles.add(tab1);
@@ -872,7 +875,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 				case Menu.FIRST + 1: {
 					//noinspection ConstantConditions
-					if (!PreferenceManager.getDefaultSharedPreferences(MainActivity.this)
+					if (!preferences
 							.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER).contains("2")) {
 						final String tab2 = getResources().getString(R.string.album);
 						mTitles.add(tab2);
@@ -886,7 +889,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 				case Menu.FIRST + 2: {
 					//noinspection ConstantConditions
-					if (!PreferenceManager.getDefaultSharedPreferences(MainActivity.this)
+					if (!preferences
 							.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER).contains("3")) {
 						final String tab3 = getResources().getString(R.string.artist);
 						mTitles.add(tab3);
@@ -900,7 +903,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 				case Menu.FIRST + 3: {
 					//noinspection ConstantConditions
-					if (!PreferenceManager.getDefaultSharedPreferences(MainActivity.this)
+					if (!preferences
 							.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER).contains("4")) {
 						final String tab4 = getResources().getString(R.string.play_list);
 						mTitles.add(tab4);
@@ -914,7 +917,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 				case Menu.FIRST + 4: {
 					//noinspection ConstantConditions
-					if (!PreferenceManager.getDefaultSharedPreferences(MainActivity.this)
+					if (!preferences
 							.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER).contains("5")) {
 						final String tab5 = getResources().getString(R.string.tab_file);
 						mTitles.add(tab5);
@@ -933,8 +936,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			if (!added) {
 				Toast.makeText(MainActivity.this, getString(R.string.already_exsits), Toast.LENGTH_SHORT).show();
 			} else {
-				SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit();
-				editor.putString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER) + typeAdded);
+				SharedPreferences.Editor editor = preferences.edit();
+				editor.putString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER) + typeAdded);
 				editor.apply();
 				mPagerAdapter.notifyDataSetChanged();
 
@@ -988,7 +991,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					tab.select();
 				}
 
-				String order = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+				String order = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
 				if (order.charAt(i) == '1') {
 					mCurrentShowedFragment = musicListFragment;
 
@@ -1094,7 +1097,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		getWindow().setNavigationBarColor(Utils.Ui.getPrimaryDarkColor(this));
 
 		Observable.create((ObservableOnSubscribe<Theme>) emitter -> {
-			final String themeId = PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.SELECT_THEME, ThemeActivity.DEFAULT_THEME);
+			final String themeId = preferences.getString(Values.SharedPrefsTag.SELECT_THEME, ThemeActivity.DEFAULT_THEME);
 			if (themeId != null && !"null".equals(themeId)) {
 				final File themeFile = ThemeUtils.getThemeFile(this, themeId);
 				Data.sTheme = ThemeUtils.fileToTheme(themeFile);

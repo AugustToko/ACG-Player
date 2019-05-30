@@ -16,10 +16,10 @@ android {
         applicationId "top.geek_studio.chenlongcould.musicplayer"
         minSdkVersion 21
         targetSdkVersion 28
-        versionName '2.6.3.8(20190529)'
+        versionName '2.6.5.0(20190530)'
         testInstrumentationRunner "android.support.albumLoader.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config
-        versionCode 95
+        versionCode 96
         flavorDimensions "default"
         multiDexEnabled = false
 

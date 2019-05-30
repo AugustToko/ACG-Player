@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -134,7 +133,7 @@ public final class AlbumListFragment extends BaseFragment {
 		mRecyclerView.setHasFixedSize(true);
 
 		//get type
-		final SharedPreferences mDef = PreferenceManager.getDefaultSharedPreferences(getActivity());
+		final SharedPreferences mDef = preferences;
 		int type = mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
 		switch (type) {
 			case MyRecyclerAdapter2AlbumList.LINEAR_TYPE: {

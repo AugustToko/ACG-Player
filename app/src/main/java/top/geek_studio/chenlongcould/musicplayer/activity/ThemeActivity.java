@@ -19,7 +19,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.ViewGroup;
@@ -149,7 +148,7 @@ public final class ThemeActivity extends BaseCompatActivity {
 				break;
 
 				case R.id.menu_toolbar_theme_reset: {
-					final SharedPreferences.Editor preferences = PreferenceManager.getDefaultSharedPreferences(this).edit();
+					final SharedPreferences.Editor preferences = super.preferences.edit();
 					preferences.putBoolean(Values.SharedPrefsTag.THEME_USE_NOTE, false);
 					preferences.apply();
 
@@ -159,7 +158,7 @@ public final class ThemeActivity extends BaseCompatActivity {
 					builder.setCancelable(true);
 					builder.setNegativeButton(getString(R.string.sure), (dialog, which) -> {
 						Data.sTheme = null;
-						SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(ThemeActivity.this).edit();
+						SharedPreferences.Editor editor = super.preferences.edit();
 						editor.putString(Values.SharedPrefsTag.SELECT_THEME, DEFAULT_THEME);
 						editor.apply();
 
@@ -177,14 +176,13 @@ public final class ThemeActivity extends BaseCompatActivity {
 				break;
 
 				case R.id.menu_toolbar_theme_load_def: {
-					PreferenceManager.getDefaultSharedPreferences(this).edit()
-							.putBoolean(Values.SharedPrefsTag.LOAD_DEFAULT_THEME, true).apply();
+					preferences.edit().putBoolean(Values.SharedPrefsTag.LOAD_DEFAULT_THEME, true).apply();
 					loadDataUI();
 				}
 				break;
 
 				case R.id.menu_toolbar_theme_note: {
-					final SharedPreferences.Editor preferences = PreferenceManager.getDefaultSharedPreferences(this).edit();
+					final SharedPreferences.Editor preferences = super.preferences.edit();
 					preferences.putBoolean(Values.SharedPrefsTag.THEME_USE_NOTE, false);
 					preferences.apply();
 					noteCheck();
@@ -203,7 +201,6 @@ public final class ThemeActivity extends BaseCompatActivity {
 	}
 
 	private void noteCheck() {
-		final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		if (!preferences.getBoolean(Values.SharedPrefsTag.THEME_USE_NOTE, false)) {
 			final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setCancelable(false);
@@ -281,7 +278,6 @@ public final class ThemeActivity extends BaseCompatActivity {
 				return;
 			}
 
-			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ThemeActivity.this);
 			if (preferences.getBoolean(Values.SharedPrefsTag.LOAD_DEFAULT_THEME, true)) {
 				final File defTheme1 = new File(themeDir.getAbsolutePath() + File.separatorChar + "0_def");
 				final File defTheme2 = new File(themeDir.getAbsolutePath() + File.separatorChar + "01_def");

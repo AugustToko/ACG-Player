@@ -47,14 +47,6 @@
                 android:theme="@style/LightTheme.NoActionBar"
                 />
 
-        <receiver
-                android:name=".broadcast.NotificationBroadcast"
-                android:enabled="true"
-                android:exported="true"
-                android:permission="top.geek_studio.chenlongcould.musicplayer.BroadCasts"
-                android:process=":musicService"
-                />
-
         <service
                 android:name=".DBArtSync"
                 android:exported="false"
@@ -184,6 +176,13 @@
                     android:resource="@xml/file_path"
                     />
         </provider>
+
+        <provider
+                android:authorities="com.lain.preference"
+                android:name=".utils.SharedPreferenceProvider"
+                android:process=":remote"
+                android:exported="false"
+                />
 
         <service
                 android:name=".MyTileService"

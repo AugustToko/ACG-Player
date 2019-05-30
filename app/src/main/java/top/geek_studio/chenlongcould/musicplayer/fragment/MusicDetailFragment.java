@@ -11,8 +11,8 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.*;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.*;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
@@ -47,6 +47,7 @@ import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.customView.PlayPauseDrawable;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
+import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.lang.ref.WeakReference;
@@ -675,7 +676,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		 * init view animation
 		 * */
 		//default type is common, but the random button alpha is 1f(it means this button is on), so set animate
-		if (Values.TYPE_RANDOM.equals(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
+		if (Values.TYPE_RANDOM.equals(PreferenceUtil.getDefault(mMainActivity).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
 			final ValueAnimator animator = new ValueAnimator();
 			animator.setDuration(300);
 			animator.setFloatValues(0f, 1f);
@@ -736,7 +737,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		final ValueAnimator animator = new ValueAnimator();
 		animator.setDuration(300);
 		//noinspection ConstantConditions
-		switch (PreferenceManager.getDefaultSharedPreferences(mMainActivity).getString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE)) {
+		switch (PreferenceUtil.getDefault(mMainActivity).getString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE)) {
 			case MusicService.PlayType.REPEAT_NONE: {
 				mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
 				animator.setFloatValues(0f, 0.3f);
@@ -1061,9 +1062,9 @@ public final class MusicDetailFragment extends BaseFragment {
 			animator.setDuration(300);
 			mRepeatButton.clearAnimation();
 			//noinspection ConstantConditions
-			switch (PreferenceManager.getDefaultSharedPreferences(mMainActivity).getString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE)) {
+			switch (PreferenceUtil.getDefault(mMainActivity).getString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE)) {
 				case MusicService.PlayType.REPEAT_NONE: {
-					PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit().putString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_LIST).commit();
+					PreferenceUtil.getDefault(mMainActivity).edit().putString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_LIST).apply();
 					mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
 					animator.setFloatValues(0.3f, 1f);
 					animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));
@@ -1094,11 +1095,11 @@ public final class MusicDetailFragment extends BaseFragment {
 				}
 				case MusicService.PlayType.REPEAT_LIST: {
 					mRepeatButton.setImageResource(R.drawable.ic_repeat_one_white_24dp);
-					PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit().putString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_ONE).commit();
+					PreferenceUtil.getDefault(mMainActivity).edit().putString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_ONE).apply();
 				}
 				break;
 				case MusicService.PlayType.REPEAT_ONE: {
-					PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit().putString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE).commit();
+					PreferenceUtil.getDefault(mMainActivity).edit().putString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE).apply();
 					mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
 					animator.setFloatValues(1f, 0.3f);
 					animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));
@@ -1129,6 +1130,8 @@ public final class MusicDetailFragment extends BaseFragment {
 				}
 				default:
 			}
+
+			Log.d(TAG, "setClickListener: repeat mode: " + PreferenceUtil.getDefault(mMainActivity).getString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE));
 		});
 
 		mRepeatButton.setOnLongClickListener(v -> {
@@ -1142,8 +1145,8 @@ public final class MusicDetailFragment extends BaseFragment {
 
 		mRandomButton.setOnClickListener(v -> {
 			mRandomButton.clearAnimation();
-			final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit();
-			if (Values.TYPE_RANDOM.equals(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
+			final SharedPreferences.Editor editor = PreferenceUtil.getDefault(mMainActivity).edit();
+			if (Values.TYPE_RANDOM.equals(PreferenceUtil.getDefault(mMainActivity).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
 				editor.putString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).apply();
 				final ValueAnimator animator = new ValueAnimator();
 				animator.setFloatValues(1f, 0.3f);
@@ -1295,7 +1298,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		public static void dropToTrash(@NonNull Context context, @Nullable MusicItem item) {
 			if (item == null) return;
 
-			if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, true)) {
+			if (PreferenceUtil.getDefault(context).getBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, true)) {
 				final AlertDialog.Builder builder = new AlertDialog.Builder(context);
 				builder.setTitle(context.getString(R.string.sure_int));
 				builder.setMessage(context.getString(R.string.drop_to_trash_can));
@@ -1310,7 +1313,7 @@ public final class MusicDetailFragment extends BaseFragment {
 				builder.setCancelable(true);
 				builder.setNegativeButton(context.getString(R.string.sure), (dialog, which) -> {
 					if (checkBox.isChecked()) {
-						PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, false).apply();
+						PreferenceUtil.getDefault(context).edit().putBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, false).apply();
 					}
 					Data.S_TRASH_CAN_LIST.add(item);
 					dialog.dismiss();
@@ -1567,7 +1570,7 @@ public final class MusicDetailFragment extends BaseFragment {
 
 
 								//播放模式不为循环单曲时，跳出提示
-								if (!MusicService.PlayType.REPEAT_ONE.equals(PreferenceManager.getDefaultSharedPreferences(mMainActivity).getString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE))) {
+								if (!MusicService.PlayType.REPEAT_ONE.equals(PreferenceUtil.getDefault(mMainActivity).getString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE))) {
 									if (ReceiverOnMusicPlay.getCurrentPosition() / 1000 == ReceiverOnMusicPlay.getDuration() / 1000 - 5 && !snackNotice) {
 										snackNotice = true;
 

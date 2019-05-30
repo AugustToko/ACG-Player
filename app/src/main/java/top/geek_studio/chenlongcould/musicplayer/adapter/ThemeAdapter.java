@@ -18,7 +18,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -51,6 +50,7 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.ThemeActivity;
 import top.geek_studio.chenlongcould.musicplayer.databinding.DialogThemeBinding;
+import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.io.File;
@@ -69,9 +69,12 @@ public final class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHo
 
 	private ArrayList<Disposable> mDisposables = new ArrayList<>();
 
+	private SharedPreferences preferences;
+
 	public ThemeAdapter(ThemeActivity themeActivity, List<Theme> themes) {
 		mThemes = themes;
 		mThemeActivity = themeActivity;
+		preferences = PreferenceUtil.getDefault(themeActivity);
 	}
 
 	@NonNull
@@ -100,7 +103,7 @@ public final class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHo
 
 				//del
 				case Menu.FIRST: {
-					if (PreferenceManager.getDefaultSharedPreferences(mThemeActivity).getString(Values.SharedPrefsTag.SELECT_THEME, "null").equals(mThemes.get(holder.getAdapterPosition()).getId())) {
+					if (preferences.getString(Values.SharedPrefsTag.SELECT_THEME, "null").equals(mThemes.get(holder.getAdapterPosition()).getId())) {
 						Toast.makeText(mThemeActivity, mThemeActivity.getString(R.string.theme_is_in_use), Toast.LENGTH_SHORT).show();
 						break;
 					}
@@ -160,7 +163,7 @@ public final class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHo
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 
-		if (mThemes.get(i).getId().equals(PreferenceManager.getDefaultSharedPreferences(mThemeActivity).getString(Values.SharedPrefsTag.SELECT_THEME, "null"))) {
+		if (mThemes.get(i).getId().equals(preferences.getString(Values.SharedPrefsTag.SELECT_THEME, "null"))) {
 			((CardView) viewHolder.itemView).setCardBackgroundColor(ContextCompat.getColor(mThemeActivity, R.color.theme_in_use_item_bg_color));
 		} else {
 			((CardView) viewHolder.itemView).setCardBackgroundColor(ContextCompat.getColor(mThemeActivity, R.color.win_background_color));
@@ -214,7 +217,7 @@ public final class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHo
 		//REMOVE THEME
 		builder.setNeutralButton(mThemeActivity.getString(R.string.del), (dialog, which) -> {
 
-			final String r1 = PreferenceManager.getDefaultSharedPreferences(mThemeActivity).getString(Values.SharedPrefsTag.SELECT_THEME, null);
+			final String r1 = preferences.getString(Values.SharedPrefsTag.SELECT_THEME, null);
 			final String r2 = mThemes.get(holder.getAdapterPosition()).getId();
 
 			if (r1 != null && r1.equals(r2)) {
@@ -243,7 +246,7 @@ public final class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHo
 		//apply!!
 		builder.setNegativeButton(mThemeActivity.getString(R.string.apply), (dialog, which) -> {
 			Data.sTheme = mThemes.get(holder.getAdapterPosition());
-			final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(mThemeActivity).edit();
+			final SharedPreferences.Editor editor = preferences.edit();
 			editor.putString(Values.SharedPrefsTag.SELECT_THEME, mThemes.get(holder.getAdapterPosition()).getId());
 			editor.apply();
 			dialog.dismiss();
