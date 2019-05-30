@@ -9,12 +9,18 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
 import top.geek_studio.chenlongcould.geeklibrary.Private;
+import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
@@ -360,4 +366,34 @@ public class MusicUtil {
 //
 //        return lyrics;
 //    }
+
+	public static void dropToTrash(@NonNull Context context, @Nullable MusicItem item) {
+		if (item == null) return;
+
+		if (PreferenceUtil.getDefault(context).getBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, true)) {
+			final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+			builder.setTitle(context.getString(R.string.sure_int));
+			builder.setMessage(context.getString(R.string.drop_to_trash_can));
+			final FrameLayout frameLayout = new FrameLayout(context);
+			final CheckBox checkBox = new CheckBox(context);
+			checkBox.setText(context.getString(R.string.do_not_show_again));
+			frameLayout.addView(checkBox);
+			final FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+			params.leftMargin = (int) context.getResources().getDimension(R.dimen.margin_16);
+			checkBox.setLayoutParams(params);
+			builder.setView(frameLayout);
+			builder.setCancelable(true);
+			builder.setNegativeButton(context.getString(R.string.sure), (dialog, which) -> {
+				if (checkBox.isChecked()) {
+					PreferenceUtil.getDefault(context).edit().putBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, false).apply();
+				}
+				Data.S_TRASH_CAN_LIST.add(item);
+				dialog.dismiss();
+			});
+			builder.setPositiveButton(context.getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
+			builder.show();
+		} else {
+			Data.S_TRASH_CAN_LIST.add(item);
+		}
+	}
 }

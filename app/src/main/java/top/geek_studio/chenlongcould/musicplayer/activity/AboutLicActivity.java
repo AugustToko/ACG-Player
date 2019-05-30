@@ -5,12 +5,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
-
 import androidx.appcompat.app.AlertDialog;
-
-import java.io.IOException;
-import java.io.InputStream;
-
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
@@ -19,6 +14,9 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.geeklibrary.DialogUtil;
 import top.geek_studio.chenlongcould.musicplayer.R;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @author chenlongcould

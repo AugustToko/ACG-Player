@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,7 +20,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
-import top.geek_studio.chenlongcould.geeklibrary.DialogUtil;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
@@ -74,9 +72,6 @@ public final class AlbumListFragment extends BaseFragment {
 
 	private void initAlbumData() {
 
-		final AlertDialog load = DialogUtil.getLoadingDialog(mMainActivity, "Loading");
-		load.show();
-
 		Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
 			if (Data.sAlbumItems.size() == 0) {
 				Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null, null, null, null);
@@ -116,8 +111,7 @@ public final class AlbumListFragment extends BaseFragment {
 
 					@Override
 					public void onComplete() {
-						load.dismiss();
-						mMainActivity.getMainBinding().toolBar.setSubtitle(Data.sAlbumItems.size() + " Album");
+//						mMainActivity.getMainBinding().toolBar.setSubtitle(Data.sAlbumItems.size() + " Album");
 					}
 				});
 

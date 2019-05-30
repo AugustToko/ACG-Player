@@ -16,12 +16,11 @@ import android.database.Cursor;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio.PlaylistsColumns;
-
-import java.util.ArrayList;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
+
+import java.util.ArrayList;
 
 public class PlaylistLoader {
 

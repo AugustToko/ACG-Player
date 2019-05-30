@@ -52,7 +52,6 @@ import io.reactivex.schedulers.Schedulers;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import org.litepal.LitePal;
 import org.litepal.LitePalDB;
-import top.geek_studio.chenlongcould.geeklibrary.DialogUtil;
 import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
 import top.geek_studio.chenlongcould.geeklibrary.theme.Theme;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
@@ -93,6 +92,10 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			Data.sMusicBinder = IMuiscService.Stub.asInterface(service);
+
+			if (Values.TYPE_RANDOM.equals(preferences.getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
+				Data.shuffleOrderListSync(MainActivity.this, false);
+			}
 
 			if (Data.sMusicBinder != null && Data.sCurrentMusicItem.getMusicID() != -1) {
 				try {
@@ -197,8 +200,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	 * ----------------- fragment(s) ----------------------
 	 */
 	private HandlerThread mHandlerThread;
-
-	private AlertDialog load;
 
 	/**
 	 * clearData data
@@ -584,9 +585,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	}
 
 	private void loadData() {
-		load = DialogUtil.getLoadingDialog(this, "Loading...");
-		load.show();
-
 		Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
 			if (!loadDataSource()) {
 				emitter.onNext(-1);
@@ -601,7 +599,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 			@Override
 			public final void onNext(Integer result) {
-				load.dismiss();
 				if (result == -1) {
 					AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 					builder.setTitle("Error")
@@ -617,11 +614,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				//service
 				final Intent intent = new Intent(MainActivity.this, MusicService.class);
 				//init service and shuffle list
-				if (Values.TYPE_RANDOM.equals(preferences.getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
-					long seed = Data.shuffleList(Data.sPlayOrderList);
-					intent.setAction(MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
-					intent.putExtra("random_seed", seed);
-				}
+
 				startService(intent);
 				Data.HAS_BIND = bindService(intent, sServiceConnection, BIND_AUTO_CREATE);
 				setSubtitle(Data.sPlayOrderList.size() + " Songs");
@@ -636,7 +629,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 			@Override
 			public final void onError(Throwable throwable) {
-				load.dismiss();
 				Toast.makeText(MainActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
 			}
 

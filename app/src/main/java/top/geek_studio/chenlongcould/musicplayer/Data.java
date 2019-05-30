@@ -80,6 +80,7 @@ public final class Data {
 	}
 
 	public static int getCurrentIndex() {
+		if (Data.sMusicBinder == null) return 0;
 		try {
 			return sMusicBinder.getCurrentIndex();
 		} catch (RemoteException e) {

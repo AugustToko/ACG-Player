@@ -4,6 +4,7 @@ import android.database.Cursor;
 import android.os.*;
 import android.provider.MediaStore;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,9 +17,11 @@ import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
+import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -239,6 +242,17 @@ public final class ListViewActivity extends BaseCompatActivity {
 				break;
 
 				case FragmentType.ACTION_TRASH_CAN: {
+					if (preferences.getBoolean(Values.SharedPrefsTag.TRASH_CAN_INFO, true)) {
+						AlertDialog.Builder builder = new AlertDialog.Builder(this)
+								.setTitle("About trash can")
+								.setMessage("You can throw the music into the trash, so you won't hear the song recently unless you actively play it.")
+								.setNegativeButton("OK", (dialog, which) -> {
+									PreferenceUtil.getDefault(ListViewActivity.this).edit().putBoolean(Values.SharedPrefsTag.TRASH_CAN_INFO, false).apply();
+									dialog.dismiss();
+								});
+						builder.show();
+					}
+
 					mToolbar.setTitle(getString(R.string.trash_can));
 					mMusicItemList.addAll(Data.S_TRASH_CAN_LIST);
 					adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList, new MyRecyclerAdapter.Config(0, false));

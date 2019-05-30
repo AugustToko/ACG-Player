@@ -129,7 +129,7 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 				break;
 
 				case R.id.menu_toolbar_trash_can: {
-					MusicDetailFragment.P.dropToTrash(mCarViewActivity, Data.sCurrentMusicItem);
+					MusicUtil.dropToTrash(mCarViewActivity, Data.sCurrentMusicItem);
 				}
 				break;
 				default:

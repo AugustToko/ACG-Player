@@ -1,7 +1,6 @@
 package top.geek_studio.chenlongcould.musicplayer.activity;
 
 import android.os.Bundle;
-
 import top.geek_studio.chenlongcould.musicplayer.R;
 
 /**

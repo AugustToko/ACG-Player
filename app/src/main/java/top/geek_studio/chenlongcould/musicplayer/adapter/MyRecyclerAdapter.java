@@ -56,6 +56,7 @@ import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.ItemCoverThreadPool;
+import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
@@ -359,6 +360,11 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 						e.printStackTrace();
 						Toast.makeText(mActivity, "Could not share this file, I'm aware of the issue.", Toast.LENGTH_SHORT).show();
 					}
+				}
+				break;
+
+				case Menu.FIRST + 7: {
+					MusicUtil.dropToTrash(mActivity, mMusicItems.get(holder.getAdapterPosition()));
 				}
 				break;
 				default:
@@ -883,6 +889,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 			}
 			mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, resources.getString(R.string.more_info));
 			mMenu.add(Menu.NONE, Menu.FIRST + 6, 0, resources.getString(R.string.share));
+			mMenu.add(Menu.NONE, Menu.FIRST + 7, 0, resources.getString(R.string.drop_to_trash_can));
 
 			MenuInflater menuInflater = mActivity.getMenuInflater();
 			menuInflater.inflate(R.menu.recycler_song_item_menu, mMenu);

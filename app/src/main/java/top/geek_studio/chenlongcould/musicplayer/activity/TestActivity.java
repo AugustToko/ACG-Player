@@ -13,7 +13,6 @@ package top.geek_studio.chenlongcould.musicplayer.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
-
 import androidx.appcompat.widget.Toolbar;
 import top.geek_studio.chenlongcould.musicplayer.R;
 
