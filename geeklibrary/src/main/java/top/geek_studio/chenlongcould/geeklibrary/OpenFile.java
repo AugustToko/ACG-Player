@@ -176,8 +176,8 @@ public class OpenFile {
 
         Intent intent = new Intent("android.intent.action.VIEW");
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra("oneshot", 0);
-        intent.putExtra("configchange", 0);
+//        intent.putExtra("oneshot", 0);
+//        intent.putExtra("configchange", 0);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         Uri uri = FileProvider.getUriForFile(context.getApplicationContext(), AUT, new File(param));
         intent.setDataAndType(uri, "audio/*");

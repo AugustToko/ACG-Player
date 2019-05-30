@@ -1,14 +1,3 @@
-/*
- * ************************************************************
- * 文件：AlbumListFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月27日 13:11:38
- * 上次修改时间：2019年01月27日 13:08:44
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.musicplayer.fragment;
 
 import android.content.Context;
@@ -45,15 +34,15 @@ import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
  * @author chenlongcould
  */
 public final class AlbumListFragment extends BaseFragment {
-	
+
 	public static final String TAG = "AlbumListFragment";
-	
+
 	private RecyclerView mRecyclerView;
-	
+
 	private MainActivity mMainActivity;
 
 	private MyRecyclerAdapter2AlbumList mAdapter2AlbumListAdapter;
-	
+
 	public static AlbumListFragment newInstance() {
 		return new AlbumListFragment();
 	}
@@ -75,32 +64,26 @@ public final class AlbumListFragment extends BaseFragment {
 		super.onAttach(context);
 		mMainActivity = (MainActivity) getActivity();
 	}
-	
+
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.fragment_album_list, container, false);
+		View view = inflater.inflate(R.layout.fragment_album_list, container, false);
+		setRecyclerViewData(view);
+		initAlbumData();
+		return view;
 	}
-	
-	@Override
-	public void setUserVisibleHint(boolean isVisibleToUser) {
-		if (isVisibleToUser) {
-			if (Data.sAlbumItems.size() == 0) {
-				initAlbumData();
-			}
-		}
-	}
-	
+
 	private void initAlbumData() {
-		
+
 		final AlertDialog load = DialogUtil.getLoadingDialog(mMainActivity, "Loading");
 		load.show();
-		
+
 		Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
 			if (Data.sAlbumItems.size() == 0) {
 				Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null, null, null, null);
 				if (cursor != null) {
 					cursor.moveToFirst();
-					
+
 					do {
 						String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM));
 						String albumId = cursor.getString(cursor.getColumnIndexOrThrow("_id"));
@@ -109,11 +92,11 @@ public final class AlbumListFragment extends BaseFragment {
 						Data.sAlbumItems.add(albumItem);
 						Data.sAlbumItemsBackUp.add(albumItem);
 					} while (cursor.moveToNext());
-					
+
 					cursor.close();
 				}   //initData
 			}
-			
+
 			emitter.onComplete();
 		}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
 				.safeSubscribe(new Observer<Integer>() {
@@ -121,68 +104,66 @@ public final class AlbumListFragment extends BaseFragment {
 					public void onSubscribe(Disposable disposable) {
 						Data.sDisposables.add(disposable);
 					}
-					
+
 					@Override
 					public void onNext(Integer result) {
-					
+
 					}
-					
+
 					@Override
 					public void onError(Throwable throwable) {
-					
+
 					}
-					
+
 					@Override
 					public void onComplete() {
-						setRecyclerViewData();
 						load.dismiss();
 						mMainActivity.getMainBinding().toolBar.setSubtitle(Data.sAlbumItems.size() + " Album");
 					}
 				});
-		
+
 	}
-	
+
 	/**
 	 * by firstStartApp, change Layout...
 	 */
-	public void setRecyclerViewData() {
-		
-		if (getView() != null) {
-			mRecyclerView = getView().findViewById(R.id.recycler_view);
-			mRecyclerView.setHasFixedSize(true);
-			
-			//get type
-			final SharedPreferences mDef = PreferenceManager.getDefaultSharedPreferences(getActivity());
-			int type = mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
-			switch (type) {
-				case MyRecyclerAdapter2AlbumList.LINEAR_TYPE: {
-					LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mMainActivity);
-					linearLayoutManager.setItemPrefetchEnabled(true);
-					linearLayoutManager.setInitialPrefetchItemCount(6);
-					mRecyclerView.setLayoutManager(linearLayoutManager);
-				}
-				break;
-				case MyRecyclerAdapter2AlbumList.GRID_TYPE: {
-					GridLayoutManager gridLayoutManager = new GridLayoutManager(mMainActivity, mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2));
-					gridLayoutManager.setItemPrefetchEnabled(true);
-					gridLayoutManager.setInitialPrefetchItemCount(6);
-					mRecyclerView.setLayoutManager(gridLayoutManager);
-				}
-				break;
-				default:
-			}
+	public void setRecyclerViewData(@Nullable View view) {
+		if (view == null) return;
 
-			mAdapter2AlbumListAdapter = new MyRecyclerAdapter2AlbumList(mMainActivity, Data.sAlbumItems, type);
-			mRecyclerView.setAdapter(mAdapter2AlbumListAdapter);
+		mRecyclerView = view.findViewById(R.id.recycler_view);
+		mRecyclerView.setHasFixedSize(true);
+
+		//get type
+		final SharedPreferences mDef = PreferenceManager.getDefaultSharedPreferences(getActivity());
+		int type = mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
+		switch (type) {
+			case MyRecyclerAdapter2AlbumList.LINEAR_TYPE: {
+				LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mMainActivity);
+				linearLayoutManager.setItemPrefetchEnabled(true);
+				linearLayoutManager.setInitialPrefetchItemCount(6);
+				mRecyclerView.setLayoutManager(linearLayoutManager);
+			}
+			break;
+			case MyRecyclerAdapter2AlbumList.GRID_TYPE: {
+				GridLayoutManager gridLayoutManager = new GridLayoutManager(mMainActivity, mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2));
+				gridLayoutManager.setItemPrefetchEnabled(true);
+				gridLayoutManager.setInitialPrefetchItemCount(6);
+				mRecyclerView.setLayoutManager(gridLayoutManager);
+			}
+			break;
+			default:
 		}
+
+		mAdapter2AlbumListAdapter = new MyRecyclerAdapter2AlbumList(mMainActivity, Data.sAlbumItems, type);
+		mRecyclerView.setAdapter(mAdapter2AlbumListAdapter);
 	}
-	
+
 	public RecyclerView getRecyclerView() {
 		return mRecyclerView;
 	}
-	
-	public MyRecyclerAdapter2AlbumList getAdapter2AlbumList() {
+
+	public MyRecyclerAdapter2AlbumList getAdapter() {
 		return mAdapter2AlbumListAdapter;
 	}
-	
+
 }

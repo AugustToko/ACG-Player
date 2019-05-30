@@ -28,7 +28,6 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
@@ -36,17 +35,9 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -61,6 +52,12 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.ThemeActivity;
 import top.geek_studio.chenlongcould.musicplayer.databinding.DialogThemeBinding;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public final class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
 
@@ -119,7 +116,7 @@ public final class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHo
 								.subscribe(result -> {
 									dialog12.dismiss();
 									mThemeActivity.getThemes().clear();
-									mThemeActivity.reLoadDataUi();
+									mThemeActivity.loadDataUI();
 								});
 						disposable.dispose();
 						dialog12.cancel();
@@ -217,7 +214,7 @@ public final class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHo
 		//REMOVE THEME
 		builder.setNeutralButton(mThemeActivity.getString(R.string.del), (dialog, which) -> {
 
-			final String r1 = PreferenceManager.getDefaultSharedPreferences(mThemeActivity).getString(Values.SharedPrefsTag.SELECT_THEME, "null");
+			final String r1 = PreferenceManager.getDefaultSharedPreferences(mThemeActivity).getString(Values.SharedPrefsTag.SELECT_THEME, null);
 			final String r2 = mThemes.get(holder.getAdapterPosition()).getId();
 
 			if (r1 != null && r1.equals(r2)) {
@@ -230,13 +227,9 @@ public final class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHo
 			sure.setTitle(mThemeActivity.getString(R.string.are_u_sure));
 			sure.setMessage(mThemeActivity.getString(R.string.remove_int));
 			sure.setNeutralButton(mThemeActivity.getString(R.string.sure), (dialog12, which12) -> {
-				final Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) emitter -> Utils.IO.delFolder(mThemes.get(holder.getAdapterPosition()).getPath()))
-						.subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
-						.subscribe(result -> {
-							dialog12.dismiss();
-							mThemeActivity.reLoadDataUi();
-						});
-				mDisposables.add(disposable);
+				Utils.IO.delFolder(mThemes.get(holder.getAdapterPosition()).getPath());
+				mThemeActivity.loadDataUI();
+				dialog12.dismiss();
 				dialog12.cancel();
 			});
 			sure.setNegativeButton(mThemeActivity.getString(R.string.cancel), (dialog1, which1) -> {
@@ -255,7 +248,7 @@ public final class ThemeAdapter extends RecyclerView.Adapter<ThemeAdapter.ViewHo
 			editor.apply();
 			dialog.dismiss();
 			mThemeActivity.getThemes().clear();
-			mThemeActivity.reLoadDataUi();
+			mThemeActivity.loadDataUI();
 		});
 
 		//setData

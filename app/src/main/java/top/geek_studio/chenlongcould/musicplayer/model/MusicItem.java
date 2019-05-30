@@ -35,10 +35,10 @@ public final class MusicItem implements Parcelable {
 	private int mMusicID;
 	private int mAlbumId;
 	private String mMusicAlbum;
-	private int mDuration;
+	private long mDuration;
 	private int mSize;
 	private String mArtist;
-	private int mAddTime;
+	private long mAddTime;
 	transient private boolean mIsFavourite;
 	private int mArtistId;
 
@@ -86,7 +86,7 @@ public final class MusicItem implements Parcelable {
 		return mMusicAlbum == null ? "null" : mMusicAlbum;
 	}
 
-	public int getDuration() {
+	public long getDuration() {
 		return mDuration;
 	}
 
@@ -98,7 +98,7 @@ public final class MusicItem implements Parcelable {
 		return mArtist;
 	}
 
-	public int getAddTime() {
+	public long getAddTime() {
 		return mAddTime;
 	}
 
@@ -121,7 +121,7 @@ public final class MusicItem implements Parcelable {
 	@NonNull
 	@Override
 	public String toString() {
-		return mMusicName + " @ " + mMusicAlbum + " @ " + getMusicPath();
+		return mMusicName + " @ " + mMusicAlbum + " @ " + mMusicPath + "@" + mArtist;
 	}
 
 	@Override
@@ -154,10 +154,10 @@ public final class MusicItem implements Parcelable {
 		dest.writeInt(this.mMusicID);
 		dest.writeInt(this.mAlbumId);
 		dest.writeString(this.mMusicAlbum);
-		dest.writeInt(this.mDuration);
+		dest.writeLong(this.mDuration);
 		dest.writeInt(this.mSize);
 		dest.writeString(this.mArtist);
-		dest.writeInt(this.mAddTime);
+		dest.writeLong(this.mAddTime);
 		dest.writeInt(this.mArtistId);
 	}
 
@@ -168,10 +168,10 @@ public final class MusicItem implements Parcelable {
 
 		private String mMimeName = "null";
 		private String mMusicAlbum = "null";
-		private int mDuration = -1;
+		private long mDuration = -1;
 		private int mSize = -1;
 		private String mArtist = "null";
-		private int mAddTime = -1;
+		private long mAddTime = -1;
 		private int mAlbumId;
 		private int mArtistId;
 		private boolean mIsFav;
@@ -192,7 +192,7 @@ public final class MusicItem implements Parcelable {
 			return this;
 		}
 
-		public Builder duration(int time) {
+		public Builder duration(long time) {
 			mDuration = time;
 			return this;
 		}
@@ -207,7 +207,7 @@ public final class MusicItem implements Parcelable {
 			return this;
 		}
 
-		public Builder addTime(int time) {
+		public Builder addTime(long time) {
 			mAddTime = time;
 			return this;
 		}

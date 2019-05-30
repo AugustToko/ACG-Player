@@ -73,7 +73,7 @@ public final class FileViewFragment extends BaseFragment {
 		initData();
 	}
 
-	public void initData() {
+	private void initData() {
 		final File file = Environment.getExternalStorageDirectory();
 		mFileItems.addAll(new ArrayList<>(Arrays.asList(file.listFiles())));
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

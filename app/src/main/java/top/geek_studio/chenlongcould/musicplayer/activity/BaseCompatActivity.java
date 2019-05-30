@@ -65,7 +65,7 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 	 */
 	@Deprecated
 	private TextView mSubtitleView = null;
-	
+
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 
@@ -92,13 +92,13 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 
 		super.onCreate(savedInstanceState);
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
 		initStyle();
 	}
-	
+
 	/**
 	 * set up status bar color
 	 */
@@ -114,14 +114,14 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 			}
 		});
 	}
-	
+
 	/**
 	 * setup TaskCardColor
 	 */
 	protected void setUpTaskCardColor(@ColorInt int color) {
 		setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, color));
 	}
-	
+
 	/**
 	 * init permission, every Activity extends {@link BaseCompatActivity}
 	 */
@@ -159,7 +159,7 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 		mToolbar = toolbar;
 		mAppBarLayout = appBarLayout;
 	}
-	
+
 	@Override
 	public void initStyle() {
 		setStatusBarTextColor(this, Utils.Ui.getPrimaryColor(this));
@@ -203,41 +203,45 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 	/**
 	 * @param menuItem the menuItem the icon will set AlphaAnimation by {@link ValueAnimator}
 	 */
-	public void setMenuIconAlphaAnimation(@Nullable MenuItem menuItem, boolean visibility) {
+	public void setMenuIconAlphaAnimation(@Nullable MenuItem menuItem, boolean visibility, boolean skipAnimation) {
 		if (menuItem == null) {
 			return;
 		}
 
-		final ValueAnimator animator = new ValueAnimator();
-		animator.setDuration(Values.DefaultValues.ANIMATION_DURATION);
-		if (!visibility && menuItem.isVisible()) {
-			animator.setIntValues(255, 0);
-			animator.addUpdateListener(animation -> {
-				if (menuItem.getIcon() != null) {
-					menuItem.getIcon().setAlpha((Integer) animation.getAnimatedValue());
-				}
-			});
-			animator.addListener(new AnimatorListenerAdapter() {
-				@Override
-				public void onAnimationEnd(Animator animation) {
-					menuItem.setVisible(false);
-				}
-			});
-			animator.start();
-		} else if (visibility && !menuItem.isVisible()) {
-			animator.setIntValues(0, 255);
-			animator.addUpdateListener(animation -> {
-				if (menuItem.getIcon() != null) {
-					menuItem.getIcon().setAlpha((Integer) animation.getAnimatedValue());
-				}
-			});
-			animator.addListener(new AnimatorListenerAdapter() {
-				@Override
-				public void onAnimationStart(Animator animation) {
-					menuItem.setVisible(true);
-				}
-			});
-			animator.start();
+		if (!skipAnimation) {
+			final ValueAnimator animator = new ValueAnimator();
+			animator.setDuration(Values.DefaultValues.ANIMATION_DURATION);
+			if (!visibility && menuItem.isVisible()) {
+				animator.setIntValues(255, 0);
+				animator.addUpdateListener(animation -> {
+					if (menuItem.getIcon() != null) {
+						menuItem.getIcon().setAlpha((Integer) animation.getAnimatedValue());
+					}
+				});
+				animator.addListener(new AnimatorListenerAdapter() {
+					@Override
+					public void onAnimationEnd(Animator animation) {
+						menuItem.setVisible(false);
+					}
+				});
+				animator.start();
+			} else if (visibility && !menuItem.isVisible()) {
+				animator.setIntValues(0, 255);
+				animator.addUpdateListener(animation -> {
+					if (menuItem.getIcon() != null) {
+						menuItem.getIcon().setAlpha((Integer) animation.getAnimatedValue());
+					}
+				});
+				animator.addListener(new AnimatorListenerAdapter() {
+					@Override
+					public void onAnimationStart(Animator animation) {
+						menuItem.setVisible(true);
+					}
+				});
+				animator.start();
+			}
+		} else {
+			menuItem.setVisible(visibility);
 		}
 
 	}

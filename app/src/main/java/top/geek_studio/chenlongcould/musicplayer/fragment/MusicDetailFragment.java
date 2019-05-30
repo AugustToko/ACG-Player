@@ -13,7 +13,6 @@ import android.graphics.Color;
 import android.os.*;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.*;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
@@ -40,25 +39,18 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import org.jetbrains.annotations.NotNull;
 import top.geek_studio.chenlongcould.geeklibrary.widget.GkSnackbar;
-import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.GlideApp;
-import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.*;
 import top.geek_studio.chenlongcould.musicplayer.activity.AlbumDetailActivity;
-import top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyWaitListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
-import top.geek_studio.chenlongcould.musicplayer.customView.AlbumImageView;
 import top.geek_studio.chenlongcould.musicplayer.customView.PlayPauseDrawable;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.lang.ref.WeakReference;
-import java.util.Collections;
 import java.util.Date;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -71,23 +63,122 @@ public final class MusicDetailFragment extends BaseFragment {
 
 	public static final String TAG = "MusicDetailFragment";
 
+	public static final int key = -465854196;
+	/**
+	 * Handler
+	 */
+	private static NotLeakHandler mHandler = null;
+	/**
+	 * for {@link #setBlurEffect(Bitmap, ImageView, ImageView, TextView)}
+	 *
+	 * @see ViewAnimationUtils#createCircularReveal
+	 */
+	private final int m_Position = 200;
+	private volatile ImageView LV;
+	private volatile ImageView MV;
+	private volatile ImageView RV;
+	private volatile ImageView mMusicAlbumImage;
+	private volatile ImageView mMusicAlbumImageOth2;
+	private volatile ImageView mMusicAlbumImageOth3;
+	private ImageView mBGup;
+	private ImageView mBGdown;
+	private SeekBar mSeekBar;
+	private View mInfoBarInfoSeek;
+
+	////////////////////INFO_BAR//////////////////////////
+	private TextView mInfoBarSongText;
+	private ImageView mInfoBarSongImage;
+	private TextView mInfoBarAlbumText;
+	private ImageView mInfoBarBackgroundImage;
+	private ImageView mInfoBarFavButton;
+	private HandlerThread mHandlerThread;
+
+	////////////////////INFO_BAR//////////////////////////
+	private FloatingActionButton mPlayButton;
+	private PlayPauseDrawable mPlayPauseDrawable;
+	private ImageButton mNextButton;
+	private ImageButton mPreviousButton;
+	private RecyclerView mRecyclerView;
+	private LinearLayoutManager mLinearLayoutManager;
+	private MainActivity mMainActivity;
+	private ConstraintLayout mCurrentInfoBody;
+	private TextView mCurrentAlbumNameText;
+	private TextView mCurrentMusicNameText;
+	private ImageButton mRandomButton;
+	private ImageButton mRepeatButton;
+	private Toolbar mToolbar;
+	private AppBarLayout mAppBarLayout;
+	private TextView mLeftTime;
+	private TextView mRightTime;
+	private TextView mNextWillText;
+	private PopupMenu mPopupMenu;
+	private SlidingUpPanelLayout mSlidingUpPanelLayout;
+	private ConstraintLayout mNowPlayingBody;
+	private ConstraintLayout mSlideUpGroup;
+
+	@SuppressWarnings("unused")
+	public static boolean sendMessage(@NonNull Message message) {
+		boolean result = false;
+		if (mHandler != null) {
+			mHandler.sendMessage(message);
+			result = true;
+		}
+		return result;
+	}
+
+	@SuppressWarnings("UnusedReturnValue")
+	public static boolean sendEmptyMessage(int what) {
+		boolean result = false;
+		if (mHandler != null) {
+			mHandler.sendEmptyMessage(what);
+			result = true;
+		}
+		return result;
+	}
+
+	public ImageView getR() {
+		if ((Integer) LV.getTag(key) == 2) {
+			return LV;
+		}
+
+		if ((Integer) RV.getTag(key) == 2) {
+			return RV;
+		}
+
+		if ((Integer) MV.getTag(key) == 2) {
+			return MV;
+		}
+
+		return RV;
+	}
+
+	public ImageView getL() {
+		if ((Integer) LV.getTag(key) == 0) {
+			return LV;
+		}
+
+		if ((Integer) RV.getTag(key) == 0) {
+			return RV;
+		}
+
+		if ((Integer) MV.getTag(key) == 0) {
+			return MV;
+		}
+
+		return LV;
+	}
+
 	/**
 	 * init Views
 	 */
 	private void initView(View view) {
 
 		mPlayPauseDrawable = new PlayPauseDrawable(mMainActivity);
-		mPlayPauseDrawable.setPause(true);
+		mPlayPauseDrawable.setPlay(true);
 
 		//get Default values
-		ImageView.ScaleType scaleType = mPlayButton.getScaleType();
 		defXScale = mPlayButton.getScaleX();
 		defYScale = mPlayButton.getScaleY();
-
-		mMusicAlbumImageOth3.setX(0 - mMusicAlbumImage.getWidth());
-		mMusicAlbumImageOth2.setX(mMusicAlbumImage.getWidth() * 2);
-		mMusicAlbumImageOth2.setVisibility(View.GONE);
-		mMusicAlbumImageOth3.setVisibility(View.GONE);
 
 		mPlayButton.setImageDrawable(mPlayPauseDrawable);
 		mPlayButton.setColorFilter(Color.BLACK);
@@ -100,459 +191,240 @@ public final class MusicDetailFragment extends BaseFragment {
 		setUpToolbar();
 
 		mSlidingUpPanelLayout.post(() -> {
-			int val0 = view.getHeight() - view.findViewById(R.id.frame_ctrl).getBottom();
-			mSlidingUpPanelLayout.setPanelHeight(val0);
+			View v = view.findViewById(R.id.frame_ctrl);
+			mSlidingUpPanelLayout.setPanelHeight(view.getHeight() - v.getTop() - v.getHeight());
 		});
 
-		mMusicAlbumImage.setOnTouchListener((v, event) -> {
-			final int action = event.getAction();
+		mMusicAlbumImageOth3.setX(0 - mMusicAlbumImage.getWidth());
+		mMusicAlbumImageOth2.setX(mMusicAlbumImage.getWidth() * 2);
 
-			MusicItem befItem = null;
-			MusicItem nexItem = null;
-			if (Values.CurrentData.CURRENT_MUSIC_INDEX > 0 && Values.CurrentData.CURRENT_MUSIC_INDEX < Data.sPlayOrderList.size() - 1) {
-				befItem = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX - 1);
-			}
-			if (Values.CurrentData.CURRENT_MUSIC_INDEX < Data.sPlayOrderList.size() - 1 && Values.CurrentData.CURRENT_MUSIC_INDEX > 0) {
-				nexItem = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX + 1);
-			}
+		LV = mMusicAlbumImageOth3;
+		MV = mMusicAlbumImage;
+		RV = mMusicAlbumImageOth2;
 
-			mMusicAlbumImageOth2.setVisibility(View.VISIBLE);
-			mMusicAlbumImageOth3.setVisibility(View.VISIBLE);
+		mMusicAlbumImage.setTag(key, 1);
+		mMusicAlbumImageOth3.setTag(key, 0);
+		mMusicAlbumImageOth2.setTag(key, 2);
 
-			switch (action) {
-				case MotionEvent.ACTION_DOWN:
-					//预加载
-					GlideApp.with(MusicDetailFragment.this)
-							.load(befItem == null ? R.drawable.default_album_art : Utils.Audio.getCoverBitmapFull(mMainActivity, befItem.getAlbumId()))
-							.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-							.diskCacheStrategy(DiskCacheStrategy.NONE)
-							.into(mMusicAlbumImageOth3);
+//		View.OnTouchListener touchListener = (v, event) -> {
+//			final int action = event.getAction();
+//
+//			MusicItem befItem = null;
+//			MusicItem nexItem = null;
+//			if (Values.CurrentData.CURRENT_MUSIC_INDEX > 0 && Values.CurrentData.CURRENT_MUSIC_INDEX < Data.sPlayOrderList.size() - 1) {
+//				befItem = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX - 1);
+//			}
+//			if (Values.CurrentData.CURRENT_MUSIC_INDEX < Data.sPlayOrderList.size() - 1 && Values.CurrentData.CURRENT_MUSIC_INDEX > 0) {
+//				nexItem = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX + 1);
+//			}
+//
+//			switch (action) {
+//				case MotionEvent.ACTION_DOWN:
+//
+//					//预加载
+//					GlideApp.with(MusicDetailFragment.this)
+//							.load(befItem == null ? R.drawable.default_album_art : Utils.Audio.getCoverBitmapFull(mMainActivity, befItem.getAlbumId()))
+//							.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+//							.diskCacheStrategy(DiskCacheStrategy.NONE)
+//							.into(getL());
+//
+//					GlideApp.with(MusicDetailFragment.this)
+//							.load(nexItem == null ? R.drawable.default_album_art : Utils.Audio.getCoverBitmapFull(mMainActivity, nexItem.getAlbumId()))
+//							.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+//							.diskCacheStrategy(DiskCacheStrategy.NONE)
+//							.into(getR());
+//
+//					moveX = event.getX();
+//					mLastX = event.getRawX();
+//
+//					break;
+//				case MotionEvent.ACTION_MOVE:
+//
+//					if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+//						break;
+//					}
+//
+//					//首尾禁止对应边缘滑动
+//					if (Values.CurrentData.CURRENT_MUSIC_INDEX == 0) {
+//						if (event.getRawX() > mLastX) {
+//							break;
+//						}
+//					}
+//
+//					if (Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sPlayOrderList.size() - 1) {
+//						if (event.getRawX() < mLastX) {
+//							break;
+//						}
+//					}
+//
+//					float val = MV.getX() + (event.getX() - moveX);
+//					MV.setTranslationX(val);
+//					RV.setTranslationX(+val);
+//					LV.setTranslationX(0 - mMusicAlbumImage.getWidth() + val);
+//					break;
+//
+//				case MotionEvent.ACTION_CANCEL:
+//				case MotionEvent.ACTION_UP:
+//
+//					mSlidingUpPanelLayout.setTouchEnabled(true);
+//
+//					if (Math.abs(Math.abs(event.getRawX()) - Math.abs(mLastX)) < 5) {
+//						MV.performClick();
+//						break;
+//					}
+//
+//					/*
+//					 * enter Animation...
+//					 * */
+//					ValueAnimator animatorMain = new ValueAnimator();
+//					animatorMain.setDuration(300);
+//
+//					//左滑一半 滑过去
+//					if (MV.getX() < 0 && Math.abs(MV.getX()) >= mMusicAlbumImage.getWidth() / 2) {
+//						animatorMain.setFloatValues(MV.getX(), 0 - mMusicAlbumImage.getWidth());
+//						MusicItem finalNexItem = nexItem;
+//						animatorMain.addListener(new Animator.AnimatorListener() {
+//							@Override
+//							public void onAnimationStart(Animator animation) {
+//							}
+//
+//							@Override
+//							public void onAnimationEnd(Animator animation) {
+//								Utils.SendSomeThing.sendPlay(mMainActivity, 6, "next_slide");
+//
+//								if (finalNexItem != null) {
+//									Bitmap bitmap = Utils.Audio.getCoverBitmapFull(mMainActivity, finalNexItem.getAlbumId());
+//									setIconLightOrDark(bitmap);
+//									mHandler.postDelayed(() -> {
+//										if (bitmap != null && !bitmap.isRecycled()) {
+//											bitmap.recycle();
+//										}
+//									}, 5000);
+//								}
+//
+//								MV.setTranslationX(mMusicAlbumImage.getWidth() * 2);
+//								ImageView temp = MV;
+//								MV = RV;
+//								RV = temp;
+//
+//								RV.setTag(key, 2);
+//								MV.setTag(key, 1);
+//								LV.setTag(key, 0);
+//							}
+//
+//							@Override
+//							public void onAnimationCancel(Animator animation) {
+//
+//							}
+//
+//							@Override
+//							public void onAnimationRepeat(Animator animation) {
+//
+//							}
+//						});
+//
+//						/*右滑一半 滑过去*/
+//					} else if (MV.getX() > 0 && Math.abs(MV.getX()) >= mMusicAlbumImage.getWidth() / 2) {
+//						animatorMain.setFloatValues(MV.getX(), mMusicAlbumImage.getWidth());
+//						MusicItem finalBefItem = befItem;
+//						animatorMain.addListener(new Animator.AnimatorListener() {
+//							@Override
+//							public void onAnimationStart(Animator animation) {
+//
+//							}
+//
+//							@Override
+//							public void onAnimationEnd(Animator animation) {
+//								Utils.SendSomeThing.sendPlay(mMainActivity, 6, "previous_slide");
+//								if (finalBefItem != null) {
+//									Bitmap bitmap = Utils.Audio.getCoverBitmapFull(mMainActivity, finalBefItem.getAlbumId());
+//									setIconLightOrDark(bitmap);
+//									mHandler.postDelayed(() -> {
+//										if (bitmap != null && !bitmap.isRecycled()) {
+//											bitmap.recycle();
+//										}
+//									}, 5000);
+//								}
+//								MV.setTranslationX(0 - mMusicAlbumImage.getWidth());
+//								ImageView temp = MV;
+//								MV = LV;
+//								LV = temp;
+//
+//								RV.setTag(key, 2);
+//								MV.setTag(key, 1);
+//								LV.setTag(key, 0);
+//							}
+//
+//							@Override
+//							public void onAnimationCancel(Animator animation) {
+//
+//							}
+//
+//							@Override
+//							public void onAnimationRepeat(Animator animation) {
+//
+//							}
+//						});
+//
+//					} else {
+//						animatorMain.setFloatValues(MV.getX(), 0);
+//
+//						animatorMain.addListener(new Animator.AnimatorListener() {
+//							@Override
+//							public void onAnimationStart(Animator animation) {
+//
+//							}
+//
+//							@Override
+//							public void onAnimationEnd(Animator animation) {
+//								MV.setTranslationX(0);
+//								RV.setTranslationX(mMusicAlbumImage.getWidth() * 2);
+//								LV.setTranslationX(0 - mMusicAlbumImage.getWidth());
+//
+//								RV.setTag(key, 2);
+//								MV.setTag(key, 1);
+//								LV.setTag(key, 0);
+//							}
+//
+//							@Override
+//							public void onAnimationCancel(Animator animation) {
+//
+//							}
+//
+//							@Override
+//							public void onAnimationRepeat(Animator animation) {
+//
+//							}
+//						});
+//					}
+//
+//					animatorMain.addUpdateListener(animation -> {
+//						MV.setTranslationX((Float) animation.getAnimatedValue());
+//						RV.setTranslationX((Float) animation.getAnimatedValue() + mMusicAlbumImage.getWidth());
+//						LV.setTranslationX(0 - mMusicAlbumImage.getWidth() + (Float) animation.getAnimatedValue());
+//					});
+//					animatorMain.start();
+//
+//					return true;
+//				default:
+//			}
+//			return true;
+//		};
 
-					GlideApp.with(MusicDetailFragment.this)
-							.load(nexItem == null ? R.drawable.default_album_art : Utils.Audio.getCoverBitmapFull(mMainActivity, nexItem.getAlbumId()))
-							.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-							.diskCacheStrategy(DiskCacheStrategy.NONE)
-							.into(mMusicAlbumImageOth2);
-
-					moveX = event.getX();
-//					moveY = event.getY();
-					mLastX = event.getRawX();
-//					mLastY = event.getRawY();
-
-					break;
-				case MotionEvent.ACTION_MOVE:
-
-//                    if (mSlidingUpPanelLayout.getPanelState() != SlidingUpPanelLayout.PanelState.EXPANDED || CURRENT_SLIDE_OFFSET != 0)
-					if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
-						break;
-					}
-
-					//首尾禁止对应边缘滑动
-					if (Values.CurrentData.CURRENT_MUSIC_INDEX == 0) {
-						if (event.getRawX() > mLastX) {
-							break;
-						}
-					}
-
-					if (Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sPlayOrderList.size() - 1) {
-						if (event.getRawX() < mLastX) {
-							break;
-						}
-					}
-
-					float val = mMusicAlbumImage.getX() + (event.getX() - moveX);
-					mMusicAlbumImage.setTranslationX(val);
-					mMusicAlbumImageOth2.setTranslationX(mMusicAlbumImage.getWidth() + val);
-					mMusicAlbumImageOth3.setTranslationX(0 - mMusicAlbumImage.getWidth() + val);
-
-					// FIXME: 2018/12/11 上下滑动删除
-//                    if (mode == 1) {
-//                        float val2 = mMusicAlbumImage.getY() + (event.getY() - moveY);
-//                        mMusicAlbumImage.setTranslationY(val2);
-//                    }
-
-					break;
-
-				case MotionEvent.ACTION_CANCEL:
-				case MotionEvent.ACTION_UP:
-
-					//reset
-					mode = 0;
-					lc.set(false);
-					mSlidingUpPanelLayout.setTouchEnabled(true);
-
-					if (Math.abs(Math.abs(event.getRawX()) - Math.abs(mLastX)) < 5) {
-						mMusicAlbumImage.performClick();
-						break;
-					}
-
-					/*
-					 * enter Animation...
-					 * */
-					ValueAnimator animatorMain = new ValueAnimator();
-					animatorMain.setDuration(300);
-
-					//左滑一半 滑过去
-					if (mMusicAlbumImage.getX() < 0 && Math.abs(mMusicAlbumImage.getX()) >= mMusicAlbumImage.getWidth() / 2) {
-						animatorMain.setFloatValues(mMusicAlbumImage.getX(), 0 - mMusicAlbumImage.getWidth());
-						MusicItem finalNexItem = nexItem;
-						animatorMain.addListener(new Animator.AnimatorListener() {
-							@Override
-							public void onAnimationStart(Animator animation) {
-
-							}
-
-							@Override
-							public void onAnimationEnd(Animator animation) {
-								Utils.SendSomeThing.sendPlay(mMainActivity, 6, "next_slide");
-								Bitmap bitmap = null;
-								if (finalNexItem != null) {
-									bitmap = Utils.Audio.getCoverBitmapFull(mMainActivity, finalNexItem.getAlbumId());
-								}
-								//TODO use Util.UI.releaseImageViewResource
-								GlideApp.with(MusicDetailFragment.this)
-										.load(finalNexItem == null ? R.drawable.default_album_art : bitmap)
-										.into(mMusicAlbumImage);
-								setIconLightOrDark(bitmap);
-								mMusicAlbumImage.setTranslationX(0);
-								mMusicAlbumImageOth2.setTranslationX(mMusicAlbumImage.getWidth() * 2);
-								mMusicAlbumImageOth2.setVisibility(View.GONE);
-								GlideApp.with(MusicDetailFragment.this).clear(mMusicAlbumImageOth2);
-							}
-
-							@Override
-							public void onAnimationCancel(Animator animation) {
-
-							}
-
-							@Override
-							public void onAnimationRepeat(Animator animation) {
-
-							}
-						});
-
-						/*右滑一半 滑过去*/
-					} else if (mMusicAlbumImage.getX() > 0 && Math.abs(mMusicAlbumImage.getX()) >= mMusicAlbumImage.getWidth() / 2) {
-						animatorMain.setFloatValues(mMusicAlbumImage.getX(), mMusicAlbumImage.getWidth());
-						MusicItem finalBefItem = befItem;
-						animatorMain.addListener(new Animator.AnimatorListener() {
-							@Override
-							public void onAnimationStart(Animator animation) {
-
-							}
-
-							@Override
-							public void onAnimationEnd(Animator animation) {
-								Utils.SendSomeThing.sendPlay(mMainActivity, 6, "previous_slide");
-								Bitmap bitmap = null;
-								if (finalBefItem != null) {
-									bitmap = Utils.Audio.getCoverBitmapFull(mMainActivity, finalBefItem.getAlbumId());
-								}
-								GlideApp.with(MusicDetailFragment.this)
-										.load(finalBefItem == null ? R.drawable.default_album_art : bitmap)
-										.into(mMusicAlbumImage);
-								setIconLightOrDark(bitmap);
-								mMusicAlbumImage.setTranslationX(0);
-								mMusicAlbumImageOth3.setVisibility(View.GONE);
-								mMusicAlbumImageOth3.setTranslationX(0 - mMusicAlbumImage.getWidth());
-								GlideApp.with(MusicDetailFragment.this).clear(mMusicAlbumImageOth3);
-							}
-
-							@Override
-							public void onAnimationCancel(Animator animation) {
-
-							}
-
-							@Override
-							public void onAnimationRepeat(Animator animation) {
-
-							}
-						});
-
-					} else {
-						animatorMain.setFloatValues(mMusicAlbumImage.getX(), 0);
-
-						animatorMain.addListener(new Animator.AnimatorListener() {
-							@Override
-							public void onAnimationStart(Animator animation) {
-
-							}
-
-							@Override
-							public void onAnimationEnd(Animator animation) {
-								mMusicAlbumImage.setTranslationX(0);
-
-								GlideApp.with(MusicDetailFragment.this).clear(mMusicAlbumImageOth3);
-								GlideApp.with(MusicDetailFragment.this).clear(mMusicAlbumImageOth2);
-								mMusicAlbumImageOth2.setTranslationX(mMusicAlbumImage.getWidth() * 2);
-								mMusicAlbumImageOth3.setTranslationX(0 - mMusicAlbumImage.getWidth());
-								mMusicAlbumImageOth2.setVisibility(View.GONE);
-								mMusicAlbumImageOth3.setVisibility(View.GONE);
-							}
-
-							@Override
-							public void onAnimationCancel(Animator animation) {
-
-							}
-
-							@Override
-							public void onAnimationRepeat(Animator animation) {
-
-							}
-						});
-					}
-
-					ValueAnimator animatorY = new ValueAnimator();
-					animatorY.setDuration(300);
-					animatorY.setFloatValues(mMusicAlbumImage.getTranslationY(), 0);
-					animatorY.addUpdateListener(animation -> mMusicAlbumImage.setTranslationY((Float) animation.getAnimatedValue()));
-					animatorY.start();
-
-					animatorMain.addUpdateListener(animation -> {
-						mMusicAlbumImage.setTranslationX((Float) animation.getAnimatedValue());
-						mMusicAlbumImageOth2.setTranslationX((Float) animation.getAnimatedValue() + mMusicAlbumImage.getWidth());
-						mMusicAlbumImageOth3.setTranslationX(0 - mMusicAlbumImage.getWidth() + (Float) animation.getAnimatedValue());
-					});
-					animatorMain.start();
-
-					return true;
-				default:
-			}
-			return true;
-		});
+		//todo
+//		mMusicAlbumImage.setOnTouchListener(touchListener);
+//		mMusicAlbumImageOth2.setOnTouchListener(touchListener);
+//		mMusicAlbumImageOth3.setOnTouchListener(touchListener);
 
 		setClickListener();
 
-		/*---------------------- Menu -----------------------*/
-		mPopupMenu = new PopupMenu(mMainActivity, mMenuButton);
-
-		final Menu menu = mPopupMenu.getMenu();
-
-		menu.add(Menu.NONE, Menu.FIRST + 1, 0, getString(R.string.show_album));
-		menu.add(Menu.NONE, Menu.FIRST + 2, 0, getString(R.string.show_detail));
-
-		mPopupMenu.setOnMenuItemClickListener(item -> {
-			switch (item.getItemId()) {
-				case Menu.FIRST + 1: {
-					final MusicItem currentItem = ReceiverOnMusicPlay.getCurrentItem();
-					if (currentItem != null) {
-						final String albumName = currentItem.getMusicAlbum();
-						final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
-								MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{albumName}, null);
-
-						//int MusicDetailActivity
-						final Intent intent = new Intent(mMainActivity, AlbumDetailActivity.class);
-						intent.putExtra(AlbumDetailActivity.IntentKey.ALBUM_NAME, albumName);
-						if (cursor != null) {
-							cursor.moveToFirst();
-							int id = Integer.parseInt(cursor.getString(0));
-							intent.putExtra(AlbumDetailActivity.IntentKey.ID, id);
-							cursor.close();
-						}
-						startActivity(intent);
-					}
-				}
-				break;
-				case Menu.FIRST + 2: {
-					Intent intent = new Intent(mMainActivity, ListViewActivity.class);
-					intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, "detail");
-					startActivity(intent);
-				}
-				break;
-				default:
-			}
-			return false;
-		});
-
-		mCurrentInfoBody.setOnClickListener(v -> {
-
-			if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
-				mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
-			} else {
-				mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-			}
-
-			mHandler.sendEmptyMessage(NotLeakHandler.RECYCLER_SCROLL);
-
-		});
-
-		mCurrentInfoBody.setOnLongClickListener(v -> {
-			final MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
-			if (item != null) {
-				P.dropToTrash(mMainActivity, item);
-			}
-			return true;
-		});
-
 		mLinearLayoutManager = new LinearLayoutManager(mMainActivity);
-
 		mRecyclerView.setLayoutManager(mLinearLayoutManager);
 		mMyWaitListAdapter = new MyWaitListAdapter(mMainActivity, Data.sPlayOrderList);
 		mRecyclerView.setAdapter(mMyWaitListAdapter);
 
-		mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-			@Override
-			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-				if (fromUser) {
-					ReceiverOnMusicPlay.seekTo(progress);
-				}
-			}
-
-			@Override
-			public void onStartTrackingTouch(SeekBar seekBar) {
-
-			}
-
-			@Override
-			public void onStopTrackingTouch(SeekBar seekBar) {
-				ReceiverOnMusicPlay.seekTo(seekBar.getProgress());
-				ReceiverOnMusicPlay.playMusic();
-				mHandler.sendEmptyMessage(NotLeakHandler.SET_BUTTON_PLAY);
-			}
-		});
-
-		mSlidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
-			@Override
-			public void onPanelSlide(View panel, float slideOffset) {
-				CURRENT_SLIDE_OFFSET = slideOffset;
-				mSlideUpGroup.setTranslationY(0 - slideOffset * 120);
-				if (slideOffset == 0) {
-					mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
-				}
-			}
-
-			@Override
-			public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
-				if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
-					mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
-					mHandler.sendEmptyMessage(NotLeakHandler.RECYCLER_SCROLL);
-				} else {
-					mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(false);
-				}
-			}
-		});
-
 	}
-
-	/**
-	 * @see MainActivity#CURRENT_SLIDE_OFFSET
-	 */
-	public static float CURRENT_SLIDE_OFFSET = 1;
-
-	/**
-	 * Handler
-	 */
-	private static NotLeakHandler mHandler = null;
-
-	public static boolean sendMessage(@NonNull Message message) {
-		boolean result = false;
-		if (mHandler != null) {
-			mHandler.sendMessage(message);
-			result = true;
-		}
-		return result;
-	}
-
-	public static boolean sendEmptyMessage(int what) {
-		boolean result = false;
-		if (mHandler != null) {
-			mHandler.sendEmptyMessage(what);
-			result = true;
-		}
-		return result;
-	}
-
-	private ImageView mBGup;
-
-	private ImageView mBGdown;
-
-	private SeekBar mSeekBar;
-
-	////////////////////INFO_BAR//////////////////////////
-
-	private View mInfoBarInfoSeek;
-
-	private TextView mInfoBarSongText;
-
-	private ImageView mInfoBarSongImage;
-
-	private TextView mInfoBarAlbumText;
-
-//	private ImageView mInfoBarPlayStatusImage;
-
-	private ImageView mInfoBarBackgroundImage;
-
-	private ImageView mInfoBarFavButton;
-
-	////////////////////INFO_BAR//////////////////////////
-
-	private HandlerThread mHandlerThread;
-
-	private FloatingActionButton mPlayButton;
-
-	private PlayPauseDrawable mPlayPauseDrawable;
-
-	private ImageButton mNextButton;
-
-	private ImageButton mPreviousButton;
-
-	private RecyclerView mRecyclerView;
-
-	private LinearLayoutManager mLinearLayoutManager;
-
-	private MainActivity mMainActivity;
-
-	private ConstraintLayout mCurrentInfoBody;
-
-	private TextView mCurrentAlbumNameText;
-
-	private TextView mCurrentMusicNameText;
-
-	private ImageButton mRandomButton;
-
-	private ImageButton mRepeatButton;
-
-	private Toolbar mToolbar;
-
-	private AppBarLayout mAppBarLayout;
-
-	private TextView mLeftTime;
-
-	private TextView mRightTime;
-
-	private TextView mNextWillText;
-
-	/**
-	 * for {@link #setBlurEffect(Bitmap, ImageView, ImageView, TextView)}
-	 *
-	 * @see ViewAnimationUtils#createCircularReveal
-	 */
-	private final int m_Position = 200;
-
-	private PopupMenu mPopupMenu;
-
-	private SlidingUpPanelLayout mSlidingUpPanelLayout;
-
-
-	private ConstraintLayout mNowPlayingBody;
-
-	private ConstraintLayout mSlideUpGroup;
-
-	/**
-	 * @see #mMusicAlbumImage 的滑动模式
-	 * 0: just x
-	 * 1: x & y
-	 */
-	private int mode = 0;
-
-	private AlbumImageView mMusicAlbumImage;
-	private AlbumImageView mMusicAlbumImageOth2;
-	private AlbumImageView mMusicAlbumImageOth3;
 	private MyWaitListAdapter mMyWaitListAdapter;
-	/**
-	 * 记录是否为长按 (2000ms)
-	 */
-	private volatile AtomicBoolean lc = new AtomicBoolean(false);
 
 	/**
 	 * menu
@@ -571,14 +443,6 @@ public final class MusicDetailFragment extends BaseFragment {
 	 */
 	@ColorInt
 	private int targetColor;
-
-	/* handler methods */
-	public static void setSeekBar(final int val) {
-		Message message = Message.obtain();
-		message.what = MusicDetailFragment.NotLeakHandler.SET_SEEK_BAR;
-		message.arg1 = val;
-		MusicDetailFragment.mHandler.sendMessage(message);
-	}
 
 	private void setBlurEffect(@Nullable final Bitmap bitmap, @NonNull final ImageView bgUp
 			, @NonNull final ImageView bgDown, final TextView nextText) {
@@ -664,15 +528,18 @@ public final class MusicDetailFragment extends BaseFragment {
 	 * preLoad data
 	 */
 	private void preLoad() {
-		final MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
+		final MusicItem item = Data.sCurrentMusicItem;
 		if (item != null && item.getMusicID() != -1) {
 			final Bitmap cover = Utils.Audio.getCoverBitmapFull(getContext(), item.getAlbumId());
 			setCurrentInfo(item.getMusicName(), item.getMusicAlbum(), cover);
-		} else {
-			if (Data.sCurrentMusicItem.getMusicID() != -1) {
-				final Bitmap cover = Utils.Audio.getCoverBitmapFull(getContext(), Data.sCurrentMusicItem.getAlbumId());
-				setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), cover);
+		}
+
+		try {
+			if (Data.sMusicBinder != null && Data.sMusicBinder.isPlayingMusic()) {
+				mPlayPauseDrawable.setPause(true);
 			}
+		} catch (RemoteException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -717,7 +584,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		mToolbar.setOnMenuItemClickListener(menuItem -> {
 			switch (menuItem.getItemId()) {
 				case R.id.menu_toolbar_fast_play: {
-					Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, PlayListFragment.TAG);
+					ReceiverOnMusicPlay.startService(mMainActivity, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
 				}
 				break;
 
@@ -788,7 +655,7 @@ public final class MusicDetailFragment extends BaseFragment {
 					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
 					.centerCrop()
 					.diskCacheStrategy(DiskCacheStrategy.NONE)
-					.into(mMusicAlbumImage);
+					.into(MV);
 
 			final MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
 			if (item != null) {
@@ -868,8 +735,9 @@ public final class MusicDetailFragment extends BaseFragment {
 
 		final ValueAnimator animator = new ValueAnimator();
 		animator.setDuration(300);
-		switch (Values.CurrentData.CURRENT_PLAY_TYPE) {
-			case Values.TYPE_COMMON: {
+		//noinspection ConstantConditions
+		switch (PreferenceManager.getDefaultSharedPreferences(mMainActivity).getString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE)) {
+			case MusicService.PlayType.REPEAT_NONE: {
 				mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
 				animator.setFloatValues(0f, 0.3f);
 				animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));
@@ -898,7 +766,7 @@ public final class MusicDetailFragment extends BaseFragment {
 				animator.start();
 				break;
 			}
-			case Values.TYPE_REPEAT: {
+			case MusicService.PlayType.REPEAT_LIST: {
 				mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
 				animator.setFloatValues(0f, 1f);
 				animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));
@@ -927,7 +795,7 @@ public final class MusicDetailFragment extends BaseFragment {
 				animator.start();
 			}
 			break;
-			case Values.TYPE_REPEAT_ONE: {
+			case MusicService.PlayType.REPEAT_ONE: {
 				mRepeatButton.setImageResource(R.drawable.ic_repeat_one_white_24dp);
 				animator.setFloatValues(0f, 1f);
 				animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));
@@ -1082,6 +950,106 @@ public final class MusicDetailFragment extends BaseFragment {
 	}
 
 	private void setClickListener() {
+		/*---------------------- Menu -----------------------*/
+		mPopupMenu = new PopupMenu(mMainActivity, mMenuButton);
+
+		final Menu menu = mPopupMenu.getMenu();
+
+		menu.add(Menu.NONE, Menu.FIRST + 1, 0, getString(R.string.show_album));
+		menu.add(Menu.NONE, Menu.FIRST + 2, 0, getString(R.string.show_detail));
+
+		mPopupMenu.setOnMenuItemClickListener(item -> {
+			switch (item.getItemId()) {
+				case Menu.FIRST + 1: {
+					final MusicItem currentItem = ReceiverOnMusicPlay.getCurrentItem();
+					if (currentItem != null) {
+						final String albumName = currentItem.getMusicAlbum();
+						final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
+								MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{albumName}, null);
+
+						//int MusicDetailActivity
+						final Intent intent = new Intent(mMainActivity, AlbumDetailActivity.class);
+						intent.putExtra(AlbumDetailActivity.IntentKey.ALBUM_NAME, albumName);
+						if (cursor != null) {
+							cursor.moveToFirst();
+							int id = Integer.parseInt(cursor.getString(0));
+							intent.putExtra(AlbumDetailActivity.IntentKey.ID, id);
+							cursor.close();
+						}
+						startActivity(intent);
+					}
+				}
+				break;
+				case Menu.FIRST + 2: {
+					AlertDialog dialog = Utils.Audio.getMusicDetailDialog(mMainActivity, Data.sCurrentMusicItem);
+					if (dialog != null) dialog.show();
+				}
+				break;
+				default:
+			}
+			return false;
+		});
+
+		mCurrentInfoBody.setOnClickListener(v -> {
+
+			if (mSlidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+				mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+			} else {
+				mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+			}
+
+			mHandler.sendEmptyMessage(NotLeakHandler.RECYCLER_SCROLL);
+
+		});
+
+		mCurrentInfoBody.setOnLongClickListener(v -> {
+			final MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
+			if (item != null) {
+				P.dropToTrash(mMainActivity, item);
+			}
+			return true;
+		});
+
+		mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+				if (fromUser) {
+					ReceiverOnMusicPlay.seekTo(progress);
+				}
+			}
+
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {
+
+			}
+
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+				ReceiverOnMusicPlay.seekTo(seekBar.getProgress());
+				ReceiverOnMusicPlay.startService(mMainActivity, MusicService.ServiceActions.ACTION_PLAY);
+			}
+		});
+
+		mSlidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+			@Override
+			public void onPanelSlide(View panel, float slideOffset) {
+				mSlideUpGroup.setTranslationY(0 - slideOffset * 120);
+				if (slideOffset == 0) {
+					mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
+				}
+			}
+
+			@Override
+			public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+				if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+					mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
+					mHandler.sendEmptyMessage(NotLeakHandler.RECYCLER_SCROLL);
+				} else {
+					mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(false);
+				}
+			}
+		});
+
 		mRepeatButton.setOnClickListener(v -> {
 
 			/*
@@ -1092,9 +1060,10 @@ public final class MusicDetailFragment extends BaseFragment {
 			final ValueAnimator animator = new ValueAnimator();
 			animator.setDuration(300);
 			mRepeatButton.clearAnimation();
-			switch (Values.CurrentData.CURRENT_PLAY_TYPE) {
-				case Values.TYPE_COMMON: {
-					Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_REPEAT;
+			//noinspection ConstantConditions
+			switch (PreferenceManager.getDefaultSharedPreferences(mMainActivity).getString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE)) {
+				case MusicService.PlayType.REPEAT_NONE: {
+					PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit().putString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_LIST).commit();
 					mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
 					animator.setFloatValues(0.3f, 1f);
 					animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));
@@ -1123,13 +1092,13 @@ public final class MusicDetailFragment extends BaseFragment {
 					animator.start();
 					break;
 				}
-				case Values.TYPE_REPEAT: {
+				case MusicService.PlayType.REPEAT_LIST: {
 					mRepeatButton.setImageResource(R.drawable.ic_repeat_one_white_24dp);
-					Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_REPEAT_ONE;
+					PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit().putString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_ONE).commit();
 				}
 				break;
-				case Values.TYPE_REPEAT_ONE: {
-					Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_COMMON;
+				case MusicService.PlayType.REPEAT_ONE: {
+					PreferenceManager.getDefaultSharedPreferences(mMainActivity).edit().putString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE).commit();
 					mRepeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
 					animator.setFloatValues(1f, 0.3f);
 					animator.addUpdateListener(animation -> mRepeatButton.setAlpha((Float) animation.getAnimatedValue()));
@@ -1204,20 +1173,7 @@ public final class MusicDetailFragment extends BaseFragment {
 				});
 				animator.start();
 
-				Data.sPlayOrderList.clear();
-				Data.sPlayOrderList.addAll(Data.sMusicItemsBackUp);
-
-				// 重新定位 item
-				final MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
-				if (item != null) {
-					for (int i = 0; i < Data.sMusicItems.size(); i++) {
-						if (Data.sPlayOrderList.get(i).getMusicID() == item.getMusicID()) {
-							Values.CurrentData.CURRENT_MUSIC_INDEX = i;
-						}
-					}
-				} else {
-					Values.CurrentData.CURRENT_MUSIC_INDEX = 0;
-				}
+				Data.shuffleOrderListSync(mMainActivity, true);
 
 				mMyWaitListAdapter.notifyDataSetChanged();
 
@@ -1251,34 +1207,40 @@ public final class MusicDetailFragment extends BaseFragment {
 				});
 				animator.start();
 
-//				final MusicItem item = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX);
-				Collections.shuffle(Data.sPlayOrderList);
-
-//				for (int i = 0; i < Data.sMusicItems.size(); i++) {
-//					if (Data.sPlayOrderList.get(i).getMusicID() == item.getMusicID()) {
-//						Values.CurrentData.CURRENT_MUSIC_INDEX = i;
-//					}
-//				}
-
+				Data.shuffleOrderListSync(mMainActivity, false);
 				mMyWaitListAdapter.notifyDataSetChanged();
-
 			}
 		});
 
-		mMusicAlbumImage.setOnClickListener(v -> {
+		View.OnClickListener listener = v -> {
 			if (hideToolbar) {
 				showToolbar();
 			} else {
 				hideToolbar();
 			}
-		});
+		};
+
+		mMusicAlbumImage.setOnClickListener(listener);
+		mMusicAlbumImageOth2.setOnClickListener(listener);
+		mMusicAlbumImageOth3.setOnClickListener(listener);
 
 		mMenuButton.setOnClickListener(v -> mPopupMenu.show());
 
 		//just pause or play
-		mPlayButton.setOnClickListener(v -> clickPlayButton());
+		mPlayButton.setOnClickListener(v -> {
+			// 判断是否播放过, 如没有默认随机播放
+			if (Data.sCurrentMusicItem.getMusicID() != -1) {
+				if (ReceiverOnMusicPlay.isPlayingMusic()) {
+					ReceiverOnMusicPlay.startService(mMainActivity, MusicService.ServiceActions.ACTION_PAUSE);
+				} else {
+					ReceiverOnMusicPlay.startService(mMainActivity, MusicService.ServiceActions.ACTION_PLAY);
+				}
+			} else {
+				ReceiverOnMusicPlay.startService(mMainActivity, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
+			}
+		});
 
-		mNextButton.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mMainActivity, 6, ReceiverOnMusicPlay.TYPE_NEXT));
+		mNextButton.setOnClickListener(v -> MusicService.MusicControl.next(mMainActivity));
 
 		mNextButton.setOnLongClickListener(v -> {
 			int nowPosition = mSeekBar.getProgress() + ReceiverOnMusicPlay.getDuration() / 20;
@@ -1295,14 +1257,9 @@ public final class MusicDetailFragment extends BaseFragment {
 		});
 
 		mPreviousButton.setOnClickListener(v -> {
-			//当进度条大于播放总长 1/20 那么重新播放该歌曲
-			//noinspection AlibabaUndefineMagicConstant
-			if (ReceiverOnMusicPlay.getCurrentPosition() > ReceiverOnMusicPlay.getDuration() / 20 || Values.CurrentData.CURRENT_MUSIC_INDEX == 0) {
-				ReceiverOnMusicPlay.seekTo(0);
-			} else {
-				Utils.SendSomeThing.sendPlay(mMainActivity, 6, "previous");
-			}
-
+			Intent next = new Intent(MusicService.ServiceActions.ACTION_PN);
+			next.putExtra("pnType", MusicService.ServiceActions.ACTION_PN_PREVIOUS);
+			ReceiverOnMusicPlay.startService(mMainActivity, next);
 		});
 
 		mPreviousButton.setOnLongClickListener(v -> {
@@ -1367,22 +1324,6 @@ public final class MusicDetailFragment extends BaseFragment {
 
 	}
 
-	private void clickPlayButton() {
-		// 判断是否播放过, 如没有默认随机播放
-		if (Data.HAS_PLAYED) {
-			if (ReceiverOnMusicPlay.isPlayingMusic()) {
-				Utils.SendSomeThing.sendPause(mMainActivity);
-				mHandler.sendEmptyMessage(NotLeakHandler.SET_BUTTON_PAUSE);
-			} else {
-				Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_NOTIFICATION_RESUME, null);
-				mHandler.sendEmptyMessage(NotLeakHandler.SET_BUTTON_PLAY);
-			}
-		} else {
-			Utils.SendSomeThing.sendPlay(mMainActivity, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, TAG);
-			mHandler.sendEmptyMessage(NotLeakHandler.SET_BUTTON_PLAY);
-		}
-	}
-
 	/**
 	 * hide or show toolbar
 	 */
@@ -1410,6 +1351,7 @@ public final class MusicDetailFragment extends BaseFragment {
 			mCurrentMusicNameText.setText(name);
 			mCurrentAlbumNameText.setText(albumName);
 			setBlurEffect(cover, mBGup, mBGdown, mNextWillText);
+			setSlideInfoBar(name, albumName, cover);
 		});
 	}
 
@@ -1583,6 +1525,8 @@ public final class MusicDetailFragment extends BaseFragment {
 							return;
 						}
 
+						int duration = (int) Data.sCurrentMusicItem.getDuration();
+
 						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 							mSeekBar.setProgress(0, true);
 						} else {
@@ -1593,8 +1537,8 @@ public final class MusicDetailFragment extends BaseFragment {
 						mInfoBarInfoSeek.setLayoutParams(mInfoBarInfoSeek.getLayoutParams());
 						mInfoBarInfoSeek.requestLayout();
 
-						mRightTime.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(ReceiverOnMusicPlay.getDuration()))));
-						mSeekBar.setMax(ReceiverOnMusicPlay.getDuration());
+						mRightTime.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(duration))));
+						mSeekBar.setMax(duration);
 					});
 				}
 				break;
@@ -1605,35 +1549,39 @@ public final class MusicDetailFragment extends BaseFragment {
 						if (Data.sMusicBinder != null) {
 							if (ReceiverOnMusicPlay.isPlayingMusic()) {
 
-								Log.v(TAG, "handleMessage: current position " + ReceiverOnMusicPlay.getCurrentPosition() + " ------------ " + ReceiverOnMusicPlay.getDuration());
+								int duration = (int) Data.sCurrentMusicItem.getDuration();
+								int position = ReceiverOnMusicPlay.getCurrentPosition();
 
 								if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-									mSeekBar.setProgress(ReceiverOnMusicPlay.getCurrentPosition(), true);
+									mSeekBar.setProgress(position, true);
 								} else {
-									mSeekBar.setProgress(ReceiverOnMusicPlay.getCurrentPosition());
+									mSeekBar.setProgress(position);
 								}
 
-								int duration = ReceiverOnMusicPlay.getDuration();
-
 								mInfoBarInfoSeek.getLayoutParams().width = mCurrentInfoBody.getWidth()
-										* ReceiverOnMusicPlay.getCurrentPosition() / ReceiverOnMusicPlay.getDuration();
+										* position / duration;
 								mInfoBarInfoSeek.setLayoutParams(mInfoBarInfoSeek.getLayoutParams());
 								mInfoBarInfoSeek.requestLayout();
-								mLeftTime.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(ReceiverOnMusicPlay.getCurrentPosition()))));
+
+								mLeftTime.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(position))));
 
 
 								//播放模式不为循环单曲时，跳出提示
-								if (!Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_REPEAT_ONE)) {
+								if (!MusicService.PlayType.REPEAT_ONE.equals(PreferenceManager.getDefaultSharedPreferences(mMainActivity).getString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE))) {
 									if (ReceiverOnMusicPlay.getCurrentPosition() / 1000 == ReceiverOnMusicPlay.getDuration() / 1000 - 5 && !snackNotice) {
 										snackNotice = true;
 
 										final GkSnackbar gkSnackbar = new GkSnackbar(mSlidingUpPanelLayout, getString(R.string.next_will_play_x,
-												Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX + 1 != Data.sPlayOrderList.size() ? Values.CurrentData.CURRENT_MUSIC_INDEX + 1 : 0).getMusicName())
+												Data.sPlayOrderList.get(Data.getCurrentIndex() + 1 != Data.sPlayOrderList.size() ? Data.getCurrentIndex() + 1 : 0).getMusicName())
 												, Snackbar.LENGTH_LONG);
 										gkSnackbar.setAction(getString(R.string.skip), v -> {
 											//点击右侧的按钮之后的操作
-											Values.CurrentData.CURRENT_MUSIC_INDEX += 1;
-											Utils.SendSomeThing.sendPlay(mMainActivity, 6, ReceiverOnMusicPlay.TYPE_NEXT);
+											try {
+												Data.sMusicBinder.setCurrentIndex(Data.getCurrentIndex() + 1);
+											} catch (RemoteException e) {
+												e.printStackTrace();
+											}
+											MusicService.MusicControl.next(mMainActivity);
 										});
 										gkSnackbar.addCallback(new Snackbar.Callback() {
 											@Override
@@ -1659,8 +1607,10 @@ public final class MusicDetailFragment extends BaseFragment {
 				break;
 
 				case RECYCLER_SCROLL: {
-					mWeakReference.get().runOnUiThread(() -> mLinearLayoutManager.scrollToPositionWithOffset(Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sMusicItems.size() ?
-							Values.CurrentData.CURRENT_MUSIC_INDEX : Values.CurrentData.CURRENT_MUSIC_INDEX + 1, 0));
+					mWeakReference.get().runOnUiThread(() -> mLinearLayoutManager
+							.scrollToPositionWithOffset(Data.getCurrentIndex() == Data.sMusicItems.size()
+									? Data.getCurrentIndex()
+									: Data.getCurrentIndex() + 1, 0));
 				}
 				break;
 
@@ -1686,8 +1636,7 @@ public final class MusicDetailFragment extends BaseFragment {
 
 				case setCurrentInfoWithoutMainImage: {
 					final Bundle data = msg.getData();
-					setCurrentInfoWithoutMainImage(data.getString("name", "Name"),
-							data.getString("albumName", "AlbumName"), (Bitmap) msg.obj);
+					setCurrentInfoWithoutMainImage(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
 					data.clear();
 				}
 				break;

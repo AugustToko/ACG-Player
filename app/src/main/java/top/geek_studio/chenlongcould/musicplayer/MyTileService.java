@@ -1,12 +1,13 @@
 package top.geek_studio.chenlongcould.musicplayer;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.service.quicksettings.Tile;
@@ -44,6 +45,18 @@ public final class MyTileService extends TileService {
 		Log.d(TAG, "MyTileService: ");
 	}
 
+	public ServiceConnection sServiceConnection = new ServiceConnection() {
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			Data.sMusicBinder = IMuiscService.Stub.asInterface(service);
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+
+		}
+	};
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -53,7 +66,7 @@ public final class MyTileService extends TileService {
 			if (!Data.HAS_BIND) {
 				Intent intent = new Intent(this, MusicService.class);
 				startService(intent);
-				Data.HAS_BIND = bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
+				Data.HAS_BIND = bindService(intent, sServiceConnection, BIND_AUTO_CREATE);
 			}
 		} else {
 			Toast.makeText(this, "Need Permission, please open the app...", Toast.LENGTH_SHORT).show();
@@ -177,18 +190,14 @@ public final class MyTileService extends TileService {
 				getQsTile().setLabel("Playing...");
 				getQsTile().setIcon(Icon.createWithResource(this, R.drawable.ic_audiotrack_24px));
 				getQsTile().updateTile();
-				Utils.SendSomeThing.sendPlay(this, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, null);
+				ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
 			} else {
 				mEnable = false;
 				getQsTile().setState(Tile.STATE_INACTIVE);
 				getQsTile().setLabel(getString(R.string.fast_play));
 				getQsTile().setIcon(Icon.createWithResource(this, R.drawable.ic_audiotrack_24px));
 				getQsTile().updateTile();
-				try {
-					Data.sMusicBinder.stopMusic();
-				} catch (RemoteException e) {
-					e.printStackTrace();
-				}
+				ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_PAUSE);
 			}
 		} else {
 			Toast.makeText(this, "Music data loading...", Toast.LENGTH_SHORT).show();
@@ -209,7 +218,7 @@ public final class MyTileService extends TileService {
 
 		if (Data.HAS_BIND) {
 			try {
-				unbindService(Data.sServiceConnection);
+				unbindService(sServiceConnection);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

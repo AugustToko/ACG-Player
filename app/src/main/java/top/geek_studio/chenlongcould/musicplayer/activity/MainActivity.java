@@ -2,14 +2,14 @@ package top.geek_studio.chenlongcould.musicplayer.activity;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.media.AudioManager;
 import android.net.Uri;
 import android.os.*;
 import android.preference.PreferenceManager;
@@ -78,7 +78,6 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
@@ -108,7 +107,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	 * 3 is ARTIST TAB
 	 * 4 is PLAYLIST TAB
 	 * 5 is FILE MANAGER TAB
-	 *
+	 * <p>
 	 * default tab order is: 12345
 	 */
 	public static final String DEFAULT_TAB_ORDER = "12345";
@@ -164,6 +163,26 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		return result;
 	}
 
+	public ServiceConnection sServiceConnection = new ServiceConnection() {
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			Data.sMusicBinder = IMuiscService.Stub.asInterface(service);
+
+			if (Data.sCurrentMusicItem.getMusicID() != -1) {
+				try {
+					Data.sMusicBinder.setCurrentMusicData(Data.sCurrentMusicItem);
+				} catch (RemoteException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+
+		}
+	};
+
 	private ActivityMainBinding mMainBinding;
 	private ActionBarDrawerToggle mDrawerToggle;
 	private MyPagerAdapter mPagerAdapter;
@@ -218,18 +237,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		mHandlerThread.start();
 		mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
 
-		//service
-		final Intent intent = new Intent(MainActivity.this, MusicService.class);
-		startService(intent);
-		Data.HAS_BIND = bindService(intent, Data.sServiceConnection, BIND_AUTO_CREATE);
-
-		//监听耳机(有线或无线)的插拔动作, 拔出暂停音乐
-		final IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-		intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
-		registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
-
 		loadData();
-
 	}
 
 	/**
@@ -246,6 +254,9 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 		Log.d(TAG, "receivedIntentCheck: " + uri);
 		Log.d(TAG, "receivedIntentCheck: " + mimeType);
+
+		ReceiverOnMusicPlay.playFromUri(this, uri);
+
 	}
 
 	@Override
@@ -257,12 +268,11 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	@Override
 	protected void onResume() {
 		super.onResume();
-
 		if (getIntent().getStringExtra(Values.IntentTAG.SHORTCUT_TYPE) != null) {
 			//noinspection SwitchStatementWithTooFewBranches
 			switch (getIntent().getStringExtra("SHORTCUT_TYPE")) {
 				case App.SHORTCUT_RANDOM: {
-					Utils.SendSomeThing.sendPlay(MainActivity.this, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, null);
+					ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
 				}
 				break;
 				default:
@@ -276,21 +286,13 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		GlideApp.get(this).clearMemory();
 
 		try {
-			unbindService(Data.sServiceConnection);
-		} catch (Exception e) {
-			Log.d(TAG, "onDestroy: " + e.getMessage());
-		}
-
-		try {
-			unregisterReceiver(Data.mMyHeadSetPlugReceiver);
+			unbindService(sServiceConnection);
 		} catch (Exception e) {
 			Log.d(TAG, "onDestroy: " + e.getMessage());
 		}
 
 		Data.HAS_BIND = false;
-
 		Data.sTheme = null;
-
 		mHandlerThread.quit();
 		mFragmentList.clear();
 
@@ -374,43 +376,45 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				/*--------------- 快速 随机 播放 ----------------*/
 				case R.id.menu_toolbar_fast_play: {
 					//just fast random play, without change Data.sPlayOrderList
-					Utils.SendSomeThing.sendPlay(this, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, "null");
+					ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
 				}
 				break;
 
 				case R.id.menu_toolbar_album_linear: {
 					editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.LINEAR_TYPE);
 					editor.apply();
-					mPagerAdapter.notifyDataSetChanged();
-					albumListFragment.setRecyclerViewData();
+//					mPagerAdapter.notifyDataSetChanged();
+					albumListFragment.setRecyclerViewData(albumListFragment.getView());
 				}
 				break;
 
 				case R.id.menu_toolbar_album_grid: {
 					editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
 					editor.apply();
-					mPagerAdapter.notifyDataSetChanged();
-
-					albumListFragment.setRecyclerViewData();
+//					mPagerAdapter.notifyDataSetChanged();
+					albumListFragment.setRecyclerViewData(albumListFragment.getView());
 				}
 				break;
 
 				case R.id.menu_toolbar_artist_linear: {
 					editor.putInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.LINEAR_TYPE);
 					editor.apply();
-					mPagerAdapter.notifyDataSetChanged();
+//					mPagerAdapter.notifyDataSetChanged();
+					artistListFragment.setRecyclerViewData(artistListFragment.getView());
 				}
 				break;
 
 				case R.id.menu_toolbar_artist_grid: {
 					editor.putInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.GRID_TYPE);
 					editor.apply();
-					mPagerAdapter.notifyDataSetChanged();
+//					mPagerAdapter.notifyDataSetChanged();
+					artistListFragment.setRecyclerViewData(artistListFragment.getView());
 				}
 				break;
 
 				case R.id.menu_toolbar_reload: {
-					mCurrentShowedFragment.reloadData();
+					if (mCurrentShowedFragment != null) mCurrentShowedFragment.reloadData();
+
 				}
 				break;
 				default:
@@ -543,7 +547,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 						final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
 								.musicAlbum(albumName)
-								.addTime((int) addTime)
+								.addTime(addTime)
 								.artist(artist)
 								.duration(duration)
 								.mimeName(mimeType)
@@ -553,21 +557,17 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 						if (Data.sCurrentMusicItem.getMusicID() == -1 && PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, -1) == id) {
 							Data.sCurrentMusicItem = builder.build();
-							Log.d(TAG, "onNext: the last data: name: " + Data.sCurrentMusicItem.getMusicName());
 						}
+
 						final MusicItem item = builder.build();
 						Data.sMusicItems.add(item);
 						Data.sMusicItemsBackUp.add(item);
 						Data.sPlayOrderList.add(item);
 						Data.sPlayOrderListBackup.add(item);
+
 					}
 					while (cursor.moveToNext());
-					Log.i(Values.TAG_UNIVERSAL_ONE, "onCreate: The MusicData load done.");
 					cursor.close();
-
-					if (Values.TYPE_RANDOM.equals(PreferenceManager.getDefaultSharedPreferences(this).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
-						Collections.shuffle(Data.sPlayOrderList);
-					}
 				}
 			} else {
 				//cursor null or getCount == 0
@@ -605,12 +605,21 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 							.setCancelable(false)
 							.setNegativeButton("OK", (dialog, which) -> {
 								dialog.cancel();
-//								fullExit();
 							});
 					builder.show();
 					return;
 				}
 
+				//service
+				final Intent intent = new Intent(MainActivity.this, MusicService.class);
+				//init service and shuffle list
+				if (Values.TYPE_RANDOM.equals(PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
+					long seed = Data.shuffleList(Data.sPlayOrderList);
+					intent.setAction(MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
+					intent.putExtra("random_seed", seed);
+				}
+				startService(intent);
+				Data.HAS_BIND = bindService(intent, sServiceConnection, BIND_AUTO_CREATE);
 				setSubtitle(Data.sPlayOrderList.size() + " Songs");
 
 				initFragmentData();
@@ -625,7 +634,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			public final void onError(Throwable throwable) {
 				load.dismiss();
 				Toast.makeText(MainActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
-//				fullExit();
 			}
 
 			@Override
@@ -668,7 +676,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			if (TextUtils.isEmpty(filterStr)) {
 				Data.sAlbumItems.clear();
 				Data.sAlbumItems.addAll(Data.sAlbumItemsBackUp);
-				albumListFragment.getAdapter2AlbumList().notifyDataSetChanged();
+				albumListFragment.getAdapter().notifyDataSetChanged();
 			} else {
 				Data.sAlbumItems.clear();
 
@@ -680,7 +688,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					}
 				}
 
-				albumListFragment.getAdapter2AlbumList().notifyDataSetChanged();
+				albumListFragment.getAdapter().notifyDataSetChanged();
 			}
 		}
 
@@ -689,7 +697,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			if (TextUtils.isEmpty(filterStr)) {
 				Data.sArtistItems.clear();
 				Data.sArtistItems.addAll(Data.sArtistItemsBackUp);
-				artistListFragment.getAdapter2ArtistList().notifyDataSetChanged();
+				artistListFragment.getAdapter().notifyDataSetChanged();
 			} else {
 				Data.sArtistItems.clear();
 
@@ -701,7 +709,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					}
 				}
 
-				artistListFragment.getAdapter2ArtistList().notifyDataSetChanged();
+				artistListFragment.getAdapter().notifyDataSetChanged();
 			}
 		}
 	}
@@ -984,27 +992,27 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				if (order.charAt(i) == '1') {
 					mCurrentShowedFragment = musicListFragment;
 
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true);
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true, false);
 					setSubtitle(Data.sMusicItems.size() + " Songs");
 				}
 
 				if (order.charAt(i) == '2') {
 					mCurrentShowedFragment = albumListFragment;
 
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), true);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true);
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), true, true);
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true, false);
 					setSubtitle(Data.sAlbumItems.size() + " Albums");
 				}
 
 				if (order.charAt(i) == '3') {
 					mCurrentShowedFragment = artistListFragment;
 
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), true);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true);
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), true, true);
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true, false);
 					setSubtitle(Data.sArtistItems.size() + " Artists");
 				}
 
@@ -1012,9 +1020,9 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				if (order.charAt(i) == '4') {
 					mCurrentShowedFragment = playListFragment;
 
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), false);
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), false, false);
 					setSubtitle(Data.sPlayListItems.size() + " Playlists");
 				}
 
@@ -1022,9 +1030,9 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				if (order.charAt(i) == '5') {
 					mCurrentShowedFragment = fileViewFragment;
 
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), false);
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), false, false);
 				}
 			}
 
@@ -1054,11 +1062,14 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			}
 		});
 
+		//default
+		mCurrentShowedFragment = musicListFragment;
+
 	}
 
 	public void fullExit() {
 		try {
-			unbindService(Data.sServiceConnection);
+			unbindService(sServiceConnection);
 		} catch (Exception e) {
 			Log.d(TAG, "fullExit: " + e.getMessage());
 		}

@@ -2,8 +2,6 @@ package top.geek_studio.chenlongcould.musicplayer.adapter;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -22,7 +20,10 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.*;
 import android.view.animation.OvershootInterpolator;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -137,7 +138,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 			}
 
 			//when clicked ModHolder(fastPlay item)
-			holder.itemView.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mActivity, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, "null"));
+			holder.itemView.setOnClickListener(v -> ReceiverOnMusicPlay.startService(mActivity, MusicService.ServiceActions.ACTION_FAST_SHUFFLE));
 
 		} else {
 			switch (mConfig.styleId) {
@@ -281,14 +282,16 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 		holder.mPopupMenu.setOnMenuItemClickListener(item -> {
 
-			Values.CurrentData.CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = holder.getAdapterPosition();
-
 			switch (item.getItemId()) {
 				//noinspection PointlessArithmeticExpression
 				case Menu.FIRST + 0: {
-					final MusicItem target = mMusicItems.get(holder.getAdapterPosition());
-					if (!target.equals(Data.sNextWillPlayItem)) {
-						Data.sNextWillPlayItem = target;
+					Data.sNextWillPlayItem = mMusicItems.get(holder.getAdapterPosition());
+					if (Data.sMusicBinder != null) {
+						try {
+							Data.sMusicBinder.setNextWillPlayItem(Data.sNextWillPlayItem);
+						} catch (RemoteException e) {
+							e.printStackTrace();
+						}
 					}
 				}
 				break;
@@ -328,20 +331,8 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 				// show song detail
 				case Menu.FIRST + 5: {
-					final List<String> data = Utils.Audio.extractMetadata(mMusicItems.get(holder.getAdapterPosition()));
-					ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(mActivity, android.R.layout.simple_list_item_1
-							, data);
-					final AlertDialog.Builder builder = new AlertDialog.Builder(mActivity)
-							.setTitle(mActivity.getString(R.string.detail))
-							.setAdapter(arrayAdapter, (dialog, which) -> {
-								final ClipboardManager clipboardManager = (ClipboardManager) mActivity.getSystemService(Context.CLIPBOARD_SERVICE);
-								final ClipData clipData = new ClipData("Copied by song detail", new String[]{"text"}, new ClipData.Item(data.get(which).split(":")[1]));
-								clipboardManager.setPrimaryClip(clipData);
-								Toast.makeText(mActivity, "Copied!", Toast.LENGTH_SHORT).show();
-							})
-							.setCancelable(false)
-							.setNegativeButton(mActivity.getString(R.string.done), (dialog, which) -> dialog.dismiss());
-					builder.show();
+					AlertDialog dialog = Utils.Audio.getMusicDetailDialog(mActivity, mMusicItems.get(holder.getAdapterPosition()));
+					if (dialog != null) dialog.show();
 				}
 				break;
 
@@ -372,8 +363,6 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 				break;
 				default:
 			}
-
-			Values.CurrentData.CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = -1;
 
 			return true;
 		});
@@ -441,13 +430,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 				mSelected.add(mMusicItems.get(holder.getAdapterPosition()).getMusicID());
 				((ItemHolder) holder).mBody.setBackgroundColor(Utils.Ui.getAccentColor(mActivity));
 			} else {
-
-				Data.sCurrentMusicItem = mMusicItems.get(holder.getAdapterPosition());
-				if (mConfig.recordIndex) {
-					Values.CurrentData.CURRENT_MUSIC_INDEX = Data.sPlayOrderList.indexOf(Data.sCurrentMusicItem);
-				}
-				Utils.SendSomeThing.sendPlay(mActivity, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, "null");
-
+				MusicService.MusicControl.itemClick(mActivity, mMusicItems.get(holder.getAdapterPosition()));
 			}
 		});
 	}

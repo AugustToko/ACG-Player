@@ -55,7 +55,15 @@ public final class ArtistListFragment extends BaseFragment {
 
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.fragment_album_list, container, false);
+		final View view = inflater.inflate(R.layout.fragment_album_list, container, false);
+		setRecyclerViewData(view);
+		initArtistData();
+		return view;
+	}
+
+	public void setRecyclerViewData(@Nullable View view) {
+		if (view == null) return;
+
 		mRecyclerView = view.findViewById(R.id.recycler_view);
 		mRecyclerView.setHasFixedSize(true);
 
@@ -85,10 +93,6 @@ public final class ArtistListFragment extends BaseFragment {
 
 		mAdapter2ArtistList = new MyRecyclerAdapter2ArtistList(mMainActivity, Data.sArtistItems, type);
 		mRecyclerView.setAdapter(mAdapter2ArtistList);
-
-		initArtistData();
-
-		return view;
 	}
 
 	private void initArtistData() {
@@ -143,7 +147,7 @@ public final class ArtistListFragment extends BaseFragment {
 		return mRecyclerView;
 	}
 
-	public MyRecyclerAdapter2ArtistList getAdapter2ArtistList() {
+	public MyRecyclerAdapter2ArtistList getAdapter() {
 		return mAdapter2ArtistList;
 	}
 

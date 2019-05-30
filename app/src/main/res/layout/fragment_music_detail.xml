@@ -1,119 +1,129 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:sothree="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_detail_sliding_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:clickable="false"
-    android:focusable="true"
-    android:gravity="bottom"
-    app:umanoPanelHeight="220dp"
-    app:umanoShadowHeight="2dp"
-    sothree:umanoDragView="@id/item_layout"
-    sothree:umanoScrollableView="@id/recycler_view">
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/detail_body"
+<com.sothree.slidinguppanel.SlidingUpPanelLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:sothree="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/activity_detail_sliding_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center">
+        android:clickable="false"
+        android:focusable="true"
+        android:gravity="bottom"
+        app:umanoPanelHeight="220dp"
+        app:umanoShadowHeight="2dp"
+        sothree:umanoDragView="@id/item_layout"
+        sothree:umanoScrollableView="@id/recycler_view"
+        >
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/activity_music_detail_primary_background_down"
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/detail_body"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:contentDescription="@string/activity_music_detail_primary_background"
-            android:scaleType="centerCrop"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/out_slide"
-            android:src="@color/colorPrimary" />
+            android:layout_height="match_parent"
+            android:gravity="center"
+            >
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/activity_music_detail_primary_background_up"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginStart="0dp"
-            android:layout_marginEnd="0dp"
-            android:contentDescription="@string/activity_music_detail_primary_background"
-            android:scaleType="centerCrop"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/out_slide"
-            tools:background="#000" />
+                android:id="@+id/activity_music_detail_primary_background_down"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:contentDescription="@string/activity_music_detail_primary_background"
+                android:scaleType="centerCrop"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/out_slide"
+                android:src="@color/colorPrimary"
+                />
 
-            <FrameLayout
+        <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/activity_music_detail_primary_background_up"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="0dp"
+                android:layout_marginEnd="0dp"
+                android:contentDescription="@string/activity_music_detail_primary_background"
+                android:scaleType="centerCrop"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/out_slide"
+                tools:background="#000"
+                />
+
+        <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="0dp"
                 android:elevation="1dp"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:alpha="0.5">
+                tools:alpha="0.5"
+                >
 
-                <include layout="@layout/include_music_info_bar"/>
+            <include layout="@layout/include_music_info_bar" />
 
-            </FrameLayout>
+        </FrameLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/out_slide"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="0dp"
-            android:clickable="true"
-            android:focusable="true"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <top.geek_studio.chenlongcould.musicplayer.customView.AlbumImageView
-                android:id="@+id/activity_music_detail_album_image_3"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/album_image_height"
-                android:layout_marginTop="0dp"
-                android:contentDescription="@string/activity_music_detail_album_image"
-                android:scaleType="centerCrop"
-                android:visibility="visible"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <top.geek_studio.chenlongcould.musicplayer.customView.AlbumImageView
-                android:id="@+id/activity_music_detail_album_image_2"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/album_image_height"
-                android:layout_marginTop="0dp"
-                android:contentDescription="@string/activity_music_detail_album_image"
-                android:scaleType="centerCrop"
-                android:visibility="visible"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <top.geek_studio.chenlongcould.musicplayer.customView.AlbumImageView
-                android:id="@+id/activity_music_detail_album_image"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/album_image_height"
-                android:contentDescription="@string/activity_music_detail_album_image"
-                android:scaleType="centerCrop"
-                android:src="@mipmap/ic_launcher_round"
-                android:transitionName="@string/image_trans_album"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <com.google.android.material.appbar.AppBarLayout
-                android:id="@+id/activity_music_detail_appbar"
+                android:id="@+id/out_slide"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="0dp"
-                android:background="@drawable/ramp_toolbar"
-                android:paddingTop="@dimen/toolbar_padding_top"
-                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-                app:elevation="0dp"
-                app:layout_constraintTop_toTopOf="parent">
+                android:clickable="true"
+                android:focusable="true"
+                app:layout_constraintTop_toTopOf="parent"
+                >
+
+            <ImageView
+                    android:id="@+id/activity_music_detail_album_image_3"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/album_image_height"
+                    android:layout_marginTop="0dp"
+                    android:contentDescription="@string/activity_music_detail_album_image"
+                    android:scaleType="centerCrop"
+                    app:layout_constraintTop_toTopOf="parent"
+                    />
+
+            <ImageView
+                    android:id="@+id/activity_music_detail_album_image_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/album_image_height"
+                    android:layout_marginTop="0dp"
+                    android:contentDescription="@string/activity_music_detail_album_image"
+                    android:scaleType="centerCrop"
+                    app:layout_constraintTop_toTopOf="parent"
+                    />
+
+            <ImageView
+                    android:id="@+id/activity_music_detail_album_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/album_image_height"
+                    android:contentDescription="@string/activity_music_detail_album_image"
+                    android:scaleType="centerCrop"
+                    android:src="@mipmap/ic_launcher_round"
+                    android:transitionName="@string/image_trans_album"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    />
+
+            <com.google.android.material.appbar.AppBarLayout
+                    android:id="@+id/activity_music_detail_appbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="0dp"
+                    android:background="@drawable/ramp_toolbar"
+                    android:paddingTop="@dimen/toolbar_padding_top"
+                    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                    app:elevation="0dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    >
 
                 <androidx.appcompat.widget.Toolbar
-                    android:id="@+id/activity_music_detail_toolbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="?actionBarSize"
-                    app:navigationIcon="@drawable/ic_arrow_back_white_24dp"
-                    app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+                        android:id="@+id/activity_music_detail_toolbar"
+                        android:layout_width="match_parent"
+                        android:layout_height="?actionBarSize"
+                        app:navigationIcon="@drawable/ic_arrow_back_white_24dp"
+                        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                        >
 
                 </androidx.appcompat.widget.Toolbar>
 
@@ -121,21 +131,23 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <FrameLayout
+        <FrameLayout
                 android:id="@+id/layout_seek_bar_1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/out_slide">
+                app:layout_constraintTop_toBottomOf="@+id/out_slide"
+                >
 
-                <include layout="@layout/include_seek_bar" />
+            <include layout="@layout/include_seek_bar" />
 
-            </FrameLayout>
+        </FrameLayout>
 
         <FrameLayout
-            android:id="@+id/frame_ctrl"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/layout_seek_bar_1">
+                android:id="@+id/frame_ctrl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/layout_seek_bar_1"
+                >
 
             <include layout="@layout/include_player_control" />
 
@@ -144,9 +156,10 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="75dp">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="75dp"
+            >
 
         <include layout="@layout/include_wait_play_body" />
 

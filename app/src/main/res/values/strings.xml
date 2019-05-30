@@ -184,4 +184,12 @@
     <string name="click_to_learn_more">Click to learn more</string>
     <string name="bug_report_or_feature_request">Bug report or Feature request</string>
     <string name="data_overview_empty">The database is currently empty and you can play some songs so we can collect your playback information.</string>
+    <string name="load_default_themes">Load Default Themes</string>
+    <string name="modify_the_title_color_on_a_toolbar_tablayout">Modify the title color on a Toolbar, TabLayout</string>
+    <string name="delete_artist_images_from_sdcard_download_artist">Delete artist images from /sdcard/DownLoad/Artist</string>
+    <string name="clean_artists_images">Clean Artists Images</string>
+    <string name="delete_covers_from_sdcard_download_albumcovers">Delete covers from /sdcard/DownLoad/AlbumCovers</string>
+    <string name="clean_album_covers">Clean Album Covers</string>
+    <string name="album_cover_by_network">Album Cover By Network</string>
+    <string name="get_cover_from_network_sdcard_download_albumcovers">Get cover from network, /sdcard/DownLoad/AlbumCovers</string>
 </resources>

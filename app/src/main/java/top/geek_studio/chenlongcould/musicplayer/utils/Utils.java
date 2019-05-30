@@ -24,10 +24,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.*;
 import androidx.annotation.*;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
@@ -122,7 +119,17 @@ public final class Utils {
 					effects.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC);
 					activity.startActivityForResult(effects, 0);
 				} catch (@NonNull final ActivityNotFoundException notFound) {
-					Toast.makeText(activity, activity.getResources().getString(R.string.no_equalizer), Toast.LENGTH_SHORT).show();
+					notFound.printStackTrace();
+					AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+							.setTitle("No equalizer found")
+							.setMessage("Sorry, I did not find an equalizer on your device. You can install it from your app store!")
+							.setPositiveButton("Search in PlayStore", (dialog, which) -> {
+								dialog.dismiss();
+								Uri uri = Uri.parse("https://play.google.com/store/search?q=equalizer&c=apps");
+								activity.startActivity(new Intent(Intent.ACTION_VIEW, uri));
+							})
+							.setNegativeButton("OK", (dialog, which) -> dialog.dismiss());
+					builder.show();
 				}
 			}
 		}
@@ -376,6 +383,24 @@ public final class Utils {
 			}
 		}
 
+		public static AlertDialog getMusicDetailDialog(@NonNull Context context, @Nullable MusicItem item) {
+			if (item == null) return null;
+
+			final List<String> data = Utils.Audio.extractMetadata(item);
+			ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1
+					, data);
+			final AlertDialog.Builder builder = new AlertDialog.Builder(context)
+					.setTitle(context.getString(R.string.detail))
+					.setAdapter(arrayAdapter, (dialog, which) -> {
+						final ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+						final ClipData clipData = new ClipData("Copied by song detail", new String[]{"text"}, new ClipData.Item(data.get(which).split(":")[1]));
+						clipboardManager.setPrimaryClip(clipData);
+						Toast.makeText(context, "Copied!", Toast.LENGTH_SHORT).show();
+					})
+					.setCancelable(false)
+					.setNegativeButton(context.getString(R.string.done), (dialog, which) -> dialog.dismiss());
+			return builder.create();
+		}
 	}
 
 	public static final class Ui {
@@ -863,37 +888,6 @@ public final class Utils {
 
 		}
 
-	}
-
-	/**
-	 * start activity, broadcast, service...
-	 */
-	public static final class SendSomeThing {
-
-		public static final String TAG = "SendSomeThing";
-
-		/**
-		 * send broadcast by pause
-		 *
-		 * @param context context
-		 */
-		public static void sendPause(final Context context) {
-			Intent intent = new Intent();
-			intent.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
-			intent.putExtra("play_type", -1);
-			context.sendBroadcast(intent, Values.Permission.BROAD_CAST);
-		}
-
-		/**
-		 * @param playBy play_type: previous, next, slide (scroll album cover)
-		 */
-		public static void sendPlay(final Context context, final int receiveType, final String playBy) {
-			Intent intent = new Intent();
-			intent.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
-			intent.putExtra("play_type", receiveType);
-			intent.putExtra("args", playBy);
-			context.sendBroadcast(intent, Values.Permission.BROAD_CAST);
-		}
 	}
 
 	public static final class M3Utils {

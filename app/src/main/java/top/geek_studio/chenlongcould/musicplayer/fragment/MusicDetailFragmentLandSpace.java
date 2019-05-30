@@ -39,10 +39,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.GlideApp;
-import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.*;
 import top.geek_studio.chenlongcould.musicplayer.activity.CarViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyWaitListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
@@ -52,7 +49,6 @@ import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.lang.ref.WeakReference;
-import java.util.Collections;
 import java.util.Date;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
@@ -110,7 +106,7 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 		mMusicDetail2Binding.toolbar.setOnMenuItemClickListener(menuItem -> {
 			switch (menuItem.getItemId()) {
 				case R.id.menu_toolbar_fast_play: {
-					Utils.SendSomeThing.sendPlay(mCarViewActivity, ReceiverOnMusicPlay.CASE_TYPE_SHUFFLE, PlayListFragment.TAG);
+					ReceiverOnMusicPlay.startService(mCarViewActivity, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
 				}
 				break;
 
@@ -160,7 +156,7 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 			mMusicDetail2Binding.includePlayerControlCar.playButton.setImageResource(R.drawable.ic_play_arrow_grey_600_24dp);
 		}
 
-		mMusicDetail2Binding.includePlayerControlCar.nextButton.setOnClickListener(v -> Utils.SendSomeThing.sendPlay(mCarViewActivity, 6, "next"));
+		mMusicDetail2Binding.includePlayerControlCar.nextButton.setOnClickListener(v -> MusicService.MusicControl.next(mCarViewActivity));
 
 		mMusicDetail2Binding.includePlayerControlCar.nextButton.setOnLongClickListener(v -> {
 			int nowPosition = mMusicDetail2Binding.includeSeekBarCar.seekBar.getProgress() + ReceiverOnMusicPlay.getDuration() / 20;
@@ -179,10 +175,10 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 		mMusicDetail2Binding.includePlayerControlCar.previousButton.setOnClickListener(v -> {
 
 			//当进度条大于播放总长 1/20 那么重新播放该歌曲
-			if (ReceiverOnMusicPlay.getCurrentPosition() > ReceiverOnMusicPlay.getDuration() / 20 || Values.CurrentData.CURRENT_MUSIC_INDEX == 0) {
+			if (ReceiverOnMusicPlay.getCurrentPosition() > ReceiverOnMusicPlay.getDuration() / 20 || Data.getCurrentIndex() == 0) {
 				ReceiverOnMusicPlay.seekTo(0);
 			} else {
-				Utils.SendSomeThing.sendPlay(mCarViewActivity, 6, "previous");
+				MusicService.MusicControl.previous(mCarViewActivity);
 			}
 
 		});
@@ -210,9 +206,10 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 			final ValueAnimator animator = new ValueAnimator();
 			animator.setDuration(300);
 			mMusicDetail2Binding.includePlayerControlCar.repeatButton.clearAnimation();
-			switch (Values.CurrentData.CURRENT_PLAY_TYPE) {
-				case Values.TYPE_COMMON: {
-					Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_REPEAT;
+			//noinspection ConstantConditions
+			switch (PreferenceManager.getDefaultSharedPreferences(mCarViewActivity).getString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE)) {
+				case MusicService.PlayType.REPEAT_NONE: {
+					PreferenceManager.getDefaultSharedPreferences(mCarViewActivity).edit().putString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_LIST).apply();
 					mMusicDetail2Binding.includePlayerControlCar.repeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
 					animator.setFloatValues(0.3f, 1f);
 					animator.addUpdateListener(animation -> mMusicDetail2Binding.includePlayerControlCar.repeatButton.setAlpha((Float) animation.getAnimatedValue()));
@@ -241,13 +238,13 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 					animator.start();
 					break;
 				}
-				case Values.TYPE_REPEAT: {
-					Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_REPEAT_ONE;
+				case MusicService.PlayType.REPEAT_LIST: {
+					PreferenceManager.getDefaultSharedPreferences(mCarViewActivity).edit().putString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_ONE).apply();
 					mMusicDetail2Binding.includePlayerControlCar.repeatButton.setImageResource(R.drawable.ic_repeat_one_white_24dp);
 				}
 				break;
-				case Values.TYPE_REPEAT_ONE: {
-					Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_COMMON;
+				case MusicService.PlayType.REPEAT_ONE: {
+					PreferenceManager.getDefaultSharedPreferences(mCarViewActivity).edit().putString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE).apply();
 					mMusicDetail2Binding.includePlayerControlCar.repeatButton.setImageResource(R.drawable.ic_repeat_white_24dp);
 					animator.setFloatValues(1f, 0.3f);
 					animator.addUpdateListener(animation -> mMusicDetail2Binding.includePlayerControlCar.repeatButton.setAlpha((Float) animation.getAnimatedValue()));
@@ -276,7 +273,9 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 					animator.start();
 					break;
 				}
-				default:
+				default: {
+
+				}
 			}
 		});
 
@@ -284,7 +283,6 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 			mMusicDetail2Binding.includePlayerControlCar.randomButton.clearAnimation();
 			final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(mCarViewActivity).edit();
 			if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM)) {
-				Values.CurrentData.CURRENT_PLAY_TYPE = Values.TYPE_COMMON;
 				final ValueAnimator animator = new ValueAnimator();
 				animator.setFloatValues(1f, 0.3f);
 				animator.setDuration(300);
@@ -315,16 +313,15 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 				});
 				animator.start();
 
-				final MusicItem item = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX);
+//				final MusicItem item = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX);
 
-				Data.sPlayOrderList.clear();
-				Data.sPlayOrderList.addAll(Data.sMusicItems);
+				Data.shuffleOrderListSync(mCarViewActivity, false);
 
-				for (int i = 0; i < Data.sMusicItems.size(); i++) {
-					if (Data.sPlayOrderList.get(i).getMusicID() == item.getMusicID()) {
-						Values.CurrentData.CURRENT_MUSIC_INDEX = i;
-					}
-				}
+//				for (int i = 0; i < Data.sMusicItems.size(); i++) {
+//					if (Data.sPlayOrderList.get(i).getMusicID() == item.getMusicID()) {
+//						Values.CurrentData.CURRENT_MUSIC_INDEX = i;
+//					}
+//				}
 
 				mWaitListAdapter.notifyDataSetChanged();
 
@@ -360,14 +357,15 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 				});
 				animator.start();
 
-				final MusicItem item = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX);
-				Collections.shuffle(Data.sPlayOrderList);
+//				final MusicItem item = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX);
 
-				for (int i = 0; i < Data.sMusicItems.size(); i++) {
-					if (Data.sPlayOrderList.get(i).getMusicID() == item.getMusicID()) {
-						Values.CurrentData.CURRENT_MUSIC_INDEX = i;
-					}
-				}
+				Data.shuffleOrderListSync(mCarViewActivity, false);
+
+//				for (int i = 0; i < Data.sMusicItems.size(); i++) {
+//					if (Data.sPlayOrderList.get(i).getMusicID() == item.getMusicID()) {
+//						Values.CurrentData.CURRENT_MUSIC_INDEX = i;
+//					}
+//				}
 
 				mWaitListAdapter.notifyDataSetChanged();
 
@@ -376,10 +374,9 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 
 		mMusicDetail2Binding.includePlayerControlCar.playButton.setOnClickListener(v -> {
 			if (ReceiverOnMusicPlay.isPlayingMusic()) {
-				Utils.SendSomeThing.sendPause(mCarViewActivity);
+				ReceiverOnMusicPlay.startService(mCarViewActivity, MusicService.ServiceActions.ACTION_PAUSE);
 			} else {
-				ReceiverOnMusicPlay.playMusic();
-				Utils.SendSomeThing.sendPlay(mCarViewActivity, 2, null);        //just resumePlay
+				ReceiverOnMusicPlay.startService(mCarViewActivity, MusicService.ServiceActions.ACTION_PLAY);
 			}
 		});
 
@@ -487,8 +484,8 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 			mMusicDetail2Binding.albumText.setText(Data.sCurrentMusicItem.getMusicAlbum());
 			mMusicDetail2Binding.musicName.setText(Data.sCurrentMusicItem.getMusicName());
 
-			mCarViewActivity.runOnUiThread(() -> mLinearLayoutManager.scrollToPositionWithOffset(Values.CurrentData.CURRENT_MUSIC_INDEX == Data.sMusicItems.size() ?
-					Values.CurrentData.CURRENT_MUSIC_INDEX : Values.CurrentData.CURRENT_MUSIC_INDEX + 1, 0));
+			mCarViewActivity.runOnUiThread(() -> mLinearLayoutManager.scrollToPositionWithOffset(Data.getCurrentIndex() == Data.sMusicItems.size() ?
+					Data.getCurrentIndex() : Data.getCurrentIndex() + 1, 0));
 		});
 	}
 

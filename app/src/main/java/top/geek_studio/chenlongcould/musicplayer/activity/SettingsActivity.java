@@ -27,6 +27,7 @@ import org.litepal.LitePal;
 import org.litepal.LitePalDB;
 import top.geek_studio.chenlongcould.geeklibrary.DialogUtil;
 import top.geek_studio.chenlongcould.musicplayer.*;
+import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivitySettingsBinding;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
@@ -372,12 +373,13 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 			startService(intent);
 
+			// TODO: 2019/5/30 专门设立一个action用来更新 notification
 			if (Data.HAS_PLAYED) {
 				try {
 					if (Data.sMusicBinder.isPlayingMusic()) {
-						Data.sMusicBinder.playMusic();
+						ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_PLAY);
 					} else {
-						Data.sMusicBinder.pauseMusic();
+						ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_PAUSE);
 					}
 				} catch (RemoteException e) {
 					e.printStackTrace();

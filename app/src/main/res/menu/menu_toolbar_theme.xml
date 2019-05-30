@@ -1,35 +1,35 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-  ~ *************************************************************
-  ~ 文件：menu_toolbar_theme.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月17日 17:31:47
-  ~ 上次修改时间：2019年01月17日 17:28:52
-  ~ 作者：chenlongcould
-  ~ Geek Studio
-  ~ Copyright (c) 2019
-  ~ *************************************************************
-  -->
-
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        >
     <item
-        android:id="@+id/menu_toolbar_theme_add"
-        android:icon="@drawable/ic_add_white_24dp"
-        android:title="@string/add"
-        app:showAsAction="always" />
+            android:id="@+id/menu_toolbar_theme_add"
+            android:icon="@drawable/ic_add_white_24dp"
+            android:title="@string/add"
+            app:showAsAction="always"
+            />
 
     <item
-        android:id="@+id/menu_toolbar_theme_reset"
-        android:icon="@drawable/ic_layers_clear_white_24dp"
-        android:title="@string/reset"
-        app:showAsAction="always" />
+            android:id="@+id/menu_toolbar_theme_reset"
+            android:icon="@drawable/ic_layers_clear_white_24dp"
+            android:title="@string/reset"
+            app:showAsAction="always"
+            />
 
     <item
-        android:id="@+id/menu_toolbar_theme_sync"
-        android:icon="@drawable/ic_sync_white_24dp"
-        android:title="@string/sync"
-        app:showAsAction="always" />
-
+            android:id="@+id/menu_toolbar_theme_sync"
+            android:icon="@drawable/ic_sync_white_24dp"
+            android:title="@string/sync"
+            app:showAsAction="ifRoom"
+            />
     <item
-        android:id="@+id/menu_toolbar_theme_note"
-        android:title="@string/note" />
+            android:id="@+id/menu_toolbar_theme_load_def"
+            android:title="@string/load_default_themes"
+            app:showAsAction="never"
+            />
+    <item
+            android:id="@+id/menu_toolbar_theme_note"
+            android:title="@string/note"
+            />
 </menu>

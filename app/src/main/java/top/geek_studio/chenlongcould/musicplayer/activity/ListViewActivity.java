@@ -14,16 +14,14 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
-import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -96,7 +94,7 @@ public final class ListViewActivity extends BaseCompatActivity {
 							if (o1 == null || o2 == null) {
 								return 0;
 							}
-							return Integer.compare(o1.getAddTime(), o2.getAddTime());
+							return Long.compare(o1.getAddTime(), o2.getAddTime());
 						});
 					}
 
@@ -262,11 +260,9 @@ public final class ListViewActivity extends BaseCompatActivity {
 			switch (item.getItemId()) {
 				case R.id.menu_public_random: {
 					Data.sPlayOrderListBackup.addAll(Data.sPlayOrderList);
-					Data.sPlayOrderList.clear();
-					Data.sPlayOrderList.addAll(mMusicItemList);
-					Collections.shuffle(Data.sPlayOrderList);
-					Values.CurrentData.CURRENT_MUSIC_INDEX = 0;
-					Utils.SendSomeThing.sendPlay(this, ReceiverOnMusicPlay.ReceiveType.RECEIVE_TYPE_COMMON, ReceiverOnMusicPlay.TYPE_NEXT);
+					Data.syncPlayOrderList(this, mMusicItemList);
+					Data.shuffleOrderListSync(this, false);
+					ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
 				}
 				break;
 
@@ -291,14 +287,7 @@ public final class ListViewActivity extends BaseCompatActivity {
 		mRecyclerView = null;
 		mMusicItemList.clear();
 
-		// FIXME: 2019/5/26 当音乐播放玩去list中寻找下个，但是list正在进行操作，可能会报越界错误
-		Data.sPlayOrderList.clear();
-		Data.sPlayOrderList.addAll(Data.sPlayOrderListBackup);
-		for (final MusicItem item : Data.sPlayOrderList) {
-			if (item.getMusicID() == Data.sCurrentMusicItem.getMusicID()) {
-				Values.CurrentData.CURRENT_MUSIC_INDEX = Data.sPlayOrderList.indexOf(item);
-			}
-		}
+		Data.syncPlayOrderList(this, Data.sPlayOrderListBackup);
 		super.onDestroy();
 	}
 

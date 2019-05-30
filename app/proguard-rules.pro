@@ -62,7 +62,6 @@
 #Fragment不需要在AndroidManifest.xml中注册，需要额外保护下
 -keep public class * extends android.support.v4.app.Fragment
 -keep public class * extends android.app.Fragment
--keep class top.geek_studio.chenlongcould.geeklibrary.** { *;}
 -keep class androidx.appcompat.widget.** { *;}
 
 # 保持测试相关的代码
@@ -92,3 +91,7 @@
 -keep interface okhttp3.** { *; }
 
 #------------------okhttp
+
+-keep class top.geek_studio.chenlongcould.geeklibrary.** { *;}
+-keep class top.geek_studio.chenlongcould.musicplayer.** { *;}
+-keep class top.geek_studio.chenlongcould.musicplayer.Common.** { *;}

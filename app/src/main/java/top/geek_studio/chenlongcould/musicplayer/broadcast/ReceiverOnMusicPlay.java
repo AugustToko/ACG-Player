@@ -1,28 +1,31 @@
 package top.geek_studio.chenlongcould.musicplayer.broadcast;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
+import android.annotation.TargetApi;
+import android.content.*;
+import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.os.Bundle;
-import android.os.Message;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
 import android.os.RemoteException;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.util.Log;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.CarViewActivity;
-import top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
-import java.util.Arrays;
-import java.util.Random;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author chenlongcould
@@ -31,9 +34,12 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 	public static final String TAG = "ReceiverOnMusicPlay";
 
-	public static final byte CASE_TYPE_SHUFFLE = 90;
+	public static final byte FLASH_UI_COMMON = 127;
+
+	public static final byte SHUFFLE_PLAY = 90;
 	public static final byte CASE_TYPE_ITEM_CLICK = 15;
-	public static final byte CASE_TYPE_NOTIFICATION_RESUME = 2;
+	public static final byte PLAY = 100;
+	public static final byte PAUSE = 101;
 	public static final byte RECEIVE_TYPE_COMMON = 6;
 
 
@@ -47,105 +53,12 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 	////////////////////////MEDIA CONTROL/////////////////////////////
 
-	public synchronized static void setDataSource(@NonNull final MusicItem item) {
-		if (Data.sMusicBinder == null) {
-			Log.d(TAG, "MusicBinder is null.");
-			return;
-		}
-
-		ListViewActivity.addToHistory(item);
-
-		try {
-			Data.sMusicBinder.setCurrentMusicData(item);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-			resetMusic("by setDataSource");
-		} catch (IllegalStateException e) {
-			e.printStackTrace();
-			resetMusic("by setDataSource + IllegalStateException");
-		}
-	}
-
-	public synchronized static void playMusic() {
-		if (Data.sMusicBinder == null) {
-			Log.d(TAG, "MusicBinder is null.");
-			return;
-		}
-		try {
-			Data.sMusicBinder.playMusic();
-			Data.HAS_PLAYED = true;
-		} catch (RemoteException e) {
-			e.printStackTrace();
-			resetMusic("by playMusic");
-		} catch (IllegalStateException e) {
-			e.printStackTrace();
-			resetMusic("by playMusic + IllegalStateException");
-		}
-	}
-
-	public synchronized static void pauseMusic() {
-		if (Data.sMusicBinder == null) {
-			Log.d(TAG, "MusicBinder is null.");
-			return;
-		}
-		try {
-			Data.sMusicBinder.pauseMusic();
-		} catch (RemoteException e) {
-			e.printStackTrace();
-			resetMusic("by pauseMusic");
-		}
-	}
-
-	public synchronized static void resetMusic(String... args) {
-		if (args != null && args.length > 0) {
-			Log.d(TAG, "resetMusic: args: " + Arrays.toString(args));
-		}
-
-		if (Data.sMusicBinder == null) {
-			Log.d(TAG, "MusicBinder is null.");
-			return;
-		}
-		try {
-			Data.sMusicBinder.resetMusic();
-		} catch (RemoteException e) {
-			e.printStackTrace();
-			try {
-				Data.sMusicBinder.resetMusic();
-			} catch (RemoteException e1) {
-				e1.printStackTrace();
-			}
-		}
-	}
-
-	public synchronized static void prepare() {
-		if (Data.sMusicBinder == null) {
-			Log.d(TAG, "MusicBinder is null.");
-			return;
-		}
-		try {
-			Data.sMusicBinder.prepare();
-		} catch (RemoteException e) {
-			e.printStackTrace();
-			resetMusic("by prepare");
-		} catch (IllegalStateException e) {
-			e.printStackTrace();
-			resetMusic("by prepare + IllegalStateException");
-		}
-	}
-
 	public static int getDuration() {
-		int duration = 1;
-		if (Data.sMusicBinder == null) {
-			Log.d(TAG, "MusicBinder is null.");
-			return duration;
-		}
+		int duration = 0;
 		try {
 			duration = Data.sMusicBinder.getDuration();
-			//issue: duration may br zero, if quick click "fast play" button
-			return duration == 0 ? 1 : duration;
 		} catch (RemoteException e) {
 			e.printStackTrace();
-			resetMusic("by getDuration");
 		}
 		return duration;
 	}
@@ -159,7 +72,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 			return Data.sMusicBinder.isPlayingMusic();
 		} catch (RemoteException e) {
 			e.printStackTrace();
-			resetMusic("by isPlayingMusic");
 		}
 		return false;
 	}
@@ -173,7 +85,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 			return Data.sMusicBinder.getCurrentPosition();
 		} catch (RemoteException e) {
 			e.printStackTrace();
-			resetMusic("by getCurrentPosition");
 		}
 		return 0;
 	}
@@ -187,21 +98,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 			Data.sMusicBinder.seekTo(nowPosition);
 		} catch (RemoteException e) {
 			e.printStackTrace();
-			resetMusic("by seekTo");
-		}
-	}
-
-	@SuppressWarnings("unused")
-	public synchronized static void stopMusic() {
-		if (Data.sMusicBinder == null) {
-			Log.d(TAG, "MusicBinder is null.");
-			return;
-		}
-		try {
-			Data.sMusicBinder.stopMusic();
-		} catch (RemoteException e) {
-			e.printStackTrace();
-			resetMusic("by stopMusic");
 		}
 	}
 
@@ -212,7 +108,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 				Data.sMusicBinder.setCurrentMusicData(item);
 			} catch (RemoteException e) {
 				e.printStackTrace();
-				resetMusic("by setMusicItem");
 			}
 		}
 	}
@@ -227,10 +122,143 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 			return Data.sMusicBinder.getCurrentItem();
 		} catch (RemoteException e) {
 			e.printStackTrace();
-			resetMusic("by getCurrentItem");
 		}
 		return null;
 	}
+
+	public static void playFromUri(Context context, Uri uri) {
+		if (Data.sMusicBinder != null) {
+			List<MusicItem> songs = null;
+//
+			if (uri.getScheme() != null && uri.getAuthority() != null) {
+				if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+					String songId = null;
+					if (uri.getAuthority().equals("com.android.providers.media.documents")) {
+						songId = getSongIdFromMediaProvider(uri);
+						Log.d(TAG, "playFromUri: getSongIdFromMediaProvider: " + songId);
+					} else if (uri.getAuthority().equals("media")) {
+						songId = uri.getLastPathSegment();
+						Log.d(TAG, "playFromUri: getLastPathSegment: " + songId);
+					}
+					if (songId != null) {
+						Cursor cursor = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+								null, MediaStore.Audio.AudioColumns._ID + "=?", new String[]{songId}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+						List<MusicItem> items = new ArrayList<>();
+						if (cursor != null && cursor.moveToFirst()) {
+							do {
+								items.add(getSongFromCursorImpl(cursor));
+							} while (cursor.moveToNext());
+						}
+
+						if (cursor != null) {
+							cursor.close();
+						}
+
+						songs = items;
+
+						Log.d(TAG, "playFromUri: " + songs.get(0).toString());
+					}
+				}
+			}
+
+			if (songs == null) {
+				File songFile = null;
+				if (uri.getAuthority() != null && uri.getAuthority().equals("com.android.externalstorage.documents")) {
+					songFile = new File(Environment.getExternalStorageDirectory(), uri.getPath().split(":", 2)[1]);
+				}
+				if (songFile == null) {
+					String path = getFilePathFromUri(context, uri);
+					if (path != null) {
+						songFile = new File(path);
+					}
+				}
+				if (songFile == null && uri.getPath() != null) {
+					songFile = new File(uri.getPath());
+				}
+				if (songFile != null) {
+					Cursor cursor = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+							null, MediaStore.Audio.AudioColumns.DATA + "=?"
+							, new String[]{songFile.getAbsolutePath()}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+					List<MusicItem> items = new ArrayList<>();
+					if (cursor != null && cursor.moveToFirst()) {
+						do {
+							items.add(getSongFromCursorImpl(cursor));
+						} while (cursor.moveToNext());
+					}
+
+					if (cursor != null) {
+						cursor.close();
+					}
+
+					songs = items;
+				}
+			}
+
+			//noinspection StatementWithEmptyBody
+			if (songs != null && !songs.isEmpty()) {
+				Data.sNextWillPlayItem = songs.get(0);
+				ReceiverOnMusicPlay.playNext(context);
+			} else {
+				//TODO the file is not listed in the media store
+			}
+		}
+	}
+
+	@NonNull
+	private static MusicItem getSongFromCursorImpl(@NonNull Cursor cursor) {
+		final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+		final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+		final String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+		final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+		final String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+		final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+		final int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
+		final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+		final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
+		final int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+		final int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID));
+
+		final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
+				.musicAlbum(albumName)
+				.addTime(addTime)
+				.artist(artist)
+				.duration(duration)
+				.mimeName(mimeType)
+				.size(size)
+				.addAlbumId(albumId)
+				.addArtistId(artistId);
+		return builder.build();
+	}
+
+	@Nullable
+	private static String getFilePathFromUri(Context context, Uri uri) {
+		Cursor cursor = null;
+		final String column = "_data";
+		final String[] projection = {
+				column
+		};
+
+		try {
+			cursor = context.getContentResolver().query(uri, projection, null, null,
+					null);
+			if (cursor != null && cursor.moveToFirst()) {
+				final int column_index = cursor.getColumnIndexOrThrow(column);
+				return cursor.getString(column_index);
+			}
+		} catch (Exception e) {
+			Log.e(TAG, e.getMessage());
+		} finally {
+			if (cursor != null)
+				cursor.close();
+		}
+		return null;
+	}
+
+	@TargetApi(Build.VERSION_CODES.KITKAT)
+	private static String getSongIdFromMediaProvider(Uri uri) {
+		return DocumentsContract.getDocumentId(uri).split(":")[1];
+	}
+
 
 	public synchronized static void sureCar() {
 		//set data (image and name)
@@ -239,220 +267,75 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		}
 	}
 
-	////////////////////////////////////////////////////////////////
+	public static void startService(@NonNull Context context, @NonNull String action) {
+		final ComponentName serviceName = new ComponentName(context, MusicService.class);
+		Intent resumeIntent = new Intent(action);
+		resumeIntent.setComponent(serviceName);
+		context.startService(resumeIntent);
+	}
 
-	/**
-	 * 获取下个播放的 index
-	 *
-	 * @param playType 播放的模式 (向前 或者 向后)
-	 */
-	public synchronized int getIndex(@NonNull String playType) {
-		int targetIndex = 0;
-		if (playType.contains(TYPE_NEXT)) {
-			targetIndex = Values.CurrentData.CURRENT_MUSIC_INDEX + 1;
-			//超出范围自动跳转0
-			if (targetIndex > Data.sPlayOrderList.size() - 1) {
-				targetIndex = 0;
-			}
-		} else if (playType.contains(TYPE_PREVIOUS)) {
-			targetIndex = Values.CurrentData.CURRENT_MUSIC_INDEX - 1;
-			if (targetIndex < 0) {
-				//超出范围超转最后
-				targetIndex = Data.sPlayOrderList.size() - 1;
-			}
-		}
-		return targetIndex;
+	public static void startService(@NonNull Context context, @NonNull Intent intent) {
+		final ComponentName serviceName = new ComponentName(context, MusicService.class);
+		intent.setComponent(serviceName);
+		context.startService(intent);
+	}
+
+	public static void playNext(Context context) {
+		Intent intent = new Intent();
+		intent.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
+		intent.putExtra("play_type", 6);
+		intent.putExtra("args", ReceiverOnMusicPlay.TYPE_NEXT);
+		context.sendBroadcast(intent, Values.Permission.BROAD_CAST);
 	}
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-
 		CustomThreadPool.post(() -> {
-			final int type = intent.getIntExtra(INTENT_PLAY_TYPE, 0);
+			final byte type = intent.getByteExtra(INTENT_PLAY_TYPE, Byte.MAX_VALUE);
 
 			///////////////////////////BEFORE PLAYER SET/////////////////////////////////////////
 
 			switch (type) {
 				//clicked by notif, just resume play
-				case CASE_TYPE_NOTIFICATION_RESUME: {
+				case FLASH_UI_COMMON: {
+					Log.d(TAG, "onReceive: common");
+					final MusicItem item = intent.getParcelableExtra("item");
+					if (item != null) {
+						if (item.getMusicID() == Data.sCurrentMusicItem.getMusicID()) {
+							break;
+						} else {
+							Data.sCurrentMusicItem = item;
+						}
+
+						final Bitmap cover = Utils.Audio.getCoverBitmapFull(context, Data.sCurrentMusicItem.getAlbumId());
+						Data.setCurrentCover(cover);
+						MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
+						MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
+						MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_CURRENT_DATA);
+						sureCar();
+					}
+				}
+				break;
+
+				case PLAY: {
 					MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
-					playMusic();
+					Log.d(TAG, "onReceive: after resume");
 				}
 				break;
 
 				//pause music
-				case -1: {
-					pauseMusic();
+				case PAUSE: {
 					MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PAUSE);
+					Log.d(TAG, "onReceive: after pause");
 				}
 				break;
 
-				//Type Random (play)
-				case CASE_TYPE_SHUFFLE: {
-					if (Data.sPlayOrderList.isEmpty()) {
-						break;
-					}
-
-					resetMusic();
-
-					Log.d(TAG, "onReceive: " + Thread.currentThread().getName());
-
-					//get data
-					final Random random = new Random();
-					int index = random.nextInt(Data.sPlayOrderList.size());
-
-					// 循环检测是否播放到 “垃圾桶” 中的歌曲，如是，则跳过
-					for (; ; ) {
-						if (Data.S_TRASH_CAN_LIST.contains(Data.sPlayOrderList.get(index))) {
-							index = random.nextInt(Data.sPlayOrderList.size());
-						} else {
-							Values.CurrentData.CURRENT_MUSIC_INDEX = index;
-							break;
-						}
-					}
-
-					Data.sCurrentMusicItem = Data.sPlayOrderList.get(index);
-
-					setDataSource(Data.sCurrentMusicItem);
-					prepare();
-					playMusic();
-
-					final Bitmap cover = Utils.Audio.getCoverBitmapFull(context, Data.sCurrentMusicItem.getAlbumId());
-					Data.setCurrentCover(cover);
-
-					MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
-					MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
-					MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_CURRENT_DATA);
-
-					sureCar();
-				}
-				break;
-
-				//by next button...(in detail or noti) (must ActivityList isn't empty)
-				//by auto-next(mediaPlayer OnCompletionListener) of next-play by user, at this time MainActivity is present
-				//by MusicDetailFragment preview imageButton (view history song list)
-				case RECEIVE_TYPE_COMMON: {
-
-					//检测是否指定下一首播放
-					if (Data.sNextWillPlayItem != null) {
-						Data.sCurrentMusicItem = Data.sNextWillPlayItem;
-						resetMusic();
-						ReceiverOnMusicPlay.setDataSource(Data.sNextWillPlayItem);
-						prepare();
-						playMusic();
-
-						final Bitmap cover = Utils.Audio.getCoverBitmapFull(context, Data.sNextWillPlayItem.getAlbumId());
-						Data.setCurrentCover(cover);
-
-						MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
-						MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
-						MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_CURRENT_DATA);
-
-						sureCar();
-
-						Data.sNextWillPlayItem = null;
-						break;
-					}
-
-					//检测循环
-					if (Values.CurrentData.CURRENT_PLAY_TYPE.equals(Values.TYPE_REPEAT_ONE)) {
-						seekTo(0);
-						playMusic();
-						break;
-					}
-
-					//检测大小
-					if (Data.sPlayOrderList.size() <= 0) {
-						Toast.makeText(context, "Data.sPlayOrderList.size() <= 0", Toast.LENGTH_SHORT).show();
-						break;
-					}
-
-					resetMusic();
-
-					int targetIndex = getIndex(intent.getStringExtra(INTENT_ARGS));
-
-					// 循环检测是否播放到 “垃圾桶” 中的歌曲，如是，则跳过
-					for (; ; ) {
-						if (Data.S_TRASH_CAN_LIST.contains(Data.sPlayOrderList.get(targetIndex))) {
-							targetIndex = getIndex(intent.getStringExtra(INTENT_ARGS));
-						} else {
-							Values.CurrentData.CURRENT_MUSIC_INDEX = targetIndex;
-							break;
-						}
-					}
-
-					Data.sCurrentMusicItem = Data.sPlayOrderList.get(targetIndex);
-
-					setDataSource(Data.sCurrentMusicItem);
-					prepare();
-					playMusic();
-
-					final Bitmap cover = Utils.Audio.getCoverBitmapFull(context, Data.sCurrentMusicItem.getAlbumId());
-					Data.setCurrentCover(cover);
-
-					//load data
-
-					//slide 滑动切歌无需再次加载albumCover
-					if (intent.getStringExtra(INTENT_ARGS) != null && intent.getStringExtra(INTENT_ARGS).contains(TYPE_SLIDE)) {
-						final String musicName = Data.sPlayOrderList.get(targetIndex).getMusicName();
-						final String albumName = Data.sPlayOrderList.get(targetIndex).getMusicAlbum();
-
-						MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
-						//set music data
-						final Message message = Message.obtain();
-						message.what = MusicDetailFragment.NotLeakHandler.setCurrentInfoWithoutMainImage;
-						final Bundle bundle = new Bundle();
-						bundle.putString("name", musicName);
-						bundle.putString("albumName", albumName);
-						message.setData(bundle);
-						message.obj = cover;
-						MusicDetailFragment.sendMessage(message);
-					} else {
-						MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
-						MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
-						MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_CURRENT_DATA);
-					}
-					sureCar();
-				}
-				break;
-
-				//by MusicListFragment item click
-				case CASE_TYPE_ITEM_CLICK: {
-
-					Data.setCurrentCover(Utils.Audio.getCoverBitmapFull(context, Data.sCurrentMusicItem.getAlbumId()));
-
-					//set current data
-					resetMusic();
-					setDataSource(Data.sCurrentMusicItem);
-					prepare();
-					playMusic();
-
-					sureCar();
-
-					MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
-					MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
-					MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_CURRENT_DATA);
-
-				}
-				break;
 				default:
 			}
-
-			///////////////////////////AFTER PLAYER SET/////////////////////////////////////////
 
 			MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.RECYCLER_SCROLL);
 			MainActivity.sendEmptyMessage(MainActivity.NotLeakHandler.SET_SLIDE_TOUCH_ENABLE);
 
 		});
-	}
-
-	/**
-	 * Receive Types
-	 */
-	public interface ReceiveType {
-		int CASE_TYPE_SHUFFLE = 90;
-		int CASE_TYPE_ITEM_CLICK = 15;
-		int CASE_TYPE_NOTIFICATION_RESUME = 2;
-		int RECEIVE_TYPE_COMMON = 6;
 	}
 }

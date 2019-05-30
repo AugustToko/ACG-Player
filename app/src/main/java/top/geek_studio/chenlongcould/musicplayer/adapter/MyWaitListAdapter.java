@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.view.*;
 import android.widget.ArrayAdapter;
@@ -17,11 +18,11 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.RecyclerView;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.BaseCompatActivity;
-import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
@@ -51,7 +52,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 		View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_in_detail, viewGroup, false);
 		ViewHolder holder = new ViewHolder(view);
 
-		onMusicItemClick(view, holder);
+		view.setOnClickListener(v -> MusicService.MusicControl.itemClick(mContext, mMusicItems.get(holder.getAdapterPosition())));
 
 		holder.mItemMenuButton.setOnClickListener(v -> holder.mPopupMenu.show());
 
@@ -59,12 +60,17 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
 			final int index = holder.getAdapterPosition();
 
-			Values.CurrentData.CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = index;
-
 			switch (item.getItemId()) {
 				//noinspection PointlessArithmeticExpression
 				case Menu.FIRST + 0: {
 					Data.sNextWillPlayItem = mMusicItems.get(holder.getAdapterPosition());
+					if (Data.sMusicBinder != null) {
+						try {
+							Data.sMusicBinder.setNextWillPlayItem(Data.sNextWillPlayItem);
+						} catch (RemoteException e) {
+							e.printStackTrace();
+						}
+					}
 				}
 				break;
 
@@ -110,8 +116,6 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 				break;
 			}
 
-			Values.CurrentData.CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = -1;
-
 			return false;
 		});
 
@@ -121,16 +125,6 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 		});
 
 		return holder;
-	}
-
-	private void onMusicItemClick(View view, ViewHolder holder) {
-		view.setOnClickListener(v -> {
-
-			Values.CurrentData.CURRENT_MUSIC_INDEX = holder.getAdapterPosition();
-			Data.sCurrentMusicItem = mMusicItems.get(holder.getAdapterPosition());
-
-			Utils.SendSomeThing.sendPlay(mContext, ReceiverOnMusicPlay.CASE_TYPE_ITEM_CLICK, "null");
-		});
 	}
 
 	@Override

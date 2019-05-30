@@ -48,6 +48,7 @@ public interface Values {
 
 		String SELECT_THEME = "SELECT_THEME";
 		String THEME_USE_NOTE = "THEME_USE_NOTE";
+		String LOAD_DEFAULT_THEME = "LOAD_DEFAULT_THEME";
 
 		String NOTIFICATION_COLORIZED = "NOTIFICATION_COLORIZED";
 
@@ -80,6 +81,7 @@ public interface Values {
 		 * 存储最后播放的音乐的Id
 		 */
 		String LAST_PLAY_MUSIC_ID = "LAST_PLAY_MUSIC_ID";
+
 	}
 
 	interface IntentTAG {
@@ -120,14 +122,9 @@ public interface Values {
 		 */
 		public static int CURRENT_PAGE_INDEX = 0;
 
-		/**
-		 * 存储使浮动菜单弹出的item,def = -1
-		 */
-		public static int CURRENT_SELECT_ITEM_INDEX_WITH_ITEM_MENU = -1;
-
-		/**
-		 * 当前序列指针, 指向 {@link Data#sPlayOrderList} 的位置
-		 */
+		//		/**
+//		 * 当前序列指针, 指向 {@link Data#sPlayOrderList} 的位置
+//		 */
 		public static volatile int CURRENT_MUSIC_INDEX = -1;
 
 		/**
@@ -141,6 +138,7 @@ public interface Values {
 		 * 3. repeat list
 		 * 4. random
 		 */
+		@Deprecated
 		public static String CURRENT_PLAY_TYPE = "COMMON";
 
 	}
