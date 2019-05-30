@@ -4,6 +4,7 @@ package top.geek_studio.chenlongcould.musicplayer;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 
 interface IMuiscService {
+    void reset();
     boolean isPlayingMusic();
     int getDuration();
     int getCurrentPosition();

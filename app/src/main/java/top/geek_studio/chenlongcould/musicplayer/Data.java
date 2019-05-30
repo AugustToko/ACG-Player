@@ -45,7 +45,6 @@ public final class Data {
 	/**
 	 * 检测app打开后, 是否播放过音乐 (如果没, 默认点击播放按钮为快速随机播放)
 	 */
-	@Deprecated
 	public volatile static boolean HAS_PLAYED = false;
 	public static ArrayList<Disposable> sDisposables = new ArrayList<>();
 

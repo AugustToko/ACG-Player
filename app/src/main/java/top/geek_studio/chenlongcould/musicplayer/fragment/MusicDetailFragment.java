@@ -463,7 +463,7 @@ public final class MusicDetailFragment extends BaseFragment {
 			nextText.setTextColor(defColor);
 		}
 
-		if (Values.BackgroundStyle.DETAIL_BACKGROUND.equals(Values.BackgroundStyle.STYLE_BACKGROUND_BLUR)) {
+		if (MusicDetailFragment.BackgroundStyle.DETAIL_BACKGROUND.equals(MusicDetailFragment.BackgroundStyle.STYLE_BACKGROUND_BLUR)) {
 			bgUp.post(() -> GlideApp.with(this)
 					.load(bitmap)
 					.dontAnimate()
@@ -540,6 +540,8 @@ public final class MusicDetailFragment extends BaseFragment {
 				mPlayPauseDrawable.setPause(true);
 			}
 		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (IllegalStateException e) {
 			e.printStackTrace();
 		}
 	}
@@ -1446,14 +1448,14 @@ public final class MusicDetailFragment extends BaseFragment {
 	/**
 	 * 对于 {@link top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment} 中的背景进行样式设定
 	 */
-	interface BackgroundStyle {
-		String STYLE_BACKGROUND_BLUR = "BLUR";
-		String STYLE_BACKGROUND_AUTO_COLOR = "AUTO_COLOR";
+	public static class BackgroundStyle {
+		public static String STYLE_BACKGROUND_BLUR = "BLUR";
+		public static String STYLE_BACKGROUND_AUTO_COLOR = "AUTO_COLOR";
 
 		/**
 		 * background style model
 		 */
-		String DETAIL_BACKGROUND = STYLE_BACKGROUND_BLUR;
+		public static String DETAIL_BACKGROUND = STYLE_BACKGROUND_BLUR;
 	}
 
 	@SuppressWarnings("WeakerAccess")
@@ -1510,7 +1512,7 @@ public final class MusicDetailFragment extends BaseFragment {
 				case SEEK_BAR_UPDATE: {
 					mWeakReference.get().runOnUiThread(() -> {
 						//点击body 或 music 正在播放 才可以进行seekBar更新
-						if (Data.sMusicBinder != null) {
+						if (Data.sMusicBinder != null && Data.HAS_PLAYED) {
 							if (ReceiverOnMusicPlay.isPlayingMusic()) {
 
 								int duration = (int) Data.sCurrentMusicItem.getDuration();

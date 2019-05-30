@@ -97,13 +97,13 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				Data.shuffleOrderListSync(MainActivity.this, false);
 			}
 
-			if (Data.sMusicBinder != null && Data.sCurrentMusicItem.getMusicID() != -1) {
-				try {
-					Data.sMusicBinder.setCurrentMusicData(Data.sCurrentMusicItem);
-				} catch (RemoteException e) {
-					e.printStackTrace();
-				}
-			}
+//			if (Data.sMusicBinder != null && Data.sCurrentMusicItem.getMusicID() != -1) {
+//				try {
+//					Data.sMusicBinder.setCurrentMusicData(Data.sCurrentMusicItem);
+//				} catch (RemoteException e) {
+//					e.printStackTrace();
+//				}
+//			}
 		}
 
 		@Override
@@ -205,6 +205,13 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	 * clearData data
 	 */
 	public static void clearData() {
+		Data.sMusicBinder = null;
+
+		if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
+			Data.getCurrentCover().recycle();
+		}
+
+		App.clearDisposable();
 
 		//lists
 		Data.sPlayOrderList.clear();
@@ -214,15 +221,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		Data.sMusicItemsBackUp.clear();
 		Data.sAlbumItemsBackUp.clear();
 		Data.sArtistItemsBackUp.clear();
-
 		Data.sHistoryPlayed.clear();
 		Data.S_TRASH_CAN_LIST.clear();
-
-		App.clearDisposable();
-
-		if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
-			Data.getCurrentCover().recycle();
-		}
 	}
 
 	/**
@@ -515,6 +515,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					List<MyBlackPath> lists = LitePal.findAll(MyBlackPath.class);
 					LitePal.useDefault();
 
+					int lastId = preferences.getInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, -1);
+
 					do {
 						final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
 						boolean skip = false;
@@ -560,7 +562,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 								.addAlbumId(albumId)
 								.addArtistId(artistId);
 
-						if (Data.sCurrentMusicItem.getMusicID() == -1 && preferences.getInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, -1) == id) {
+						if (lastId == id) {
 							Data.sCurrentMusicItem = builder.build();
 						}
 
@@ -573,6 +575,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					}
 					while (cursor.moveToNext());
 					cursor.close();
+
+					Log.d(TAG, "loadDataSource: done");
 				}
 			} else {
 				//cursor null or getCount == 0
@@ -613,10 +617,9 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 				//service
 				final Intent intent = new Intent(MainActivity.this, MusicService.class);
-				//init service and shuffle list
-
 				startService(intent);
 				Data.HAS_BIND = bindService(intent, sServiceConnection, BIND_AUTO_CREATE);
+
 				setSubtitle(Data.sPlayOrderList.size() + " Songs");
 
 				initFragmentData();
@@ -1073,7 +1076,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		} catch (Exception e) {
 			Log.d(TAG, "fullExit: " + e.getMessage());
 		}
-		Data.sMusicBinder = null;
 		clearData();
 		finish();
 	}

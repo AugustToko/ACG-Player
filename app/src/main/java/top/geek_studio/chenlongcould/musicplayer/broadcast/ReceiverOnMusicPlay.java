@@ -72,6 +72,8 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 			return Data.sMusicBinder.isPlayingMusic();
 		} catch (RemoteException e) {
 			e.printStackTrace();
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -336,6 +338,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 			MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.RECYCLER_SCROLL);
 			MainActivity.sendEmptyMessage(MainActivity.NotLeakHandler.SET_SLIDE_TOUCH_ENABLE);
 
+			Data.HAS_PLAYED = true;
 		});
 	}
 }

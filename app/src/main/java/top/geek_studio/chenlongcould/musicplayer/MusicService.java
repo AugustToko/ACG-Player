@@ -37,7 +37,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author chenlongcould
@@ -49,12 +48,99 @@ public final class MusicService extends Service {
 
 	public static final String ACG_PLAYER_PACKAGE_NAME = "top.geek_studio.chenlongcould.musicplayer.Common";
 
+	private static MusicItem mMusicItem = null;
+
+	/**
+	 * 最短播放时间为 3000 毫秒
+	 */
+	public static final int MINIMUM_PLAY_TIME = 3000;
+	public static final int DEFAULT_SHORT_DURATION = 20000;
+	private static WeakReference<MusicService> serviceWeakReference;
+	private static boolean HAS_PLAYED = false;
+	private final Binder mMusicBinder = new IMuiscService.Stub() {
+
+		@Override
+		public void reset() {
+			MusicControl.reset(false);
+		}
+
+		@Override
+		public boolean isPlayingMusic() {
+			return MusicControl.isPlayingMusic();
+		}
+
+		@Override
+		public int getDuration() {
+			return MusicControl.getDuration();
+		}
+
+		@Override
+		public int getCurrentPosition() {
+			return MusicControl.getCurrentPosition();
+		}
+
+		@Override
+		public void seekTo(int position) {
+			MusicControl.seekTo(position);
+		}
+
+		@Override
+		public void release() {
+			MusicControl.release();
+		}
+
+		@Override
+		public void setCurrentMusicData(MusicItem item) {
+			if (item != null && item.getMusicID() != -1) {
+				mMusicItem = item;
+				ItemList.CURRENT_MUSIC_INDEX = ItemList.playOrderList.indexOf(mMusicItem);
+			}
+		}
+
+		@Override
+		public void setNextWillPlayItem(MusicItem item) throws RemoteException {
+			ItemList.nextItem = item;
+		}
+
+		@Override
+		public void addToOrderList(MusicItem item) throws RemoteException {
+			ItemList.playOrderList.add(item);
+		}
+
+		@Override
+		public MusicItem getCurrentItem() {
+			return mMusicItem;
+		}
+
+		@Override
+		public int getCurrentIndex() throws RemoteException {
+			return ItemList.CURRENT_MUSIC_INDEX;
+		}
+
+		@Override
+		public void setCurrentIndex(int index) throws RemoteException {
+			ItemList.CURRENT_MUSIC_INDEX = index;
+		}
+	};
+	private boolean bind = false;
+	private AtomicBoolean mIsServiceDestroyed = new AtomicBoolean(false);
+	/**
+	 * NotificationId
+	 */
+	private String mId = "Player";
+	private int mStartNotificationId = 1;
+	private PowerManager.WakeLock wakeLock;
+
 	@Override
 	public void onCreate() {
 		serviceWeakReference = new WeakReference<>(this);
 		final PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
 		wakeLock.setReferenceCounted(false);
+
+		if (MusicControl.mediaPlayer == null) {
+			MusicControl.mediaPlayer = new MediaPlayer();
+		}
 
 		MusicControl.mediaPlayer.setOnCompletionListener(mp -> {
 			switch (PreferenceUtil.getDefault(this).getString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE)) {
@@ -103,83 +189,6 @@ public final class MusicService extends Service {
 		intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
 		registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
 	}
-
-	/**
-	 * 最短播放时间为 3000 毫秒
-	 */
-	public static final int MINIMUM_PLAY_TIME = 3000;
-	public static final int DEFAULT_SHORT_DURATION = 20000;
-	private static WeakReference<MusicService> serviceWeakReference;
-	private static boolean HAS_PLAYED = false;
-	private static AtomicReference<MusicItem> mMusicItem = new AtomicReference<>(null);
-	private final Binder mMusicBinder = new IMuiscService.Stub() {
-
-		@Override
-		public boolean isPlayingMusic() {
-			return MusicControl.isPlayingMusic();
-		}
-
-		@Override
-		public int getDuration() {
-			return MusicControl.getDuration();
-		}
-
-		@Override
-		public int getCurrentPosition() {
-			return MusicControl.getCurrentPosition();
-		}
-
-		@Override
-		public void seekTo(int position) {
-			MusicControl.seekTo(position);
-		}
-
-		@Override
-		public void release() {
-			MusicControl.release();
-		}
-
-		@Override
-		public void setCurrentMusicData(MusicItem item) {
-			if (item != null && item.getMusicID() != -1) {
-				mMusicItem.set(item);
-				ItemList.CURRENT_MUSIC_INDEX = ItemList.playOrderList.indexOf(mMusicItem.get());
-			}
-		}
-
-		@Override
-		public void setNextWillPlayItem(MusicItem item) throws RemoteException {
-			ItemList.nextItem = item;
-		}
-
-		@Override
-		public void addToOrderList(MusicItem item) throws RemoteException {
-			ItemList.playOrderList.add(item);
-		}
-
-		@Override
-		public MusicItem getCurrentItem() {
-			return mMusicItem.get();
-		}
-
-		@Override
-		public int getCurrentIndex() throws RemoteException {
-			return ItemList.CURRENT_MUSIC_INDEX;
-		}
-
-		@Override
-		public void setCurrentIndex(int index) throws RemoteException {
-			ItemList.CURRENT_MUSIC_INDEX = index;
-		}
-	};
-	private AtomicBoolean mIsServiceDestroyed = new AtomicBoolean(false);
-	/**
-	 * NotificationId
-	 */
-	private String mId = "Player";
-	private int mStartNotificationId = 1;
-	private PowerManager.WakeLock wakeLock;
-
 
 	public MusicService() {
 		Log.d(TAG, "MusicService: ");
@@ -234,7 +243,7 @@ public final class MusicService extends Service {
 					// 从未播放过说明没有设置过DataSource，同时也不要记录播放统计
 					if (!HAS_PLAYED) {
 						MusicControl.reset(false);
-						MusicControl.setDataSource(mMusicItem.get());
+						MusicControl.setDataSource(mMusicItem);
 						MusicControl.prepare();
 					}
 					MusicControl.playMusic();
@@ -246,9 +255,9 @@ public final class MusicService extends Service {
 				case ServiceActions.ACTION_PN: {
 					//检测是否指定下一首播放
 					if (ItemList.nextItem != null && ItemList.nextItem.getMusicID() != -1) {
-						mMusicItem.set(ItemList.nextItem);
+						mMusicItem = ItemList.nextItem;
 						MusicControl.reset(true);
-						MusicControl.setDataSource(mMusicItem.get());
+						MusicControl.setDataSource(mMusicItem);
 						MusicControl.prepare();
 						MusicControl.playMusic();
 
@@ -275,7 +284,7 @@ public final class MusicService extends Service {
 					final String pnType = intent.getStringExtra("pnType");
 
 					if (ServiceActions.ACTION_PN_PREVIOUS.equals(pnType)
-							&& MusicControl.getCurrentPosition() / mMusicItem.get().getDuration() > 20) {
+							&& MusicControl.getCurrentPosition() / mMusicItem.getDuration() > 20) {
 						MusicControl.seekTo(0);
 						break;
 					}
@@ -292,9 +301,9 @@ public final class MusicService extends Service {
 						}
 					}
 
-					mMusicItem.set(ItemList.playOrderList.get(ItemList.CURRENT_MUSIC_INDEX));
+					mMusicItem = ItemList.playOrderList.get(ItemList.CURRENT_MUSIC_INDEX);
 					MusicControl.reset(true);
-					MusicControl.setDataSource(mMusicItem.get());
+					MusicControl.setDataSource(mMusicItem);
 					MusicControl.prepare();
 					MusicControl.playMusic();
 
@@ -319,8 +328,8 @@ public final class MusicService extends Service {
 						}
 					}
 
-					mMusicItem.set(ItemList.playOrderList.get(index));
-					MusicControl.setDataSource(mMusicItem.get());
+					mMusicItem = ItemList.playOrderList.get(index);
+					MusicControl.setDataSource(mMusicItem);
 					MusicControl.prepare();
 					MusicControl.playMusic();
 
@@ -330,10 +339,10 @@ public final class MusicService extends Service {
 				break;
 
 				case ServiceActions.ACTION_ITEM_CLICK: {
-					mMusicItem.set(intent.getParcelableExtra("item"));
-					ItemList.CURRENT_MUSIC_INDEX = ItemList.playOrderList.indexOf(mMusicItem.get());
+					mMusicItem = intent.getParcelableExtra("item");
+					ItemList.CURRENT_MUSIC_INDEX = ItemList.playOrderList.indexOf(mMusicItem);
 					MusicControl.reset(true);
-					MusicControl.setDataSource(mMusicItem.get());
+					MusicControl.setDataSource(mMusicItem);
 					MusicControl.prepare();
 					MusicControl.playMusic();
 
@@ -344,7 +353,7 @@ public final class MusicService extends Service {
 
 			if (flashMode != -1) {
 				updateUI.putExtra("play_type", flashMode);
-				updateUI.putExtra("item", mMusicItem.get());
+				updateUI.putExtra("item", mMusicItem);
 				sendBroadcast(updateUI, Values.Permission.BROAD_CAST);
 			}
 		}
@@ -450,8 +459,15 @@ public final class MusicService extends Service {
 
 	@Override
 	public IBinder onBind(Intent intent) {
+		bind = true;
 		Log.d(TAG, "onBind: ");
 		return mMusicBinder;
+	}
+
+	@Override
+	public boolean onUnbind(Intent intent) {
+		bind = false;
+		return super.onUnbind(intent);
 	}
 
 	private PendingIntent buildPendingIntent(Context context, final String action, final ComponentName serviceName) {
@@ -523,6 +539,10 @@ public final class MusicService extends Service {
 						.addAlbumId(albumId)
 						.addArtistId(artistId);
 
+				if (PreferenceUtil.getDefault(this).getInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, -1) == id) {
+					mMusicItem = builder.build();
+				}
+
 				final MusicItem item = builder.build();
 
 				ItemList.musicItems.add(item);
@@ -554,16 +574,18 @@ public final class MusicService extends Service {
 
 	private void startFN() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			startForeground(mStartNotificationId, getChannelNotification(mMusicItem.get().getMusicName(), mMusicItem.get().getMusicAlbum(), ItemList.mCurrentCover, this).build());
+			startForeground(mStartNotificationId, getChannelNotification(mMusicItem.getMusicName(), mMusicItem.getMusicAlbum(), ItemList.mCurrentCover, this).build());
 		} else {
-			startForeground(mStartNotificationId, getNotification25(mMusicItem.get().getMusicName(), mMusicItem.get().getMusicAlbum(), ItemList.mCurrentCover, this).build());
+			startForeground(mStartNotificationId, getNotification25(mMusicItem.getMusicName(), mMusicItem.getMusicAlbum(), ItemList.mCurrentCover, this).build());
 		}
 	}
 
 	@Override
 	public void onDestroy() {
-		stopForeground(true);
 		MusicControl.mediaPlayer.release();
+		MusicControl.mediaPlayer = null;
+
+		stopForeground(true);
 		mIsServiceDestroyed.set(true);
 		wakeLock.release();
 		mMusicItem = null;
@@ -577,6 +599,7 @@ public final class MusicService extends Service {
 			Log.d(TAG, "onDestroy: " + e.getMessage());
 		}
 
+		Log.d(TAG, "onDestroy: done");
 		super.onDestroy();
 	}
 
@@ -587,10 +610,6 @@ public final class MusicService extends Service {
 		} else {
 			Collections.shuffle(ItemList.playOrderList, new Random(seed));
 		}
-	}
-
-	static class Config {
-
 	}
 
 	public interface PlayType {
@@ -667,20 +686,19 @@ public final class MusicService extends Service {
 			if (item == null || item.getMusicID() == -1) {
 				return;
 			}
-			ItemList.mCurrentCover = Utils.Audio.getCoverBitmapFull(serviceWeakReference.get(), mMusicItem.get().getAlbumId());
+			ItemList.mCurrentCover = Utils.Audio.getCoverBitmapFull(serviceWeakReference.get(), mMusicItem.getAlbumId());
 		}
 	}
 
 	public static class MusicControl {
-		private static final MediaPlayer mediaPlayer = new MediaPlayer();
+		private static MediaPlayer mediaPlayer = new MediaPlayer();
 
 		private static void reset(boolean saveData) {
 			/*
 			 * 记录播放信息
 			 * */
-			if (mMusicItem.get() != null && saveData) {
-				if (HAS_PLAYED) {
-					final List<Detail> infos = LitePal.where("MusicId = ?", String.valueOf(mMusicItem.get().getMusicID())).find(Detail.class);
+			if (HAS_PLAYED && mMusicItem != null && saveData) {
+				final List<Detail> infos = LitePal.where("MusicId = ?", String.valueOf(mMusicItem.getMusicID())).find(Detail.class);
 					if (infos.size() > 0) {
 						Detail detail = infos.get(0);
 						if (mediaPlayer.getCurrentPosition() < MINIMUM_PLAY_TIME) {
@@ -692,7 +710,7 @@ public final class MusicService extends Service {
 						detail.save();
 					} else {
 						Detail detail = new Detail();
-						detail.setMusicId(mMusicItem.get().getMusicID());
+						detail.setMusicId(mMusicItem.getMusicID());
 						if (mediaPlayer.getCurrentPosition() < MINIMUM_PLAY_TIME) {
 							detail.setMinimumPlayTimes(detail.getMinimumPlayTimes() + 1);
 						} else {
@@ -701,7 +719,6 @@ public final class MusicService extends Service {
 						detail.setPlayTimes(detail.getPlayTimes() + 1);
 						detail.save();
 					}
-				}
 			}
 
 			mediaPlayer.reset();
@@ -713,9 +730,9 @@ public final class MusicService extends Service {
 			HAS_PLAYED = true;
 			serviceWeakReference.get().startFN();
 			// update last played
-			if (mMusicItem.get() != null) {
+			if (mMusicItem != null) {
 				PreferenceUtil.getDefault(serviceWeakReference.get()).edit()
-						.putInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, mMusicItem.get().getMusicID()).apply();
+						.putInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, mMusicItem.getMusicID()).apply();
 			}
 		}
 
