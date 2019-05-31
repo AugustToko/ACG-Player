@@ -128,8 +128,8 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		return null;
 	}
 
-	public static void playFromUri(Context context, Uri uri) {
-		if (Data.sMusicBinder != null) {
+	public static void playFromUri(Context context, @Nullable Uri uri) {
+		if (Data.sMusicBinder != null && uri != null) {
 			List<MusicItem> songs = null;
 //
 			if (uri.getScheme() != null && uri.getAuthority() != null) {

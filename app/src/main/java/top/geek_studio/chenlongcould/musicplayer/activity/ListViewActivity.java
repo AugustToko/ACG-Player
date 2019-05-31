@@ -262,6 +262,9 @@ public final class ListViewActivity extends BaseCompatActivity {
 				default:
 			}
 			initDone = true;
+			Data.sPlayOrderListBackup.addAll(Data.sPlayOrderList);
+			Data.syncPlayOrderList(this, mMusicItemList);
+			Data.shuffleOrderListSync(this, false);
 		}
 
 	}
@@ -273,9 +276,6 @@ public final class ListViewActivity extends BaseCompatActivity {
 		mToolbar.setOnMenuItemClickListener(item -> {
 			switch (item.getItemId()) {
 				case R.id.menu_public_random: {
-					Data.sPlayOrderListBackup.addAll(Data.sPlayOrderList);
-					Data.syncPlayOrderList(this, mMusicItemList);
-					Data.shuffleOrderListSync(this, false);
 					ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
 				}
 				break;
