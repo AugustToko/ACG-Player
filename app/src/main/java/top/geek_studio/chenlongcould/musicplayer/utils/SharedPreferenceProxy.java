@@ -158,7 +158,8 @@ public class SharedPreferenceProxy implements SharedPreferences {
 					, PreferenceUtil.METHOD_QUERY_VALUE
 					, preferName
 					, input.getBundle());
-			return new OpEntry(res);
+			// FIXME: 2019/6/1 null point
+			return new OpEntry(res == null ? new Bundle() : res);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;

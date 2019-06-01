@@ -129,7 +129,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		return null;
 	}
 
-	public static void playFromUri(Context context, @Nullable Uri uri) {
+	public static void playFromUri(@NonNull Context context, @Nullable Uri uri) {
 		if (Data.sMusicBinder != null && uri != null) {
 			List<MusicItem> songs = null;
 //
@@ -199,8 +199,12 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 			//noinspection StatementWithEmptyBody
 			if (songs != null && !songs.isEmpty()) {
-				Data.sNextWillPlayItem = songs.get(0);
-				ReceiverOnMusicPlay.playNext(context);
+				try {
+					Data.sMusicBinder.setNextWillPlayItem(songs.get(0));
+					MusicService.MusicControl.next(context);
+				} catch (RemoteException e) {
+					e.printStackTrace();
+				}
 			} else {
 				//TODO the file is not listed in the media store
 			}
@@ -255,14 +259,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		final ComponentName serviceName = new ComponentName(context, MusicService.class);
 		intent.setComponent(serviceName);
 		context.startService(intent);
-	}
-
-	public static void playNext(Context context) {
-		Intent intent = new Intent();
-		intent.setComponent(new ComponentName(context.getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
-		intent.putExtra("play_type", 6);
-		intent.putExtra("args", ReceiverOnMusicPlay.TYPE_NEXT);
-		context.sendBroadcast(intent, Values.Permission.BROAD_CAST);
 	}
 
 	@Override
