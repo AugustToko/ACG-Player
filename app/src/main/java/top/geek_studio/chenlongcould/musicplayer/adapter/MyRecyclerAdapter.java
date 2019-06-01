@@ -339,32 +339,41 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 				//share
 				case Menu.FIRST + 6: {
-					Intent intent = new Intent(Intent.ACTION_SEND);
-					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-						intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(mActivity, mActivity.getApplicationContext().getPackageName(), new File(mMusicItems.get(holder.getAdapterPosition()).getMusicPath())));
-						intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-						intent.setType("audio/*");
-					} else {
-						intent.setDataAndType(Uri.fromFile(new File(mMusicItems.get(holder.getAdapterPosition()).getMusicPath())), "audio/*");
-					}
+					final File file = new File(mMusicItems.get(holder.getAdapterPosition()).getMusicPath());
+					if (file.exists()) {
+						Intent intent = new Intent(Intent.ACTION_SEND);
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+							intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(mActivity, mActivity.getApplicationContext().getPackageName(), file));
+							intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+							intent.setType("audio/*");
+						} else {
+							intent.setDataAndType(Uri.fromFile(new File(mMusicItems.get(holder.getAdapterPosition()).getMusicPath())), "audio/*");
+						}
 
-					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-					/*
-					 * by Karim Abou Zeid (kabouzeid)
-					 * */
-					try {
-						mActivity.startActivity(intent);
-					} catch (IllegalArgumentException e) {
-						// TODO the path is most likely not like /storage/emulated/0/... but something like /storage/28C7-75B0/...
-						e.printStackTrace();
-						Toast.makeText(mActivity, "Could not share this file, I'm aware of the issue.", Toast.LENGTH_SHORT).show();
+						/*
+						 * by Karim Abou Zeid (kabouzeid)
+						 * */
+						try {
+							mActivity.startActivity(intent);
+						} catch (IllegalArgumentException e) {
+							// TODO the path is most likely not like /storage/emulated/0/... but something like /storage/28C7-75B0/...
+							e.printStackTrace();
+							Toast.makeText(mActivity, "Could not share this file, I'm aware of the issue.", Toast.LENGTH_SHORT).show();
+						}
 					}
 				}
 				break;
 
 				case Menu.FIRST + 7: {
 					MusicUtil.dropToTrash(mActivity, mMusicItems.get(holder.getAdapterPosition()));
+				}
+				break;
+
+				case Menu.FIRST + 8: {
+					MusicUtil.addToBlackList(mMusicItems.get(holder.getAdapterPosition()));
+					MainActivity.sendEmptyMessage(MainActivity.NotLeakHandler.RELOAD_MUSIC_ITEMS);
 				}
 				break;
 				default:
@@ -890,6 +899,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 			mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, resources.getString(R.string.more_info));
 			mMenu.add(Menu.NONE, Menu.FIRST + 6, 0, resources.getString(R.string.share));
 			mMenu.add(Menu.NONE, Menu.FIRST + 7, 0, resources.getString(R.string.drop_to_trash_can));
+			mMenu.add(Menu.NONE, Menu.FIRST + 8, 0, resources.getString(R.string.add_to_black_list));
 
 			MenuInflater menuInflater = mActivity.getMenuInflater();
 			menuInflater.inflate(R.menu.recycler_song_item_menu, mMenu);

@@ -43,6 +43,8 @@ public final class App extends Application {
 	private static final String PKG_1 = "top.geek_studio.chenlongcould.musicplayer";
 	
 	private static final String PKG_SUFFIX = ".Common";
+
+	public static final int BLACK_LIST_VERSION = 1;
 	
 	private ShortcutManager mShortcutManager;
 	
@@ -125,9 +127,6 @@ public final class App extends Application {
 			if (level == TRIM_MEMORY_MODERATE) {
 				Data.S_TRASH_CAN_LIST.clear();
 				
-				Data.sAlbumItems.clear();
-				
-				Data.sArtistItems.clear();
 			}
 			
 			GlideApp.get(this).trimMemory(level);

@@ -17,10 +17,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
+import org.litepal.LitePal;
+import org.litepal.LitePalDB;
 import top.geek_studio.chenlongcould.geeklibrary.Private;
+import top.geek_studio.chenlongcould.musicplayer.App;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
 import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
@@ -28,6 +32,7 @@ import top.geek_studio.chenlongcould.musicplayer.model.Playlist;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -367,6 +372,105 @@ public class MusicUtil {
 //        return lyrics;
 //    }
 
+	@NonNull
+	public static MusicItem getSongFromCursorImpl(@NonNull Cursor cursor) {
+		final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+		final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+		final String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+		final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+		final String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+		final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+		final int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
+		final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+		final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
+		final int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+		final int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID));
+
+		final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
+				.musicAlbum(albumName)
+				.addTime(addTime)
+				.artist(artist)
+				.duration(duration)
+				.mimeName(mimeType)
+				.size(size)
+				.addAlbumId(albumId)
+				.addArtistId(artistId);
+		return builder.build();
+	}
+
+	public static void deleteTracks(@NonNull final Context context, @NonNull final List<MusicItem> songs) {
+		final String[] projection = new String[]{
+				BaseColumns._ID, MediaStore.MediaColumns.DATA
+		};
+		final StringBuilder selection = new StringBuilder();
+		selection.append(BaseColumns._ID + " IN (");
+		for (int i = 0; i < songs.size(); i++) {
+			selection.append(songs.get(i).getMusicID());
+			if (i < songs.size() - 1) {
+				selection.append(",");
+			}
+		}
+		selection.append(")");
+
+		try {
+			final Cursor cursor = context.getContentResolver().query(
+					MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, selection.toString(),
+					null, null);
+			if (cursor != null) {
+				// Step 1: Remove selected tracks from the current playlist, as well
+				// as from the album art cache
+				cursor.moveToFirst();
+				while (!cursor.isAfterLast()) {
+					final int id = cursor.getInt(0);
+					Cursor cursor1 = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+							null, MediaStore.Audio.AudioColumns._ID + "=?", new String[]{String.valueOf(id)}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+					List<MusicItem> items = new ArrayList<>();
+					if (cursor1 != null && cursor1.moveToFirst()) {
+						do {
+							items.add(MusicUtil.getSongFromCursorImpl(cursor1));
+						} while (cursor1.moveToNext());
+					}
+
+					for (final MusicItem item : items) {
+						Data.sMusicItems.remove(item);
+						Data.sMusicItemsBackUp.remove(item);
+						Data.sPlayOrderList.remove(item);
+						Data.sPlayOrderListBackup.remove(item);
+
+						Data.syncPlayOrderList(context);
+					}
+				}
+
+				// Step 2: Remove selected tracks from the database
+				context.getContentResolver().delete(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+						selection.toString(), null);
+
+				// Step 3: Remove files from card
+				cursor.moveToFirst();
+				while (!cursor.isAfterLast()) {
+					final String name = cursor.getString(1);
+					try { // File.delete can throw a security exception
+						final File f = new File(name);
+						if (!f.delete()) {
+							// I'm not sure if we'd ever get here (deletion would
+							// have to fail, but no exception thrown)
+							Log.e("MusicUtils", "Failed to delete file " + name);
+						}
+						cursor.moveToNext();
+					} catch (@NonNull final SecurityException ex) {
+						cursor.moveToNext();
+					} catch (NullPointerException e) {
+						Log.e("MusicUtils", "Failed to find file " + name);
+					}
+				}
+				cursor.close();
+			}
+			context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
+//			Toast.makeText(context, context.getString(R.string.deleted_x_songs, songs.size()), Toast.LENGTH_SHORT).show();
+		} catch (SecurityException ignored) {
+		}
+	}
+
 	public static void dropToTrash(@NonNull Context context, @Nullable MusicItem item) {
 		if (item == null) return;
 
@@ -395,5 +499,27 @@ public class MusicUtil {
 		} else {
 			Data.S_TRASH_CAN_LIST.add(item);
 		}
+	}
+
+	public synchronized static void addToBlackList(@Nullable MusicItem item) {
+		if (item == null || item.getMusicID() == -1) return;
+		final List<MusicItem> items = new ArrayList<>();
+		items.add(item);
+		addToBlackList(items);
+	}
+
+	public synchronized static void addToBlackList(@Nullable List<MusicItem> items) {
+		if (items == null || items.size() == 0) return;
+
+		final LitePalDB blackList = new LitePalDB("BlackList", App.BLACK_LIST_VERSION);
+		blackList.addClassName(MyBlackPath.class.getName());
+		LitePal.use(blackList);
+
+		for (final MusicItem item : items) {
+			final MyBlackPath blackPath = new MyBlackPath();
+			blackPath.setDirPath(item.getMusicPath());
+			blackPath.save();
+		}
+		LitePal.useDefault();
 	}
 }

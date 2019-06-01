@@ -21,6 +21,7 @@ import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
+import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.io.File;
@@ -148,7 +149,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 						List<MusicItem> items = new ArrayList<>();
 						if (cursor != null && cursor.moveToFirst()) {
 							do {
-								items.add(getSongFromCursorImpl(cursor));
+								items.add(MusicUtil.getSongFromCursorImpl(cursor));
 							} while (cursor.moveToNext());
 						}
 
@@ -184,7 +185,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 					List<MusicItem> items = new ArrayList<>();
 					if (cursor != null && cursor.moveToFirst()) {
 						do {
-							items.add(getSongFromCursorImpl(cursor));
+							items.add(MusicUtil.getSongFromCursorImpl(cursor));
 						} while (cursor.moveToNext());
 					}
 
@@ -204,32 +205,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 				//TODO the file is not listed in the media store
 			}
 		}
-	}
-
-	@NonNull
-	private static MusicItem getSongFromCursorImpl(@NonNull Cursor cursor) {
-		final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-		final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-		final String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
-		final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-		final String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
-		final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
-		final int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-		final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-		final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
-		final int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
-		final int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID));
-
-		final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
-				.musicAlbum(albumName)
-				.addTime(addTime)
-				.artist(artist)
-				.duration(duration)
-				.mimeName(mimeType)
-				.size(size)
-				.addAlbumId(albumId)
-				.addArtistId(artistId);
-		return builder.build();
 	}
 
 	@Nullable

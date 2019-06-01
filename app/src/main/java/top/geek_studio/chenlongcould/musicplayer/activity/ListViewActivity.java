@@ -86,6 +86,8 @@ public final class ListViewActivity extends BaseCompatActivity {
 
 		mType = getIntent().getStringExtra(IntentTag.INTENT_START_BY);
 
+		Data.sPlayOrderListBackup.addAll(Data.sPlayOrderList);
+
 		if (mType != null) {
 			switch (mType) {
 				case FragmentType.ACTION_ADD_RECENT: {
@@ -100,6 +102,9 @@ public final class ListViewActivity extends BaseCompatActivity {
 							return Long.compare(o1.getAddTime(), o2.getAddTime());
 						});
 					}
+
+					Data.syncPlayOrderList(this, mMusicItemList);
+					Data.shuffleOrderListSync(this, false);
 
 					adapter = new MyRecyclerAdapter(this, mMusicItemList, new MyRecyclerAdapter.Config(0, false));
 					mRecyclerView.setAdapter(adapter);
@@ -219,6 +224,9 @@ public final class ListViewActivity extends BaseCompatActivity {
 
 							} while (cursor.moveToNext());
 							cursor.close();
+
+							Data.syncPlayOrderList(this, mMusicItemList);
+							Data.shuffleOrderListSync(this, false);
 						}
 
 						observableEmitter.onNext(0);
@@ -236,6 +244,10 @@ public final class ListViewActivity extends BaseCompatActivity {
 				case FragmentType.ACTION_HISTORY: {
 					mToolbar.setTitle(getString(R.string.history));
 					mMusicItemList.addAll(Data.sHistoryPlayed);
+
+					Data.syncPlayOrderList(this, mMusicItemList);
+					Data.shuffleOrderListSync(this, false);
+
 					adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList, new MyRecyclerAdapter.Config(0, false));
 					mRecyclerView.setAdapter(adapter);
 				}
@@ -255,16 +267,18 @@ public final class ListViewActivity extends BaseCompatActivity {
 
 					mToolbar.setTitle(getString(R.string.trash_can));
 					mMusicItemList.addAll(Data.S_TRASH_CAN_LIST);
+
+					Data.syncPlayOrderList(this, mMusicItemList);
+					Data.shuffleOrderListSync(this, false);
+
 					adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList, new MyRecyclerAdapter.Config(0, false));
 					mRecyclerView.setAdapter(adapter);
+
 				}
 				break;
 				default:
 			}
 			initDone = true;
-			Data.sPlayOrderListBackup.addAll(Data.sPlayOrderList);
-			Data.syncPlayOrderList(this, mMusicItemList);
-			Data.shuffleOrderListSync(this, false);
 		}
 
 	}
@@ -301,6 +315,7 @@ public final class ListViewActivity extends BaseCompatActivity {
 		mRecyclerView = null;
 		mMusicItemList.clear();
 
+		// restore items
 		Data.syncPlayOrderList(this, Data.sPlayOrderListBackup);
 		super.onDestroy();
 	}

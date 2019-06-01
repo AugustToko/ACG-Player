@@ -202,30 +202,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	private HandlerThread mHandlerThread;
 
 	/**
-	 * clearData data
-	 */
-	public static void clearData() {
-		Data.sMusicBinder = null;
-
-		if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
-			Data.getCurrentCover().recycle();
-		}
-
-		App.clearDisposable();
-
-		//lists
-		Data.sPlayOrderList.clear();
-		Data.sMusicItems.clear();
-		Data.sAlbumItems.clear();
-		Data.sArtistItems.clear();
-		Data.sMusicItemsBackUp.clear();
-		Data.sAlbumItemsBackUp.clear();
-		Data.sArtistItemsBackUp.clear();
-		Data.sHistoryPlayed.clear();
-		Data.S_TRASH_CAN_LIST.clear();
-	}
-
-	/**
 	 * onXXX
 	 * At Override
 	 */
@@ -506,29 +482,34 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					return false;
 				} else {
 
+					// skip short
 					final boolean skipShort = preferences
 							.getBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
 
-					final LitePalDB blackList = new LitePalDB("BlackList", 1);
+					// black list
+					final LitePalDB blackList = new LitePalDB("BlackList", App.BLACK_LIST_VERSION);
 					blackList.addClassName(MyBlackPath.class.getName());
 					LitePal.use(blackList);
 					List<MyBlackPath> lists = LitePal.findAll(MyBlackPath.class);
 					LitePal.useDefault();
 
+					// music that you last played
 					int lastId = preferences.getInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, -1);
 
 					do {
 						final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+
 						boolean skip = false;
 
 						for (int i = 0; i < lists.size(); i++) {
-							MyBlackPath bp = lists.get(i);
-							if (path.contains(bp.getDirPath())) {
+							final MyBlackPath bp = lists.get(i);
+
+							if (path.contains(bp.getDirPath()) || bp.getDirPath().equals(path)) {
 								skip = true;
 								lists.remove(bp);
 								break;
 							}
-							lists.remove(bp);
+
 						}
 
 						if (skip) {
@@ -569,8 +550,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 						final MusicItem item = builder.build();
 						Data.sMusicItems.add(item);
 						Data.sMusicItemsBackUp.add(item);
-						Data.sPlayOrderList.add(item);
-						Data.sPlayOrderListBackup.add(item);
 
 					}
 					while (cursor.moveToNext());
@@ -593,6 +572,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			if (!loadDataSource()) {
 				emitter.onNext(-1);
 			} else {
+				Data.sPlayOrderList.addAll(Data.sMusicItems);
+				Data.sPlayOrderListBackup.addAll(Data.sMusicItems);
 				emitter.onNext(0);
 			}
 		}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Integer>() {
@@ -608,9 +589,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					builder.setTitle("Error")
 							.setMessage("Can not find any music or the cursor is null, Will exit.")
 							.setCancelable(false)
-							.setNegativeButton("OK", (dialog, which) -> {
-								dialog.cancel();
-							});
+							.setNegativeButton("OK", (dialog, which) -> dialog.cancel());
 					builder.show();
 					return;
 				}
@@ -637,6 +616,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 			@Override
 			public final void onComplete() {
+
 			}
 		});
 
@@ -660,7 +640,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				Data.sMusicItems.clear();
 
 				//algorithm
-				for (MusicItem item : Data.sMusicItemsBackUp) {
+				for (final MusicItem item : Data.sMusicItemsBackUp) {
 					final String name = item.getMusicName();
 					if (name.contains(filterStr.toLowerCase()) || name.contains(filterStr.toUpperCase())) {
 						Data.sMusicItems.add(item);
@@ -673,17 +653,17 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 		if (tabOrder.charAt(Values.CurrentData.CURRENT_PAGE_INDEX) == '2') {
 			if (TextUtils.isEmpty(filterStr)) {
-				Data.sAlbumItems.clear();
-				Data.sAlbumItems.addAll(Data.sAlbumItemsBackUp);
+				albumListFragment.getAlbumItemList().clear();
+				albumListFragment.getAlbumItemList().addAll(albumListFragment.getAlbumItemListBackup());
 				albumListFragment.getAdapter().notifyDataSetChanged();
 			} else {
-				Data.sAlbumItems.clear();
+				albumListFragment.getAlbumItemList().clear();
 
 				//algorithm
-				for (AlbumItem item : Data.sAlbumItemsBackUp) {
+				for (final AlbumItem item : albumListFragment.getAlbumItemListBackup()) {
 					final String name = item.getAlbumName();
 					if (name.contains(filterStr.toLowerCase()) || name.contains(filterStr.toUpperCase())) {
-						Data.sAlbumItems.add(item);
+						albumListFragment.getAlbumItemList().add(item);
 					}
 				}
 
@@ -694,17 +674,17 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		//artist
 		if (tabOrder.charAt(Values.CurrentData.CURRENT_PAGE_INDEX) == '3') {
 			if (TextUtils.isEmpty(filterStr)) {
-				Data.sArtistItems.clear();
-				Data.sArtistItems.addAll(Data.sArtistItemsBackUp);
+				artistListFragment.getArtistItemList().clear();
+				artistListFragment.getArtistItemList().addAll(artistListFragment.getArtistItemListBackup());
 				artistListFragment.getAdapter().notifyDataSetChanged();
 			} else {
-				Data.sArtistItems.clear();
+				artistListFragment.getArtistItemList().clear();
 
 				//algorithm
-				for (ArtistItem item : Data.sArtistItemsBackUp) {
+				for (ArtistItem item : artistListFragment.getArtistItemListBackup()) {
 					String name = item.getArtistName();
 					if (name.contains(filterStr.toLowerCase()) || name.contains(filterStr.toUpperCase())) {
-						Data.sArtistItems.add(item);
+						artistListFragment.getArtistItemList().add(item);
 					}
 				}
 
@@ -1002,7 +982,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), true, true);
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true, false);
-					setSubtitle(Data.sAlbumItems.size() + " Albums");
+					setSubtitle(albumListFragment.getAlbumItemList().size() + " Albums");
 				}
 
 				if (order.charAt(i) == '3') {
@@ -1011,7 +991,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), true, true);
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true, false);
-					setSubtitle(Data.sArtistItems.size() + " Artists");
+					setSubtitle(artistListFragment.getArtistItemList().size() + " Artists");
 				}
 
 				//playlist
@@ -1076,7 +1056,21 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		} catch (Exception e) {
 			Log.d(TAG, "fullExit: " + e.getMessage());
 		}
-		clearData();
+		Data.sMusicBinder = null;
+
+		if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
+			Data.getCurrentCover().recycle();
+		}
+
+		App.clearDisposable();
+
+		//lists
+		Data.sPlayOrderList.clear();
+		Data.sMusicItems.clear();
+		Data.sMusicItemsBackUp.clear();
+		Data.sHistoryPlayed.clear();
+		Data.S_TRASH_CAN_LIST.clear();
+
 		finish();
 	}
 
@@ -1421,6 +1415,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		public static final int LOAD_INTO_NAV_IMAGE = 5003;
 		public static final int SET_SLIDE_TOUCH_ENABLE = 5004;
 		public static final int SET_SLIDE_TOUCH_DISABLE = 5005;
+		public static final byte RELOAD_MUSIC_ITEMS = 127;
 
 		private WeakReference<MainActivity> mWeakReference;
 
@@ -1461,6 +1456,12 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				case SET_SLIDE_TOUCH_DISABLE: {
 					mWeakReference.get().getMainBinding().slidingLayout.setTouchEnabled(false);
 				}
+				break;
+
+				case RELOAD_MUSIC_ITEMS: {
+					mWeakReference.get().runOnUiThread(() -> mWeakReference.get().musicListFragment.reloadData());
+				}
+				break;
 				default:
 			}
 		}

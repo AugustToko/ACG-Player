@@ -28,6 +28,9 @@ import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter2Artis
 import top.geek_studio.chenlongcould.musicplayer.model.ArtistItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author chenlongcould
  */
@@ -40,6 +43,10 @@ public final class ArtistListFragment extends BaseFragment {
 	private MainActivity mMainActivity;
 
 	private MyRecyclerAdapter2ArtistList mAdapter2ArtistList;
+
+	private List<ArtistItem> artistItemList = new ArrayList<>();
+
+	private List<ArtistItem> artistItemListBackup = new ArrayList<>();
 
 	public static ArtistListFragment newInstance() {
 		return new ArtistListFragment();
@@ -89,13 +96,13 @@ public final class ArtistListFragment extends BaseFragment {
 			}
 		}
 
-		mAdapter2ArtistList = new MyRecyclerAdapter2ArtistList(mMainActivity, Data.sArtistItems, type);
+		mAdapter2ArtistList = new MyRecyclerAdapter2ArtistList(mMainActivity, artistItemList, type);
 		mRecyclerView.setAdapter(mAdapter2ArtistList);
 	}
 
 	private void initArtistData() {
 		Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
-			if (Data.sArtistItems.size() == 0) {
+			if (artistItemList.size() == 0) {
 				Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, null, null, null, null);
 				if (cursor != null) {
 					cursor.moveToFirst();
@@ -104,8 +111,8 @@ public final class ArtistListFragment extends BaseFragment {
 						String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
 						String albumId = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID));
 						final ArtistItem artistItem = new ArtistItem(albumName, Integer.parseInt(albumId));
-						Data.sArtistItems.add(artistItem);
-						Data.sArtistItemsBackUp.add(artistItem);
+						artistItemList.add(artistItem);
+						artistItemListBackup.add(artistItem);
 					} while (cursor.moveToNext());
 
 					cursor.close();
@@ -144,6 +151,14 @@ public final class ArtistListFragment extends BaseFragment {
 		return mAdapter2ArtistList;
 	}
 
+	public List<ArtistItem> getArtistItemList() {
+		return artistItemList;
+	}
+
+	public List<ArtistItem> getArtistItemListBackup() {
+		return artistItemListBackup;
+	}
+
 	@Override
 	protected void setFragmentType(FragmentType fragmentType) {
 		fragmentType = FragmentType.ARTIST_FRAGMENT;
@@ -151,8 +166,7 @@ public final class ArtistListFragment extends BaseFragment {
 
 	@Override
 	public void reloadData() {
-		Data.sArtistItems.clear();
-		Data.sArtistItemsBackUp.clear();
+		artistItemList.clear();
 		initArtistData();
 	}
 }

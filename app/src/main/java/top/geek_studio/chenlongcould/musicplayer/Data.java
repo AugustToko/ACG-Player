@@ -13,11 +13,8 @@ import io.reactivex.disposables.Disposable;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.geeklibrary.recycler_tools.RecycleViewDivider;
 import top.geek_studio.chenlongcould.geeklibrary.theme.Theme;
-import top.geek_studio.chenlongcould.musicplayer.activity.CarViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.MyHeadSetPlugReceiver;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
-import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
-import top.geek_studio.chenlongcould.musicplayer.model.ArtistItem;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
 
@@ -41,26 +38,21 @@ public final class Data {
 
 	public final static SimpleDateFormat S_SIMPLE_DATE_FORMAT = new SimpleDateFormat("mm:ss", Locale.CHINESE);
 	public final static SimpleDateFormat S_SIMPLE_DATE_FORMAT_FILE = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINESE);
+
+	private static final String TAG = "Data";
+
 	public volatile static boolean HAS_BIND = false;
 	/**
 	 * 检测app打开后, 是否播放过音乐 (如果没, 默认点击播放按钮为快速随机播放)
 	 */
 	public volatile static boolean HAS_PLAYED = false;
+
 	public static ArrayList<Disposable> sDisposables = new ArrayList<>();
 
-	/**
-	 * data
-	 */
 	public static List<MusicItem> sMusicItems = new ArrayList<>();
 	public static List<MusicItem> sMusicItemsBackUp = new ArrayList<>();
-	@Deprecated
-	public static CarViewActivity sCarViewActivity = null;
-	public static List<AlbumItem> sAlbumItems = new ArrayList<>();
-	public static List<AlbumItem> sAlbumItemsBackUp = new ArrayList<>();
 
 	public static List<MusicItem> sPlayOrderList = new ArrayList<>();
-
-	public static Random random = new Random();
 
 	public static void syncPlayOrderList(final Context context, final List<MusicItem> items) {
 		Data.sPlayOrderList.clear();
@@ -68,6 +60,7 @@ public final class Data {
 
 		ReceiverOnMusicPlay.startService(context, MusicService.ServiceActions.ACTION_CLEAR_ITEMS);
 
+		// TODO: 2019/5/31 性能问题
 		for (MusicItem item : Data.sPlayOrderList) {
 			try {
 				Data.sMusicBinder.addToOrderList(item);
@@ -75,7 +68,19 @@ public final class Data {
 				e.printStackTrace();
 			}
 		}
+	}
 
+	public static void syncPlayOrderList(final Context context) {
+		ReceiverOnMusicPlay.startService(context, MusicService.ServiceActions.ACTION_CLEAR_ITEMS);
+
+		// TODO: 2019/5/31 性能问题
+		for (final MusicItem item : Data.sPlayOrderList) {
+			try {
+				Data.sMusicBinder.addToOrderList(item);
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public static int getCurrentIndex() {
@@ -110,34 +115,32 @@ public final class Data {
 	 * for {@link top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity}
 	 */
 	public static List<MusicItem> sPlayOrderListBackup = new ArrayList<>();
+
 	public static List<PlayListItem> sPlayListItems = new ArrayList<>();
-	public static List<ArtistItem> sArtistItems = new ArrayList<>();
-	public static List<ArtistItem> sArtistItemsBackUp = new ArrayList<>();
+
 	/**
 	 * nextWillPlay
 	 * def null
 	 */
 	public static MusicItem sNextWillPlayItem = null;
+
 	public static Theme sTheme = null;
+
 	/**
 	 * sCurrent DATA
 	 */
 	public static MusicItem sCurrentMusicItem = new MusicItem.Builder(-1, "null", "null").build();
 
 	public static BlurTransformation sBlurTransformation = new BlurTransformation(20, 30);
+
 	public static BlurTransformation sBlurTransformationCarView = new BlurTransformation(5, 10);
+
 	public static MyHeadSetPlugReceiver mMyHeadSetPlugReceiver = new MyHeadSetPlugReceiver();
+
 	/**
 	 * public static MusicService.MusicBinder sMusicBinder;
 	 */
 	public static IMuiscService sMusicBinder;
-
-	public static long shuffleList(final List<MusicItem> items) {
-		long seed = new Random().nextLong();
-		Random random = new Random(seed);
-		Collections.shuffle(items, random);
-		return seed;
-	}
 
 	/**
 	 * save temp bitmap

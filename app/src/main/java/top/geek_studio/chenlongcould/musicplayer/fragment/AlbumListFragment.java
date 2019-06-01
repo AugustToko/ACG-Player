@@ -27,6 +27,9 @@ import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter2AlbumList;
 import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author chenlongcould
  */
@@ -40,6 +43,10 @@ public final class AlbumListFragment extends BaseFragment {
 
 	private MyRecyclerAdapter2AlbumList mAdapter2AlbumListAdapter;
 
+	private List<AlbumItem> albumItemList = new ArrayList<>();
+
+	private List<AlbumItem> albumItemListBackup = new ArrayList<>();
+
 	public static AlbumListFragment newInstance() {
 		return new AlbumListFragment();
 	}
@@ -51,8 +58,7 @@ public final class AlbumListFragment extends BaseFragment {
 
 	@Override
 	public void reloadData() {
-		Data.sAlbumItems.clear();
-		Data.sAlbumItemsBackUp.clear();
+		albumItemList.clear();
 		initAlbumData();
 	}
 
@@ -73,7 +79,7 @@ public final class AlbumListFragment extends BaseFragment {
 	private void initAlbumData() {
 
 		Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
-			if (Data.sAlbumItems.size() == 0) {
+			if (albumItemList.size() == 0) {
 				Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null, null, null, null);
 				if (cursor != null) {
 					cursor.moveToFirst();
@@ -83,8 +89,8 @@ public final class AlbumListFragment extends BaseFragment {
 						String albumId = cursor.getString(cursor.getColumnIndexOrThrow("_id"));
 						String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
 						final AlbumItem albumItem = new AlbumItem(albumName, Integer.parseInt(albumId), artist);
-						Data.sAlbumItems.add(albumItem);
-						Data.sAlbumItemsBackUp.add(albumItem);
+						albumItemList.add(albumItem);
+						albumItemListBackup.add(albumItem);
 					} while (cursor.moveToNext());
 
 					cursor.close();
@@ -147,7 +153,8 @@ public final class AlbumListFragment extends BaseFragment {
 			default:
 		}
 
-		mAdapter2AlbumListAdapter = new MyRecyclerAdapter2AlbumList(mMainActivity, Data.sAlbumItems, type);
+		mAdapter2AlbumListAdapter = new MyRecyclerAdapter2AlbumList(mMainActivity, albumItemList, type);
+
 		mRecyclerView.setAdapter(mAdapter2AlbumListAdapter);
 	}
 
@@ -159,4 +166,11 @@ public final class AlbumListFragment extends BaseFragment {
 		return mAdapter2AlbumListAdapter;
 	}
 
+	public List<AlbumItem> getAlbumItemList() {
+		return albumItemList;
+	}
+
+	public List<AlbumItem> getAlbumItemListBackup() {
+		return albumItemListBackup;
+	}
 }

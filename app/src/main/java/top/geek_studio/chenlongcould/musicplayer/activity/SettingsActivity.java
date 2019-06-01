@@ -408,11 +408,11 @@ public final class SettingsActivity extends BaseCompatActivity {
 		});
 
 		mSettingsBinding.itemBlacklist.setOnClickListener(v -> {
-			LitePalDB blackList = new LitePalDB("BlackList", 1);
+			LitePalDB blackList = new LitePalDB("BlackList", App.BLACK_LIST_VERSION);
 			blackList.addClassName(MyBlackPath.class.getName());
 			LitePal.use(blackList);
 
-			ArrayList<String> data = new ArrayList<>();
+			final ArrayList<String> data = new ArrayList<>();
 			List<MyBlackPath> lists = LitePal.findAll(MyBlackPath.class);
 			for (MyBlackPath path : lists) {
 				data.add(path.getDirPath());
@@ -467,16 +467,16 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 				List<String> pathList = new ArrayList<>();
 
-				//sort
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-					pathList.sort(String::compareTo);
-				}
-
 				for (File file : sdcard.listFiles()) {
 					if (file.isFile()) {
 						continue;
 					}
 					pathList.add(file.getName());
+				}
+
+				//sort
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+					pathList.sort(String::compareTo);
 				}
 
 				ArrayAdapter<String> pathAdapter = new ArrayAdapter<>(SettingsActivity.this, android.R.layout.simple_list_item_1, pathList);

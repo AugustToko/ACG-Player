@@ -22,7 +22,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragmentLandSpace;
@@ -111,8 +110,6 @@ public final class CarViewActivity extends BaseCompatActivity {
 
 		setContentView(R.layout.activity_car_view);
 
-		Data.sCarViewActivity = this;
-
 		mVisible = true;
 		mContentView = findViewById(R.id.fullscreen_content);
 
@@ -177,7 +174,6 @@ public final class CarViewActivity extends BaseCompatActivity {
 		getWindow().setBackgroundDrawable(null);
 
 		backPressed = true;
-		Data.sCarViewActivity = null;
 		Toast.makeText(this, "Exiting", Toast.LENGTH_SHORT).show();
 		Values.CurrentData.CURRENT_UI_MODE = Values.UIMODE.MODE_COMMON;
 
