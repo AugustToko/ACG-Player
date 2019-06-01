@@ -355,6 +355,14 @@ public final class MusicService extends Service {
 				updateUI.putExtra("play_type", flashMode);
 				updateUI.putExtra("item", mMusicItem);
 				sendBroadcast(updateUI, Values.Permission.BROAD_CAST);
+
+				if (flashMode != ReceiverOnMusicPlay.PAUSE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+					Intent tile = new Intent(this, MyTileService.class);
+					tile.setAction(MyTileService.ACTION_SET_TITLE);
+					tile.putExtra("title", mMusicItem.getMusicName());
+					startService(tile);
+				}
+
 			}
 		}
 

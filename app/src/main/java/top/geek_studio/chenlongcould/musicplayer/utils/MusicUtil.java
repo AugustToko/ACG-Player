@@ -24,6 +24,7 @@ import top.geek_studio.chenlongcould.musicplayer.App;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
 import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
@@ -42,6 +43,116 @@ import java.util.Locale;
 public class MusicUtil {
 
 	private static final String TAG = "MusicUtil";
+
+	public static boolean loadDataSource(final Context context) {
+		//noinspection StatementWithEmptyBody
+		if (Data.sMusicItems.isEmpty()) {
+
+			SharedPreferences preferences = PreferenceUtil.getDefault(context);
+
+			/*---------------------- init Data!!!! -------------------*/
+			final Cursor cursor = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+			if (cursor != null && cursor.moveToFirst()) {
+				//没有歌曲直接退出app
+				if (cursor.getCount() == 0) {
+					return false;
+				} else {
+
+					// skip short
+					final boolean skipShort = preferences
+							.getBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
+
+					// black list
+					final LitePalDB blackList = new LitePalDB("BlackList", App.BLACK_LIST_VERSION);
+					blackList.addClassName(MyBlackPath.class.getName());
+					LitePal.use(blackList);
+					List<MyBlackPath> lists = LitePal.findAll(MyBlackPath.class);
+					LitePal.useDefault();
+
+					// music that you last played
+					int lastId = preferences.getInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, -1);
+
+					do {
+						final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+
+						boolean skip = false;
+
+						for (int i = 0; i < lists.size(); i++) {
+							final MyBlackPath bp = lists.get(i);
+
+							if (path.contains(bp.getDirPath()) || bp.getDirPath().equals(path)) {
+								skip = true;
+								lists.remove(bp);
+								break;
+							}
+
+						}
+
+						if (skip) {
+							Log.d(TAG, "loadData: skip the song that in the blacklist");
+							continue;
+						}
+
+						final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+						if (skipShort && duration <= MainActivity.DEFAULT_SHORT_DURATION) {
+							Log.d(TAG, "loadDataSource: the music-file duration is " + duration + " (too short), skip...");
+							continue;
+						}
+
+						final String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+						final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+						final String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+						final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+						final int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
+						final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+						final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
+						final int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+						final int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID));
+
+						final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
+								.musicAlbum(albumName)
+								.addTime(addTime)
+								.artist(artist)
+								.duration(duration)
+								.mimeName(mimeType)
+								.size(size)
+								.addAlbumId(albumId)
+								.addArtistId(artistId);
+
+						if (lastId == id) {
+							Data.sCurrentMusicItem = builder.build();
+						}
+
+						final MusicItem item = builder.build();
+						Data.sMusicItems.add(item);
+						Data.sMusicItemsBackUp.add(item);
+
+					}
+					while (cursor.moveToNext());
+					cursor.close();
+
+					Log.d(TAG, "loadDataSource: done");
+				}
+			} else {
+				//cursor null or getCount == 0
+				return false;
+			}
+		} else {
+			// already have data
+		}
+		return true;
+	}
+
+
+
+
+
+
+
+
+
+
+
 
 	public static Uri getMediaStoreAlbumCoverUri(int albumId) {
 		final Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");

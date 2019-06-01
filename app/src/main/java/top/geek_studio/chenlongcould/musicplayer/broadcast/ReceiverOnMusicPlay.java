@@ -36,21 +36,10 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 	public static final String TAG = "ReceiverOnMusicPlay";
 
 	public static final byte FLASH_UI_COMMON = 127;
-
-	public static final byte SHUFFLE_PLAY = 90;
-	public static final byte CASE_TYPE_ITEM_CLICK = 15;
 	public static final byte PLAY = 100;
 	public static final byte PAUSE = 101;
-	public static final byte RECEIVE_TYPE_COMMON = 6;
-
 
 	public static final String INTENT_PLAY_TYPE = "play_type";
-
-	public static final String INTENT_ARGS = "args";
-
-	public static final String TYPE_NEXT = "next";
-	public static final String TYPE_PREVIOUS = "previous";
-	public static final String TYPE_SLIDE = "slide";
 
 	////////////////////////MEDIA CONTROL/////////////////////////////
 

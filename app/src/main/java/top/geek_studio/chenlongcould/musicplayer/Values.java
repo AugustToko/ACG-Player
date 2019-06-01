@@ -14,14 +14,11 @@ public interface Values {
 	String TAG_UNIVERSAL_ONE = "TAG_UNIVERSAL_ONE";
 	String TYPE_RANDOM = "RANDOM";
 	String TYPE_COMMON = "COMMON";
-	String TYPE_REPEAT = "REPEAT";
-	String TYPE_REPEAT_ONE = "REPEAT_ONE";
 
 	/**
 	 * permission RequestCode
 	 */
 	byte REQUEST_WRITE_EXTERNAL_STORAGE = 60;
-	byte REQUEST_WRITE_SETTINGS = 61;
 
 	byte MAX_HEIGHT_AND_WIDTH = 100;
 

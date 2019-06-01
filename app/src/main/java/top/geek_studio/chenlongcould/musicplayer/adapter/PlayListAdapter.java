@@ -70,7 +70,7 @@ public final class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.
 				
 				//del
 				case Menu.FIRST: {
-					PlayListItem listItem = mPlayListItems.get(holder.getAdapterPosition());
+					final PlayListItem listItem = mPlayListItems.get(holder.getAdapterPosition());
 					if (PlayListsUtil.doesPlaylistExist(mMainActivity, listItem.getId())) {
 						ArrayList<PlayListItem> playListItems = new ArrayList<>();
 						playListItems.add(listItem);
