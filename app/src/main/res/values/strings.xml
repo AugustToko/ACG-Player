@@ -193,4 +193,5 @@
     <string name="album_cover_by_network">Album Cover By Network</string>
     <string name="get_cover_from_network_sdcard_download_albumcovers">Get cover from network, /sdcard/DownLoad/AlbumCovers</string>
     <string name="add_to_black_list">Add to black list</string>
+    <string name="tab_add_notice">This button is used to add a TAB to the main page. You can press TAB to close the page. If you want to re-add TAB, you can click on the last \"+\" button</string>
 </resources>

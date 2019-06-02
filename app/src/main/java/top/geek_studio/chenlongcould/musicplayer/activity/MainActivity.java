@@ -816,7 +816,21 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			return true;
 		});
 
-		((LinearLayout) addTab.view).setOnClickListener(v -> popupMenu.show());
+		((LinearLayout) addTab.view).setOnClickListener(v -> {
+			if (preferences.getBoolean(Values.SharedPrefsTag.SHOW_NOTICE_ADD_TAB, true)) {
+				//show dialog
+				AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this)
+						.setTitle("About add tab")
+						.setMessage(getString(R.string.tab_add_notice))
+						.setCancelable(false)
+						.setNegativeButton("OK", (dialog, which) -> {
+							preferences.edit().putBoolean(Values.SharedPrefsTag.SHOW_NOTICE_ADD_TAB, false).apply();
+							dialog.dismiss();
+						});
+				builder.show();
+			}
+			popupMenu.show();
+		});
 
 		mMainBinding.viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
 			@Override
@@ -1178,7 +1192,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			public final void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
 				if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
 					mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-					if (Data.getCurrentCover() != null) {
+					if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
 						setStatusBarTextColor(MainActivity.this, new Palette.Builder(Data.getCurrentCover())
 								.generate().getVibrantColor(Utils.Ui.getPrimaryColor(MainActivity.this)));
 					}

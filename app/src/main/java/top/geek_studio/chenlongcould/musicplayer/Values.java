@@ -80,6 +80,7 @@ public interface Values {
 		String LAST_PLAY_MUSIC_ID = "LAST_PLAY_MUSIC_ID";
 
 		String TRASH_CAN_INFO = "TRASH_CAN_INFO";
+		String SHOW_NOTICE_ADD_TAB = "SHOW_NOTICE_ADD_TAB";
 	}
 
 	interface IntentTAG {

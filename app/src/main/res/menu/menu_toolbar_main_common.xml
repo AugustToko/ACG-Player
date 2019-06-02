@@ -1,60 +1,64 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-  ~ *************************************************************
-  ~ 文件：menu_toolbar_main_common_main_common.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月17日 17:31:46
-  ~ 上次修改时间：2019年01月17日 17:28:52
-  ~ 作者：chenlongcould
-  ~ Geek Studio
-  ~ Copyright (c) 2019
-  ~ *************************************************************
-  -->
-
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/menu_toolbar_fast_play"
-        android:icon="@drawable/ic_flash_on_white_24dp"
-        android:orderInCategory="100"
-        android:title="@string/fast_play"
-        app:showAsAction="ifRoom" />
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        >
 
     <item
-        android:id="@+id/menu_toolbar_search"
-        android:icon="@drawable/ic_search_white_24dp"
-        android:title="@string/search"
-        app:showAsAction="ifRoom" />
+            android:id="@+id/menu_toolbar_search"
+            android:icon="@drawable/ic_search_white_24dp"
+            android:title="@string/search"
+            app:showAsAction="always"
+            />
 
     <item
-        android:id="@+id/menu_toolbar_album_layout"
-        android:title="@string/album_layout">
+            android:id="@+id/menu_toolbar_fast_play"
+            android:icon="@drawable/ic_flash_on_white_24dp"
+            android:orderInCategory="100"
+            android:title="@string/fast_play"
+            app:showAsAction="ifRoom"
+            />
+
+    <item
+            android:id="@+id/menu_toolbar_album_layout"
+            android:title="@string/album_layout"
+            >
         <menu>
             <item
-                android:id="@+id/menu_toolbar_album_linear"
-                android:title="@string/linear" />
+                    android:id="@+id/menu_toolbar_album_linear"
+                    android:title="@string/linear"
+                    />
             <item
-                android:id="@+id/menu_toolbar_album_grid"
-                android:title="@string/grid" />
+                    android:id="@+id/menu_toolbar_album_grid"
+                    android:title="@string/grid"
+                    />
         </menu>
     </item>
 
     <item
             android:id="@+id/menu_toolbar_artist_layout"
-            android:title="@string/artist_layout">
+            android:title="@string/artist_layout"
+            >
         <menu>
             <item
-                android:id="@+id/menu_toolbar_artist_linear"
-                android:title="@string/linear" />
+                    android:id="@+id/menu_toolbar_artist_linear"
+                    android:title="@string/linear"
+                    />
             <item
-                android:id="@+id/menu_toolbar_artist_grid"
-                android:title="@string/grid" />
+                    android:id="@+id/menu_toolbar_artist_grid"
+                    android:title="@string/grid"
+                    />
         </menu>
     </item>
 
 
     <item
-        android:id="@+id/menu_toolbar_reload"
-        android:title="@string/reload" />
+            android:id="@+id/menu_toolbar_reload"
+            android:title="@string/reload"
+            />
 
-    <item android:id="@+id/menu_toolbar_exit"
-        android:title="@string/exit" />
+    <item
+            android:id="@+id/menu_toolbar_exit"
+            android:title="@string/exit"
+            />
 </menu>

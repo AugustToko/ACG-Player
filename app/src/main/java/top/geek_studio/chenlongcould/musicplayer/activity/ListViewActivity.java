@@ -3,6 +3,7 @@ package top.geek_studio.chenlongcould.musicplayer.activity;
 import android.database.Cursor;
 import android.os.*;
 import android.provider.MediaStore;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
@@ -342,6 +343,11 @@ public final class ListViewActivity extends BaseCompatActivity {
 	public void inflateChooseMenu() {
 		mToolbar.getMenu().clear();
 		mToolbar.inflateMenu(R.menu.menu_toolbar_main_choose);
+		mToolbar.setOnMenuItemClickListener(item -> {
+			// TODO: 2019/6/2 多选菜单
+			Toast.makeText(this, "Building...", Toast.LENGTH_SHORT).show();
+			return true;
+		});
 	}
 
 	@Override

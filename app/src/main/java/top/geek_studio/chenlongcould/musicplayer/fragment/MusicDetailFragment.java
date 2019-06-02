@@ -606,9 +606,10 @@ public final class MusicDetailFragment extends BaseFragment {
 				}
 
 				case R.id.menu_toolbar_debug: {
-
+					// none
 				}
 				break;
+
 				case R.id.menu_toolbar_trash_can: {
 					MusicUtil.dropToTrash(mMainActivity, Data.sCurrentMusicItem);
 				}
@@ -962,6 +963,7 @@ public final class MusicDetailFragment extends BaseFragment {
 
 		menu.add(Menu.NONE, Menu.FIRST + 1, 0, getString(R.string.show_album));
 		menu.add(Menu.NONE, Menu.FIRST + 2, 0, getString(R.string.show_detail));
+		menu.add(Menu.NONE, Menu.FIRST + 3, 0, getString(R.string.drop_to_trash_can));
 
 		mPopupMenu.setOnMenuItemClickListener(item -> {
 			switch (item.getItemId()) {
@@ -988,6 +990,14 @@ public final class MusicDetailFragment extends BaseFragment {
 				case Menu.FIRST + 2: {
 					AlertDialog dialog = Utils.Audio.getMusicDetailDialog(mMainActivity, Data.sCurrentMusicItem);
 					if (dialog != null) dialog.show();
+				}
+				break;
+
+				case Menu.FIRST + 3: {
+					final MusicItem target = ReceiverOnMusicPlay.getCurrentItem();
+					if (target != null) {
+						MusicUtil.dropToTrash(mMainActivity, target);
+					}
 				}
 				break;
 				default:

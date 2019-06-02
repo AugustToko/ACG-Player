@@ -366,6 +366,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 				}
 				break;
 
+				// drop to trash can
 				case Menu.FIRST + 7: {
 					MusicUtil.dropToTrash(mActivity, mMusicItems.get(holder.getAdapterPosition()));
 				}
@@ -726,6 +727,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 																		c.setAlbumArt(newPath);
 																		c.save();
 
+																		// 如果是当前歌曲，更新
 																		try {
 																			if (Data.sMusicBinder.getCurrentItem().getAlbumId() == albumId && Data.getCurrentCover() == null) {
 																				Data.setCurrentCover(BitmapFactory.decodeFile(newPath));
