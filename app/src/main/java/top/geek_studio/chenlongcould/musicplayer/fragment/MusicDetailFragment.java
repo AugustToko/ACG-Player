@@ -606,6 +606,7 @@ public final class MusicDetailFragment extends BaseFragment {
 				}
 
 				case R.id.menu_toolbar_debug: {
+
 				}
 				break;
 				case R.id.menu_toolbar_trash_can: {

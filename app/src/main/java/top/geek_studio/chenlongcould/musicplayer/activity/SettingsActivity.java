@@ -95,6 +95,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 					//set cardColor
 					setUpTaskCardColor(color);
+					setStatusBarTextColor(SettingsActivity.this, Utils.Ui.getPrimaryColor(SettingsActivity.this));
 				}
 				break;
 

@@ -6,6 +6,8 @@ import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.*;
 import android.provider.MediaStore;
@@ -214,6 +216,14 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		initFragmentData();
 
 		initView();
+
+		inflateCommonMenu();
+
+		runOnUiThread(() -> {
+			//hide
+			getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(false);
+			getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(false);
+		});
 
 		receivedIntentCheck(getIntent());
 
@@ -664,14 +674,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		mMainBinding.viewPager.setAdapter(mPagerAdapter);
 		mMainBinding.viewPager.setOffscreenPageLimit(mTitles.size() > 1 ? mTitles.size() - 1 : 1);
 
-		inflateCommonMenu();
-
-		runOnUiThread(() -> {
-			//hide
-			getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(false);
-			getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(false);
-		});
-
 		setTabLongClickListener();
 
 		final int position = mMainBinding.tabLayout.getTabCount();
@@ -1039,6 +1041,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 			@Override
 			public final void onComplete() {
+
 			}
 		});
 	}
@@ -1175,8 +1178,27 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			public final void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
 				if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
 					mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+					if (Data.getCurrentCover() != null) {
+						setStatusBarTextColor(MainActivity.this, new Palette.Builder(Data.getCurrentCover())
+								.generate().getVibrantColor(Utils.Ui.getPrimaryColor(MainActivity.this)));
+					}
 				} else if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
 					mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+
+					final Drawable drawable = mMainBinding.bgImage.getDrawable();
+					if (drawable instanceof BitmapDrawable) {
+						BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+						Bitmap bitmap = bitmapDrawable.getBitmap();
+						if (bitmap != null && !bitmap.isRecycled()) {
+							setStatusBarTextColor(MainActivity.this, new Palette.Builder(bitmap)
+									.generate().getVibrantColor(Utils.Ui.getPrimaryColor(MainActivity.this)));
+						} else {
+							setStatusBarTextColor(MainActivity.this, Utils.Ui.getPrimaryColor(MainActivity.this));
+						}
+					} else {
+						setStatusBarTextColor(MainActivity.this, Utils.Ui.getPrimaryColor(MainActivity.this));
+					}
+					Log.d(TAG, "onPanelStateChanged: COLLAPSED");
 				}
 			}
 		});
