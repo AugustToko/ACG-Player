@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.util.Log;
@@ -122,6 +123,37 @@ public final class MyTileService extends TileService {
 			getQsTile().updateTile();
 			ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_PAUSE);
 		}
+	}
+
+	@Override
+	public void onTileAdded() {
+		super.onTileAdded();
+		Tile tile = getQsTile();
+		try {
+			if (tile != null && Data.sMusicBinder.isPlayingMusic()) {
+				getQsTile().setState(Tile.STATE_ACTIVE);
+				getQsTile().setLabel(title);
+				getQsTile().setIcon(Icon.createWithResource(this, R.drawable.ic_audiotrack_24px));
+				getQsTile().updateTile();
+			}
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void onTileRemoved() {
+		super.onTileRemoved();
+	}
+
+	@Override
+	public void onStartListening() {
+		super.onStartListening();
+	}
+
+	@Override
+	public void onStopListening() {
+		super.onStopListening();
 	}
 
 	@Override

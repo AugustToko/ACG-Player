@@ -41,7 +41,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author chenlongcould
  */
-// FIXME: 2019/5/23 bugs... when broadcast dead, the action can not send
 public final class MusicService extends Service {
 
 	private static final String TAG = "MusicService";
@@ -105,6 +104,11 @@ public final class MusicService extends Service {
 		@Override
 		public void addToOrderList(MusicItem item) throws RemoteException {
 			ItemList.playOrderList.add(item);
+		}
+
+		@Override
+		public void removeFromOrderList(MusicItem item) throws RemoteException {
+			ItemList.playOrderList.remove(item);
 		}
 
 		@Override
@@ -207,7 +211,6 @@ public final class MusicService extends Service {
 			switch (action) {
 				//no ui update
 				case ServiceActions.ACTION_CLEAR_ITEMS: {
-					ItemList.musicItems.clear();
 					ItemList.playOrderList.clear();
 				}
 				break;
@@ -218,20 +221,20 @@ public final class MusicService extends Service {
 				}
 				break;
 
-				//no ui update
-				case ServiceActions.ACTION_INSERT_MUSIC: {
-					int[] musicIds = intent.getIntArrayExtra("insert_music_id");
-					if (musicIds != null && musicIds.length > 0) {
-						for (final int id : musicIds) {
-							for (final MusicItem item : ItemList.musicItems) {
-								if (item.getMusicID() == id) {
-									ItemList.playOrderList.add(ItemList.CURRENT_MUSIC_INDEX, item);
-								}
-							}
-						}
-					}
-				}
-				break;
+//				//no ui update
+//				case ServiceActions.ACTION_INSERT_MUSIC: {
+//					int[] musicIds = intent.getIntArrayExtra("insert_music_id");
+//					if (musicIds != null && musicIds.length > 0) {
+//						for (final int id : musicIds) {
+//							for (final MusicItem item : ItemList.musicItems) {
+//								if (item.getMusicID() == id) {
+//									ItemList.playOrderList.add(ItemList.CURRENT_MUSIC_INDEX, item);
+//								}
+//							}
+//						}
+//					}
+//				}
+//				break;
 
 				case ServiceActions.ACTION_PAUSE: {
 					MusicControl.pauseMusic();
@@ -485,7 +488,6 @@ public final class MusicService extends Service {
 	}
 
 	private void loadDataSource() {
-		ItemList.musicItems.clear();
 		ItemList.playOrderList.clear();
 
 		/*---------------------- init Data!!!! -------------------*/
@@ -553,7 +555,6 @@ public final class MusicService extends Service {
 
 				final MusicItem item = builder.build();
 
-				ItemList.musicItems.add(item);
 				ItemList.playOrderList.add(item);
 			}
 			while (cursor.moveToNext());
@@ -613,8 +614,7 @@ public final class MusicService extends Service {
 
 	private void shuffleList(long seed) {
 		if (seed == 0) {
-			ItemList.playOrderList.clear();
-			ItemList.playOrderList.addAll(ItemList.musicItems);
+			loadDataSource();
 		} else {
 			Collections.shuffle(ItemList.playOrderList, new Random(seed));
 		}
@@ -682,7 +682,6 @@ public final class MusicService extends Service {
 
 	private static class ItemList {
 		static int CURRENT_MUSIC_INDEX = 0;
-		static List<MusicItem> musicItems = new ArrayList<>();
 
 		///////////////////////////DATA//////////////////////////
 		static List<MusicItem> playOrderList = new ArrayList<>();

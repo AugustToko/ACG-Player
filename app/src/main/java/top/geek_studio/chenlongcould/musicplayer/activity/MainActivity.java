@@ -1,16 +1,14 @@
 package top.geek_studio.chenlongcould.musicplayer.activity;
 
-import android.annotation.SuppressLint;
 import android.app.ActivityManager;
-import android.content.ComponentName;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.content.res.ColorStateList;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.*;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -48,6 +46,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import jp.wasabeef.glide.transformations.BlurTransformation;
+import org.litepal.LitePal;
 import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
 import top.geek_studio.chenlongcould.geeklibrary.theme.Theme;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
@@ -57,6 +56,7 @@ import top.geek_studio.chenlongcould.musicplayer.adapter.MyPagerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter2AlbumList;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter2ArtistList;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
+import top.geek_studio.chenlongcould.musicplayer.database.Detail;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityMainBinding;
 import top.geek_studio.chenlongcould.musicplayer.fragment.*;
 import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
@@ -203,18 +203,44 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-
-		preferences = PreferenceUtil.getDefault(this);
-
-		mMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-		initView();
-		super.onCreate(savedInstanceState);
-
 		mHandlerThread = new HandlerThread("HandlerThread@MainActivity");
 		mHandlerThread.start();
 		mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
+		preferences = PreferenceUtil.getDefault(this);
+		mMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
 		loadData();
+
+		initView();
+
+		initFragmentData();
+
+		receivedIntentCheck(getIntent());
+
+		super.onCreate(savedInstanceState);
+	}
+
+	private void loadData() {
+		DBArtSync.startActionSyncAlbum(this);
+		DBArtSync.startActionSyncArtist(this);
+
+		// clear old data
+		CustomThreadPool.post(() -> {
+			List<Detail> details = LitePal.findAll(Detail.class);
+			for (Detail d : details) {
+				Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+						null, MediaStore.MediaColumns._ID + "=?", new String[]{String.valueOf(d.getMusicId())}
+						, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+
+				if (cursor != null && cursor.moveToNext()) {
+					if (cursor.getCount() == 0) {
+						Log.d(TAG, "onNext: " + d.getMusicId());
+						LitePal.deleteAll(Detail.class, "musicId=?", String.valueOf(d.getMusicId()));
+					}
+					cursor.close();
+				}
+			}
+		});
 	}
 
 	/**
@@ -229,9 +255,9 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		String mimeType = intent.getType();
 		String action = intent.getAction();
 
-		Log.d(TAG, "receivedIntentCheck: uri: " + uri);
-		Log.d(TAG, "receivedIntentCheck: mimeType: " + mimeType);
-		Log.d(TAG, "receivedIntentCheck: action: " + action);
+//		Log.d(TAG, "receivedIntentCheck: uri: " + uri);
+//		Log.d(TAG, "receivedIntentCheck: mimeType: " + mimeType);
+//		Log.d(TAG, "receivedIntentCheck: action: " + action);
 
 		ReceiverOnMusicPlay.playFromUri(this, uri);
 
@@ -246,6 +272,15 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	@Override
 	protected void onResume() {
 		super.onResume();
+
+		if (musicDetailFragment == null) {
+			musicDetailFragment = MusicDetailFragment.newInstance();
+			final FragmentManager fragmentManager = getSupportFragmentManager();
+			final FragmentTransaction transaction = fragmentManager.beginTransaction();
+			transaction.replace(R.id.frame_wait, musicDetailFragment);
+			transaction.commit();
+		}
+
 		if (getIntent().getStringExtra(Values.IntentTAG.SHORTCUT_TYPE) != null) {
 			//noinspection SwitchStatementWithTooFewBranches
 			switch (getIntent().getStringExtra("SHORTCUT_TYPE")) {
@@ -361,7 +396,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				case R.id.menu_toolbar_album_linear: {
 					editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.LINEAR_TYPE);
 					editor.apply();
-//					mPagerAdapter.notifyDataSetChanged();
 					albumListFragment.setRecyclerViewData(albumListFragment.getView());
 				}
 				break;
@@ -369,7 +403,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				case R.id.menu_toolbar_album_grid: {
 					editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
 					editor.apply();
-//					mPagerAdapter.notifyDataSetChanged();
 					albumListFragment.setRecyclerViewData(albumListFragment.getView());
 				}
 				break;
@@ -377,7 +410,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				case R.id.menu_toolbar_artist_linear: {
 					editor.putInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.LINEAR_TYPE);
 					editor.apply();
-//					mPagerAdapter.notifyDataSetChanged();
 					artistListFragment.setRecyclerViewData(artistListFragment.getView());
 				}
 				break;
@@ -385,7 +417,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				case R.id.menu_toolbar_artist_grid: {
 					editor.putInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.GRID_TYPE);
 					editor.apply();
-//					mPagerAdapter.notifyDataSetChanged();
 					artistListFragment.setRecyclerViewData(artistListFragment.getView());
 				}
 				break;
@@ -411,7 +442,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	/**
 	 * use this
 	 */
-	@SuppressLint("StaticFieldLeak")
 	@Override
 	public void inflateChooseMenu() {
 		mMainBinding.toolBar.getMenu().clear();
@@ -434,32 +464,27 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				}
 				break;
 				case R.id.menu_toolbar_main_choose_share: {
-					new AsyncTask<Void, Void, Void>() {
+					CustomThreadPool.post(() -> {
+						Intent intent = new Intent(Intent.ACTION_SEND);
+						intent.setType("text/plain");
+						StringBuilder content = new StringBuilder(getResources().getString(R.string.app_name))
+								.append("\r\n")
+								.append("https://www.coolapk.com/apk/top.geek_studio.chenlongcould.musicplayer.Common")
+								.append("\r\n");
 
-						@Override
-						protected Void doInBackground(Void... voids) {
-							Intent intent = new Intent(Intent.ACTION_SEND);
-							intent.setType("text/plain");
-							StringBuilder content = new StringBuilder(getResources().getString(R.string.app_name))
-									.append("\r\n")
-									.append("https://www.coolapk.com/apk/top.geek_studio.chenlongcould.musicplayer.Common")
-									.append("\r\n");
-
-							for (final MusicItem item : Data.sMusicItems) {
-								for (int id : musicListFragment.getAdapter().getSelected()) {
-									if (id == item.getMusicID()) {
-										content.append(item.getMusicName()).append("\r\n");
-										break;
-									}
+						for (final MusicItem item : Data.sMusicItems) {
+							for (int id : musicListFragment.getAdapter().getSelected()) {
+								if (id == item.getMusicID()) {
+									content.append(item.getMusicName()).append("\r\n");
+									break;
 								}
 							}
-
-							intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-							intent.putExtra(Intent.EXTRA_TEXT, content.toString());
-							startActivity(intent);
-							return null;
 						}
-					}.execute();
+
+						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+						intent.putExtra(Intent.EXTRA_TEXT, content.toString());
+						startActivity(intent);
+					});
 				}
 				break;
 				default:
@@ -468,62 +493,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		});
 	}
 
-
-
-	private void loadData() {
-		Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
-			if (!MusicUtil.loadDataSource(MainActivity.this)) {
-				emitter.onNext(-1);
-			} else {
-				Data.sPlayOrderList.addAll(Data.sMusicItems);
-				Data.sPlayOrderListBackup.addAll(Data.sMusicItems);
-				emitter.onNext(0);
-			}
-		}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Integer>() {
-			@Override
-			public final void onSubscribe(Disposable disposable) {
-				Data.sDisposables.add(disposable);
-			}
-
-			@Override
-			public final void onNext(Integer result) {
-				if (result == -1) {
-					AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-					builder.setTitle("Error")
-							.setMessage("Can not find any music or the cursor is null, Will exit.")
-							.setCancelable(false)
-							.setNegativeButton("OK", (dialog, which) -> dialog.cancel());
-					builder.show();
-					return;
-				}
-
-				//service
-				final Intent intent = new Intent(MainActivity.this, MusicService.class);
-				startService(intent);
-				Data.HAS_BIND = bindService(intent, sServiceConnection, BIND_AUTO_CREATE);
-
-				setSubtitle(Data.sPlayOrderList.size() + " Songs");
-
-				initFragmentData();
-
-				DBArtSync.startActionSyncAlbum(MainActivity.this);
-				DBArtSync.startActionSyncArtist(MainActivity.this);
-
-				receivedIntentCheck(getIntent());
-			}
-
-			@Override
-			public final void onError(Throwable throwable) {
-				Toast.makeText(MainActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
-			}
-
-			@Override
-			public final void onComplete() {
-
-			}
-		});
-
-	}
 
 	/**
 	 * 根据输入框中的值来过滤数据并更新RecyclerView
@@ -644,9 +613,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	 */
 	private void initFragmentData() {
 
-		final String tabOrder = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
-
-		assert tabOrder != null;
+		String tabOrder = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+		if (tabOrder == null) tabOrder = DEFAULT_TAB_ORDER;
 
 		for (char c : tabOrder.toCharArray()) {
 			if (c == '1') {
@@ -689,12 +657,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab5));
 			}
 		}
-
-		musicDetailFragment = MusicDetailFragment.newInstance();
-		final FragmentManager fragmentManager = getSupportFragmentManager();
-		final FragmentTransaction transaction = fragmentManager.beginTransaction();
-		transaction.replace(R.id.frame_wait, musicDetailFragment);
-		transaction.commit();
 
 		Values.CurrentData.CURRENT_PAGE_INDEX = 0;
 
@@ -864,12 +826,19 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			public void onPageSelected(int i) {
 				Values.CurrentData.CURRENT_PAGE_INDEX = i;
 
+				musicListFragment.getAdapter().clearSelection();
+
 				TabLayout.Tab tab = mMainBinding.tabLayout.getTabAt(i);
 				if (tab != null) {
 					tab.select();
 				}
 
 				String order = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+
+				if (order == null) {
+					order = DEFAULT_TAB_ORDER;
+				}
+
 				if (order.charAt(i) == '1') {
 					mCurrentShowedFragment = musicListFragment;
 
@@ -984,6 +953,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 	@Override
 	public final void initStyle() {
+		Log.d(TAG, "initStyle: Main");
 		mDrawerToggle.getDrawerArrowDrawable().setColor(Utils.Ui.getTitleColor(MainActivity.this));
 		setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, Utils.Ui.getPrimaryColor(MainActivity.this)));
 		mMainBinding.tabLayout.setTabTextColors(ColorStateList.valueOf(Utils.Ui.getTitleColor(MainActivity.this)));
@@ -1163,13 +1133,18 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			@Override
 			public void onPanelSlide(View panel, float slideOffset) {
 
-				MusicDetailFragment.getHandler().sendEmptyMessage(MusicDetailFragment.NotLeakHandler.RECYCLER_SCROLL);
+				if (musicDetailFragment == null || musicDetailFragment.getNowPlayingBody() == null) {
+					return;
+				}
+
+				MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.RECYCLER_SCROLL);
 
 				CURRENT_SLIDE_OFFSET = slideOffset;
 
 				mMainBinding.mainBody.setTranslationY(0 - slideOffset * 120);
 
 				float current = 1 - slideOffset;
+
 				musicDetailFragment.getNowPlayingBody().setAlpha(current);
 
 				//在底部, 重置动画初始位置
@@ -1325,6 +1300,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		public static final int SET_SLIDE_TOUCH_DISABLE = 5005;
 		public static final byte RELOAD_MUSIC_ITEMS = 127;
 
+		public static final byte LOAD_DATA_DONE = 126;
+
 		private WeakReference<MainActivity> mWeakReference;
 
 		NotLeakHandler(MainActivity activity, Looper looper) {
@@ -1368,6 +1345,16 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 				case RELOAD_MUSIC_ITEMS: {
 					mWeakReference.get().runOnUiThread(() -> mWeakReference.get().musicListFragment.reloadData());
+				}
+				break;
+
+				case LOAD_DATA_DONE: {
+					//service
+					final Intent intent = new Intent(mWeakReference.get(), MusicService.class);
+					mWeakReference.get().startService(intent);
+					Data.HAS_BIND = mWeakReference.get().bindService(intent, mWeakReference.get().sServiceConnection, Context.BIND_AUTO_CREATE);
+
+					mWeakReference.get().setSubtitle(Data.sPlayOrderList.size() + " Songs");
 				}
 				break;
 				default:

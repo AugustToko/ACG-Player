@@ -25,6 +25,7 @@ import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.database.Detail;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
 import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
@@ -126,12 +127,9 @@ public class MusicUtil {
 						final MusicItem item = builder.build();
 						Data.sMusicItems.add(item);
 						Data.sMusicItemsBackUp.add(item);
-
 					}
 					while (cursor.moveToNext());
 					cursor.close();
-
-					Log.d(TAG, "loadDataSource: done");
 				}
 			} else {
 				//cursor null or getCount == 0
@@ -142,16 +140,6 @@ public class MusicUtil {
 		}
 		return true;
 	}
-
-
-
-
-
-
-
-
-
-
 
 
 	public static Uri getMediaStoreAlbumCoverUri(int albumId) {
@@ -509,10 +497,11 @@ public class MusicUtil {
 		return builder.build();
 	}
 
-	public static void deleteTracks(@NonNull final Context context, @NonNull final List<MusicItem> songs) {
+	public synchronized static void deleteTracks(@NonNull final Context context, @NonNull final List<MusicItem> songs) {
 		final String[] projection = new String[]{
 				BaseColumns._ID, MediaStore.MediaColumns.DATA
 		};
+
 		final StringBuilder selection = new StringBuilder();
 		selection.append(BaseColumns._ID + " IN (");
 		for (int i = 0; i < songs.size(); i++) {
@@ -531,26 +520,26 @@ public class MusicUtil {
 				// Step 1: Remove selected tracks from the current playlist, as well
 				// as from the album art cache
 				cursor.moveToFirst();
-				while (!cursor.isAfterLast()) {
+
+				do {
 					final int id = cursor.getInt(0);
 					Cursor cursor1 = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
 							null, MediaStore.Audio.AudioColumns._ID + "=?", new String[]{String.valueOf(id)}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
 					List<MusicItem> items = new ArrayList<>();
 					if (cursor1 != null && cursor1.moveToFirst()) {
 						do {
-							items.add(MusicUtil.getSongFromCursorImpl(cursor1));
+							MusicItem item = MusicUtil.getSongFromCursorImpl(cursor1);
+							Log.d(TAG, "deleteTracks: count: " + cursor1.getCount() + "   " + item.getMusicPath());
+							items.add(item);
 						} while (cursor1.moveToNext());
 					}
 
 					for (final MusicItem item : items) {
-						Data.sMusicItems.remove(item);
-						Data.sMusicItemsBackUp.remove(item);
 						Data.sPlayOrderList.remove(item);
 						Data.sPlayOrderListBackup.remove(item);
-
-						Data.syncPlayOrderList(context);
+						LitePal.deleteAll(Detail.class, "musicId=?", String.valueOf(item.getMusicID()));
 					}
-				}
+				} while (cursor.moveToNext());
 
 				// Step 2: Remove selected tracks from the database
 				context.getContentResolver().delete(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -577,6 +566,11 @@ public class MusicUtil {
 				cursor.close();
 			}
 			context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
+			// final reload music item in music list fragment
+			MainActivity.sendEmptyMessage(MainActivity.NotLeakHandler.RELOAD_MUSIC_ITEMS);
+			// sync order list
+			Data.syncPlayOrderList(context);
+
 //			Toast.makeText(context, context.getString(R.string.deleted_x_songs, songs.size()), Toast.LENGTH_SHORT).show();
 		} catch (SecurityException ignored) {
 		}

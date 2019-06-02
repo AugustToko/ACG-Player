@@ -73,6 +73,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 		@Override
 		public void onColorSelected(int dialogId, @ColorInt int color) {
 			SharedPreferences.Editor editor = preferences.edit();
+
 			switch (dialogId) {
 
 				/*
@@ -119,9 +120,11 @@ public final class SettingsActivity extends BaseCompatActivity {
 				 * Accent Color
 				 * */
 				case ACCENT: {
+					Log.d(TAG, "onColorSelected: before: " + preferences.getInt(Values.SharedPrefsTag.ACCENT_COLOR, color));
 					mAccentImage.setBackgroundColor(color);
 					editor.putInt(Values.SharedPrefsTag.ACCENT_COLOR, color);
 					editor.apply();
+					Log.d(TAG, "onColorSelected: after: " + preferences.getInt(Values.SharedPrefsTag.ACCENT_COLOR, color));
 				}
 				break;
 
@@ -232,7 +235,6 @@ public final class SettingsActivity extends BaseCompatActivity {
 					.setAllowPresets(false)
 					.create();
 			colorPickerDialog.setColorPickerDialogListener(pickerDialogListener);
-			//noinspection deprecation
 			colorPickerDialog.show(getFragmentManager(), "color-picker-dialog");
 		});
 
@@ -245,7 +247,6 @@ public final class SettingsActivity extends BaseCompatActivity {
 					.setAllowPresets(false)
 					.create();
 			colorPickerDialog.setColorPickerDialogListener(pickerDialogListener);
-			//noinspection deprecation
 			colorPickerDialog.show(getFragmentManager(), "color-picker-dialog");
 		});
 
@@ -258,7 +259,6 @@ public final class SettingsActivity extends BaseCompatActivity {
 					.setAllowPresets(false)
 					.create();
 			colorPickerDialog.setColorPickerDialogListener(pickerDialogListener);
-			//noinspection deprecation
 			colorPickerDialog.show(getFragmentManager(), "color-picker-dialog");
 		});
 

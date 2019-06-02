@@ -3,6 +3,7 @@ package top.geek_studio.chenlongcould.musicplayer.activity;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -120,6 +121,8 @@ public final class DetailActivity extends BaseCompatActivity {
 			detailBinding.includeContent.t3.setText(detailBinding.includeContent.t3.getText() + String.valueOf(minimumTimes) + " times");
 
 			if (itemDuration != null) {
+				Log.d(TAG, "onCreate: " + itemDuration.getMusicName());
+
 				detailBinding.includeContent.includeItemPlayDuration.recyclerItemMusicName.setText(itemDuration.getMusicName());
 				detailBinding.includeContent.includeItemPlayDuration.recyclerItemMusicAlbumName.setText(itemDuration.getMusicAlbum());
 				detailBinding.includeContent.includeItemPlayDuration.recyclerItemMusicDuration.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(itemDuration.getDuration()))));
@@ -133,6 +136,8 @@ public final class DetailActivity extends BaseCompatActivity {
 			}
 
 			if (itemMinimum != null) {
+				Log.d(TAG, "onCreate: " + itemMinimum.getMusicName());
+
 				detailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMusicName.setText(itemMinimum.getMusicName());
 				detailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMusicAlbumName.setText(itemMinimum.getMusicAlbum());
 				detailBinding.includeContent.includeItemPlayMinitimes.recyclerItemMusicDuration.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(itemMinimum.getDuration()))));
@@ -146,6 +151,9 @@ public final class DetailActivity extends BaseCompatActivity {
 			}
 
 			if (itemTimes != null) {
+				Log.d(TAG, "onCreate: " + itemTimes.getMusicName());
+
+
 				detailBinding.includeContent.includeItemPlaytimes.recyclerItemMusicName.setText(itemTimes.getMusicName());
 				detailBinding.includeContent.includeItemPlaytimes.recyclerItemMusicAlbumName.setText(itemTimes.getMusicAlbum());
 				detailBinding.includeContent.includeItemPlaytimes.recyclerItemMusicDuration.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(itemTimes.getDuration()))));

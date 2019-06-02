@@ -620,6 +620,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		mToolbar.setNavigationOnClickListener(v -> MainActivity.getHandler().sendEmptyMessage(MainActivity.NotLeakHandler.DOWN));
 	}
 
+	@Nullable
 	public final ConstraintLayout getNowPlayingBody() {
 		return mNowPlayingBody;
 	}

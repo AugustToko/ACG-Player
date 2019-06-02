@@ -376,6 +376,13 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 					MainActivity.sendEmptyMessage(MainActivity.NotLeakHandler.RELOAD_MUSIC_ITEMS);
 				}
 				break;
+
+				case Menu.FIRST + 9: {
+					final List<MusicItem> items = new ArrayList<>();
+					items.add(mMusicItems.get(holder.getAdapterPosition()));
+					MusicUtil.deleteTracks(mActivity, items);
+				}
+				break;
 				default:
 			}
 
@@ -503,7 +510,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 	/**
 	 * config for {@link MyRecyclerAdapter}
-	 * */
+	 */
 	public static class Config {
 		/**
 		 * 样式id
@@ -900,6 +907,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 			mMenu.add(Menu.NONE, Menu.FIRST + 6, 0, resources.getString(R.string.share));
 			mMenu.add(Menu.NONE, Menu.FIRST + 7, 0, resources.getString(R.string.drop_to_trash_can));
 			mMenu.add(Menu.NONE, Menu.FIRST + 8, 0, resources.getString(R.string.add_to_black_list));
+			mMenu.add(Menu.NONE, Menu.FIRST + 9, 0, resources.getString(R.string.del));
 
 			MenuInflater menuInflater = mActivity.getMenuInflater();
 			menuInflater.inflate(R.menu.recycler_song_item_menu, mMenu);

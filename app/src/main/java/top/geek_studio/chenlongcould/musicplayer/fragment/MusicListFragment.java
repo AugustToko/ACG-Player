@@ -5,16 +5,25 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import io.reactivex.Observable;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentMusicListBinding;
+import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 
 /**
  * @author chenlongcould
@@ -58,14 +67,49 @@ public final class MusicListFragment extends BaseFragment {
 		adapter = new MyRecyclerAdapter(mActivity, Data.sMusicItems, new MyRecyclerAdapter.Config(0, true));
 		mMusicListBinding.includeRecycler.recyclerView.setAdapter(adapter);
 
+		loadData();
+
 		return mMusicListBinding.getRoot();
 	}
 
-	@Override
-	public void setUserVisibleHint(boolean isVisibleToUser) {
-		if (adapter != null && !isVisibleToUser) {
-			adapter.clearSelection();
-		}
+	private void loadData() {
+		Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+			if (!MusicUtil.loadDataSource(mActivity)) {
+				emitter.onNext(-1);
+			} else {
+				Data.sPlayOrderList.addAll(Data.sMusicItems);
+				Data.sPlayOrderListBackup.addAll(Data.sMusicItems);
+				emitter.onNext(0);
+			}
+		}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Integer>() {
+			@Override
+			public final void onSubscribe(Disposable disposable) {
+				Data.sDisposables.add(disposable);
+			}
+
+			@Override
+			public final void onNext(Integer result) {
+				if (result == -1) {
+					AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+					builder.setTitle("Error")
+							.setMessage("Can not find any music or the cursor is null, Will exit.")
+							.setCancelable(false)
+							.setNegativeButton("OK", (dialog, which) -> dialog.cancel());
+					builder.show();
+				}
+			}
+
+			@Override
+			public final void onError(Throwable throwable) {
+				Toast.makeText(mActivity, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+			}
+
+			@Override
+			public final void onComplete() {
+
+			}
+		});
+
 	}
 
 	public final MyRecyclerAdapter getAdapter() {

@@ -12,7 +12,6 @@ import android.media.MediaMetadataRetriever;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.Build;
-import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -201,7 +200,7 @@ public final class Utils {
 				albumPath[0] = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART));
 				cursor.close();
 			}
-			if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(Values.SharedPrefsTag.USE_NET_WORK_ALBUM, false)) {
+			if (PreferenceUtil.getDefault(context).getBoolean(Values.SharedPrefsTag.USE_NET_WORK_ALBUM, false)) {
 				List<CustomAlbumPath> customs = LitePal.findAll(CustomAlbumPath.class);
 				if (customs.size() != 0) {
 					final CustomAlbumPath custom = customs.get(0);
@@ -430,7 +429,7 @@ public final class Utils {
 		 */
 		@ColorInt
 		public static int getAccentColor(Context context) {
-			return PreferenceManager.getDefaultSharedPreferences(context).getInt(Values.SharedPrefsTag.ACCENT_COLOR, ContextCompat.getColor(context, R.color.colorAccent));
+			return PreferenceUtil.getDefault(context).getInt(Values.SharedPrefsTag.ACCENT_COLOR, ContextCompat.getColor(context, R.color.colorAccent));
 		}
 
 		/**
@@ -440,7 +439,7 @@ public final class Utils {
 		 */
 		@ColorInt
 		public static int getPrimaryColor(Context context) {
-			return PreferenceManager.getDefaultSharedPreferences(context).getInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(context, R.color.colorPrimary));
+			return PreferenceUtil.getDefault(context).getInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(context, R.color.colorPrimary));
 		}
 
 		/**
@@ -450,17 +449,18 @@ public final class Utils {
 		 */
 		@ColorInt
 		public static int getPrimaryDarkColor(Context context) {
-			return PreferenceManager.getDefaultSharedPreferences(context).getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, ContextCompat.getColor(context, R.color.colorPrimaryDark));
+			return PreferenceUtil.getDefault(context).getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, ContextCompat.getColor(context, R.color.colorPrimaryDark));
 		}
 
 		/**
 		 * getTitleColor from {@link SharedPreferences}, default: {@link top.geek_studio.chenlongcould.musicplayer.R.color#def_over_title_color}
 		 *
 		 * @return color (int)
+		 * @return color (int)
 		 */
 		@ColorInt
 		public static int getTitleColor(Context context) {
-			return PreferenceManager.getDefaultSharedPreferences(context).getInt(Values.SharedPrefsTag.TITLE_COLOR, ContextCompat.getColor(context, R.color.def_over_title_color));
+			return PreferenceUtil.getDefault(context).getInt(Values.SharedPrefsTag.TITLE_COLOR, ContextCompat.getColor(context, R.color.def_over_title_color));
 		}
 
 		public static Bitmap readBitmapFromFile(String filePath, int width, int height) {

@@ -80,8 +80,6 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 		//set taskDescription (all activity extends this)
 		setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, Utils.Ui.getPrimaryColor(this)));
 
-		initStyle();
-
 		//设置状态栏是否全透明
 		if (preferences.getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false)) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

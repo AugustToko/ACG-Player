@@ -18,6 +18,8 @@ interface IMuiscService {
 
     void addToOrderList(in MusicItem item);
 
+    void removeFromOrderList(in MusicItem item);
+
     MusicItem getCurrentItem();
 
     int getCurrentIndex();
