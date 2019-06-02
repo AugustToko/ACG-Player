@@ -385,8 +385,8 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 		mSettingsBinding.statusColor.setOnClickListener(v -> {
 			final SharedPreferences.Editor editor = preferences.edit();
-			if (preferences.getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false)) {
-				editor.putBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false);
+			if (preferences.getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, true)) {
+				editor.putBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, true);
 				mSettingsBinding.colorStatusSwitch.setChecked(false);
 			} else {
 				editor.putBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, true);
@@ -641,7 +641,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 		mSettingsBinding.colorNotiSwitch.setChecked(preferences.getBoolean(NOTIFICATION_COLORIZED, true));
 
-		mSettingsBinding.colorStatusSwitch.setChecked(preferences.getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false));
+		mSettingsBinding.colorStatusSwitch.setChecked(preferences.getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, true));
 
 		mSettingsBinding.filterSwitch.setChecked(preferences.getBoolean(HIDE_SHORT_SONG, true));
 

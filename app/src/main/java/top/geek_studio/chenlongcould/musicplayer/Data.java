@@ -55,6 +55,8 @@ public final class Data {
 	public static List<MusicItem> sPlayOrderList = new ArrayList<>();
 
 	public static void syncPlayOrderList(final Context context, final List<MusicItem> items) {
+		if (Data.sMusicBinder == null) return;
+
 		Data.sPlayOrderList.clear();
 		Data.sPlayOrderList.addAll(items);
 

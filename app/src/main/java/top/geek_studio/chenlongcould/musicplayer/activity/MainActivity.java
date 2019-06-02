@@ -211,9 +211,9 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 		loadData();
 
-		initView();
-
 		initFragmentData();
+
+		initView();
 
 		receivedIntentCheck(getIntent());
 
@@ -1116,7 +1116,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		mNavHeaderImageView = mMainBinding.navigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
 
 		mNavHeaderImageView.setOnClickListener(v -> {
-			if (musicDetailFragment.getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+			if (musicDetailFragment != null && musicDetailFragment.getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
 				musicDetailFragment.getSlidingUpPanelLayout().setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
 				return;
 			}

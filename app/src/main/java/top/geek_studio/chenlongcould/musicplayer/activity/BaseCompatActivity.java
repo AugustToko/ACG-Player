@@ -81,7 +81,7 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 		setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, Utils.Ui.getPrimaryColor(this)));
 
 		//设置状态栏是否全透明
-		if (preferences.getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false)) {
+		if (preferences.getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, true)) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 				Window window = getWindow();
 				window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
