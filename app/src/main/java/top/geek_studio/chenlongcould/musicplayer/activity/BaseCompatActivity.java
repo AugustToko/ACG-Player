@@ -1,17 +1,5 @@
-/*
- * ************************************************************
- * 文件：BaseCompatActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:28:59
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.musicplayer.activity;
 
-import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -19,7 +7,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,8 +21,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import com.google.android.material.appbar.AppBarLayout;
 import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
 import top.geek_studio.chenlongcould.geeklibrary.widget.GkToolbar;
@@ -123,19 +108,6 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 	 */
 	protected void setUpTaskCardColor(@ColorInt int color) {
 		setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, color));
-	}
-
-	/**
-	 * init permission, every Activity extends {@link BaseCompatActivity}
-	 */
-	public boolean initPermission() {
-		if (ContextCompat.checkSelfPermission(this,
-				Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-			return true;
-		} else {
-			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Values.REQUEST_WRITE_EXTERNAL_STORAGE);
-			return false;
-		}
 	}
 
 	/**

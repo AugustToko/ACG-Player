@@ -84,7 +84,6 @@ public final class AlbumDetailActivity extends BaseCompatActivity {
 
 	private List<Disposable> mDisposables = new ArrayList<>();
 
-
 	private String intentAlbumId = "0";
 
 	private List<CustomAlbumPath> paths;

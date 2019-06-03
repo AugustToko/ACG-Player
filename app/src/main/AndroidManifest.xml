@@ -10,6 +10,7 @@
             android:name="top.geek_studio.chenlongcould.musicplayer.broadcast"
             android:protectionLevel="signature"
             />
+
     <permission
             android:name="top.geek_studio.chenlongcould.musicplayer.MusicService"
             android:protectionLevel="signature"

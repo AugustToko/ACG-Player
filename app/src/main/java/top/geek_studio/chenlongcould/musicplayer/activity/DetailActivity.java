@@ -113,12 +113,18 @@ public final class DetailActivity extends BaseCompatActivity {
 				}
 			}
 
-			detailBinding.includeContent.textTotalPlays.setText(detailBinding.includeContent.textTotalPlays.getText() + String.valueOf(totalTimes) + " times");
-			detailBinding.includeContent.textTotalPlayTime.setText(detailBinding.includeContent.textTotalPlayTime.getText() + String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(totalDuration))) + " (mm:ss)");
+			detailBinding.includeContent.textTotalPlays.setText(detailBinding.includeContent.textTotalPlays
+					.getText() + String.valueOf(totalTimes) + " times");
+			detailBinding.includeContent.textTotalPlayTime.setText(detailBinding.includeContent.textTotalPlayTime
+					.getText() + String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(totalDuration))) + " (mm:ss)");
 
-			detailBinding.includeContent.t1.setText(detailBinding.includeContent.t1.getText() + String.valueOf(maxTimes) + " times");
-			detailBinding.includeContent.t2.setText(detailBinding.includeContent.t2.getText() + String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(maxDuration))) + " (mm:ss)");
-			detailBinding.includeContent.t3.setText(detailBinding.includeContent.t3.getText() + String.valueOf(minimumTimes) + " times");
+			detailBinding.includeContent.t1.setText(detailBinding.includeContent.t1.getText()
+					+ String.valueOf(maxTimes) + " times");
+			detailBinding.includeContent.t2.setText(detailBinding.includeContent.t2.getText()
+					+ String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(maxDuration)))
+					+ " (mm:ss)");
+			detailBinding.includeContent.t3.setText(detailBinding.includeContent.t3.getText()
+					+ String.valueOf(minimumTimes) + " times");
 
 			if (itemDuration != null) {
 				Log.d(TAG, "onCreate: " + itemDuration.getMusicName());

@@ -44,7 +44,8 @@ public class AboutActivity extends BaseCompatActivity {
 		mAppBinding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
 		// TODO: 2019/3/10 add Thinking
-		@SuppressWarnings("unused") final AboutThanksBinding thanksBinding = DataBindingUtil.inflate(getLayoutInflater(), R.layout.about_thanks, (ViewGroup) mAppBinding.getRoot(), false);
+		@SuppressWarnings("unused") final AboutThanksBinding thanksBinding = DataBindingUtil.inflate(getLayoutInflater()
+				, R.layout.about_thanks, (ViewGroup) mAppBinding.getRoot(), false);
 
 		setUpVersion();
 		setUpLicense();

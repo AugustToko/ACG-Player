@@ -158,14 +158,6 @@ public final class MyTileService extends TileService {
 
 	@Override
 	public void onDestroy() {
-		Tile tile = getQsTile();
-		if (tile != null) {
-			getQsTile().setState(Tile.STATE_INACTIVE);
-			getQsTile().setLabel(title);
-			getQsTile().setIcon(Icon.createWithResource(this, R.drawable.ic_audiotrack_24px));
-			getQsTile().updateTile();
-		}
-
 		if (mDisposable != null && !mDisposable.isDisposed()) {
 			mDisposable.dispose();
 		}
