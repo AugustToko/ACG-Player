@@ -63,12 +63,13 @@ public final class FileViewFragment extends BaseFragment {
 	}
 
 	@Override
-	protected void setFragmentType(FragmentType fragmentType) {
-		fragmentType = FragmentType.FILE_VIEW_FRAGMENT;
+	public FragmentType getFragmentType() {
+		return FragmentType.FILE_VIEW_FRAGMENT;
 	}
 
 	@Override
 	public void reloadData() {
+		super.reloadData();
 		mFileItems.clear();
 		initData();
 	}

@@ -91,9 +91,12 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			Data.sMusicBinder = IMuiscService.Stub.asInterface(service);
 
-			if (Values.TYPE_RANDOM.equals(preferences.getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
+			if (Values.TYPE_RANDOM.equals(PreferenceUtil.getDefault(MainActivity.this).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
 				Data.shuffleOrderListSync(MainActivity.this, false);
 			}
+
+//			DBArtSync.startActionSyncAlbum(MainActivity.this);
+//			DBArtSync.startActionSyncArtist(MainActivity.this);
 
 //			if (Data.sMusicBinder != null && Data.sCurrentMusicItem.getMusicID() != -1) {
 //				try {
@@ -106,7 +109,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
-
+			Data.sMusicBinder = null;
 		}
 	};
 
@@ -231,8 +234,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	}
 
 	private void loadData() {
-		DBArtSync.startActionSyncAlbum(this);
-		DBArtSync.startActionSyncArtist(this);
 
 		// clear old data
 		CustomThreadPool.post(() -> {
@@ -459,42 +460,14 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		mMainBinding.toolBar.setOnMenuItemClickListener(menuItem -> {
 			switch (menuItem.getItemId()) {
 				case R.id.menu_toolbar_main_choose_addlist: {
-					ArrayList<MusicItem> helper = new ArrayList<>();
-
-					for (MusicItem item : Data.sMusicItems) {
-						for (int id : musicListFragment.getAdapter().getSelected()) {
-							if (id == item.getMusicID()) {
-								helper.add(item);
-							}
-						}
-					}
+					ArrayList<MusicItem> helper = new ArrayList<>(musicListFragment.getAdapter().getSelected());
 
 					Utils.DataSet.addListDialog(MainActivity.this, helper);
 					musicListFragment.getAdapter().clearSelection();
 				}
 				break;
 				case R.id.menu_toolbar_main_choose_share: {
-					CustomThreadPool.post(() -> {
-						Intent intent = new Intent(Intent.ACTION_SEND);
-						intent.setType("text/plain");
-						StringBuilder content = new StringBuilder(getResources().getString(R.string.app_name))
-								.append("\r\n")
-								.append("https://www.coolapk.com/apk/top.geek_studio.chenlongcould.musicplayer.Common")
-								.append("\r\n");
-
-						for (final MusicItem item : Data.sMusicItems) {
-							for (int id : musicListFragment.getAdapter().getSelected()) {
-								if (id == item.getMusicID()) {
-									content.append(item.getMusicName()).append("\r\n");
-									break;
-								}
-							}
-						}
-
-						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-						intent.putExtra(Intent.EXTRA_TEXT, content.toString());
-						startActivity(intent);
-					});
+					MusicUtil.sharMusic(MainActivity.this, musicListFragment.getAdapter().getSelected());
 				}
 				break;
 				default:
@@ -842,7 +815,9 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			public void onPageSelected(int i) {
 				Values.CurrentData.CURRENT_PAGE_INDEX = i;
 
-				musicListFragment.getAdapter().clearSelection();
+				if (musicListFragment != null && musicListFragment.getAdapter() != null) {
+					musicListFragment.getAdapter().clearSelection();
+				}
 
 				TabLayout.Tab tab = mMainBinding.tabLayout.getTabAt(i);
 				if (tab != null) {
@@ -855,50 +830,49 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 					order = DEFAULT_TAB_ORDER;
 				}
 
-				if (order.charAt(i) == '1') {
+				char type = order.charAt(i);
+				setSubTitleType(type);
+
+				if (type == '1') {
 					mCurrentShowedFragment = musicListFragment;
 
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true, false);
-					setSubtitle(Data.sMusicItems.size() + " Songs");
+//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true, false);
 				}
 
-				if (order.charAt(i) == '2') {
+				if (type == '2') {
 					mCurrentShowedFragment = albumListFragment;
 
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), true, true);
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true, false);
-					setSubtitle(albumListFragment.getAlbumItemList().size() + " Albums");
+//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true, false);
 				}
 
-				if (order.charAt(i) == '3') {
+				if (type == '3') {
 					mCurrentShowedFragment = artistListFragment;
 
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), true, true);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true, false);
-					setSubtitle(artistListFragment.getArtistItemList().size() + " Artists");
+//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true, false);
 				}
 
 				//playlist
-				if (order.charAt(i) == '4') {
+				if (type == '4') {
 					mCurrentShowedFragment = playListFragment;
 
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), false, false);
-					setSubtitle(Data.sPlayListItems.size() + " Playlists");
+//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), false, false);
 				}
 
 				//fileviewer
-				if (order.charAt(i) == '5') {
+				if (type == '5') {
 					mCurrentShowedFragment = fileViewFragment;
 
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
 					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), false, false);
+//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), false, false);
 				}
 			}
 
@@ -933,6 +907,41 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 	}
 
+	private void setSubTitleType(final char type) {
+
+		String content = "-";
+
+		switch (type) {
+			case '1': {
+				content = Data.sMusicItems.size() + " Songs";
+			}
+			break;
+
+			case '2': {
+				if (albumListFragment == null || albumListFragment.getAlbumItemList() == null) break;
+				content = albumListFragment.getAlbumItemList().size() + " Albums";
+			}
+			break;
+
+			case '3': {
+				if (artistListFragment == null || artistListFragment.getArtistItemList() == null) break;
+				content = artistListFragment.getArtistItemList().size() + " Artists";
+			}
+			break;
+
+			case '4': {
+				content = Data.sPlayListItems.size() + " Playlists";
+			}
+			break;
+
+			case '5': {
+
+			}
+			break;
+		}
+		setSubtitle(content);
+	}
+
 	public void fullExit() {
 		try {
 			unbindService(sServiceConnection);
@@ -949,6 +958,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		} catch (Exception e) {
 			Log.d(TAG, "fullExit: " + e.getMessage());
 		}
+
 		Data.sMusicBinder = null;
 
 		if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
@@ -964,7 +974,19 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		Data.sHistoryPlayed.clear();
 		Data.S_TRASH_CAN_LIST.clear();
 
-		finish();
+		new Thread(() -> {
+			GlideApp.get(MainActivity.this).clearDiskCache();
+			GlideApp.get(MainActivity.this).clearMemory();
+		});
+		mHandlerThread.quit();
+		CustomThreadPool.finish();
+		AlbumThreadPool.finish();
+		ArtistThreadPool.finish();
+		ItemCoverThreadPool.finish();
+
+		runOnUiThread(() -> {
+			finish();
+		});
 	}
 
 	@Override
@@ -1251,7 +1273,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				}
 				break;
 				case R.id.debug: {
-					startActivity(new Intent(this, TestActivity.class));
+					Toast.makeText(this, "NONE", Toast.LENGTH_SHORT).show();
 				}
 				break;
 				default:

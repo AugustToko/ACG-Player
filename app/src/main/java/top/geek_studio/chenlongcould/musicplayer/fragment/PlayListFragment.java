@@ -73,10 +73,9 @@ public final class PlayListFragment extends BaseFragment {
 	}
 
 	@Override
-	protected void setFragmentType(FragmentType fragmentType) {
-		fragmentType = FragmentType.PLAY_LIST_FRAGMENT;
+	public FragmentType getFragmentType() {
+		return FragmentType.PLAY_LIST_FRAGMENT;
 	}
-
 	@Override
 	public void onAttach(@NonNull Context context) {
 		super.onAttach(context);
@@ -189,6 +188,7 @@ public final class PlayListFragment extends BaseFragment {
 
 	@Override
 	public void reloadData() {
+		super.reloadData();
 		mHandler.sendEmptyMessage(NotLeakHandler.RE_LOAD_PLAY_LIST);
 	}
 

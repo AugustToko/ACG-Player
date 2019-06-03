@@ -22,6 +22,7 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
+import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 
 import java.lang.ref.WeakReference;
@@ -87,6 +88,7 @@ public final class ListViewActivity extends BaseCompatActivity {
 
 		mType = getIntent().getStringExtra(IntentTag.INTENT_START_BY);
 
+		Data.sPlayOrderListBackup.clear();
 		Data.sPlayOrderListBackup.addAll(Data.sPlayOrderList);
 
 		if (mType != null) {
@@ -225,9 +227,6 @@ public final class ListViewActivity extends BaseCompatActivity {
 
 							} while (cursor.moveToNext());
 							cursor.close();
-
-							Data.syncPlayOrderList(this, mMusicItemList);
-							Data.shuffleOrderListSync(this, false);
 						}
 
 						observableEmitter.onNext(0);
@@ -236,6 +235,8 @@ public final class ListViewActivity extends BaseCompatActivity {
 								if (i != 0) {
 									return;
 								}
+								Data.syncPlayOrderList(this, mMusicItemList);
+								Data.shuffleOrderListSync(this, false);
 								adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList, new MyRecyclerAdapter.Config(0, true));
 								mRecyclerView.setAdapter(adapter);
 							});
@@ -279,6 +280,7 @@ public final class ListViewActivity extends BaseCompatActivity {
 				break;
 				default:
 			}
+
 			initDone = true;
 		}
 
@@ -296,11 +298,32 @@ public final class ListViewActivity extends BaseCompatActivity {
 				break;
 
 				case R.id.menu_public_m3u: {
-
+					Toast.makeText(this, "Building...", Toast.LENGTH_SHORT).show();
 				}
 				break;
 				default:
 			}
+			return true;
+		});
+	}
+
+	@Override
+	public void inflateChooseMenu() {
+		mToolbar.getMenu().clear();
+		mToolbar.inflateMenu(R.menu.menu_toolbar_main_choose);
+		mToolbar.setOnMenuItemClickListener(item -> {
+			switch (item.getItemId()) {
+				case R.id.menu_toolbar_main_choose_share: {
+					MusicUtil.sharMusic(ListViewActivity.this, adapter.getSelected());
+				}
+				break;
+
+				default: {
+					// TODO: 2019/6/2 多选菜单
+					Toast.makeText(this, "Building...", Toast.LENGTH_SHORT).show();
+				}
+			}
+
 			return true;
 		});
 	}
@@ -316,11 +339,12 @@ public final class ListViewActivity extends BaseCompatActivity {
 		mRecyclerView = null;
 		mMusicItemList.clear();
 
-		// restore items
-		Data.syncPlayOrderList(this, Data.sPlayOrderListBackup);
+		Data.sPlayOrderList.clear();
+		Data.sPlayOrderList.addAll(Data.sPlayOrderListBackup);
+		ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_RESET_LIST);
+
 		super.onDestroy();
 	}
-
 
 	public interface FragmentType {
 		String ACTION_ADD_RECENT = "add recent";
@@ -339,19 +363,11 @@ public final class ListViewActivity extends BaseCompatActivity {
 		String INTENT_START_BY = "start_by";
 	}
 
-	@Override
-	public void inflateChooseMenu() {
-		mToolbar.getMenu().clear();
-		mToolbar.inflateMenu(R.menu.menu_toolbar_main_choose);
-		mToolbar.setOnMenuItemClickListener(item -> {
-			// TODO: 2019/6/2 多选菜单
-			Toast.makeText(this, "Building...", Toast.LENGTH_SHORT).show();
-			return true;
-		});
-	}
 
 	@Override
 	public void onBackPressed() {
+		if (!initDone) Toast.makeText(this, "Wait, loading data...", Toast.LENGTH_SHORT).show();
+
 		super.onBackPressed();
 	}
 

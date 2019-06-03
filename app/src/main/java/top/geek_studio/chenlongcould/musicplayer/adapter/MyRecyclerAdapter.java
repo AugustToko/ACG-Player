@@ -96,7 +96,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 	private ArrayList<ItemHolder> mViewHolders = new ArrayList<>();
 
-	private ArrayList<Integer> mSelected = new ArrayList<>();
+	private ArrayList<MusicItem> mSelected = new ArrayList<>();
 
 	private boolean isChoose = false;
 
@@ -393,10 +393,10 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		onMusicItemClick(holder.mUView, holder);
 
 		holder.mUView.setOnLongClickListener(v -> {
-			for (int id : mSelected) {
-				if (id == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
+			for (MusicItem item : mSelected) {
+				if (item.getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
 					holder.mBody.setBackgroundColor(ContextCompat.getColor(mActivity, R.color.card_bg));
-					mSelected.remove((Integer) mMusicItems.get(holder.getAdapterPosition()).getMusicID());
+					mSelected.remove(mMusicItems.get(holder.getAdapterPosition()));
 					if (mSelected.size() == 0) {
 						isChoose = false;
 						mActivity.inflateCommonMenu();
@@ -405,7 +405,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 				}
 			}
 
-			mSelected.add(mMusicItems.get(holder.getAdapterPosition()).getMusicID());
+			mSelected.add(mMusicItems.get(holder.getAdapterPosition()));
 			isChoose = true;
 
 			holder.mBody.setBackgroundColor(Utils.Ui.getAccentColor(mActivity));
@@ -438,20 +438,22 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		view.setOnClickListener(v -> {
 			//在多选模式下
 			if (isChoose) {
-				for (int id : mSelected) {
-					if (id == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
-						((ItemHolder) holder).mBody.setBackgroundColor(ContextCompat.getColor(mActivity, R.color.card_bg));
-						mSelected.remove((Integer) mMusicItems.get(holder.getAdapterPosition()).getMusicID());
-						if (mSelected.size() == 0) {
-							isChoose = false;
-							mActivity.inflateCommonMenu();
-						}
-						return;
-					}
+				MusicItem itemClicked = mMusicItems.get(holder.getAdapterPosition());
+
+				// select or un-select
+				if (mSelected.contains(itemClicked)) {
+					((ItemHolder) holder).mBody.setBackgroundColor(ContextCompat.getColor(mActivity, R.color.card_bg));
+					mSelected.remove(mMusicItems.get(holder.getAdapterPosition()));
+				} else {
+					mSelected.add(mMusicItems.get(holder.getAdapterPosition()));
+					((ItemHolder) holder).mBody.setBackgroundColor(Utils.Ui.getAccentColor(mActivity));
 				}
 
-				mSelected.add(mMusicItems.get(holder.getAdapterPosition()).getMusicID());
-				((ItemHolder) holder).mBody.setBackgroundColor(Utils.Ui.getAccentColor(mActivity));
+				if (mSelected.size() == 0) {
+					isChoose = false;
+					mActivity.inflateCommonMenu();
+				}
+
 			} else {
 				MusicService.MusicControl.itemClick(mActivity, mMusicItems.get(holder.getAdapterPosition()));
 			}
@@ -464,7 +466,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		final ItemHolder holder = ((ItemHolder) viewHolder);
 
 		//check selection
-		if (mSelected.contains(mMusicItems.get(holder.getAdapterPosition()).getMusicID())) {
+		if (mSelected.contains(mMusicItems.get(holder.getAdapterPosition()))) {
 			holder.mBody.setBackgroundColor(Utils.Ui.getAccentColor(mActivity));
 		} else {
 			holder.mBody.setBackgroundColor(ContextCompat.getColor(mActivity, R.color.card_bg));
@@ -814,7 +816,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		return mMusicItems.size();
 	}
 
-	public ArrayList<Integer> getSelected() {
+	public ArrayList<MusicItem> getSelected() {
 		return mSelected;
 	}
 

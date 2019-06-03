@@ -15,6 +15,8 @@ public class PreferenceUtil {
 	public static final String METHOD_QUERY_PID = "method_query_pid";
 	public static final String KEY_VALUES = "key_result";
 
+	public static SharedPreferences defPrefs = null;
+
 
 	public static final Uri sContentCreate = Uri.withAppendedPath(URI, "create");
 
@@ -25,6 +27,9 @@ public class PreferenceUtil {
 	}
 
 	public static SharedPreferences getDefault(@NonNull Context context) {
-		return getSharedPreference(context, context.getPackageName() + "_preferences");
+		if (defPrefs == null) {
+			defPrefs = getSharedPreference(context, context.getPackageName() + "_preferences");
+		}
+		return defPrefs;
 	}
 }

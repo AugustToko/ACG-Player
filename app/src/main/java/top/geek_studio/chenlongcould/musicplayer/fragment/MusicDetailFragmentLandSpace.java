@@ -73,10 +73,9 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 	}
 
 	@Override
-	protected void setFragmentType(FragmentType fragmentType) {
-		fragmentType = FragmentType.MUSIC_DETAIL_FRAGMENT_LAND_SPACE;
+	public FragmentType getFragmentType() {
+		return FragmentType.MUSIC_DETAIL_FRAGMENT_LAND_SPACE;
 	}
-
 	@Override
 	public void reloadData() {
 		// needn't

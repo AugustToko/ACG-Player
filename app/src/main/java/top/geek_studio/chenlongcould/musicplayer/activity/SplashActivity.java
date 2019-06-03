@@ -6,7 +6,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -93,11 +92,7 @@ public final class SplashActivity extends AppCompatActivity {
 		// 虚拟导航键
 		window.setNavigationBarColor(Color.TRANSPARENT);
 
-		try {
-			setContentView(R.layout.activity_splash);
-		} catch (Exception e) {
-			Log.d(TAG, "onCreate: " + e.getMessage());
-		}
+		setContentView(R.layout.activity_splash);
 
 		if (initPermission()) {
 			new Handler().post(this::initDone);

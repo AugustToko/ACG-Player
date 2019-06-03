@@ -31,6 +31,7 @@ import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
 import top.geek_studio.chenlongcould.musicplayer.model.Playlist;
+import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +45,27 @@ import java.util.Locale;
 public class MusicUtil {
 
 	private static final String TAG = "MusicUtil";
+
+	public static void sharMusic(@NonNull final Context context, List<MusicItem> items) {
+		CustomThreadPool.post(() -> {
+			Intent intent = new Intent(Intent.ACTION_SEND);
+			intent.setType("text/plain");
+			StringBuilder content = new StringBuilder(context.getResources().getString(R.string.app_name))
+					.append("\r\n")
+					.append("https://www.coolapk.com/apk/top.geek_studio.chenlongcould.musicplayer.Common")
+					.append("\r\n");
+
+			for (final MusicItem item : items) {
+				content.append(item.getMusicName()).append("\r\n");
+				Log.d(TAG, "sharMusic: append: " + item.getMusicName());
+				break;
+			}
+
+			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			intent.putExtra(Intent.EXTRA_TEXT, content.toString());
+			context.startActivity(intent);
+		});
+	}
 
 	public static boolean loadDataSource(final Context context) {
 		//noinspection StatementWithEmptyBody
@@ -387,7 +409,7 @@ public class MusicUtil {
 
 	public static void toggleFavorite(@NonNull final Context context, @Nullable final MusicItem song) {
 		PlayListFragment.reloadDataByHandler();
-		if (song != null) {
+		if (song != null && song.getMusicID() != -1) {
 			if (isFavorite(context, song)) {
 				PlayListItem item = getFavoritesPlaylist(context);
 				if (item != null) PlayListsUtil.removeFromPlaylist(context, song, item.getId());
@@ -395,6 +417,7 @@ public class MusicUtil {
 				PlayListsUtil.addToPlaylist(context, song, getOrCreateFavoritesPlaylist(context).getId(), false);
 			}
 		} else {
+			Toast.makeText(context, "Add error, song is null or id == -1", Toast.LENGTH_SHORT).show();
 			Log.d(TAG, "toggleFavorite: the song is null.");
 		}
 	}

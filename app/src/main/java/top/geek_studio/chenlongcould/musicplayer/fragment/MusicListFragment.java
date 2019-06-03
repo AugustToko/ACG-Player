@@ -1,6 +1,7 @@
 package top.geek_studio.chenlongcould.musicplayer.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
 import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
@@ -41,12 +43,12 @@ public final class MusicListFragment extends BaseFragment {
 	}
 
 	@Override
-	protected void setFragmentType(FragmentType fragmentType) {
-		fragmentType = FragmentType.MUSIC_LIST_FRAGMENT;
+	public FragmentType getFragmentType() {
+		return FragmentType.MUSIC_LIST_FRAGMENT;
 	}
-
 	@Override
 	public void reloadData() {
+		super.reloadData();
 		mActivity.reloadMusicItems();
 	}
 
@@ -97,6 +99,10 @@ public final class MusicListFragment extends BaseFragment {
 							.setNegativeButton("OK", (dialog, which) -> dialog.cancel());
 					builder.show();
 				}
+
+				final Intent intent = new Intent(mActivity, MusicService.class);
+				mActivity.startService(intent);
+				mActivity.bindService(intent, mActivity.sServiceConnection, Context.BIND_AUTO_CREATE);
 			}
 
 			@Override

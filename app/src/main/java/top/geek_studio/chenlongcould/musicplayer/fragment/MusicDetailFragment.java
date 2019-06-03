@@ -75,9 +75,7 @@ public final class MusicDetailFragment extends BaseFragment {
 	 * @see ViewAnimationUtils#createCircularReveal
 	 */
 	private final int m_Position = 200;
-	private volatile ImageView LV;
 	private volatile ImageView MV;
-	private volatile ImageView RV;
 	private volatile ImageView mMusicAlbumImage;
 	private volatile ImageView mMusicAlbumImageOth2;
 	private volatile ImageView mMusicAlbumImageOth3;
@@ -93,10 +91,12 @@ public final class MusicDetailFragment extends BaseFragment {
 	private ImageView mInfoBarBackgroundImage;
 	private ImageView mInfoBarFavButton;
 	private HandlerThread mHandlerThread;
+	private ImageView mInfoBarPlayButton;
 
 	////////////////////INFO_BAR//////////////////////////
 	private FloatingActionButton mPlayButton;
 	private PlayPauseDrawable mPlayPauseDrawable;
+	private PlayPauseDrawable mPlayPauseDrawable2InfoBar;
 	private ImageButton mNextButton;
 	private ImageButton mPreviousButton;
 	private RecyclerView mRecyclerView;
@@ -137,51 +137,22 @@ public final class MusicDetailFragment extends BaseFragment {
 		return result;
 	}
 
-	public ImageView getR() {
-		if ((Integer) LV.getTag(key) == 2) {
-			return LV;
-		}
-
-		if ((Integer) RV.getTag(key) == 2) {
-			return RV;
-		}
-
-		if ((Integer) MV.getTag(key) == 2) {
-			return MV;
-		}
-
-		return RV;
-	}
-
-	public ImageView getL() {
-		if ((Integer) LV.getTag(key) == 0) {
-			return LV;
-		}
-
-		if ((Integer) RV.getTag(key) == 0) {
-			return RV;
-		}
-
-		if ((Integer) MV.getTag(key) == 0) {
-			return MV;
-		}
-
-		return LV;
-	}
-
 	/**
 	 * init Views
 	 */
 	private void initView(View view) {
 
 		mPlayPauseDrawable = new PlayPauseDrawable(mMainActivity);
+		mPlayPauseDrawable2InfoBar = new PlayPauseDrawable(mMainActivity);
 		mPlayPauseDrawable.setPlay(true);
+		mPlayPauseDrawable2InfoBar.setPlay(true);
 
 		//get Default values
 		defXScale = mPlayButton.getScaleX();
 		defYScale = mPlayButton.getScaleY();
 
 		mPlayButton.setImageDrawable(mPlayPauseDrawable);
+		mInfoBarPlayButton.setImageDrawable(mPlayPauseDrawable2InfoBar);
 		mPlayButton.setColorFilter(Color.BLACK);
 
 		mInfoBarInfoSeek.setBackgroundColor(Utils.Ui.getAccentColor(mMainActivity));
@@ -199,9 +170,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		mMusicAlbumImageOth3.setX(0 - mMusicAlbumImage.getWidth());
 		mMusicAlbumImageOth2.setX(mMusicAlbumImage.getWidth() * 2);
 
-		LV = mMusicAlbumImageOth3;
 		MV = mMusicAlbumImage;
-		RV = mMusicAlbumImageOth2;
 
 		mMusicAlbumImage.setTag(key, 1);
 		mMusicAlbumImageOth3.setTag(key, 0);
@@ -538,6 +507,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		try {
 			if (Data.sMusicBinder != null && Data.sMusicBinder.isPlayingMusic()) {
 				mPlayPauseDrawable.setPause(true);
+				mPlayPauseDrawable2InfoBar.setPause(true);
 			}
 		} catch (RemoteException e) {
 			e.printStackTrace();
@@ -594,7 +564,7 @@ public final class MusicDetailFragment extends BaseFragment {
 				case R.id.menu_toolbar_love: {
 					MusicUtil.toggleFavorite(mMainActivity, ReceiverOnMusicPlay.getCurrentItem());
 					updateFav(ReceiverOnMusicPlay.getCurrentItem());
-					Toast.makeText(mMainActivity, getString(R.string.done), Toast.LENGTH_SHORT).show();
+//					Toast.makeText(mMainActivity, getString(R.string.done), Toast.LENGTH_SHORT).show();
 				}
 				break;
 
@@ -944,6 +914,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		mInfoBarAlbumText = view.findViewById(R.id.info_bar_album);
 		mNowPlayingBody = view.findViewById(R.id.current_info);
 		mInfoBarFavButton = view.findViewById(R.id.info_bar_fav_img);
+		mInfoBarPlayButton = view.findViewById(R.id.info_bar_play_pause_img);
 		mInfoBarBackgroundImage = view.findViewById(R.id.info_bar_background);
 		mInfoBarSongText = view.findViewById(R.id.info_bar_music_name);
 		mInfoBarSongImage = view.findViewById(R.id.info_bar_clover);
@@ -1244,18 +1215,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		mMenuButton.setOnClickListener(v -> mPopupMenu.show());
 
 		//just pause or play
-		mPlayButton.setOnClickListener(v -> {
-			// 判断是否播放过, 如没有默认随机播放
-			if (Data.sCurrentMusicItem.getMusicID() != -1) {
-				if (ReceiverOnMusicPlay.isPlayingMusic()) {
-					ReceiverOnMusicPlay.startService(mMainActivity, MusicService.ServiceActions.ACTION_PAUSE);
-				} else {
-					ReceiverOnMusicPlay.startService(mMainActivity, MusicService.ServiceActions.ACTION_PLAY);
-				}
-			} else {
-				ReceiverOnMusicPlay.startService(mMainActivity, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
-			}
-		});
+		mPlayButton.setOnClickListener(v -> playPause());
 
 		mNextButton.setOnClickListener(v -> MusicService.MusicControl.next(mMainActivity));
 
@@ -1299,7 +1259,28 @@ public final class MusicDetailFragment extends BaseFragment {
 			Toast.makeText(mMainActivity, getString(R.string.done), Toast.LENGTH_SHORT).show();
 		});
 
+		mInfoBarPlayButton.setOnClickListener(v -> playPause());
+
 		mNowPlayingBody.setOnClickListener(v -> MainActivity.getHandler().sendEmptyMessage(MainActivity.NotLeakHandler.UP));
+	}
+
+	/**
+	 * 播放按钮逻辑
+	 * <p>
+	 * {@link #mInfoBarPlayButton}
+	 * {@link #mPlayButton}
+	 */
+	private void playPause() {
+		// 判断是否播放过, 如没有默认随机播放
+		if (Data.sCurrentMusicItem.getMusicID() != -1) {
+			if (ReceiverOnMusicPlay.isPlayingMusic()) {
+				ReceiverOnMusicPlay.startService(mMainActivity, MusicService.ServiceActions.ACTION_PAUSE);
+			} else {
+				ReceiverOnMusicPlay.startService(mMainActivity, MusicService.ServiceActions.ACTION_PLAY);
+			}
+		} else {
+			ReceiverOnMusicPlay.startService(mMainActivity, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
+		}
 	}
 
 	/**
@@ -1331,10 +1312,6 @@ public final class MusicDetailFragment extends BaseFragment {
 			setBlurEffect(cover, mBGup, mBGdown, mNextWillText);
 			setSlideInfoBar(name, albumName, cover);
 		});
-	}
-
-	public static NotLeakHandler getHandler() {
-		return mHandler;
 	}
 
 	private void hideToolbar() {
@@ -1453,10 +1430,9 @@ public final class MusicDetailFragment extends BaseFragment {
 	}
 
 	@Override
-	protected void setFragmentType(FragmentType fragmentType) {
-		fragmentType = FragmentType.MUSIC_DETAIL_FRAGMENT;
+	public FragmentType getFragmentType() {
+		return FragmentType.MUSIC_DETAIL_FRAGMENT;
 	}
-
 	/**
 	 * 对于 {@link top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment} 中的背景进行样式设定
 	 */
@@ -1593,12 +1569,18 @@ public final class MusicDetailFragment extends BaseFragment {
 				break;
 
 				case SET_BUTTON_PLAY: {
-					mWeakReference.get().runOnUiThread(() -> mPlayPauseDrawable.setPause(true));
+					mWeakReference.get().runOnUiThread(() -> {
+						mPlayPauseDrawable.setPause(true);
+						mPlayPauseDrawable2InfoBar.setPause(true);
+					});
 				}
 				break;
 
 				case SET_BUTTON_PAUSE: {
-					mWeakReference.get().runOnUiThread(() -> mPlayPauseDrawable.setPlay(true));
+					mWeakReference.get().runOnUiThread(() -> {
+						mPlayPauseDrawable.setPlay(true);
+						mPlayPauseDrawable2InfoBar.setPlay(true);
+					});
 				}
 				break;
 

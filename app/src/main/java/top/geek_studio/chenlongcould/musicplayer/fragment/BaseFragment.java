@@ -3,6 +3,7 @@ package top.geek_studio.chenlongcould.musicplayer.fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -17,7 +18,7 @@ import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
  */
 public abstract class BaseFragment extends Fragment {
 
-	private FragmentType fragmentType = FragmentType.BASE_FRAGMENT;
+	private static final String TAG = "BaseFragment";
 
 	protected SharedPreferences preferences;
 
@@ -28,19 +29,24 @@ public abstract class BaseFragment extends Fragment {
 
 	@Override
 	public void onAttach(@NonNull Context context) {
-		setFragmentType(fragmentType);
 		super.onAttach(context);
 		preferences = PreferenceUtil.getDefault(context);
 	}
 
-	public FragmentType getFragmentType() {
-		return fragmentType;
-	}
-
-	abstract protected void setFragmentType(FragmentType fragmentType);
+	/**
+	 * Get fragment type
+	 */
+	public abstract FragmentType getFragmentType();
 
 	/**
-	 * fragment type for {@link #getFragment(int)}
+	 * override this method, and call {@code super.reloadData()}
+	 */
+	public void reloadData() {
+		Log.d(TAG, "reloadData: reloading... " + getFragmentType());
+	}
+
+	/**
+	 * fragment type for {@link #getFragmentType()}
 	 */
 	public enum FragmentType {
 		BASE_FRAGMENT,
@@ -51,7 +57,5 @@ public abstract class BaseFragment extends Fragment {
 		PLAY_LIST_FRAGMENT,
 		ARTIST_FRAGMENT,
 		FILE_VIEW_FRAGMENT
-	}
-
-	public abstract void reloadData();
+	};
 }

@@ -1,19 +1,23 @@
 package top.geek_studio.chenlongcould.musicplayer.broadcast;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.*;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.IMuiscService;
 import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.CarViewActivity;
@@ -22,6 +26,7 @@ import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
+import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.io.File;
@@ -239,15 +244,44 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 	public static void startService(@NonNull Context context, @NonNull String action) {
 		final ComponentName serviceName = new ComponentName(context, MusicService.class);
-		Intent resumeIntent = new Intent(action);
-		resumeIntent.setComponent(serviceName);
-		context.startService(resumeIntent);
+		Intent intent = new Intent(action);
+		intent.setComponent(serviceName);
+		context.startService(intent);
+		bindServiceImp(context, intent);
 	}
 
 	public static void startService(@NonNull Context context, @NonNull Intent intent) {
 		final ComponentName serviceName = new ComponentName(context, MusicService.class);
 		intent.setComponent(serviceName);
 		context.startService(intent);
+		bindServiceImp(context, intent);
+	}
+
+	public static void startForeceService(@NonNull Context context, @NonNull Intent intent) {
+		final ComponentName serviceName = new ComponentName(context, MusicService.class);
+		intent.setComponent(serviceName);
+		ContextCompat.startForegroundService(context, intent);
+		bindServiceImp(context, intent);
+	}
+
+	public static void bindServiceImp(@NonNull final Context context, Intent intent) {
+		if (context instanceof Activity && Data.sMusicBinder == null) {
+			context.bindService(intent, new ServiceConnection() {
+				@Override
+				public void onServiceConnected(ComponentName name, IBinder service) {
+					Data.sMusicBinder = IMuiscService.Stub.asInterface(service);
+
+					if (Values.TYPE_RANDOM.equals(PreferenceUtil.getDefault(context).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
+						Data.shuffleOrderListSync(context, false);
+					}
+				}
+
+				@Override
+				public void onServiceDisconnected(ComponentName name) {
+					Data.sMusicBinder = null;
+				}
+			}, Context.BIND_AUTO_CREATE);
+		}
 	}
 
 	@Override

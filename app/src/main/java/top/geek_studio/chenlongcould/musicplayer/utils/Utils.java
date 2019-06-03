@@ -773,23 +773,21 @@ public final class Utils {
 			builder.setNegativeButton(resources.getString(R.string.new_list), (dialog, which) -> {
 				final androidx.appcompat.app.AlertDialog.Builder b2 = new androidx.appcompat.app.AlertDialog.Builder(context);
 				b2.setTitle(resources.getString(R.string.enter_name));
-
 				final EditText et = new EditText(context);
 				b2.setView(et);
-
 				et.setHint(resources.getString(R.string.enter_name));
 				et.setSingleLine(true);
 				b2.setNegativeButton(resources.getString(R.string.cancel), null);
 				b2.setPositiveButton(resources.getString(R.string.sure), (dialog1, which1) -> {
 					if (TextUtils.isEmpty(et.getText())) {
-						Toast.makeText(context, "name can not empty!", Toast.LENGTH_SHORT).show();
+						Toast.makeText(context, "Enter name!", Toast.LENGTH_SHORT).show();
 						return;
 					}
 
 					final int result = PlayListsUtil.createPlaylist(context, et.getText().toString());
 
 					if (result != -1) {
-						PlayListsUtil.addToPlaylist(context, musicItem, result, false);
+						PlayListsUtil.addToPlaylist(context, musicItem, result, true);
 					}
 
 					dialog.dismiss();

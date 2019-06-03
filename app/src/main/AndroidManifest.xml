@@ -40,12 +40,6 @@
             tools:replace="android:allowBackup"
             tools:targetApi="n"
             >
-        <activity android:name=".activity.Test2Activity" />
-        <activity
-                android:name=".activity.ScrollingActivity"
-                android:label="@string/title_activity_scrolling"
-                android:theme="@style/LightTheme.NoActionBar"
-                />
 
         <service
                 android:name=".DBArtSync"
@@ -65,11 +59,11 @@
                 >
             <intent-filter>
                 <action android:name="android.intent.action.MUSIC_PLAYER" />
-                <category android:name="android.intent.category.APP_MUSIC" />
 
+                <category android:name="android.intent.category.APP_MUSIC" />
             </intent-filter>
 
-            <!--content-->
+            <!-- content -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -82,7 +76,7 @@
                 <data android:mimeType="application/itunes" />
             </intent-filter>
 
-            <!--file-->
+            <!-- file -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -95,7 +89,7 @@
                 <data android:mimeType="application/itunes" />
             </intent-filter>
 
-            <!--http-->
+            <!-- http -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -108,7 +102,6 @@
                 <data android:mimeType="application/x-ogg" />
                 <data android:mimeType="application/itunes" />
             </intent-filter>
-
         </activity>
         <activity
                 android:name=".activity.SplashActivity"
@@ -153,7 +146,6 @@
                 android:label="@string/title_activity_theme"
                 android:launchMode="singleTask"
                 />
-        <activity android:name=".activity.TestActivity" />
         <activity
                 android:name=".activity.AboutActivity"
                 android:exported="false"
@@ -176,12 +168,11 @@
                     android:resource="@xml/file_path"
                     />
         </provider>
-
         <provider
-                android:authorities="com.lain.preference"
                 android:name=".utils.SharedPreferenceProvider"
-                android:process=":remote"
+                android:authorities="com.lain.preference"
                 android:exported="false"
+                android:process=":remote"
                 />
 
         <service
@@ -219,6 +210,12 @@
                 >
             <intent-filter>
                 <action android:name="android.intent.action.HEADSET_PLUG" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".broadcast.MediaButtonIntentReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </receiver>
 

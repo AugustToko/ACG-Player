@@ -53,8 +53,8 @@ public class PublicFragment extends BaseFragment {
 	}
 
 	@Override
-	protected void setFragmentType(FragmentType fragmentType) {
-		fragmentType = null;
+	public FragmentType getFragmentType() {
+		return null;
 	}
 
 	@Override

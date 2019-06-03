@@ -52,12 +52,8 @@ public final class AlbumListFragment extends BaseFragment {
 	}
 
 	@Override
-	protected void setFragmentType(FragmentType fragmentType) {
-		fragmentType = FragmentType.ALBUM_LIST_FRAGMENT;
-	}
-
-	@Override
 	public void reloadData() {
+		super.reloadData();
 		albumItemList.clear();
 		initAlbumData();
 	}
@@ -66,6 +62,11 @@ public final class AlbumListFragment extends BaseFragment {
 	public void onAttach(@NotNull Context context) {
 		super.onAttach(context);
 		mMainActivity = (MainActivity) getActivity();
+	}
+
+	@Override
+	public FragmentType getFragmentType() {
+		return FragmentType.ALBUM_LIST_FRAGMENT;
 	}
 
 	@Override

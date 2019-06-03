@@ -1,6 +1,5 @@
 package top.geek_studio.chenlongcould.musicplayer;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -50,16 +49,14 @@ public final class Data {
 	public static ArrayList<Disposable> sDisposables = new ArrayList<>();
 
 	public static List<MusicItem> sMusicItems = new ArrayList<>();
+
 	public static List<MusicItem> sMusicItemsBackUp = new ArrayList<>();
 
 	public static List<MusicItem> sPlayOrderList = new ArrayList<>();
 
-	public static void syncPlayOrderList(final Context context, final List<MusicItem> items) {
-		if (Data.sMusicBinder == null) return;
-
+	public synchronized static void syncPlayOrderList(final Context context, final List<MusicItem> items) {
 		Data.sPlayOrderList.clear();
 		Data.sPlayOrderList.addAll(items);
-
 		ReceiverOnMusicPlay.startService(context, MusicService.ServiceActions.ACTION_CLEAR_ITEMS);
 
 		// TODO: 2019/5/31 性能问题
@@ -72,7 +69,7 @@ public final class Data {
 		}
 	}
 
-	public static void syncPlayOrderList(final Context context) {
+	public synchronized static void syncPlayOrderList(final Context context) {
 		ReceiverOnMusicPlay.startService(context, MusicService.ServiceActions.ACTION_CLEAR_ITEMS);
 
 		// TODO: 2019/5/31 性能问题
@@ -97,7 +94,6 @@ public final class Data {
 
 	public static void shuffleOrderListSync(@NonNull final Context context, boolean reset) {
 		Intent intent = new Intent(MusicService.ServiceActions.ACTION_SHUFFLE_ORDER_LIST);
-		final ComponentName serviceName = new ComponentName(context, MusicService.class);
 
 		if (reset) {
 			Data.sPlayOrderList.clear();
@@ -109,8 +105,7 @@ public final class Data {
 			intent.putExtra("random_seed", seed);
 		}
 
-		intent.setComponent(serviceName);
-		context.startService(intent);
+		ReceiverOnMusicPlay.startService(context, intent);
 	}
 
 	/**

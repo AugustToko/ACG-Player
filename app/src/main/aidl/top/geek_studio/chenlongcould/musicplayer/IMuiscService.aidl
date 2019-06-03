@@ -20,6 +20,8 @@ interface IMuiscService {
 
     void removeFromOrderList(in MusicItem item);
 
+    void syncOrderList(in int[] array);
+
     MusicItem getCurrentItem();
 
     int getCurrentIndex();

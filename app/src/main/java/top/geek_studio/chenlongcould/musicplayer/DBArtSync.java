@@ -59,21 +59,28 @@ public final class DBArtSync extends IntentService {
 
 	private void handleActionSyncAlbum() {
 		final Cursor cursor = getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
+		LitePal.useDefault();
 		if (cursor != null && cursor.moveToFirst()) {
-			LitePal.useDefault();
-			do {
-				int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID));
+			if (LitePal.findAll(CustomAlbumPath.class).size() == cursor.getCount()) {
+				Log.d(TAG, "handleActionSyncAlbum: count is same return");
+			}
+			try {
+				do {
+					int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID));
 
-				if (LitePal.where("mAlbumId = ?", String.valueOf(albumId)).find(CustomAlbumPath.class).size() == 0) {
-					Log.d(TAG, "handleActionSyncAlbum: not exists... add albumId: " + albumId);
-					CustomAlbumPath customAlbumPath = new CustomAlbumPath();
-					customAlbumPath.setAlbumId(albumId);
-					customAlbumPath.save();
-				} else {
-					Log.d(TAG, "handleActionSyncAlbum: albumId: " + albumId + " exists...");
-				}
+					if (LitePal.where("mAlbumId = ?", String.valueOf(albumId)).find(CustomAlbumPath.class).size() == 0) {
+						Log.d(TAG, "handleActionSyncAlbum: not exists... add albumId: " + albumId);
+						CustomAlbumPath customAlbumPath = new CustomAlbumPath();
+						customAlbumPath.setAlbumId(albumId);
+						customAlbumPath.save();
+					} else {
+						Log.d(TAG, "handleActionSyncAlbum: albumId: " + albumId + " exists...");
+					}
 
-			} while (cursor.moveToNext());
+				} while (cursor.moveToNext());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			cursor.close();
 		}
 	}
@@ -82,6 +89,9 @@ public final class DBArtSync extends IntentService {
 		final Cursor cursor = getContentResolver().query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Artists.DEFAULT_SORT_ORDER);
 		if (cursor != null && cursor.moveToFirst()) {
 			LitePal.useDefault();
+			if (LitePal.findAll(ArtistArtPath.class).size() == cursor.getCount()) {
+				Log.d(TAG, "handleActionSyncArtist: count is same return");
+			}
 			do {
 				int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID));
 

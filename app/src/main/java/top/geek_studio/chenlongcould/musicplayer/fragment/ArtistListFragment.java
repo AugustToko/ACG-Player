@@ -160,12 +160,12 @@ public final class ArtistListFragment extends BaseFragment {
 	}
 
 	@Override
-	protected void setFragmentType(FragmentType fragmentType) {
-		fragmentType = FragmentType.ARTIST_FRAGMENT;
+	public FragmentType getFragmentType() {
+		return FragmentType.ARTIST_FRAGMENT;
 	}
-
 	@Override
 	public void reloadData() {
+		super.reloadData();
 		artistItemList.clear();
 		initArtistData();
 	}
