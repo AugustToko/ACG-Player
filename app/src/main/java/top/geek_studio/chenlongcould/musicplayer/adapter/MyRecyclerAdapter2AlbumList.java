@@ -1,19 +1,9 @@
-/*
- * ************************************************************
- * 文件：MyRecyclerAdapter2AlbumList.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月27日 13:11:38
- * 上次修改时间：2019年01月27日 13:08:44
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.musicplayer.adapter;
 
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
@@ -27,9 +17,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.content.ContextCompat;
+import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
@@ -116,10 +108,10 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 		viewHolder.mAlbumText.setText(mAlbumNameList.get(viewHolder.getAdapterPosition()).getAlbumName());
 		viewHolder.mImageViewReference.get().setTag(R.string.key_id_3, viewHolder.getAdapterPosition());
 		AlbumItem albumItem = mAlbumNameList.get(viewHolder.getAdapterPosition());
-		albumLoader(mMainActivity, viewHolder.mImageViewReference.get(), albumItem.getAlbumId(), albumItem.getArtist(), albumItem.getAlbumName());
+		albumLoader(mMainActivity, viewHolder.mImageViewReference.get(), viewHolder.mView, albumItem.getAlbumId(), albumItem.getArtist(), albumItem.getAlbumName());
 	}
 
-	private void albumLoader(@NonNull final Context activity, @NonNull final ImageView imageView, final int albumId, @NonNull final String artist, @NonNull final String albumName) {
+	private void albumLoader(@NonNull final Context activity, @NonNull final ImageView imageView, View tagView, final int albumId, @NonNull final String artist, @NonNull final String albumName) {
 		final String[] albumPath = {null};
 
 		final Cursor cursor = activity.getContentResolver().query(
@@ -140,7 +132,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 			final File file = new File(baseCoverPath);
 			if (file.exists()) {
 				Log.d(TAG, "albumLoader: the album id DEFAULT_DB is ability, loading def");
-				loadPath2ImageView(baseCoverPath, imageView);
+				loadPath2ImageView(baseCoverPath, imageView, tagView);
 			} else {
 				//load default res
 				imageView.post(() -> GlideApp.with(imageView)
@@ -174,7 +166,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
 								custom.setAlbumArt(mayPath);
 								custom.save();
-								loadPath2ImageView(mayPath, imageView);
+								loadPath2ImageView(mayPath, imageView, tagView);
 							} else {
 								//DB内不存在Cover, 且缓存也不存在, 进行下载
 								final String request = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" +
@@ -223,7 +215,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 																		e.printStackTrace();
 																	}
 
-																	loadFile2ImageView(file, imageView);
+																	loadPath2ImageView(file.getAbsolutePath(), imageView, tagView);
 																}
 
 																@Override
@@ -255,7 +247,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
 						} else {
 							Log.d(TAG, "albumLoader: has data in DB, loading...");
-							loadFile2ImageView(file, imageView);
+							loadPath2ImageView(file.getAbsolutePath(), imageView, tagView);
 						}
 					} catch (Exception e) {
 						Log.d(TAG, "albumLoader: load customAlbum Error, loading default..., msg: " + e.getMessage());
@@ -272,7 +264,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 					File file = new File(baseCoverPath);
 					if (file.exists()) {
 						Log.d(TAG, "albumLoader: exists...");
-						loadPath2ImageView(baseCoverPath, imageView);
+						loadPath2ImageView(baseCoverPath, imageView, tagView);
 					} else {
 						loadDefaultArt(imageView);
 					}
@@ -285,33 +277,44 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
 	}
 
+//	/**
+//	 * load from defaultDB {@link MediaStore.Audio.Albums}
+//	 */
+//	private void loadFile2ImageView(@NonNull final File path, @NonNull final ImageView imageView) {
+//		if (verify(imageView)) {
+//			imageView.post(() -> imageView.post(() -> GlideApp.with(imageView)
+//					.load(path)
+//					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+//					.centerCrop()
+//					.diskCacheStrategy(DiskCacheStrategy.NONE)
+//					.into(imageView)));
+//		}
+//	}
+
+
 	/**
 	 * load from defaultDB {@link MediaStore.Audio.Albums}
 	 */
-	private void loadFile2ImageView(@NonNull final File path, @NonNull final ImageView imageView) {
+	private void loadPath2ImageView(@NonNull final String path, @NonNull final ImageView imageView, View tagView) {
 		if (verify(imageView)) {
-			imageView.post(() -> imageView.post(() -> GlideApp.with(imageView)
-					.load(path)
-					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-					.centerCrop()
-					.diskCacheStrategy(DiskCacheStrategy.NONE)
-					.into(imageView)));
+			imageView.post(() -> {
+				final Bitmap bitmap = BitmapFactory.decodeFile(path);
+				if (bitmap != null) {
+					@ColorInt int color = Palette.from(bitmap).generate().getVibrantColor(ContextCompat.getColor(mMainActivity, R.color.notVeryBlack));
+					tagView.setBackgroundColor(color);
+				}
+				GlideApp.with(imageView)
+						.load(path)
+						.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+						.centerCrop()
+						.diskCacheStrategy(DiskCacheStrategy.NONE)
+						.into(imageView);
+			});
 		}
 	}
 
+	private void setTagColor(final Bitmap bitmap) {
 
-	/**
-	 * load from defaultDB {@link MediaStore.Audio.Albums}
-	 */
-	private void loadPath2ImageView(@NonNull final String path, @NonNull final ImageView imageView) {
-		if (verify(imageView)) {
-			imageView.post(() -> GlideApp.with(imageView)
-					.load(path)
-					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-					.centerCrop()
-					.diskCacheStrategy(DiskCacheStrategy.NONE)
-					.into(imageView));
-		}
 	}
 
 	/**
