@@ -26,12 +26,14 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.palette.graphics.Palette;
-import io.reactivex.disposables.Disposable;
 import org.litepal.LitePal;
+import org.litepal.LitePalDB;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.MediaButtonIntentReceiver;
+import top.geek_studio.chenlongcould.musicplayer.broadcast.MyHeadSetPlugReceiver;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.Detail;
+import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
@@ -54,13 +56,21 @@ public final class MusicService extends Service {
 
 	public static final String ACG_PLAYER_PACKAGE_NAME = "top.geek_studio.chenlongcould.musicplayer.Common";
 
-	private static MusicItem mMusicItem = null;
+	/**
+	 * 音频文件长度小于 2s ，便排除
+	 */
+	public static final int DEFAULT_SHORT_DURATION = 20000;
+	public static MyHeadSetPlugReceiver mMyHeadSetPlugReceiver = new MyHeadSetPlugReceiver();
 
 	/**
 	 * 最短播放时间为 3000 毫秒
 	 */
 	public static final int MINIMUM_PLAY_TIME = 3000;
-	public static final int DEFAULT_SHORT_DURATION = 20000;
+	/**
+	 * 当前加载完成的 musicItem {@link MusicItem}
+	 */
+	private static MusicItem mMusicItem = null;
+
 	private static WeakReference<MusicService> serviceWeakReference;
 	private final Binder mMusicBinder = new IMuiscService.Stub() {
 
@@ -157,21 +167,24 @@ public final class MusicService extends Service {
 		}
 
 		@Override
-		public int getCurrentIndex() throws RemoteException {
+		public int getCurrentIndex() {
 			return ItemList.CURRENT_MUSIC_INDEX;
 		}
 
 		@Override
-		public void setCurrentIndex(int index) throws RemoteException {
+		public void setCurrentIndex(int index) {
 			ItemList.CURRENT_MUSIC_INDEX = index;
 		}
 	};
+
 	private static boolean HAS_PLAYED = false;
+
 	private MediaSessionCompat mediaSession;
 
 	private AtomicBoolean mIsServiceDestroyed = new AtomicBoolean(false);
 
 	private int mStartNotificationId = 1;
+
 	private PowerManager.WakeLock wakeLock;
 
 	@Override
@@ -201,19 +214,22 @@ public final class MusicService extends Service {
 		//监听耳机(有线或无线)的插拔动作, 拔出暂停音乐
 		final IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
 		intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
-		registerReceiver(Data.mMyHeadSetPlugReceiver, intentFilter);
+		registerReceiver(mMyHeadSetPlugReceiver, intentFilter);
 
 	}
 
 	private void setupMediaSession() {
-		ComponentName mediaButtonReceiverComponentName = new ComponentName(getApplicationContext(), MediaButtonIntentReceiver.class);
+		ComponentName mediaButtonReceiverComponentName = new ComponentName(getApplicationContext()
+				, MediaButtonIntentReceiver.class);
 
 		Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
 		mediaButtonIntent.setComponent(mediaButtonReceiverComponentName);
 
-		PendingIntent mediaButtonReceiverPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, mediaButtonIntent, 0);
+		PendingIntent mediaButtonReceiverPendingIntent = PendingIntent.getBroadcast(getApplicationContext()
+				, 0, mediaButtonIntent, 0);
 
-		mediaSession = new MediaSessionCompat(this, "ACG-Player", mediaButtonReceiverComponentName, mediaButtonReceiverPendingIntent);
+		mediaSession = new MediaSessionCompat(this, "ACG-Player", mediaButtonReceiverComponentName
+				, mediaButtonReceiverPendingIntent);
 		mediaSession.setCallback(new MediaSessionCompat.Callback() {
 			@Override
 			public void onPlay() {
@@ -266,8 +282,12 @@ public final class MusicService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Log.d(TAG, "onStartCommand: ");
-		if (intent == null || ItemList.playOrderList.isEmpty()) return START_STICKY;
+		if (intent == null || ItemList.playOrderList.isEmpty()) {
+			Log.d(TAG, "onStartCommand: intent == null or ItemList.playOrderList is empty");
+			return START_STICKY;
+		} else {
+			Log.d(TAG, "onStartCommand: action: " + intent.getAction() + " extra: " + intent.getExtras());
+		}
 
 		CustomThreadPool.post(() -> {
 			final String action = intent.getAction();
@@ -360,7 +380,7 @@ public final class MusicService extends Service {
 						}
 
 						// previous or next => pn
-						final String pnType = intent.getStringExtra("pnType");
+						final String pnType = intent.getStringExtra(IntentTAG.PN_TYPE);
 
 						if (ServiceActions.ACTION_PN_PREVIOUS.equals(pnType)
 								&& MusicControl.getCurrentPosition() / mMusicItem.getDuration() > 20) {
@@ -570,39 +590,33 @@ public final class MusicService extends Service {
 		final Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null
 				, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
 		if (cursor != null && cursor.moveToFirst()) {
-			//没有歌曲直接退出app
 
+			// skip short duration song(s)
 			final boolean skipShort = PreferenceUtil.getDefault(serviceWeakReference.get())
 					.getBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
 
+			// last played music id
 			int lastId = PreferenceUtil.getDefault(serviceWeakReference.get()).getInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, -1);
 
-//			final LitePalDB blackList = new LitePalDB("BlackList", 1);
-//			blackList.addClassName(MyBlackPath.class.getName());
-//			LitePal.use(blackList);
-//			List<MyBlackPath> lists = LitePal.findAll(MyBlackPath.class);
-//			LitePal.useDefault();
+			final LitePalDB blackList = new LitePalDB("BlackList", 1);
+			blackList.addClassName(MyBlackPath.class.getName());
+			LitePal.use(blackList);
+			List<String> blackListPaths = new ArrayList<>();
+			for (final MyBlackPath blackPath : LitePal.findAll(MyBlackPath.class)) {
+				blackListPaths.add(blackPath.getDirPath());
+			}
+			LitePal.useDefault();
 
 			do {
 				final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-				boolean skip = false;
 
-//				for (int i = 0; i < lists.size(); i++) {
-//					MyBlackPath bp = lists.get(i);
-//					if (path.contains(bp.getDirPath())) {
-//						skip = true;
-//						lists.remove(bp);
-//						break;
-//					}
-//					lists.remove(bp);
-//				}
-
-//				if (skip) {
-//					Log.d(TAG, "loadData: skip the song that in the blacklist");
-//					continue;
-//				}
+				if (blackListPaths.contains(path)) {
+					Log.d(TAG, "loadDataSource: path in black path: " + path);
+					continue;
+				}
 
 				final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+
 				if (skipShort && duration <= DEFAULT_SHORT_DURATION) {
 					Log.d(TAG, "loadDataSource: the music-file duration is " + duration + " (too short), skip...");
 					continue;
@@ -642,6 +656,9 @@ public final class MusicService extends Service {
 		}
 	}
 
+	/**
+	 * start notification
+	 * */
 	private void startFN() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			startForeground(mStartNotificationId, NotificationTool.getChannelNotification(mMusicItem.getMusicName()
@@ -654,8 +671,9 @@ public final class MusicService extends Service {
 
 	@Override
 	public void onDestroy() {
-		MusicControl.release();
 		stopForeground(true);
+		MusicControl.release();
+		MusicControl.mediaPlayer = null;
 		mIsServiceDestroyed.set(true);
 		wakeLock.release();
 		mMusicItem = null;
@@ -665,15 +683,9 @@ public final class MusicService extends Service {
 		}
 
 		try {
-			unregisterReceiver(Data.mMyHeadSetPlugReceiver);
+			unregisterReceiver(mMyHeadSetPlugReceiver);
 		} catch (Exception e) {
 			Log.d(TAG, "onDestroy: " + e.getMessage());
-		}
-
-		for (final Disposable disposable : Data.sDisposables) {
-			if (!disposable.isDisposed()) {
-				disposable.dispose();
-			}
 		}
 
 		super.onDestroy();
@@ -691,6 +703,10 @@ public final class MusicService extends Service {
 		String REPEAT_NONE = "REPEAT_NONE";
 		String REPEAT_LIST = "REPEAT_LIST";
 		String REPEAT_ONE = "REPEAT_ONE";
+	}
+
+	public interface IntentTAG {
+		String PN_TYPE = "pnType";
 	}
 
 	public interface ServiceActions {
@@ -762,7 +778,7 @@ public final class MusicService extends Service {
 		/**
 		 * NotificationId
 		 */
-		public static final String ID = "Player";
+		private static final String ID = "Player";
 
 		public static void init(@NonNull final Context context) {
 			//Notification
@@ -816,12 +832,12 @@ public final class MusicService extends Service {
 			PendingIntent playIntent = PendingIntent.getService(context, 2, play, PendingIntent.FLAG_UPDATE_CURRENT);
 
 			Intent next = new Intent(ServiceActions.ACTION_PN);
-			next.putExtra("pnType", ACG_PLAYER_PACKAGE_NAME + ".pnnext");
+			next.putExtra(IntentTAG.PN_TYPE, ACG_PLAYER_PACKAGE_NAME + ".pnnext");
 			next.setComponent(serviceName);
 			PendingIntent nextIntent = PendingIntent.getService(context, 3, next, PendingIntent.FLAG_UPDATE_CURRENT);
 
 			Intent previous = new Intent(ServiceActions.ACTION_PN);
-			previous.putExtra("pnType", ACG_PLAYER_PACKAGE_NAME + ".pnprevious");
+			previous.putExtra(IntentTAG.PN_TYPE, ACG_PLAYER_PACKAGE_NAME + ".pnprevious");
 			previous.setComponent(serviceName);
 			PendingIntent previousIntent = PendingIntent.getService(context, 4, previous, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -896,7 +912,7 @@ public final class MusicService extends Service {
 					case PlayType.REPEAT_NONE: {
 						if (ItemList.CURRENT_MUSIC_INDEX != ItemList.playOrderList.size()) {
 							Intent intent = new Intent(ServiceActions.ACTION_PN);
-							intent.putExtra("pnType", ServiceActions.ACTION_PN_NEXT);
+							intent.putExtra(IntentTAG.PN_TYPE, ServiceActions.ACTION_PN_NEXT);
 							ReceiverOnMusicPlay.startService(context, intent);
 						}
 					}
@@ -1024,14 +1040,14 @@ public final class MusicService extends Service {
 		public static void next(@Nullable final Context context) {
 			if (context == null) return;
 			Intent next = new Intent(MusicService.ServiceActions.ACTION_PN);
-			next.putExtra("pnType", MusicService.ServiceActions.ACTION_PN_NEXT);
+			next.putExtra(IntentTAG.PN_TYPE, MusicService.ServiceActions.ACTION_PN_NEXT);
 			ReceiverOnMusicPlay.startService(context, next);
 		}
 
 		public static void previous(@Nullable final Context context) {
 			if (context == null) return;
 			Intent next = new Intent(MusicService.ServiceActions.ACTION_PN);
-			next.putExtra("pnType", ServiceActions.ACTION_PN_PREVIOUS);
+			next.putExtra(IntentTAG.PN_TYPE, ServiceActions.ACTION_PN_PREVIOUS);
 			ReceiverOnMusicPlay.startService(context, next);
 		}
 

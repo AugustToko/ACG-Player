@@ -7,11 +7,6 @@ public interface Values {
 
 	int DEF_CROSS_FATE_TIME = 500;
 
-	/**
-	 * final string(s), TAGs
-	 */
-	String INDEX = "index";
-	String TAG_UNIVERSAL_ONE = "TAG_UNIVERSAL_ONE";
 	String TYPE_RANDOM = "RANDOM";
 	String TYPE_COMMON = "COMMON";
 
@@ -20,6 +15,10 @@ public interface Values {
 	 */
 	byte REQUEST_WRITE_EXTERNAL_STORAGE = 60;
 
+	/**
+	 * For {@link top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore.ThemeColumns#THUMBNAIL}
+	 * height and width
+	 */
 	byte MAX_HEIGHT_AND_WIDTH = 100;
 
 	/**
@@ -89,8 +88,6 @@ public interface Values {
 
 	interface BroadCast {
 		String ReceiverOnMusicPlay = "top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay";
-//		String ReceiverOnMusicStop = "top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicStop";
-		//		String ReceiverOnMusicPause = "top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPause";
 	}
 
 	interface DefaultValues {
@@ -103,16 +100,6 @@ public interface Values {
 
 	final class CurrentData {
 
-		/**
-		 * same as
-		 *
-		 * @see UIMODE#MODE_CAR
-		 * @see UIMODE#MODE_COMMON
-		 * @deprecated use {@link UIMODE#MODE_COMMON}, {@link UIMODE#MODE_CAR}
-		 */
-		@Deprecated
-		public static String MODE_CAR = UIMODE.MODE_CAR;
-
 		public static String CURRENT_UI_MODE = UIMODE.MODE_COMMON;
 
 		/**
@@ -120,25 +107,6 @@ public interface Values {
 		 * default value -1 or null
 		 */
 		public static int CURRENT_PAGE_INDEX = 0;
-
-		//		/**
-//		 * 当前序列指针, 指向 {@link Data#sPlayOrderList} 的位置
-//		 */
-		public static volatile int CURRENT_MUSIC_INDEX = -1;
-
-		/**
-		 * 用户手动切歌的播放模式
-		 * 1. random
-		 * 2. common
-		 * <p>
-		 * auto switch
-		 * 1. common
-		 * 2. repeat one
-		 * 3. repeat list
-		 * 4. random
-		 */
-		@Deprecated
-		public static String CURRENT_PLAY_TYPE = "COMMON";
 
 	}
 

@@ -286,10 +286,10 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 			switch (item.getItemId()) {
 				//noinspection PointlessArithmeticExpression
 				case Menu.FIRST + 0: {
-					Data.sNextWillPlayItem = mMusicItems.get(holder.getAdapterPosition());
-					if (Data.sMusicBinder != null) {
+					final MusicItem nextItem = mMusicItems.get(holder.getAdapterPosition());
+					if (Data.sMusicBinder != null && nextItem.getMusicID() != -1) {
 						try {
-							Data.sMusicBinder.setNextWillPlayItem(Data.sNextWillPlayItem);
+							Data.sMusicBinder.setNextWillPlayItem(nextItem);
 						} catch (RemoteException e) {
 							e.printStackTrace();
 						}

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.RemoteException;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,7 +13,6 @@ import io.reactivex.disposables.Disposable;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.geeklibrary.recycler_tools.RecycleViewDivider;
 import top.geek_studio.chenlongcould.geeklibrary.theme.Theme;
-import top.geek_studio.chenlongcould.musicplayer.broadcast.MyHeadSetPlugReceiver;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
@@ -32,6 +32,7 @@ public final class Data {
 
 	/**
 	 * 垃圾箱 (dislike)
+	 * TODO 与 MusicService 同步
 	 */
 	public final static List<MusicItem> S_TRASH_CAN_LIST = new ArrayList<>();
 
@@ -41,6 +42,7 @@ public final class Data {
 	private static final String TAG = "Data";
 
 	public volatile static boolean HAS_BIND = false;
+
 	/**
 	 * 检测app打开后, 是否播放过音乐 (如果没, 默认点击播放按钮为快速随机播放)
 	 */
@@ -53,6 +55,11 @@ public final class Data {
 	public static List<MusicItem> sMusicItemsBackUp = new ArrayList<>();
 
 	public static List<MusicItem> sPlayOrderList = new ArrayList<>();
+	/**
+	 * save temp bitmap
+	 */
+	@Nullable
+	private static Bitmap sCurrentCover = null;
 
 	public synchronized static void syncPlayOrderList(final Context context, final List<MusicItem> items) {
 		Data.sPlayOrderList.clear();
@@ -62,19 +69,7 @@ public final class Data {
 		// TODO: 2019/5/31 性能问题
 		for (MusicItem item : Data.sPlayOrderList) {
 			try {
-				Data.sMusicBinder.addToOrderList(item);
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	public synchronized static void syncPlayOrderList(final Context context) {
-		ReceiverOnMusicPlay.startService(context, MusicService.ServiceActions.ACTION_CLEAR_ITEMS);
-
-		// TODO: 2019/5/31 性能问题
-		for (final MusicItem item : Data.sPlayOrderList) {
-			try {
+				if (Data.sMusicBinder == null) return;
 				Data.sMusicBinder.addToOrderList(item);
 			} catch (RemoteException e) {
 				e.printStackTrace();
@@ -115,12 +110,6 @@ public final class Data {
 
 	public static List<PlayListItem> sPlayListItems = new ArrayList<>();
 
-	/**
-	 * nextWillPlay
-	 * def null
-	 */
-	public static MusicItem sNextWillPlayItem = null;
-
 	public static Theme sTheme = null;
 
 	/**
@@ -132,17 +121,24 @@ public final class Data {
 
 	public static BlurTransformation sBlurTransformationCarView = new BlurTransformation(5, 10);
 
-	public static MyHeadSetPlugReceiver mMyHeadSetPlugReceiver = new MyHeadSetPlugReceiver();
-
 	/**
 	 * public static MusicService.MusicBinder sMusicBinder;
 	 */
 	public static IMuiscService sMusicBinder;
 
-	/**
-	 * save temp bitmap
-	 */
-	private static Bitmap sCurrentCover = null;
+	public synchronized static void syncPlayOrderList(final Context context) {
+		ReceiverOnMusicPlay.startService(context, MusicService.ServiceActions.ACTION_CLEAR_ITEMS);
+
+		// TODO: 2019/5/31 性能问题
+		for (final MusicItem item : Data.sPlayOrderList) {
+			try {
+				if (Data.sMusicBinder == null) return;
+				Data.sMusicBinder.addToOrderList(item);
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
 	private static RecyclerView.ItemDecoration mItemDecoration;
 
@@ -154,11 +150,13 @@ public final class Data {
 		return mItemDecoration;
 	}
 
+	@Nullable
 	public static Bitmap getCurrentCover() {
 		return sCurrentCover;
 	}
 
-	public static void setCurrentCover(@NonNull final Bitmap currentCover) {
+	public static void setCurrentCover(@Nullable final Bitmap currentCover) {
+		if (currentCover == null || currentCover.isRecycled()) return;
 		sCurrentCover = currentCover;
 	}
 

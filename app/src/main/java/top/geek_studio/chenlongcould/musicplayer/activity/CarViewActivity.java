@@ -1,14 +1,3 @@
-/*
- * ************************************************************
- * 文件：CarViewActivity.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:28:59
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.musicplayer.activity;
 
 import android.content.pm.ActivityInfo;
@@ -102,7 +91,7 @@ public final class CarViewActivity extends BaseCompatActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		Values.CurrentData.CURRENT_UI_MODE = Values.CurrentData.MODE_CAR;
+		Values.CurrentData.CURRENT_UI_MODE = Values.UIMODE.MODE_CAR;
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		super.onCreate(savedInstanceState);
 
