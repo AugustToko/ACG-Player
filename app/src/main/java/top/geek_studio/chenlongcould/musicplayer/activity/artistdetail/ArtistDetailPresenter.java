@@ -23,7 +23,7 @@ import java.util.List;
  * @author : chenlongcould
  * @date : 2019/06/04/14
  */
-public class ArtistDetailPresenter implements ArtistDetailContract.Presenter {
+final public class ArtistDetailPresenter implements ArtistDetailContract.Presenter {
 
 	private ArtistDetailContract.View mView;
 

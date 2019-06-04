@@ -826,6 +826,9 @@ public final class MusicService extends Service {
 		String ACTION_STOP = ACG_PLAYER_PACKAGE_NAME + ".stop";
 	}
 
+	/**
+	 * data store
+	 */
 	private static class ItemList {
 		static int CURRENT_MUSIC_INDEX = 0;
 
@@ -931,25 +934,6 @@ public final class MusicService extends Service {
 			//pi(s)
 			Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
 			PendingIntent pi = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-//			Intent intentPause = new Intent(ServiceActions.ACTION_PAUSE);
-//			intentPause.setComponent(serviceName);
-//			PendingIntent pauseIntent = PendingIntent.getService(context, 1, intentPause, PendingIntent.FLAG_UPDATE_CURRENT);
-//
-//			//resume play...(before show notification, must has music in playing...)
-//			Intent play = new Intent(ServiceActions.ACTION_PLAY);
-//			play.setComponent(serviceName);
-//			PendingIntent playIntent = PendingIntent.getService(context, 2, play, PendingIntent.FLAG_UPDATE_CURRENT);
-//
-//			Intent intentNext = new Intent(ServiceActions.ACTION_PN);
-//			intentNext.putExtra(IntentTAG.PN_TYPE, ACG_PLAYER_PACKAGE_NAME + ".pnnext");
-//			intentNext.setComponent(serviceName);
-//			PendingIntent nextIntent = PendingIntent.getService(context, 3, intentNext, PendingIntent.FLAG_UPDATE_CURRENT);
-//
-//			Intent intentPrevious = new Intent(ServiceActions.ACTION_PN);
-//			intentPrevious.putExtra(IntentTAG.PN_TYPE, ACG_PLAYER_PACKAGE_NAME + ".pnprevious");
-//			intentPrevious.setComponent(serviceName);
-//			PendingIntent previousIntent = PendingIntent.getService(context, 4, intentPrevious, PendingIntent.FLAG_UPDATE_CURRENT);
 
 			androidx.media.app.NotificationCompat.MediaStyle mediaStyle = new androidx.media.app.NotificationCompat.MediaStyle();
 			mediaStyle.setMediaSession(mediaSessionCompat.getSessionToken())

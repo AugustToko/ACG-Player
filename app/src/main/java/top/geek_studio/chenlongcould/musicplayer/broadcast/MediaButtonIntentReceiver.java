@@ -32,7 +32,7 @@ import top.geek_studio.chenlongcould.musicplayer.MusicService;
  * Double press: intentNext track
  * Triple press: intentPrevious track
  */
-public class MediaButtonIntentReceiver extends BroadcastReceiver {
+final public class MediaButtonIntentReceiver extends BroadcastReceiver {
 	public static final String TAG = MediaButtonIntentReceiver.class.getSimpleName();
 
 	private static final int MSG_HEADSET_DOUBLE_CLICK_TIMEOUT = 2;

@@ -30,7 +30,7 @@ import java.io.IOException;
 /**
  * @author chenlongcould
  */
-public class AboutActivity extends BaseCompatActivity {
+final public class AboutActivity extends BaseCompatActivity {
 
 	private static final String TAG = "AboutActivity";
 

@@ -95,9 +95,6 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				Data.shuffleOrderListSync(MainActivity.this, false);
 			}
 
-//			DBArtSync.startActionSyncAlbum(MainActivity.this);
-//			DBArtSync.startActionSyncArtist(MainActivity.this);
-
 //			if (Data.sMusicBinder != null && Data.sCurrentMusicItem.getMusicID() != -1) {
 //				try {
 //					Data.sMusicBinder.setCurrentMusicData(Data.sCurrentMusicItem);
@@ -214,15 +211,19 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		preferences = PreferenceUtil.getDefault(this);
 		mMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
+		DBArtSync.startActionSyncAlbum(MainActivity.this);
+
+		DBArtSync.startActionSyncArtist(MainActivity.this);
+
 		loadData();
 
 		initFragmentData();
 
 		initView();
 
-		inflateCommonMenu();
 
 		runOnUiThread(() -> {
+			inflateCommonMenu();
 			//hide
 			getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(false);
 			getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(false);
@@ -233,13 +234,16 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		super.onCreate(savedInstanceState);
 	}
 
+	/**
+	 * clear old data
+	 */
 	private void loadData() {
 
 		// clear old data
 		CustomThreadPool.post(() -> {
 			List<Detail> details = LitePal.findAll(Detail.class);
 			for (Detail d : details) {
-				Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+				final Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
 						null, MediaStore.MediaColumns._ID + "=?", new String[]{String.valueOf(d.getMusicId())}
 						, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
 
@@ -266,9 +270,9 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		String mimeType = intent.getType();
 		String action = intent.getAction();
 
-//		Log.d(TAG, "receivedIntentCheck: uri: " + uri);
-//		Log.d(TAG, "receivedIntentCheck: mimeType: " + mimeType);
-//		Log.d(TAG, "receivedIntentCheck: action: " + action);
+		Log.d(TAG, "receivedIntentCheck: uri: " + uri);
+		Log.d(TAG, "receivedIntentCheck: mimeType: " + mimeType);
+		Log.d(TAG, "receivedIntentCheck: action: " + action);
 
 		ReceiverOnMusicPlay.playFromUri(this, uri);
 
@@ -276,6 +280,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 	@Override
 	protected void onNewIntent(Intent intent) {
+		Log.d(TAG, "onNewIntent: " + intent.toString());
 		super.onNewIntent(intent);
 		receivedIntentCheck(intent);
 	}
@@ -984,9 +989,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		ArtistThreadPool.finish();
 		ItemCoverThreadPool.finish();
 
-		runOnUiThread(() -> {
-			finish();
-		});
+		runOnUiThread(this::finish);
 	}
 
 	@Override
@@ -1349,6 +1352,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 ////////////get///////////////////////get///////////////////////get/////////////////
 
+	@SuppressWarnings("WeakerAccess")
 	public static final class NotLeakHandler extends Handler {
 
 		/**

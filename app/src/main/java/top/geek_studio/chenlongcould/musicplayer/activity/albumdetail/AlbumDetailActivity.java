@@ -83,15 +83,20 @@ public final class AlbumDetailActivity extends BaseCompatActivity implements Alb
 			switch (menuItem.getItemId()) {
 				case R.id.menu_toolbar_album_force_album: {
 					if (!AlbumItem.DEFAULT_ALBUM_ID.equals(intentAlbumId)) {
-						CustomAlbumPath customAlbumPath = paths.get(0);
-						if (menuItem.isChecked()) {
-							menuItem.setChecked(false);
-							customAlbumPath.setForceUse(false);
+						if (paths.size() > 0) {
+							final CustomAlbumPath customAlbumPath = paths.get(0);
+							if (menuItem.isChecked()) {
+								menuItem.setChecked(false);
+								customAlbumPath.setForceUse(false);
+							} else {
+								menuItem.setChecked(true);
+								customAlbumPath.setForceUse(true);
+							}
+							customAlbumPath.save();
 						} else {
-							menuItem.setChecked(true);
-							customAlbumPath.setForceUse(true);
+							Toast.makeText(getApplicationContext(), "CustomAlbumPath DB is empty."
+									, Toast.LENGTH_SHORT).show();
 						}
-						customAlbumPath.save();
 					} else {
 						Toast.makeText(this, "Album Id Error..., finishing...", Toast.LENGTH_SHORT).show();
 						finish();
