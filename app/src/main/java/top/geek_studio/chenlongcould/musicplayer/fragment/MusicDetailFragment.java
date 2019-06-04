@@ -1214,10 +1214,10 @@ public final class MusicDetailFragment extends BaseFragment {
 
 		mMenuButton.setOnClickListener(v -> mPopupMenu.show());
 
-		//just pause or play
+		//just intentPause or play
 		mPlayButton.setOnClickListener(v -> playPause());
 
-		mNextButton.setOnClickListener(v -> MusicService.MusicControl.next(mMainActivity));
+		mNextButton.setOnClickListener(v -> MusicService.MusicControl.intentNext(mMainActivity));
 
 		mNextButton.setOnLongClickListener(v -> {
 			int nowPosition = mSeekBar.getProgress() + ReceiverOnMusicPlay.getDuration() / 20;
@@ -1535,7 +1535,7 @@ public final class MusicDetailFragment extends BaseFragment {
 											} catch (RemoteException e) {
 												e.printStackTrace();
 											}
-											MusicService.MusicControl.next(mMainActivity);
+											MusicService.MusicControl.intentNext(mMainActivity);
 										});
 										gkSnackbar.addCallback(new Snackbar.Callback() {
 											@Override

@@ -75,19 +75,19 @@ public class PlayPauseDrawable extends Drawable {
 		leftPauseBar.rewind();
 		rightPauseBar.rewind();
 
-		// The current distance between the two pause bars.
+		// The current distance between the two intentPause bars.
 		final float barDist = lerp(pauseBarDistance, 0f, progress);
-		// The current width of each pause bar.
+		// The current width of each intentPause bar.
 		float rawBarWidth = lerp(pauseBarWidth, pauseBarHeight / 1.75f, progress);
 		// We have to round the bar width when finishing the progress to prevent the gap
 		// that might occur onDraw because of a pixel is lost when casting float to int instead of rounding it.
 		final float barWidth = progress == 1f ? Math.round(rawBarWidth) : rawBarWidth;
-		// The current position of the left pause bar's top left coordinate.
+		// The current position of the left intentPause bar's top left coordinate.
 		final float firstBarTopLeft = lerp(0f, barWidth, progress);
-		// The current position of the right pause bar's top right coordinate.
+		// The current position of the right intentPause bar's top right coordinate.
 		final float secondBarTopRight = lerp(2f * barWidth + barDist, barWidth + barDist, progress);
 
-		// Draw the left pause bar. The left pause bar transforms into the
+		// Draw the left intentPause bar. The left intentPause bar transforms into the
 		// top half of the play button triangle by animating the position of the
 		// rectangle's top left coordinate and expanding its bottom width.
 		leftPauseBar.moveTo(0f, 0f);
@@ -96,7 +96,7 @@ public class PlayPauseDrawable extends Drawable {
 		leftPauseBar.lineTo(barWidth, 0f);
 		leftPauseBar.close();
 
-		// Draw the right pause bar. The right pause bar transforms into the
+		// Draw the right intentPause bar. The right intentPause bar transforms into the
 		// bottom half of the play button triangle by animating the position of the
 		// rectangle's top right coordinate and expanding its bottom width.
 		rightPauseBar.moveTo(barWidth + barDist, 0f);
@@ -116,10 +116,10 @@ public class PlayPauseDrawable extends Drawable {
 		final float startingRotation = isPlay ? 90f : 0f;
 		canvas.rotate(lerp(startingRotation, startingRotation + 90f, rotationProgress), width / 2f, height / 2f);
 
-		// Position the pause/play button in the center of the drawable's bounds.
+		// Position the intentPause/play button in the center of the drawable's bounds.
 		canvas.translate(Math.round(width / 2f - ((2f * barWidth + barDist) / 2f)), Math.round(height / 2f + (pauseBarHeight / 2f)));
 
-		// Draw the two bars that form the animated pause/play button.
+		// Draw the two bars that form the animated intentPause/play button.
 		canvas.drawPath(leftPauseBar, paint);
 		canvas.drawPath(rightPauseBar, paint);
 

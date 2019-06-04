@@ -28,9 +28,9 @@ import top.geek_studio.chenlongcould.musicplayer.MusicService;
 
 /**
  * Used to control headset playback.
- * Single press: pause/resume
- * Double press: next track
- * Triple press: previous track
+ * Single press: intentPause/resume
+ * Double press: intentNext track
+ * Triple press: intentPrevious track
  */
 public class MediaButtonIntentReceiver extends BroadcastReceiver {
 	public static final String TAG = MediaButtonIntentReceiver.class.getSimpleName();

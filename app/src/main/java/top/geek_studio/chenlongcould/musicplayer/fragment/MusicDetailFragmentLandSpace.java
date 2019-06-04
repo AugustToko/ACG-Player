@@ -154,7 +154,7 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 			mMusicDetail2Binding.includePlayerControlCar.playButton.setImageResource(R.drawable.ic_play_arrow_grey_600_24dp);
 		}
 
-		mMusicDetail2Binding.includePlayerControlCar.nextButton.setOnClickListener(v -> MusicService.MusicControl.next(mCarViewActivity));
+		mMusicDetail2Binding.includePlayerControlCar.nextButton.setOnClickListener(v -> MusicService.MusicControl.intentNext(mCarViewActivity));
 
 		mMusicDetail2Binding.includePlayerControlCar.nextButton.setOnLongClickListener(v -> {
 			int nowPosition = mMusicDetail2Binding.includeSeekBarCar.seekBar.getProgress() + ReceiverOnMusicPlay.getDuration() / 20;
@@ -176,7 +176,7 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 			if (ReceiverOnMusicPlay.getCurrentPosition() > ReceiverOnMusicPlay.getDuration() / 20 || Data.getCurrentIndex() == 0) {
 				ReceiverOnMusicPlay.seekTo(0);
 			} else {
-				MusicService.MusicControl.previous(mCarViewActivity);
+				MusicService.MusicControl.intentPrevious(mCarViewActivity);
 			}
 
 		});

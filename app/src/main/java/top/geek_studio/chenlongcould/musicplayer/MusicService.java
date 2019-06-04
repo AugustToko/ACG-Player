@@ -12,20 +12,22 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.*;
 import android.provider.MediaStore;
+import android.support.v4.media.MediaDescriptionCompat;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
-import androidx.palette.graphics.Palette;
+import androidx.media.session.MediaButtonReceiver;
 import org.litepal.LitePal;
 import org.litepal.LitePalDB;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
@@ -60,6 +62,7 @@ public final class MusicService extends Service {
 	 * 音频文件长度小于 2s ，便排除
 	 */
 	public static final int DEFAULT_SHORT_DURATION = 20000;
+
 	public static MyHeadSetPlugReceiver mMyHeadSetPlugReceiver = new MyHeadSetPlugReceiver();
 
 	/**
@@ -72,6 +75,7 @@ public final class MusicService extends Service {
 	private static MusicItem mMusicItem = null;
 
 	private static WeakReference<MusicService> serviceWeakReference;
+
 	private final Binder mMusicBinder = new IMuiscService.Stub() {
 
 		@Override
@@ -218,6 +222,55 @@ public final class MusicService extends Service {
 
 	}
 
+	private static Bitmap copy(Bitmap bitmap) {
+		Bitmap.Config config = bitmap.getConfig();
+		if (config == null) {
+			config = Bitmap.Config.RGB_565;
+		}
+		try {
+			return bitmap.copy(config, false);
+		} catch (OutOfMemoryError e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private void updateMediaSessionMetaData() {
+		final MusicItem song = mMusicItem;
+
+		if (song.getMusicID() == -1) {
+			mediaSession.setMetadata(null);
+			return;
+		}
+
+		final MediaMetadataCompat.Builder metaData = new MediaMetadataCompat.Builder()
+				.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, song.getArtist())
+				.putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST, song.getArtist())
+				.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, song.getMusicAlbum())
+				.putString(MediaMetadataCompat.METADATA_KEY_TITLE, song.getMusicName())
+				.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, song.getDuration())
+				.putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, ItemList.CURRENT_MUSIC_INDEX + 1)
+				// TODO: 2019/6/4 add  year
+				.putLong(MediaMetadataCompat.METADATA_KEY_YEAR, 0)
+				.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, null);
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			metaData.putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, ItemList.playOrderList.size());
+		}
+
+//		if (PreferenceUtil.getDefault(this).getBoolean(Values.SharedPrefsTag.ALBUM_LOCK_SCREEN, true)) {
+//			final Point screenSize = Utils.Ui.getScreenSize(MusicService.this);
+		metaData.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, copy(ItemList.mCurrentCover));
+		mediaSession.setMetadata(metaData.build());
+
+//			if (PreferenceUtil.getDefault(this).getBoolean(Values.SharedPrefsTag.BLUR_ALBUM_LOCK_SCREEN, true)) {
+//				 ...
+//			}
+//		} else {
+//			mediaSession.setMetadata(metaData.build());
+//		}
+	}
+
 	private void setupMediaSession() {
 		ComponentName mediaButtonReceiverComponentName = new ComponentName(getApplicationContext()
 				, MediaButtonIntentReceiver.class);
@@ -233,37 +286,44 @@ public final class MusicService extends Service {
 		mediaSession.setCallback(new MediaSessionCompat.Callback() {
 			@Override
 			public void onPlay() {
+				Log.d(TAG, "onPlay: mediaSessionCallBack");
 				MusicControl.play(MusicService.this);
 			}
 
 			@Override
 			public void onPause() {
-				MusicControl.pause(MusicService.this);
+				Log.d(TAG, "onPause: mediaSessionCallBack");
+				MusicControl.intentPause(MusicService.this);
 			}
 
 			@Override
 			public void onSkipToNext() {
-				MusicControl.next(MusicService.this);
+				Log.d(TAG, "onSkipToNext: mediaSessionCallBack");
+				MusicControl.intentNext(MusicService.this);
 			}
 
 			@Override
 			public void onSkipToPrevious() {
-				MusicControl.previous(MusicService.this);
+				Log.d(TAG, "onSkipToPrevious: mediaSessionCallBack");
+				MusicControl.intentPrevious(MusicService.this);
 			}
 
 			@Override
 			public void onStop() {
+				Log.d(TAG, "onStop: mediaSessionCallBack");
 				// TODO: 2019/6/3 待完善
 				MusicControl.stopMusic();
 			}
 
 			@Override
 			public void onSeekTo(long pos) {
+				Log.d(TAG, "onSeekTo:  mediaSessionCallBack");
 				MusicControl.seekTo((int) pos);
 			}
 
 			@Override
 			public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
+				Log.d(TAG, "onMediaButtonEvent: mediaSessionCallBack");
 				return MediaButtonIntentReceiver.handleIntent(MusicService.this, mediaButtonEvent);
 			}
 		});
@@ -293,7 +353,7 @@ public final class MusicService extends Service {
 			final String action = intent.getAction();
 
 			if (action != null && ItemList.playOrderList.size() > 0) {
-				Intent updateUI = new Intent();
+				final Intent updateUI = new Intent();
 				updateUI.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
 
 				// 刷新ui的模式
@@ -343,6 +403,7 @@ public final class MusicService extends Service {
 						// 从未播放过说明没有设置过DataSource，同时也不要记录播放统计
 						if (!HAS_PLAYED) {
 							setRandomItemPrepare();
+							updateMediaSessionMetaData();
 							flashMode = ReceiverOnMusicPlay.FLASH_UI_COMMON;
 						} else {
 							flashMode = ReceiverOnMusicPlay.PLAY;
@@ -357,6 +418,9 @@ public final class MusicService extends Service {
 							mMusicItem = ItemList.nextItem;
 							MusicControl.reset(true);
 							MusicControl.setDataSource(mMusicItem);
+
+							updateMediaSessionMetaData();
+
 							MusicControl.prepare();
 							MusicControl.playMusic();
 
@@ -379,7 +443,7 @@ public final class MusicService extends Service {
 							break;
 						}
 
-						// previous or next => pn
+						// intentPrevious or intentNext => pn
 						final String pnType = intent.getStringExtra(IntentTAG.PN_TYPE);
 
 						if (ServiceActions.ACTION_PN_PREVIOUS.equals(pnType)
@@ -403,6 +467,9 @@ public final class MusicService extends Service {
 						mMusicItem = ItemList.playOrderList.get(ItemList.CURRENT_MUSIC_INDEX);
 						MusicControl.reset(true);
 						MusicControl.setDataSource(mMusicItem);
+
+						updateMediaSessionMetaData();
+
 						MusicControl.prepare();
 						MusicControl.playMusic();
 
@@ -429,6 +496,7 @@ public final class MusicService extends Service {
 
 						mMusicItem = ItemList.playOrderList.get(index);
 						MusicControl.setDataSource(mMusicItem);
+						updateMediaSessionMetaData();
 						MusicControl.prepare();
 						MusicControl.playMusic();
 
@@ -442,6 +510,7 @@ public final class MusicService extends Service {
 						ItemList.CURRENT_MUSIC_INDEX = ItemList.playOrderList.indexOf(mMusicItem);
 						MusicControl.reset(true);
 						MusicControl.setDataSource(mMusicItem);
+						updateMediaSessionMetaData();
 						MusicControl.prepare();
 						MusicControl.playMusic();
 
@@ -457,6 +526,7 @@ public final class MusicService extends Service {
 							// 从未播放过说明没有设置过DataSource，同时也不要记录播放统计
 							if (!HAS_PLAYED) {
 								setRandomItemPrepare();
+								updateMediaSessionMetaData();
 								flashMode = ReceiverOnMusicPlay.FLASH_UI_COMMON;
 							} else {
 								flashMode = ReceiverOnMusicPlay.PLAY;
@@ -658,14 +728,13 @@ public final class MusicService extends Service {
 
 	/**
 	 * start notification
-	 * */
+	 * call by {@link MusicControl#playMusic()}
+	 */
 	private void startFN() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			startForeground(mStartNotificationId, NotificationTool.getChannelNotification(mMusicItem.getMusicName()
-					, mMusicItem.getMusicAlbum(), ItemList.mCurrentCover, this, mediaSession).build());
+			startForeground(mStartNotificationId, NotificationTool.getChannelNotification(ItemList.mCurrentCover, this, mediaSession).build());
 		} else {
-			startForeground(mStartNotificationId, NotificationTool.getNotification25(mMusicItem.getMusicName()
-					, mMusicItem.getMusicAlbum(), ItemList.mCurrentCover, this).build());
+			startForeground(mStartNotificationId, NotificationTool.getNotification25(this, mediaSession).build());
 		}
 	}
 
@@ -723,7 +792,7 @@ public final class MusicService extends Service {
 		 * common
 		 */
 		String ACTION_PLAY = ACG_PLAYER_PACKAGE_NAME + ".play";
-		String ACTION_PAUSE = ACG_PLAYER_PACKAGE_NAME + ".pause";
+		String ACTION_PAUSE = ACG_PLAYER_PACKAGE_NAME + ".intentPause";
 		String ACTION_PN = ACG_PLAYER_PACKAGE_NAME + ".pntype";
 		String ACTION_PN_NEXT = ACG_PLAYER_PACKAGE_NAME + ".pnnext";
 		String ACTION_PN_PREVIOUS = ACG_PLAYER_PACKAGE_NAME + ".pnprevious";
@@ -793,101 +862,123 @@ public final class MusicService extends Service {
 			}
 		}
 
-		private static NotificationCompat.Builder getNotification25(final String title, final String content, final @Nullable Bitmap cover, final Context context) {
+		private static NotificationCompat.Builder getNotification25(final Context context, @NonNull final MediaSessionCompat mediaSessionCompat) {
+
+			MediaControllerCompat controller = mediaSessionCompat.getController();
+			MediaMetadataCompat mediaMetadata = controller.getMetadata();
+			MediaDescriptionCompat description = mediaMetadata.getDescription();
+
+			androidx.media.app.NotificationCompat.MediaStyle mediaStyle = new androidx.media.app.NotificationCompat.MediaStyle();
+			mediaStyle.setMediaSession(mediaSessionCompat.getSessionToken())
+					//小型化通知的按钮布局
+					.setShowActionsInCompactView(0, 1, 2)
+					.setShowCancelButton(true)
+					.setCancelButtonIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(context
+							, PlaybackStateCompat.ACTION_STOP));
+
 			final Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
 			final PendingIntent pi = PendingIntent.getActivity(context, 0, intent, 0);
 
-			@SuppressWarnings("UnnecessaryLocalVariable") NotificationCompat.Builder builder = new NotificationCompat.Builder(context, ID)
-					.setContentTitle(title)
-					.setContentText(content)
+			NotificationCompat.Builder builder = new NotificationCompat.Builder(context, ID)
+					.setContentTitle(description.getTitle())
+					.setContentText(description.getSubtitle())
+					.setSubText(description.getDescription())
 					.setSmallIcon(R.drawable.ic_audiotrack_24px)
-					.setLargeIcon(cover == null ? BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px) : cover)
+					.setStyle(mediaStyle)
+					.setLargeIcon(description.getIconBitmap())
 					.setContentIntent(pi)
-					.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
-					.setPriority(NotificationCompat.PRIORITY_DEFAULT)
+					.setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(context,
+							PlaybackStateCompat.ACTION_STOP))
 					.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-					.setAutoCancel(false)
 					.setWhen(System.currentTimeMillis())
-					.setOngoing(true);
+					.setColor(Utils.Ui.getPrimaryColor(context))
+					.setColorized(PreferenceUtil.getDefault(context).getBoolean(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true));
+
+			NotificationCompat.Action[] actions = {
+					new NotificationCompat.Action.Builder(R.drawable.ic_skip_previous_white_24dp, "intentPrevious",
+							MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)).build(),
+					new NotificationCompat.Action.Builder(MusicControl.isPlayingMusic() ?
+							R.drawable.ic_pause_white_24dp : R.drawable.ic_play_arrow_grey_600_24dp, "togglePausePlay"
+							, MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_PLAY_PAUSE)).build(),
+					new NotificationCompat.Action.Builder(R.drawable.ic_skip_next_white_24dp, "intentNext",
+							MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_SKIP_TO_NEXT)).build()
+			};
+
+			for (NotificationCompat.Action a : actions) {
+				builder.addAction(a);
+			}
+
 			return builder;
 		}
 
 		@RequiresApi(api = Build.VERSION_CODES.O)
 		@NonNull
-		private static NotificationCompat.Builder getChannelNotification(final String title, final String content
-				, final @Nullable Bitmap cover, final Context context, @NonNull final MediaSessionCompat mediaSessionCompat) {
-			final ComponentName serviceName = new ComponentName(context, MusicService.class);
+		private static NotificationCompat.Builder getChannelNotification(final @Nullable Bitmap cover
+				, final Context context, @NonNull final MediaSessionCompat mediaSessionCompat) {
+
+			MediaControllerCompat controller = mediaSessionCompat.getController();
+			MediaMetadataCompat mediaMetadata = controller.getMetadata();
+			MediaDescriptionCompat description = mediaMetadata.getDescription();
 
 			//pi(s)
 			Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
 			PendingIntent pi = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-			Intent pause = new Intent(ServiceActions.ACTION_PAUSE);
-			pause.setComponent(serviceName);
-			PendingIntent pauseIntent = PendingIntent.getService(context, 1, pause, PendingIntent.FLAG_UPDATE_CURRENT);
-
-			//resume play...(before show notification, must has music in playing...)
-			Intent play = new Intent(ServiceActions.ACTION_PLAY);
-			play.setComponent(serviceName);
-			PendingIntent playIntent = PendingIntent.getService(context, 2, play, PendingIntent.FLAG_UPDATE_CURRENT);
-
-			Intent next = new Intent(ServiceActions.ACTION_PN);
-			next.putExtra(IntentTAG.PN_TYPE, ACG_PLAYER_PACKAGE_NAME + ".pnnext");
-			next.setComponent(serviceName);
-			PendingIntent nextIntent = PendingIntent.getService(context, 3, next, PendingIntent.FLAG_UPDATE_CURRENT);
-
-			Intent previous = new Intent(ServiceActions.ACTION_PN);
-			previous.putExtra(IntentTAG.PN_TYPE, ACG_PLAYER_PACKAGE_NAME + ".pnprevious");
-			previous.setComponent(serviceName);
-			PendingIntent previousIntent = PendingIntent.getService(context, 4, previous, PendingIntent.FLAG_UPDATE_CURRENT);
+//			Intent intentPause = new Intent(ServiceActions.ACTION_PAUSE);
+//			intentPause.setComponent(serviceName);
+//			PendingIntent pauseIntent = PendingIntent.getService(context, 1, intentPause, PendingIntent.FLAG_UPDATE_CURRENT);
+//
+//			//resume play...(before show notification, must has music in playing...)
+//			Intent play = new Intent(ServiceActions.ACTION_PLAY);
+//			play.setComponent(serviceName);
+//			PendingIntent playIntent = PendingIntent.getService(context, 2, play, PendingIntent.FLAG_UPDATE_CURRENT);
+//
+//			Intent intentNext = new Intent(ServiceActions.ACTION_PN);
+//			intentNext.putExtra(IntentTAG.PN_TYPE, ACG_PLAYER_PACKAGE_NAME + ".pnnext");
+//			intentNext.setComponent(serviceName);
+//			PendingIntent nextIntent = PendingIntent.getService(context, 3, intentNext, PendingIntent.FLAG_UPDATE_CURRENT);
+//
+//			Intent intentPrevious = new Intent(ServiceActions.ACTION_PN);
+//			intentPrevious.putExtra(IntentTAG.PN_TYPE, ACG_PLAYER_PACKAGE_NAME + ".pnprevious");
+//			intentPrevious.setComponent(serviceName);
+//			PendingIntent previousIntent = PendingIntent.getService(context, 4, intentPrevious, PendingIntent.FLAG_UPDATE_CURRENT);
 
 			androidx.media.app.NotificationCompat.MediaStyle mediaStyle = new androidx.media.app.NotificationCompat.MediaStyle();
 			mediaStyle.setMediaSession(mediaSessionCompat.getSessionToken())
 					//小型化通知的按钮布局
-					.setShowActionsInCompactView(0, 1, 2);
+					.setShowActionsInCompactView(0, 1, 2)
+					.setShowCancelButton(true)
+					.setCancelButtonIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(context
+							, PlaybackStateCompat.ACTION_STOP));
 
 			NotificationCompat.Builder builder = new NotificationCompat.Builder(context, ID)
-					.setContentTitle(title)
-					.setContentText(content)
+					.setContentTitle(description.getTitle())
+					.setContentText(description.getSubtitle())
+					.setSubText(description.getDescription())
 					.setSmallIcon(R.drawable.ic_audiotrack_24px)
 					.setStyle(mediaStyle)
-					.setLargeIcon(cover == null ? BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_audiotrack_24px) : cover)
+					.setLargeIcon(description.getIconBitmap())
 					.setContentIntent(pi)
+					.setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(context,
+							PlaybackStateCompat.ACTION_STOP))
 					.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-					.setWhen(System.currentTimeMillis());
+					.setWhen(System.currentTimeMillis())
+					.setColor(Utils.Ui.getPrimaryColor(context))
+					.setColorized(PreferenceUtil.getDefault(context).getBoolean(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true));
 
-			if (MusicControl.isPlayingMusic()) {
-				NotificationCompat.Action[] actions = {
-						new NotificationCompat.Action.Builder(R.drawable.ic_skip_previous_white_24dp, "previous", previousIntent).build(),
-						new NotificationCompat.Action.Builder(R.drawable.ic_pause_white_24dp, "pause", pauseIntent).build(),
-						new NotificationCompat.Action.Builder(R.drawable.ic_skip_next_white_24dp, "next", nextIntent).build()
-				};
+			NotificationCompat.Action[] actions = {
+					new NotificationCompat.Action.Builder(R.drawable.ic_skip_previous_white_24dp, "intentPrevious",
+							MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)).build(),
+					new NotificationCompat.Action.Builder(MusicControl.isPlayingMusic() ?
+							R.drawable.ic_pause_white_24dp : R.drawable.ic_play_arrow_grey_600_24dp, "togglePausePlay"
+							, MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_PLAY_PAUSE)).build(),
+					new NotificationCompat.Action.Builder(R.drawable.ic_skip_next_white_24dp, "intentNext",
+							MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_SKIP_TO_NEXT)).build()
+			};
 
-				for (NotificationCompat.Action a : actions) {
-					builder.addAction(a);
-				}
-
-			} else {
-				NotificationCompat.Action[] actions = {
-						new NotificationCompat.Action.Builder(R.drawable.ic_skip_previous_white_24dp, "previous", previousIntent).build(),
-						new NotificationCompat.Action.Builder(R.drawable.ic_play_arrow_grey_600_24dp, "play", playIntent).build(),
-						new NotificationCompat.Action.Builder(R.drawable.ic_skip_next_white_24dp, "next", nextIntent).build()
-				};
-
-				for (NotificationCompat.Action a : actions) {
-					builder.addAction(a);
-				}
-
+			for (NotificationCompat.Action a : actions) {
+				builder.addAction(a);
 			}
-
-			if (cover != null && !cover.isRecycled()) {
-				Palette palette = Palette.from(cover).generate();
-				builder.setColor(palette.getVibrantColor(Color.TRANSPARENT));
-			} else {
-				builder.setColor(Color.WHITE);
-			}
-
-			builder.setColorized(PreferenceUtil.getDefault(context).getBoolean(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true));
 
 			return builder;
 		}
@@ -979,6 +1070,7 @@ public final class MusicService extends Service {
 		private synchronized static void pauseMusic() {
 			mediaPlayer.pause();
 			serviceWeakReference.get().startFN();
+			serviceWeakReference.get().stopForeground(false);
 		}
 
 		private synchronized static void stopMusic() {
@@ -1037,21 +1129,21 @@ public final class MusicService extends Service {
 
 		//////////////////////EXP
 
-		public static void next(@Nullable final Context context) {
+		public static void intentNext(@Nullable final Context context) {
 			if (context == null) return;
 			Intent next = new Intent(MusicService.ServiceActions.ACTION_PN);
 			next.putExtra(IntentTAG.PN_TYPE, MusicService.ServiceActions.ACTION_PN_NEXT);
 			ReceiverOnMusicPlay.startService(context, next);
 		}
 
-		public static void previous(@Nullable final Context context) {
+		public static void intentPrevious(@Nullable final Context context) {
 			if (context == null) return;
 			Intent next = new Intent(MusicService.ServiceActions.ACTION_PN);
 			next.putExtra(IntentTAG.PN_TYPE, ServiceActions.ACTION_PN_PREVIOUS);
 			ReceiverOnMusicPlay.startService(context, next);
 		}
 
-		public static void itemClick(@NonNull final Context context, @NonNull MusicItem item) {
+		public static void intentItemClick(@NonNull final Context context, @NonNull MusicItem item) {
 			final Intent intent = new Intent(MusicService.ServiceActions.ACTION_ITEM_CLICK);
 			intent.putExtra("item", item);
 			ReceiverOnMusicPlay.startService(context, intent);
@@ -1062,14 +1154,14 @@ public final class MusicService extends Service {
 			ReceiverOnMusicPlay.startService(context, intent);
 		}
 
-		public static void pause(@NonNull final Context context) {
+		public static void intentPause(@NonNull final Context context) {
 			final Intent intent = new Intent(ServiceActions.ACTION_PAUSE);
 			ReceiverOnMusicPlay.startService(context, intent);
 		}
 
-		public static void togglePlayPause(@NonNull final Context context) {
+		public static void intentTogglePlayPause(@NonNull final Context context) {
 			if (isPlayingMusic()) {
-				pause(context);
+				intentPause(context);
 			} else {
 				play(context);
 			}

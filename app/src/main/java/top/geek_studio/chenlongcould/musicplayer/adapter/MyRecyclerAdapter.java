@@ -455,7 +455,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 				}
 
 			} else {
-				MusicService.MusicControl.itemClick(mActivity, mMusicItems.get(holder.getAdapterPosition()));
+				MusicService.MusicControl.intentItemClick(mActivity, mMusicItems.get(holder.getAdapterPosition()));
 			}
 		});
 	}

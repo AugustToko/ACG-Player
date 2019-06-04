@@ -195,7 +195,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 			if (songs != null && !songs.isEmpty()) {
 				try {
 					Data.sMusicBinder.setNextWillPlayItem(songs.get(0));
-					MusicService.MusicControl.next(context);
+					MusicService.MusicControl.intentNext(context);
 				} catch (RemoteException e) {
 					e.printStackTrace();
 				}
@@ -319,10 +319,10 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 				}
 				break;
 
-				//pause music
+				//intentPause music
 				case PAUSE: {
 					MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PAUSE);
-					Log.d(TAG, "onReceive: after pause");
+					Log.d(TAG, "onReceive: after intentPause");
 				}
 				break;
 

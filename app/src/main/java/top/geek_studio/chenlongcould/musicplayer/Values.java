@@ -80,6 +80,8 @@ public interface Values {
 
 		String TRASH_CAN_INFO = "TRASH_CAN_INFO";
 		String SHOW_NOTICE_ADD_TAB = "SHOW_NOTICE_ADD_TAB";
+		String ALBUM_LOCK_SCREEN = "ALBUM_LOCK_SCREEN";
+		String BLUR_ALBUM_LOCK_SCREEN = "BLUR_ALBUM_LOCK_SCREEN";
 	}
 
 	interface IntentTAG {

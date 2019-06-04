@@ -14,13 +14,21 @@ package top.geek_studio.chenlongcould.musicplayer.utils;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
+import android.text.TextUtils;
+import android.widget.EditText;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
 
@@ -38,6 +46,64 @@ public final class PlayListsUtil {
 
 	public static final String DEFAULT_LIST = "Default";
 	private static final String TAG = "PlayListsUtil";
+
+	public static void addListDialog(Context context, MusicItem musicItem) {
+		final Resources resources = context.getResources();
+
+		final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
+		builder.setTitle(resources.getString(R.string.add_to_playlist));
+
+		builder.setNegativeButton(resources.getString(R.string.new_list), (dialog, which) -> {
+			final androidx.appcompat.app.AlertDialog.Builder b2 = new androidx.appcompat.app.AlertDialog.Builder(context);
+			b2.setTitle(resources.getString(R.string.enter_name));
+			final EditText et = new EditText(context);
+			b2.setView(et);
+			et.setHint(resources.getString(R.string.enter_name));
+			et.setSingleLine(true);
+			b2.setNegativeButton(resources.getString(R.string.cancel), null);
+			b2.setPositiveButton(resources.getString(R.string.sure), (dialog1, which1) -> {
+				if (TextUtils.isEmpty(et.getText())) {
+					Toast.makeText(context, "Enter name!", Toast.LENGTH_SHORT).show();
+					return;
+				}
+
+				final int result = PlayListsUtil.createPlaylist(context, et.getText().toString());
+
+				if (result != -1) {
+					PlayListsUtil.addToPlaylist(context, musicItem, result, true);
+				}
+
+				dialog.dismiss();
+				Data.sPlayListItems.add(0, new PlayListItem(result, et.getText().toString()));
+
+				final Intent intent = new Intent(PlayListFragment.ItemChange.ACTION_REFRESH_LIST);
+				LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+			});
+			b2.show();
+		});
+
+		builder.setCancelable(true);
+
+		builder.setSingleChoiceItems(context.getContentResolver()
+						.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null),
+				-1, MediaStore.Audio.Playlists.NAME, (dialog, which) -> {
+					//0 is favourite music list
+					if (which == 0) {
+						PlayListItem favItem = MusicUtil.getFavoritesPlaylist(context);
+						if (favItem != null && favItem.getId() != -1) {
+							if (!PlayListsUtil.doPlaylistContains(context, favItem.getId(), musicItem.getMusicID())) {
+								PlayListsUtil.addToPlaylist(context, musicItem, favItem.getId(), false);
+							} else {
+								Toast.makeText(context, "Already in Favourite music list.", Toast.LENGTH_SHORT).show();
+							}
+						}
+					} else {
+						PlayListsUtil.addToPlaylist(context, musicItem, Data.sPlayListItems.get(which).getId(), false);
+					}
+					dialog.dismiss();
+				});
+		builder.show();
+	}
 
 	/**
 	 * doesPlaylistExist, search by id

@@ -53,7 +53,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 		View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_in_detail, viewGroup, false);
 		ViewHolder holder = new ViewHolder(view);
 
-		view.setOnClickListener(v -> MusicService.MusicControl.itemClick(mContext, mMusicItems.get(holder.getAdapterPosition())));
+		view.setOnClickListener(v -> MusicService.MusicControl.intentItemClick(mContext, mMusicItems.get(holder.getAdapterPosition())));
 
 		holder.mItemMenuButton.setOnClickListener(v -> holder.mPopupMenu.show());
 

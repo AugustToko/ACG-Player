@@ -391,6 +391,7 @@ public class MusicUtil {
 		return playlist.name != null && playlist.name.equals(context.getString(R.string.favorites));
 	}
 
+	@Nullable
 	public static PlayListItem getFavoritesPlaylist(@NonNull final Context context) {
 		return PlaylistLoader.getPlaylist(context, context.getString(R.string.favorites));
 	}
@@ -555,6 +556,7 @@ public class MusicUtil {
 							Log.d(TAG, "deleteTracks: count: " + cursor1.getCount() + "   " + item.getMusicPath());
 							items.add(item);
 						} while (cursor1.moveToNext());
+						cursor1.close();
 					}
 
 					for (final MusicItem item : items) {

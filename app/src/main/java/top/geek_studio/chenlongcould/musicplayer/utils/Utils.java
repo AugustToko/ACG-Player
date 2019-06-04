@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
@@ -21,8 +22,10 @@ import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.*;
 import androidx.annotation.*;
 import androidx.appcompat.app.AlertDialog;
@@ -406,6 +409,13 @@ public final class Utils {
 
 		private static final String TAG = "Ui";
 
+		public static Point getScreenSize(@NonNull Context c) {
+			Display display = ((WindowManager) c.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+			Point size = new Point();
+			display.getSize(size);
+			return size;
+		}
+
 		// FIXME: 2019/5/24
 		public static void releaseImageViewResource(@NonNull Context context, @NonNull ImageView imageView, @Nullable Bitmap replace) {
 			final Drawable drawable = imageView.getDrawable();
@@ -763,62 +773,11 @@ public final class Utils {
 		 *
 		 * @param context   MainActivity
 		 * @param musicItem MusicItem
+		 *
+		 * @deprecated use {@link PlayListsUtil#addListDialog(Context, MusicItem)}
 		 */
 		public static void addListDialog(Context context, MusicItem musicItem) {
-			final Resources resources = context.getResources();
-
-			final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
-			builder.setTitle(resources.getString(R.string.add_to_playlist));
-
-			builder.setNegativeButton(resources.getString(R.string.new_list), (dialog, which) -> {
-				final androidx.appcompat.app.AlertDialog.Builder b2 = new androidx.appcompat.app.AlertDialog.Builder(context);
-				b2.setTitle(resources.getString(R.string.enter_name));
-				final EditText et = new EditText(context);
-				b2.setView(et);
-				et.setHint(resources.getString(R.string.enter_name));
-				et.setSingleLine(true);
-				b2.setNegativeButton(resources.getString(R.string.cancel), null);
-				b2.setPositiveButton(resources.getString(R.string.sure), (dialog1, which1) -> {
-					if (TextUtils.isEmpty(et.getText())) {
-						Toast.makeText(context, "Enter name!", Toast.LENGTH_SHORT).show();
-						return;
-					}
-
-					final int result = PlayListsUtil.createPlaylist(context, et.getText().toString());
-
-					if (result != -1) {
-						PlayListsUtil.addToPlaylist(context, musicItem, result, true);
-					}
-
-					dialog.dismiss();
-					Data.sPlayListItems.add(0, new PlayListItem(result, et.getText().toString()));
-
-					final Intent intent = new Intent(PlayListFragment.ItemChange.ACTION_REFRESH_LIST);
-					LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-				});
-				b2.show();
-			});
-
-			builder.setCancelable(true);
-
-			builder.setSingleChoiceItems(context.getContentResolver()
-							.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null),
-					-1, MediaStore.Audio.Playlists.NAME, (dialog, which) -> {
-						//0 is favourite music list
-						if (which == 0) {
-							PlayListItem favItem = MusicUtil.getFavoritesPlaylist(context);
-							if (!PlayListsUtil.doPlaylistContains(context, favItem.getId(), musicItem.getMusicID())) {
-								PlayListsUtil.addToPlaylist(context, musicItem, MusicUtil.getFavoritesPlaylist(context).getId(), false);
-							} else {
-								Toast.makeText(context, "Already in Favourite music list.", Toast.LENGTH_SHORT).show();
-							}
-						} else {
-							PlayListsUtil.addToPlaylist(context, musicItem, Data.sPlayListItems.get(which).getId(), false);
-						}
-						dialog.dismiss();
-					});
-			builder.show();
-
+			PlayListsUtil.addListDialog(context, musicItem);
 		}
 
 		/**
