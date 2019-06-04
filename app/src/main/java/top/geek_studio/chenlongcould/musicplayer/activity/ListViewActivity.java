@@ -91,6 +91,7 @@ public final class ListViewActivity extends BaseCompatActivity {
 		Data.sPlayOrderListBackup.clear();
 		Data.sPlayOrderListBackup.addAll(Data.sPlayOrderList);
 
+
 		if (mType != null) {
 			switch (mType) {
 				case FragmentType.ACTION_ADD_RECENT: {

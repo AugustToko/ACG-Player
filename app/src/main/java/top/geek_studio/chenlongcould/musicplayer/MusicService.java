@@ -363,12 +363,14 @@ public final class MusicService extends Service {
 					//no ui update
 					case ServiceActions.ACTION_CLEAR_ITEMS: {
 						ItemList.playOrderList.clear();
+						ItemList.CURRENT_MUSIC_INDEX = 0;
 					}
 					break;
 
 					case ServiceActions.ACTION_RESET_LIST: {
 						ItemList.playOrderList.clear();
 						ItemList.playOrderList.addAll(ItemList.playOrderListBK);
+						ItemList.CURRENT_MUSIC_INDEX = 0;
 					}
 					break;
 
@@ -849,6 +851,9 @@ public final class MusicService extends Service {
 		 */
 		private static final String ID = "Player";
 
+		private static NotificationCompat.Action actionSkipPrevious;
+		private static NotificationCompat.Action actionSkipnext;
+
 		public static void init(@NonNull final Context context) {
 			//Notification
 			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -860,6 +865,14 @@ public final class MusicService extends Service {
 				channel.setSound(null, null);
 				((NotificationManager) context.getSystemService(NOTIFICATION_SERVICE)).createNotificationChannel(channel);
 			}
+
+
+			actionSkipPrevious = new NotificationCompat.Action.Builder(R.drawable.ic_skip_previous_white_24dp, "intentPrevious",
+					MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)).build();
+
+			actionSkipnext = new NotificationCompat.Action.Builder(R.drawable.ic_skip_next_white_24dp, "intentNext",
+					MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_SKIP_TO_NEXT)).build();
+
 		}
 
 		private static NotificationCompat.Builder getNotification25(final Context context, @NonNull final MediaSessionCompat mediaSessionCompat) {
@@ -894,19 +907,14 @@ public final class MusicService extends Service {
 					.setColor(Utils.Ui.getPrimaryColor(context))
 					.setColorized(PreferenceUtil.getDefault(context).getBoolean(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true));
 
-			NotificationCompat.Action[] actions = {
-					new NotificationCompat.Action.Builder(R.drawable.ic_skip_previous_white_24dp, "intentPrevious",
-							MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)).build(),
-					new NotificationCompat.Action.Builder(MusicControl.isPlayingMusic() ?
-							R.drawable.ic_pause_white_24dp : R.drawable.ic_play_arrow_grey_600_24dp, "togglePausePlay"
-							, MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_PLAY_PAUSE)).build(),
-					new NotificationCompat.Action.Builder(R.drawable.ic_skip_next_white_24dp, "intentNext",
-							MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_SKIP_TO_NEXT)).build()
-			};
+			builder.addAction(actionSkipPrevious);
 
-			for (NotificationCompat.Action a : actions) {
-				builder.addAction(a);
-			}
+			builder.addAction(new NotificationCompat.Action.Builder(MusicControl.isPlayingMusic() ?
+					R.drawable.ic_pause_white_24dp : R.drawable.ic_play_arrow_grey_600_24dp, "togglePausePlay"
+					, MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_PLAY_PAUSE)).build()
+			);
+
+			builder.addAction(actionSkipnext);
 
 			return builder;
 		}
@@ -966,19 +974,14 @@ public final class MusicService extends Service {
 					.setColor(Utils.Ui.getPrimaryColor(context))
 					.setColorized(PreferenceUtil.getDefault(context).getBoolean(Values.SharedPrefsTag.NOTIFICATION_COLORIZED, true));
 
-			NotificationCompat.Action[] actions = {
-					new NotificationCompat.Action.Builder(R.drawable.ic_skip_previous_white_24dp, "intentPrevious",
-							MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)).build(),
-					new NotificationCompat.Action.Builder(MusicControl.isPlayingMusic() ?
-							R.drawable.ic_pause_white_24dp : R.drawable.ic_play_arrow_grey_600_24dp, "togglePausePlay"
-							, MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_PLAY_PAUSE)).build(),
-					new NotificationCompat.Action.Builder(R.drawable.ic_skip_next_white_24dp, "intentNext",
-							MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_SKIP_TO_NEXT)).build()
-			};
+			builder.addAction(actionSkipPrevious);
 
-			for (NotificationCompat.Action a : actions) {
-				builder.addAction(a);
-			}
+			builder.addAction(new NotificationCompat.Action.Builder(MusicControl.isPlayingMusic() ?
+					R.drawable.ic_pause_white_24dp : R.drawable.ic_play_arrow_grey_600_24dp, "togglePausePlay"
+					, MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_PLAY_PAUSE)).build()
+			);
+
+			builder.addAction(actionSkipnext);
 
 			return builder;
 		}
