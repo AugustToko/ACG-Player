@@ -116,7 +116,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	public static final char MUSIC_LIST_FRAGMENT_ID = '1';
 	public static final char ALBUM_LIST_FRAGMENT_ID = '2';
 	public static final char ARTIST_LIST_FRAGMENT_ID = '3';
-	public static final char PLAYT_LIST_FRAGMENT_ID = '4';
+	public static final char PLAY_LIST_FRAGMENT_ID = '4';
 	public static final char FILE_LIST_FRAGMENT_ID = '5';
 	public static final char MUSIC_DETAIL_FRAGMENT_ID = '6';
 
@@ -1287,7 +1287,10 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 	}
 
-	public void setSubtitle(CharSequence subTitle) {
+	/**
+	 * setup subtitle with animation
+	 */
+	public void setSubtitle(@NonNull final CharSequence subTitle) {
 		try {
 			super.setToolbarSubTitleWithAlphaAnimation(mMainBinding.toolBar, subTitle);
 		} catch (NoSuchFieldException e) {
