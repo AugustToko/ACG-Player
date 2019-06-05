@@ -43,7 +43,9 @@ import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.albumdetail.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
+import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
+import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -277,44 +279,34 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
 	}
 
-//	/**
-//	 * load from defaultDB {@link MediaStore.Audio.Albums}
-//	 */
-//	private void loadFile2ImageView(@NonNull final File path, @NonNull final ImageView imageView) {
-//		if (verify(imageView)) {
-//			imageView.post(() -> imageView.post(() -> GlideApp.with(imageView)
-//					.load(path)
-//					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-//					.centerCrop()
-//					.diskCacheStrategy(DiskCacheStrategy.NONE)
-//					.into(imageView)));
-//		}
-//	}
-
-
 	/**
 	 * load from defaultDB {@link MediaStore.Audio.Albums}
 	 */
 	private void loadPath2ImageView(@NonNull final String path, @NonNull final ImageView imageView, View tagView) {
 		if (verify(imageView)) {
 			imageView.post(() -> {
-				final Bitmap bitmap = BitmapFactory.decodeFile(path);
-				if (bitmap != null) {
-					@ColorInt int color = Palette.from(bitmap).generate().getVibrantColor(ContextCompat.getColor(mMainActivity, R.color.notVeryBlack));
-					tagView.setBackgroundColor(color);
-				}
 				GlideApp.with(imageView)
 						.load(path)
 						.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
 						.centerCrop()
 						.diskCacheStrategy(DiskCacheStrategy.NONE)
+						.override(250, 250)
 						.into(imageView);
+
+				CustomThreadPool.post(() -> {
+					Bitmap bitmap = Utils.Ui.readBitmapFromFile(path, 100, 100);
+					if (bitmap != null) {
+						@ColorInt int color = Palette.from(bitmap).generate().getVibrantColor(ContextCompat.getColor(mMainActivity, R.color.notVeryBlack));
+						imageView.post(() -> {
+							tagView.setBackgroundColor(color);
+							if (!bitmap.isRecycled()) {
+								bitmap.recycle();
+							}
+						});
+					}
+				});
 			});
 		}
-	}
-
-	private void setTagColor(final Bitmap bitmap) {
-
 	}
 
 	/**
