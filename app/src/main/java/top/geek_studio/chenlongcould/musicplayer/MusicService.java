@@ -222,21 +222,9 @@ public final class MusicService extends Service {
 
 	}
 
-	private static Bitmap copy(Bitmap bitmap) {
-		Bitmap.Config config = bitmap.getConfig();
-		if (config == null) {
-			config = Bitmap.Config.RGB_565;
-		}
-		try {
-			return bitmap.copy(config, false);
-		} catch (OutOfMemoryError e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-
 	private void updateMediaSessionMetaData() {
 		final MusicItem song = mMusicItem;
+		Log.d(TAG, "updateMediaSessionMetaData: " + song.getMusicID());
 
 		if (song.getMusicID() == -1) {
 			mediaSession.setMetadata(null);
@@ -260,8 +248,9 @@ public final class MusicService extends Service {
 
 //		if (PreferenceUtil.getDefault(this).getBoolean(Values.SharedPrefsTag.ALBUM_LOCK_SCREEN, true)) {
 //			final Point screenSize = Utils.Ui.getScreenSize(MusicService.this);
-		metaData.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, copy(ItemList.mCurrentCover));
+		metaData.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, ItemList.mCurrentCover);
 		mediaSession.setMetadata(metaData.build());
+		Log.d(TAG, "updateMediaSessionMetaData: build done");
 
 //			if (PreferenceUtil.getDefault(this).getBoolean(Values.SharedPrefsTag.BLUR_ALBUM_LOCK_SCREEN, true)) {
 //				 ...
@@ -527,10 +516,12 @@ public final class MusicService extends Service {
 						} else {
 							// 从未播放过说明没有设置过DataSource，同时也不要记录播放统计
 							if (!HAS_PLAYED) {
+								Log.d(TAG, "onStartCommand: has not played");
 								setRandomItemPrepare();
 								updateMediaSessionMetaData();
 								flashMode = ReceiverOnMusicPlay.FLASH_UI_COMMON;
 							} else {
+								Log.d(TAG, "onStartCommand: has played");
 								flashMode = ReceiverOnMusicPlay.PLAY;
 							}
 							MusicControl.playMusic();
@@ -655,7 +646,7 @@ public final class MusicService extends Service {
 		return mMusicBinder;
 	}
 
-	private void loadDataSource() {
+	private synchronized void loadDataSource() {
 		ItemList.playOrderList.clear();
 
 		/*---------------------- init Data!!!! -------------------*/
@@ -742,6 +733,8 @@ public final class MusicService extends Service {
 
 	@Override
 	public void onDestroy() {
+		Log.d(TAG, "onDestroy: ");
+		HAS_PLAYED = false;
 		stopForeground(true);
 		MusicControl.release();
 		MusicControl.mediaPlayer = null;
@@ -928,7 +921,7 @@ public final class MusicService extends Service {
 				, final Context context, @NonNull final MediaSessionCompat mediaSessionCompat) {
 
 			MediaControllerCompat controller = mediaSessionCompat.getController();
-			MediaMetadataCompat mediaMetadata = controller.getMetadata();
+			@Nullable MediaMetadataCompat mediaMetadata = controller.getMetadata();
 			MediaDescriptionCompat description = mediaMetadata.getDescription();
 
 			//pi(s)

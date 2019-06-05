@@ -42,11 +42,6 @@
             tools:targetApi="n"
             >
 
-        <service
-                android:name=".DBArtSync"
-                android:exported="false"
-                />
-
         <activity
                 android:name=".activity.DetailActivity"
                 android:label="@string/title_activity_detail"
@@ -55,9 +50,17 @@
         <activity
                 android:name=".activity.MainActivity"
                 android:launchMode="singleTask"
-                android:theme="@style/LightTheme"
+                android:theme="@style/MainActivityTheme"
                 android:windowSoftInputMode="stateHidden|adjustPan"
                 >
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.MUSIC_PLAYER" />
 
@@ -110,12 +113,12 @@
                 android:launchMode="singleTask"
                 android:theme="@style/SplashActivityTheme"
                 >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            <!--<intent-filter>-->
+            <!--<action android:name="android.intent.action.MAIN" />-->
 
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
+            <!--<category android:name="android.intent.category.LAUNCHER" />-->
+            <!--<category android:name="android.intent.category.DEFAULT" />-->
+            <!--</intent-filter>-->
         </activity>
         <activity
                 android:name=".activity.ListViewActivity"
@@ -191,6 +194,10 @@
                 android:enabled="true"
                 android:exported="false"
                 android:process=":musicService"
+                />
+        <service
+                android:name=".DBArtSync"
+                android:exported="false"
                 />
 
         <receiver

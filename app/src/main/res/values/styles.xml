@@ -41,6 +41,14 @@
         <item name="android:windowBackground">@drawable/activity_bg_bitmap</item>
     </style>
 
+    <style name="MainActivityTheme" parent="MyBaseTheme">
+        <item name="android:windowBackground">@drawable/activity_bg_bitmap</item>
+        <!--colorPrimaryDark 默认作用于状态栏颜色-->
+        <!--<item name="colorPrimaryDark">@color/colorPrimaryDark</item>-->
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
     <style name="LightTheme" parent="CommonActivityTheme">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>

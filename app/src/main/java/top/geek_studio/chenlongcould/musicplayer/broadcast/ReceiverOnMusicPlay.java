@@ -60,7 +60,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 	public static boolean isPlayingMusic() {
 		if (Data.sMusicBinder == null) {
-			Log.d(TAG, "MusicBinder is null.");
+			Log.d(TAG, "isPlayingMusic: MusicBinder is null.");
 			return false;
 		}
 		try {
@@ -75,7 +75,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 	public static int getCurrentPosition() {
 		if (Data.sMusicBinder == null) {
-			Log.d(TAG, "MusicBinder is null.");
+			Log.d(TAG, "getCurrentPosition: MusicBinder is null.");
 			return 0;
 		}
 		try {
@@ -88,7 +88,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 	public static void seekTo(int nowPosition) {
 		if (Data.sMusicBinder == null) {
-			Log.d(TAG, "MusicBinder is null.");
+			Log.d(TAG, "seekTo: MusicBinder is null.");
 			return;
 		}
 		try {
@@ -112,7 +112,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 	@Nullable
 	public static MusicItem getCurrentItem() {
 		if (Data.sMusicBinder == null) {
-			Log.d(TAG, "MusicBinder is null.");
+			Log.d(TAG, "getCurrentItem: MusicBinder is null.");
 			return null;
 		}
 		try {
@@ -258,6 +258,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 	}
 
 	public static void startForeceService(@NonNull Context context, @NonNull Intent intent) {
+		Log.d(TAG, "startForeceService: ");
 		final ComponentName serviceName = new ComponentName(context, MusicService.class);
 		intent.setComponent(serviceName);
 		ContextCompat.startForegroundService(context, intent);
@@ -296,8 +297,9 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 				case FLASH_UI_COMMON: {
 					Log.d(TAG, "onReceive: common");
 					final MusicItem item = intent.getParcelableExtra("item");
-					if (item != null) {
+					if (item != null && item.getMusicID() != -1) {
 						if (item.getMusicID() == Data.sCurrentMusicItem.getMusicID()) {
+							Log.d(TAG, "onReceive: item is same break");
 							break;
 						} else {
 							Data.sCurrentMusicItem = item;
@@ -309,6 +311,8 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 						MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
 						MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_CURRENT_DATA);
 						sureCar();
+					} else {
+						Log.d(TAG, "onReceive: common receiver item is null");
 					}
 				}
 				break;

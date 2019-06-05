@@ -2,6 +2,7 @@ package top.geek_studio.chenlongcould.musicplayer.activity;
 
 import android.app.ActivityManager;
 import android.content.*;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -28,6 +29,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
@@ -205,12 +207,20 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		preferences = PreferenceUtil.getDefault(this);
 		mHandlerThread = new HandlerThread("HandlerThread@MainActivity");
 		mHandlerThread.start();
 		mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
-		preferences = PreferenceUtil.getDefault(this);
 		mMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
+		initPermission();
+
+		initView();
+
+		super.onCreate(savedInstanceState);
+	}
+
+	private void init() {
 		DBArtSync.startActionSyncAlbum(MainActivity.this);
 
 		DBArtSync.startActionSyncArtist(MainActivity.this);
@@ -219,19 +229,44 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 
 		initFragmentData();
 
-		initView();
-
-
-		runOnUiThread(() -> {
-			inflateCommonMenu();
-			//hide
-			getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(false);
-			getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(false);
-		});
-
 		receivedIntentCheck(getIntent());
+	}
 
-		super.onCreate(savedInstanceState);
+	/**
+	 * init permission, every Activity extends {@link BaseCompatActivity}
+	 */
+	public void initPermission() {
+		if (ContextCompat.checkSelfPermission(this,
+				android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+			ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, Values.REQUEST_WRITE_EXTERNAL_STORAGE);
+		} else {
+			init();
+		}
+	}
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+		switch (requestCode) {
+			case Values.REQUEST_WRITE_EXTERNAL_STORAGE: {
+				if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+					Utils.Ui.fastToast(this, "Failed to get permission, again!");
+					final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+					builder.setTitle("Failed to get permission");
+					builder.setMessage("Try again?");
+					builder.setCancelable(false);
+					builder.setNegativeButton("Sure!", (dialog, which) -> initPermission());
+					builder.setNeutralButton("Cancel!", (dialog, which) -> {
+						dialog.dismiss();
+						finish();
+					});
+					builder.show();
+				} else {
+					init();
+				}
+			}
+			break;
+			default:
+		}
 	}
 
 	/**
@@ -1287,6 +1322,13 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 		mDrawerToggle = new ActionBarDrawerToggle(this, mMainBinding.drawerLayout, mMainBinding.toolBar, R.string.open, R.string.close);
 		mDrawerToggle.syncState();
 		mMainBinding.drawerLayout.addDrawerListener(mDrawerToggle);
+
+		runOnUiThread(() -> {
+			inflateCommonMenu();
+			//hide
+			getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(false);
+			getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(false);
+		});
 
 	}
 

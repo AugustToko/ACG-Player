@@ -387,7 +387,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 		mSettingsBinding.statusColor.setOnClickListener(v -> {
 			final SharedPreferences.Editor editor = preferences.edit();
 			if (preferences.getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, true)) {
-				editor.putBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, true);
+				editor.putBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, false);
 				mSettingsBinding.colorStatusSwitch.setChecked(false);
 			} else {
 				editor.putBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, true);

@@ -19,6 +19,10 @@ import io.reactivex.disposables.Disposable;
 import org.litepal.LitePal;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.database.ArtistArtPath;
+import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
+import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
+import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.io.File;
@@ -36,7 +40,7 @@ public final class App extends Application {
 	public static final String PRIVACY_POLICY_URL = "https://github.com/AugustToko/ACG-Player/blob/master/Privacy%20policy.md";
 	public static final String ISSUE_URL = "https://github.com/AugustToko/ACG-Player/issues/new/choose";
 	public static final String VERSION_CODE = "ver_code";
-	public static final int VER_CODE = 74;
+	public static final int VER_CODE = 108;
 	public static final String SHORTCUT_RANDOM = "SHORTCUT_RANDOM";
 	private static final String TAG = "App";
 	
@@ -65,21 +69,30 @@ public final class App extends Application {
 		LitePal.initialize(this);
 		
 		String processName = getProcessName(this);
-		
-		if (processName != null && processName.equals(getPackageName() + PKG_SUFFIX)) {
-			if (PreferenceManager.getDefaultSharedPreferences(this).getLong(VERSION_CODE, -1) != VER_CODE) {
-				File file = getExternalFilesDir(ThemeStore.DIR_NAME);
-				if (file != null) {
+
+		Log.d(TAG, "onCreate: " + processName);
+
+		if (processName != null && !processName.contains("remote")) {
+
+			// 升级版本清空数据
+			if (PreferenceUtil.getDefault(this).getInt(VERSION_CODE, 0) != VER_CODE) {
+				Log.d(TAG, "onCreate: clear data");
+
+				final File file = getExternalFilesDir(ThemeStore.DIR_NAME);
+				if (file != null && file.exists()) {
 					Utils.IO.delFolder(file.getAbsolutePath());
 				}
-			}
-			
-			//add version code
-			final SharedPreferences.Editor verEdit = PreferenceManager.getDefaultSharedPreferences(this).edit();
-			verEdit.putLong(VERSION_CODE, VER_CODE);
-			verEdit.apply();
 
-			Values.BackgroundStyle.DETAIL_BACKGROUND = PreferenceManager.getDefaultSharedPreferences(this)
+				//add version code
+				final SharedPreferences.Editor verEdit = PreferenceUtil.getDefault(this).edit();
+				verEdit.putLong(VERSION_CODE, VER_CODE);
+				verEdit.apply();
+
+				LitePal.deleteAll(CustomAlbumPath.class);
+				LitePal.deleteAll(ArtistArtPath.class);
+			}
+
+			MusicDetailFragment.BackgroundStyle.DETAIL_BACKGROUND = PreferenceManager.getDefaultSharedPreferences(this)
 					.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.BackgroundStyle.STYLE_BACKGROUND_BLUR);
 
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {

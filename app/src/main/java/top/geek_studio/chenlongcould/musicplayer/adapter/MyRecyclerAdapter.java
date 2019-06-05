@@ -57,6 +57,7 @@ import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
+import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
@@ -299,7 +300,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 				//add to list
 				case Menu.FIRST + 2: {
-					Utils.DataSet.addListDialog(mActivity, mMusicItems.get(holder.getAdapterPosition()));
+					PlayListsUtil.addListDialog(mActivity, mMusicItems.get(holder.getAdapterPosition()));
 				}
 				break;
 

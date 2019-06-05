@@ -13,6 +13,7 @@ package top.geek_studio.chenlongcould.musicplayer.fragment;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -24,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -75,13 +77,21 @@ public final class FileViewFragment extends BaseFragment {
 	}
 
 	private void initData() {
-		final File file = Environment.getExternalStorageDirectory();
-		mFileItems.addAll(new ArrayList<>(Arrays.asList(file.listFiles())));
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-			mFileItems.sort(File::compareTo);
+		if (ContextCompat.checkSelfPermission(mMainActivity,
+				android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+			final File file = Environment.getExternalStorageDirectory();
+			if (file != null && file.exists()) {
+				List<File> files = Arrays.asList(file.listFiles());
+				if (files != null && files.size() > 0) {
+					mFileItems.addAll(files);
+				}
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+					mFileItems.sort(File::compareTo);
+				}
+				mCurrentFile = file;
+				mMyAdapter.notifyDataSetChanged();
+			}
 		}
-		mCurrentFile = file;
-		mMyAdapter.notifyDataSetChanged();
 	}
 
 	@Override

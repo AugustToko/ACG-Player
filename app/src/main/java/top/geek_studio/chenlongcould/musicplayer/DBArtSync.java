@@ -63,6 +63,7 @@ public final class DBArtSync extends IntentService {
 		if (cursor != null && cursor.moveToFirst()) {
 			if (LitePal.findAll(CustomAlbumPath.class).size() == cursor.getCount()) {
 				Log.d(TAG, "handleActionSyncAlbum: count is same return");
+				return;
 			} else if (LitePal.findAll(CustomAlbumPath.class).size() == 0) {
 				Log.d(TAG, "handleActionSyncAlbum: size == 0, clear");
 				LitePal.deleteAll(CustomAlbumPath.class);
@@ -90,6 +91,7 @@ public final class DBArtSync extends IntentService {
 			LitePal.useDefault();
 			if (LitePal.findAll(ArtistArtPath.class).size() == cursor.getCount()) {
 				Log.d(TAG, "handleActionSyncArtist: count is same return");
+				return;
 			} else if (LitePal.findAll(ArtistArtPath.class).size() == 0) {
 				Log.d(TAG, "handleActionSyncArtist: size == 0, clear all");
 				LitePal.deleteAll(ArtistArtPath.class);

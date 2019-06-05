@@ -386,7 +386,7 @@ public final class Utils {
 		}
 
 		public static AlertDialog getMusicDetailDialog(@NonNull Context context, @Nullable MusicItem item) {
-			if (item == null) return null;
+			if (item == null || item.getMusicID() == -1) return null;
 
 			final List<String> data = Utils.Audio.extractMetadata(item);
 			ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1

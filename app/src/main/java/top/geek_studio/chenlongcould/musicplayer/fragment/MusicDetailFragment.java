@@ -24,9 +24,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -47,6 +49,7 @@ import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.customView.PlayPauseDrawable;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
+import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
@@ -116,6 +119,52 @@ public final class MusicDetailFragment extends BaseFragment {
 	private SlidingUpPanelLayout mSlidingUpPanelLayout;
 	private ConstraintLayout mNowPlayingBody;
 	private ConstraintLayout mSlideUpGroup;
+
+	private final PopupMenu.OnMenuItemClickListener clickListener = item -> {
+		switch (item.getItemId()) {
+			case Menu.FIRST + 1: {
+				final MusicItem currentItem = ReceiverOnMusicPlay.getCurrentItem();
+				if (currentItem != null) {
+					final String albumName = currentItem.getMusicAlbum();
+					final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
+							MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{albumName}, null);
+
+					//int MusicDetailActivity
+					final Intent intent = new Intent(mMainActivity, AlbumDetailActivity.class);
+					intent.putExtra(AlbumDetailActivity.IntentKey.ALBUM_NAME, albumName);
+					if (cursor != null) {
+						cursor.moveToFirst();
+						int id = Integer.parseInt(cursor.getString(0));
+						intent.putExtra(AlbumDetailActivity.IntentKey.ID, id);
+						cursor.close();
+					}
+					startActivity(intent);
+				}
+			}
+			break;
+			case Menu.FIRST + 2: {
+				AlertDialog dialog = Utils.Audio.getMusicDetailDialog(mMainActivity, Data.sCurrentMusicItem);
+				if (dialog != null) dialog.show();
+			}
+			break;
+
+			case Menu.FIRST + 3: {
+				final MusicItem target = ReceiverOnMusicPlay.getCurrentItem();
+				if (target != null) {
+					MusicUtil.dropToTrash(mMainActivity, target);
+				}
+			}
+			break;
+
+			// add to playlist
+			case Menu.FIRST + 4: {
+				PlayListsUtil.addListDialog(mMainActivity, Data.sCurrentMusicItem);
+			}
+			break;
+			default:
+		}
+		return true;
+	};
 
 	@SuppressWarnings("unused")
 	public static boolean sendMessage(@NonNull Message message) {
@@ -399,7 +448,7 @@ public final class MusicDetailFragment extends BaseFragment {
 	/**
 	 * menu
 	 */
-	private AppCompatImageView mMenuButton;
+	private AppCompatImageView mCurrentInfoBodyMenuButton;
 	private float mLastX = 0;
 	//	private float mLastY = 0;
 	private float moveX = 0;
@@ -502,6 +551,8 @@ public final class MusicDetailFragment extends BaseFragment {
 		if (item != null && item.getMusicID() != -1) {
 			final Bitmap cover = Utils.Audio.getCoverBitmapFull(getContext(), item.getAlbumId());
 			setCurrentInfo(item.getMusicName(), item.getMusicAlbum(), cover);
+		} else {
+			Log.d(TAG, "preLoad: item is null");
 		}
 
 		try {
@@ -531,7 +582,8 @@ public final class MusicDetailFragment extends BaseFragment {
 	}
 
 	@Override
-	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container
+			, @Nullable Bundle savedInstanceState) {
 		final View view = inflater.inflate(R.layout.fragment_music_detail, container, false);
 
 		findView(view);
@@ -900,7 +952,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		mCurrentInfoBody = view.findViewById(R.id.item_layout);
 		mCurrentAlbumNameText = view.findViewById(R.id.item_text_one);
 		mCurrentMusicNameText = view.findViewById(R.id.item_main_text);
-		mMenuButton = view.findViewById(R.id.item_menu);
+		mCurrentInfoBodyMenuButton = view.findViewById(R.id.item_menu);
 		mRandomButton = view.findViewById(R.id.random_button);
 		mRepeatButton = view.findViewById(R.id.repeat_button);
 		mToolbar = view.findViewById(R.id.activity_music_detail_toolbar);
@@ -926,55 +978,28 @@ public final class MusicDetailFragment extends BaseFragment {
 		//needn't
 	}
 
-	private void setClickListener() {
+	private void showPopupMenu(Context context, View view) {
+		if (Data.sCurrentMusicItem == null || Data.sCurrentMusicItem.getMusicID() == -1) return;
+
 		/*---------------------- Menu -----------------------*/
-		mPopupMenu = new PopupMenu(mMainActivity, mMenuButton);
+		mPopupMenu = new PopupMenu(context, view);
+
+		mPopupMenu.setGravity(GravityCompat.END);
 
 		final Menu menu = mPopupMenu.getMenu();
+		menu.clear();
 
 		menu.add(Menu.NONE, Menu.FIRST + 1, 0, getString(R.string.show_album));
 		menu.add(Menu.NONE, Menu.FIRST + 2, 0, getString(R.string.show_detail));
 		menu.add(Menu.NONE, Menu.FIRST + 3, 0, getString(R.string.drop_to_trash_can));
+		menu.add(Menu.NONE, Menu.FIRST + 4, 0, getString(R.string.add_to_playlist));
 
-		mPopupMenu.setOnMenuItemClickListener(item -> {
-			switch (item.getItemId()) {
-				case Menu.FIRST + 1: {
-					final MusicItem currentItem = ReceiverOnMusicPlay.getCurrentItem();
-					if (currentItem != null) {
-						final String albumName = currentItem.getMusicAlbum();
-						final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
-								MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{albumName}, null);
+		mPopupMenu.setOnMenuItemClickListener(clickListener);
 
-						//int MusicDetailActivity
-						final Intent intent = new Intent(mMainActivity, AlbumDetailActivity.class);
-						intent.putExtra(AlbumDetailActivity.IntentKey.ALBUM_NAME, albumName);
-						if (cursor != null) {
-							cursor.moveToFirst();
-							int id = Integer.parseInt(cursor.getString(0));
-							intent.putExtra(AlbumDetailActivity.IntentKey.ID, id);
-							cursor.close();
-						}
-						startActivity(intent);
-					}
-				}
-				break;
-				case Menu.FIRST + 2: {
-					AlertDialog dialog = Utils.Audio.getMusicDetailDialog(mMainActivity, Data.sCurrentMusicItem);
-					if (dialog != null) dialog.show();
-				}
-				break;
+		mPopupMenu.show();
+	}
 
-				case Menu.FIRST + 3: {
-					final MusicItem target = ReceiverOnMusicPlay.getCurrentItem();
-					if (target != null) {
-						MusicUtil.dropToTrash(mMainActivity, target);
-					}
-				}
-				break;
-				default:
-			}
-			return false;
-		});
+	private void setClickListener() {
 
 		mCurrentInfoBody.setOnClickListener(v -> {
 
@@ -989,12 +1014,16 @@ public final class MusicDetailFragment extends BaseFragment {
 		});
 
 		mCurrentInfoBody.setOnLongClickListener(v -> {
-			final MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
-			if (item != null) {
-				MusicUtil.dropToTrash(mMainActivity, item);
-			}
+//			final MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
+//			if (item != null) {
+//				MusicUtil.dropToTrash(mMainActivity, item);
+//			}
+			showPopupMenu(mMainActivity, mCurrentInfoBody);
+
 			return true;
 		});
+
+		mCurrentInfoBodyMenuButton.setOnClickListener(v -> showPopupMenu(mMainActivity, mCurrentInfoBodyMenuButton));
 
 		mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 			@Override
@@ -1212,7 +1241,6 @@ public final class MusicDetailFragment extends BaseFragment {
 		mMusicAlbumImageOth2.setOnClickListener(listener);
 		mMusicAlbumImageOth3.setOnClickListener(listener);
 
-		mMenuButton.setOnClickListener(v -> mPopupMenu.show());
 
 		//just intentPause or play
 		mPlayButton.setOnClickListener(v -> playPause());
@@ -1262,6 +1290,11 @@ public final class MusicDetailFragment extends BaseFragment {
 		mInfoBarPlayButton.setOnClickListener(v -> playPause());
 
 		mNowPlayingBody.setOnClickListener(v -> MainActivity.getHandler().sendEmptyMessage(MainActivity.NotLeakHandler.UP));
+
+		mNowPlayingBody.setOnLongClickListener(v -> {
+			showPopupMenu(mMainActivity, mNowPlayingBody);
+			return true;
+		});
 	}
 
 	/**

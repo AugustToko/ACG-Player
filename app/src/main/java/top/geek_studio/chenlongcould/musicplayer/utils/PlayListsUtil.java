@@ -47,7 +47,9 @@ public final class PlayListsUtil {
 	public static final String DEFAULT_LIST = "Default";
 	private static final String TAG = "PlayListsUtil";
 
-	public static void addListDialog(Context context, MusicItem musicItem) {
+	public static void addListDialog(@NonNull final Context context, @Nullable final MusicItem musicItem) {
+		if (musicItem == null || musicItem.getMusicID() == -1) return;
+
 		final Resources resources = context.getResources();
 
 		final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
