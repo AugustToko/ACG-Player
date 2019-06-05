@@ -221,9 +221,8 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 	}
 
 	private void init() {
-		DBArtSync.startActionSyncAlbum(MainActivity.this);
-
-		DBArtSync.startActionSyncArtist(MainActivity.this);
+		DBArtSync.startActionSyncArtist(this);
+		DBArtSync.startActionSyncAlbum(this);
 
 		loadData();
 

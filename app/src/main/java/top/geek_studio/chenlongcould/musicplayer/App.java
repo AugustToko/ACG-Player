@@ -90,10 +90,12 @@ public final class App extends Application {
 
 				LitePal.deleteAll(CustomAlbumPath.class);
 				LitePal.deleteAll(ArtistArtPath.class);
+
+
 			}
 
 			MusicDetailFragment.BackgroundStyle.DETAIL_BACKGROUND = PreferenceManager.getDefaultSharedPreferences(this)
-					.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.BackgroundStyle.STYLE_BACKGROUND_BLUR);
+					.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, MusicDetailFragment.BackgroundStyle.STYLE_BACKGROUND_BLUR);
 
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
 				mShortcutManager = getSystemService(ShortcutManager.class);
