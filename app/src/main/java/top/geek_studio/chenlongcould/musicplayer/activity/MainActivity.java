@@ -1307,7 +1307,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 				}
 				break;
 				case R.id.menu_nav_ad: {
-					Toast.makeText(this, "MAKINGS", Toast.LENGTH_SHORT).show();
+					Toast.makeText(this, "This feature is coming soon", Toast.LENGTH_SHORT).show();
 				}
 				break;
 				case R.id.debug: {

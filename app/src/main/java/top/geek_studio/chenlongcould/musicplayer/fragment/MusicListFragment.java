@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentMusicListBinding;
@@ -66,7 +67,9 @@ public final class MusicListFragment extends BaseFragment {
 		linearLayoutManager.setInitialPrefetchItemCount(6);
 		mMusicListBinding.includeRecycler.recyclerView.setLayoutManager(linearLayoutManager);
 		mMusicListBinding.includeRecycler.recyclerView.setHasFixedSize(true);
-		adapter = new MyRecyclerAdapter(mActivity, Data.sMusicItems, new MyRecyclerAdapter.Config(0, true));
+		adapter = new MyRecyclerAdapter(mActivity, Data.sMusicItems
+				, new MyRecyclerAdapter.Config(preferences.getInt(Values.SharedPrefsTag
+				.RECYCLER_VIEW_ITEM_STYLE, 0), true));
 		mMusicListBinding.includeRecycler.recyclerView.setAdapter(adapter);
 
 		loadData();

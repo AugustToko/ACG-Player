@@ -70,6 +70,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 app:layout_constraintTop_toTopOf="parent"
+                android:background="@android:color/background_light"
                 >
 
             <ImageView

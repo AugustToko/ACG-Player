@@ -76,6 +76,7 @@ public final class PlayListFragment extends BaseFragment {
 	public FragmentType getFragmentType() {
 		return FragmentType.PLAY_LIST_FRAGMENT;
 	}
+
 	@Override
 	public void onAttach(@NonNull Context context) {
 		super.onAttach(context);

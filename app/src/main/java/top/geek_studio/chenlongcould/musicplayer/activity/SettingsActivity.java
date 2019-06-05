@@ -30,6 +30,7 @@ import top.geek_studio.chenlongcould.musicplayer.*;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivitySettingsBinding;
+import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.io.File;
@@ -587,7 +588,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 			s1.setLayoutParams(params2);
 
 			s0.setOnClickListener(v1 -> {
-				PreferenceManager.getDefaultSharedPreferences(SettingsActivity.this).edit().putInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 0).apply();
+				PreferenceUtil.getDefault(SettingsActivity.this).edit().putInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 0).apply();
 				Toast.makeText(this, "Select style 0", Toast.LENGTH_SHORT).show();
 			});
 

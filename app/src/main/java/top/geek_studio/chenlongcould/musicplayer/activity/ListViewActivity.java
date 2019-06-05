@@ -110,7 +110,9 @@ public final class ListViewActivity extends BaseCompatActivity {
 					Data.syncPlayOrderList(this, mMusicItemList);
 					Data.shuffleOrderListSync(this, false);
 
-					adapter = new MyRecyclerAdapter(this, mMusicItemList, new MyRecyclerAdapter.Config(0, false));
+					adapter = new MyRecyclerAdapter(this, mMusicItemList, new MyRecyclerAdapter.Config(
+							preferences.getInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 0)
+							, false));
 					mRecyclerView.setAdapter(adapter);
 				}
 				break;
@@ -238,7 +240,9 @@ public final class ListViewActivity extends BaseCompatActivity {
 								}
 								Data.syncPlayOrderList(this, mMusicItemList);
 								Data.shuffleOrderListSync(this, false);
-								adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList, new MyRecyclerAdapter.Config(0, true));
+								adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList
+										, new MyRecyclerAdapter.Config(preferences.getInt(Values.SharedPrefsTag
+										.RECYCLER_VIEW_ITEM_STYLE, 0), true));
 								mRecyclerView.setAdapter(adapter);
 							});
 				}
@@ -251,7 +255,9 @@ public final class ListViewActivity extends BaseCompatActivity {
 					Data.syncPlayOrderList(this, mMusicItemList);
 					Data.shuffleOrderListSync(this, false);
 
-					adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList, new MyRecyclerAdapter.Config(0, false));
+					adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList
+							, new MyRecyclerAdapter.Config(preferences.getInt(Values.SharedPrefsTag
+							.RECYCLER_VIEW_ITEM_STYLE, 0), false));
 					mRecyclerView.setAdapter(adapter);
 				}
 				break;
@@ -274,7 +280,9 @@ public final class ListViewActivity extends BaseCompatActivity {
 					Data.syncPlayOrderList(this, mMusicItemList);
 					Data.shuffleOrderListSync(this, false);
 
-					adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList, new MyRecyclerAdapter.Config(0, false));
+					adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList
+							, new MyRecyclerAdapter.Config(preferences.getInt(Values.SharedPrefsTag
+							.RECYCLER_VIEW_ITEM_STYLE, 0), false));
 					mRecyclerView.setAdapter(adapter);
 
 				}

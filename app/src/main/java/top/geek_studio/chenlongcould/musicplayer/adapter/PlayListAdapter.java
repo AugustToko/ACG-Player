@@ -1,14 +1,12 @@
 package top.geek_studio.chenlongcould.musicplayer.adapter;
 
 import android.content.Intent;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.PopupMenu;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
@@ -89,12 +87,49 @@ public final class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.
 				break;
 				
 				case Menu.FIRST + 1: {
-					Toast.makeText(mMainActivity, "Building...", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mMainActivity, "This feature is coming soon", Toast.LENGTH_SHORT).show();
 				}
 				break;
 				
 				case Menu.FIRST + 2: {
-					Toast.makeText(mMainActivity, "Building...", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mMainActivity, "This feature is coming soon", Toast.LENGTH_SHORT).show();
+				}
+				break;
+
+				case Menu.FIRST + 3: {
+					Toast.makeText(mMainActivity, "This feature is coming soon", Toast.LENGTH_SHORT).show();
+				}
+				break;
+
+				case Menu.FIRST + 4: {
+					Toast.makeText(mMainActivity, "This feature is coming soon", Toast.LENGTH_SHORT).show();
+				}
+				break;
+
+				// rename
+				case Menu.FIRST + 5: {
+					final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(mMainActivity);
+					builder.setTitle(mMainActivity.getString(R.string.enter_name));
+					final EditText et = new EditText(mMainActivity);
+					builder.setView(et);
+					et.setHint(mMainActivity.getString(R.string.enter_name));
+					et.setSingleLine(true);
+					builder.setNegativeButton(mMainActivity.getString(R.string.cancel), null);
+					builder.setPositiveButton(mMainActivity.getString(R.string.sure), (dialog1, which1) -> {
+						if (TextUtils.isEmpty(et.getText())) {
+							Toast.makeText(mMainActivity, "Enter name!", Toast.LENGTH_SHORT).show();
+							return;
+						}
+
+						PlayListsUtil.renamePlaylist(mMainActivity, mPlayListItems.get(holder.getAdapterPosition()).getId(), String.valueOf(et.getText()));
+						PlayListFragment.reloadDataByHandler();
+					});
+					builder.show();
+				}
+				break;
+
+				case Menu.FIRST + 6: {
+					Toast.makeText(mMainActivity, "This feature is coming soon", Toast.LENGTH_SHORT).show();
 				}
 				break;
 				default:
@@ -142,7 +177,7 @@ public final class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.
 			mMenu.add(Menu.NONE, Menu.FIRST + 3, 0, "Duplicate");
 			mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, "Shuffle Playback");
 			mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, "Rename");
-			mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, "Clear this play list");
+			mMenu.add(Menu.NONE, Menu.FIRST + 6, 0, "Clear this play list");
 		}
 	}
 }

@@ -143,7 +143,7 @@ public final class ArtistDetailActivity extends BaseCompatActivity implements Ar
 		final View contentView = getWindow().getDecorView().findViewById(android.R.id.content);
 		contentView.post(() -> observableScrollViewCallbacks.onScrollChanged(-headerViewHeight, false, false));
 		mArtistDetailOthBinding.recyclerView.setLayoutManager(new GridLayoutManager(ArtistDetailActivity.this, 1));
-		final MyRecyclerAdapter adapter = new MyRecyclerAdapter(this, mPresenter.getSongs(), new MyRecyclerAdapter.Config(0, false));
+		final MyRecyclerAdapter adapter = new MyRecyclerAdapter(this, mPresenter.getSongs(), new MyRecyclerAdapter.Config(preferences.getInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 0), false));
 		mArtistDetailOthBinding.recyclerView.setAdapter(adapter);
 		adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
 			@Override

@@ -157,7 +157,7 @@ public final class AlbumDetailActivity extends BaseCompatActivity implements Alb
 		final View contentView = getWindow().getDecorView().findViewById(android.R.id.content);
 		contentView.post(() -> observableScrollViewCallbacks.onScrollChanged(-headerViewHeight, false, false));
 		mAlbumDetailBinding.recyclerView.setLayoutManager(new GridLayoutManager(AlbumDetailActivity.this, 1));
-		mAdapter = new MyRecyclerAdapter(this, mPresenter.getSongs(), new MyRecyclerAdapter.Config(0, false));
+		mAdapter = new MyRecyclerAdapter(this, mPresenter.getSongs(), new MyRecyclerAdapter.Config(preferences.getInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 0), false));
 		mAlbumDetailBinding.recyclerView.setAdapter(mAdapter);
 		mAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
 			@Override

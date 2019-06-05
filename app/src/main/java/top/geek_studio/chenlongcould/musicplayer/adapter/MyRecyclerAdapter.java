@@ -103,12 +103,6 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 	private Config mConfig;
 
-	public MyRecyclerAdapter(BaseCompatActivity activity, List<MusicItem> musicItems, @NonNull Config config) {
-		mActivity = activity;
-		mMusicItems = musicItems;
-		mConfig = config;
-	}
-
 	@NonNull
 	@Override
 	public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int itemType) {
@@ -123,7 +117,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		 * ModHolder: common item + fastPlay item
 		 * */
 		//在 MusicListFragment 的第一选项上面添加"快速随机播放项目"
-		if (itemType == MOD_TYPE && mActivity.getActivityTAG().equals(MainActivity.TAG)) {
+		if (itemType == MOD_TYPE && mActivity instanceof MainActivity) {
 
 			//style switch
 			switch (mConfig.styleId) {
@@ -418,100 +412,6 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		return holder;
 	}
 
-	@NonNull
-	@Override
-	public String getSectionName(int position) {
-		return String.valueOf(mMusicItems.get(position).getMusicName().charAt(0));
-	}
-
-	@Override
-	public void onViewRecycled(@NonNull ViewHolder holder) {
-		super.onViewRecycled(holder);
-		if (holder instanceof ItemHolder) {
-			ItemHolder itemHolder = ((ItemHolder) holder);
-			itemHolder.mCoverReference.get().setTag(R.string.key_id_1, null);
-			GlideApp.with(mActivity).clear(itemHolder.mCoverReference.get());
-			GlideApp.get(mActivity).clearMemory();
-		}
-	}
-
-	private void onMusicItemClick(View view, ViewHolder holder) {
-		view.setOnClickListener(v -> {
-			//在多选模式下
-			if (isChoose) {
-				MusicItem itemClicked = mMusicItems.get(holder.getAdapterPosition());
-
-				// select or un-select
-				if (mSelected.contains(itemClicked)) {
-					((ItemHolder) holder).mBody.setBackgroundColor(ContextCompat.getColor(mActivity, R.color.card_bg));
-					mSelected.remove(mMusicItems.get(holder.getAdapterPosition()));
-				} else {
-					mSelected.add(mMusicItems.get(holder.getAdapterPosition()));
-					((ItemHolder) holder).mBody.setBackgroundColor(Utils.Ui.getAccentColor(mActivity));
-				}
-
-				if (mSelected.size() == 0) {
-					isChoose = false;
-					mActivity.inflateCommonMenu();
-				}
-
-			} else {
-				MusicService.MusicControl.intentItemClick(mActivity, mMusicItems.get(holder.getAdapterPosition()));
-			}
-		});
-	}
-
-	@Override
-	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-
-		final ItemHolder holder = ((ItemHolder) viewHolder);
-
-		//check selection
-		if (mSelected.contains(mMusicItems.get(holder.getAdapterPosition()))) {
-			holder.mBody.setBackgroundColor(Utils.Ui.getAccentColor(mActivity));
-		} else {
-			holder.mBody.setBackgroundColor(ContextCompat.getColor(mActivity, R.color.card_bg));
-		}
-
-		holder.mMusicText.setText(mMusicItems.get(holder.getAdapterPosition()).getMusicName());
-		holder.mMusicAlbumName.setText(mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum());
-		String prefix = mMusicItems.get(holder.getAdapterPosition()).getMusicPath().substring(mMusicItems.get(holder.getAdapterPosition()).getMusicPath().lastIndexOf(".") + 1);
-		holder.mMusicExtName.setText(prefix);
-		holder.mTime.setText(Data.S_SIMPLE_DATE_FORMAT.format(new Date(mMusicItems.get(holder.getAdapterPosition()).getDuration())));
-
-		/*--- 添加标记以便避免ImageView因为ViewHolder的复用而出现混乱 ---*/
-		holder.mCoverReference.get().setTag(R.string.key_id_1, holder.getAdapterPosition());
-
-		ItemCoverThreadPool.post(() -> {
-
-			Loader.albumLoader(mActivity, holder.mCoverReference.get(), mMusicItems.get(i).getAlbumId()
-					, mMusicItems.get(i).getArtist(), mMusicItems.get(i).getMusicAlbum());
-
-			switch (mConfig.styleId) {
-				case 1: {
-					ItemHolderS1 holderS1 = (ItemHolderS1) holder;
-					final Bitmap bitmap = Utils.Ui.readBitmapFromFile(Utils.Audio.getCoverPath(mActivity, mMusicItems.get(i).getAlbumId()), 50, 50);
-					if (bitmap != null) {
-						//color set (album tag)
-						Palette.from(bitmap).generate(p -> {
-							if (p != null) {
-								@ColorInt int color = p.getVibrantColor(ContextCompat.getColor(mActivity, R.color.notVeryBlack));
-								GradientDrawable drawable = new GradientDrawable();
-								drawable.setStroke(((int) mActivity.getResources().getDimension(R.dimen.frame_width) * 2), color);
-								drawable.setCornerRadius(mActivity.getResources().getDimension(R.dimen.frame_corners));
-								holderS1.mFrame.setBackground(drawable);
-								bitmap.recycle();
-							}
-						});
-					}
-				}
-				break;
-				default:
-			}
-
-		});
-	}
-
 	/**
 	 * config for {@link MyRecyclerAdapter}
 	 */
@@ -519,17 +419,14 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		/**
 		 * 样式id
 		 * <p>
-		 * 1: 带随机播放item
+		 * 1: 带边框线
 		 * 0：default
 		 */
 		int styleId = 0;
+
 		boolean recordIndex = true;
 
 		public Config() {
-		}
-
-		public Config(int styleId) {
-			this.styleId = styleId;
 		}
 
 		public Config(boolean recordIndex) {
@@ -540,6 +437,12 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 			this.styleId = styleId;
 			this.recordIndex = recordIndex;
 		}
+	}
+
+	public MyRecyclerAdapter(BaseCompatActivity activity, List<MusicItem> musicItems, @NonNull Config config) {
+		mActivity = activity;
+		mMusicItems = musicItems;
+		mConfig = config;
 	}
 
 	public static class Loader {
@@ -812,6 +715,100 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 	}
 
+	@NonNull
+	@Override
+	public String getSectionName(int position) {
+		return String.valueOf(mMusicItems.get(position).getMusicName().charAt(0));
+	}
+
+	@Override
+	public void onViewRecycled(@NonNull ViewHolder holder) {
+		super.onViewRecycled(holder);
+		if (holder instanceof ItemHolder) {
+			ItemHolder itemHolder = ((ItemHolder) holder);
+			itemHolder.mCoverReference.get().setTag(R.string.key_id_1, null);
+			GlideApp.with(mActivity).clear(itemHolder.mCoverReference.get());
+			GlideApp.get(mActivity).clearMemory();
+		}
+	}
+
+	private void onMusicItemClick(View view, ViewHolder holder) {
+		view.setOnClickListener(v -> {
+			//在多选模式下
+			if (isChoose) {
+				MusicItem itemClicked = mMusicItems.get(holder.getAdapterPosition());
+
+				// select or un-select
+				if (mSelected.contains(itemClicked)) {
+					((ItemHolder) holder).mBody.setBackgroundColor(ContextCompat.getColor(mActivity, R.color.card_bg));
+					mSelected.remove(mMusicItems.get(holder.getAdapterPosition()));
+				} else {
+					mSelected.add(mMusicItems.get(holder.getAdapterPosition()));
+					((ItemHolder) holder).mBody.setBackgroundColor(Utils.Ui.getAccentColor(mActivity));
+				}
+
+				if (mSelected.size() == 0) {
+					isChoose = false;
+					mActivity.inflateCommonMenu();
+				}
+
+			} else {
+				MusicService.MusicControl.intentItemClick(mActivity, mMusicItems.get(holder.getAdapterPosition()));
+			}
+		});
+	}
+
+	@Override
+	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
+
+		final ItemHolder holder = ((ItemHolder) viewHolder);
+
+		//check selection
+		if (mSelected.contains(mMusicItems.get(holder.getAdapterPosition()))) {
+			holder.mBody.setBackgroundColor(Utils.Ui.getAccentColor(mActivity));
+		} else {
+			holder.mBody.setBackgroundColor(ContextCompat.getColor(mActivity, R.color.card_bg));
+		}
+
+		holder.mMusicText.setText(mMusicItems.get(holder.getAdapterPosition()).getMusicName());
+		holder.mMusicAlbumName.setText(mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum());
+		String prefix = mMusicItems.get(holder.getAdapterPosition()).getMusicPath().substring(mMusicItems.get(holder.getAdapterPosition()).getMusicPath().lastIndexOf(".") + 1);
+		holder.mMusicExtName.setText(prefix);
+		holder.mTime.setText(Data.S_SIMPLE_DATE_FORMAT.format(new Date(mMusicItems.get(holder.getAdapterPosition()).getDuration())));
+
+		/*--- 添加标记以便避免ImageView因为ViewHolder的复用而出现混乱 ---*/
+		holder.mCoverReference.get().setTag(R.string.key_id_1, holder.getAdapterPosition());
+
+		ItemCoverThreadPool.post(() -> {
+
+			Loader.albumLoader(mActivity, holder.mCoverReference.get(), mMusicItems.get(i).getAlbumId()
+					, mMusicItems.get(i).getArtist(), mMusicItems.get(i).getMusicAlbum());
+
+			switch (mConfig.styleId) {
+				case 1: {
+					ItemHolderS1 holderS1 = (ItemHolderS1) holder;
+					final Bitmap bitmap = Utils.Ui.readBitmapFromFile(Utils.Audio.getCoverPath(mActivity, mMusicItems.get(i).getAlbumId()), 50, 50);
+					if (bitmap != null) {
+						//color set (album tag)
+						Palette.from(bitmap).generate(p -> {
+							if (p != null) {
+								@ColorInt int color = p.getVibrantColor(ContextCompat.getColor(mActivity, R.color.notVeryBlack));
+								GradientDrawable drawable = new GradientDrawable();
+								drawable.setStroke(((int) mActivity.getResources().getDimension(R.dimen.frame_width) * 2), color);
+								drawable.setCornerRadius(mActivity.getResources().getDimension(R.dimen.frame_corners));
+								holderS1.mFrame.setBackground(drawable);
+								bitmap.recycle();
+							}
+						});
+					}
+				}
+				break;
+				default:
+			}
+
+		});
+	}
+
 	@Override
 	public int getItemCount() {
 		return mMusicItems.size();
@@ -837,12 +834,18 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		}
 	}
 
+	/**
+	 * base
+	 */
 	class ViewHolder extends RecyclerView.ViewHolder {
 		ViewHolder(@NonNull View itemView) {
 			super(itemView);
 		}
 	}
 
+	/**
+	 * 通常item
+	 * */
 	class ItemHolder extends ViewHolder {
 
 		View mBody;
@@ -919,6 +922,9 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		}
 	}
 
+	/**
+	 * 带随机item
+	 * */
 	class ModHolder extends ItemHolder {
 
 		ConstraintLayout mRandomItem;
@@ -929,6 +935,9 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		}
 	}
 
+	/**
+	 * 带边框线
+	 * */
 	class ItemHolderS1 extends ItemHolder {
 
 		ConstraintLayout mFrame;
@@ -939,6 +948,9 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		}
 	}
 
+	/**
+	 * 带随机item 带边框线
+	 * */
 	class ModHolderS1 extends ItemHolderS1 {
 
 		ConstraintLayout mRandomItem;
