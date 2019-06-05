@@ -4,7 +4,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.ViewGroup;
+import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -15,7 +18,6 @@ import okhttp3.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-import top.geek_studio.chenlongcould.geeklibrary.DialogUtil;
 import top.geek_studio.chenlongcould.geeklibrary.HttpUtil;
 import top.geek_studio.chenlongcould.musicplayer.App;
 import top.geek_studio.chenlongcould.musicplayer.R;
@@ -121,18 +123,16 @@ final public class AboutActivity extends BaseCompatActivity {
 		update.ico.setImageResource(R.drawable.ic_cloud_download_black_24dp);
 		update.text.setText(getString(R.string.update_log));
 		update.body.setOnClickListener(v -> {
-			AlertDialog load = DialogUtil.getLoadingDialog(AboutActivity.this, "Loading...");
-			load.show();
-
 			final AlertDialog.Builder builder = new AlertDialog.Builder(AboutActivity.this);
-			builder.setCancelable(true);
 			builder.setTitle(getString(R.string.update_log));
 			builder.setPositiveButton(getString(R.string.close), (dialog, which) -> dialog.cancel());
 
 			HttpUtil.sedOkHttpRequest("https://www.coolapk.com/apk/top.geek_studio.chenlongcould.musicplayer.Common", new Callback() {
 				@Override
 				public void onFailure(@NonNull Call call, @NonNull IOException e) {
-					runOnUiThread(() -> Toast.makeText(AboutActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show());
+					runOnUiThread(() -> {
+						Toast.makeText(AboutActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+					});
 				}
 
 				@Override
@@ -142,12 +142,21 @@ final public class AboutActivity extends BaseCompatActivity {
 						responseText = new StringBuilder(response.body().string());
 						final Document document = Jsoup.parse(responseText.toString());
 						final Elements elements = document.getAllElements();
-						String status = elements.select("p[class=apk_left_title_info]").text();
-						builder.setMessage(status);
-						runOnUiThread(() -> {
-							load.dismiss();
-							builder.show();
-						});
+
+						final int margin = (int) getResources().getDimension(R.dimen.margin_8) * 2;
+
+						final ScrollView frameLayout = new ScrollView(AboutActivity.this);
+
+						// set html data
+						final TextView textView = new TextView(AboutActivity.this);
+
+						// set bold text
+						textView.getPaint().setFakeBoldText(true);
+						textView.setText(Html.fromHtml(elements.select("p[class=apk_left_title_info]").html()));
+						frameLayout.addView(textView);
+						frameLayout.setPadding(margin, margin, margin, margin);
+						builder.setView(frameLayout);
+						runOnUiThread(builder::show);
 					} else {
 						Toast.makeText(AboutActivity.this, "Get Data Error", Toast.LENGTH_SHORT).show();
 					}

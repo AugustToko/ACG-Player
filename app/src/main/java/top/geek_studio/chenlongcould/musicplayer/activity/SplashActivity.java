@@ -20,6 +20,7 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 /**
  * @author chenlongcould
+ * @deprecated use {@link MainActivity}
  */
 public final class SplashActivity extends AppCompatActivity {
 

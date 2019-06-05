@@ -20,10 +20,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.Toast;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.databinding.DataBindingUtil;
@@ -72,21 +70,17 @@ public final class ThemeActivity extends BaseCompatActivity {
 	private ArrayList<Theme> mThemes = new ArrayList<>();
 
 	private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-			= new BottomNavigationView.OnNavigationItemSelectedListener() {
-
-		@Override
-		public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-			switch (item.getItemId()) {
-				case R.id.navigation_home:
-					return true;
-				case R.id.navigation_dashboard:
-					return true;
-				case R.id.navigation_notifications:
-					return true;
-				default:
-			}
-			return false;
+			= item -> {
+		switch (item.getItemId()) {
+			case R.id.navigation_home:
+				return true;
+			case R.id.navigation_dashboard:
+				return true;
+			case R.id.navigation_notifications:
+				return true;
+			default:
 		}
+		return false;
 	};
 
 	private Disposable mDisposable;
@@ -224,7 +218,7 @@ public final class ThemeActivity extends BaseCompatActivity {
 		super.onActivityResult(requestCode, resultCode, data);
 		switch (requestCode) {
 			case REQUEST_ADD_THEME: {
-				if (resultCode == RESULT_OK) {
+				if (resultCode == RESULT_OK && data != null) {
 					Uri uri = data.getData();
 					if (uri != null) {
 						final Cursor cursor = getContentResolver().query(uri, null, null, null, null);

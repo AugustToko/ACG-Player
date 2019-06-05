@@ -51,7 +51,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import org.litepal.LitePal;
-import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
 import top.geek_studio.chenlongcould.geeklibrary.theme.Theme;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeUtils;
@@ -84,7 +83,7 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 /**
  * @author chenlongcould
  */
-public final class MainActivity extends BaseCompatActivity implements IStyle {
+public final class MainActivity extends BaseCompatActivity {
 
 	public static final String TAG = "MainActivity";
 
@@ -1251,10 +1250,10 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 			public final void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
 				if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
 					mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-					if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
-						setStatusBarTextColor(MainActivity.this, new Palette.Builder(Data.getCurrentCover())
-								.generate().getVibrantColor(Utils.Ui.getPrimaryColor(MainActivity.this)));
-					}
+//					if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
+//						setStatusBarTextColor(MainActivity.this, new Palette.Builder(Data.getCurrentCover())
+//								.generate().getLightVibrantColor(Utils.Ui.getPrimaryColor(MainActivity.this)));
+//					}
 				} else if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
 					mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 
@@ -1264,7 +1263,7 @@ public final class MainActivity extends BaseCompatActivity implements IStyle {
 						Bitmap bitmap = bitmapDrawable.getBitmap();
 						if (bitmap != null && !bitmap.isRecycled()) {
 							setStatusBarTextColor(MainActivity.this, new Palette.Builder(bitmap)
-									.generate().getVibrantColor(Utils.Ui.getPrimaryColor(MainActivity.this)));
+									.generate().getLightVibrantColor(Utils.Ui.getPrimaryColor(MainActivity.this)));
 						} else {
 							setStatusBarTextColor(MainActivity.this, Utils.Ui.getPrimaryColor(MainActivity.this));
 						}

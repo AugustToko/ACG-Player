@@ -685,6 +685,12 @@ public final class MusicDetailFragment extends BaseFragment {
 					.diskCacheStrategy(DiskCacheStrategy.NONE)
 					.into(MV);
 
+			// 根据专辑图更改状态栏明暗
+//			if (cover != null && !cover.isRecycled()) {
+//				Utils.Ui.setStatusBarTextColor(mMainActivity, new Palette.Builder(cover)
+//						.generate().getLightVibrantColor(Utils.Ui.getPrimaryColor(mMainActivity)));
+//			}
+
 			final MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
 			if (item != null) {
 				updateFav(item);

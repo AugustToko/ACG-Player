@@ -466,7 +466,6 @@ public final class Utils {
 		 * getTitleColor from {@link SharedPreferences}, default: {@link top.geek_studio.chenlongcould.musicplayer.R.color#def_over_title_color}
 		 *
 		 * @return color (int)
-		 * @return color (int)
 		 */
 		@ColorInt
 		public static int getTitleColor(Context context) {
@@ -610,7 +609,9 @@ public final class Utils {
 		public static void setStatusBarTextColor(final Activity activity, @ColorInt int color) {
 			final View decor = activity.getWindow().getDecorView();
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-				if (isColorLight(color)) {
+				double lum = ColorUtils.calculateLuminance(color);
+				Log.d(TAG, "setStatusBarTextColor: calculateLuminance: " + lum);
+				if (lum >= 0.5) {
 					decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
 				} else {
 					decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
@@ -773,7 +774,6 @@ public final class Utils {
 		 *
 		 * @param context   MainActivity
 		 * @param musicItem MusicItem
-		 *
 		 * @deprecated use {@link PlayListsUtil#addListDialog(Context, MusicItem)}
 		 */
 		public static void addListDialog(Context context, MusicItem musicItem) {

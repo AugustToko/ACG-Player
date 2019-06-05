@@ -91,16 +91,19 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 	 * set up status bar color
 	 */
 	protected void setStatusBarTextColor(@NonNull final Activity activity, @ColorInt int color) {
-		activity.runOnUiThread(() -> {
-			final View decor = activity.getWindow().getDecorView();
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-				if (Utils.Ui.isColorLight(color)) {
-					decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-				} else {
-					decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-				}
-			}
-		});
+		Utils.Ui.setStatusBarTextColor(activity, color);
+//		activity.runOnUiThread(() -> {
+//			final View decor = activity.getWindow().getDecorView();
+//			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//				double lum = ColorUtils.calculateLuminance(color);
+//				Log.d(TAG, "setStatusBarTextColor: calculateLuminance: " + lum);
+//				if (lum >= 0.5) {
+//					decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+//				} else {
+//					decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+//				}
+//			}
+//		});
 	}
 
 	/**
