@@ -1,4 +1,4 @@
-package top.geek_studio.chenlongcould.musicplayer.activity;
+package top.geek_studio.chenlongcould.musicplayer.activity.base;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;

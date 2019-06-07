@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import top.geek_studio.chenlongcould.geeklibrary.DialogUtil;
 import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.activity.BaseCompatActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseCompatActivity;
 
 /**
  * @author chenlongcould

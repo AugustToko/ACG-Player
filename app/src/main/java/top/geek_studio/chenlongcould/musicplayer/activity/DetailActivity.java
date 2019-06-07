@@ -17,6 +17,7 @@ import org.litepal.LitePal;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseCompatActivity;
 import top.geek_studio.chenlongcould.musicplayer.database.Detail;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityInfoDetailBinding;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;

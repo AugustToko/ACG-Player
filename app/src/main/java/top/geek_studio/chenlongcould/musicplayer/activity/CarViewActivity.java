@@ -13,6 +13,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseCompatActivity;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragmentLandSpace;
 
 import java.lang.ref.WeakReference;
@@ -118,7 +119,7 @@ public final class CarViewActivity extends BaseCompatActivity {
 		mHideHandler.removeCallbacks(mHideRunnable);
 		mHideHandler.postDelayed(mHideRunnable, 100);
 	}
-	
+
 	private void toggle() {
 		if (mVisible) {
 			hide();
@@ -172,7 +173,7 @@ public final class CarViewActivity extends BaseCompatActivity {
 	public boolean isVisible() {
 		return mVisible;
 	}
-	
+
 	@Override
 	protected void finalize() throws Throwable {
 		Log.d(TAG, "finalize: ");

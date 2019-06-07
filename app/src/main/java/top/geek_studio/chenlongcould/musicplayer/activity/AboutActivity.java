@@ -22,6 +22,7 @@ import top.geek_studio.chenlongcould.geeklibrary.HttpUtil;
 import top.geek_studio.chenlongcould.musicplayer.App;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.activity.aboutlic.AboutLicActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseCompatActivity;
 import top.geek_studio.chenlongcould.musicplayer.databinding.AboutDulTextBinding;
 import top.geek_studio.chenlongcould.musicplayer.databinding.AboutSingleTextBinding;
 import top.geek_studio.chenlongcould.musicplayer.databinding.AboutThanksBinding;

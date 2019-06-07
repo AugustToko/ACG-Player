@@ -1,4 +1,4 @@
-package top.geek_studio.chenlongcould.musicplayer.activity;
+package top.geek_studio.chenlongcould.musicplayer.activity.base;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;

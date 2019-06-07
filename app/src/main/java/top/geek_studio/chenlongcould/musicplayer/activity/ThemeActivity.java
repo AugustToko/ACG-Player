@@ -39,6 +39,7 @@ import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeUtils;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseCompatActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.ThemeAdapter;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityThemeBinding;
 import top.geek_studio.chenlongcould.musicplayer.utils.MyThemeDBHelper;
