@@ -485,7 +485,7 @@ public final class MainActivity extends BaseListActivity {
 		Data.sMusicItems.clear();
 		Data.sMusicItemsBackUp.clear();
 		MusicUtil.loadDataSource(this);
-		musicListFragment.getAdapter().notifyDataSetChanged();
+		runOnUiThread(() -> musicListFragment.getAdapter().notifyDataSetChanged());
 	}
 
 	/**

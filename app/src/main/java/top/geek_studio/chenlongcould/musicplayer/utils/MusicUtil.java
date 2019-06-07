@@ -560,6 +560,7 @@ public class MusicUtil {
 					for (final MusicItem item : items) {
 						Data.sPlayOrderList.remove(item);
 						Data.sPlayOrderListBackup.remove(item);
+						Data.S_TRASH_CAN_LIST.remove(item);
 						worker.removeItem(item);
 						LitePal.deleteAll(Detail.class, "musicId=?", String.valueOf(item.getMusicID()));
 					}
