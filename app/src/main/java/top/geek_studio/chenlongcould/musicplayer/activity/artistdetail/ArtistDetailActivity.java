@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Message;
 import android.view.View;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
@@ -17,7 +18,7 @@ import org.litepal.LitePal;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
-import top.geek_studio.chenlongcould.musicplayer.activity.BaseCompatActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.BaseListActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.database.ArtistArtPath;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityArtistDetailOthBinding;
@@ -34,7 +35,7 @@ import java.util.List;
  * @author chenlongcould
  * @apiNote some by others
  */
-public final class ArtistDetailActivity extends BaseCompatActivity implements ArtistDetailContract.View {
+public final class ArtistDetailActivity extends BaseListActivity implements ArtistDetailContract.View {
 
 	public static final String TAG = "ArtistDetailActivity";
 
@@ -206,5 +207,15 @@ public final class ArtistDetailActivity extends BaseCompatActivity implements Ar
 	@Override
 	public void notifyDataSetChanged() {
 		mArtistDetailOthBinding.recyclerView.getAdapter().notifyDataSetChanged();
+	}
+
+	@Override
+	public void sendEmptyMessage(int what) {
+
+	}
+
+	@Override
+	public void sendMessage(Message message) {
+
 	}
 }

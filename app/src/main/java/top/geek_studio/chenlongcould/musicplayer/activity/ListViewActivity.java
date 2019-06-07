@@ -15,10 +15,7 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.MusicService;
-import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.*;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
@@ -32,7 +29,7 @@ import java.util.List;
 /**
  * @author chenlongcould
  */
-public final class ListViewActivity extends BaseCompatActivity {
+public final class ListViewActivity extends BaseListActivity {
 
 	public static final String TAG = "ListViewActivity";
 
@@ -296,6 +293,11 @@ public final class ListViewActivity extends BaseCompatActivity {
 	}
 
 	@Override
+	public boolean removeItem(MusicItem item) {
+		return mMusicItemList.remove(item);
+	}
+
+	@Override
 	public void inflateCommonMenu() {
 		mToolbar.getMenu().clear();
 		mToolbar.inflateMenu(R.menu.menu_public);
@@ -355,6 +357,15 @@ public final class ListViewActivity extends BaseCompatActivity {
 		super.onDestroy();
 	}
 
+	@Override
+	public void sendEmptyMessage(int what) {
+		if (handler != null) handler.sendEmptyMessage(what);
+	}
+
+	@Override
+	public void sendMessage(Message message) {
+	}
+
 	public interface FragmentType {
 		String ACTION_ADD_RECENT = "add recent";
 		String ACTION_FAVOURITE = "favourite music";
@@ -394,6 +405,7 @@ public final class ListViewActivity extends BaseCompatActivity {
 		 * @see Message#what
 		 */
 		public static final int NOTIFICATION_ITEM_INSERT = 990;
+		public static final int RELOAD = 991;
 
 		@SuppressWarnings("unused")
 		private WeakReference<ListViewActivity> mWeakReference;
@@ -416,6 +428,10 @@ public final class ListViewActivity extends BaseCompatActivity {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
+				}
+
+				case MessageWorker.RELOAD: {
+					if (mWeakReference.get().adapter != null) mWeakReference.get().adapter.notifyDataSetChanged();
 				}
 				break;
 			}

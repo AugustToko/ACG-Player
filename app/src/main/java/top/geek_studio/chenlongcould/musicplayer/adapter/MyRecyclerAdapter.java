@@ -49,7 +49,7 @@ import org.litepal.LitePal;
 import top.geek_studio.chenlongcould.geeklibrary.DownloadUtil;
 import top.geek_studio.chenlongcould.geeklibrary.HttpUtil;
 import top.geek_studio.chenlongcould.musicplayer.*;
-import top.geek_studio.chenlongcould.musicplayer.activity.BaseCompatActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.BaseListActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.albumdetail.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
@@ -88,7 +88,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 	/**
 	 * MAIN
 	 */
-	private BaseCompatActivity mActivity;
+	private BaseListActivity mActivity;
 
 	/**
 	 * 媒体库，默认顺序排序
@@ -102,6 +102,39 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 	private boolean isChoose = false;
 
 	private Config mConfig;
+
+	public MyRecyclerAdapter(BaseListActivity activity, List<MusicItem> musicItems, @NonNull Config config) {
+		mActivity = activity;
+		mMusicItems = musicItems;
+		mConfig = config;
+	}
+
+	/**
+	 * config for {@link MyRecyclerAdapter}
+	 */
+	public static class Config {
+		/**
+		 * 样式id
+		 * <p>
+		 * 1: 带边框线
+		 * 0：default
+		 */
+		int styleId = 0;
+
+		boolean recordIndex = true;
+
+		public Config() {
+		}
+
+		public Config(boolean recordIndex) {
+			this.recordIndex = recordIndex;
+		}
+
+		public Config(int styleId, boolean recordIndex) {
+			this.styleId = styleId;
+			this.recordIndex = recordIndex;
+		}
+	}
 
 	@NonNull
 	@Override
@@ -369,14 +402,14 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 				case Menu.FIRST + 8: {
 					MusicUtil.addToBlackList(mMusicItems.get(holder.getAdapterPosition()));
-					MainActivity.sendEmptyMessage(MainActivity.NotLeakHandler.RELOAD_MUSIC_ITEMS);
+					MainActivity.sendEmptyMessageStatic(MainActivity.NotLeakHandler.RELOAD_MUSIC_ITEMS);
 				}
 				break;
 
 				case Menu.FIRST + 9: {
 					final List<MusicItem> items = new ArrayList<>();
 					items.add(mMusicItems.get(holder.getAdapterPosition()));
-					MusicUtil.deleteTracks(mActivity, items);
+					MusicUtil.deleteTracks(mActivity, items, mActivity);
 				}
 				break;
 				default:
@@ -410,39 +443,6 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		});
 
 		return holder;
-	}
-
-	/**
-	 * config for {@link MyRecyclerAdapter}
-	 */
-	public static class Config {
-		/**
-		 * 样式id
-		 * <p>
-		 * 1: 带边框线
-		 * 0：default
-		 */
-		int styleId = 0;
-
-		boolean recordIndex = true;
-
-		public Config() {
-		}
-
-		public Config(boolean recordIndex) {
-			this.recordIndex = recordIndex;
-		}
-
-		public Config(int styleId, boolean recordIndex) {
-			this.styleId = styleId;
-			this.recordIndex = recordIndex;
-		}
-	}
-
-	public MyRecyclerAdapter(BaseCompatActivity activity, List<MusicItem> musicItems, @NonNull Config config) {
-		mActivity = activity;
-		mMusicItems = musicItems;
-		mConfig = config;
 	}
 
 	public static class Loader {

@@ -38,6 +38,11 @@ import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+import io.reactivex.Observable;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import org.jetbrains.annotations.NotNull;
 import top.geek_studio.chenlongcould.geeklibrary.widget.GkSnackbar;
@@ -54,7 +59,9 @@ import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -115,10 +122,14 @@ public final class MusicDetailFragment extends BaseFragment {
 	private TextView mLeftTime;
 	private TextView mRightTime;
 	private TextView mNextWillText;
-	private PopupMenu mPopupMenu;
 	private SlidingUpPanelLayout mSlidingUpPanelLayout;
 	private ConstraintLayout mNowPlayingBody;
 	private ConstraintLayout mSlideUpGroup;
+
+	/**
+	 * for {@link #setBlurEffect(Bitmap, ImageView, ImageView, TextView)} bitmap. width, height 150
+	 */
+	private static final int SIZE_OF_BLUR = 150;
 
 	private final PopupMenu.OnMenuItemClickListener clickListener = item -> {
 		switch (item.getItemId()) {
@@ -443,6 +454,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		mRecyclerView.setAdapter(mMyWaitListAdapter);
 
 	}
+
 	private MyWaitListAdapter mMyWaitListAdapter;
 
 	/**
@@ -462,6 +474,7 @@ public final class MusicDetailFragment extends BaseFragment {
 	 */
 	@ColorInt
 	private int targetColor;
+	private List<Disposable> disposables = new ArrayList<>();
 
 	private void setBlurEffect(@Nullable final Bitmap bitmap, @NonNull final ImageView bgUp
 			, @NonNull final ImageView bgDown, final TextView nextText) {
@@ -470,7 +483,7 @@ public final class MusicDetailFragment extends BaseFragment {
 
 		@ColorInt final int defColor = ContextCompat.getColor(mMainActivity, R.color.colorPrimary);
 
-		if (bitmap != null) {
+		if (bitmap != null && !bitmap.isRecycled()) {
 			Palette.from(bitmap).generate(palette -> {
 				if (palette != null) {
 					targetColor = palette.getVibrantColor(defColor);
@@ -487,6 +500,7 @@ public final class MusicDetailFragment extends BaseFragment {
 					.dontAnimate()
 					.apply(bitmapTransform(Data.sBlurTransformation))
 					.diskCacheStrategy(DiskCacheStrategy.NONE)
+					.override(SIZE_OF_BLUR, SIZE_OF_BLUR)
 					.into(bgUp));
 		} else {
 			if (bitmap != null) {
@@ -511,12 +525,13 @@ public final class MusicDetailFragment extends BaseFragment {
 				@Override
 				public void onAnimationEnd(Animator animation) {
 					GlideApp.with(MusicDetailFragment.this).clear(bgDown);
-					if (Values.BackgroundStyle.DETAIL_BACKGROUND.equals(Values.BackgroundStyle.STYLE_BACKGROUND_BLUR)) {
+					if (MusicDetailFragment.BackgroundStyle.DETAIL_BACKGROUND.equals(MusicDetailFragment.BackgroundStyle.STYLE_BACKGROUND_BLUR)) {
 						GlideApp.with(MusicDetailFragment.this)
 								.load(bitmap)
 								.dontAnimate()
 								.apply(bitmapTransform(Data.sBlurTransformation))
 								.diskCacheStrategy(DiskCacheStrategy.NONE)
+								.override(SIZE_OF_BLUR, SIZE_OF_BLUR)
 								.into(bgDown);
 					} else {
 						if (bitmap != null) {
@@ -671,7 +686,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		mPlayButton.setScaleY(0);
 	}
 
-	public final void setCurrentInfo(@NonNull final String name, @NonNull final String albumName, final Bitmap cover) {
+	private void setCurrentInfo(@NonNull final String name, @NonNull final String albumName, final Bitmap cover) {
 		mMainActivity.runOnUiThread(() -> {
 			setSlideInfoBar(name, albumName, cover);
 
@@ -912,7 +927,9 @@ public final class MusicDetailFragment extends BaseFragment {
 	 * @param albumName music album name
 	 * @param cover     music cover image, it is @NullAble(some types of music do not have cover)
 	 */
-	private void setSlideInfoBar(String songName, String albumName, Bitmap cover) {
+	private void setSlideInfoBar(String songName, String albumName, @Nullable Bitmap cover) {
+		if (cover == null || cover.isRecycled()) return;
+
 		mMainActivity.runOnUiThread(() -> {
 			setIconLightOrDark(cover);
 
@@ -988,7 +1005,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		if (Data.sCurrentMusicItem == null || Data.sCurrentMusicItem.getMusicID() == -1) return;
 
 		/*---------------------- Menu -----------------------*/
-		mPopupMenu = new PopupMenu(context, view);
+		PopupMenu mPopupMenu = new PopupMenu(context, view);
 
 		mPopupMenu.setGravity(GravityCompat.END);
 
@@ -1400,71 +1417,82 @@ public final class MusicDetailFragment extends BaseFragment {
 	 */
 	private void setIconLightOrDark(@Nullable final Bitmap bitmap) {
 		if (bitmap != null) {
-			new AsyncTask<Void, Void, Integer>() {
 
-				@Override
-				protected Integer doInBackground(Void... voids) {
-					//InfoBar background color AND text color balance
-					return Utils.Ui.getBright(bitmap);
-				}
+			Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter ->
+					observableEmitter.onNext(Utils.Ui.getBright(bitmap))).subscribeOn(Schedulers.newThread())
+					.observeOn(AndroidSchedulers.mainThread()).subscribe(i -> {
 
-				@Override
-				protected void onPostExecute(Integer integer) {
-					if (integer > (255 / 2)) {
-						@ColorInt final int target = ContextCompat.getColor(mMainActivity, R.color.notVeryBlack);
+						if (i > (255 / 2)) {
+							@ColorInt final int target = ContextCompat.getColor(mMainActivity, R.color.notVeryBlack);
 
-						final ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mNextWillText.getCurrentTextColor(), target);
-						animator.setDuration(0);
-						animator.setStartDelay(300);
-						animator.addUpdateListener(animation -> {
-							@ColorInt int val = (int) animation.getAnimatedValue();
-							mInfoBarSongText.setTextColor(val);
-							mInfoBarAlbumText.setTextColor(val);
-							mInfoBarFavButton.setColorFilter(val);
+							final ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mNextWillText.getCurrentTextColor(), target);
+							animator.setDuration(0);
+							animator.setStartDelay(300);
+							animator.addUpdateListener(animation -> {
+								@ColorInt int val = (int) animation.getAnimatedValue();
+								mInfoBarSongText.setTextColor(val);
+								mInfoBarAlbumText.setTextColor(val);
+								mInfoBarFavButton.setColorFilter(val);
 
-							mRandomButton.setColorFilter(val);
-							mRepeatButton.setColorFilter(val);
-							mNextButton.setColorFilter(val);
-							mPreviousButton.setColorFilter(val);
-							mLeftTime.setTextColor(val);
-							mRightTime.setTextColor(val);
+								mRandomButton.setColorFilter(val);
+								mRepeatButton.setColorFilter(val);
+								mNextButton.setColorFilter(val);
+								mPreviousButton.setColorFilter(val);
+								mLeftTime.setTextColor(val);
+								mRightTime.setTextColor(val);
 
-							mSeekBar.getProgressDrawable().setTint(val);
-							mSeekBar.getThumb().setTint(val);
-						});
-						animator.start();
-					} else {
-						@ColorInt final int target = ContextCompat.getColor(mMainActivity, R.color.notVeryWhite);
+								mSeekBar.getProgressDrawable().setTint(val);
+								mSeekBar.getThumb().setTint(val);
+							});
+							animator.start();
+						} else {
+							@ColorInt final int target = ContextCompat.getColor(mMainActivity, R.color.notVeryWhite);
 
-						final ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mNextWillText.getCurrentTextColor(), target);
-						animator.setDuration(0);
-						animator.addUpdateListener(animation -> {
-							@ColorInt int val = (int) animation.getAnimatedValue();
-							mInfoBarSongText.setTextColor(val);
-							mInfoBarAlbumText.setTextColor(val);
-							mInfoBarFavButton.setColorFilter(val);
+							final ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), mNextWillText.getCurrentTextColor(), target);
+							animator.setDuration(0);
+							animator.addUpdateListener(animation -> {
+								@ColorInt int val = (int) animation.getAnimatedValue();
+								mInfoBarSongText.setTextColor(val);
+								mInfoBarAlbumText.setTextColor(val);
+								mInfoBarFavButton.setColorFilter(val);
 
-							mRandomButton.setColorFilter(val);
-							mRepeatButton.setColorFilter(val);
-							mNextButton.setColorFilter(val);
-							mPreviousButton.setColorFilter(val);
-							mLeftTime.setTextColor(val);
-							mRightTime.setTextColor(val);
+								mRandomButton.setColorFilter(val);
+								mRepeatButton.setColorFilter(val);
+								mNextButton.setColorFilter(val);
+								mPreviousButton.setColorFilter(val);
+								mLeftTime.setTextColor(val);
+								mRightTime.setTextColor(val);
 
-							mSeekBar.getProgressDrawable().setTint(val);
-							mSeekBar.getThumb().setTint(val);
-						});
-						animator.start();
-					}
+								mSeekBar.getProgressDrawable().setTint(val);
+								mSeekBar.getThumb().setTint(val);
+							});
+							animator.start();
+						}
+					});
 
-				}
-			}.execute();
+			disposables.add(disposable);
 		}
+	}
+
+	private void clearDisposable() {
+		for (final Disposable disposable : disposables) {
+			if (disposable != null && !disposable.isDisposed()) {
+				disposable.dispose();
+			}
+		}
+	}
+
+	@Override
+	public void onPause() {
+		Log.d(TAG, "onPause: ");
+		clearDisposable();
+		super.onPause();
 	}
 
 	@Override
 	public void onDestroyView() {
 		mHandlerThread.quitSafely();
+		clearDisposable();
 		super.onDestroyView();
 	}
 
@@ -1472,6 +1500,7 @@ public final class MusicDetailFragment extends BaseFragment {
 	public FragmentType getFragmentType() {
 		return FragmentType.MUSIC_DETAIL_FRAGMENT;
 	}
+
 	/**
 	 * 对于 {@link top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment} 中的背景进行样式设定
 	 */

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Message;
 import android.view.View;
 import android.widget.Toast;
 import androidx.annotation.ColorInt;
@@ -19,7 +20,7 @@ import org.litepal.LitePal;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
-import top.geek_studio.chenlongcould.musicplayer.activity.BaseCompatActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.BaseListActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityAlbumDetailOthBinding;
@@ -36,7 +37,7 @@ import java.util.List;
  * @author chenlongcould
  * @apiNote some by others
  */
-public final class AlbumDetailActivity extends BaseCompatActivity implements AlbumDetailContract.View {
+public final class AlbumDetailActivity extends BaseListActivity implements AlbumDetailContract.View {
 	
 	public static final String TAG = "AlbumDetailActivity";
 	
@@ -272,6 +273,16 @@ public final class AlbumDetailActivity extends BaseCompatActivity implements Alb
 	@Override
 	public void setArtistText(@NonNull String data) {
 		mAlbumDetailBinding.artistText.setText(data);
+	}
+
+	@Override
+	public void sendEmptyMessage(int what) {
+
+	}
+
+	@Override
+	public void sendMessage(Message message) {
+
 	}
 
 	public interface IntentKey {

@@ -9,17 +9,20 @@ import android.os.Message;
  * @date : 2019/05/26/18
  */
 public interface MessageWorker {
+
+	int RELOAD = 9920;
+
 	/**
 	 * send empty message
 	 *
 	 * @see android.os.Handler#sendEmptyMessage(int)
 	 */
-	boolean sendEmptyMessage(final int what);
+	void sendEmptyMessage(final int what);
 
 	/**
 	 * send message
 	 *
 	 * @see android.os.Handler#sendMessage(Message)
 	 */
-	boolean sendMessage(final Message message);
+	void sendMessage(final Message message);
 }

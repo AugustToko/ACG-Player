@@ -83,7 +83,7 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 /**
  * @author chenlongcould
  */
-public final class MainActivity extends BaseCompatActivity {
+public final class MainActivity extends BaseListActivity {
 
 	public static final String TAG = "MainActivity";
 
@@ -166,7 +166,7 @@ public final class MainActivity extends BaseCompatActivity {
 	private static NotLeakHandler mHandler = null;
 
 	@SuppressWarnings("unused")
-	public static boolean sendMessage(@NonNull Message message) {
+	public static boolean sendMessageStatic(@NonNull Message message) {
 		boolean result = false;
 		if (mHandler != null) {
 			mHandler.sendMessage(message);
@@ -176,7 +176,7 @@ public final class MainActivity extends BaseCompatActivity {
 	}
 
 	@SuppressWarnings("UnusedReturnValue")
-	public static boolean sendEmptyMessage(int what) {
+	public static boolean sendEmptyMessageStatic(int what) {
 		boolean result = false;
 		if (mHandler != null) {
 			mHandler.sendEmptyMessage(what);
@@ -1390,6 +1390,16 @@ public final class MainActivity extends BaseCompatActivity {
 		return mMainBinding.toolBar.getMenu();
 	}
 
+	@Override
+	public void sendEmptyMessage(int what) {
+		mHandler.sendEmptyMessage(what);
+	}
+
+	@Override
+	public void sendMessage(Message message) {
+		mHandler.sendMessage(message);
+	}
+
 ////////////get///////////////////////get///////////////////////get/////////////////
 
 	@SuppressWarnings("WeakerAccess")
@@ -1462,6 +1472,12 @@ public final class MainActivity extends BaseCompatActivity {
 					mWeakReference.get().setSubtitle(Data.sPlayOrderList.size() + " Songs");
 				}
 				break;
+
+				case MessageWorker.RELOAD: {
+					if (mWeakReference.get().musicListFragment != null) {
+						mWeakReference.get().musicListFragment.reloadData();
+					}
+				}
 				default:
 			}
 		}

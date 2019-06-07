@@ -39,6 +39,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/LightTheme"
             tools:replace="android:allowBackup"
+            android:hardwareAccelerated="true"
             tools:targetApi="n"
             >
 

@@ -129,6 +129,12 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 	 * Load the selection menu, has item in selected({@link androidx.recyclerview.widget.RecyclerView})
 	 */
 	abstract public void inflateChooseMenu();
+//
+//	/**
+//	 * send empty message to activity
+//	 * @return if send done return true else false
+//	 * */
+//	abstract public boolean sendEmptyMessageStatic(int what);
 
 	/**
 	 * set up view

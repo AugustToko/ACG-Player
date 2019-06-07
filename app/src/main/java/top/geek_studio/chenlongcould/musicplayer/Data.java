@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.RemoteException;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -55,11 +56,6 @@ public final class Data {
 	public static List<MusicItem> sMusicItemsBackUp = new ArrayList<>();
 
 	public static List<MusicItem> sPlayOrderList = new ArrayList<>();
-	/**
-	 * save temp bitmap
-	 */
-	@Nullable
-	private static Bitmap sCurrentCover = null;
 
 	public synchronized static void syncPlayOrderList(final Context context, final List<MusicItem> items) {
 		Data.sPlayOrderList.clear();
@@ -150,14 +146,46 @@ public final class Data {
 		return mItemDecoration;
 	}
 
+	/**
+	 * save temp bitmap
+	 */
 	@Nullable
-	public static Bitmap getCurrentCover() {
-		return sCurrentCover;
+	private static Bitmap sCurrentCover = null;
+
+	@Nullable
+	private static Bitmap sCurrentCoverBk = null;
+
+	@Nullable
+	public synchronized static Bitmap getCurrentCover() {
+		return sCurrentCover == null ? sCurrentCoverBk : sCurrentCover;
 	}
 
-	public static void setCurrentCover(@Nullable final Bitmap currentCover) {
+	public synchronized static void setCurrentCover(@Nullable final Bitmap currentCover) {
 		if (currentCover == null || currentCover.isRecycled()) return;
-		sCurrentCover = currentCover;
+
+		if (sCurrentCover == null && sCurrentCoverBk == null) {
+			sCurrentCover = currentCover;
+			Log.d(TAG, "setCurrentCover: all null");
+			return;
+		}
+
+		if (sCurrentCover != null) {
+			sCurrentCoverBk = currentCover;
+
+			if (!sCurrentCover.isRecycled()) {
+				sCurrentCover.recycle();
+				sCurrentCover = null;
+				Log.d(TAG, "setCurrentCover: recycle sCurrentCover");
+			}
+		} else {
+			sCurrentCover = currentCover;
+
+			if (!sCurrentCoverBk.isRecycled()) {
+				sCurrentCoverBk.recycle();
+				sCurrentCoverBk = null;
+				Log.d(TAG, "setCurrentCover: recycle sCurrentCoverBk");
+			}
+		}
 	}
 
 }

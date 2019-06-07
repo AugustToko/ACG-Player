@@ -20,10 +20,8 @@ import androidx.core.content.FileProvider;
 import org.litepal.LitePal;
 import org.litepal.LitePalDB;
 import top.geek_studio.chenlongcould.geeklibrary.Private;
-import top.geek_studio.chenlongcould.musicplayer.App;
-import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.*;
+import top.geek_studio.chenlongcould.musicplayer.activity.BaseListActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.database.Detail;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
@@ -521,7 +519,7 @@ public class MusicUtil {
 		return builder.build();
 	}
 
-	public synchronized static void deleteTracks(@NonNull final Context context, @NonNull final List<MusicItem> songs) {
+	public synchronized static void deleteTracks(@NonNull final Context context, @NonNull final List<MusicItem> songs, BaseListActivity worker) {
 		final String[] projection = new String[]{
 				BaseColumns._ID, MediaStore.MediaColumns.DATA
 		};
@@ -562,6 +560,7 @@ public class MusicUtil {
 					for (final MusicItem item : items) {
 						Data.sPlayOrderList.remove(item);
 						Data.sPlayOrderListBackup.remove(item);
+						worker.removeItem(item);
 						LitePal.deleteAll(Detail.class, "musicId=?", String.valueOf(item.getMusicID()));
 					}
 				} while (cursor.moveToNext());
@@ -591,10 +590,12 @@ public class MusicUtil {
 				cursor.close();
 			}
 			context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
-			// final reload music item in music list fragment
-			MainActivity.sendEmptyMessage(MainActivity.NotLeakHandler.RELOAD_MUSIC_ITEMS);
 			// sync order list
 			Data.syncPlayOrderList(context);
+
+			// TODO: 2019/6/7 统一使用 worker
+			// final reload music item in music list fragment
+			worker.sendEmptyMessage(MessageWorker.RELOAD);
 
 //			Toast.makeText(context, context.getString(R.string.deleted_x_songs, songs.size()), Toast.LENGTH_SHORT).show();
 		} catch (SecurityException ignored) {

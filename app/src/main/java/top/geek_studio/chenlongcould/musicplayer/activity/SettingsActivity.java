@@ -30,6 +30,7 @@ import top.geek_studio.chenlongcould.musicplayer.*;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivitySettingsBinding;
+import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
@@ -320,14 +321,19 @@ public final class SettingsActivity extends BaseCompatActivity {
 		styleOpt.setOnClickListener(v -> {
 
 			SharedPreferences.Editor editor = preferences.edit();
-			if (Values.BackgroundStyle.DETAIL_BACKGROUND.equals(Values.BackgroundStyle.STYLE_BACKGROUND_BLUR)) {
-				Values.BackgroundStyle.DETAIL_BACKGROUND = Values.BackgroundStyle.STYLE_BACKGROUND_AUTO_COLOR;
+			if (MusicDetailFragment.BackgroundStyle.DETAIL_BACKGROUND.equals(MusicDetailFragment.BackgroundStyle
+					.STYLE_BACKGROUND_BLUR)) {
+				MusicDetailFragment.BackgroundStyle.DETAIL_BACKGROUND = MusicDetailFragment
+						.BackgroundStyle.STYLE_BACKGROUND_AUTO_COLOR;
 				mStyleSwitch.setChecked(false);
-				editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.BackgroundStyle.STYLE_BACKGROUND_AUTO_COLOR);
+				editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, MusicDetailFragment
+						.BackgroundStyle.STYLE_BACKGROUND_AUTO_COLOR);
 			} else {
-				Values.BackgroundStyle.DETAIL_BACKGROUND = Values.BackgroundStyle.STYLE_BACKGROUND_BLUR;
+				MusicDetailFragment.BackgroundStyle.DETAIL_BACKGROUND = MusicDetailFragment
+						.BackgroundStyle.STYLE_BACKGROUND_BLUR;
 				mStyleSwitch.setChecked(true);
-				editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.BackgroundStyle.STYLE_BACKGROUND_BLUR);
+				editor.putString(Values.SharedPrefsTag.DETAIL_BG_STYLE, MusicDetailFragment
+						.BackgroundStyle.STYLE_BACKGROUND_BLUR);
 			}
 			editor.apply();
 

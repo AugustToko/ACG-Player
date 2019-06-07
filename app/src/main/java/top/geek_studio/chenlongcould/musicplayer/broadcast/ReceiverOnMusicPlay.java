@@ -334,7 +334,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 			}
 
 			MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.RECYCLER_SCROLL);
-			MainActivity.sendEmptyMessage(MainActivity.NotLeakHandler.SET_SLIDE_TOUCH_ENABLE);
+			MainActivity.sendEmptyMessageStatic(MainActivity.NotLeakHandler.SET_SLIDE_TOUCH_ENABLE);
 
 			Data.HAS_PLAYED = true;
 		});
