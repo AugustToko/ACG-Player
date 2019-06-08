@@ -1,9 +1,7 @@
 package top.geek_studio.chenlongcould.musicplayer.fragment;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,7 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
@@ -29,47 +26,45 @@ import top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.PlayListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentPlaylistBinding;
+import top.geek_studio.chenlongcould.musicplayer.model.Item;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author chenlongcould
  */
-public final class PlayListFragment extends BaseFragment {
+public final class PlayListFragment extends BaseListFragment {
 
 	public static final String TAG = "PlayListFragment";
 
-	private LocalBroadcastManager mBroadcastManager;
 	private FragmentPlaylistBinding mPlayListBinding;
 	private MainActivity mMainActivity;
-	private static Handler mHandler;
+
+	public static NotLeakHandler mHandler;
+
 	private PlayListAdapter mPlayListAdapter;
-	private BroadcastReceiver mRefreshReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			mPlayListAdapter.notifyDataSetChanged();
-		}
-	};
+
+	public List<PlayListItem> mPlayListItemList = new ArrayList<>();
+
+	/**
+	 * add playlist item
+	 */
+	public static void sendAddPlayList(@Nullable PlayListItem playListItem) {
+		Message message = Message.obtain();
+		message.what = PlayListFragment.NotLeakHandler.ADD_TO_PLAYLIST;
+		message.obj = playListItem;
+		PlayListFragment.mHandler.sendEmptyMessage(PlayListFragment.NotLeakHandler.ADD_TO_PLAYLIST);
+	}
 
 	/**
 	 * 实例化 {@link PlayListFragment}
 	 */
 	public static PlayListFragment newInstance() {
 		return new PlayListFragment();
-	}
-
-	/**
-	 * receive broadcast
-	 *
-	 * @see PlayListFragment#mBroadcastManager
-	 * @see PlayListFragment.ItemChange#ACTION_REFRESH_LIST
-	 */
-	private void receiveItemChange() {
-		IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction(ItemChange.ACTION_REFRESH_LIST);
-		mBroadcastManager.registerReceiver(mRefreshReceiver, intentFilter);
 	}
 
 	@Override
@@ -82,17 +77,27 @@ public final class PlayListFragment extends BaseFragment {
 		super.onAttach(context);
 		mMainActivity = (MainActivity) getActivity();
 		mHandler = new NotLeakHandler(this);
+	}
 
-		mBroadcastManager = LocalBroadcastManager.getInstance(context);
-		receiveItemChange();
+	/**
+	 * reload
+	 * by create list or rename list
+	 */
+	public static void reloadDataByHandler() {
+		mHandler.sendEmptyMessage(NotLeakHandler.RE_LOAD_PLAY_LIST);
+	}
+
+	public PlayListAdapter getPlayListAdapter() {
+		return mPlayListAdapter;
 	}
 
 	/**
 	 * load data
 	 */
 	private void initData() {
+
 		final Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
-			Data.sPlayListItems.clear();
+			mPlayListItemList.clear();
 			Cursor cursor = mMainActivity.getContentResolver()
 					.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null);
 			if (cursor != null && cursor.moveToFirst()) {
@@ -109,7 +114,7 @@ public final class PlayListFragment extends BaseFragment {
 					// TODO: 2018/12/10 M3U FILE
 					final File file = new File(filePath + ".m3u");
 
-					Data.sPlayListItems.add(new PlayListItem(id, name, filePath, addTime));
+					mPlayListItemList.add(new PlayListItem(id, name, filePath, addTime));
 				} while (cursor.moveToNext());
 				cursor.close();
 			}
@@ -122,29 +127,11 @@ public final class PlayListFragment extends BaseFragment {
 					if (integer == 0) {
 
 						//load recyclerView
-						mPlayListAdapter = new PlayListAdapter(mMainActivity, Data.sPlayListItems);
+						mPlayListAdapter = new PlayListAdapter(this, mPlayListItemList);
 						mPlayListBinding.recyclerView.setAdapter(mPlayListAdapter);
 					}
 				});
 		Data.sDisposables.add(disposable);
-	}
-
-	public static Handler getHandler() {
-		return mHandler;
-	}
-
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		mBroadcastManager.unregisterReceiver(mRefreshReceiver);
-	}
-
-	public PlayListAdapter getPlayListAdapter() {
-		return mPlayListAdapter;
-	}
-
-	public static void reloadDataByHandler() {
-		mHandler.sendEmptyMessage(NotLeakHandler.RE_LOAD_PLAY_LIST);
 	}
 
 	@Override
@@ -153,25 +140,25 @@ public final class PlayListFragment extends BaseFragment {
 
 		mPlayListBinding.addRecent.setOnClickListener(v -> {
 			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
-			intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, ListViewActivity.FragmentType.ACTION_ADD_RECENT);
+			intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, ListViewActivity.ListType.ACTION_ADD_RECENT);
 			startActivity(intent);
 		});
 
 //		mPlayListBinding.favourite.setOnClickListener(v -> {
 //			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
-//			intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, ListViewActivity.FragmentType.ACTION_FAVOURITE);
+//			intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, ListViewActivity.ListType.ACTION_FAVOURITE);
 //			startActivity(intent);
 //		});
 
 		mPlayListBinding.history.setOnClickListener(v -> {
 			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
-			intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, ListViewActivity.FragmentType.ACTION_HISTORY);
+			intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, ListViewActivity.ListType.ACTION_HISTORY);
 			startActivity(intent);
 		});
 
 		mPlayListBinding.trashCan.setOnClickListener(v -> {
 			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
-			intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, ListViewActivity.FragmentType.ACTION_TRASH_CAN);
+			intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, ListViewActivity.ListType.ACTION_TRASH_CAN);
 			startActivity(intent);
 		});
 
@@ -193,21 +180,41 @@ public final class PlayListFragment extends BaseFragment {
 		mHandler.sendEmptyMessage(NotLeakHandler.RE_LOAD_PLAY_LIST);
 	}
 
-	/**
-	 * for intent use
-	 */
-	public interface ItemChange {
-		/**
-		 * for broadcasts
-		 */
-		String ACTION_REFRESH_LIST = "ACTION_REFRESH_LIST";
+	@Override
+	public boolean removeItem(@Nullable Item item) {
+		if (!(item instanceof PlayListItem)) return false;
+
+		final PlayListItem playListItem = (PlayListItem) item;
+
+		if (mPlayListAdapter != null && playListItem.getId() != -1) {
+			int pos = mPlayListItemList.indexOf(playListItem);
+			boolean result = mPlayListItemList.remove(playListItem);
+			mPlayListAdapter.notifyItemRemoved(pos);
+			return result;
+		}
+		return false;
 	}
 
-	private static class NotLeakHandler extends Handler {
+	@Override
+	public boolean addItem(@Nullable Item item) {
+		if (!(item instanceof PlayListItem)) return false;
+
+		final PlayListItem playListItem = (PlayListItem) item;
+
+		if (mPlayListAdapter != null && playListItem.getId() != -1) {
+			boolean result = mPlayListItemList.add(playListItem);
+			mPlayListAdapter.notifyItemInserted(mPlayListItemList.size() - 1);
+			return result;
+		}
+		return false;
+	}
+
+	public static class NotLeakHandler extends Handler {
 		
 		private WeakReference<PlayListFragment> mWeakReference;
 
 		public static final int RE_LOAD_PLAY_LIST = 80001;
+		public static final int ADD_TO_PLAYLIST = 80002;
 
 		NotLeakHandler(PlayListFragment fragment) {
 			mWeakReference = new WeakReference<>(fragment);
@@ -215,15 +222,20 @@ public final class PlayListFragment extends BaseFragment {
 
 		@Override
 		public void handleMessage(Message msg) {
-			//noinspection SwitchStatementWithTooFewBranches
 			switch (msg.what) {
 				case RE_LOAD_PLAY_LIST: {
 					mWeakReference.get().initData();
 					mWeakReference.get().getPlayListAdapter().notifyDataSetChanged();
 				}
 				break;
+
+				case ADD_TO_PLAYLIST: {
+					mWeakReference.get().addItem((Item) msg.obj);
+				}
+				break;
 				default:
 			}
 		}
 	}
+
 }

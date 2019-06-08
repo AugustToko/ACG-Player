@@ -17,7 +17,7 @@ import android.os.Parcelable;
 /**
  * @author chenlongcould
  */
-public final class AlbumItem implements Parcelable {
+public final class AlbumItem extends Item implements Parcelable {
 
 	public static final String DEFAULT_ALBUM_ID = "-1";
 	public static final Parcelable.Creator<AlbumItem> CREATOR = new Parcelable.Creator<AlbumItem>() {
@@ -56,6 +56,11 @@ public final class AlbumItem implements Parcelable {
 
 	public String getAlbumName() {
 		return mAlbumName;
+	}
+
+	@Override
+	public int hashCode() {
+		return mAlbumId;
 	}
 
 	@Override

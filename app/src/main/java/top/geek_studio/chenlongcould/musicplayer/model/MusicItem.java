@@ -16,7 +16,7 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-public final class MusicItem implements Parcelable {
+public final class MusicItem extends Item implements Parcelable {
 
 	public static final Creator<MusicItem> CREATOR = new Creator<MusicItem>() {
 		@Override

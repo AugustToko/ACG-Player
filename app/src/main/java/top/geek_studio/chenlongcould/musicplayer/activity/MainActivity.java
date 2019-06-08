@@ -51,6 +51,9 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import org.litepal.LitePal;
+import top.geek_studio.chenlongcould.geeklibrary.GCSutil;
+import top.geek_studio.chenlongcould.geeklibrary.GeekProject;
+import top.geek_studio.chenlongcould.geeklibrary.PackageTool;
 import top.geek_studio.chenlongcould.geeklibrary.theme.Theme;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeUtils;
@@ -72,6 +75,7 @@ import top.geek_studio.chenlongcould.musicplayer.threadPool.ArtistThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
+import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
@@ -219,6 +223,8 @@ public final class MainActivity extends BaseListActivity {
 		initView();
 
 		super.onCreate(savedInstanceState);
+
+		mHandler.post(() -> GCSutil.checkUpdate(this, GeekProject.ACG_Player, PackageTool.getVerCode(this)));
 	}
 
 	private void init() {
@@ -502,7 +508,7 @@ public final class MainActivity extends BaseListActivity {
 				case R.id.menu_toolbar_main_choose_addlist: {
 					ArrayList<MusicItem> helper = new ArrayList<>(musicListFragment.getAdapter().getSelected());
 
-					Utils.DataSet.addListDialog(MainActivity.this, helper);
+					PlayListsUtil.addListDialog(MainActivity.this, helper);
 					musicListFragment.getAdapter().clearSelection();
 				}
 				break;
@@ -970,7 +976,7 @@ public final class MainActivity extends BaseListActivity {
 			break;
 
 			case '4': {
-				content = Data.sPlayListItems.size() + " Playlists";
+				content = playListFragment.mPlayListItemList.size() + " Playlists";
 			}
 			break;
 
@@ -1011,7 +1017,6 @@ public final class MainActivity extends BaseListActivity {
 		Data.sPlayOrderList.clear();
 		Data.sMusicItems.clear();
 		Data.sMusicItemsBackUp.clear();
-		Data.sHistoryPlayed.clear();
 		Data.S_TRASH_CAN_LIST.clear();
 
 		new Thread(() -> {

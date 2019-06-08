@@ -14,7 +14,7 @@ package top.geek_studio.chenlongcould.musicplayer.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public final class PlayListItem implements Parcelable {
+public final class PlayListItem extends Item implements Parcelable {
 
 	public static final Parcelable.Creator<PlayListItem> CREATOR = new Parcelable.Creator<PlayListItem>() {
 		@Override
@@ -65,6 +65,11 @@ public final class PlayListItem implements Parcelable {
 
 	public long getAddTime() {
 		return mAddTime;
+	}
+
+	@Override
+	public int hashCode() {
+		return mId;
 	}
 
 	@Override

@@ -22,11 +22,20 @@ public abstract class BaseListActivity extends BaseCompatActivity implements Mes
 	}
 
 	/**
-	 * 用于对列表的删除操作
+	 * 用于对列表的操作
 	 * 请务必覆盖本方法
-	 * todo 使用抽象关键字
 	 */
-	public boolean removeItem(MusicItem item) {
+	public boolean removeItem(@Nullable final MusicItem item) {
 		return false;
 	}
+
+	;
+
+	/**
+	 * 用于对列表的操作
+	 * 请务必覆盖本方法
+	 */
+	public boolean addItem(@Nullable final MusicItem item) {
+		return false;
+	};
 }

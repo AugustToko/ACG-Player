@@ -5,6 +5,7 @@ import android.os.*;
 import android.provider.MediaStore;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -26,6 +27,7 @@ import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author chenlongcould
@@ -53,18 +55,27 @@ public final class ListViewActivity extends BaseListActivity {
 	/**
 	 * different type enter different UI(Activity)
 	 */
-	private String mType;
+	private String mType = "null";
 	private Disposable mDisposable;
 
-	/**
-	 * add music to history list
-	 */
-	public static void addToHistory(@NonNull MusicItem item) {
-		Data.sHistoryPlayed.add(item);
-		if (initDone) {
-			handler.sendEmptyMessage(NotLeakHandler.NOTIFICATION_ITEM_INSERT);
+	public static boolean sendMessageStatic(@NonNull Message message) {
+		boolean result = false;
+		if (handler != null) {
+			handler.sendMessage(message);
+			result = true;
 		}
+		return result;
 	}
+
+	public static boolean sendEmptyMessageStatic(int what) {
+		boolean result = false;
+		if (handler != null) {
+			handler.sendEmptyMessage(what);
+			result = true;
+		}
+		return result;
+	}
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -89,10 +100,9 @@ public final class ListViewActivity extends BaseListActivity {
 		Data.sPlayOrderListBackup.clear();
 		Data.sPlayOrderListBackup.addAll(Data.sPlayOrderList);
 
-
 		if (mType != null) {
 			switch (mType) {
-				case FragmentType.ACTION_ADD_RECENT: {
+				case ListType.ACTION_ADD_RECENT: {
 					mToolbar.setTitle(getResources().getString(R.string.add_recent));
 
 					mMusicItemList.addAll(Data.sMusicItems);
@@ -105,84 +115,13 @@ public final class ListViewActivity extends BaseListActivity {
 						});
 					}
 
-					Data.syncPlayOrderList(this, mMusicItemList);
-					Data.shuffleOrderListSync(this, false);
-
 					adapter = new MyRecyclerAdapter(this, mMusicItemList, new MyRecyclerAdapter.Config(
 							preferences.getInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 0)
 							, false));
 					mRecyclerView.setAdapter(adapter);
 				}
 				break;
-//				case FragmentType.ACTION_FAVOURITE: {
-//					mToolbar.setTitle(getResources().getString(R.string.my_favourite));
-//
-//					final PlayListItem playListItem = MusicUtil.getFavoritesPlaylist(this);
-//
-//					if (playListItem != null) {
-//						int id = playListItem.getId();
-//						if (id != -1) {
-//							mDisposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
-//								//data
-//
-//								//get musicId in PlayList
-//								final Cursor cursor = getContentResolver().query(MediaStore.Audio.Playlists.Members.getContentUri("external", id)
-//										, null, null, null, MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
-//								if (cursor != null && cursor.moveToFirst()) {
-//									cursor.moveToFirst();
-//									do {
-//
-//										//search music (with audioId)
-//										int audioId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID));
-//										Cursor cursor1 = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, MediaStore.MediaColumns._ID + " = ?", new String[]{String.valueOf(audioId)}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-//										if (cursor1 != null && cursor1.moveToFirst()) {
-//											do {
-//												final String mimeType = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.MediaColumns.MIME_TYPE));
-//												final String name = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.MediaColumns.TITLE));
-//												final String albumName = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
-//												final int musicId = cursor1.getInt(cursor1.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
-//												final int size = (int) cursor1.getLong(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-//												final int duration = cursor1.getInt(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-//												final String artist = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-//												final long addTime = cursor1.getLong(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
-//												final int albumId = cursor1.getInt(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
-//												final String path = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-//
-//												final MusicItem.Builder builder = new MusicItem.Builder(musicId, name, path)
-//														.musicAlbum(albumName)
-//														.addTime((int) addTime)
-//														.artist(artist)
-//														.duration(duration)
-//														.mimeName(mimeType)
-//														.size(size)
-//														.addAlbumId(albumId);
-//												mMusicItemList.add(builder.build());
-//											} while (cursor1.moveToNext());
-//											cursor1.close();
-//										}
-//
-//									} while (cursor.moveToNext());
-//									cursor.close();
-//								}
-//
-//								observableEmitter.onNext(0);
-//							}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
-//									.subscribe(i -> {
-//										if (i != 0) {
-//											return;
-//										}
-//										adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList, new MyRecyclerAdapter.Config(0, true));
-//										mRecyclerView.setAdapter(adapter);
-//									});
-//						}
-//					} else {
-//						Toast.makeText(this, "ID is null...", Toast.LENGTH_SHORT).show();
-//					}
-//				}
-//				break;
-
-				//点击播放列表中的一项
-				case FragmentType.ACTION_PLAY_LIST_ITEM: {
+				case ListType.ACTION_PLAY_LIST_ITEM: {
 					mToolbar.setTitle(getIntent().getStringExtra("play_list_name"));
 
 					currentListName = getIntent().getStringExtra("play_list_name");
@@ -236,8 +175,7 @@ public final class ListViewActivity extends BaseListActivity {
 								if (i != 0) {
 									return;
 								}
-								Data.syncPlayOrderList(this, mMusicItemList);
-								Data.shuffleOrderListSync(this, false);
+
 								adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList
 										, new MyRecyclerAdapter.Config(preferences.getInt(Values.SharedPrefsTag
 										.RECYCLER_VIEW_ITEM_STYLE, 0), true));
@@ -246,12 +184,10 @@ public final class ListViewActivity extends BaseListActivity {
 				}
 				break;
 
-				case FragmentType.ACTION_HISTORY: {
+				case ListType.ACTION_HISTORY: {
 					mToolbar.setTitle(getString(R.string.history));
+					mMusicItemList.clear();
 					mMusicItemList.addAll(Data.sHistoryPlayed);
-
-					Data.syncPlayOrderList(this, mMusicItemList);
-					Data.shuffleOrderListSync(this, false);
 
 					adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList
 							, new MyRecyclerAdapter.Config(preferences.getInt(Values.SharedPrefsTag
@@ -260,7 +196,7 @@ public final class ListViewActivity extends BaseListActivity {
 				}
 				break;
 
-				case FragmentType.ACTION_TRASH_CAN: {
+				case ListType.ACTION_TRASH_CAN: {
 					if (preferences.getBoolean(Values.SharedPrefsTag.TRASH_CAN_INFO, true)) {
 						AlertDialog.Builder builder = new AlertDialog.Builder(this)
 								.setTitle("About trash can")
@@ -274,9 +210,6 @@ public final class ListViewActivity extends BaseListActivity {
 
 					mToolbar.setTitle(getString(R.string.trash_can));
 					mMusicItemList.addAll(Data.S_TRASH_CAN_LIST);
-
-					Data.syncPlayOrderList(this, mMusicItemList);
-					Data.shuffleOrderListSync(this, false);
 
 					adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList
 							, new MyRecyclerAdapter.Config(preferences.getInt(Values.SharedPrefsTag
@@ -295,7 +228,23 @@ public final class ListViewActivity extends BaseListActivity {
 
 	@Override
 	public boolean removeItem(MusicItem item) {
-		return mMusicItemList.remove(item);
+		if (mMusicItemList != null && adapter != null && item != null && item.getMusicID() != -1) {
+			final int position = mMusicItemList.indexOf(item);
+			final boolean result = mMusicItemList.remove(item);
+			adapter.notifyItemRemoved(position);
+			return result;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean addItem(@Nullable MusicItem item) {
+		if (mMusicItemList != null && adapter != null && item != null && item.getMusicID() != -1) {
+			final boolean result = mMusicItemList.add(item);
+			adapter.notifyItemInserted(0);
+			return result;
+		}
+		return false;
 	}
 
 	@Override
@@ -305,7 +254,8 @@ public final class ListViewActivity extends BaseListActivity {
 		mToolbar.setOnMenuItemClickListener(item -> {
 			switch (item.getItemId()) {
 				case R.id.menu_public_random: {
-					ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
+					int index = new Random().nextInt(mMusicItemList.size());
+					MusicService.MusicControl.intentItemClick(ListViewActivity.this, mMusicItemList.get(index));
 				}
 				break;
 
@@ -367,7 +317,7 @@ public final class ListViewActivity extends BaseListActivity {
 	public void sendMessage(Message message) {
 	}
 
-	public interface FragmentType {
+	public interface ListType {
 		String ACTION_ADD_RECENT = "add recent";
 		String ACTION_FAVOURITE = "favourite music";
 		String ACTION_HISTORY = "play history";
@@ -402,11 +352,7 @@ public final class ListViewActivity extends BaseListActivity {
 
 	public static final class NotLeakHandler extends Handler {
 
-		/**
-		 * @see Message#what
-		 */
-		public static final int NOTIFICATION_ITEM_INSERT = 990;
-		public static final int RELOAD = 991;
+		public static final byte NOTI_ADAPTER_CHANGED = 127;
 
 		@SuppressWarnings("unused")
 		private WeakReference<ListViewActivity> mWeakReference;
@@ -419,17 +365,14 @@ public final class ListViewActivity extends BaseListActivity {
 		@Override
 		public final void handleMessage(Message msg) {
 			switch (msg.what) {
-				case NOTIFICATION_ITEM_INSERT: {
-					// 只有在历史页面才更新
-					// FIXME: 2019/5/26 crash: 播放列表中随机播放几次 然后退出进入MusicDetailFrag 快速点击下个 crash.
-					try {
-						if (mWeakReference.get().adapter != null && FragmentType.ACTION_HISTORY.equals(mWeakReference.get().mType)) {
-							mWeakReference.get().adapter.notifyItemInserted(Data.sHistoryPlayed.size() - 1);
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
+
+				case NOTI_ADAPTER_CHANGED: {
+					if (mWeakReference != null && mWeakReference.get() != null && mWeakReference.get().adapter != null
+							&& mWeakReference.get().mType != null && mWeakReference.get().mType.equals(ListType.ACTION_HISTORY)) {
+						mWeakReference.get().adapter.notifyDataSetChanged();
 					}
 				}
+				break;
 
 				case MessageWorker.RELOAD: {
 					if (mWeakReference.get().adapter != null) mWeakReference.get().adapter.notifyDataSetChanged();

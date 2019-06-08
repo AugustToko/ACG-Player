@@ -25,6 +25,7 @@ import top.geek_studio.chenlongcould.musicplayer.activity.albumdetail.AlbumDetai
 import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseCompatActivity;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
+import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.util.List;
@@ -74,7 +75,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 				break;
 
 				case Menu.FIRST + 2: {
-					Utils.DataSet.addListDialog(mContext, mMusicItems.get(holder.getAdapterPosition()));
+					PlayListsUtil.addListDialog(mContext, mMusicItems.get(holder.getAdapterPosition()));
 				}
 				break;
 

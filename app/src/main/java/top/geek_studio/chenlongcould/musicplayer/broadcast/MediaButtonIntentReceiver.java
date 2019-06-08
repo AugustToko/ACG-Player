@@ -72,6 +72,11 @@ final public class MediaButtonIntentReceiver extends BroadcastReceiver {
 							intent.setAction(MusicService.ServiceActions.ACTION_PN);
 							intent.putExtra("pnType", MusicService.ServiceActions.ACTION_PN_PREVIOUS);
 							break;
+
+						case 4: {
+							intent.setAction(MusicService.ServiceActions.ACTION_TOGGLE_FAVOURITE);
+						}
+						break;
 						default:
 							intent.setAction(null);
 							break;
@@ -128,6 +133,7 @@ final public class MediaButtonIntentReceiver extends BroadcastReceiver {
 			if (command != null) {
 				if (action == KeyEvent.ACTION_DOWN) {
 					if (event.getRepeatCount() == 0) {
+						Log.d(TAG, "handleIntent: intoer3");
 						// Only consider the first event in a sequence, not the repeat events,
 						// so that we don't trigger in cases where the first event went to
 						// a different app (e.g. when the user ends a phone call by
@@ -147,10 +153,12 @@ final public class MediaButtonIntentReceiver extends BroadcastReceiver {
 							Message msg = mHandler.obtainMessage(
 									MSG_HEADSET_DOUBLE_CLICK_TIMEOUT, mClickCounter, 0, context);
 
-							long delay = mClickCounter < 3 ? DOUBLE_CLICK : 0;
-							if (mClickCounter >= 3) {
+							long delay = mClickCounter < 4 ? DOUBLE_CLICK : 0;
+
+							if (mClickCounter >= 4) {
 								mClickCounter = 0;
 							}
+
 							mLastClickTime = eventTime;
 							acquireWakeLockAndSendMessage(context, msg, delay);
 						} else {

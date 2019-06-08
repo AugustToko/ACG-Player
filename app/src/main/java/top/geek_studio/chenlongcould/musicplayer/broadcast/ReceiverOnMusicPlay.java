@@ -21,6 +21,7 @@ import top.geek_studio.chenlongcould.musicplayer.IMuiscService;
 import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.CarViewActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
@@ -45,6 +46,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 	public static final byte PAUSE = 101;
 
 	public static final String INTENT_PLAY_TYPE = "play_type";
+	public static final byte TOGGLE_FAV = 102;
 
 	////////////////////////MEDIA CONTROL/////////////////////////////
 
@@ -296,6 +298,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 				//clicked by notif, just resume play
 				case FLASH_UI_COMMON: {
 					Log.d(TAG, "onReceive: common");
+
 					final MusicItem item = intent.getParcelableExtra("item");
 					if (item != null && item.getMusicID() != -1) {
 						if (item.getMusicID() == Data.sCurrentMusicItem.getMusicID()) {
@@ -303,9 +306,13 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 							break;
 						} else {
 							Data.sCurrentMusicItem = item;
+							Data.sHistoryPlayed.add(item);
+							ListViewActivity.sendEmptyMessageStatic(ListViewActivity.NotLeakHandler.NOTI_ADAPTER_CHANGED);
+							Log.d(TAG, "onReceive: common item is not same, new item name: " + item.getMusicName());
 						}
 
 						final Bitmap cover = Utils.Audio.getCoverBitmapFull(context, Data.sCurrentMusicItem.getAlbumId());
+
 						Data.setCurrentCover(cover);
 						MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
 						MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
@@ -327,6 +334,11 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 				case PAUSE: {
 					MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PAUSE);
 					Log.d(TAG, "onReceive: after intentPause");
+				}
+				break;
+
+				case TOGGLE_FAV: {
+					MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.TOGGLE_FAV);
 				}
 				break;
 

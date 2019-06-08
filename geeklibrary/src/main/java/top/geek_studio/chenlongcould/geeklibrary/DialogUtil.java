@@ -1,19 +1,9 @@
-/*
- * ************************************************************
- * 文件：DialogUtil.java  模块：geeklibrary  项目：MusicPlayer
- * 当前修改时间：2019年01月27日 13:11:38
- * 上次修改时间：2019年01月19日 12:17:57
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.geeklibrary;
 
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
+import androidx.annotation.NonNull;
 
 /**
  * @author chenlongcould
@@ -24,7 +14,8 @@ public class DialogUtil {
      * @param context context
      * @param aTitle  theTitle
      */
-    public static androidx.appcompat.app.AlertDialog getLoadingDialog(Context context, String... aTitle) {
+	public static androidx.appcompat.app.AlertDialog getLoadingDialog(@NonNull final Context context
+			, @NonNull final String... aTitle) {
         androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
         final View loadView = LayoutInflater.from(context).inflate(R.layout.dialog_loading, null);
         // TODO: 2019/1/7 custom Theme loading animation

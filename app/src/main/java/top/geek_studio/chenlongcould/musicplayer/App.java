@@ -73,7 +73,6 @@ public final class App extends Application {
 		Log.d(TAG, "onCreate: " + processName);
 
 		if (processName != null && !processName.contains("remote")) {
-
 			// 升级版本清空数据
 			if (PreferenceUtil.getDefault(this).getInt(VERSION_CODE, 0) != VER_CODE) {
 				Log.d(TAG, "onCreate: clear data");

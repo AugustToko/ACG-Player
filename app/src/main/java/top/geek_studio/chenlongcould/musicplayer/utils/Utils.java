@@ -13,9 +13,7 @@ import android.media.MediaMetadataRetriever;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.Build;
-import android.provider.BaseColumns;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
@@ -26,14 +24,16 @@ import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.*;
+import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.Toast;
 import androidx.annotation.*;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.graphics.ColorUtils;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.internal.NavigationMenuPresenter;
@@ -43,9 +43,7 @@ import org.litepal.LitePal;
 import top.geek_studio.chenlongcould.geeklibrary.widget.GkToolbar;
 import top.geek_studio.chenlongcould.musicplayer.*;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
-import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
-import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -348,42 +346,42 @@ public final class Utils {
 			return ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId);
 		}
 
-		/**
-		 * @author Karim Abou Zeid (kabouzeid)
-		 */
-		public static void setRingtone(@NonNull final Context context, final int id) {
-			final ContentResolver resolver = context.getContentResolver();
-			final Uri uri = getSongFileUri(id);
-			try {
-				final ContentValues values = new ContentValues(2);
-				values.put(MediaStore.Audio.AudioColumns.IS_RINGTONE, "1");
-				values.put(MediaStore.Audio.AudioColumns.IS_ALARM, "1");
-				resolver.update(uri, values, null, null);
-			} catch (@NonNull final UnsupportedOperationException ignored) {
-				return;
-			}
-
-			try {
-				Cursor cursor = resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-						new String[]{MediaStore.MediaColumns.TITLE},
-						BaseColumns._ID + "=?",
-						new String[]{String.valueOf(id)},
-						null);
-				try {
-					if (cursor != null && cursor.getCount() == 1) {
-						cursor.moveToFirst();
-						Settings.System.putString(resolver, Settings.System.RINGTONE, uri.toString());
-						final String message = context.getString(R.string.x_has_been_set_as_ringtone, cursor.getString(0));
-						Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-					}
-				} finally {
-					if (cursor != null) {
-						cursor.close();
-					}
-				}
-			} catch (SecurityException ignored) {
-			}
-		}
+//		/**
+//		 * @author Karim Abou Zeid (kabouzeid)
+//		 */
+//		public static void setRingtone(@NonNull final Context context, final int id) {
+//			final ContentResolver resolver = context.getContentResolver();
+//			final Uri uri = getSongFileUri(id);
+//			try {
+//				final ContentValues values = new ContentValues(2);
+//				values.put(MediaStore.Audio.AudioColumns.IS_RINGTONE, "1");
+//				values.put(MediaStore.Audio.AudioColumns.IS_ALARM, "1");
+//				resolver.update(uri, values, null, null);
+//			} catch (@NonNull final UnsupportedOperationException ignored) {
+//				return;
+//			}
+//
+//			try {
+//				Cursor cursor = resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+//						new String[]{MediaStore.MediaColumns.TITLE},
+//						BaseColumns._ID + "=?",
+//						new String[]{String.valueOf(id)},
+//						null);
+//				try {
+//					if (cursor != null && cursor.getCount() == 1) {
+//						cursor.moveToFirst();
+//						Settings.System.putString(resolver, Settings.System.RINGTONE, uri.toString());
+//						final String message = context.getString(R.string.x_has_been_set_as_ringtone, cursor.getString(0));
+//						Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+//					}
+//				} finally {
+//					if (cursor != null) {
+//						cursor.close();
+//					}
+//				}
+//			} catch (SecurityException ignored) {
+//			}
+//		}
 
 		public static AlertDialog getMusicDetailDialog(@NonNull Context context, @Nullable MusicItem item) {
 			if (item == null || item.getMusicID() == -1) return null;
@@ -767,82 +765,6 @@ public final class Utils {
 			Data.sPlayOrderList.clear();
 			Data.sPlayOrderList.addAll(Data.sMusicItems);
 			Collections.shuffle(Data.sPlayOrderList);
-		}
-
-		/**
-		 * add into music List
-		 *
-		 * @param context   MainActivity
-		 * @param musicItem MusicItem
-		 * @deprecated use {@link PlayListsUtil#addListDialog(Context, MusicItem)}
-		 */
-		public static void addListDialog(Context context, MusicItem musicItem) {
-			PlayListsUtil.addListDialog(context, musicItem);
-		}
-
-		/**
-		 * add into music List
-		 *
-		 * @param context MainActivity
-		 * @param items   MusicItems
-		 */
-		public static void addListDialog(Context context, ArrayList<MusicItem> items) {
-			final Resources resources = context.getResources();
-
-			final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
-			builder.setTitle(resources.getString(R.string.add_to_playlist));
-
-			builder.setNegativeButton(resources.getString(R.string.new_list), (dialog, which) -> {
-				final androidx.appcompat.app.AlertDialog.Builder b2 = new androidx.appcompat.app.AlertDialog.Builder(context);
-				b2.setTitle(resources.getString(R.string.enter_name));
-
-				final EditText et = new EditText(context);
-				b2.setView(et);
-
-				et.setHint(resources.getString(R.string.enter_name));
-				et.setSingleLine(true);
-				b2.setNegativeButton(resources.getString(R.string.cancel), null);
-				b2.setPositiveButton(resources.getString(R.string.sure), (dialog1, which1) -> {
-					if (TextUtils.isEmpty(et.getText())) {
-						Toast.makeText(context, "name can not empty!", Toast.LENGTH_SHORT).show();
-						return;
-					}
-
-					final int result = PlayListsUtil.createPlaylist(context, et.getText().toString());
-					if (result != -1) {
-						PlayListsUtil.addToPlaylist(context, items, result, false);
-					}
-					dialog.dismiss();
-					Data.sPlayListItems.add(0, new PlayListItem(result, et.getText().toString()));
-
-					final Intent intent = new Intent(PlayListFragment.ItemChange.ACTION_REFRESH_LIST);
-					LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-				});
-				b2.show();
-			});
-
-			builder.setCancelable(true);
-
-			builder.setSingleChoiceItems(context.getContentResolver()
-							.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null),
-					-1, MediaStore.Audio.Playlists.NAME, (dialog, which) -> {
-						//0 is favourite music list
-						if (which == 0) {
-							PlayListItem favItem = MusicUtil.getFavoritesPlaylist(context);
-							for (MusicItem item : items) {
-								if (!PlayListsUtil.doPlaylistContains(context, favItem.getId(), item.getMusicID())) {
-									PlayListsUtil.addToPlaylist(context, items, favItem.getId(), false);
-								} else {
-									Toast.makeText(context, "Already in Favourite music list.", Toast.LENGTH_SHORT).show();
-								}
-							}
-						} else {
-							PlayListsUtil.addToPlaylist(context, items, Data.sPlayListItems.get(which).getId(), false);
-						}
-						dialog.dismiss();
-					});
-			builder.show();
-
 		}
 
 	}

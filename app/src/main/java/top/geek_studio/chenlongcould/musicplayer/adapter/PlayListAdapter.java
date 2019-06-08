@@ -10,11 +10,9 @@ import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.fragment.BaseFragment;
 import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
@@ -30,12 +28,16 @@ public final class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.
 	private List<PlayListItem> mPlayListItems;
 	
 	private MainActivity mMainActivity;
-	
-	public PlayListAdapter(MainActivity activity, List<PlayListItem> playListItems) {
+
+	private PlayListFragment playListFragment;
+
+	public PlayListAdapter(PlayListFragment fragment, List<PlayListItem> playListItems) {
 		mPlayListItems = playListItems;
-		mMainActivity = activity;
+		playListFragment = fragment;
+		mMainActivity = (MainActivity) fragment.getActivity();
 	}
-	
+
+
 	@NonNull
 	@Override
 	public String getSectionName(int position) {
@@ -50,7 +52,7 @@ public final class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.
 		
 		view.setOnClickListener(v -> {
 			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
-			intent.putExtra("start_by", ListViewActivity.FragmentType.ACTION_PLAY_LIST_ITEM);
+			intent.putExtra("start_by", ListViewActivity.ListType.ACTION_PLAY_LIST_ITEM);
 			intent.putExtra("play_list_name", mPlayListItems.get(holder.getAdapterPosition()).getName());
 			intent.putExtra("play_list_id", mPlayListItems.get(holder.getAdapterPosition()).getId());
 			mMainActivity.startActivity(intent);
@@ -68,20 +70,13 @@ public final class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.
 				
 				//del
 				case Menu.FIRST: {
+
 					final PlayListItem listItem = mPlayListItems.get(holder.getAdapterPosition());
 					if (PlayListsUtil.doesPlaylistExist(mMainActivity, listItem.getId())) {
-						ArrayList<PlayListItem> playListItems = new ArrayList<>();
+						final ArrayList<PlayListItem> playListItems = new ArrayList<>();
 						playListItems.add(listItem);
 						PlayListsUtil.deletePlaylists(mMainActivity, playListItems);
-						
-						for (int i = 0; i < Data.sPlayListItems.size(); i++) {
-							if (Data.sPlayListItems.get(i).getId() == listItem.getId()) {
-								Data.sPlayListItems.remove(i);
-								((PlayListFragment) mMainActivity.getFragment(BaseFragment.FragmentType.PLAY_LIST_FRAGMENT)).getPlayListAdapter().notifyItemRemoved(i);
-								break;
-							}
-						}
-						
+						playListFragment.removeItem(listItem);
 					}
 				}
 				break;
@@ -122,7 +117,6 @@ public final class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.
 						}
 
 						PlayListsUtil.renamePlaylist(mMainActivity, mPlayListItems.get(holder.getAdapterPosition()).getId(), String.valueOf(et.getText()));
-						PlayListFragment.reloadDataByHandler();
 					});
 					builder.show();
 				}

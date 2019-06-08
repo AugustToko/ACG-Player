@@ -14,7 +14,6 @@ package top.geek_studio.chenlongcould.musicplayer.utils;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
@@ -25,8 +24,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
@@ -48,7 +45,13 @@ public final class PlayListsUtil {
 	private static final String TAG = "PlayListsUtil";
 
 	public static void addListDialog(@NonNull final Context context, @Nullable final MusicItem musicItem) {
-		if (musicItem == null || musicItem.getMusicID() == -1) return;
+		List<MusicItem> musicItems = new ArrayList<>();
+		musicItems.add(musicItem);
+		addListDialog(context, musicItems);
+	}
+
+	public static void addListDialog(@NonNull final Context context, @Nullable final List<MusicItem> musicItem) {
+		if (musicItem == null || musicItem.size() == 0) return;
 
 		final Resources resources = context.getResources();
 
@@ -76,31 +79,35 @@ public final class PlayListsUtil {
 				}
 
 				dialog.dismiss();
-				Data.sPlayListItems.add(0, new PlayListItem(result, et.getText().toString()));
-
-				final Intent intent = new Intent(PlayListFragment.ItemChange.ACTION_REFRESH_LIST);
-				LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+				PlayListFragment.sendAddPlayList(new PlayListItem(result, et.getText().toString()));
 			});
 			b2.show();
 		});
 
 		builder.setCancelable(true);
 
-		builder.setSingleChoiceItems(context.getContentResolver()
-						.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null),
+		Cursor cursor = context.getContentResolver()
+				.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null);
+
+		builder.setSingleChoiceItems(cursor,
 				-1, MediaStore.Audio.Playlists.NAME, (dialog, which) -> {
-					//0 is favourite music list
-					if (which == 0) {
-						PlayListItem favItem = MusicUtil.getFavoritesPlaylist(context);
-						if (favItem != null && favItem.getId() != -1) {
-							if (!PlayListsUtil.doPlaylistContains(context, favItem.getId(), musicItem.getMusicID())) {
-								PlayListsUtil.addToPlaylist(context, musicItem, favItem.getId(), false);
-							} else {
-								Toast.makeText(context, "Already in Favourite music list.", Toast.LENGTH_SHORT).show();
-							}
-						}
-					} else {
-						PlayListsUtil.addToPlaylist(context, musicItem, Data.sPlayListItems.get(which).getId(), false);
+//					//0 is favourite music list
+//					if (which == 0) {
+//						PlayListItem favItem = MusicUtil.getFavoritesPlaylist(context);
+//						if (favItem != null && favItem.getId() != -1) {
+//							if (!PlayListsUtil.doPlaylistContains(context, favItem.getId(), musicItem)) {
+//								PlayListsUtil.addToPlaylist(context, musicItem, favItem.getId(), false);
+//							} else {
+//								Toast.makeText(context, "Already in Favourite music list.", Toast.LENGTH_SHORT).show();
+//							}
+//						}
+//					} else {
+//					PlayListsUtil.addToPlaylist(context, musicItem, Data.sPlayListItems.get(which).getId(), false);
+//					}
+
+					if (cursor != null && cursor.getCount() > 0 && cursor.moveToPosition(which)) {
+						int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists._ID));
+						PlayListsUtil.addToPlaylist(context, musicItem, id, false);
 					}
 					dialog.dismiss();
 				});
@@ -143,7 +150,6 @@ public final class PlayListsUtil {
 	 *
 	 * @param context context
 	 * @param name    music play list name
-	 *
 	 * @return return the list id that yuo created
 	 */
 	public static int createPlaylist(@NonNull final Context context, @Nullable final String name) {
@@ -161,6 +167,7 @@ public final class PlayListsUtil {
 					if (uri != null) {
 						// Necessary because somehow the MediaStoreObserver is not notified when adding a playlist
 						context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
+						PlayListFragment.reloadDataByHandler();
 						String temp = uri.getLastPathSegment();
 						if (temp != null && temp.length() > 0) {
 							id = Integer.parseInt(uri.getLastPathSegment());
@@ -325,6 +332,7 @@ public final class PlayListsUtil {
 					MediaStore.Audio.Playlists._ID + "=?",
 					new String[]{String.valueOf(id)});
 			context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
+			PlayListFragment.reloadDataByHandler();
 		} catch (SecurityException ignored) {
 		}
 	}

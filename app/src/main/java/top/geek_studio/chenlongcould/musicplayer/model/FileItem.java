@@ -16,7 +16,8 @@ import android.os.Parcelable;
 
 import java.io.File;
 
-public final class FileItem implements Parcelable {
+// TODO: 2019/6/8 hashcode
+public final class FileItem extends Item implements Parcelable {
 	public static final Parcelable.Creator<FileItem> CREATOR = new Parcelable.Creator<FileItem>() {
 		@Override
 		public FileItem createFromParcel(Parcel source) {

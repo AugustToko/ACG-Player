@@ -25,7 +25,6 @@ import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseListActivity;
 import top.geek_studio.chenlongcould.musicplayer.database.Detail;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
-import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
 import top.geek_studio.chenlongcould.musicplayer.model.Playlist;
@@ -43,6 +42,15 @@ import java.util.Locale;
 public class MusicUtil {
 
 	private static final String TAG = "MusicUtil";
+
+	public static Uri getMediaStoreAlbumCoverUri(int albumId) {
+		final Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
+		return ContentUris.withAppendedId(sArtworkUri, albumId);
+	}
+
+	public static Uri getSongFileUri(int songId) {
+		return ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId);
+	}
 
 	public static void sharMusic(@NonNull final Context context, List<MusicItem> items) {
 		CustomThreadPool.post(() -> {
@@ -159,33 +167,6 @@ public class MusicUtil {
 			// already have data
 		}
 		return true;
-	}
-
-
-	public static Uri getMediaStoreAlbumCoverUri(int albumId) {
-		final Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
-
-		return ContentUris.withAppendedId(sArtworkUri, albumId);
-	}
-
-	public static Uri getSongFileUri(int songId) {
-		return ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId);
-	}
-
-	@NonNull
-	public static Intent createShareSongFileIntent(@NonNull final MusicItem song, Context context) {
-		try {
-			return new Intent()
-					.setAction(Intent.ACTION_SEND)
-					.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName(), new File(song.getMusicPath())))
-					.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-					.setType("audio/*");
-		} catch (IllegalArgumentException e) {
-			// TODO the path is most likely not like /storage/emulated/0/... but something like /storage/28C7-75B0/...
-			e.printStackTrace();
-			Toast.makeText(context, "Could not share this file, I'm aware of the issue.", Toast.LENGTH_SHORT).show();
-			return new Intent();
-		}
 	}
 
 	public static void setRingtone(@NonNull final Context context, final int id) {
@@ -400,17 +381,16 @@ public class MusicUtil {
 	}
 
 	public static boolean isFavorite(@NonNull final Context context, @NonNull final MusicItem song) {
-		PlayListItem item = getFavoritesPlaylist(context);
+		final PlayListItem item = getFavoritesPlaylist(context);
 		if (item != null)
 			return PlayListsUtil.doPlaylistContains(context, item.getId(), song.getMusicID());
 		else return false;
 	}
 
 	public static void toggleFavorite(@NonNull final Context context, @Nullable final MusicItem song) {
-		PlayListFragment.reloadDataByHandler();
 		if (song != null && song.getMusicID() != -1) {
 			if (isFavorite(context, song)) {
-				PlayListItem item = getFavoritesPlaylist(context);
+				final PlayListItem item = getFavoritesPlaylist(context);
 				if (item != null) PlayListsUtil.removeFromPlaylist(context, song, item.getId());
 			} else {
 				PlayListsUtil.addToPlaylist(context, song, getOrCreateFavoritesPlaylist(context).getId(), false);
@@ -519,7 +499,8 @@ public class MusicUtil {
 		return builder.build();
 	}
 
-	public synchronized static void deleteTracks(@NonNull final Context context, @NonNull final List<MusicItem> songs, BaseListActivity worker) {
+	public synchronized static void deleteTracks(@NonNull final Context context, @NonNull final List<MusicItem> songs
+			, @NonNull final BaseListActivity worker) {
 		final String[] projection = new String[]{
 				BaseColumns._ID, MediaStore.MediaColumns.DATA
 		};
@@ -546,12 +527,15 @@ public class MusicUtil {
 				do {
 					final int id = cursor.getInt(0);
 					Cursor cursor1 = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-							null, MediaStore.Audio.AudioColumns._ID + "=?", new String[]{String.valueOf(id)}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+							null, MediaStore.Audio.AudioColumns._ID + "=?"
+							, new String[]{String.valueOf(id)}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
 					List<MusicItem> items = new ArrayList<>();
 					if (cursor1 != null && cursor1.moveToFirst()) {
 						do {
 							MusicItem item = MusicUtil.getSongFromCursorImpl(cursor1);
-							Log.d(TAG, "deleteTracks: count: " + cursor1.getCount() + "   " + item.getMusicPath());
+							Log.d(TAG, "deleteTracks: count: " + cursor1.getCount()
+									+ "   "
+									+ item.getMusicPath());
 							items.add(item);
 						} while (cursor1.moveToNext());
 						cursor1.close();
@@ -603,6 +587,7 @@ public class MusicUtil {
 		}
 	}
 
+	// TODO: 2019/6/8 dropToTrash
 	public static void dropToTrash(@NonNull Context context, @Nullable MusicItem item) {
 		if (item == null) return;
 
@@ -633,13 +618,18 @@ public class MusicUtil {
 		}
 	}
 
+	/**
+	 * @see #addToBlackList(List)
+	 */
 	public synchronized static void addToBlackList(@Nullable MusicItem item) {
-		if (item == null || item.getMusicID() == -1) return;
 		final List<MusicItem> items = new ArrayList<>();
 		items.add(item);
 		addToBlackList(items);
 	}
 
+	/**
+	 * add music item to black list
+	 */
 	public synchronized static void addToBlackList(@Nullable List<MusicItem> items) {
 		if (items == null || items.size() == 0) return;
 
@@ -648,10 +638,29 @@ public class MusicUtil {
 		LitePal.use(blackList);
 
 		for (final MusicItem item : items) {
+			if (item.getMusicID() == -1) continue;
+
 			final MyBlackPath blackPath = new MyBlackPath();
 			blackPath.setDirPath(item.getMusicPath());
 			blackPath.save();
 		}
+
 		LitePal.useDefault();
+	}
+
+	@NonNull
+	public static Intent createShareSongFileIntent(@NonNull final MusicItem song, Context context) {
+		try {
+			return new Intent()
+					.setAction(Intent.ACTION_SEND)
+					.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName(), new File(song.getMusicPath())))
+					.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+					.setType("audio/*");
+		} catch (IllegalArgumentException e) {
+			// TODO the path is most likely not like /storage/emulated/0/... but something like /storage/28C7-75B0/...
+			e.printStackTrace();
+			Toast.makeText(context, "Could not share this file, I'm aware of the issue.", Toast.LENGTH_SHORT).show();
+			return new Intent();
+		}
 	}
 }

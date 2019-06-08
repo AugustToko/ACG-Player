@@ -593,7 +593,7 @@ public final class MusicDetailFragment extends BaseFragment {
 
 		mHandlerThread = new HandlerThread("Handler Thread in MusicDetailActivity");
 		mHandlerThread.start();
-		mHandler = new MusicDetailFragment.NotLeakHandler(mMainActivity, mHandlerThread.getLooper());
+		mHandler = new MusicDetailFragment.NotLeakHandler(mMainActivity, this, mHandlerThread.getLooper());
 	}
 
 	@Override
@@ -1515,7 +1515,7 @@ public final class MusicDetailFragment extends BaseFragment {
 	}
 
 	@SuppressWarnings("WeakerAccess")
-	public final class NotLeakHandler extends Handler {
+	public static final class NotLeakHandler extends Handler {
 
 		/**
 		 * For {@link #mHandler}
@@ -1526,15 +1526,19 @@ public final class MusicDetailFragment extends BaseFragment {
 		public static final int SET_BUTTON_PAUSE = 57;
 		public static final int SET_BUTTON_PLAY = 58;
 		public static final int setCurrentInfoWithoutMainImage = 60;
+		public static final int TOGGLE_FAV = 61;
 		private static final int SEEK_BAR_UPDATE = 53;        //just for this
 
 		public static final int SET_CURRENT_DATA = 55;
 
 		private WeakReference<MainActivity> mWeakReference;
 
-		NotLeakHandler(@NonNull MainActivity activity, @Nullable Looper looper) {
+		private WeakReference<MusicDetailFragment> mFragmentWeakReference;
+
+		NotLeakHandler(@NonNull MainActivity activity, MusicDetailFragment fragment, @Nullable Looper looper) {
 			super(looper == null ? Looper.myLooper() : looper);
 			mWeakReference = new WeakReference<>(activity);
+			mFragmentWeakReference = new WeakReference<>(fragment);
 		}
 
 		@Override
@@ -1550,17 +1554,18 @@ public final class MusicDetailFragment extends BaseFragment {
 						int duration = (int) Data.sCurrentMusicItem.getDuration();
 
 						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-							mSeekBar.setProgress(0, true);
+							mFragmentWeakReference.get().mSeekBar.setProgress(0, true);
 						} else {
-							mSeekBar.setProgress(0);
+							mFragmentWeakReference.get().mSeekBar.setProgress(0);
 						}
 
-						mInfoBarInfoSeek.getLayoutParams().width = 0;
-						mInfoBarInfoSeek.setLayoutParams(mInfoBarInfoSeek.getLayoutParams());
-						mInfoBarInfoSeek.requestLayout();
+						mFragmentWeakReference.get().mInfoBarInfoSeek.getLayoutParams().width = 0;
+						mFragmentWeakReference.get().mInfoBarInfoSeek.setLayoutParams(mFragmentWeakReference.get()
+								.mInfoBarInfoSeek.getLayoutParams());
+						mFragmentWeakReference.get().mInfoBarInfoSeek.requestLayout();
 
-						mRightTime.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(duration))));
-						mSeekBar.setMax(duration);
+						mFragmentWeakReference.get().mRightTime.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(duration))));
+						mFragmentWeakReference.get().mSeekBar.setMax(duration);
 					});
 				}
 				break;
@@ -1575,43 +1580,57 @@ public final class MusicDetailFragment extends BaseFragment {
 								int position = ReceiverOnMusicPlay.getCurrentPosition();
 
 								if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-									mSeekBar.setProgress(position, true);
+									mFragmentWeakReference.get().mSeekBar.setProgress(position, true);
 								} else {
-									mSeekBar.setProgress(position);
+									mFragmentWeakReference.get().mSeekBar.setProgress(position);
 								}
 
-								mInfoBarInfoSeek.getLayoutParams().width = mCurrentInfoBody.getWidth()
+								mFragmentWeakReference.get().mInfoBarInfoSeek.getLayoutParams().width
+										= mFragmentWeakReference.get().mCurrentInfoBody.getWidth()
 										* position / duration;
-								mInfoBarInfoSeek.setLayoutParams(mInfoBarInfoSeek.getLayoutParams());
-								mInfoBarInfoSeek.requestLayout();
+								mFragmentWeakReference.get().mInfoBarInfoSeek.setLayoutParams(mFragmentWeakReference
+										.get().mInfoBarInfoSeek.getLayoutParams());
+								mFragmentWeakReference.get().mInfoBarInfoSeek.requestLayout();
 
-								mLeftTime.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(position))));
+								mFragmentWeakReference.get().mLeftTime.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT
+										.format(new Date(position))));
 
 
 								//播放模式不为循环单曲时，跳出提示
-								if (!MusicService.PlayType.REPEAT_ONE.equals(PreferenceUtil.getDefault(mMainActivity).getString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE))) {
-									if (ReceiverOnMusicPlay.getCurrentPosition() / 1000 == ReceiverOnMusicPlay.getDuration() / 1000 - 5 && !snackNotice) {
-										snackNotice = true;
+								if (!MusicService.PlayType.REPEAT_ONE.equals(PreferenceUtil.getDefault(
+										mWeakReference.get()).getString(Values.SharedPrefsTag.PLAY_TYPE
+										, MusicService.PlayType.REPEAT_NONE))) {
 
-										final GkSnackbar gkSnackbar = new GkSnackbar(mSlidingUpPanelLayout, getString(R.string.next_will_play_x,
-												Data.sPlayOrderList.get(Data.getCurrentIndex() + 1 != Data.sPlayOrderList.size() ? Data.getCurrentIndex() + 1 : 0).getMusicName())
+									if (ReceiverOnMusicPlay.getCurrentPosition() / 1000 == ReceiverOnMusicPlay
+											.getDuration() / 1000 - 5 && !mFragmentWeakReference.get().snackNotice) {
+
+										mFragmentWeakReference.get().snackNotice = true;
+
+										final GkSnackbar gkSnackbar = new GkSnackbar(mFragmentWeakReference.get()
+												.mSlidingUpPanelLayout, mWeakReference.get()
+												.getString(R.string.next_will_play_x,
+														Data.sPlayOrderList.get(Data.getCurrentIndex() +
+																1 != Data.sPlayOrderList.size() ? Data.getCurrentIndex() + 1 : 0)
+																.getMusicName()
+												)
 												, Snackbar.LENGTH_LONG);
-										gkSnackbar.setAction(getString(R.string.skip), v -> {
+
+										gkSnackbar.setAction(mWeakReference.get().getString(R.string.skip), v -> {
 											//点击右侧的按钮之后的操作
 											try {
 												Data.sMusicBinder.setCurrentIndex(Data.getCurrentIndex() + 1);
 											} catch (RemoteException e) {
 												e.printStackTrace();
 											}
-											MusicService.MusicControl.intentNext(mMainActivity);
+											MusicService.MusicControl.intentNext(mWeakReference.get());
 										});
 										gkSnackbar.addCallback(new Snackbar.Callback() {
 											@Override
 											public void onDismissed(Snackbar transientBottomBar, int event) {
-												snackNotice = false;
+												mFragmentWeakReference.get().snackNotice = false;
 											}
 										});
-										gkSnackbar.setBackgroundColor(Utils.Ui.getPrimaryColor(getActivity()))
+										gkSnackbar.setBackgroundColor(Utils.Ui.getPrimaryColor(mWeakReference.get()))
 												.setBodyViewAlpha(0.8f).setActionTextColor(Color.BLACK);
 										gkSnackbar.show();
 
@@ -1629,7 +1648,7 @@ public final class MusicDetailFragment extends BaseFragment {
 				break;
 
 				case RECYCLER_SCROLL: {
-					mWeakReference.get().runOnUiThread(() -> mLinearLayoutManager
+					mWeakReference.get().runOnUiThread(() -> mFragmentWeakReference.get().mLinearLayoutManager
 							.scrollToPositionWithOffset(Data.getCurrentIndex() == Data.sMusicItems.size()
 									? Data.getCurrentIndex()
 									: Data.getCurrentIndex() + 1, 0));
@@ -1638,16 +1657,16 @@ public final class MusicDetailFragment extends BaseFragment {
 
 				case SET_BUTTON_PLAY: {
 					mWeakReference.get().runOnUiThread(() -> {
-						mPlayPauseDrawable.setPause(true);
-						mPlayPauseDrawable2InfoBar.setPause(true);
+						mFragmentWeakReference.get().mPlayPauseDrawable.setPause(true);
+						mFragmentWeakReference.get().mPlayPauseDrawable2InfoBar.setPause(true);
 					});
 				}
 				break;
 
 				case SET_BUTTON_PAUSE: {
 					mWeakReference.get().runOnUiThread(() -> {
-						mPlayPauseDrawable.setPlay(true);
-						mPlayPauseDrawable2InfoBar.setPlay(true);
+						mFragmentWeakReference.get().mPlayPauseDrawable.setPlay(true);
+						mFragmentWeakReference.get().mPlayPauseDrawable2InfoBar.setPlay(true);
 					});
 				}
 				break;
@@ -1655,23 +1674,31 @@ public final class MusicDetailFragment extends BaseFragment {
 				case SET_SEEK_BAR: {
 					int value = msg.arg1;
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-						mSeekBar.setProgress(value, true);
+						mFragmentWeakReference.get().mSeekBar.setProgress(value, true);
 					} else {
-						mSeekBar.setProgress(value);
+						mFragmentWeakReference.get().mSeekBar.setProgress(value);
 					}
 				}
 				break;
 
 				case setCurrentInfoWithoutMainImage: {
 					final Bundle data = msg.getData();
-					setCurrentInfoWithoutMainImage(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
+					mFragmentWeakReference.get().setCurrentInfoWithoutMainImage(Data.sCurrentMusicItem.getMusicName()
+							, Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
 					data.clear();
 				}
 				break;
 
 				case SET_CURRENT_DATA: {
-					setCurrentInfo(Data.sCurrentMusicItem.getMusicName(), Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
+					mFragmentWeakReference.get().setCurrentInfo(Data.sCurrentMusicItem.getMusicName()
+							, Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
 				}
+				break;
+
+				case TOGGLE_FAV: {
+					mWeakReference.get().runOnUiThread(() -> mFragmentWeakReference.get().updateFav(Data.sCurrentMusicItem));
+				}
+				break;
 
 				default: {
 

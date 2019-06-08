@@ -17,7 +17,7 @@ import android.os.Parcelable;
 /**
  * @author chenlongcould
  */
-public final class ArtistItem implements Parcelable {
+public final class ArtistItem extends Item implements Parcelable {
 
 	public static final Creator<ArtistItem> CREATOR = new Creator<ArtistItem>() {
 		@Override

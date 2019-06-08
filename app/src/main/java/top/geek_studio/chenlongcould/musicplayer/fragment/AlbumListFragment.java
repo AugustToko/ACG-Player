@@ -26,6 +26,7 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter2AlbumList;
 import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
+import top.geek_studio.chenlongcould.musicplayer.model.Item;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +34,7 @@ import java.util.List;
 /**
  * @author chenlongcould
  */
-public final class AlbumListFragment extends BaseFragment {
+public final class AlbumListFragment extends BaseListFragment {
 
 	public static final String TAG = "AlbumListFragment";
 
@@ -173,5 +174,34 @@ public final class AlbumListFragment extends BaseFragment {
 
 	public List<AlbumItem> getAlbumItemListBackup() {
 		return albumItemListBackup;
+	}
+
+	@Override
+	public boolean removeItem(@Nullable Item item) {
+		if (!(item instanceof AlbumItem)) return false;
+
+		final AlbumItem albumItem = (AlbumItem) item;
+
+		if (albumItemList != null && mAdapter2AlbumListAdapter != null && albumItem.getAlbumId() != -1) {
+			int pos = albumItemList.indexOf(albumItem);
+			boolean result = albumItemList.remove(albumItem);
+			mAdapter2AlbumListAdapter.notifyItemRemoved(pos);
+			return result;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean addItem(@Nullable Item item) {
+		if (!(item instanceof AlbumItem)) return false;
+
+		final AlbumItem albumItem = (AlbumItem) item;
+
+		if (albumItemList != null && mAdapter2AlbumListAdapter != null && albumItem.getAlbumId() != -1) {
+			boolean result = albumItemList.add(albumItem);
+			mAdapter2AlbumListAdapter.notifyItemInserted(albumItemList.size() - 1);
+			return result;
+		}
+		return false;
 	}
 }

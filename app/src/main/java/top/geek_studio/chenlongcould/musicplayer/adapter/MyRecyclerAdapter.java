@@ -10,7 +10,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.provider.MediaStore;
@@ -30,7 +29,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -108,6 +106,10 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		mMusicItems = musicItems;
 		mConfig = config;
 	}
+
+//	public MyRecyclerAdapter(BaseFragment fragment, List<MusicItem> musicItems, @NonNull Config config) {
+//		mActivity = fragment.getActivity();
+//	}
 
 	/**
 	 * config for {@link MyRecyclerAdapter}
@@ -299,10 +301,10 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 					intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS, Uri.parse("package:" + mActivity.getPackageName()));
 					mActivity.startActivityForResult(intent, Values.REQUEST_WRITE_EXTERNAL_STORAGE);
 				} else {
-					Utils.Audio.setRingtone(mActivity, mMusicItems.get(holder.getAdapterPosition()).getMusicID());
+					MusicUtil.setRingtone(mActivity, mMusicItems.get(holder.getAdapterPosition()).getMusicID());
 				}
 			} else {
-				Utils.Audio.setRingtone(mActivity, mMusicItems.get(holder.getAdapterPosition()).getMusicID());
+				MusicUtil.setRingtone(mActivity, mMusicItems.get(holder.getAdapterPosition()).getMusicID());
 			}
 		});
 		holder.mButton4.setOnClickListener(v -> mActivity.startActivity(Intent.createChooser(Utils.Audio.createShareSongFileIntent(mMusicItems.get(holder.getAdapterPosition()), mActivity), null)));
@@ -367,30 +369,40 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 				//share
 				case Menu.FIRST + 6: {
-					final File file = new File(mMusicItems.get(holder.getAdapterPosition()).getMusicPath());
-					if (file.exists()) {
-						Intent intent = new Intent(Intent.ACTION_SEND);
-						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-							intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(mActivity, mActivity.getApplicationContext().getPackageName(), file));
-							intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-							intent.setType("audio/*");
-						} else {
-							intent.setDataAndType(Uri.fromFile(new File(mMusicItems.get(holder.getAdapterPosition()).getMusicPath())), "audio/*");
-						}
+					final Intent intent = MusicUtil.createShareSongFileIntent(
+							mMusicItems.get(holder.getAdapterPosition()), mActivity
+					);
 
-						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-						/*
-						 * by Karim Abou Zeid (kabouzeid)
-						 * */
-						try {
-							mActivity.startActivity(intent);
-						} catch (IllegalArgumentException e) {
-							// TODO the path is most likely not like /storage/emulated/0/... but something like /storage/28C7-75B0/...
-							e.printStackTrace();
-							Toast.makeText(mActivity, "Could not share this file, I'm aware of the issue.", Toast.LENGTH_SHORT).show();
-						}
+					try {
+						mActivity.startActivity(intent);
+					} catch (Exception e) {
+						Toast.makeText(mActivity, e.getMessage(), Toast.LENGTH_SHORT).show();
 					}
+
+//					final File file = new File(mMusicItems.get(holder.getAdapterPosition()).getMusicPath());
+//					if (file.exists()) {
+//						Intent intent = new Intent(Intent.ACTION_SEND);
+//						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//							intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(mActivity, mActivity.getApplicationContext().getPackageName(), file));
+//							intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//							intent.setType("audio/*");
+//						} else {
+//							intent.setDataAndType(Uri.fromFile(new File(mMusicItems.get(holder.getAdapterPosition()).getMusicPath())), "audio/*");
+//						}
+//
+//						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//
+//						/*
+//						 * by Karim Abou Zeid (kabouzeid)
+//						 * */
+//						try {
+//							mActivity.startActivity(intent);
+//						} catch (IllegalArgumentException e) {
+//							// TODO the path is most likely not like /storage/emulated/0/... but something like /storage/28C7-75B0/...
+//							e.printStackTrace();
+//							Toast.makeText(mActivity, "Could not share this file, I'm aware of the issue.", Toast.LENGTH_SHORT).show();
+//						}
+//					}
 				}
 				break;
 
@@ -845,7 +857,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 	/**
 	 * 通常item
-	 * */
+	 */
 	class ItemHolder extends ViewHolder {
 
 		View mBody;
@@ -924,7 +936,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 	/**
 	 * 带随机item
-	 * */
+	 */
 	class ModHolder extends ItemHolder {
 
 		ConstraintLayout mRandomItem;
@@ -937,7 +949,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 	/**
 	 * 带边框线
-	 * */
+	 */
 	class ItemHolderS1 extends ItemHolder {
 
 		ConstraintLayout mFrame;
@@ -950,7 +962,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 	/**
 	 * 带随机item 带边框线
-	 * */
+	 */
 	class ModHolderS1 extends ItemHolderS1 {
 
 		ConstraintLayout mRandomItem;

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.RemoteException;
-import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -16,7 +15,6 @@ import top.geek_studio.chenlongcould.geeklibrary.recycler_tools.RecycleViewDivid
 import top.geek_studio.chenlongcould.geeklibrary.theme.Theme;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
-import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -26,10 +24,7 @@ import java.util.*;
  */
 public final class Data {
 
-	/**
-	 * 存储播放历史(序列) default...
-	 */
-	public final static List<MusicItem> sHistoryPlayed = new ArrayList<>();
+
 
 	/**
 	 * 垃圾箱 (dislike)
@@ -56,6 +51,7 @@ public final class Data {
 	public static List<MusicItem> sMusicItemsBackUp = new ArrayList<>();
 
 	public static List<MusicItem> sPlayOrderList = new ArrayList<>();
+	public static List<MusicItem> sHistoryPlayed = new ArrayList<>();
 
 	public synchronized static void syncPlayOrderList(final Context context, final List<MusicItem> items) {
 		Data.sPlayOrderList.clear();
@@ -103,8 +99,6 @@ public final class Data {
 	 * for {@link top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity}
 	 */
 	public static List<MusicItem> sPlayOrderListBackup = new ArrayList<>();
-
-	public static List<PlayListItem> sPlayListItems = new ArrayList<>();
 
 	public static Theme sTheme = null;
 
@@ -163,29 +157,31 @@ public final class Data {
 	public synchronized static void setCurrentCover(@Nullable final Bitmap currentCover) {
 		if (currentCover == null || currentCover.isRecycled()) return;
 
-		if (sCurrentCover == null && sCurrentCoverBk == null) {
-			sCurrentCover = currentCover;
-			Log.d(TAG, "setCurrentCover: all null");
-			return;
-		}
+		sCurrentCover = currentCover;
 
-		if (sCurrentCover != null) {
-			sCurrentCoverBk = currentCover;
-
-			if (!sCurrentCover.isRecycled()) {
-				sCurrentCover.recycle();
-				sCurrentCover = null;
-				Log.d(TAG, "setCurrentCover: recycle sCurrentCover");
-			}
-		} else {
-			sCurrentCover = currentCover;
-
-			if (!sCurrentCoverBk.isRecycled()) {
-				sCurrentCoverBk.recycle();
-				sCurrentCoverBk = null;
-				Log.d(TAG, "setCurrentCover: recycle sCurrentCoverBk");
-			}
-		}
+//		if (sCurrentCover == null && sCurrentCoverBk == null) {
+//			sCurrentCover = currentCover;
+//			Log.d(TAG, "setCurrentCover: all null");
+//			return;
+//		}
+//
+//		if (sCurrentCover != null) {
+//			sCurrentCoverBk = currentCover;
+//
+//			if (!sCurrentCover.isRecycled()) {
+//				sCurrentCover.recycle();
+//				sCurrentCover = null;
+//				Log.d(TAG, "setCurrentCover: recycle sCurrentCover");
+//			}
+//		} else {
+//			sCurrentCover = currentCover;
+//
+//			if (!sCurrentCoverBk.isRecycled()) {
+//				sCurrentCoverBk.recycle();
+//				sCurrentCoverBk = null;
+//				Log.d(TAG, "setCurrentCover: recycle sCurrentCoverBk");
+//			}
+//		}
 	}
 
 }

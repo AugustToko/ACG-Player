@@ -38,6 +38,7 @@ import top.geek_studio.chenlongcould.musicplayer.database.Detail;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
+import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
@@ -275,44 +276,37 @@ public final class MusicService extends Service {
 		mediaSession.setCallback(new MediaSessionCompat.Callback() {
 			@Override
 			public void onPlay() {
-				Log.d(TAG, "onPlay: mediaSessionCallBack");
 				MusicControl.play(MusicService.this);
 			}
 
 			@Override
 			public void onPause() {
-				Log.d(TAG, "onPause: mediaSessionCallBack");
 				MusicControl.intentPause(MusicService.this);
 			}
 
 			@Override
 			public void onSkipToNext() {
-				Log.d(TAG, "onSkipToNext: mediaSessionCallBack");
 				MusicControl.intentNext(MusicService.this);
 			}
 
 			@Override
 			public void onSkipToPrevious() {
-				Log.d(TAG, "onSkipToPrevious: mediaSessionCallBack");
 				MusicControl.intentPrevious(MusicService.this);
 			}
 
 			@Override
 			public void onStop() {
-				Log.d(TAG, "onStop: mediaSessionCallBack");
 				// TODO: 2019/6/3 待完善
 				MusicControl.stopMusic();
 			}
 
 			@Override
 			public void onSeekTo(long pos) {
-				Log.d(TAG, "onSeekTo:  mediaSessionCallBack");
 				MusicControl.seekTo((int) pos);
 			}
 
 			@Override
 			public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
-				Log.d(TAG, "onMediaButtonEvent: mediaSessionCallBack");
 				return MediaButtonIntentReceiver.handleIntent(MusicService.this, mediaButtonEvent);
 			}
 		});
@@ -331,14 +325,20 @@ public final class MusicService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		if (intent == null || ItemList.playOrderList.isEmpty()) {
-			Log.d(TAG, "onStartCommand: intent == null or ItemList.playOrderList is empty");
+
+		if (intent == null) {
+			Log.d(TAG, "onStartCommand: intent == null");
 			return START_STICKY;
 		} else {
 			Log.d(TAG, "onStartCommand: action: " + intent.getAction() + " extra: " + intent.getExtras());
 		}
 
 		CustomThreadPool.post(() -> {
+			if (ItemList.playOrderList.size() == 0) {
+				Log.d(TAG, "onStartCommand: order list is empty, reload...");
+				loadDataSource();
+			}
+
 			final String action = intent.getAction();
 
 			if (action != null && ItemList.playOrderList.size() > 0) {
@@ -526,6 +526,12 @@ public final class MusicService extends Service {
 							}
 							MusicControl.playMusic();
 						}
+					}
+					break;
+
+					case ServiceActions.ACTION_TOGGLE_FAVOURITE: {
+						MusicUtil.toggleFavorite(this, mMusicItem);
+						flashMode = ReceiverOnMusicPlay.TOGGLE_FAV;
 					}
 					break;
 
@@ -799,6 +805,8 @@ public final class MusicService extends Service {
 
 		String ACTION_ITEM_CLICK = ACG_PLAYER_PACKAGE_NAME + ".itemclick";
 
+		String ACTION_TOGGLE_FAVOURITE = ACG_PLAYER_PACKAGE_NAME + ".togglefav";
+
 		/**
 		 * int extra key: next_item_id
 		 */
@@ -829,6 +837,11 @@ public final class MusicService extends Service {
 		static List<MusicItem> playOrderList = new ArrayList<>();
 		static List<MusicItem> playOrderListBK = new ArrayList<>();
 		static List<MusicItem> trashCanList = new ArrayList<>();
+
+		/**
+		 * 存储播放历史(序列) default...
+		 */
+		static List<MusicItem> historyList = new ArrayList<>();
 		static MusicItem nextItem = null;
 		private static Bitmap mCurrentCover = null;
 
@@ -1069,6 +1082,7 @@ public final class MusicService extends Service {
 
 			try {
 				mediaPlayer.setDataSource(item.getMusicPath());
+				ItemList.historyList.add(item);
 				ItemList.updateCurrentCover(item);
 			} catch (IOException e) {
 				e.printStackTrace();
