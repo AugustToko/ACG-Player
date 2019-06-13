@@ -70,10 +70,11 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
  */
 public final class MusicDetailFragment extends BaseFragment {
 
-	//////////////////////////////////////////////////////////////////////////////////////
-
 	public static final String TAG = "MusicDetailFragment";
 
+	/**
+	 * key for albumImage slide
+	 */
 	public static final int key = -465854196;
 	/**
 	 * Handler
@@ -100,10 +101,9 @@ public final class MusicDetailFragment extends BaseFragment {
 	private TextView mInfoBarAlbumText;
 	private ImageView mInfoBarBackgroundImage;
 	private ImageView mInfoBarFavButton;
-	private HandlerThread mHandlerThread;
 	private ImageView mInfoBarPlayButton;
-
 	////////////////////INFO_BAR//////////////////////////
+
 	private FloatingActionButton mPlayButton;
 	private PlayPauseDrawable mPlayPauseDrawable;
 	private PlayPauseDrawable mPlayPauseDrawable2InfoBar;
@@ -125,6 +125,8 @@ public final class MusicDetailFragment extends BaseFragment {
 	private SlidingUpPanelLayout mSlidingUpPanelLayout;
 	private ConstraintLayout mNowPlayingBody;
 	private ConstraintLayout mSlideUpGroup;
+
+	private HandlerThread mHandlerThread;
 
 	/**
 	 * for {@link #setBlurEffect(Bitmap, ImageView, ImageView, TextView)} bitmap. width, height 150
@@ -566,19 +568,20 @@ public final class MusicDetailFragment extends BaseFragment {
 		if (item != null && item.getMusicID() != -1) {
 			final Bitmap cover = Utils.Audio.getCoverBitmapFull(getContext(), item.getAlbumId());
 			setCurrentInfo(item.getMusicName(), item.getMusicAlbum(), cover);
+
+			try {
+				if (Data.sMusicBinder != null && Data.sMusicBinder.isPlayingMusic()) {
+					mPlayPauseDrawable.setPause(true);
+					mPlayPauseDrawable2InfoBar.setPause(true);
+				}
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			} catch (IllegalStateException e) {
+				e.printStackTrace();
+			}
+
 		} else {
 			Log.d(TAG, "preLoad: item is null");
-		}
-
-		try {
-			if (Data.sMusicBinder != null && Data.sMusicBinder.isPlayingMusic()) {
-				mPlayPauseDrawable.setPause(true);
-				mPlayPauseDrawable2InfoBar.setPause(true);
-			}
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		} catch (IllegalStateException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -1033,7 +1036,6 @@ public final class MusicDetailFragment extends BaseFragment {
 			}
 
 			mHandler.sendEmptyMessage(NotLeakHandler.RECYCLER_SCROLL);
-
 		});
 
 		mCurrentInfoBody.setOnLongClickListener(v -> {
@@ -1074,6 +1076,10 @@ public final class MusicDetailFragment extends BaseFragment {
 				mSlideUpGroup.setTranslationY(0 - slideOffset * 120);
 				if (slideOffset == 0) {
 					mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
+					mMainActivity.getMainBinding().slidingLayout.setEnabled(true);
+				} else {
+					mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(false);
+					mMainActivity.getMainBinding().slidingLayout.setEnabled(false);
 				}
 			}
 
@@ -1081,9 +1087,11 @@ public final class MusicDetailFragment extends BaseFragment {
 			public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
 				if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
 					mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
+					mMainActivity.getMainBinding().slidingLayout.setEnabled(true);
 					mHandler.sendEmptyMessage(NotLeakHandler.RECYCLER_SCROLL);
 				} else {
 					mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(false);
+					mMainActivity.getMainBinding().slidingLayout.setEnabled(false);
 				}
 			}
 		});
@@ -1547,11 +1555,13 @@ public final class MusicDetailFragment extends BaseFragment {
 			switch (msg.what) {
 				case INIT_SEEK_BAR: {
 					mWeakReference.get().runOnUiThread(() -> {
-						if (Data.sMusicBinder == null) {
+						if (!MusicUtil.availableCurrentItem()) {
 							return;
 						}
 
 						int duration = (int) Data.sCurrentMusicItem.getDuration();
+
+						Log.d(TAG, "handleMessage: INIT_SEEK_BAR: duration: " + duration);
 
 						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 							mFragmentWeakReference.get().mSeekBar.setProgress(0, true);
@@ -1564,7 +1574,9 @@ public final class MusicDetailFragment extends BaseFragment {
 								.mInfoBarInfoSeek.getLayoutParams());
 						mFragmentWeakReference.get().mInfoBarInfoSeek.requestLayout();
 
-						mFragmentWeakReference.get().mRightTime.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(duration))));
+						mFragmentWeakReference.get().mRightTime.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT
+								.format(new Date(duration))));
+
 						mFragmentWeakReference.get().mSeekBar.setMax(duration);
 					});
 				}
@@ -1573,70 +1585,66 @@ public final class MusicDetailFragment extends BaseFragment {
 				case SEEK_BAR_UPDATE: {
 					mWeakReference.get().runOnUiThread(() -> {
 						//点击body 或 music 正在播放 才可以进行seekBar更新
-						if (Data.sMusicBinder != null && Data.HAS_PLAYED) {
-							if (ReceiverOnMusicPlay.isPlayingMusic()) {
+						if (Data.sMusicBinder == null || !MusicUtil.availableCurrentItem()
+								|| !ReceiverOnMusicPlay.isPlayingMusic()) {
+							return;
+						}
 
-								int duration = (int) Data.sCurrentMusicItem.getDuration();
-								int position = ReceiverOnMusicPlay.getCurrentPosition();
+						int duration = (int) Data.sCurrentMusicItem.getDuration();
+						int position = ReceiverOnMusicPlay.getCurrentPosition();
 
-								if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-									mFragmentWeakReference.get().mSeekBar.setProgress(position, true);
-								} else {
-									mFragmentWeakReference.get().mSeekBar.setProgress(position);
-								}
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+							mFragmentWeakReference.get().mSeekBar.setProgress(position, true);
+						} else {
+							mFragmentWeakReference.get().mSeekBar.setProgress(position);
+						}
 
-								mFragmentWeakReference.get().mInfoBarInfoSeek.getLayoutParams().width
-										= mFragmentWeakReference.get().mCurrentInfoBody.getWidth()
-										* position / duration;
-								mFragmentWeakReference.get().mInfoBarInfoSeek.setLayoutParams(mFragmentWeakReference
-										.get().mInfoBarInfoSeek.getLayoutParams());
-								mFragmentWeakReference.get().mInfoBarInfoSeek.requestLayout();
+						mFragmentWeakReference.get().mInfoBarInfoSeek.getLayoutParams().width
+								= mFragmentWeakReference.get().mCurrentInfoBody.getWidth()
+								* position / duration;
+						mFragmentWeakReference.get().mInfoBarInfoSeek.setLayoutParams(mFragmentWeakReference
+								.get().mInfoBarInfoSeek.getLayoutParams());
+						mFragmentWeakReference.get().mInfoBarInfoSeek.requestLayout();
 
-								mFragmentWeakReference.get().mLeftTime.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT
-										.format(new Date(position))));
+						mFragmentWeakReference.get().mLeftTime.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT
+								.format(new Date(position))));
 
+						//播放模式不为循环单曲时，跳出提示
+						if (!MusicService.PlayType.REPEAT_ONE.equals(PreferenceUtil.getDefault(mWeakReference.get())
+								.getString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE))) {
 
-								//播放模式不为循环单曲时，跳出提示
-								if (!MusicService.PlayType.REPEAT_ONE.equals(PreferenceUtil.getDefault(
-										mWeakReference.get()).getString(Values.SharedPrefsTag.PLAY_TYPE
-										, MusicService.PlayType.REPEAT_NONE))) {
+							if (ReceiverOnMusicPlay.getCurrentPosition() / 1000 == ReceiverOnMusicPlay
+									.getDuration() / 1000 - 5 && !mFragmentWeakReference.get().snackNotice) {
 
-									if (ReceiverOnMusicPlay.getCurrentPosition() / 1000 == ReceiverOnMusicPlay
-											.getDuration() / 1000 - 5 && !mFragmentWeakReference.get().snackNotice) {
+								mFragmentWeakReference.get().snackNotice = true;
 
-										mFragmentWeakReference.get().snackNotice = true;
+								final GkSnackbar gkSnackbar = new GkSnackbar(mFragmentWeakReference.get()
+										.mSlidingUpPanelLayout, mWeakReference.get()
+										.getString(R.string.next_will_play_x,
+												Data.sPlayOrderList.get(Data.getCurrentIndex() +
+														1 != Data.sPlayOrderList.size() ? Data.getCurrentIndex() + 1 : 0)
+														.getMusicName()
+										)
+										, Snackbar.LENGTH_LONG);
 
-										final GkSnackbar gkSnackbar = new GkSnackbar(mFragmentWeakReference.get()
-												.mSlidingUpPanelLayout, mWeakReference.get()
-												.getString(R.string.next_will_play_x,
-														Data.sPlayOrderList.get(Data.getCurrentIndex() +
-																1 != Data.sPlayOrderList.size() ? Data.getCurrentIndex() + 1 : 0)
-																.getMusicName()
-												)
-												, Snackbar.LENGTH_LONG);
-
-										gkSnackbar.setAction(mWeakReference.get().getString(R.string.skip), v -> {
-											//点击右侧的按钮之后的操作
-											try {
-												Data.sMusicBinder.setCurrentIndex(Data.getCurrentIndex() + 1);
-											} catch (RemoteException e) {
-												e.printStackTrace();
-											}
-											MusicService.MusicControl.intentNext(mWeakReference.get());
-										});
-										gkSnackbar.addCallback(new Snackbar.Callback() {
-											@Override
-											public void onDismissed(Snackbar transientBottomBar, int event) {
-												mFragmentWeakReference.get().snackNotice = false;
-											}
-										});
-										gkSnackbar.setBackgroundColor(Utils.Ui.getPrimaryColor(mWeakReference.get()))
-												.setBodyViewAlpha(0.8f).setActionTextColor(Color.BLACK);
-										gkSnackbar.show();
-
+								gkSnackbar.setAction(mWeakReference.get().getString(R.string.skip), v -> {
+									//点击右侧的按钮之后的操作
+									try {
+										Data.sMusicBinder.setCurrentIndex(Data.getCurrentIndex() + 1);
+									} catch (RemoteException e) {
+										e.printStackTrace();
 									}
-
-								}
+									MusicService.MusicControl.intentNext(mWeakReference.get());
+								});
+								gkSnackbar.addCallback(new Snackbar.Callback() {
+									@Override
+									public void onDismissed(Snackbar transientBottomBar, int event) {
+										mFragmentWeakReference.get().snackNotice = false;
+									}
+								});
+								gkSnackbar.setBackgroundColor(Utils.Ui.getPrimaryColor(mWeakReference.get()))
+										.setBodyViewAlpha(0.8f).setActionTextColor(Color.BLACK);
+								gkSnackbar.show();
 
 							}
 						}

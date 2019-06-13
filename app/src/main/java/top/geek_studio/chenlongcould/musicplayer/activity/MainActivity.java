@@ -93,12 +93,17 @@ public final class MainActivity extends BaseListActivity {
 
 	public static final String TAG = "MainActivity";
 
+	/**
+	 * connect {@link MusicService}
+	 */
 	public ServiceConnection sServiceConnection = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			Data.sMusicBinder = IMuiscService.Stub.asInterface(service);
 
-			if (Values.TYPE_RANDOM.equals(PreferenceUtil.getDefault(MainActivity.this).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
+			if (Values.TYPE_RANDOM.equals(PreferenceUtil.getDefault(MainActivity.this)
+					.getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
+
 				Data.shuffleOrderListSync(MainActivity.this, false);
 			}
 

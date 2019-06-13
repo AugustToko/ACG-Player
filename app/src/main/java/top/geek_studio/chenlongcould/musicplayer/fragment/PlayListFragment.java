@@ -84,7 +84,7 @@ public final class PlayListFragment extends BaseListFragment {
 	 * by create list or rename list
 	 */
 	public static void reloadDataByHandler() {
-		mHandler.sendEmptyMessage(NotLeakHandler.RE_LOAD_PLAY_LIST);
+		if (mHandler != null) mHandler.sendEmptyMessage(NotLeakHandler.RE_LOAD_PLAY_LIST);
 	}
 
 	public PlayListAdapter getPlayListAdapter() {

@@ -109,7 +109,7 @@ public class MusicUtil {
 						for (int i = 0; i < lists.size(); i++) {
 							final MyBlackPath bp = lists.get(i);
 
-							if (path.contains(bp.getDirPath()) || bp.getDirPath().equals(path)) {
+							if (bp.getDirPath().contains(path) || bp.getDirPath().equals(path)) {
 								skip = true;
 								lists.remove(bp);
 								break;
@@ -124,7 +124,8 @@ public class MusicUtil {
 
 						final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
 						if (skipShort && duration <= MainActivity.DEFAULT_SHORT_DURATION) {
-							Log.d(TAG, "loadDataSource: the music-file duration is " + duration + " (too short), skip...");
+							Log.d(TAG, "loadDataSource: the music-file duration is " + duration + " (too short)" +
+									", skip...");
 							continue;
 						}
 
@@ -167,6 +168,12 @@ public class MusicUtil {
 			// already have data
 		}
 		return true;
+	}
+
+	public static boolean availableCurrentItem() {
+		boolean result;
+		result = Data.sCurrentMusicItem != null && Data.sCurrentMusicItem.getMusicID() != -1;
+		return result;
 	}
 
 	public static void setRingtone(@NonNull final Context context, final int id) {
