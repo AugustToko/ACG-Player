@@ -14,7 +14,10 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.os.*;
+import android.os.Binder;
+import android.os.Build;
+import android.os.IBinder;
+import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
@@ -132,22 +135,22 @@ public final class MusicService extends Service {
 		}
 
 		@Override
-		public void setNextWillPlayItem(MusicItem item) throws RemoteException {
+		public void setNextWillPlayItem(MusicItem item) {
 			ItemList.nextItem = item;
 		}
 
 		@Override
-		public void addToOrderList(MusicItem item) throws RemoteException {
+		public void addToOrderList(MusicItem item) {
 			ItemList.playOrderList.add(item);
 		}
 
 		@Override
-		public void removeFromOrderList(MusicItem item) throws RemoteException {
+		public void removeFromOrderList(MusicItem item) {
 			ItemList.playOrderList.remove(item);
 		}
 
 		@Override
-		public void syncOrderList(int[] array) throws RemoteException {
+		public void syncOrderList(int[] array) {
 			ItemList.playOrderList.clear();
 			for (int i : array) {
 				Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null
@@ -203,6 +206,7 @@ public final class MusicService extends Service {
 	private int mStartNotificationId = 1;
 
 	private PowerManager.WakeLock wakeLock;
+
 	private List<Disposable> disposableList = new ArrayList<>();
 
 	public MusicService() {
@@ -227,6 +231,7 @@ public final class MusicService extends Service {
 		wakeLock.setReferenceCounted(false);
 
 		MusicControl.init(MusicService.this);
+
 		NotificationTool.init(MusicService.this);
 
 		loadDataSource();
@@ -289,34 +294,35 @@ public final class MusicService extends Service {
 	}
 
 	private void updateMediaSessionMetaData() {
-		final MusicItem song = mMusicItem;
-		Log.d(TAG, "updateMediaSessionMetaData: " + song.getMusicID());
+		CustomThreadPool.post(() -> {
+			final MusicItem song = mMusicItem;
+			Log.d(TAG, "updateMediaSessionMetaData: " + song.getMusicID());
 
-		if (song.getMusicID() == -1) {
-			mediaSession.setMetadata(null);
-			return;
-		}
+			if (song.getMusicID() == -1) {
+				mediaSession.setMetadata(null);
+				return;
+			}
 
-		final MediaMetadataCompat.Builder metaData = new MediaMetadataCompat.Builder()
-				.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, song.getArtist())
-				.putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST, song.getArtist())
-				.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, song.getMusicAlbum())
-				.putString(MediaMetadataCompat.METADATA_KEY_TITLE, song.getMusicName())
-				.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, song.getDuration())
-				.putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, ItemList.CURRENT_MUSIC_INDEX + 1)
-				// TODO: 2019/6/4 add  year
-				.putLong(MediaMetadataCompat.METADATA_KEY_YEAR, 0)
-				.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, null);
+			final MediaMetadataCompat.Builder metaData = new MediaMetadataCompat.Builder()
+					.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, song.getArtist())
+					.putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST, song.getArtist())
+					.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, song.getMusicAlbum())
+					.putString(MediaMetadataCompat.METADATA_KEY_TITLE, song.getMusicName())
+					.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, song.getDuration())
+					.putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, ItemList.CURRENT_MUSIC_INDEX + 1)
+					// TODO: 2019/6/4 add  year
+					.putLong(MediaMetadataCompat.METADATA_KEY_YEAR, 0)
+					.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, null);
 
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			metaData.putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, ItemList.playOrderList.size());
-		}
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+				metaData.putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, ItemList.playOrderList.size());
+			}
 
 //		if (PreferenceUtil.getDefault(this).getBoolean(Values.SharedPrefsTag.ALBUM_LOCK_SCREEN, true)) {
 //			final Point screenSize = Utils.Ui.getScreenSize(MusicService.this);
-		metaData.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, ItemList.mCurrentCover);
-		mediaSession.setMetadata(metaData.build());
-		Log.d(TAG, "updateMediaSessionMetaData: build done");
+			metaData.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, ItemList.mCurrentCover);
+			mediaSession.setMetadata(metaData.build());
+			Log.d(TAG, "updateMediaSessionMetaData: build done");
 
 //			if (PreferenceUtil.getDefault(this).getBoolean(Values.SharedPrefsTag.BLUR_ALBUM_LOCK_SCREEN, true)) {
 //				 ...
@@ -324,8 +330,8 @@ public final class MusicService extends Service {
 //		} else {
 //			mediaSession.setMetadata(metaData.build());
 //		}
+		});
 	}
-
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
@@ -394,15 +400,18 @@ public final class MusicService extends Service {
 				break;
 
 				case ServiceActions.ACTION_PLAY: {
-					// 从未播放过说明没有设置过DataSource，同时也不要记录播放统计
-					if (!HAS_PLAYED) {
+					// 1 没有播放过 也没有找到上次打开app 最后播放的数据
+					if (!HAS_PLAYED && mMusicItem == null) {
 						setRandomItemPrepare();
 						flashMode = ReceiverOnMusicPlay.FLASH_UI_COMMON;
-					} else {
+						updateMediaSessionMetaData();
+
+						// 2 已经播放过了
+					} else if (HAS_PLAYED && mMusicItem != null) {
 						flashMode = ReceiverOnMusicPlay.PLAY;
+						MusicControl.prepareAndPlay();
 					}
-					updateMediaSessionMetaData();
-					MusicControl.playMusic();
+
 				}
 				break;
 
@@ -415,8 +424,7 @@ public final class MusicService extends Service {
 
 						updateMediaSessionMetaData();
 
-						MusicControl.prepare();
-						MusicControl.playMusic();
+						MusicControl.prepareAndPlay();
 
 						ItemList.nextItem = null;
 
@@ -430,7 +438,6 @@ public final class MusicService extends Service {
 					if (PlayType.REPEAT_ONE.equals(PreferenceUtil.getDefault(serviceWeakReference.get())
 							.getString(Values.SharedPrefsTag.PLAY_TYPE, PlayType.REPEAT_NONE))) {
 						MusicControl.seekTo(0);
-						MusicControl.playMusic();
 						break;
 					}
 
@@ -461,8 +468,7 @@ public final class MusicService extends Service {
 
 					updateMediaSessionMetaData();
 
-					MusicControl.prepare();
-					MusicControl.playMusic();
+					MusicControl.prepareAndPlay();
 
 					flashMode = ReceiverOnMusicPlay.FLASH_UI_COMMON;
 				}
@@ -488,8 +494,7 @@ public final class MusicService extends Service {
 					mMusicItem = ItemList.playOrderList.get(index);
 					MusicControl.setDataSource(mMusicItem);
 					updateMediaSessionMetaData();
-					MusicControl.prepare();
-					MusicControl.playMusic();
+					MusicControl.prepareAndPlay();
 
 					flashMode = ReceiverOnMusicPlay.FLASH_UI_COMMON;
 
@@ -502,8 +507,7 @@ public final class MusicService extends Service {
 					MusicControl.reset(true);
 					MusicControl.setDataSource(mMusicItem);
 					updateMediaSessionMetaData();
-					MusicControl.prepare();
-					MusicControl.playMusic();
+					MusicControl.prepareAndPlay();
 
 					flashMode = ReceiverOnMusicPlay.FLASH_UI_COMMON;
 				}
@@ -575,7 +579,7 @@ public final class MusicService extends Service {
 
 		mMusicItem = ItemList.playOrderList.get(index);
 		MusicControl.setDataSource(mMusicItem);
-		MusicControl.prepare();
+		MusicControl.prepareAndPlay();
 	}
 
 	/**
@@ -670,7 +674,6 @@ public final class MusicService extends Service {
 				if (lastId == id) {
 					mMusicItem = builder.build();
 					MusicControl.setDataSource(mMusicItem);
-					MusicControl.prepare();
 					HAS_PLAYED = true;
 				}
 
@@ -690,7 +693,7 @@ public final class MusicService extends Service {
 	 */
 	private void startFN() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			startForeground(mStartNotificationId, NotificationTool.getChannelNotification(ItemList.mCurrentCover, this, mediaSession).build());
+			startForeground(mStartNotificationId, NotificationTool.getChannelNotification(this, mediaSession).build());
 		} else {
 			startForeground(mStartNotificationId, NotificationTool.getNotification25(this, mediaSession).build());
 		}
@@ -894,12 +897,13 @@ public final class MusicService extends Service {
 
 		@RequiresApi(api = Build.VERSION_CODES.O)
 		@NonNull
-		private static NotificationCompat.Builder getChannelNotification(final @Nullable Bitmap cover
-				, final Context context, @NonNull final MediaSessionCompat mediaSessionCompat) {
+		private static NotificationCompat.Builder getChannelNotification(final Context context
+				, @NonNull final MediaSessionCompat mediaSessionCompat) {
 
 			MediaControllerCompat controller = mediaSessionCompat.getController();
 			@Nullable MediaMetadataCompat mediaMetadata = controller.getMetadata();
-			MediaDescriptionCompat description = mediaMetadata.getDescription();
+			@Nullable MediaDescriptionCompat description = null;
+			if (mediaMetadata != null) description = mediaMetadata.getDescription();
 
 			//pi(s)
 			Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
@@ -914,12 +918,13 @@ public final class MusicService extends Service {
 							, PlaybackStateCompat.ACTION_STOP));
 
 			NotificationCompat.Builder builder = new NotificationCompat.Builder(context, ID)
-					.setContentTitle(description.getTitle())
-					.setContentText(description.getSubtitle())
-					.setSubText(description.getDescription())
+					.setContentTitle(description == null ? mMusicItem.getMusicName() : description.getTitle())
+					.setContentText(description == null ? mMusicItem.getMusicAlbum() : description.getSubtitle())
+					.setSubText(description == null ? mMusicItem.getArtist() : description.getDescription())
 					.setSmallIcon(R.drawable.ic_audiotrack_24px)
 					.setStyle(mediaStyle)
-					.setLargeIcon(description.getIconBitmap())
+					.setLargeIcon(description == null ? Utils.Audio.getCoverBitmapFull(context
+							, mMusicItem.getAlbumId()) : description.getIconBitmap())
 					.setContentIntent(pi)
 					.setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(context,
 							PlaybackStateCompat.ACTION_STOP))
@@ -981,60 +986,62 @@ public final class MusicService extends Service {
 					return true;
 				});
 
+				mediaPlayer.setOnPreparedListener(mp -> {
+					Log.d(TAG, "onPrepared: done");
+					mp.start();
+					serviceWeakReference.get().startFN();
+				});
+
 			});
 		}
 
 		private synchronized static void reset(final boolean saveData) {
 			if (mediaPlayer == null) return;
-
-			CustomThreadPool.post(() -> {
-				/*
-				 * 记录播放信息
-				 * */
-				if (HAS_PLAYED && mMusicItem != null && saveData) {
-					final List<Detail> infos = LitePal.where("MusicId = ?", String.valueOf(mMusicItem.getMusicID())).find(Detail.class);
-					if (infos.size() > 0) {
-						Detail detail = infos.get(0);
-						if (mediaPlayer.getCurrentPosition() < MINIMUM_PLAY_TIME) {
-							detail.setMinimumPlayTimes(detail.getMinimumPlayTimes() + 1);
-						} else {
-							detail.setPlayDuration(detail.getPlayDuration() + mediaPlayer.getCurrentPosition());
-						}
-						detail.setPlayTimes(detail.getPlayTimes() + 1);
-						detail.save();
+			/*
+			 * 记录播放信息
+			 * */
+			if (HAS_PLAYED && mMusicItem != null && saveData) {
+				final List<Detail> infos = LitePal.where("MusicId = ?", String.valueOf(mMusicItem.getMusicID())).find(Detail.class);
+				if (infos.size() > 0) {
+					Detail detail = infos.get(0);
+					if (mediaPlayer.getCurrentPosition() < MINIMUM_PLAY_TIME) {
+						detail.setMinimumPlayTimes(detail.getMinimumPlayTimes() + 1);
 					} else {
-						Detail detail = new Detail();
-						detail.setMusicId(mMusicItem.getMusicID());
-						if (mediaPlayer.getCurrentPosition() < MINIMUM_PLAY_TIME) {
-							detail.setMinimumPlayTimes(detail.getMinimumPlayTimes() + 1);
-						} else {
-							detail.setPlayDuration(detail.getPlayDuration() + mediaPlayer.getCurrentPosition());
-						}
-						detail.setPlayTimes(detail.getPlayTimes() + 1);
-						detail.save();
+						detail.setPlayDuration(detail.getPlayDuration() + mediaPlayer.getCurrentPosition());
 					}
+					detail.setPlayTimes(detail.getPlayTimes() + 1);
+					detail.save();
+				} else {
+					Detail detail = new Detail();
+					detail.setMusicId(mMusicItem.getMusicID());
+					if (mediaPlayer.getCurrentPosition() < MINIMUM_PLAY_TIME) {
+						detail.setMinimumPlayTimes(detail.getMinimumPlayTimes() + 1);
+					} else {
+						detail.setPlayDuration(detail.getPlayDuration() + mediaPlayer.getCurrentPosition());
+					}
+					detail.setPlayTimes(detail.getPlayTimes() + 1);
+					detail.save();
 				}
+			}
 
-				mediaPlayer.reset();
-			});
-
-
-
+			mediaPlayer.reset();
 		}
 
+		/**
+		 * play music
+		 * use {@link MediaPlayer#setOnPreparedListener(MediaPlayer.OnPreparedListener)}
+		 */
 		private synchronized static void playMusic() {
 			if (mediaPlayer == null) return;
 
-			CustomThreadPool.post(() -> {
-				mediaPlayer.start();
-				HAS_PLAYED = true;
-				serviceWeakReference.get().startFN();
-				// update last played
-				if (mMusicItem != null) {
-					PreferenceUtil.getDefault(serviceWeakReference.get()).edit()
-							.putInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, mMusicItem.getMusicID()).apply();
-				}
-			});
+			mediaPlayer.start();
+			HAS_PLAYED = true;
+			serviceWeakReference.get().startFN();
+			// update last played
+			if (mMusicItem != null) {
+				PreferenceUtil.getDefault(serviceWeakReference.get()).edit()
+						.putInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, mMusicItem.getMusicID()).apply();
+			}
 		}
 
 		private synchronized static void pauseMusic() {
@@ -1075,7 +1082,7 @@ public final class MusicService extends Service {
 			}
 		}
 
-		private synchronized static void prepare() {
+		private synchronized static void prepareAndPlay() {
 			if (mediaPlayer == null) return;
 
 			try {

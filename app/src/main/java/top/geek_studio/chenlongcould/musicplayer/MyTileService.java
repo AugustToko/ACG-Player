@@ -165,7 +165,7 @@ public final class MyTileService extends TileService {
 		try {
 			unbindService(sServiceConnection);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.d(TAG, "onDestroy: " + e.getMessage());
 		}
 
 		super.onDestroy();
