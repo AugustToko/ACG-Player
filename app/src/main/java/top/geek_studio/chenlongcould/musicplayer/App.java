@@ -7,9 +7,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
+import android.database.Cursor;
 import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import androidx.annotation.NonNull;
@@ -21,7 +23,9 @@ import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.database.ArtistArtPath;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
+import top.geek_studio.chenlongcould.musicplayer.database.Detail;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
+import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
@@ -73,6 +77,25 @@ public final class App extends Application {
 		Log.d(TAG, "onCreate: " + processName);
 
 		if (processName != null && !processName.contains("remote")) {
+
+			// 清除旧数据
+			CustomThreadPool.post(() -> {
+				List<Detail> details = LitePal.findAll(Detail.class);
+				for (Detail d : details) {
+					final Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+							, null
+							, MediaStore.MediaColumns._ID + "=?"
+							, new String[]{String.valueOf(d.getMusicId())}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+
+					if (cursor != null && cursor.moveToNext()) {
+						if (cursor.getCount() == 0) {
+							LitePal.deleteAll(Detail.class, "musicId=?", String.valueOf(d.getMusicId()));
+						}
+						cursor.close();
+					}
+				}
+			});
+
 			// 升级版本清空数据
 			if (PreferenceUtil.getDefault(this).getInt(VERSION_CODE, 0) != VER_CODE) {
 				Log.d(TAG, "onCreate: clear data");

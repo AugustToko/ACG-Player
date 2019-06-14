@@ -1,14 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-  ~ *************************************************************
-  ~ 文件：include_seek_bar.xml  模块：app  项目：MusicPlayer
-  ~ 当前修改时间：2019年01月27日 13:11:38
-  ~ 上次修改时间：2019年01月19日 10:56:30
-  ~ 作者：chenlongcould
-  ~ Geek Studio
-  ~ Copyright (c) 2019
-  ~ *************************************************************
-  -->
-
+<?xml version="1.0" encoding="utf-8"?>
 <layout>
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"

@@ -13,20 +13,14 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import io.reactivex.Observable;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
-import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter2ArtistList;
 import top.geek_studio.chenlongcould.musicplayer.model.ArtistItem;
 import top.geek_studio.chenlongcould.musicplayer.model.Item;
+import top.geek_studio.chenlongcould.musicplayer.threadPool.ArtistThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 
 import java.util.ArrayList;
@@ -102,9 +96,9 @@ public final class ArtistListFragment extends BaseListFragment {
 	}
 
 	private void initArtistData() {
-		Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+		ArtistThreadPool.post(() -> {
 			if (artistItemList.size() == 0) {
-				Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, null, null, null, null);
+				final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, null, null, null, null);
 				if (cursor != null) {
 					cursor.moveToFirst();
 
@@ -119,29 +113,7 @@ public final class ArtistListFragment extends BaseListFragment {
 					cursor.close();
 				}   //initData
 			}
-
-			emitter.onComplete();
-		}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
-				.safeSubscribe(new Observer<Integer>() {
-					@Override
-					public void onSubscribe(Disposable disposable) {
-						Data.sDisposables.add(disposable);
-					}
-
-					@Override
-					public void onNext(Integer result) {
-					}
-
-					@Override
-					public void onError(Throwable throwable) {
-
-					}
-
-					@Override
-					public void onComplete() {
-//						mMainActivity.getMainBinding().toolBar.setSubtitle(Data.sArtistItems.size() + " Artists");
-					}
-				});
+		});
 	}
 
 	public RecyclerView getRecyclerView() {

@@ -1,7 +1,8 @@
 package top.geek_studio.chenlongcould.musicplayer.adapter;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
+import android.graphics.drawable.Animatable;
+import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
@@ -11,15 +12,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.content.ContextCompat;
-import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -40,9 +41,9 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.artistdetail.ArtistDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.database.ArtistArtPath;
+import top.geek_studio.chenlongcould.musicplayer.misc.BlurringView;
 import top.geek_studio.chenlongcould.musicplayer.model.ArtistItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.AlbumThreadPool;
-import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -70,9 +71,9 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 		holder.mArtistImage.setTag(R.string.key_id_2, -1);
 		GlideApp.with(mMainActivity).clear(holder.mArtistImage);
 		GlideApp.get(mMainActivity).clearMemory();
-		if (mType == GRID_TYPE) {
-			holder.mView.setBackgroundColor(ContextCompat.getColor(mMainActivity, R.color.notVeryBlack));
-		}
+//		if (mType == GRID_TYPE) {
+//			holder.mView.setBackgroundColor(ContextCompat.getColor(mMainActivity, R.color.notVeryBlack));
+//		}
 		holder.mArtistText.setTextColor(ContextCompat.getColor(mMainActivity, R.color.notVeryWhite));
 //		holder.debugInfo.setText("");
 	}
@@ -111,11 +112,13 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 		viewHolder.mArtistText.setText(mArtistItems.get(i).getArtistName());
 		viewHolder.mArtistImage.setTag(R.string.key_id_2, i);
-		dataSet(i, viewHolder.mArtistImage, viewHolder.mArtistText, viewHolder.mView, viewHolder.debugInfo);
+		dataSet(i, viewHolder);
 	}
 
-	private void dataSet(final int index, final ImageView imageView, final TextView textView, final View view, final TextView debugText) {
+	private void dataSet(final int index, final ViewHolder holder) {
 		AlbumThreadPool.post(() -> {
+
+			ImageView imageView = holder.mArtistImage;
 
 			final ArtistItem artistItem = mArtistItems.get(index);
 			int artistId = artistItem.getArtistId();
@@ -145,18 +148,7 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 						custom.setArtistArt(mayPath);
 						custom.save();
 
-						if (verify(imageView, index)) {
-							imageView.post(() -> GlideApp.with(mMainActivity)
-									.load(mayPath)
-									.placeholder(R.drawable.default_album_art)
-									.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-									.diskCacheStrategy(DiskCacheStrategy.NONE)
-									.into(imageView));
-							setUpTagColor(mayPath, textView, view);
-
-							// TODO: 2019/5/24 debug
-//							debugText.setText(mayPath);
-						}
+						loadToImageView(holder, index, mayPath);
 
 					} else {
 						Log.d(TAG, "onBindViewHolder: (in CUSTOM_DB) DB not ability, path not ability, download...");
@@ -172,7 +164,7 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 							@Override
 							public void onFailure(@NotNull Call call, @NotNull IOException e) {
 								imageView.post(() -> Toast.makeText(mMainActivity, e.getMessage(), Toast.LENGTH_SHORT).show());
-								loadDEF(imageView, view, textView, index);
+								loadDEF(holder, index);
 							}
 
 							@Override
@@ -206,16 +198,7 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 															c.setArtistArt(newPath);
 															c.save();
 
-															if (verify(imageView, index)) {
-																Log.d(TAG, "onDownloadSuccess: loading,,," + " albumName is: " + artistName);
-																imageView.post(() -> GlideApp.with(mMainActivity)
-																		.load(file)
-																		.placeholder(R.drawable.default_album_art)
-																		.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-																		.diskCacheStrategy(DiskCacheStrategy.NONE)
-																		.into(imageView));
-																setUpTagColor(newPath, textView, view);
-															}
+															loadToImageView(holder, index, file.getPath());
 														}
 
 														@Override
@@ -226,20 +209,20 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 														@Override
 														public void onDownloadFailed(Exception e) {
 															Log.d(TAG, "onDownloadFailed: " + img.toString() + " " + e.getMessage());
-															loadDEF(imageView, view, textView, index);
+															loadDEF(holder, index);
 														}
 													});
 										} else {
 											Log.d(TAG, "onResponse: img url error" + img.toString() + " albumName is: " + artistName);
-											loadDEF(imageView, view, textView, index);
+											loadDEF(holder, index);
 										}
 									} else {
 										Log.d(TAG, "onResponse: result not ok, load DEF_ALBUM");
-										loadDEF(imageView, view, textView, index);
+										loadDEF(holder, index);
 									}
 								} else {
 									mMainActivity.runOnUiThread(() -> Toast.makeText(mMainActivity, "response is NUll! " + " albumName is: " + artistName, Toast.LENGTH_SHORT).show());
-									loadDEF(imageView, view, textView, index);
+									loadDEF(holder, index);
 								}
 							}
 						});
@@ -249,28 +232,46 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 					if (file.exists()) {
 						Log.d(TAG, "already in customDB or not forceLoad, loading data from customDB " + " artistName is: " + artistName +
 								"the path is: " + path);
-						if (verify(imageView, index)) {
-
-							setUpTagColor(path, textView, view);
-							imageView.post(() -> GlideApp.with(mMainActivity)
-									.load(path)
-									.placeholder(R.drawable.default_album_art)
-									.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-									.diskCacheStrategy(DiskCacheStrategy.NONE)
-									.into(imageView));
-						}
-
+						loadToImageView(holder, index, path);
 					} else {
 						Log.d(TAG, "onBindViewHolder: already in DB but not a file path");
 						// 存在于数据库 但 路径失效了
-						loadDEF(imageView, view, textView, index);
+						loadDEF(holder, index);
 					}
 				}
 			} else {
 				Log.d(TAG, "customDB size is 0, load DEF_ALBUM.png");
-				loadDEF(imageView, view, textView, index);
+				loadDEF(holder, index);
 			}
 		});
+	}
+
+	private void loadToImageView(@NonNull final ViewHolder holder, int index, @NonNull final String path) {
+		if (verify(holder.mArtistImage, index)) {
+
+//							setUpTagColor(path, textView, view);
+			holder.mArtistImage.post(() -> GlideApp.with(mMainActivity)
+					.load(path)
+					.placeholder(R.drawable.default_album_art)
+					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+					.diskCacheStrategy(DiskCacheStrategy.NONE)
+					.into(new CustomTarget<Drawable>() {
+						@Override
+						public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+							if (resource instanceof Animatable) {
+								((Animatable) resource).start();
+							}
+							holder.mArtistImage.setImageDrawable(resource);
+							holder.invalidate();
+							holder.setBluredView(holder.mArtistImage);
+						}
+
+						@Override
+						public void onLoadCleared(@Nullable Drawable placeholder) {
+
+						}
+					}));
+		}
 	}
 
 	@Nullable
@@ -306,25 +307,31 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 	/**
 	 * Load default image into imageView
 	 *
-	 * @param imageView imageView
-	 * @param view      title background
-	 * @param textView  textView, show artist name
+	 * @param holder viewHolder
 	 * @param index     tag
 	 */
-	private void loadDEF(ImageView imageView, View view, TextView textView, int index) {
-		if (verify(imageView, index)) {
-			Log.d(TAG, "key_test(loadDEF): tagId: " + imageView.getTag(R.string.key_id_2) + " pos: " + index);
-			imageView.post(() -> {
+	private void loadDEF(ViewHolder holder, int index) {
+		if (verify(holder.mArtistImage, index)) {
+//			Log.d(TAG, "key_test(loadDEF): tagId: " + imageView.getTag(R.string.key_id_2) + " pos: " + index);
+			holder.mArtistImage.post(() -> {
 				GlideApp.with(mMainActivity)
 						.load(R.drawable.default_album_art)
 						.placeholder(R.drawable.default_album_art)
 						.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
 						.diskCacheStrategy(DiskCacheStrategy.NONE)
-						.into(imageView);
-				if (view != null)
-					view.setBackgroundColor(ContextCompat.getColor(mMainActivity, R.color.notVeryBlack));
-				if (textView != null)
-					textView.setTextColor(ContextCompat.getColor(mMainActivity, R.color.notVeryWhite));
+						.into(new CustomTarget<Drawable>() {
+							@Override
+							public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+								holder.mArtistImage.setImageDrawable(resource);
+								holder.invalidate();
+								holder.setBluredView(holder.mArtistImage);
+							}
+
+							@Override
+							public void onLoadCleared(@Nullable Drawable placeholder) {
+
+							}
+						});
 			});
 
 		}
@@ -353,37 +360,6 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 		return flag;
 	}
 
-	private void setUpTagColor(String artistPath, TextView textView, View bgView) {
-		//...mode set
-		switch (mType) {
-			case GRID_TYPE: {
-
-				final Bitmap bitmap = Utils.Ui.readBitmapFromFile(artistPath, 50, 50);
-				if (bitmap != null) {
-					//color set (album tag)
-					Palette.from(bitmap).generate(p -> {
-						if (p != null) {
-							@ColorInt int color = p.getVibrantColor(ContextCompat.getColor(mMainActivity, R.color.notVeryBlack));
-							if (Utils.Ui.isColorLight(color)) {
-								textView.setTextColor(ContextCompat.getColor(mMainActivity, R.color.notVeryBlack));
-							} else {
-								textView.setTextColor(ContextCompat.getColor(mMainActivity, R.color.notVeryWhite));
-							}
-							bgView.setBackgroundColor(color);
-
-							bitmap.recycle();
-						} else {
-							bgView.setBackgroundColor(ContextCompat.getColor(mMainActivity, R.color.colorPrimary));
-						}
-					});
-				}
-
-			}
-			break;
-			default:
-		}
-	}
-
 	@Override
 	public int getItemCount() {
 		return mArtistItems.size();
@@ -403,9 +379,11 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 
 		ImageView mArtistImage;
 
-		View mView;
+//		View mView;
 
 		TextView debugInfo;
+
+		BlurringView blurringView;
 
 		ViewHolder(@NonNull View itemView) {
 			super(itemView);
@@ -417,10 +395,19 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 
 			switch (mType) {
 				case GRID_TYPE: {
-					mView = itemView.findViewById(R.id.mask);
+					blurringView = itemView.findViewById(R.id.blurring_view);
+					blurringView.setBlurredView(mArtistImage);
 				}
 				break;
 			}
+		}
+
+		public void setBluredView(View view) {
+			if (blurringView != null) blurringView.setBlurredView(view);
+		}
+
+		public void invalidate() {
+			if (blurringView != null) blurringView.invalidate();
 		}
 	}
 }

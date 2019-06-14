@@ -24,7 +24,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="top.geek_studio.chenlongcould.musicplayer.Service.MyMusicService" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission
+            android:name="android.permission.WRITE_SETTINGS" tools:ignore="ProtectedPermissions"
+            />
 
     <application
             android:name=".App"
@@ -40,7 +42,6 @@
             android:theme="@style/LightTheme"
             tools:replace="android:allowBackup"
             android:hardwareAccelerated="true"
-            tools:targetApi="n"
             >
 
         <activity
@@ -108,19 +109,19 @@
                 <data android:mimeType="application/itunes" />
             </intent-filter>
         </activity>
-        <activity
-                android:name=".activity.SplashActivity"
-                android:exported="true"
-                android:launchMode="singleTask"
-                android:theme="@style/SplashActivityTheme"
-                >
-            <!--<intent-filter>-->
-            <!--<action android:name="android.intent.action.MAIN" />-->
+        <!--<activity-->
+        <!--android:name=".activity.SplashActivity"-->
+        <!--android:exported="true"-->
+        <!--android:launchMode="singleTask"-->
+        <!--android:theme="@style/SplashActivityTheme"-->
+        <!--&gt;-->
+        <!--&lt;!&ndash;<intent-filter>&ndash;&gt;-->
+        <!--&lt;!&ndash;<action android:name="android.intent.action.MAIN" />&ndash;&gt;-->
 
-            <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--<category android:name="android.intent.category.DEFAULT" />-->
-            <!--</intent-filter>-->
-        </activity>
+        <!--&lt;!&ndash;<category android:name="android.intent.category.LAUNCHER" />&ndash;&gt;-->
+        <!--&lt;!&ndash;<category android:name="android.intent.category.DEFAULT" />&ndash;&gt;-->
+        <!--&lt;!&ndash;</intent-filter>&ndash;&gt;-->
+        <!--</activity>-->
         <activity
                 android:name=".activity.ListViewActivity"
                 android:exported="false"

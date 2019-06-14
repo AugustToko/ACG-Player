@@ -31,7 +31,6 @@
                 android:scaleType="centerCrop"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/out_slide"
-                android:src="@color/colorPrimary"
                 />
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -101,7 +100,7 @@
                     android:layout_height="@dimen/album_image_height"
                     android:contentDescription="@string/activity_music_detail_album_image"
                     android:scaleType="centerCrop"
-                    android:src="@mipmap/ic_launcher_round"
+                    android:src="@drawable/default_album_art"
                     android:transitionName="@string/image_trans_album"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"

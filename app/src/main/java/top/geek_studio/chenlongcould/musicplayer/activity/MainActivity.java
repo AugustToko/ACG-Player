@@ -4,14 +4,10 @@ import android.app.ActivityManager;
 import android.content.*;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.*;
-import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -21,7 +17,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.Toast;
-import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -29,6 +24,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -36,10 +32,10 @@ import androidx.databinding.DataBindingUtil;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.palette.graphics.Palette;
 import androidx.viewpager.widget.ViewPager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.tabs.TabLayout;
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -50,7 +46,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import jp.wasabeef.glide.transformations.BlurTransformation;
-import org.litepal.LitePal;
 import top.geek_studio.chenlongcould.geeklibrary.GCSutil;
 import top.geek_studio.chenlongcould.geeklibrary.GeekProject;
 import top.geek_studio.chenlongcould.geeklibrary.PackageTool;
@@ -64,7 +59,6 @@ import top.geek_studio.chenlongcould.musicplayer.adapter.MyPagerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter2AlbumList;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter2ArtistList;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
-import top.geek_studio.chenlongcould.musicplayer.database.Detail;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityMainBinding;
 import top.geek_studio.chenlongcould.musicplayer.fragment.*;
 import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
@@ -92,6 +86,7 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 public final class MainActivity extends BaseListActivity {
 
 	public static final String TAG = "MainActivity";
+	public static int PADDING = 0;
 
 	/**
 	 * connect {@link MusicService}
@@ -106,19 +101,18 @@ public final class MainActivity extends BaseListActivity {
 
 				Data.shuffleOrderListSync(MainActivity.this, false);
 			}
-
-//			if (Data.sMusicBinder != null && Data.sCurrentMusicItem.getMusicID() != -1) {
-//				try {
-//					Data.sMusicBinder.setCurrentMusicData(Data.sCurrentMusicItem);
-//				} catch (RemoteException e) {
-//					e.printStackTrace();
-//				}
-//			}
 		}
 
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			Data.sMusicBinder = null;
+		}
+	};
+
+	private AppBarLayout.OnOffsetChangedListener mOnOffsetChangedListener = new AppBarLayout.OnOffsetChangedListener() {
+		@Override
+		public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+			mMainBinding.realBlur.setTranslationY(mMainBinding.realBlur.getTranslationX() + verticalOffset);
 		}
 	};
 
@@ -223,20 +217,19 @@ public final class MainActivity extends BaseListActivity {
 		mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
 		mMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
-		initPermission();
-
 		initView();
+
+		initPermission();
 
 		super.onCreate(savedInstanceState);
 
-		mHandler.post(() -> GCSutil.checkUpdate(this, GeekProject.ACG_Player, PackageTool.getVerCode(this)));
+		mHandler.post(() -> GCSutil.checkUpdate(this, GeekProject.ACG_Player
+				, PackageTool.getVerCode(this)));
 	}
 
 	private void init() {
 		DBArtSync.startActionSyncArtist(this);
 		DBArtSync.startActionSyncAlbum(this);
-
-		loadData();
 
 		initFragmentData();
 
@@ -278,30 +271,6 @@ public final class MainActivity extends BaseListActivity {
 			break;
 			default:
 		}
-	}
-
-	/**
-	 * clear old data
-	 */
-	private void loadData() {
-
-		// clear old data
-		CustomThreadPool.post(() -> {
-			List<Detail> details = LitePal.findAll(Detail.class);
-			for (Detail d : details) {
-				final Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-						null, MediaStore.MediaColumns._ID + "=?", new String[]{String.valueOf(d.getMusicId())}
-						, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-
-				if (cursor != null && cursor.moveToNext()) {
-					if (cursor.getCount() == 0) {
-						Log.d(TAG, "onNext: " + d.getMusicId());
-						LitePal.deleteAll(Detail.class, "musicId=?", String.valueOf(d.getMusicId()));
-					}
-					cursor.close();
-				}
-			}
-		});
 	}
 
 	/**
@@ -527,7 +496,6 @@ public final class MainActivity extends BaseListActivity {
 		});
 	}
 
-
 	/**
 	 * 根据输入框中的值来过滤数据并更新RecyclerView
 	 *
@@ -599,49 +567,6 @@ public final class MainActivity extends BaseListActivity {
 		}
 	}
 
-	private void setTabLongClickListener() {
-		for (int i = 0; i < mMainBinding.tabLayout.getTabCount(); i++) {
-			TabLayout.Tab tab = mMainBinding.tabLayout.getTabAt(i);
-			if (tab != null) {
-				if (tab.view != null) {
-					int finalI = i;
-					((LinearLayout) tab.view).setOnLongClickListener(v -> {
-						int pos = tab.getPosition();
-
-						AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-						builder.setTitle(getString(R.string.are_u_sure));
-						builder.setMessage(getString(R.string.close_the_tab_x_int, tab.getText()));
-						builder.setCancelable(true);
-						builder.setPositiveButton(getString(R.string.sure), (dialog, which) -> {
-							final SharedPreferences.Editor editor = preferences.edit();
-							final String tabOrder = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
-							assert tabOrder != null;
-							final StringBuilder currentOrder = new StringBuilder(tabOrder);
-							currentOrder.deleteCharAt(pos);
-							editor.putString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, currentOrder.toString());
-
-							boolean result = editor.commit();
-
-							if (result) {
-								mTitles.remove(pos);
-								mFragmentList.remove(pos);
-								mPagerAdapter.notifyDataSetChanged();
-								mMainBinding.tabLayout.removeTabAt(finalI);
-
-								mMainBinding.viewPager.setOffscreenPageLimit(mTitles.size() > 1 ? mTitles.size() - 1 : 1);
-							}
-
-							dialog.dismiss();
-						});
-						builder.setNegativeButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
-						builder.show();
-						return true;
-					});
-				}
-			}
-		}
-	}
-
 	/**
 	 * init fragments
 	 */
@@ -698,6 +623,470 @@ public final class MainActivity extends BaseListActivity {
 		mMainBinding.viewPager.setAdapter(mPagerAdapter);
 		mMainBinding.viewPager.setOffscreenPageLimit(mTitles.size() > 1 ? mTitles.size() - 1 : 1);
 
+		mMainBinding.viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+			@Override
+			public void onPageScrolled(int i, float v, int i1) {
+
+			}
+
+			@Override
+			public void onPageSelected(int i) {
+				Values.CurrentData.CURRENT_PAGE_INDEX = i;
+
+				if (musicListFragment != null && musicListFragment.getAdapter() != null) {
+					musicListFragment.getAdapter().clearSelection();
+				}
+
+				TabLayout.Tab tab = mMainBinding.tabLayout.getTabAt(i);
+				if (tab != null) {
+					tab.select();
+				}
+
+				String order = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+
+				if (order == null) {
+					order = DEFAULT_TAB_ORDER;
+				}
+
+				char type = order.charAt(i);
+				setSubTitleType(type);
+
+				if (type == '1') {
+					mCurrentShowedFragment = musicListFragment;
+
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
+//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true, false);
+				}
+
+				if (type == '2') {
+					mCurrentShowedFragment = albumListFragment;
+
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), true, true);
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
+//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true, false);
+				}
+
+				if (type == '3') {
+					mCurrentShowedFragment = artistListFragment;
+
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), true, true);
+//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true, false);
+				}
+
+				//playlist
+				if (type == '4') {
+					mCurrentShowedFragment = playListFragment;
+
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
+//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), false, false);
+				}
+
+				//fileviewer
+				if (type == '5') {
+					mCurrentShowedFragment = fileViewFragment;
+
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
+					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
+//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), false, false);
+				}
+			}
+
+			@Override
+			public void onPageScrollStateChanged(int i) {
+
+			}
+		});
+		mMainBinding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+			@Override
+			public void onTabSelected(TabLayout.Tab tab) {
+				//点击加号不会滑动ViewPager
+				if (tab.getPosition() != mMainBinding.tabLayout.getTabCount() - 1) {
+					mMainBinding.viewPager.setCurrentItem(tab.getPosition(), true);
+				}
+			}
+
+			@Override
+			public void onTabUnselected(TabLayout.Tab tab) {
+
+			}
+
+			@Override
+			public void onTabReselected(TabLayout.Tab tab) {
+
+			}
+		});
+
+		initTab();
+
+		//default
+		mCurrentShowedFragment = musicListFragment;
+	}
+
+	private void setSubTitleType(final char type) {
+
+		String content = "-";
+
+		switch (type) {
+			case '1': {
+				content = Data.sMusicItems.size() + " Songs";
+			}
+			break;
+
+			case '2': {
+				if (albumListFragment == null || albumListFragment.getAlbumItemList() == null) break;
+				content = albumListFragment.getAlbumItemList().size() + " Albums";
+			}
+			break;
+
+			case '3': {
+				if (artistListFragment == null || artistListFragment.getArtistItemList() == null) break;
+				content = artistListFragment.getArtistItemList().size() + " Artists";
+			}
+			break;
+
+			case '4': {
+				content = playListFragment.mPlayListItemList.size() + " Playlists";
+			}
+			break;
+
+			case '5': {
+
+			}
+			break;
+		}
+		setSubtitle(content);
+	}
+
+	public void fullExit() {
+		try {
+			unbindService(sServiceConnection);
+		} catch (Exception e) {
+			Log.d(TAG, "fullExit: " + e.getMessage());
+		}
+		try {
+			stopService(new Intent(MainActivity.this, MusicService.class));
+		} catch (Exception e) {
+			Log.d(TAG, "fullExit: " + e.getMessage());
+		}
+		try {
+			stopService(new Intent(MainActivity.this, MyTileService.class));
+		} catch (Exception e) {
+			Log.d(TAG, "fullExit: " + e.getMessage());
+		}
+
+		Data.sMusicBinder = null;
+
+		if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
+			Data.getCurrentCover().recycle();
+		}
+
+		App.clearDisposable();
+
+		//lists
+		Data.sPlayOrderList.clear();
+		Data.sMusicItems.clear();
+		Data.sMusicItemsBackUp.clear();
+		Data.S_TRASH_CAN_LIST.clear();
+
+		new Thread(() -> {
+			GlideApp.get(MainActivity.this).clearDiskCache();
+			GlideApp.get(MainActivity.this).clearMemory();
+		});
+
+		mHandlerThread.quit();
+		CustomThreadPool.finish();
+		AlbumThreadPool.finish();
+		ArtistThreadPool.finish();
+		ItemCoverThreadPool.finish();
+
+		runOnUiThread(this::finish);
+	}
+
+	@Override
+	public final void initStyle() {
+		mDrawerToggle.getDrawerArrowDrawable().setColor(Color.BLACK);
+		mMainBinding.tabLayout.setTabTextColors(ColorStateList.valueOf(Color.BLACK));
+		Utils.Ui.setOverToolbarColor(mMainBinding.toolBar, Color.BLACK);
+
+		mMainBinding.toolBar.setBackgroundColor(Color.TRANSPARENT);
+		mMainBinding.tabLayout.setBackgroundColor(Color.TRANSPARENT);
+		mMainBinding.appbar.setBackgroundColor(Color.TRANSPARENT);
+		setStatusBarTextColor(this, Color.WHITE);
+
+		setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, Utils.Ui.getPrimaryColor(MainActivity.this)));
+		mMainBinding.tabLayout.setSelectedTabIndicatorColor(Utils.Ui.getAccentColor(MainActivity.this));
+
+		getWindow().setNavigationBarColor(Utils.Ui.getPrimaryDarkColor(this));
+
+		Observable.create((ObservableOnSubscribe<Theme>) emitter -> {
+			final String themeId = preferences.getString(Values.SharedPrefsTag.SELECT_THEME, ThemeActivity.DEFAULT_THEME);
+			if (themeId != null && !ThemeActivity.DEFAULT_THEME.equals(themeId)) {
+				final File themeFile = ThemeUtils.getThemeFile(this, themeId);
+				Data.sTheme = ThemeUtils.fileToTheme(themeFile);
+			}
+			emitter.onNext(Data.sTheme);
+		}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<Theme>() {
+			@Override
+			public void onSubscribe(Disposable d) {
+				Data.sDisposables.add(d);
+			}
+
+			@Override
+			public void onNext(Theme theme) {
+				mMainBinding.styleNav.setVisibility(View.VISIBLE);
+				mMainBinding.styleTextNavTitle.setText(theme.getTitle());
+				mMainBinding.styleTextNavName.setText(theme.getNav_name());
+
+				for (String area : theme.getSelect().split(",")) {
+
+					//检测是否匹配到NAV
+					if (area.contains(ThemeStore.SupportArea.NAV)) {
+
+						final String bgPath = theme.getPath()
+								+ File.separatorChar
+								+ ThemeStore.DIR_IMG_NAV
+								+ File.separatorChar
+								+ area;
+
+						GlideApp.with(MainActivity.this)
+								.load(bgPath)
+								.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+								.diskCacheStrategy(DiskCacheStrategy.NONE)
+								.into(mMainBinding.styleImgNav);
+					}
+
+					//检测是否匹配到BG
+					if (area.contains(ThemeStore.SupportArea.BG)) {
+
+						final String bgPath = ThemeUtils.getBgFileByName(theme, area);
+
+						GlideApp.with(MainActivity.this).load(bgPath)
+								.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+								.apply(bitmapTransform(new BlurTransformation(10, 10)))
+								.into(mMainBinding.bgImage);
+
+//						setStatusBarTextColor(MainActivity.this, new Palette.Builder(Utils.Ui.readBitmapFromFile(bgPath, 50, 50))
+//								.generate().getVibrantColor(Utils.Ui.getPrimaryColor(MainActivity.this)));
+					}
+				}
+			}
+
+			@Override
+			public void onError(Throwable e) {
+				Log.d(TAG, "onError: " + e.getLocalizedMessage());
+			}
+
+			@Override
+			public void onComplete() {
+
+			}
+		});
+	}
+
+	protected void initView() {
+		super.initView(mMainBinding.toolBar, mMainBinding.appbar);
+
+		mSearchView = findViewById(R.id.search_view);
+		mSearchView.setHint(getString(R.string.type_somthing));
+		mSearchView.setHintTextColor(Color.BLACK);
+		mSearchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+			@Override
+			public boolean onQueryTextSubmit(String query) {
+				musicListFragment.getMusicListBinding().includeRecycler.recyclerView.stopScroll();
+				return true;
+			}
+
+			@Override
+			public boolean onQueryTextChange(String newText) {
+				filterData(newText);
+				return true;
+			}
+		});
+
+//        根据recycler view的滚动程度, 来判断如何返回顶部
+		mMainBinding.toolBar.setOnClickListener(v -> {
+			if (toolbarClicked) {
+				switch (Values.CurrentData.CURRENT_PAGE_INDEX) {
+					case 0: {
+						musicListFragment.getMusicListBinding().includeRecycler.recyclerView.smoothScrollToPosition(0);
+					}
+					break;
+					case 1: {
+						albumListFragment.getRecyclerView().smoothScrollToPosition(0);
+					}
+					break;
+					default:
+				}
+
+			}
+			toolbarClicked = true;
+
+			//双击机制
+			new Handler().postDelayed(() -> toolbarClicked = false, 1000);
+		});
+
+		setSupportActionBar(mMainBinding.toolBar);
+
+		final ActionBar actionBar = getSupportActionBar();
+		if (actionBar != null) {
+			actionBar.setDisplayHomeAsUpEnabled(true);
+			actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24px);
+		}
+
+		mNavHeaderImageView = mMainBinding.navigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
+
+		mNavHeaderImageView.setOnClickListener(v -> {
+			if (musicDetailFragment != null && musicDetailFragment.getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+				musicDetailFragment.getSlidingUpPanelLayout().setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+				return;
+			}
+
+			if (mMainBinding.slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+				mMainBinding.slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+				return;
+			}
+
+			mMainBinding.drawerLayout.closeDrawers();
+		});
+
+		mMainBinding.slidingLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+			@Override
+			public void onPanelSlide(View panel, float slideOffset) {
+
+				if (musicDetailFragment == null || musicDetailFragment.getNowPlayingBody() == null) {
+					return;
+				}
+
+				MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.RECYCLER_SCROLL);
+
+				CURRENT_SLIDE_OFFSET = slideOffset;
+
+				mMainBinding.mainBody.setTranslationY(0 - slideOffset * 120);
+
+				float current = 1 - slideOffset;
+
+				musicDetailFragment.getNowPlayingBody().setAlpha(current);
+
+				//在底部, 重置动画初始位置
+				if (current == 1) {
+					musicDetailFragment.setDefAnimation();
+					musicDetailFragment.clearAnimations();
+					ANIMATION_FLAG = true;
+				}
+
+				if (current == 0) {
+					//隐藏BODY
+					musicDetailFragment.getNowPlayingBody().setVisibility(View.INVISIBLE);
+
+					//start animation
+					if (ANIMATION_FLAG) {
+						ANIMATION_FLAG = false;
+						musicDetailFragment.initAnimation();
+					}
+
+				} else {
+					mMainBinding.tabLayout.setVisibility(View.VISIBLE);
+					mMainBinding.tabLayout.setVisibility(View.VISIBLE);
+					musicDetailFragment.getNowPlayingBody().setVisibility(View.VISIBLE);
+				}
+			}
+
+			@Override
+			public final void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+				if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
+					mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+//					if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
+//						setStatusBarTextColor(MainActivity.this, new Palette.Builder(Data.getCurrentCover())
+//								.generate().getLightVibrantColor(Utils.Ui.getPrimaryColor(MainActivity.this)));
+//					}
+				} else if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+					mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+
+//					final Drawable drawable = mMainBinding.bgImage.getDrawable();
+//					if (drawable instanceof BitmapDrawable) {
+//						BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+//						Bitmap bitmap = bitmapDrawable.getBitmap();
+//						if (bitmap != null && !bitmap.isRecycled()) {
+//							setStatusBarTextColor(MainActivity.this, new Palette.Builder(bitmap)
+//									.generate().getLightVibrantColor(Utils.Ui.getPrimaryColor(MainActivity.this)));
+//						} else {
+//							setStatusBarTextColor(MainActivity.this, Utils.Ui.getPrimaryColor(MainActivity.this));
+//						}
+//					} else {
+//						setStatusBarTextColor(MainActivity.this, Utils.Ui.getPrimaryColor(MainActivity.this));
+//					}
+					Log.d(TAG, "onPanelStateChanged: COLLAPSED");
+				}
+			}
+		});
+
+		mMainBinding.navigationView.setNavigationItemSelectedListener(menuItem -> {
+			switch (menuItem.getItemId()) {
+				case R.id.menu_nav_exit: {
+					fullExit();
+				}
+				break;
+				case R.id.menu_nav_detail_info: {
+					Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+					startActivity(intent);
+				}
+				break;
+				case R.id.menu_nav_setting: {
+					Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+					startActivity(intent);
+				}
+				break;
+				case R.id.menu_nav_about: {
+					Intent intent = new Intent(MainActivity.this, AboutActivity.class);
+					startActivity(intent);
+				}
+				break;
+				case R.id.car_mode: {
+					if (Data.HAS_PLAYED) {
+						startActivity(new Intent(MainActivity.this, CarViewActivity.class));
+					} else {
+						Toast.makeText(this, "No music playing...", Toast.LENGTH_SHORT).show();
+					}
+				}
+				break;
+				case R.id.menu_nav_ad: {
+					Toast.makeText(this, "This feature is coming soon", Toast.LENGTH_SHORT).show();
+				}
+				break;
+				case R.id.debug: {
+					Toast.makeText(this, "NONE", Toast.LENGTH_SHORT).show();
+				}
+				break;
+				default:
+			}
+			return true;
+		});
+
+		mDrawerToggle = new ActionBarDrawerToggle(this, mMainBinding.drawerLayout, mMainBinding.toolBar, R.string.open, R.string.close);
+		mDrawerToggle.syncState();
+		mMainBinding.drawerLayout.addDrawerListener(mDrawerToggle);
+
+		inflateCommonMenu();
+		getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(false);
+		getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(false);
+
+		// at the end, set real_blur
+		new Handler().post(() -> {
+			CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) mMainBinding.realBlur.getLayoutParams();
+			layoutParams.height = mMainBinding.appbar.getHeight();
+
+			PADDING = layoutParams.height;
+
+			mMainBinding.realBlur.setLayoutParams(layoutParams);
+
+			mMainBinding.appbar.addOnOffsetChangedListener(mOnOffsetChangedListener);
+		});
+	}
+
+	private void initTab() {
 		setTabLongClickListener();
 
 		final int position = mMainBinding.tabLayout.getTabCount();
@@ -856,490 +1245,49 @@ public final class MainActivity extends BaseListActivity {
 			popupMenu.show();
 		});
 
-		mMainBinding.viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-			@Override
-			public void onPageScrolled(int i, float v, int i1) {
-
-			}
-
-			@Override
-			public void onPageSelected(int i) {
-				Values.CurrentData.CURRENT_PAGE_INDEX = i;
-
-				if (musicListFragment != null && musicListFragment.getAdapter() != null) {
-					musicListFragment.getAdapter().clearSelection();
-				}
-
-				TabLayout.Tab tab = mMainBinding.tabLayout.getTabAt(i);
-				if (tab != null) {
-					tab.select();
-				}
-
-				String order = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
-
-				if (order == null) {
-					order = DEFAULT_TAB_ORDER;
-				}
-
-				char type = order.charAt(i);
-				setSubTitleType(type);
-
-				if (type == '1') {
-					mCurrentShowedFragment = musicListFragment;
-
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
-//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true, false);
-				}
-
-				if (type == '2') {
-					mCurrentShowedFragment = albumListFragment;
-
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), true, true);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
-//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true, false);
-				}
-
-				if (type == '3') {
-					mCurrentShowedFragment = artistListFragment;
-
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), true, true);
-//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true, false);
-				}
-
-				//playlist
-				if (type == '4') {
-					mCurrentShowedFragment = playListFragment;
-
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
-//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), false, false);
-				}
-
-				//fileviewer
-				if (type == '5') {
-					mCurrentShowedFragment = fileViewFragment;
-
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
-//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), false, false);
-				}
-			}
-
-			@Override
-			public void onPageScrollStateChanged(int i) {
-
-			}
-		});
-
-		mMainBinding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-			@Override
-			public void onTabSelected(TabLayout.Tab tab) {
-				//点击加号不会滑动ViewPager
-				if (tab.getPosition() != mMainBinding.tabLayout.getTabCount() - 1) {
-					mMainBinding.viewPager.setCurrentItem(tab.getPosition(), true);
-				}
-			}
-
-			@Override
-			public void onTabUnselected(TabLayout.Tab tab) {
-
-			}
-
-			@Override
-			public void onTabReselected(TabLayout.Tab tab) {
-
-			}
-		});
-
-		//default
-		mCurrentShowedFragment = musicListFragment;
-
 	}
 
-	private void setSubTitleType(final char type) {
+	private void setTabLongClickListener() {
+		for (int i = 0; i < mMainBinding.tabLayout.getTabCount(); i++) {
+			TabLayout.Tab tab = mMainBinding.tabLayout.getTabAt(i);
+			if (tab != null) {
+				if (tab.view != null) {
+					int finalI = i;
+					((LinearLayout) tab.view).setOnLongClickListener(v -> {
+						int pos = tab.getPosition();
 
-		String content = "-";
+						AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+						builder.setTitle(getString(R.string.are_u_sure));
+						builder.setMessage(getString(R.string.close_the_tab_x_int, tab.getText()));
+						builder.setCancelable(true);
+						builder.setPositiveButton(getString(R.string.sure), (dialog, which) -> {
+							final SharedPreferences.Editor editor = preferences.edit();
+							final String tabOrder = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+							assert tabOrder != null;
+							final StringBuilder currentOrder = new StringBuilder(tabOrder);
+							currentOrder.deleteCharAt(pos);
+							editor.putString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, currentOrder.toString());
 
-		switch (type) {
-			case '1': {
-				content = Data.sMusicItems.size() + " Songs";
+							boolean result = editor.commit();
+
+							if (result) {
+								mTitles.remove(pos);
+								mFragmentList.remove(pos);
+								mPagerAdapter.notifyDataSetChanged();
+								mMainBinding.tabLayout.removeTabAt(finalI);
+
+								mMainBinding.viewPager.setOffscreenPageLimit(mTitles.size() > 1 ? mTitles.size() - 1 : 1);
+							}
+
+							dialog.dismiss();
+						});
+						builder.setNegativeButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
+						builder.show();
+						return true;
+					});
+				}
 			}
-			break;
-
-			case '2': {
-				if (albumListFragment == null || albumListFragment.getAlbumItemList() == null) break;
-				content = albumListFragment.getAlbumItemList().size() + " Albums";
-			}
-			break;
-
-			case '3': {
-				if (artistListFragment == null || artistListFragment.getArtistItemList() == null) break;
-				content = artistListFragment.getArtistItemList().size() + " Artists";
-			}
-			break;
-
-			case '4': {
-				content = playListFragment.mPlayListItemList.size() + " Playlists";
-			}
-			break;
-
-			case '5': {
-
-			}
-			break;
 		}
-		setSubtitle(content);
-	}
-
-	public void fullExit() {
-		try {
-			unbindService(sServiceConnection);
-		} catch (Exception e) {
-			Log.d(TAG, "fullExit: " + e.getMessage());
-		}
-		try {
-			stopService(new Intent(MainActivity.this, MusicService.class));
-		} catch (Exception e) {
-			Log.d(TAG, "fullExit: " + e.getMessage());
-		}
-		try {
-			stopService(new Intent(MainActivity.this, MyTileService.class));
-		} catch (Exception e) {
-			Log.d(TAG, "fullExit: " + e.getMessage());
-		}
-
-		Data.sMusicBinder = null;
-
-		if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
-			Data.getCurrentCover().recycle();
-		}
-
-		App.clearDisposable();
-
-		//lists
-		Data.sPlayOrderList.clear();
-		Data.sMusicItems.clear();
-		Data.sMusicItemsBackUp.clear();
-		Data.S_TRASH_CAN_LIST.clear();
-
-		new Thread(() -> {
-			GlideApp.get(MainActivity.this).clearDiskCache();
-			GlideApp.get(MainActivity.this).clearMemory();
-		});
-		mHandlerThread.quit();
-		CustomThreadPool.finish();
-		AlbumThreadPool.finish();
-		ArtistThreadPool.finish();
-		ItemCoverThreadPool.finish();
-
-		runOnUiThread(this::finish);
-	}
-
-	@Override
-	public final void initStyle() {
-		Log.d(TAG, "initStyle: Main");
-		mDrawerToggle.getDrawerArrowDrawable().setColor(Utils.Ui.getTitleColor(MainActivity.this));
-		setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, Utils.Ui.getPrimaryColor(MainActivity.this)));
-		mMainBinding.tabLayout.setTabTextColors(ColorStateList.valueOf(Utils.Ui.getTitleColor(MainActivity.this)));
-		mMainBinding.tabLayout.setSelectedTabIndicatorColor(Utils.Ui.getAccentColor(MainActivity.this));
-		Utils.Ui.setOverToolbarColor(mMainBinding.toolBar, Utils.Ui.getTitleColor(MainActivity.this));
-
-		getWindow().setNavigationBarColor(Utils.Ui.getPrimaryDarkColor(this));
-
-		Observable.create((ObservableOnSubscribe<Theme>) emitter -> {
-			final String themeId = preferences.getString(Values.SharedPrefsTag.SELECT_THEME, ThemeActivity.DEFAULT_THEME);
-			if (themeId != null && !"null".equals(themeId)) {
-				final File themeFile = ThemeUtils.getThemeFile(this, themeId);
-				Data.sTheme = ThemeUtils.fileToTheme(themeFile);
-			} else {
-				Data.sTheme = null;
-			}
-
-			emitter.onNext(Data.sTheme);
-			emitter.onComplete();
-		}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<Theme>() {
-			@Override
-			public final void onSubscribe(Disposable disposable) {
-
-			}
-
-			@Override
-			public final void onNext(Theme theme) {
-
-				mMainBinding.styleNav.setVisibility(View.VISIBLE);
-				mMainBinding.styleTextNavTitle.setText(theme.getTitle());
-				mMainBinding.styleTextNavName.setText(theme.getNav_name());
-
-				for (String area : theme.getSelect().split(",")) {
-
-					//检测是否匹配到NAV
-					if (area.contains(ThemeStore.SupportArea.NAV)) {
-
-						String bgPath = theme.getPath() + File.separatorChar + ThemeStore.DIR_IMG_NAV + File.separatorChar + area;
-
-						GlideApp.with(MainActivity.this)
-								.load(bgPath)
-								.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-								.diskCacheStrategy(DiskCacheStrategy.NONE)
-								.into(mMainBinding.styleImgNav);
-					}
-
-					//检测是否匹配到BG
-					if (area.contains(ThemeStore.SupportArea.BG)) {
-
-						final String bgPath = ThemeUtils.getBgFileByName(theme, area);
-
-						mMainBinding.toolBar.setBackgroundColor(Color.TRANSPARENT);
-						mMainBinding.tabLayout.setBackgroundColor(Color.TRANSPARENT);
-						mMainBinding.appbar.setBackgroundColor(Color.TRANSPARENT);
-
-						GlideApp.with(MainActivity.this).load(bgPath)
-								.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-								.apply(bitmapTransform(new BlurTransformation(10, 10)))
-								.into(mMainBinding.bgImage);
-
-						setStatusBarTextColor(MainActivity.this, new Palette.Builder(Utils.Ui.readBitmapFromFile(bgPath, 50, 50))
-								.generate().getVibrantColor(Utils.Ui.getPrimaryColor(MainActivity.this)));
-					}
-				}
-			}
-
-			@Override
-			public final void onError(Throwable throwable) {
-				Log.d(TAG, "onError: " + throwable.getMessage());
-
-				//theme is null, call onError
-
-				mMainBinding.styleNav.setVisibility(View.INVISIBLE);
-
-				GlideApp.with(mMainBinding.bgImage).clear(mMainBinding.bgImage);
-
-				@ColorInt int color = Utils.Ui.getPrimaryColor(MainActivity.this);
-				setStatusBarTextColor(MainActivity.this, color);
-				mMainBinding.tabLayout.setBackgroundColor(color);
-				mMainBinding.appbar.setBackgroundColor(color);
-				mMainBinding.toolBar.setBackgroundColor(color);
-			}
-
-			@Override
-			public final void onComplete() {
-
-			}
-		});
-	}
-
-	/**
-	 * setUp status bright or dark by a bitmap
-	 */
-	@ColorInt
-	private int setUpStatus(String bgPath) {
-		final int[] color = new int[1];
-		final Bitmap bitmap = Utils.Ui.readBitmapFromFile(bgPath, 50, 50);
-		if (bitmap != null) {
-			//color set (album tag)
-			Palette.from(bitmap).generate(p -> {
-				if (p != null) {
-					color[0] = p.getVibrantColor(ContextCompat.getColor(MainActivity.this, R.color.colorPrimary));
-					setStatusBarTextColor(MainActivity.this, color[0]);
-					bitmap.recycle();
-				}
-			});
-		}
-		return color[0];
-	}
-
-	protected void initView() {
-		super.initView(mMainBinding.toolBar, mMainBinding.appbar);
-
-		mSearchView = findViewById(R.id.search_view);
-		mSearchView.setHint(getString(R.string.type_somthing));
-		mSearchView.setHintTextColor(Color.BLACK);
-		mSearchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
-			@Override
-			public boolean onQueryTextSubmit(String query) {
-				musicListFragment.getMusicListBinding().includeRecycler.recyclerView.stopScroll();
-				return true;
-			}
-
-			@Override
-			public boolean onQueryTextChange(String newText) {
-				filterData(newText);
-				return true;
-			}
-		});
-
-//        根据recycler view的滚动程度, 来判断如何返回顶部
-		mMainBinding.toolBar.setOnClickListener(v -> {
-			if (toolbarClicked) {
-				switch (Values.CurrentData.CURRENT_PAGE_INDEX) {
-					case 0: {
-						musicListFragment.getMusicListBinding().includeRecycler.recyclerView.smoothScrollToPosition(0);
-					}
-					break;
-					case 1: {
-						albumListFragment.getRecyclerView().smoothScrollToPosition(0);
-					}
-					break;
-					default:
-				}
-
-			}
-			toolbarClicked = true;
-
-			//双击机制
-			new Handler().postDelayed(() -> toolbarClicked = false, 1000);
-		});
-
-		setSupportActionBar(mMainBinding.toolBar);
-
-		final ActionBar actionBar = getSupportActionBar();
-		if (actionBar != null) {
-			actionBar.setDisplayHomeAsUpEnabled(true);
-			actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24px);
-		}
-
-		mNavHeaderImageView = mMainBinding.navigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
-
-		mNavHeaderImageView.setOnClickListener(v -> {
-			if (musicDetailFragment != null && musicDetailFragment.getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
-				musicDetailFragment.getSlidingUpPanelLayout().setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-				return;
-			}
-
-			if (mMainBinding.slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
-				mMainBinding.slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-				return;
-			}
-
-			mMainBinding.drawerLayout.closeDrawers();
-		});
-
-		mMainBinding.slidingLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
-			@Override
-			public void onPanelSlide(View panel, float slideOffset) {
-
-				if (musicDetailFragment == null || musicDetailFragment.getNowPlayingBody() == null) {
-					return;
-				}
-
-				MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.RECYCLER_SCROLL);
-
-				CURRENT_SLIDE_OFFSET = slideOffset;
-
-				mMainBinding.mainBody.setTranslationY(0 - slideOffset * 120);
-
-				float current = 1 - slideOffset;
-
-				musicDetailFragment.getNowPlayingBody().setAlpha(current);
-
-				//在底部, 重置动画初始位置
-				if (current == 1) {
-					musicDetailFragment.setDefAnimation();
-					musicDetailFragment.clearAnimations();
-					ANIMATION_FLAG = true;
-				}
-
-				if (current == 0) {
-					//隐藏BODY
-					musicDetailFragment.getNowPlayingBody().setVisibility(View.INVISIBLE);
-
-					//start animation
-					if (ANIMATION_FLAG) {
-						ANIMATION_FLAG = false;
-						musicDetailFragment.initAnimation();
-					}
-
-				} else {
-					mMainBinding.tabLayout.setVisibility(View.VISIBLE);
-					mMainBinding.tabLayout.setVisibility(View.VISIBLE);
-					musicDetailFragment.getNowPlayingBody().setVisibility(View.VISIBLE);
-				}
-			}
-
-			@Override
-			public final void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
-				if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
-					mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-//					if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
-//						setStatusBarTextColor(MainActivity.this, new Palette.Builder(Data.getCurrentCover())
-//								.generate().getLightVibrantColor(Utils.Ui.getPrimaryColor(MainActivity.this)));
-//					}
-				} else if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
-					mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-
-					final Drawable drawable = mMainBinding.bgImage.getDrawable();
-					if (drawable instanceof BitmapDrawable) {
-						BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-						Bitmap bitmap = bitmapDrawable.getBitmap();
-						if (bitmap != null && !bitmap.isRecycled()) {
-							setStatusBarTextColor(MainActivity.this, new Palette.Builder(bitmap)
-									.generate().getLightVibrantColor(Utils.Ui.getPrimaryColor(MainActivity.this)));
-						} else {
-							setStatusBarTextColor(MainActivity.this, Utils.Ui.getPrimaryColor(MainActivity.this));
-						}
-					} else {
-						setStatusBarTextColor(MainActivity.this, Utils.Ui.getPrimaryColor(MainActivity.this));
-					}
-					Log.d(TAG, "onPanelStateChanged: COLLAPSED");
-				}
-			}
-		});
-
-		mMainBinding.navigationView.setNavigationItemSelectedListener(menuItem -> {
-			switch (menuItem.getItemId()) {
-				case R.id.menu_nav_exit: {
-					fullExit();
-				}
-				break;
-				case R.id.menu_nav_detail_info: {
-					Intent intent = new Intent(MainActivity.this, DetailActivity.class);
-					startActivity(intent);
-				}
-				break;
-				case R.id.menu_nav_setting: {
-					Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-					startActivity(intent);
-				}
-				break;
-				case R.id.menu_nav_about: {
-					Intent intent = new Intent(MainActivity.this, AboutActivity.class);
-					startActivity(intent);
-				}
-				break;
-				case R.id.car_mode: {
-					if (Data.HAS_PLAYED) {
-						startActivity(new Intent(MainActivity.this, CarViewActivity.class));
-					} else {
-						Toast.makeText(this, "No music playing...", Toast.LENGTH_SHORT).show();
-					}
-				}
-				break;
-				case R.id.menu_nav_ad: {
-					Toast.makeText(this, "This feature is coming soon", Toast.LENGTH_SHORT).show();
-				}
-				break;
-				case R.id.debug: {
-					Toast.makeText(this, "NONE", Toast.LENGTH_SHORT).show();
-				}
-				break;
-				default:
-			}
-			return true;
-		});
-
-		mDrawerToggle = new ActionBarDrawerToggle(this, mMainBinding.drawerLayout, mMainBinding.toolBar, R.string.open, R.string.close);
-		mDrawerToggle.syncState();
-		mMainBinding.drawerLayout.addDrawerListener(mDrawerToggle);
-
-		runOnUiThread(() -> {
-			inflateCommonMenu();
-			//hide
-			getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(false);
-			getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(false);
-		});
-
 	}
 
 	/**
@@ -1359,35 +1307,6 @@ public final class MainActivity extends BaseListActivity {
 
 	public final ImageView getNavHeaderImageView() {
 		return mNavHeaderImageView;
-	}
-
-	@Nullable
-	public final BaseFragment getFragment(final BaseFragment.FragmentType type) {
-		if (mFragmentList.size() == 0) {
-			return null;
-		}
-
-		switch (type) {
-			case MUSIC_LIST_FRAGMENT: {
-				return musicListFragment;
-			}
-			case ARTIST_FRAGMENT: {
-				return artistListFragment;
-			}
-			case FILE_VIEW_FRAGMENT: {
-				return fileViewFragment;
-			}
-			case PLAY_LIST_FRAGMENT: {
-				return playListFragment;
-			}
-			case ALBUM_LIST_FRAGMENT: {
-				return albumListFragment;
-			}
-			case MUSIC_DETAIL_FRAGMENT: {
-				return musicDetailFragment;
-			}
-		}
-		return null;
 	}
 
 	public static NotLeakHandler getHandler() {

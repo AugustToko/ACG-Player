@@ -25,7 +25,6 @@ import java.util.*;
 public final class Data {
 
 
-
 	/**
 	 * 垃圾箱 (dislike)
 	 * TODO 与 MusicService 同步
@@ -100,14 +99,16 @@ public final class Data {
 	 */
 	public static List<MusicItem> sPlayOrderListBackup = new ArrayList<>();
 
-	public static Theme sTheme = null;
+	public static Theme sTheme = new Theme("null", "null", "null", "null", "null"
+			, "null", "null", "null", "null"
+			, "null", "null", "null", null);
 
 	/**
 	 * sCurrent DATA
 	 */
 	public static MusicItem sCurrentMusicItem = new MusicItem.Builder(-1, "null", "null").build();
 
-	public static BlurTransformation sBlurTransformation = new BlurTransformation(20, 30);
+	public static BlurTransformation sBlurTransformation = new BlurTransformation(5, 30);
 
 	public static BlurTransformation sBlurTransformationCarView = new BlurTransformation(5, 10);
 
@@ -142,6 +143,7 @@ public final class Data {
 
 	/**
 	 * save temp bitmap
+	 * TODO 减少内存占用
 	 */
 	@Nullable
 	private static Bitmap sCurrentCover = null;

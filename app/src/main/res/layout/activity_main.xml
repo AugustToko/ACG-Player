@@ -45,26 +45,38 @@
                 <androidx.coordinatorlayout.widget.CoordinatorLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:elevation="0dp"
                         >
+
+                    <androidx.viewpager.widget.ViewPager
+                            android:id="@+id/view_pager"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            />
+
+                    <com.github.mmin18.widget.RealtimeBlurView
+                            android:id="@+id/real_blur"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            app:realtimeBlurRadius="30dp"
+                            app:realtimeOverlayColor="#77FFFFFF"
+                            />
 
                     <com.google.android.material.appbar.AppBarLayout
                             android:id="@+id/appbar"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:background="@color/colorPrimary"
+                            android:background="@android:color/transparent"
                             android:elevation="0dp"
+                            app:elevation="0dp"
                             android:paddingTop="@dimen/toolbar_padding_top"
                             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-                            app:elevation="0dp"
                             >
 
                         <androidx.appcompat.widget.Toolbar
                                 android:id="@+id/tool_bar"
                                 android:layout_width="match_parent"
                                 android:layout_height="?actionBarSize"
-                                android:background="@color/colorPrimary"
-                                android:elevation="4dp"
+                                android:background="@android:color/transparent"
                                 app:layout_scrollFlags="scroll|enterAlways"
                                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
                                 app:subtitle="@string/app_name"
@@ -77,8 +89,7 @@
                                 android:id="@+id/tab_layout"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:background="@color/colorPrimary"
-                                android:elevation="4dp"
+                                android:background="@android:color/transparent"
                                 android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
                                 app:tabIndicatorColor="@color/colorAccent"
                                 app:tabIndicatorHeight="2dp"
@@ -95,13 +106,6 @@
                             android:layout_height="?actionBarSize"
                             android:layout_marginTop="@dimen/toolbar_padding_top"
                             android:visibility="visible"
-                            />
-
-                    <androidx.viewpager.widget.ViewPager
-                            android:id="@+id/view_pager"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            app:layout_behavior="@string/appbar_scrolling_view_behavior"
                             />
 
                 </androidx.coordinatorlayout.widget.CoordinatorLayout>

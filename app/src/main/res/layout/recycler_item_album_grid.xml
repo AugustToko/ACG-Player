@@ -24,62 +24,88 @@
                 android:layout_height="match_parent"
                 >
 
-            <ImageView
-                    android:id="@+id/recycler_item_album_image"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:contentDescription="@string/app_name"
-                    android:scaleType="centerCrop"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:src="@drawable/default_album_art"
-                    />
-
-            <TextView
-                    android:id="@+id/debug_text"
-                    tools:text="DEBUG"
-                    android:textColor="#fff"
+            <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent" android:layout_height="match_parent"
-                    />
+                    >
+
+                <ImageView
+                        android:id="@+id/recycler_item_album_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/app_name"
+                        android:scaleType="centerCrop"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:src="@drawable/default_album_art"
+                        />
+
+                <!--<com.github.mmin18.widget.RealtimeBlurView-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="68dp"-->
+                <!--app:realtimeOverlayColor="#8000"-->
+                <!--app:layout_constraintBottom_toBottomOf="@+id/recycler_item_album_image"-->
+                <!--android:id="@+id/realtimeBlurView"-->
+                <!--app:realtimeDownsampleFactor="40"-->
+                <!--/>-->
+
+                <top.geek_studio.chenlongcould.musicplayer.misc.BlurringView
+                        android:id="@+id/blurring_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="68dp"
+                        android:layout_gravity="center"
+                        app:blurRadius="10"
+                        app:downsampleFactor="2"
+                        app:overlayColor="#4DFFFFFF"
+                        app:layout_constraintEnd_toEndOf="@+id/recycler_item_album_image"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintBottom_toBottomOf="@+id/recycler_item_album_image"
+                        />
+
+                <TextView
+                        android:id="@+id/recycler_item_song_album_name"
+                        android:clickable="false"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:textColor="#fff"
+                        android:textSize="18sp"
+                        android:layout_marginHorizontal="@dimen/margin_16"
+                        tools:text="@string/app_name"
+                        tools:layout_editor_absoluteX="16dp"
+                        app:layout_constraintBottom_toBottomOf="@+id/blurring_view"
+                        android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="@+id/blurring_view"
+                        />
+
+                <TextView
+                        android:id="@+id/debug_text"
+                        tools:text="DEBUG"
+                        android:textColor="#fff"
+                        android:layout_width="match_parent" android:layout_height="match_parent"
+                        android:visibility="gone"
+                        />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </top.geek_studio.chenlongcould.geeklibrary.WidthFitSquareLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                >
+        <!--<FrameLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--&gt;-->
 
-            <View
-                    android:id="@+id/mask"
-                    android:layout_width="match_parent"
-                    android:layout_height="68dp"
-                    android:layout_marginTop="0dp"
-                    android:background="@color/notVeryBlack"
-                    android:clickable="false"
-                    app:layout_constraintTop_toTopOf="parent"
-                    />
-
-            <TextView
-                    android:id="@+id/recycler_item_song_album_name"
-                    android:clickable="false"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/margin_16"
-                    android:layout_marginEnd="@dimen/margin_16"
-                    android:gravity="center"
-                    android:ellipsize="end"
-                    android:singleLine="true"
-                    android:textColor="#fff"
-                    android:textSize="18sp"
-                    app:layout_constraintBottom_toBottomOf="@+id/mask"
-                    app:layout_constraintEnd_toEndOf="@+id/mask"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/mask"
-                    tools:text="@string/app_name"
-                    />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <!--&lt;!&ndash;<ImageView&ndash;&gt;-->
+        <!--&lt;!&ndash;android:id="@+id/mask"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:layout_height="68dp"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:layout_marginTop="0dp"&ndash;&gt;-->
+        <!--&lt;!&ndash;tools:background="@color/notVeryBlack"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:clickable="false"&ndash;&gt;-->
+        <!--&lt;!&ndash;android:contentDescription="imageView"&ndash;&gt;-->
+        <!--&lt;!&ndash;/>&ndash;&gt;-->
+        <!--</FrameLayout>-->
 
     </LinearLayout>
 

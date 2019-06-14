@@ -95,3 +95,7 @@
 -keep class top.geek_studio.chenlongcould.geeklibrary.** { *;}
 -keep class top.geek_studio.chenlongcould.musicplayer.** { *;}
 -keep class top.geek_studio.chenlongcould.musicplayer.Common.** { *;}
+
+#real_blur
+-keep class android.support.v8.renderscript.** { *; }
+-keep class androidx.renderscript.** { *; }

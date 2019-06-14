@@ -80,12 +80,11 @@ public final class MusicDetailFragment extends BaseFragment {
 	 * Handler
 	 */
 	private static NotLeakHandler mHandler = null;
+
 	/**
-	 * for {@link #setBlurEffect(Bitmap, ImageView, ImageView, TextView)}
-	 *
-	 * @see ViewAnimationUtils#createCircularReveal
+	 * for {@link #setUpImage(Bitmap, ImageView, ImageView, TextView)} bitmap. width, height 150
 	 */
-	private final int m_Position = 200;
+	private static final int SIZE_OF_BLUR = 150;
 	private volatile ImageView MV;
 	private volatile ImageView mMusicAlbumImage;
 	private volatile ImageView mMusicAlbumImageOth2;
@@ -127,11 +126,17 @@ public final class MusicDetailFragment extends BaseFragment {
 	private ConstraintLayout mSlideUpGroup;
 
 	private HandlerThread mHandlerThread;
-
 	/**
-	 * for {@link #setBlurEffect(Bitmap, ImageView, ImageView, TextView)} bitmap. width, height 150
+	 * 最后一次加载的album id
+	 * @see #setCurrentData(MusicItem, Bitmap)
+	 * */
+	private static int mLastAlbumId = -1;
+	/**
+	 * for {@link #setUpImage(Bitmap, ImageView, ImageView, TextView)}
+	 *
+	 * @see ViewAnimationUtils#createCircularReveal
 	 */
-	private static final int SIZE_OF_BLUR = 150;
+	private final int m_Position = 200;
 
 	private final PopupMenu.OnMenuItemClickListener clickListener = item -> {
 		switch (item.getItemId()) {
@@ -471,6 +476,7 @@ public final class MusicDetailFragment extends BaseFragment {
 	private boolean snackNotice = false;
 	private float defXScale;
 	private float defYScale;
+
 	/**
 	 * TargetColor
 	 */
@@ -478,8 +484,16 @@ public final class MusicDetailFragment extends BaseFragment {
 	private int targetColor;
 	private List<Disposable> disposables = new ArrayList<>();
 
-	private void setBlurEffect(@Nullable final Bitmap bitmap, @NonNull final ImageView bgUp
+	private void setUpImage(@Nullable final Bitmap bitmap, @NonNull final ImageView bgUp
 			, @NonNull final ImageView bgDown, final TextView nextText) {
+
+		// set main album image
+		GlideApp.with(mMainActivity)
+				.load(bitmap)
+				.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+				.centerCrop()
+				.diskCacheStrategy(DiskCacheStrategy.NONE)
+				.into(MV);
 
 		bgDown.setVisibility(View.VISIBLE);
 
@@ -496,7 +510,9 @@ public final class MusicDetailFragment extends BaseFragment {
 			nextText.setTextColor(defColor);
 		}
 
-		if (MusicDetailFragment.BackgroundStyle.DETAIL_BACKGROUND.equals(MusicDetailFragment.BackgroundStyle.STYLE_BACKGROUND_BLUR)) {
+		if (MusicDetailFragment.BackgroundStyle.DETAIL_BACKGROUND.equals(MusicDetailFragment.BackgroundStyle
+				.STYLE_BACKGROUND_BLUR)) {
+
 			bgUp.post(() -> GlideApp.with(this)
 					.load(bitmap)
 					.dontAnimate()
@@ -514,10 +530,11 @@ public final class MusicDetailFragment extends BaseFragment {
 
 		bgUp.post(() -> {
 			final Animator animator = ViewAnimationUtils.createCircularReveal(
-					bgUp, bgUp.getWidth() / 2, m_Position, 0, (float) Math.hypot(bgUp.getWidth(), bgUp.getHeight()));
+					bgUp, bgUp.getWidth() / 2, m_Position, 0, (float) Math.hypot(bgUp.getWidth()
+							, bgUp.getHeight()));
 
 			animator.setInterpolator(new AccelerateInterpolator());
-			animator.setDuration(700);
+			animator.setDuration(500);
 			animator.addListener(new Animator.AnimatorListener() {
 				@Override
 				public void onAnimationStart(Animator animation) {
@@ -547,7 +564,6 @@ public final class MusicDetailFragment extends BaseFragment {
 
 				@Override
 				public void onAnimationCancel(Animator animation) {
-
 				}
 
 				@Override
@@ -567,7 +583,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		final MusicItem item = Data.sCurrentMusicItem;
 		if (item != null && item.getMusicID() != -1) {
 			final Bitmap cover = Utils.Audio.getCoverBitmapFull(getContext(), item.getAlbumId());
-			setCurrentInfo(item.getMusicName(), item.getMusicAlbum(), cover);
+			setCurrentData(item, cover);
 
 			try {
 				if (Data.sMusicBinder != null && Data.sMusicBinder.isPlayingMusic()) {
@@ -689,19 +705,11 @@ public final class MusicDetailFragment extends BaseFragment {
 		mPlayButton.setScaleY(0);
 	}
 
-	private void setCurrentInfo(@NonNull final String name, @NonNull final String albumName, final Bitmap cover) {
+	private void setCurrentData(@NonNull final MusicItem item, @Nullable final Bitmap cover) {
 		mMainActivity.runOnUiThread(() -> {
-			setSlideInfoBar(name, albumName, cover);
-
-			mCurrentMusicNameText.setText(name);
-			mCurrentAlbumNameText.setText(albumName);
-
-			GlideApp.with(mMainActivity)
-					.load(cover)
-					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-					.centerCrop()
-					.diskCacheStrategy(DiskCacheStrategy.NONE)
-					.into(MV);
+			setSlideInfoBar(item.getMusicName(), item.getMusicAlbum(), cover);
+			mCurrentMusicNameText.setText(item.getMusicName());
+			mCurrentAlbumNameText.setText(item.getMusicAlbum());
 
 			// 根据专辑图更改状态栏明暗
 //			if (cover != null && !cover.isRecycled()) {
@@ -709,12 +717,14 @@ public final class MusicDetailFragment extends BaseFragment {
 //						.generate().getLightVibrantColor(Utils.Ui.getPrimaryColor(mMainActivity)));
 //			}
 
-			final MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
-			if (item != null) {
-				updateFav(item);
+			// update album id
+			if (item.getAlbumId() != mLastAlbumId) {
+				setUpImage(cover, mBGup, mBGdown, mNextWillText);
+				mLastAlbumId = item.getAlbumId();
 			}
 
-			setBlurEffect(cover, mBGup, mBGdown, mNextWillText);
+			updateFav(item);
+
 		});
 	}
 
@@ -930,8 +940,7 @@ public final class MusicDetailFragment extends BaseFragment {
 	 * @param albumName music album name
 	 * @param cover     music cover image, it is @NullAble(some types of music do not have cover)
 	 */
-	private void setSlideInfoBar(String songName, String albumName, @Nullable Bitmap cover) {
-		if (cover == null || cover.isRecycled()) return;
+	private void setSlideInfoBar(final String songName, final String albumName, @Nullable final Bitmap cover) {
 
 		mMainActivity.runOnUiThread(() -> {
 			setIconLightOrDark(cover);
@@ -939,24 +948,26 @@ public final class MusicDetailFragment extends BaseFragment {
 			mInfoBarSongText.setText(songName);
 			mInfoBarAlbumText.setText(albumName);
 
-			GlideApp.with(this).load(cover)
-					.transition(DrawableTransitionOptions.withCrossFade())
-					.diskCacheStrategy(DiskCacheStrategy.NONE)
-					.into(mInfoBarSongImage);
+			if (cover != null) {
+				GlideApp.with(this).load(cover)
+						.transition(DrawableTransitionOptions.withCrossFade())
+						.diskCacheStrategy(DiskCacheStrategy.NONE)
+						.into(mInfoBarSongImage);
 
-			GlideApp.with(this).load(cover)
-					.transition(DrawableTransitionOptions.withCrossFade())
-					.centerCrop()
-					.diskCacheStrategy(DiskCacheStrategy.NONE)
-					.into(mMainActivity.getNavHeaderImageView());
+				GlideApp.with(this).load(cover)
+						.transition(DrawableTransitionOptions.withCrossFade())
+						.centerCrop()
+						.diskCacheStrategy(DiskCacheStrategy.NONE)
+						.into(mMainActivity.getNavHeaderImageView());
 
-			//load blur...
-			GlideApp.with(this).load(cover)
-					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-					.apply(bitmapTransform(new BlurTransformation(30, 20)))
-					.override(50, 50)
-					.diskCacheStrategy(DiskCacheStrategy.NONE)
-					.into(mInfoBarBackgroundImage);
+				//load blur...
+				GlideApp.with(this).load(cover)
+						.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+						.apply(bitmapTransform(new BlurTransformation(5, 20)))
+						.override(50, 50)
+						.diskCacheStrategy(DiskCacheStrategy.NONE)
+						.into(mInfoBarBackgroundImage);
+			}
 		});
 	}
 
@@ -1373,7 +1384,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		mMainActivity.runOnUiThread(() -> {
 			mCurrentMusicNameText.setText(name);
 			mCurrentAlbumNameText.setText(albumName);
-			setBlurEffect(cover, mBGup, mBGdown, mNextWillText);
+			setUpImage(cover, mBGup, mBGdown, mNextWillText);
 			setSlideInfoBar(name, albumName, cover);
 		});
 	}
@@ -1426,7 +1437,7 @@ public final class MusicDetailFragment extends BaseFragment {
 	private void setIconLightOrDark(@Nullable final Bitmap bitmap) {
 		if (bitmap != null) {
 
-			Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter ->
+			final Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter ->
 					observableEmitter.onNext(Utils.Ui.getBright(bitmap))).subscribeOn(Schedulers.newThread())
 					.observeOn(AndroidSchedulers.mainThread()).subscribe(i -> {
 
@@ -1698,8 +1709,7 @@ public final class MusicDetailFragment extends BaseFragment {
 				break;
 
 				case SET_CURRENT_DATA: {
-					mFragmentWeakReference.get().setCurrentInfo(Data.sCurrentMusicItem.getMusicName()
-							, Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
+					mFragmentWeakReference.get().setCurrentData(Data.sCurrentMusicItem, Data.getCurrentCover());
 				}
 				break;
 

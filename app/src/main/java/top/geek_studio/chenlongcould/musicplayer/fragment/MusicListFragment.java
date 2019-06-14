@@ -47,6 +47,7 @@ public final class MusicListFragment extends BaseFragment {
 	public FragmentType getFragmentType() {
 		return FragmentType.MUSIC_LIST_FRAGMENT;
 	}
+
 	@Override
 	public void reloadData() {
 		super.reloadData();
@@ -71,7 +72,6 @@ public final class MusicListFragment extends BaseFragment {
 				, new MyRecyclerAdapter.Config(preferences.getInt(Values.SharedPrefsTag
 				.RECYCLER_VIEW_ITEM_STYLE, 0), true));
 		mMusicListBinding.includeRecycler.recyclerView.setAdapter(adapter);
-
 		loadData();
 
 		return mMusicListBinding.getRoot();

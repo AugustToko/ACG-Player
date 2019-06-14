@@ -78,13 +78,17 @@ public final class DBArtSync extends IntentService {
 				do {
 					int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID));
 
-					if (LitePal.where("mAlbumId=?", String.valueOf(albumId)).find(CustomAlbumPath.class).size() == 0) {
-						Log.d(TAG, "handleActionSyncAlbum: not exists... add albumId: " + albumId);
-						CustomAlbumPath customAlbumPath = new CustomAlbumPath();
-						customAlbumPath.setAlbumId(albumId);
-						customAlbumPath.save();
-					} else {
-						Log.d(TAG, "handleActionSyncAlbum: albumId: " + albumId + " exists...");
+					try {
+						if (LitePal.where("mAlbumId=?", String.valueOf(albumId)).find(CustomAlbumPath.class).size() == 0) {
+							Log.d(TAG, "handleActionSyncAlbum: not exists... add albumId: " + albumId);
+							CustomAlbumPath customAlbumPath = new CustomAlbumPath();
+							customAlbumPath.setAlbumId(albumId);
+							customAlbumPath.save();
+						} else {
+							Log.d(TAG, "handleActionSyncAlbum: albumId: " + albumId + " exists...");
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
 
 				} while (cursor.moveToNext());
@@ -114,13 +118,17 @@ public final class DBArtSync extends IntentService {
 				do {
 					int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID));
 
-					if (LitePal.where("mArtistId=?", String.valueOf(artistId)).find(ArtistArtPath.class).size() == 0) {
-						Log.d(TAG, "handleActionSyncAlbum: not exists... add artist: " + artistId);
-						ArtistArtPath artistArtPath = new ArtistArtPath();
-						artistArtPath.setArtistId(artistId);
-						artistArtPath.save();
-					} else {
-						Log.d(TAG, "handleActionSyncAlbum: mArtistId: " + artistId + " exists...");
+					try {
+						if (LitePal.where("mArtistId=?", String.valueOf(artistId)).find(ArtistArtPath.class).size() == 0) {
+							Log.d(TAG, "handleActionSyncAlbum: not exists... add artist: " + artistId);
+							ArtistArtPath artistArtPath = new ArtistArtPath();
+							artistArtPath.setArtistId(artistId);
+							artistArtPath.save();
+						} else {
+							Log.d(TAG, "handleActionSyncAlbum: mArtistId: " + artistId + " exists...");
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
 
 				} while (cursor.moveToNext());

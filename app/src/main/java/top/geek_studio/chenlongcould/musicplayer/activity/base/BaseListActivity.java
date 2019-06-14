@@ -29,8 +29,6 @@ public abstract class BaseListActivity extends BaseCompatActivity implements Mes
 		return false;
 	}
 
-	;
-
 	/**
 	 * 用于对列表的操作
 	 * 请务必覆盖本方法

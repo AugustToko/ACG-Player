@@ -297,7 +297,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
 				if (!Settings.System.canWrite(mActivity)) {
-					Intent intent = null;
+					Intent intent;
 					intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS, Uri.parse("package:" + mActivity.getPackageName()));
 					mActivity.startActivityForResult(intent, Values.REQUEST_WRITE_EXTERNAL_STORAGE);
 				} else {
@@ -772,6 +772,8 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
+
+		if (i == 0) viewHolder.itemView.setPadding(0, MainActivity.PADDING, 0, 0);
 
 		final ItemHolder holder = ((ItemHolder) viewHolder);
 

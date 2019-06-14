@@ -4,9 +4,7 @@ import android.app.Activity;
 import android.content.*;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Point;
+import android.graphics.*;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
@@ -61,6 +59,7 @@ public final class Utils {
 	public static final String TAG = "Utils";
 
 	private Utils() {
+		throw new AssertionError("private!");
 	}
 
 	public static final class Audio {
@@ -406,6 +405,18 @@ public final class Utils {
 	public static final class Ui {
 
 		private static final String TAG = "Ui";
+
+		private Bitmap view2Bitmap(View v) {
+			int w = v.getWidth();
+			int h = v.getHeight();
+			final Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+			Canvas c = new Canvas(bmp);
+			//如果不设置颜色，默认是透明背景
+			c.drawColor(Color.WHITE);
+			v.layout(0, 0, w, h);
+			v.draw(c);
+			return bmp;
+		}
 
 		public static Point getScreenSize(@NonNull Context c) {
 			Display display = ((WindowManager) c.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();

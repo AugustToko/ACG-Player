@@ -13,20 +13,14 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import io.reactivex.Observable;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
-import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter2AlbumList;
 import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.model.Item;
+import top.geek_studio.chenlongcould.musicplayer.threadPool.AlbumThreadPool;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,8 +73,7 @@ public final class AlbumListFragment extends BaseListFragment {
 	}
 
 	private void initAlbumData() {
-
-		Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+		AlbumThreadPool.post(() -> {
 			if (albumItemList.size() == 0) {
 				Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null, null, null, null);
 				if (cursor != null) {
@@ -99,30 +92,7 @@ public final class AlbumListFragment extends BaseListFragment {
 				}   //initData
 			}
 
-			emitter.onComplete();
-		}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
-				.safeSubscribe(new Observer<Integer>() {
-					@Override
-					public void onSubscribe(Disposable disposable) {
-						Data.sDisposables.add(disposable);
-					}
-
-					@Override
-					public void onNext(Integer result) {
-
-					}
-
-					@Override
-					public void onError(Throwable throwable) {
-
-					}
-
-					@Override
-					public void onComplete() {
-//						mMainActivity.getMainBinding().toolBar.setSubtitle(Data.sAlbumItems.size() + " Album");
-					}
-				});
-
+		});
 	}
 
 	/**
