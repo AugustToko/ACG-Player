@@ -126,7 +126,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
 						@Override
 						public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-							viewHolder.blurringView.invalidate();
+							viewHolder.invalidate();
 							return false;
 						}
 					})

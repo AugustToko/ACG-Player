@@ -629,6 +629,8 @@ public final class MainActivity extends BaseListActivity {
 			@Override
 			public void onPageSelected(int i) {
 				mMainBinding.realBlur.invalidate();
+				mMainBinding.realBlur.requestLayout();
+				mMainBinding.realBlur.refreshDrawableState();
 
 				Values.CurrentData.CURRENT_PAGE_INDEX = i;
 
@@ -702,6 +704,8 @@ public final class MainActivity extends BaseListActivity {
 			@Override
 			public void onTabSelected(TabLayout.Tab tab) {
 				mMainBinding.realBlur.invalidate();
+				mMainBinding.realBlur.requestLayout();
+				mMainBinding.realBlur.refreshDrawableState();
 
 				//点击加号不会滑动ViewPager
 				if (tab.getPosition() != mMainBinding.tabLayout.getTabCount() - 1) {
