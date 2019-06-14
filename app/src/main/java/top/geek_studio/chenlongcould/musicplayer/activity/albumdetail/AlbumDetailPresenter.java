@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Log;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
@@ -12,7 +13,9 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
+import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.ClearTool;
+import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,6 +27,8 @@ import java.util.List;
  * @date : 2019/06/04/13
  */
 final public class AlbumDetailPresenter implements AlbumDetailContract.Presenter {
+
+	private static final String TAG = "AlbumDetailPresenter";
 
 	private final AlbumDetailContract.View mView;
 
@@ -47,6 +52,8 @@ final public class AlbumDetailPresenter implements AlbumDetailContract.Presenter
 		}
 
 		final String albumTitle = intent.getStringExtra(AlbumDetailActivity.IntentKey.ALBUM_NAME);
+
+		Log.d(TAG, "load: album title: " + albumTitle);
 
 		final long[] totalDuration = {0};
 
@@ -119,7 +126,9 @@ final public class AlbumDetailPresenter implements AlbumDetailContract.Presenter
 
 						totalDuration[0] += duration;
 
-						mSongs.add(builder.build());
+						final MusicItem item = builder.build();
+						CustomThreadPool.post(() -> MusicUtil.findArtworkWithId(mView.getContext(), item));
+						mSongs.add(item);
 					} while (cursor2.moveToNext());
 					cursor2.close();
 					emitter.onNext(durationDone);

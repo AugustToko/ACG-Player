@@ -1,5 +1,6 @@
 package top.geek_studio.chenlongcould.musicplayer.activity.artistdetail;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -207,6 +208,12 @@ public final class ArtistDetailActivity extends BaseListActivity implements Arti
 	@Override
 	public void notifyDataSetChanged() {
 		mArtistDetailOthBinding.recyclerView.getAdapter().notifyDataSetChanged();
+	}
+
+	@NonNull
+	@Override
+	public Context getContext() {
+		return this;
 	}
 
 	@Override

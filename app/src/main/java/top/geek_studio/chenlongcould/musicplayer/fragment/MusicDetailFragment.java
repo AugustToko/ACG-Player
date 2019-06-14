@@ -25,7 +25,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.PopupMenu;
-import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -46,6 +45,7 @@ import io.reactivex.schedulers.Schedulers;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import org.jetbrains.annotations.NotNull;
 import top.geek_studio.chenlongcould.geeklibrary.widget.GkSnackbar;
+import top.geek_studio.chenlongcould.geeklibrary.widget.GkToolbar;
 import top.geek_studio.chenlongcould.musicplayer.*;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.albumdetail.AlbumDetailActivity;
@@ -116,7 +116,7 @@ public final class MusicDetailFragment extends BaseFragment {
 	private TextView mCurrentMusicNameText;
 	private ImageButton mRandomButton;
 	private ImageButton mRepeatButton;
-	private Toolbar mToolbar;
+	private GkToolbar mToolbar;
 	private AppBarLayout mAppBarLayout;
 	private TextView mLeftTime;
 	private TextView mRightTime;
@@ -207,7 +207,7 @@ public final class MusicDetailFragment extends BaseFragment {
 	/**
 	 * init Views
 	 */
-	private void initView(View view) {
+	private void initView(@NonNull final View view) {
 
 		mPlayPauseDrawable = new PlayPauseDrawable(mMainActivity);
 		mPlayPauseDrawable2InfoBar = new PlayPauseDrawable(mMainActivity);
@@ -229,19 +229,15 @@ public final class MusicDetailFragment extends BaseFragment {
 
 		setUpToolbar();
 
-		mSlidingUpPanelLayout.post(() -> {
-			View v = view.findViewById(R.id.frame_ctrl);
-			mSlidingUpPanelLayout.setPanelHeight(view.getHeight() - v.getTop() - v.getHeight());
-		});
 
 		mMusicAlbumImageOth3.setX(0 - mMusicAlbumImage.getWidth());
 		mMusicAlbumImageOth2.setX(mMusicAlbumImage.getWidth() * 2);
 
 		MV = mMusicAlbumImage;
 
-		mMusicAlbumImage.setTag(key, 1);
-		mMusicAlbumImageOth3.setTag(key, 0);
-		mMusicAlbumImageOth2.setTag(key, 2);
+//		mMusicAlbumImage.setTag(key, 1);
+//		mMusicAlbumImageOth3.setTag(key, 0);
+//		mMusicAlbumImageOth2.setTag(key, 2);
 
 //		View.OnTouchListener touchListener = (v, event) -> {
 //			final int action = event.getAction();
@@ -460,6 +456,11 @@ public final class MusicDetailFragment extends BaseFragment {
 		mMyWaitListAdapter = new MyWaitListAdapter(mMainActivity, Data.sPlayOrderList);
 		mRecyclerView.setAdapter(mMyWaitListAdapter);
 
+		mSlidingUpPanelLayout.post(() -> {
+			View v = view.findViewById(R.id.frame_ctrl);
+			mSlidingUpPanelLayout.setPanelHeight(view.getHeight() - v.getTop() - v.getHeight());
+		});
+
 	}
 
 	private MyWaitListAdapter mMyWaitListAdapter;
@@ -675,7 +676,10 @@ public final class MusicDetailFragment extends BaseFragment {
 			return false;
 		});
 
-		mToolbar.setNavigationOnClickListener(v -> MainActivity.getHandler().sendEmptyMessage(MainActivity.NotLeakHandler.DOWN));
+		mToolbar.setNavigationOnClickListener(v -> MainActivity.getHandler()
+				.sendEmptyMessage(MainActivity.NotLeakHandler.DOWN));
+
+		mToolbar.setOverlayColor(Color.WHITE);
 	}
 
 	@Nullable

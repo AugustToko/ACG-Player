@@ -6,14 +6,14 @@
     "apkData": {
       "type": "MAIN",
       "splits": [],
-      "versionCode": 118,
-      "versionName": "2.6.7.1(20190614)",
+      "versionCode": 119,
+      "versionName": "2.6.7.2(20190614)",
       "enabled": true,
-      "outputFile": "app-release_20190614_2.6.7.1(20190614)_(118).apk",
+      "outputFile": "app-release_20190614_2.6.7.2(20190614)_(119).apk",
       "fullName": "release",
       "baseName": "release"
     },
-    "path": "app-release_20190614_2.6.7.1(20190614)_(118).apk",
+    "path": "app-release_20190614_2.6.7.2(20190614)_(119).apk",
     "properties": {}
   }
 ]

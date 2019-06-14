@@ -15,7 +15,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityOptionsCompat;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
@@ -69,29 +68,17 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 	@Override
 	public void onViewRecycled(@NonNull ViewHolder holder) {
 		holder.mArtistImage.setTag(R.string.key_id_2, -1);
-		GlideApp.with(mMainActivity).clear(holder.mArtistImage);
-		GlideApp.get(mMainActivity).clearMemory();
-//		if (mType == GRID_TYPE) {
-//			holder.mView.setBackgroundColor(ContextCompat.getColor(mMainActivity, R.color.notVeryBlack));
-//		}
-		holder.mArtistText.setTextColor(ContextCompat.getColor(mMainActivity, R.color.notVeryWhite));
-//		holder.debugInfo.setText("");
+		holder.invalidate();
 	}
 
 	@NonNull
 	@Override
 	public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
 		View view;
-		switch (mType) {
-			case LINEAR_TYPE: {
-				view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_album_list_item, viewGroup, false);
-			}
-			break;
-			case GRID_TYPE: {
-				view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_item_album_grid, viewGroup, false);
-			}
-			default:
-				view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_item_album_grid, viewGroup, false);
+		if (mType == LINEAR_TYPE) {
+			view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_album_list_item, viewGroup, false);
+		} else {
+			view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_item_album_grid, viewGroup, false);
 		}
 		final ViewHolder holder = new ViewHolder(view);
 
@@ -248,8 +235,6 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 
 	private void loadToImageView(@NonNull final ViewHolder holder, int index, @NonNull final String path) {
 		if (verify(holder.mArtistImage, index)) {
-
-//							setUpTagColor(path, textView, view);
 			holder.mArtistImage.post(() -> GlideApp.with(mMainActivity)
 					.load(path)
 					.placeholder(R.drawable.default_album_art)

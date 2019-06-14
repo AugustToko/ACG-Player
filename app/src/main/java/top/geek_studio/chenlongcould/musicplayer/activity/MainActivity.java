@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.*;
 import android.text.TextUtils;
@@ -223,8 +224,12 @@ public final class MainActivity extends BaseListActivity {
 
 		super.onCreate(savedInstanceState);
 
-		mHandler.post(() -> GCSutil.checkUpdate(this, GeekProject.ACG_Player
-				, PackageTool.getVerCode(this)));
+		CustomThreadPool.post(() -> GCSutil.checkUpdate(MainActivity.this, GeekProject.ACG_Player
+				, PackageTool.getVerCode(MainActivity.this)));
+
+		final Intent intent = new Intent(this, MusicService.class);
+		startService(intent);
+		bindService(intent, sServiceConnection, Context.BIND_AUTO_CREATE);
 	}
 
 	private void init() {
@@ -454,20 +459,12 @@ public final class MainActivity extends BaseListActivity {
 
 				case R.id.menu_toolbar_reload: {
 					if (mCurrentShowedFragment != null) mCurrentShowedFragment.reloadData();
-
 				}
 				break;
 				default:
 			}
 			return true;
 		});
-	}
-
-	public void reloadMusicItems() {
-		Data.sMusicItems.clear();
-		Data.sMusicItemsBackUp.clear();
-		MusicUtil.loadDataSource(this);
-		runOnUiThread(() -> musicListFragment.getAdapter().notifyDataSetChanged());
 	}
 
 	/**
@@ -575,7 +572,7 @@ public final class MainActivity extends BaseListActivity {
 		String tabOrder = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
 		if (tabOrder == null) tabOrder = DEFAULT_TAB_ORDER;
 
-		for (char c : tabOrder.toCharArray()) {
+		for (final char c : tabOrder.toCharArray()) {
 			if (c == '1') {
 				final String tab1 = getResources().getString(R.string.music);
 				mTitles.add(tab1);
@@ -631,6 +628,8 @@ public final class MainActivity extends BaseListActivity {
 
 			@Override
 			public void onPageSelected(int i) {
+				mMainBinding.realBlur.invalidate();
+
 				Values.CurrentData.CURRENT_PAGE_INDEX = i;
 
 				if (musicListFragment != null && musicListFragment.getAdapter() != null) {
@@ -684,7 +683,7 @@ public final class MainActivity extends BaseListActivity {
 //					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), false, false);
 				}
 
-				//fileviewer
+				//file_viewer
 				if (type == '5') {
 					mCurrentShowedFragment = fileViewFragment;
 
@@ -702,6 +701,8 @@ public final class MainActivity extends BaseListActivity {
 		mMainBinding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
 			@Override
 			public void onTabSelected(TabLayout.Tab tab) {
+				mMainBinding.realBlur.invalidate();
+
 				//点击加号不会滑动ViewPager
 				if (tab.getPosition() != mMainBinding.tabLayout.getTabCount() - 1) {
 					mMainBinding.viewPager.setCurrentItem(tab.getPosition(), true);
@@ -761,6 +762,12 @@ public final class MainActivity extends BaseListActivity {
 	}
 
 	public void fullExit() {
+		//lists
+		Data.sPlayOrderList.clear();
+		Data.sMusicItems.clear();
+		Data.sMusicItemsBackUp.clear();
+		Data.S_TRASH_CAN_LIST.clear();
+
 		try {
 			unbindService(sServiceConnection);
 		} catch (Exception e) {
@@ -784,12 +791,6 @@ public final class MainActivity extends BaseListActivity {
 		}
 
 		App.clearDisposable();
-
-		//lists
-		Data.sPlayOrderList.clear();
-		Data.sMusicItems.clear();
-		Data.sMusicItemsBackUp.clear();
-		Data.S_TRASH_CAN_LIST.clear();
 
 		new Thread(() -> {
 			GlideApp.get(MainActivity.this).clearDiskCache();
@@ -836,6 +837,8 @@ public final class MainActivity extends BaseListActivity {
 
 			@Override
 			public void onNext(Theme theme) {
+				if ("null".equals(theme.getId())) return;
+
 				mMainBinding.styleNav.setVisibility(View.VISIBLE);
 				mMainBinding.styleTextNavTitle.setText(theme.getTitle());
 				mMainBinding.styleTextNavName.setText(theme.getNav_name());
@@ -1004,7 +1007,6 @@ public final class MainActivity extends BaseListActivity {
 //					}
 				} else if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
 					mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-
 //					final Drawable drawable = mMainBinding.bgImage.getDrawable();
 //					if (drawable instanceof BitmapDrawable) {
 //						BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
@@ -1093,7 +1095,11 @@ public final class MainActivity extends BaseListActivity {
 
 		final TabLayout.Tab addTab = mMainBinding.tabLayout.newTab();
 		final AppCompatImageView icAdd = new AppCompatImageView(this);
-		icAdd.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_add_white_24dp));
+		Drawable drawable = ContextCompat.getDrawable(this, R.drawable.ic_add_white_24dp);
+		if (drawable != null) {
+			drawable.setTint(Color.BLACK);
+		}
+		icAdd.setImageDrawable(drawable);
 		addTab.setCustomView(icAdd);
 		mMainBinding.tabLayout.addTab(addTab, position);
 

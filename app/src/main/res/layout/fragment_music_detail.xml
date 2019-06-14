@@ -120,7 +120,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     >
 
-                <androidx.appcompat.widget.Toolbar
+                <top.geek_studio.chenlongcould.geeklibrary.widget.GkToolbar
                         android:id="@+id/activity_music_detail_toolbar"
                         android:layout_width="match_parent"
                         android:layout_height="?actionBarSize"
@@ -128,7 +128,7 @@
                         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
                         >
 
-                </androidx.appcompat.widget.Toolbar>
+                </top.geek_studio.chenlongcould.geeklibrary.widget.GkToolbar>
 
             </com.google.android.material.appbar.AppBarLayout>
 

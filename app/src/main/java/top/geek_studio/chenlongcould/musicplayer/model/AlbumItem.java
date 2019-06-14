@@ -13,6 +13,7 @@ package top.geek_studio.chenlongcould.musicplayer.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import androidx.annotation.Nullable;
 
 /**
  * @author chenlongcould
@@ -20,6 +21,10 @@ import android.os.Parcelable;
 public final class AlbumItem extends Item implements Parcelable {
 
 	public static final String DEFAULT_ALBUM_ID = "-1";
+
+	private String mAlbumName;
+	private int mAlbumId;
+	private String mArtist;
 	public static final Parcelable.Creator<AlbumItem> CREATOR = new Parcelable.Creator<AlbumItem>() {
 		@Override
 		public AlbumItem createFromParcel(Parcel source) {
@@ -31,19 +36,11 @@ public final class AlbumItem extends Item implements Parcelable {
 			return new AlbumItem[size];
 		}
 	};
-	private String mAlbumName;
-	private int mAlbumId;
-	private String mArtist;
 
 	public AlbumItem(String albumName, int albumId, String artist) {
 		mAlbumName = albumName;
 		mAlbumId = albumId;
 		mArtist = artist;
-	}
-
-	protected AlbumItem(Parcel in) {
-		this.mAlbumName = in.readString();
-		this.mAlbumId = in.readInt();
 	}
 
 	public String getArtist() {
@@ -58,6 +55,16 @@ public final class AlbumItem extends Item implements Parcelable {
 		return mAlbumName;
 	}
 
+	@Nullable
+	private String mArtwork = null;
+
+	protected AlbumItem(Parcel in) {
+		this.mAlbumName = in.readString();
+		this.mAlbumId = in.readInt();
+		this.mArtist = in.readString();
+		this.mArtwork = in.readString();
+	}
+
 	@Override
 	public int hashCode() {
 		return mAlbumId;
@@ -68,9 +75,19 @@ public final class AlbumItem extends Item implements Parcelable {
 		return 0;
 	}
 
+	public String getmArtwork() {
+		return mArtwork;
+	}
+
+	public void setmArtwork(@Nullable String mArtwork) {
+		this.mArtwork = mArtwork;
+	}
+
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(this.mAlbumName);
 		dest.writeInt(this.mAlbumId);
+		dest.writeString(this.mArtist);
+		dest.writeString(this.mArtwork);
 	}
 }

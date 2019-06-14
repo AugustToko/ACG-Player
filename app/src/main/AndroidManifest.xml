@@ -41,7 +41,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/LightTheme"
             tools:replace="android:allowBackup"
-            android:hardwareAccelerated="true"
+            android:hardwareAccelerated="false"
             >
 
         <activity

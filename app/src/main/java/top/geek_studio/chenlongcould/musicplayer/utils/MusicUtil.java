@@ -25,9 +25,7 @@ import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseListActivity;
 import top.geek_studio.chenlongcould.musicplayer.database.Detail;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
-import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
-import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
-import top.geek_studio.chenlongcould.musicplayer.model.Playlist;
+import top.geek_studio.chenlongcould.musicplayer.model.*;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 
 import java.io.File;
@@ -118,7 +116,7 @@ public class MusicUtil {
 						}
 
 						if (skip) {
-							Log.d(TAG, "loadData: skip the song that in the blacklist");
+							Log.d(TAG, "loadDataSource: skip the song that in the blacklist");
 							continue;
 						}
 
@@ -149,6 +147,7 @@ public class MusicUtil {
 								.addAlbumId(albumId)
 								.addArtistId(artistId);
 
+
 						if (lastId == id) {
 							Data.sCurrentMusicItem = builder.build();
 						}
@@ -156,6 +155,8 @@ public class MusicUtil {
 						final MusicItem item = builder.build();
 						Data.sMusicItems.add(item);
 						Data.sMusicItemsBackUp.add(item);
+
+						CustomThreadPool.post(() -> findArtworkWithId(context, item));
 					}
 					while (cursor.moveToNext());
 					cursor.close();
@@ -168,6 +169,35 @@ public class MusicUtil {
 			// already have data
 		}
 		return true;
+	}
+
+	public static void findArtworkWithId(@NonNull final Context context, final Item item) {
+		MusicItem musicItem = null;
+		AlbumItem albumItem = null;
+		if (item instanceof MusicItem) musicItem = (MusicItem) item;
+		if (item instanceof AlbumItem) albumItem = (AlbumItem) item;
+
+		if (musicItem == null && albumItem == null) return;
+
+		String artwork = null;
+
+		final Cursor cursor1 = context.getContentResolver().query(
+				Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar)
+						+ (musicItem == null ? albumItem.getAlbumId() : musicItem.getAlbumId()))
+				, new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
+
+		if (cursor1 != null && cursor1.getCount() != 0) {
+			cursor1.moveToFirst();
+			artwork = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART));
+			cursor1.close();
+		} else {
+			Log.d(TAG, "loadDataSource: loadArtwork failed!");
+		}
+		if (musicItem == null) {
+			albumItem.setmArtwork(artwork);
+		} else {
+			musicItem.setArtwork(artwork);
+		}
 	}
 
 	public static boolean availableCurrentItem() {

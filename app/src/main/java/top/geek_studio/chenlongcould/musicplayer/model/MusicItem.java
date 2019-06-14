@@ -41,6 +41,7 @@ public final class MusicItem extends Item implements Parcelable {
 	private long mAddTime;
 	transient private boolean mIsFavourite;
 	private int mArtistId;
+	private String mArtwork;
 
 	private MusicItem(Builder builder) {
 		mMusicID = builder.mMusicID;
@@ -54,6 +55,7 @@ public final class MusicItem extends Item implements Parcelable {
 		mAlbumId = builder.mAlbumId;
 		mArtistId = builder.mArtistId;
 		mIsFavourite = builder.mIsFav;
+		mArtwork = builder.mArtwork;
 	}
 
 	protected MusicItem(Parcel in) {
@@ -68,6 +70,7 @@ public final class MusicItem extends Item implements Parcelable {
 		this.mArtist = in.readString();
 		this.mAddTime = in.readInt();
 		this.mArtistId = in.readInt();
+		this.mArtwork = in.readString();
 	}
 
 	public String getMusicName() {
@@ -118,6 +121,14 @@ public final class MusicItem extends Item implements Parcelable {
 		return mAlbumId;
 	}
 
+	public String getArtwork() {
+		return mArtwork;
+	}
+
+	public void setArtwork(String mArtwork) {
+		this.mArtwork = mArtwork;
+	}
+
 	@NonNull
 	@Override
 	public String toString() {
@@ -162,6 +173,7 @@ public final class MusicItem extends Item implements Parcelable {
 	}
 
 	public static class Builder {
+		private String mArtwork = null;
 		private int mMusicID;
 		private String mMusicName;
 		private String mMusicPath;
@@ -224,6 +236,11 @@ public final class MusicItem extends Item implements Parcelable {
 
 		public Builder isFavourite(boolean b) {
 			mIsFav = b;
+			return this;
+		}
+
+		public Builder setArtwork(String artwork) {
+			mArtwork = artwork;
 			return this;
 		}
 

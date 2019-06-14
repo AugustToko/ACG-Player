@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,14 +14,22 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import io.reactivex.Observable;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
+import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter2AlbumList;
 import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.model.Item;
-import top.geek_studio.chenlongcould.musicplayer.threadPool.AlbumThreadPool;
+import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
+import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,8 +57,9 @@ public final class AlbumListFragment extends BaseListFragment {
 
 	@Override
 	public void reloadData() {
-		super.reloadData();
+		Log.d(TAG, "reloadData: reload albumList");
 		albumItemList.clear();
+		mAdapter2AlbumListAdapter.notifyDataSetChanged();
 		initAlbumData();
 	}
 
@@ -73,25 +83,53 @@ public final class AlbumListFragment extends BaseListFragment {
 	}
 
 	private void initAlbumData() {
-		AlbumThreadPool.post(() -> {
+		Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
 			if (albumItemList.size() == 0) {
-				Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null, null, null, null);
+				final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null, null, null, null);
 				if (cursor != null) {
 					cursor.moveToFirst();
 
 					do {
 						String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM));
 						String albumId = cursor.getString(cursor.getColumnIndexOrThrow("_id"));
+
 						String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
 						final AlbumItem albumItem = new AlbumItem(albumName, Integer.parseInt(albumId), artist);
 						albumItemList.add(albumItem);
 						albumItemListBackup.add(albumItem);
+						emitter.onNext(albumItemList.size());
+						CustomThreadPool.post(() -> MusicUtil.findArtworkWithId(mMainActivity, albumItem));
 					} while (cursor.moveToNext());
 
 					cursor.close();
+					mRecyclerView.post(() -> {
+//						mAdapter2AlbumListAdapter.notifyItemRangeInserted(0, albumItemList.size() - 1)
+						mAdapter2AlbumListAdapter.notifyDataSetChanged();
+					});
 				}   //initData
 			}
+		}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Integer>() {
 
+			@Override
+			public void onSubscribe(Disposable d) {
+				Data.sDisposables.add(d);
+			}
+
+			@Override
+			public void onNext(Integer integer) {
+				mAdapter2AlbumListAdapter.notifyDataSetChanged();
+				Log.d(TAG, "onNext: load data album: " + integer);
+			}
+
+			@Override
+			public void onError(Throwable e) {
+
+			}
+
+			@Override
+			public void onComplete() {
+
+			}
 		});
 	}
 

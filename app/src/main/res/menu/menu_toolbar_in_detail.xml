@@ -12,16 +12,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/menu_toolbar_fast_play"
-        android:icon="@drawable/ic_flash_on_white_24dp"
-        android:title="@string/fast_play"
-        app:showAsAction="always" />
+            android:id="@+id/menu_toolbar_fast_play"
+            android:icon="@drawable/ic_flash_on_white_24dp"
+            android:title="@string/fast_play"
+            app:iconTint="#fff"
+            app:showAsAction="always" />
 
     <item
-        android:id="@+id/menu_toolbar_love"
-        android:icon="@drawable/ic_favorite_border_white_24dp"
-        android:title="@string/love_music"
-        app:showAsAction="always" />
+            android:id="@+id/menu_toolbar_love"
+            android:icon="@drawable/ic_favorite_border_white_24dp"
+            android:title="@string/love_music"
+            app:iconTint="#fff"
+            app:showAsAction="always" />
 
     <item
             android:id="@+id/menu_toolbar_trash_can"

@@ -22,9 +22,13 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import okhttp3.Call;
@@ -108,9 +112,29 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 		viewHolder.mAlbumText.setText(mAlbumNameList.get(viewHolder.getAdapterPosition()).getAlbumName());
-		viewHolder.mImageView.setTag(R.string.key_id_3, viewHolder.getAdapterPosition());
-		AlbumItem albumItem = mAlbumNameList.get(viewHolder.getAdapterPosition());
-		albumLoader(mMainActivity, viewHolder, albumItem);
+		viewHolder.mImageView.setTag(R.string.key_id_3, mAlbumNameList.get(viewHolder.getAdapterPosition()).getmArtwork());
+
+		if (mAlbumNameList.get(viewHolder.getAdapterPosition()).getmArtwork() != null) {
+			GlideApp.with(mMainActivity)
+					.load(viewHolder.mImageView.getTag(R.string.key_id_3))
+					.diskCacheStrategy(DiskCacheStrategy.NONE)
+					.addListener(new RequestListener<Drawable>() {
+						@Override
+						public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+							return false;
+						}
+
+						@Override
+						public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+							viewHolder.blurringView.invalidate();
+							return false;
+						}
+					})
+					.into(viewHolder.mImageView);
+		}
+
+//		AlbumItem albumItem = mAlbumNameList.get(viewHolder.getAdapterPosition());
+//		albumLoader(mMainActivity, viewHolder, albumItem);
 	}
 
 	private void albumLoader(@NonNull final Context activity, @NonNull final ViewHolder holder, final AlbumItem albumItem) {
@@ -362,7 +386,6 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 	public void onViewRecycled(@NonNull ViewHolder holder) {
 		super.onViewRecycled(holder);
 		holder.mImageView.setTag(R.string.key_id_3, null);
-		GlideApp.with(mMainActivity).clear(holder.mImageView);
 		holder.invalidate();
 	}
 
@@ -386,8 +409,6 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 		ImageView mImageView;
 
 		BlurringView blurringView;
-
-//		ImageView mView;
 
 		ViewHolder(@NonNull View itemView) {
 			super(itemView);

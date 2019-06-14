@@ -64,36 +64,18 @@ public final class DBArtSync extends IntentService {
 			if (LitePal.findAll(CustomAlbumPath.class).size() == cursor.getCount()) {
 				Log.d(TAG, "handleActionSyncAlbum: count is same return");
 				return;
-			} else if (LitePal.findAll(CustomAlbumPath.class).size() == 0) {
-				Log.d(TAG, "handleActionSyncAlbum: size == 0, clear");
+			} else {
+				Log.d(TAG, "handleActionSyncAlbum: not same, clear");
+				Log.d(TAG, "handleActionSyncAlbum: size: " + LitePal.findAll(CustomAlbumPath.class).size());
 				LitePal.deleteAll(CustomAlbumPath.class);
 				do {
 					int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID));
-					Log.d(TAG, "handleActionSyncAlbum: not exists... add albumId: " + albumId);
+//					Log.d(TAG, "handleActionSyncAlbum: add albumId: " + albumId);
 					CustomAlbumPath customAlbumPath = new CustomAlbumPath();
 					customAlbumPath.setAlbumId(albumId);
 					customAlbumPath.save();
 				} while (cursor.moveToNext());
-			} else {
-				do {
-					int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID));
-
-					try {
-						if (LitePal.where("mAlbumId=?", String.valueOf(albumId)).find(CustomAlbumPath.class).size() == 0) {
-							Log.d(TAG, "handleActionSyncAlbum: not exists... add albumId: " + albumId);
-							CustomAlbumPath customAlbumPath = new CustomAlbumPath();
-							customAlbumPath.setAlbumId(albumId);
-							customAlbumPath.save();
-						} else {
-							Log.d(TAG, "handleActionSyncAlbum: albumId: " + albumId + " exists...");
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-
-				} while (cursor.moveToNext());
 			}
-
 			cursor.close();
 		}
 	}
@@ -104,33 +86,17 @@ public final class DBArtSync extends IntentService {
 			LitePal.useDefault();
 			if (LitePal.findAll(ArtistArtPath.class).size() == cursor.getCount()) {
 				Log.d(TAG, "handleActionSyncArtist: count is same return");
-			} else if (LitePal.findAll(ArtistArtPath.class).size() == 0) {
-				Log.d(TAG, "handleActionSyncArtist: size == 0, clear all");
+				return;
+			} else {
+				Log.d(TAG, "handleActionSyncArtist: not same, clear all");
+				Log.d(TAG, "handleActionSyncArtist: size: " + LitePal.findAll(ArtistArtPath.class).size());
 				LitePal.deleteAll(ArtistArtPath.class);
 				do {
 					int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID));
-					Log.d(TAG, "handleActionSyncAlbum: not exists... add artist: " + artistId);
+//					Log.d(TAG, "handleActionSyncAlbum: add artist: " + artistId);
 					ArtistArtPath artistArtPath = new ArtistArtPath();
 					artistArtPath.setArtistId(artistId);
 					artistArtPath.save();
-				} while (cursor.moveToNext());
-			} else {
-				do {
-					int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID));
-
-					try {
-						if (LitePal.where("mArtistId=?", String.valueOf(artistId)).find(ArtistArtPath.class).size() == 0) {
-							Log.d(TAG, "handleActionSyncAlbum: not exists... add artist: " + artistId);
-							ArtistArtPath artistArtPath = new ArtistArtPath();
-							artistArtPath.setArtistId(artistId);
-							artistArtPath.save();
-						} else {
-							Log.d(TAG, "handleActionSyncAlbum: mArtistId: " + artistId + " exists...");
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-
 				} while (cursor.moveToNext());
 			}
 			cursor.close();

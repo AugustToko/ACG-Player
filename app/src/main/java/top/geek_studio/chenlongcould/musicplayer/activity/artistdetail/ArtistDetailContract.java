@@ -1,6 +1,7 @@
 package top.geek_studio.chenlongcould.musicplayer.activity.artistdetail;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import androidx.annotation.NonNull;
 import top.geek_studio.chenlongcould.musicplayer.BasePresenter;
@@ -18,6 +19,7 @@ public interface ArtistDetailContract {
 	interface View extends BaseView<Presenter> {
 		ContentResolver getContentResolver();
 
+		@NonNull
 		Intent getIntent();
 
 		void setSongCountText(@NonNull final String data);
@@ -27,6 +29,9 @@ public interface ArtistDetailContract {
 		void setAlbumCountText(@NonNull final String data);
 
 		void notifyDataSetChanged();
+
+		@NonNull
+		Context getContext();
 	}
 
 	interface Presenter extends BasePresenter {

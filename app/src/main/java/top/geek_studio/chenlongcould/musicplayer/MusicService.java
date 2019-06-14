@@ -247,7 +247,7 @@ public final class MusicService extends Service {
 		mediaSession.setCallback(new MediaSessionCompat.Callback() {
 			@Override
 			public void onPlay() {
-				MusicControl.play(MusicService.this);
+				MusicControl.intentPlay(MusicService.this);
 			}
 
 			@Override
@@ -400,16 +400,21 @@ public final class MusicService extends Service {
 				break;
 
 				case ServiceActions.ACTION_PLAY: {
+
+					Log.d(TAG, "onStartCommand: case play");
+
 					// 1 没有播放过 也没有找到上次打开app 最后播放的数据
 					if (!HAS_PLAYED && mMusicItem == null) {
 						setRandomItemPrepare();
 						flashMode = ReceiverOnMusicPlay.FLASH_UI_COMMON;
 						updateMediaSessionMetaData();
 
+						Log.d(TAG, "onStartCommand: has not play");
 						// 2 已经播放过了
 					} else if (HAS_PLAYED && mMusicItem != null) {
 						flashMode = ReceiverOnMusicPlay.PLAY;
-						MusicControl.prepareAndPlay();
+						MusicControl.playMusic();
+						Log.d(TAG, "onStartCommand: play: already played");
 					}
 
 				}
@@ -990,6 +995,7 @@ public final class MusicService extends Service {
 					Log.d(TAG, "onPrepared: done");
 					mp.start();
 					serviceWeakReference.get().startFN();
+					HAS_PLAYED = true;
 				});
 
 			});
@@ -1141,7 +1147,7 @@ public final class MusicService extends Service {
 			ReceiverOnMusicPlay.startService(context, intent);
 		}
 
-		public static void play(@NonNull final Context context) {
+		public static void intentPlay(@NonNull final Context context) {
 			final Intent intent = new Intent(ServiceActions.ACTION_PLAY);
 			ReceiverOnMusicPlay.startService(context, intent);
 		}
@@ -1155,7 +1161,7 @@ public final class MusicService extends Service {
 			if (isPlayingMusic()) {
 				intentPause(context);
 			} else {
-				play(context);
+				intentPlay(context);
 			}
 		}
 	}

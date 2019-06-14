@@ -12,7 +12,9 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
+import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.ClearTool;
+import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -115,7 +117,9 @@ final public class ArtistDetailPresenter implements ArtistDetailContract.Present
 
 						totalDuration[0] += duration;
 
-						mSongs.add(builder.build());
+						final MusicItem item = builder.build();
+						CustomThreadPool.post(() -> MusicUtil.findArtworkWithId(mView.getContext(), item));
+						mSongs.add(item);
 					} while (cursor2.moveToNext());
 					cursor2.close();
 					emitter.onNext(durationDone);
