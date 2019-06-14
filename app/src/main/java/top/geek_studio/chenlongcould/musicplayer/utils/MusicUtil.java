@@ -200,6 +200,28 @@ public class MusicUtil {
 		}
 	}
 
+	@Nullable
+	public static String findArtworkWithId(@NonNull final Context context, final int albumId) {
+		if (albumId < 0) return null;
+
+		String artwork = null;
+
+		final Cursor cursor1 = context.getContentResolver().query(
+				Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar)
+						+ (albumId))
+				, new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
+
+		if (cursor1 != null && cursor1.getCount() != 0) {
+			cursor1.moveToFirst();
+			artwork = cursor1.getString(cursor1.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART));
+			cursor1.close();
+		} else {
+			Log.d(TAG, "loadDataSource: loadArtwork failed!");
+		}
+		return artwork;
+	}
+
+
 	public static boolean availableCurrentItem() {
 		boolean result;
 		result = Data.sCurrentMusicItem != null && Data.sCurrentMusicItem.getMusicID() != -1;

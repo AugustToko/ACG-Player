@@ -135,8 +135,8 @@ public final class MusicService extends Service {
 		}
 
 		@Override
-		public void setNextWillPlayItem(MusicItem item) {
-			ItemList.nextItem = item;
+		public void addNextWillPlayItem(MusicItem item) {
+			ItemList.nextWillplay.add(item);
 		}
 
 		@Override
@@ -422,8 +422,8 @@ public final class MusicService extends Service {
 
 				case ServiceActions.ACTION_PN: {
 					//检测是否指定下一首播放
-					if (ItemList.nextItem != null && ItemList.nextItem.getMusicID() != -1) {
-						mMusicItem = ItemList.nextItem;
+					if (ItemList.nextWillplay.size() != 0) {
+						mMusicItem = ItemList.nextWillplay.get(0);
 						MusicControl.reset(true);
 						MusicControl.setDataSource(mMusicItem);
 
@@ -431,7 +431,7 @@ public final class MusicService extends Service {
 
 						MusicControl.prepareAndPlay();
 
-						ItemList.nextItem = null;
+						ItemList.nextWillplay.remove(mMusicItem);
 
 						flashMode = ReceiverOnMusicPlay.FLASH_UI_COMMON;
 
@@ -814,7 +814,7 @@ public final class MusicService extends Service {
 		 * 存储播放历史(序列) default...
 		 */
 		static List<MusicItem> historyList = new ArrayList<>();
-		static MusicItem nextItem = null;
+		static List<MusicItem> nextWillplay = new ArrayList<>();
 		private static Bitmap mCurrentCover = null;
 
 		static void updateCurrentCover(@Nullable MusicItem item) {

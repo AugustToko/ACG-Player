@@ -126,6 +126,11 @@ public final class ListViewActivity extends BaseListActivity {
 
 					currentListName = getIntent().getStringExtra("play_list_name");
 
+					adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList
+							, new MyRecyclerAdapter.Config(preferences.getInt(Values.SharedPrefsTag
+							.RECYCLER_VIEW_ITEM_STYLE, 0), true));
+					mRecyclerView.setAdapter(adapter);
+
 					mDisposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
 						//data
 
@@ -159,7 +164,10 @@ public final class ListViewActivity extends BaseListActivity {
 												.duration(duration)
 												.mimeName(mimeType)
 												.size(size)
-												.addAlbumId(albumId);
+												.addAlbumId(albumId)
+												.setArtwork(MusicUtil.findArtworkWithId(ListViewActivity.this
+														, albumId));
+
 										mMusicItemList.add(builder.build());
 									} while (cursor1.moveToNext());
 									cursor1.close();
@@ -175,11 +183,7 @@ public final class ListViewActivity extends BaseListActivity {
 								if (i != 0) {
 									return;
 								}
-
-								adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList
-										, new MyRecyclerAdapter.Config(preferences.getInt(Values.SharedPrefsTag
-										.RECYCLER_VIEW_ITEM_STYLE, 0), true));
-								mRecyclerView.setAdapter(adapter);
+								adapter.notifyDataSetChanged();
 							});
 				}
 				break;

@@ -226,13 +226,13 @@ public final class MainActivity extends BaseListActivity {
 
 		CustomThreadPool.post(() -> GCSutil.checkUpdate(MainActivity.this, GeekProject.ACG_Player
 				, PackageTool.getVerCode(MainActivity.this)));
-
-		final Intent intent = new Intent(this, MusicService.class);
-		startService(intent);
-		bindService(intent, sServiceConnection, Context.BIND_AUTO_CREATE);
 	}
 
 	private void init() {
+		final Intent intent = new Intent(this, MusicService.class);
+		startService(intent);
+		bindService(intent, sServiceConnection, Context.BIND_AUTO_CREATE);
+
 		DBArtSync.startActionSyncArtist(this);
 		DBArtSync.startActionSyncAlbum(this);
 
@@ -480,15 +480,25 @@ public final class MainActivity extends BaseListActivity {
 					ArrayList<MusicItem> helper = new ArrayList<>(musicListFragment.getAdapter().getSelected());
 
 					PlayListsUtil.addListDialog(MainActivity.this, helper);
-					musicListFragment.getAdapter().clearSelection();
 				}
 				break;
 				case R.id.menu_toolbar_main_choose_share: {
 					MusicUtil.sharMusic(MainActivity.this, musicListFragment.getAdapter().getSelected());
 				}
 				break;
+				case R.id.menu_toolbar_main_choose_waitplay: {
+					for (final MusicItem item : musicListFragment.getAdapter().getSelected()) {
+						try {
+							Data.sMusicBinder.addNextWillPlayItem(item);
+						} catch (RemoteException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				break;
 				default:
 			}
+			musicListFragment.getAdapter().clearSelection();
 			return true;
 		});
 	}

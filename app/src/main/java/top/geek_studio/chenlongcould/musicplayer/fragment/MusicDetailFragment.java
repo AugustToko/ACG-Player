@@ -584,7 +584,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		final MusicItem item = Data.sCurrentMusicItem;
 		if (item != null && item.getMusicID() != -1) {
 			final Bitmap cover = Utils.Audio.getCoverBitmapFull(getContext(), item.getAlbumId());
-			setCurrentData(item, cover);
+			setCurrentData(item, cover, true);
 
 			try {
 				if (Data.sMusicBinder != null && Data.sMusicBinder.isPlayingMusic()) {
@@ -709,7 +709,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		mPlayButton.setScaleY(0);
 	}
 
-	private void setCurrentData(@NonNull final MusicItem item, @Nullable final Bitmap cover) {
+	private void setCurrentData(@NonNull final MusicItem item, @Nullable final Bitmap cover, boolean... forceLoadImage) {
 		mMainActivity.runOnUiThread(() -> {
 			setSlideInfoBar(item.getMusicName(), item.getMusicAlbum(), cover);
 			mCurrentMusicNameText.setText(item.getMusicName());
@@ -722,7 +722,7 @@ public final class MusicDetailFragment extends BaseFragment {
 //			}
 
 			// update album id
-			if (item.getAlbumId() != mLastAlbumId) {
+			if (item.getAlbumId() != mLastAlbumId || forceLoadImage.length > 0) {
 				setUpImage(cover, mBGup, mBGdown, mNextWillText);
 				mLastAlbumId = item.getAlbumId();
 			}

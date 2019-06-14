@@ -14,7 +14,7 @@ interface IMuiscService {
     //other data input
     void setCurrentMusicData(in MusicItem item);
 
-    void setNextWillPlayItem(in MusicItem item);
+    void addNextWillPlayItem(in MusicItem item);
 
     void addToOrderList(in MusicItem item);
 

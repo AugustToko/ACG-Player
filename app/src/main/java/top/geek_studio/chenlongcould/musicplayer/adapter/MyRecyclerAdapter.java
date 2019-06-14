@@ -53,6 +53,7 @@ import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseListActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
+import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
@@ -319,7 +320,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 					final MusicItem nextItem = mMusicItems.get(holder.getAdapterPosition());
 					if (Data.sMusicBinder != null && nextItem.getMusicID() != -1) {
 						try {
-							Data.sMusicBinder.setNextWillPlayItem(nextItem);
+							Data.sMusicBinder.addNextWillPlayItem(nextItem);
 						} catch (RemoteException e) {
 							e.printStackTrace();
 						}
@@ -460,7 +461,9 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 
-		if (i == 0) viewHolder.itemView.setPadding(0, MainActivity.PADDING, 0, 0);
+		if (mActivity.getActivityTAG().equals(MainActivity.TAG)) {
+			if (i == 0) viewHolder.itemView.setPadding(0, MainActivity.PADDING, 0, 0);
+		}
 
 		final ItemHolder holder = ((ItemHolder) viewHolder);
 
@@ -477,21 +480,24 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		holder.mMusicExtName.setText(prefix);
 		holder.mTime.setText(Data.S_SIMPLE_DATE_FORMAT.format(new Date(mMusicItems.get(holder.getAdapterPosition()).getDuration())));
 
-		/*--- 添加标记以便避免ImageView因为ViewHolder的复用而出现混乱 ---*/
-		holder.mCoverReference.get().setTag(R.string.key_id_1, mMusicItems.get(holder.getAdapterPosition()).getArtwork());
-
 		if (mMusicItems.get(holder.getAdapterPosition()).getArtwork() != null) {
+			/*--- 添加标记以便避免ImageView因为ViewHolder的复用而出现混乱 ---*/
+			holder.mCoverReference.get().setTag(R.string.key_id_1, mMusicItems.get(holder.getAdapterPosition()).getArtwork());
+
 			GlideApp.with(mActivity)
 					.load(holder.mCoverReference.get().getTag(R.string.key_id_1))
 					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
 					.diskCacheStrategy(DiskCacheStrategy.NONE)
 					.into(holder.mCoverReference.get());
+		} else {
+			/*--- 添加标记以便避免ImageView因为ViewHolder的复用而出现混乱 ---*/
+			holder.mCoverReference.get().setTag(R.string.key_id_1, mMusicItems.get(holder.getAdapterPosition()));
+
+			CustomThreadPool.post(() -> Loader.albumLoader(mActivity, holder.mCoverReference.get()
+					, mMusicItems.get(i)));
 		}
 
 		ItemCoverThreadPool.post(() -> {
-
-//			Loader.albumLoader(mActivity, holder.mCoverReference.get(), mMusicItems.get(i).getAlbumId()
-//					, mMusicItems.get(i).getArtist(), mMusicItems.get(i).getMusicAlbum());
 
 			switch (mConfig.styleId) {
 				case 1: {
@@ -594,7 +600,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 			if (verify(imageView)) {
 				imageView.post(() -> GlideApp.with(imageView)
 						.load(path)
-//						.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+						.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
 						.centerCrop()
 						.diskCacheStrategy(DiskCacheStrategy.NONE)
 						.into(imageView));
@@ -608,7 +614,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 			if (verify(imageView)) {
 				imageView.post(() -> imageView.post(() -> GlideApp.with(imageView)
 						.load(path)
-//						.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+						.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
 						.centerCrop()
 						.diskCacheStrategy(DiskCacheStrategy.NONE)
 						.into(imageView)));
@@ -619,7 +625,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 			if (imageView != null) {
 				imageView.post(() -> GlideApp.with(imageView)
 						.load(R.drawable.default_album_art)
-//						.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+						.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
 						.centerCrop()
 						.override(100, 100)
 						.diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -651,7 +657,12 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		 * <p>
 		 * 2. NET WORK <a href="http://ws.audioscrobbler.com"/>
 		 */
-		public static void albumLoader(@NonNull final Context activity, @NonNull final ImageView imageView, final int albumId, @NonNull final String artist, @NonNull final String albumName) {
+		public static void albumLoader(@NonNull final Context activity, @NonNull final ImageView imageView
+				, @NonNull MusicItem item) {
+
+			int albumId = item.getAlbumId();
+			String artist = item.getArtist();
+			String albumName = item.getMusicAlbum();
 
 			final String[] albumPath = {null};
 

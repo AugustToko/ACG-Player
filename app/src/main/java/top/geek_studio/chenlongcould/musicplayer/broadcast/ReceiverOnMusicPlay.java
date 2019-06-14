@@ -196,7 +196,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 			//noinspection StatementWithEmptyBody
 			if (songs != null && !songs.isEmpty()) {
 				try {
-					Data.sMusicBinder.setNextWillPlayItem(songs.get(0));
+					Data.sMusicBinder.addNextWillPlayItem(songs.get(0));
 					MusicService.MusicControl.intentNext(context);
 				} catch (RemoteException e) {
 					e.printStackTrace();

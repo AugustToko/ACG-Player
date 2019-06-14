@@ -111,6 +111,7 @@ public final class ArtistListFragment extends BaseListFragment {
 					} while (cursor.moveToNext());
 
 					cursor.close();
+					mRecyclerView.post(() -> mAdapter2ArtistList.notifyDataSetChanged());
 				}   //initData
 			}
 		});
@@ -140,6 +141,7 @@ public final class ArtistListFragment extends BaseListFragment {
 	public void reloadData() {
 		super.reloadData();
 		artistItemList.clear();
+		mAdapter2ArtistList.notifyDataSetChanged();
 		initArtistData();
 	}
 

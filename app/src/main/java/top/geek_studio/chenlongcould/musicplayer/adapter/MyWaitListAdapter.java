@@ -66,7 +66,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 					final MusicItem nextItem = mMusicItems.get(holder.getAdapterPosition());
 					if (Data.sMusicBinder != null && nextItem.getMusicID() != -1) {
 						try {
-							Data.sMusicBinder.setNextWillPlayItem(nextItem);
+							Data.sMusicBinder.addNextWillPlayItem(nextItem);
 						} catch (RemoteException e) {
 							e.printStackTrace();
 						}
