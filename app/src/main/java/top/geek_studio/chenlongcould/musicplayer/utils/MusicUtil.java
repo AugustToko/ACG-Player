@@ -3,10 +3,12 @@ package top.geek_studio.chenlongcould.musicplayer.utils;
 import android.content.*;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.v4.media.MediaDescriptionCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.ViewGroup;
@@ -221,6 +223,49 @@ public class MusicUtil {
 		return artwork;
 	}
 
+	@Nullable
+	public static MusicItem d2m(@NonNull final MediaDescriptionCompat descriptionCompat) {
+		if (descriptionCompat.getExtras() == null
+				|| descriptionCompat.getMediaId() == null
+				|| descriptionCompat.getMediaUri() == null) return null;
+
+		Bundle bundle = descriptionCompat.getExtras();
+
+		final MusicItem.Builder b2 = new MusicItem.Builder(Integer.parseInt(descriptionCompat.getMediaId())
+				, String.valueOf(descriptionCompat.getTitle())
+				, descriptionCompat.getMediaUri().getPath())
+				.musicAlbum(String.valueOf(descriptionCompat.getSubtitle()))
+				.addTime(bundle.getInt("addTime"))
+				.artist(bundle.getString("artist"))
+				.duration(bundle.getInt("duration"))
+				.mimeName(bundle.getString("mimeType"))
+				.size(bundle.getInt("size"))
+				.addAlbumId(bundle.getInt("albumId"))
+				.addArtistId(bundle.getInt("artistId"));
+		return b2.build();
+	}
+
+	@Nullable
+	public static MediaDescriptionCompat m2d(@NonNull final MusicItem item) {
+		if (item.getMusicID() < 0) return null;
+
+		final Bundle bundle = new Bundle();
+		bundle.putInt("albumId", item.getAlbumId());
+		bundle.putInt("artistId", item.getArtistId());
+		bundle.putLong("addTime", item.getAddTime());
+		bundle.putInt("size", item.getSize());
+		bundle.putString("mimeType", item.getMimeName());
+
+		final MediaDescriptionCompat.Builder builder = new MediaDescriptionCompat.Builder()
+				.setTitle(item.getMusicName())
+				.setSubtitle(item.getMusicAlbum())
+				.setDescription(item.getArtist())
+				.setIconBitmap(null)
+				.setMediaId(String.valueOf(item.getMusicID()))
+				.setMediaUri(Uri.fromFile(new File(item.getMusicPath())))
+				.setExtras(bundle);
+		return builder.build();
+	}
 
 	public static boolean availableCurrentItem() {
 		boolean result;

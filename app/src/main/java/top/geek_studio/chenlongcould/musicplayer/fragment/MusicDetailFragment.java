@@ -1606,6 +1606,10 @@ public final class MusicDetailFragment extends BaseFragment {
 						}
 
 						int duration = (int) Data.sCurrentMusicItem.getDuration();
+
+						// sometimes it may be zero (0)
+						if (duration == 0) duration = 1;
+
 						int position = ReceiverOnMusicPlay.getCurrentPosition();
 
 						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -1615,8 +1619,7 @@ public final class MusicDetailFragment extends BaseFragment {
 						}
 
 						mFragmentWeakReference.get().mInfoBarInfoSeek.getLayoutParams().width
-								= mFragmentWeakReference.get().mCurrentInfoBody.getWidth()
-								* position / duration;
+								= mFragmentWeakReference.get().mCurrentInfoBody.getWidth() * position / duration;
 						mFragmentWeakReference.get().mInfoBarInfoSeek.setLayoutParams(mFragmentWeakReference
 								.get().mInfoBarInfoSeek.getLayoutParams());
 						mFragmentWeakReference.get().mInfoBarInfoSeek.requestLayout();
