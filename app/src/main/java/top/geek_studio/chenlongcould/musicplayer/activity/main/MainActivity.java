@@ -1,15 +1,15 @@
-package top.geek_studio.chenlongcould.musicplayer.activity;
+package top.geek_studio.chenlongcould.musicplayer.activity.main;
 
 import android.app.ActivityManager;
 import android.content.*;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.*;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,7 +26,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
@@ -47,14 +46,11 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import jp.wasabeef.glide.transformations.BlurTransformation;
-import top.geek_studio.chenlongcould.geeklibrary.GCSutil;
-import top.geek_studio.chenlongcould.geeklibrary.GeekProject;
-import top.geek_studio.chenlongcould.geeklibrary.PackageTool;
 import top.geek_studio.chenlongcould.geeklibrary.theme.Theme;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeUtils;
 import top.geek_studio.chenlongcould.musicplayer.*;
-import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseCompatActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.*;
 import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseListActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyPagerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter2AlbumList;
@@ -62,8 +58,6 @@ import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter2Artis
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityMainBinding;
 import top.geek_studio.chenlongcould.musicplayer.fragment.*;
-import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
-import top.geek_studio.chenlongcould.musicplayer.model.ArtistItem;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.AlbumThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.ArtistThreadPool;
@@ -84,9 +78,12 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 /**
  * @author chenlongcould
  */
-public final class MainActivity extends BaseListActivity {
+public final class MainActivity extends BaseListActivity implements MainContract.View {
 
 	public static final String TAG = "MainActivity";
+
+	private MainContract.Presenter mPresenter;
+
 	public static int PADDING = 0;
 
 	/**
@@ -152,6 +149,7 @@ public final class MainActivity extends BaseListActivity {
 	private final ArrayList<String> mTitles = new ArrayList<>();
 	private boolean toolbarClicked = false;
 	private boolean backPressed = false;
+
 	/**
 	 * ALL FRAGMENTS
 	 */
@@ -220,37 +218,13 @@ public final class MainActivity extends BaseListActivity {
 
 		initView();
 
-		initPermission();
+		new MainPresenter(this);
+
+		mPresenter.initPermission(this);
 
 		super.onCreate(savedInstanceState);
 
-		CustomThreadPool.post(() -> GCSutil.checkUpdate(MainActivity.this, GeekProject.ACG_Player
-				, PackageTool.getVerCode(MainActivity.this)));
-	}
-
-	private void init() {
-		final Intent intent = new Intent(this, MusicService.class);
-		startService(intent);
-		bindService(intent, sServiceConnection, Context.BIND_AUTO_CREATE);
-
-		DBArtSync.startActionSyncArtist(this);
-		DBArtSync.startActionSyncAlbum(this);
-
-		initFragmentData();
-
-		receivedIntentCheck(getIntent());
-	}
-
-	/**
-	 * init permission, every Activity extends {@link BaseCompatActivity}
-	 */
-	public void initPermission() {
-		if (ContextCompat.checkSelfPermission(this,
-				android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-			ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, Values.REQUEST_WRITE_EXTERNAL_STORAGE);
-		} else {
-			init();
-		}
+		mPresenter.checkUpdate(this);
 	}
 
 	@Override
@@ -263,14 +237,15 @@ public final class MainActivity extends BaseListActivity {
 					builder.setTitle("Failed to get permission");
 					builder.setMessage("Try again?");
 					builder.setCancelable(false);
-					builder.setNegativeButton("Sure!", (dialog, which) -> initPermission());
+					builder.setNegativeButton("Sure!", (dialog, which) ->
+							mPresenter.initPermission(MainActivity.this));
 					builder.setNeutralButton("Cancel!", (dialog, which) -> {
 						dialog.dismiss();
 						finish();
 					});
 					builder.show();
 				} else {
-					init();
+					mPresenter.initData(MainActivity.this);
 				}
 			}
 			break;
@@ -281,7 +256,8 @@ public final class MainActivity extends BaseListActivity {
 	/**
 	 * check if open file, uri, http or others.
 	 */
-	private void receivedIntentCheck(@Nullable Intent intent) {
+	@Override
+	public void receivedIntentCheck(@Nullable Intent intent) {
 		if (intent == null) {
 			return;
 		}
@@ -296,6 +272,55 @@ public final class MainActivity extends BaseListActivity {
 
 		ReceiverOnMusicPlay.playFromUri(this, uri);
 
+	}
+
+	@NonNull
+	@Override
+	public Context getContext() {
+		return this;
+	}
+
+	@Override
+	public void notifyAdapter(char fragmentId) {
+		switch (fragmentId) {
+			case MainActivity.MUSIC_LIST_FRAGMENT_ID: {
+				musicListFragment.getAdapter().notifyDataSetChanged();
+			}
+			break;
+			case ALBUM_LIST_FRAGMENT_ID: {
+				albumListFragment.getAdapter().notifyDataSetChanged();
+			}
+			break;
+			case ARTIST_LIST_FRAGMENT_ID: {
+				artistListFragment.getAdapter().notifyDataSetChanged();
+			}
+			break;
+			default:
+				break;
+		}
+	}
+
+	@NonNull
+	@Override
+	public BaseFragment getFragment(char fragmentId) {
+		BaseFragment fragment;
+		switch (fragmentId) {
+			case MainActivity.MUSIC_LIST_FRAGMENT_ID: {
+				fragment = musicListFragment;
+			}
+			break;
+			case ALBUM_LIST_FRAGMENT_ID: {
+				fragment = albumListFragment;
+			}
+			break;
+			case ARTIST_LIST_FRAGMENT_ID: {
+				fragment = artistListFragment;
+			}
+			break;
+			default:
+				fragment = musicListFragment;
+		}
+		return fragment;
 	}
 
 	@Override
@@ -328,29 +353,6 @@ public final class MainActivity extends BaseListActivity {
 					break;
 			}
 		}
-	}
-
-	@Override
-	protected void onDestroy() {
-		GlideApp.get(this).clearMemory();
-
-		try {
-			unbindService(sServiceConnection);
-		} catch (Exception e) {
-			Log.d(TAG, "onDestroy: " + e.getMessage());
-		}
-
-		Data.HAS_BIND = false;
-		Data.sTheme = null;
-		mHandlerThread.quit();
-		mFragmentList.clear();
-
-		AlbumThreadPool.finish();
-		ItemCoverThreadPool.finish();
-		ArtistThreadPool.finish();
-		CustomThreadPool.finish();
-
-		super.onDestroy();
 	}
 
 	@Override
@@ -504,80 +506,12 @@ public final class MainActivity extends BaseListActivity {
 	}
 
 	/**
-	 * 根据输入框中的值来过滤数据并更新RecyclerView
-	 *
-	 * @param filterStr fileName
-	 */
-	private void filterData(String filterStr) {
-		final String tabOrder = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
-		assert tabOrder != null;
-
-		if (tabOrder.charAt(Values.CurrentData.CURRENT_PAGE_INDEX) == MUSIC_LIST_FRAGMENT_ID) {
-			if (TextUtils.isEmpty(filterStr)) {
-				Data.sMusicItems.clear();
-				Data.sMusicItems.addAll(Data.sMusicItemsBackUp);
-				musicListFragment.getAdapter().notifyDataSetChanged();
-			} else {
-				Data.sMusicItems.clear();
-
-				//algorithm
-				for (final MusicItem item : Data.sMusicItemsBackUp) {
-					final String name = item.getMusicName();
-					if (name.contains(filterStr.toLowerCase()) || name.contains(filterStr.toUpperCase())) {
-						Data.sMusicItems.add(item);
-					}
-				}
-				musicListFragment.getAdapter().notifyDataSetChanged();
-			}
-
-		}
-
-		if (tabOrder.charAt(Values.CurrentData.CURRENT_PAGE_INDEX) == '2') {
-			if (TextUtils.isEmpty(filterStr)) {
-				albumListFragment.getAlbumItemList().clear();
-				albumListFragment.getAlbumItemList().addAll(albumListFragment.getAlbumItemListBackup());
-				albumListFragment.getAdapter().notifyDataSetChanged();
-			} else {
-				albumListFragment.getAlbumItemList().clear();
-
-				//algorithm
-				for (final AlbumItem item : albumListFragment.getAlbumItemListBackup()) {
-					final String name = item.getAlbumName();
-					if (name.contains(filterStr.toLowerCase()) || name.contains(filterStr.toUpperCase())) {
-						albumListFragment.getAlbumItemList().add(item);
-					}
-				}
-
-				albumListFragment.getAdapter().notifyDataSetChanged();
-			}
-		}
-
-		//artist
-		if (tabOrder.charAt(Values.CurrentData.CURRENT_PAGE_INDEX) == '3') {
-			if (TextUtils.isEmpty(filterStr)) {
-				artistListFragment.getArtistItemList().clear();
-				artistListFragment.getArtistItemList().addAll(artistListFragment.getArtistItemListBackup());
-				artistListFragment.getAdapter().notifyDataSetChanged();
-			} else {
-				artistListFragment.getArtistItemList().clear();
-
-				//algorithm
-				for (ArtistItem item : artistListFragment.getArtistItemListBackup()) {
-					String name = item.getArtistName();
-					if (name.contains(filterStr.toLowerCase()) || name.contains(filterStr.toUpperCase())) {
-						artistListFragment.getArtistItemList().add(item);
-					}
-				}
-
-				artistListFragment.getAdapter().notifyDataSetChanged();
-			}
-		}
-	}
-
-	/**
 	 * init fragments
 	 */
-	private void initFragmentData() {
+	@Override
+	public void initFragmentData() {
+
+		mFragmentList.clear();
 
 		String tabOrder = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
 		if (tabOrder == null) tabOrder = DEFAULT_TAB_ORDER;
@@ -775,13 +709,39 @@ public final class MainActivity extends BaseListActivity {
 		setSubtitle(content);
 	}
 
-	public void fullExit() {
-		//lists
-		Data.sPlayOrderList.clear();
-		Data.sMusicItems.clear();
-		Data.sMusicItemsBackUp.clear();
-		Data.S_TRASH_CAN_LIST.clear();
+	@Override
+	protected void onDestroy() {
+		try {
+			unbindService(sServiceConnection);
+		} catch (Exception e) {
+			Log.d(TAG, "onDestroy: " + e.getMessage());
+		}
 
+		if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
+			Data.getCurrentCover().recycle();
+		}
+
+		Data.HAS_BIND = false;
+		mHandlerThread.quit();
+		mFragmentList.clear();
+		Data.sHistoryPlayed.clear();
+
+		AlbumThreadPool.finish();
+		ItemCoverThreadPool.finish();
+		ArtistThreadPool.finish();
+		CustomThreadPool.finish();
+
+		App.clearDisposable();
+
+		new Thread(() -> {
+			GlideApp.get(MainActivity.this).clearDiskCache();
+			GlideApp.get(MainActivity.this).clearMemory();
+		});
+
+		super.onDestroy();
+	}
+
+	public void fullExit() {
 		try {
 			unbindService(sServiceConnection);
 		} catch (Exception e) {
@@ -798,18 +758,16 @@ public final class MainActivity extends BaseListActivity {
 			Log.d(TAG, "fullExit: " + e.getMessage());
 		}
 
+		//lists
+		Data.sPlayOrderList.clear();
+		Data.sMusicItems.clear();
+		Data.sMusicItemsBackUp.clear();
+		Data.S_TRASH_CAN_LIST.clear();
+
 		Data.sMusicBinder = null;
-
-		if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
-			Data.getCurrentCover().recycle();
-		}
-
-		App.clearDisposable();
-
-		new Thread(() -> {
-			GlideApp.get(MainActivity.this).clearDiskCache();
-			GlideApp.get(MainActivity.this).clearMemory();
-		});
+		Data.sTheme = null;
+		Data.sCurrentMusicItem = null;
+		Data.HAS_PLAYED = false;
 
 		mHandlerThread.quit();
 		CustomThreadPool.finish();
@@ -831,14 +789,17 @@ public final class MainActivity extends BaseListActivity {
 		mMainBinding.appbar.setBackgroundColor(Color.TRANSPARENT);
 		setStatusBarTextColor(this, Color.WHITE);
 
-		setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, Utils.Ui.getPrimaryColor(MainActivity.this)));
+		CustomThreadPool.post(() ->
+				setTaskDescription(new ActivityManager.TaskDescription((String) getTitle()
+						, BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_round)
+						, Utils.Ui.getPrimaryColor(MainActivity.this))));
 		mMainBinding.tabLayout.setSelectedTabIndicatorColor(Utils.Ui.getAccentColor(MainActivity.this));
 
 		getWindow().setNavigationBarColor(Utils.Ui.getPrimaryDarkColor(this));
 
 		Observable.create((ObservableOnSubscribe<Theme>) emitter -> {
 			final String themeId = preferences.getString(Values.SharedPrefsTag.SELECT_THEME, ThemeActivity.DEFAULT_THEME);
-			if (themeId != null && !ThemeActivity.DEFAULT_THEME.equals(themeId)) {
+			if (themeId != null && !ThemeActivity.DEFAULT_THEME.equals(themeId) && (Data.sTheme.getId().equals("null"))) {
 				final File themeFile = ThemeUtils.getThemeFile(this, themeId);
 				Data.sTheme = ThemeUtils.fileToTheme(themeFile);
 			}
@@ -918,7 +879,7 @@ public final class MainActivity extends BaseListActivity {
 
 			@Override
 			public boolean onQueryTextChange(String newText) {
-				filterData(newText);
+				mPresenter.filterData(newText);
 				return true;
 			}
 		});
@@ -1351,6 +1312,11 @@ public final class MainActivity extends BaseListActivity {
 		mHandler.sendMessage(message);
 	}
 
+	@Override
+	public void setPresenter(MainContract.Presenter presenter) {
+		mPresenter = presenter;
+	}
+
 ////////////get///////////////////////get///////////////////////get/////////////////
 
 	@SuppressWarnings("WeakerAccess")
@@ -1365,8 +1331,6 @@ public final class MainActivity extends BaseListActivity {
 		public static final int SET_SLIDE_TOUCH_ENABLE = 5004;
 		public static final int SET_SLIDE_TOUCH_DISABLE = 5005;
 		public static final byte RELOAD_MUSIC_ITEMS = 127;
-
-		public static final byte LOAD_DATA_DONE = 126;
 
 		private WeakReference<MainActivity> mWeakReference;
 
@@ -1411,16 +1375,6 @@ public final class MainActivity extends BaseListActivity {
 
 				case RELOAD_MUSIC_ITEMS: {
 					mWeakReference.get().runOnUiThread(() -> mWeakReference.get().musicListFragment.reloadData());
-				}
-				break;
-
-				case LOAD_DATA_DONE: {
-					//service
-					final Intent intent = new Intent(mWeakReference.get(), MusicService.class);
-					mWeakReference.get().startService(intent);
-					Data.HAS_BIND = mWeakReference.get().bindService(intent, mWeakReference.get().sServiceConnection, Context.BIND_AUTO_CREATE);
-
-					mWeakReference.get().setSubtitle(Data.sPlayOrderList.size() + " Songs");
 				}
 				break;
 

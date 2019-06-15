@@ -14,10 +14,8 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.os.Binder;
-import android.os.Build;
-import android.os.IBinder;
-import android.os.PowerManager;
+import android.os.Process;
+import android.os.*;
 import android.provider.MediaStore;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
@@ -34,7 +32,7 @@ import androidx.media.session.MediaButtonReceiver;
 import io.reactivex.disposables.Disposable;
 import org.litepal.LitePal;
 import org.litepal.LitePalDB;
-import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.MediaButtonIntentReceiver;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.MyHeadSetPlugReceiver;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
@@ -616,79 +614,82 @@ public final class MusicService extends Service {
 	}
 
 	private synchronized void loadDataSource() {
-		ItemList.playOrderList.clear();
+		if (ContextCompat.checkSelfPermission(this,
+				android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+			ItemList.playOrderList.clear();
 
-		/*---------------------- init Data!!!! -------------------*/
-		final Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null
-				, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-		if (cursor != null && cursor.moveToFirst()) {
+			/*---------------------- init Data!!!! -------------------*/
+			final Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null
+					, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+			if (cursor != null && cursor.moveToFirst()) {
 
-			// skip short duration song(s)
-			final boolean skipShort = PreferenceUtil.getDefault(serviceWeakReference.get())
-					.getBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
+				// skip short duration song(s)
+				final boolean skipShort = PreferenceUtil.getDefault(serviceWeakReference.get())
+						.getBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
 
-			// last played music id
-			int lastId = PreferenceUtil.getDefault(serviceWeakReference.get())
-					.getInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, -1);
+				// last played music id
+				int lastId = PreferenceUtil.getDefault(serviceWeakReference.get())
+						.getInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, -1);
 
-			// black list
-			final LitePalDB blackList = new LitePalDB("BlackList", 1);
-			blackList.addClassName(MyBlackPath.class.getName());
-			LitePal.use(blackList);
-			List<String> blackListPaths = new ArrayList<>();
-			for (final MyBlackPath blackPath : LitePal.findAll(MyBlackPath.class)) {
-				blackListPaths.add(blackPath.getDirPath());
+				// black list
+				final LitePalDB blackList = new LitePalDB("BlackList", 1);
+				blackList.addClassName(MyBlackPath.class.getName());
+				LitePal.use(blackList);
+				List<String> blackListPaths = new ArrayList<>();
+				for (final MyBlackPath blackPath : LitePal.findAll(MyBlackPath.class)) {
+					blackListPaths.add(blackPath.getDirPath());
+				}
+				LitePal.useDefault();
+
+				do {
+					final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+
+					if (blackListPaths.contains(path)) {
+						Log.d(TAG, "loadDataSource: path in black path: " + path);
+						continue;
+					}
+
+					final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+
+					if (skipShort && duration <= DEFAULT_SHORT_DURATION) {
+						Log.d(TAG, "loadDataSource: the music-file's duration is " + duration + " (too short), skip...");
+						continue;
+					}
+
+					final String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+					final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+					final String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+					final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+					final int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
+					final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+					final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
+					final int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+					final int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID));
+
+					final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
+							.musicAlbum(albumName)
+							.addTime(addTime)
+							.artist(artist)
+							.duration(duration)
+							.mimeName(mimeType)
+							.size(size)
+							.addAlbumId(albumId)
+							.addArtistId(artistId);
+
+					if (lastId == id) {
+						mMusicItem = builder.build();
+						MusicControl.setDataSource(mMusicItem);
+						HAS_PLAYED = true;
+					}
+
+					final MusicItem item = builder.build();
+
+					ItemList.playOrderList.add(item);
+					ItemList.playOrderListBK.add(item);
+				}
+				while (cursor.moveToNext());
+				cursor.close();
 			}
-			LitePal.useDefault();
-
-			do {
-				final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-
-				if (blackListPaths.contains(path)) {
-					Log.d(TAG, "loadDataSource: path in black path: " + path);
-					continue;
-				}
-
-				final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-
-				if (skipShort && duration <= DEFAULT_SHORT_DURATION) {
-					Log.d(TAG, "loadDataSource: the music-file's duration is " + duration + " (too short), skip...");
-					continue;
-				}
-
-				final String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
-				final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-				final String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
-				final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
-				final int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-				final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-				final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
-				final int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
-				final int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID));
-
-				final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
-						.musicAlbum(albumName)
-						.addTime(addTime)
-						.artist(artist)
-						.duration(duration)
-						.mimeName(mimeType)
-						.size(size)
-						.addAlbumId(albumId)
-						.addArtistId(artistId);
-
-				if (lastId == id) {
-					mMusicItem = builder.build();
-					MusicControl.setDataSource(mMusicItem);
-					HAS_PLAYED = true;
-				}
-
-				final MusicItem item = builder.build();
-
-				ItemList.playOrderList.add(item);
-				ItemList.playOrderListBK.add(item);
-			}
-			while (cursor.moveToNext());
-			cursor.close();
 		}
 	}
 
@@ -712,7 +713,9 @@ public final class MusicService extends Service {
 		MusicControl.release();
 		MusicControl.mediaPlayer = null;
 		mIsServiceDestroyed.set(true);
-		wakeLock.release();
+
+		if (wakeLock != null) wakeLock.release();
+
 		mMusicItem = null;
 
 		ItemList.historyList.clear();
@@ -731,6 +734,7 @@ public final class MusicService extends Service {
 		}
 
 		super.onDestroy();
+		android.os.Process.killProcess(Process.myPid());
 	}
 
 	private void shuffleList(long seed) {

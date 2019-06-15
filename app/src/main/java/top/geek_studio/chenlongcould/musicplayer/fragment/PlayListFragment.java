@@ -2,6 +2,7 @@ package top.geek_studio.chenlongcould.musicplayer.fragment;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,8 +24,9 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity;
-import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.PlayListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentPlaylistBinding;
 import top.geek_studio.chenlongcould.musicplayer.model.Item;
@@ -95,43 +98,48 @@ public final class PlayListFragment extends BaseListFragment {
 	 * load data
 	 */
 	private void initData() {
-
-		final Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
-			mPlayListItemList.clear();
-			Cursor cursor = mMainActivity.getContentResolver()
-					.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null);
-			if (cursor != null && cursor.moveToFirst()) {
-				do {
-					final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists._ID));
+		if (ContextCompat.checkSelfPermission(mMainActivity,
+				android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+			ActivityCompat.requestPermissions(mMainActivity, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, Values.REQUEST_WRITE_EXTERNAL_STORAGE);
+		} else {
+			final Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+				mPlayListItemList.clear();
+				Cursor cursor = mMainActivity.getContentResolver()
+						.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null);
+				if (cursor != null && cursor.moveToFirst()) {
+					do {
+						final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists._ID));
 //					if (item != null && item.getId() == id) {
 //						//匹配到喜爱列表 跳过
 //						continue;
 //					}
-					final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.NAME));
-					final String filePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATA));
-					final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATE_ADDED));
+						final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.NAME));
+						final String filePath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATA));
+						final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.DATE_ADDED));
 
-					// TODO: 2018/12/10 M3U FILE
-					final File file = new File(filePath + ".m3u");
+						// TODO: 2018/12/10 M3U FILE
+						final File file = new File(filePath + ".m3u");
 
-					mPlayListItemList.add(new PlayListItem(id, name, filePath, addTime));
-				} while (cursor.moveToNext());
-				cursor.close();
-			}
+						mPlayListItemList.add(new PlayListItem(id, name, filePath, addTime));
+					} while (cursor.moveToNext());
+					cursor.close();
+				}
 
-			//done
-			emitter.onNext(0);
-		}).subscribeOn(Schedulers.newThread())
-				.observeOn(AndroidSchedulers.mainThread())
-				.subscribe(integer -> {
-					if (integer == 0) {
+				//done
+				emitter.onNext(0);
+			}).subscribeOn(Schedulers.newThread())
+					.observeOn(AndroidSchedulers.mainThread())
+					.subscribe(integer -> {
+						if (integer == 0) {
 
-						//load recyclerView
-						mPlayListAdapter = new PlayListAdapter(this, mPlayListItemList);
-						mPlayListBinding.recyclerView.setAdapter(mPlayListAdapter);
-					}
-				});
-		Data.sDisposables.add(disposable);
+							//load recyclerView
+							mPlayListAdapter = new PlayListAdapter(this, mPlayListItemList);
+							mPlayListBinding.recyclerView.setAdapter(mPlayListAdapter);
+						}
+					});
+			Data.sDisposables.add(disposable);
+		}
+
 	}
 
 	@Override

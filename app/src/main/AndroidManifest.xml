@@ -50,7 +50,7 @@
                 android:theme="@style/LightTheme.NoActionBar"
                 />
         <activity
-                android:name=".activity.MainActivity"
+                android:name=".activity.main.MainActivity"
                 android:launchMode="singleTask"
                 android:theme="@style/MainActivityTheme"
                 android:windowSoftInputMode="stateHidden|adjustPan"

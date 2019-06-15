@@ -2,6 +2,7 @@ package top.geek_studio.chenlongcould.musicplayer.fragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -10,13 +11,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import org.jetbrains.annotations.NotNull;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
-import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter2ArtistList;
 import top.geek_studio.chenlongcould.musicplayer.model.ArtistItem;
 import top.geek_studio.chenlongcould.musicplayer.model.Item;
@@ -96,25 +99,30 @@ public final class ArtistListFragment extends BaseListFragment {
 	}
 
 	private void initArtistData() {
-		ArtistThreadPool.post(() -> {
-			if (artistItemList.size() == 0) {
-				final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, null, null, null, null);
-				if (cursor != null) {
-					cursor.moveToFirst();
+		if (ContextCompat.checkSelfPermission(mMainActivity,
+				android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+			ActivityCompat.requestPermissions(mMainActivity, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, Values.REQUEST_WRITE_EXTERNAL_STORAGE);
+		} else {
+			ArtistThreadPool.post(() -> {
+				if (artistItemList.size() == 0) {
+					final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, null, null, null, null);
+					if (cursor != null) {
+						cursor.moveToFirst();
 
-					do {
-						String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
-						String albumId = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID));
-						final ArtistItem artistItem = new ArtistItem(albumName, Integer.parseInt(albumId));
-						artistItemList.add(artistItem);
-						artistItemListBackup.add(artistItem);
-					} while (cursor.moveToNext());
+						do {
+							String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
+							String albumId = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID));
+							final ArtistItem artistItem = new ArtistItem(albumName, Integer.parseInt(albumId));
+							artistItemList.add(artistItem);
+							artistItemListBackup.add(artistItem);
+						} while (cursor.moveToNext());
 
-					cursor.close();
-					mRecyclerView.post(() -> mAdapter2ArtistList.notifyDataSetChanged());
-				}   //initData
-			}
-		});
+						cursor.close();
+						mRecyclerView.post(() -> mAdapter2ArtistList.notifyDataSetChanged());
+					}   //initData
+				}
+			});
+		}
 	}
 
 	public RecyclerView getRecyclerView() {

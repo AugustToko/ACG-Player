@@ -18,7 +18,7 @@ import androidx.annotation.RequiresApi;
 import io.reactivex.disposables.Disposable;
 import org.litepal.LitePal;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
-import top.geek_studio.chenlongcould.musicplayer.activity.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.database.ArtistArtPath;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;

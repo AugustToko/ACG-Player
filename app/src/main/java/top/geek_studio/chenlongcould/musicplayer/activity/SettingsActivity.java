@@ -28,6 +28,7 @@ import org.litepal.LitePalDB;
 import top.geek_studio.chenlongcould.geeklibrary.DialogUtil;
 import top.geek_studio.chenlongcould.musicplayer.*;
 import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseCompatActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivitySettingsBinding;
@@ -378,7 +379,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 			startService(intent);
 
-			// TODO: 2019/5/30 专门设立一个action用来更新 notification
+			// TODO: 2019/5/30 专门设立一个 action 用来更新 notification
 			if (Data.HAS_PLAYED) {
 				try {
 					if (Data.sMusicBinder.isPlayingMusic()) {
@@ -674,7 +675,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 		final ImageView imageView = findViewById(R.id.theme_preview);
 
 		//load theme
-		if (Data.sTheme != null) {
+		if (!Data.sTheme.getId().equals("null")) {
 			imageView.setVisibility(View.VISIBLE);
 			GlideApp.with(this)
 					.load(Data.sTheme.getThumbnail())
