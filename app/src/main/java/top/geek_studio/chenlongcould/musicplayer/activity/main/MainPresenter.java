@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.text.TextUtils;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -31,6 +32,8 @@ import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
  * @date : 2019/06/15/08
  */
 public class MainPresenter implements MainContract.Presenter {
+
+	private static final String TAG = "MainPresenter";
 
 	private final MainContract.View mView;
 
@@ -81,6 +84,9 @@ public class MainPresenter implements MainContract.Presenter {
 
 	@Override
 	public void filterData(String key) {
+
+		Log.d(TAG, "filterData: " + key);
+
 		final String tabOrder = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT
 				, MainActivity.DEFAULT_TAB_ORDER);
 		assert tabOrder != null;
@@ -98,7 +104,8 @@ public class MainPresenter implements MainContract.Presenter {
 				//algorithm
 				for (final MusicItem item : Data.sMusicItemsBackUp) {
 					final String name = item.getMusicName();
-					if (name.contains(key.toLowerCase()) || name.contains(key.toUpperCase())) {
+					if (name.toLowerCase().contains(key.toLowerCase())) {
+						Log.d(TAG, "filterData: ------- " + name);
 						Data.sMusicItems.add(item);
 					}
 				}
@@ -121,7 +128,7 @@ public class MainPresenter implements MainContract.Presenter {
 				//algorithm
 				for (final AlbumItem item : albumListFragment.getAlbumItemListBackup()) {
 					final String name = item.getAlbumName();
-					if (name.contains(key.toLowerCase()) || name.contains(key.toUpperCase())) {
+					if (name.toLowerCase().contains(key.toLowerCase())) {
 						albumListFragment.getAlbumItemList().add(item);
 					}
 				}

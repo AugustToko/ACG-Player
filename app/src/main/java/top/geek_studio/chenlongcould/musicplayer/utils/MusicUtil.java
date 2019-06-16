@@ -235,13 +235,14 @@ public class MusicUtil {
 				, String.valueOf(descriptionCompat.getTitle())
 				, descriptionCompat.getMediaUri().getPath())
 				.musicAlbum(String.valueOf(descriptionCompat.getSubtitle()))
-				.addTime(bundle.getInt("addTime"))
-				.artist(bundle.getString("artist"))
+				.addTime(bundle.getLong("addTime"))
+				.artist(String.valueOf(descriptionCompat.getDescription()))
 				.duration(bundle.getInt("duration"))
 				.mimeName(bundle.getString("mimeType"))
 				.size(bundle.getInt("size"))
 				.addAlbumId(bundle.getInt("albumId"))
-				.addArtistId(bundle.getInt("artistId"));
+				.addArtistId(bundle.getInt("artistId"))
+				.duration(bundle.getLong("duration"));
 		return b2.build();
 	}
 
@@ -255,6 +256,7 @@ public class MusicUtil {
 		bundle.putLong("addTime", item.getAddTime());
 		bundle.putInt("size", item.getSize());
 		bundle.putString("mimeType", item.getMimeName());
+		bundle.putLong("duration", item.getDuration());
 
 		final MediaDescriptionCompat.Builder builder = new MediaDescriptionCompat.Builder()
 				.setTitle(item.getMusicName())

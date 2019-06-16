@@ -308,7 +308,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 							Data.sCurrentMusicItem = item;
 							Data.sHistoryPlayed.add(item);
 							ListViewActivity.sendEmptyMessageStatic(ListViewActivity.NotLeakHandler.NOTI_ADAPTER_CHANGED);
-							Log.d(TAG, "onReceive: common item is not same, new item name: " + item.getMusicName());
+							Log.d(TAG, "onReceive: common item is not same, new item name: " + item.toString());
 						}
 
 						final Bitmap cover = Utils.Audio.getCoverBitmapFull(context, Data.sCurrentMusicItem.getAlbumId());

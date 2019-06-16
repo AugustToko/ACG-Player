@@ -1,121 +1,146 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        >
 
-    <LinearLayout
-            android:id="@+id/body"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+    <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent" android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            >
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_16"
-            android:layout_marginTop="@dimen/margin_16"
-            android:text="@string/brief_information"
-            android:textColor="@color/colorPrimary"
-            android:textSize="24sp" />
+        <LinearLayout
+                android:id="@+id/body"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                >
 
-        <TextView
-            android:id="@+id/t1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_16"
-            android:layout_marginTop="@dimen/margin_16"
-            android:text="@string/play_most_times"
-            android:textSize="18sp" />
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/margin_16"
+                    android:layout_marginTop="@dimen/margin_16"
+                    android:text="@string/brief_information"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="24sp"
+                    />
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_8">
+            <TextView
+                    android:id="@+id/t1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/margin_16"
+                    android:layout_marginTop="@dimen/margin_16"
+                    android:text="@string/play_most_times"
+                    android:textSize="18sp"
+                    />
 
-            <include
-                android:id="@+id/include_item_playtimes"
-                layout="@layout/recycler_music_list_item" />
+            <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_8"
+                    >
 
-        </FrameLayout>
+                <include
+                        android:id="@+id/include_item_playtimes"
+                        layout="@layout/recycler_music_list_item"
+                        />
 
-        <View
-            android:id="@+id/l1"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/line_color" />
+            </FrameLayout>
 
-        <TextView
-            android:id="@+id/t2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_16"
-            android:layout_marginTop="@dimen/margin_16"
-            android:text="@string/play_for_the_longest_time"
-            android:textSize="18sp" />
+            <View
+                    android:id="@+id/l1"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/line_color"
+                    />
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_8">
+            <TextView
+                    android:id="@+id/t2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/margin_16"
+                    android:layout_marginTop="@dimen/margin_16"
+                    android:text="@string/play_for_the_longest_time"
+                    android:textSize="18sp"
+                    />
 
-            <include
-                android:id="@+id/include_item_play_duration"
-                layout="@layout/recycler_music_list_item" />
+            <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_8"
+                    >
 
-        </FrameLayout>
+                <include
+                        android:id="@+id/include_item_play_duration"
+                        layout="@layout/recycler_music_list_item"
+                        />
 
-        <View
-            android:id="@+id/l2"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/line_color" />
+            </FrameLayout>
 
-        <TextView
-            android:id="@+id/t3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_16"
-            android:layout_marginTop="@dimen/margin_16"
-            android:text="@string/minimum_time_play"
-            android:textSize="18sp" />
+            <View
+                    android:id="@+id/l2"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/line_color"
+                    />
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_8">
+            <TextView
+                    android:id="@+id/t3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/margin_16"
+                    android:layout_marginTop="@dimen/margin_16"
+                    android:text="@string/minimum_time_play"
+                    android:textSize="18sp"
+                    />
 
-            <include
-                android:id="@+id/include_item_play_minitimes"
-                layout="@layout/recycler_music_list_item" />
+            <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_8"
+                    >
 
-        </FrameLayout>
+                <include
+                        android:id="@+id/include_item_play_minitimes"
+                        layout="@layout/recycler_music_list_item"
+                        />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_16"
-            android:layout_marginTop="@dimen/margin_16"
-            android:text="@string/statistics"
-            android:textColor="@color/colorPrimary"
-            android:textSize="24sp" />
+            </FrameLayout>
 
-        <TextView
-            android:id="@+id/text_total_plays"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_16"
-            android:layout_marginTop="@dimen/margin_16"
-            android:text="@string/total_plays"
-            android:textSize="18sp" />
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/margin_16"
+                    android:layout_marginTop="@dimen/margin_16"
+                    android:text="@string/statistics"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="24sp"
+                    />
 
-        <TextView
-            android:id="@+id/text_total_play_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_16"
-            android:layout_marginTop="@dimen/margin_16"
-            android:text="@string/total_playback_time"
-            android:textSize="18sp" />
+            <TextView
+                    android:id="@+id/text_total_plays"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/margin_16"
+                    android:layout_marginTop="@dimen/margin_16"
+                    android:text="@string/total_plays"
+                    android:textSize="18sp"
+                    />
 
-    </LinearLayout>
+            <TextView
+                    android:id="@+id/text_total_play_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/margin_16"
+                    android:layout_marginTop="@dimen/margin_16"
+                    android:text="@string/total_playback_time"
+                    android:textSize="18sp"
+                    />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
 </layout>

@@ -128,7 +128,7 @@ public final class MusicDetailFragment extends BaseFragment {
 	private HandlerThread mHandlerThread;
 	/**
 	 * 最后一次加载的album id
-	 * @see #setCurrentData(MusicItem, Bitmap)
+	 * @see #setCurrentData(MusicItem, Bitmap, boolean...)
 	 * */
 	private static int mLastAlbumId = -1;
 	/**
@@ -458,6 +458,7 @@ public final class MusicDetailFragment extends BaseFragment {
 
 		mSlidingUpPanelLayout.post(() -> {
 			View v = view.findViewById(R.id.frame_ctrl);
+			// FIXME: 2019/6/15 在系统显示状态为默认时会造成覆盖现象
 			mSlidingUpPanelLayout.setPanelHeight(view.getHeight() - v.getTop() - v.getHeight());
 		});
 
@@ -1575,6 +1576,7 @@ public final class MusicDetailFragment extends BaseFragment {
 						}
 
 						int duration = (int) Data.sCurrentMusicItem.getDuration();
+						if (duration == 0) return;
 
 						Log.d(TAG, "handleMessage: INIT_SEEK_BAR: duration: " + duration);
 

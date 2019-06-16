@@ -132,7 +132,7 @@ public final class MusicItem extends Item implements Parcelable {
 	@NonNull
 	@Override
 	public String toString() {
-		return mMusicName + " @ " + mMusicAlbum + " @ " + mMusicPath + "@" + mArtist;
+		return mMusicName + " @ " + mMusicAlbum + " @ " + mMusicPath + "@" + mArtist + "@duration: " + mDuration;
 	}
 
 	@Override

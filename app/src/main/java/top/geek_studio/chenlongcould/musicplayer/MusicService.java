@@ -697,6 +697,7 @@ public final class MusicService extends Service {
 					bundle.putLong("addTime", addTime);
 					bundle.putInt("size", size);
 					bundle.putString("mimeType", mimeType);
+					bundle.putLong("duration", duration);
 
 					final MediaDescriptionCompat.Builder builder = new MediaDescriptionCompat.Builder()
 							.setTitle(name)
