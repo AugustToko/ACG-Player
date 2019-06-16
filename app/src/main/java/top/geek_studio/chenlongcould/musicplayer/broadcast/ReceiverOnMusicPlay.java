@@ -7,11 +7,9 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
-import android.provider.MediaStore;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,13 +24,8 @@ import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
-import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author chenlongcould
@@ -125,90 +118,8 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		return null;
 	}
 
-	public static void playFromUri(@NonNull Context context, @Nullable Uri uri) {
-		if (Data.sMusicBinder != null && uri != null) {
-			List<MusicItem> songs = null;
-//
-			if (uri.getScheme() != null && uri.getAuthority() != null) {
-				if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
-					String songId = null;
-					if (uri.getAuthority().equals("com.android.providers.media.documents")) {
-						songId = getSongIdFromMediaProvider(uri);
-						Log.d(TAG, "playFromUri: getSongIdFromMediaProvider: " + songId);
-					} else if (uri.getAuthority().equals("media")) {
-						songId = uri.getLastPathSegment();
-						Log.d(TAG, "playFromUri: getLastPathSegment: " + songId);
-					}
-					if (songId != null) {
-						Cursor cursor = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-								null, MediaStore.Audio.AudioColumns._ID + "=?", new String[]{songId}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-						List<MusicItem> items = new ArrayList<>();
-						if (cursor != null && cursor.moveToFirst()) {
-							do {
-								items.add(MusicUtil.getSongFromCursorImpl(cursor));
-							} while (cursor.moveToNext());
-						}
-
-						if (cursor != null) {
-							cursor.close();
-						}
-
-						songs = items;
-
-						Log.d(TAG, "playFromUri: " + songs.get(0).toString());
-					}
-				}
-			}
-
-			if (songs == null) {
-				File songFile = null;
-				if (uri.getAuthority() != null && uri.getAuthority().equals("com.android.externalstorage.documents")) {
-					songFile = new File(Environment.getExternalStorageDirectory(), uri.getPath().split(":", 2)[1]);
-				}
-				if (songFile == null) {
-					String path = getFilePathFromUri(context, uri);
-					if (path != null) {
-						songFile = new File(path);
-					}
-				}
-				if (songFile == null && uri.getPath() != null) {
-					songFile = new File(uri.getPath());
-				}
-				if (songFile != null) {
-					Cursor cursor = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-							null, MediaStore.Audio.AudioColumns.DATA + "=?"
-							, new String[]{songFile.getAbsolutePath()}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-					List<MusicItem> items = new ArrayList<>();
-					if (cursor != null && cursor.moveToFirst()) {
-						do {
-							items.add(MusicUtil.getSongFromCursorImpl(cursor));
-						} while (cursor.moveToNext());
-					}
-
-					if (cursor != null) {
-						cursor.close();
-					}
-
-					songs = items;
-				}
-			}
-
-			//noinspection StatementWithEmptyBody
-			if (songs != null && !songs.isEmpty()) {
-				try {
-					Data.sMusicBinder.addNextWillPlayItem(songs.get(0));
-					MusicService.MusicControl.intentNext(context);
-				} catch (RemoteException e) {
-					e.printStackTrace();
-				}
-			} else {
-				//TODO the file is not listed in the media store
-			}
-		}
-	}
-
 	@Nullable
-	private static String getFilePathFromUri(Context context, Uri uri) {
+	public static String getFilePathFromUri(Context context, Uri uri) {
 		Cursor cursor = null;
 		final String column = "_data";
 		final String[] projection = {
@@ -232,7 +143,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 	}
 
 	@TargetApi(Build.VERSION_CODES.KITKAT)
-	private static String getSongIdFromMediaProvider(Uri uri) {
+	public static String getSongIdFromMediaProvider(Uri uri) {
 		return DocumentsContract.getDocumentId(uri).split(":")[1];
 	}
 
@@ -301,7 +212,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 
 					final MusicItem item = intent.getParcelableExtra("item");
 					if (item != null && item.getMusicID() != -1) {
-						if (item.getMusicID() == Data.sCurrentMusicItem.getMusicID()) {
+						if (Data.sCurrentMusicItem != null && item.getMusicID() == Data.sCurrentMusicItem.getMusicID()) {
 							Log.d(TAG, "onReceive: item is same break");
 							break;
 						} else {

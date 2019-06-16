@@ -4,12 +4,14 @@ import android.app.ActivityManager;
 import android.content.*;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.*;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -99,6 +101,8 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 				Data.shuffleOrderListSync(MainActivity.this, false);
 			}
+
+			receivedIntentCheck(getIntent());
 		}
 
 		@Override
@@ -270,8 +274,87 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		Log.d(TAG, "receivedIntentCheck: mimeType: " + mimeType);
 		Log.d(TAG, "receivedIntentCheck: action: " + action);
 
-		ReceiverOnMusicPlay.playFromUri(this, uri);
+		if (Data.sMusicBinder != null && uri != null) {
+			List<MusicItem> songs = null;
+//
+			if (uri.getScheme() != null && uri.getAuthority() != null) {
+				if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+					String songId = null;
+					if (uri.getAuthority().equals("com.android.providers.media.documents")) {
+						songId = ReceiverOnMusicPlay.getSongIdFromMediaProvider(uri);
+						Log.d(TAG, "playFromUri: getSongIdFromMediaProvider: " + songId);
+					} else if (uri.getAuthority().equals("media")) {
+						songId = uri.getLastPathSegment();
+						Log.d(TAG, "playFromUri: getLastPathSegment: " + songId);
+					}
+					if (songId != null) {
+						Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+								null, MediaStore.Audio.AudioColumns._ID + "=?", new String[]{songId}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+						List<MusicItem> items = new ArrayList<>();
+						if (cursor != null && cursor.moveToFirst()) {
+							do {
+								items.add(MusicUtil.getSongFromCursorImpl(cursor));
+							} while (cursor.moveToNext());
+						}
 
+						if (cursor != null) {
+							cursor.close();
+						}
+
+						songs = items;
+
+						Log.d(TAG, "playFromUri: " + songs.get(0).toString());
+					}
+				}
+			}
+
+			if (songs == null) {
+				File songFile = null;
+				if (uri.getAuthority() != null && uri.getAuthority().equals("com.android.externalstorage.documents")) {
+					songFile = new File(Environment.getExternalStorageDirectory(), uri.getPath().split(":", 2)[1]);
+				}
+				if (songFile == null) {
+					String path = ReceiverOnMusicPlay.getFilePathFromUri(this, uri);
+					if (path != null) {
+						songFile = new File(path);
+					}
+				}
+				if (songFile == null && uri.getPath() != null) {
+					songFile = new File(uri.getPath());
+				}
+				if (songFile != null) {
+					Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+							null, MediaStore.Audio.AudioColumns.DATA + "=?"
+							, new String[]{songFile.getAbsolutePath()}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+					List<MusicItem> items = new ArrayList<>();
+					if (cursor != null && cursor.moveToFirst()) {
+						do {
+							items.add(MusicUtil.getSongFromCursorImpl(cursor));
+						} while (cursor.moveToNext());
+					}
+
+					if (cursor != null) {
+						cursor.close();
+					}
+
+					songs = items;
+				}
+			}
+
+			//noinspection StatementWithEmptyBody
+			if (songs != null && !songs.isEmpty()) {
+				try {
+					final MusicItem item = songs.get(0);
+					Data.sMusicBinder.addNextWillPlayItem(item);
+					MusicService.MusicControl.intentNext(this);
+					Log.d(TAG, "playFromUri: done");
+				} catch (RemoteException e) {
+					e.printStackTrace();
+				}
+			} else {
+				//TODO the file is not listed in the media store
+			}
+		}
 	}
 
 	@NonNull

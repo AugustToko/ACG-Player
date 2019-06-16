@@ -78,8 +78,6 @@ public class MainPresenter implements MainContract.Presenter {
 		DBArtSync.startActionSyncAlbum(activity);
 
 		mView.initFragmentData();
-
-		mView.receivedIntentCheck(activity.getIntent());
 	}
 
 	@Override

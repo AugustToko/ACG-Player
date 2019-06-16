@@ -237,7 +237,7 @@ public class MusicUtil {
 				.musicAlbum(String.valueOf(descriptionCompat.getSubtitle()))
 				.addTime(bundle.getLong("addTime"))
 				.artist(String.valueOf(descriptionCompat.getDescription()))
-				.duration(bundle.getInt("duration"))
+				.duration(bundle.getLong("duration"))
 				.mimeName(bundle.getString("mimeType"))
 				.size(bundle.getInt("size"))
 				.addAlbumId(bundle.getInt("albumId"))
