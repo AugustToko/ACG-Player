@@ -143,10 +143,6 @@ public final class ThemeActivity extends BaseCompatActivity {
 				break;
 
 				case R.id.menu_toolbar_theme_reset: {
-					final SharedPreferences.Editor preferences = super.preferences.edit();
-					preferences.putBoolean(Values.SharedPrefsTag.THEME_USE_NOTE, false);
-					preferences.apply();
-
 					final AlertDialog.Builder builder = new AlertDialog.Builder(ThemeActivity.this);
 					builder.setTitle(getString(R.string.sure_int));
 					builder.setMessage(getString(R.string.sure_set_def_theme_int));
@@ -155,6 +151,8 @@ public final class ThemeActivity extends BaseCompatActivity {
 						Data.sTheme = null;
 						SharedPreferences.Editor editor = super.preferences.edit();
 						editor.putString(Values.SharedPrefsTag.SELECT_THEME, DEFAULT_THEME);
+						editor.apply();
+						editor.putBoolean(Values.SharedPrefsTag.THEME_USE_NOTE, false);
 						editor.apply();
 
 						loadDataUI();

@@ -367,15 +367,18 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	public void notifyAdapter(char fragmentId) {
 		switch (fragmentId) {
 			case MainActivity.MUSIC_LIST_FRAGMENT_ID: {
-				musicListFragment.getAdapter().notifyDataSetChanged();
+				if (musicListFragment.getAdapter() != null)
+					musicListFragment.getAdapter().notifyDataSetChanged();
 			}
 			break;
 			case ALBUM_LIST_FRAGMENT_ID: {
-				albumListFragment.getAdapter().notifyDataSetChanged();
+				if (albumListFragment.getAdapter() != null)
+					albumListFragment.getAdapter().notifyDataSetChanged();
 			}
 			break;
 			case ARTIST_LIST_FRAGMENT_ID: {
-				artistListFragment.getAdapter().notifyDataSetChanged();
+				if (artistListFragment.getAdapter() != null)
+					artistListFragment.getAdapter().notifyDataSetChanged();
 			}
 			break;
 			default:
@@ -938,6 +941,8 @@ public final class MainActivity extends BaseListActivity implements MainContract
 			@Override
 			public void onError(Throwable e) {
 				Log.d(TAG, "onError: " + e.getLocalizedMessage());
+				mMainBinding.styleNav.setVisibility(View.INVISIBLE);
+				GlideApp.with(MainActivity.this).clear(mMainBinding.bgImage);
 			}
 
 			@Override

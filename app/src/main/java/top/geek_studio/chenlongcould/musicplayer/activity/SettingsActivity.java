@@ -675,7 +675,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 		final ImageView imageView = findViewById(R.id.theme_preview);
 
 		//load theme
-		if (!Data.sTheme.getId().equals("null")) {
+		if (Data.sTheme != null && !Data.sTheme.getId().equals("null")) {
 			imageView.setVisibility(View.VISIBLE);
 			GlideApp.with(this)
 					.load(Data.sTheme.getThumbnail())
