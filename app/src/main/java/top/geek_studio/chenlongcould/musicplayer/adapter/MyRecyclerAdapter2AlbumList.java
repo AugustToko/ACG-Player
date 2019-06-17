@@ -2,14 +2,11 @@ package top.geek_studio.chenlongcould.musicplayer.adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.provider.MediaStore;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -93,6 +90,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 			default:
 				view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_item_album_grid, viewGroup, false);
 		}
+
 		final ViewHolder holder = new ViewHolder(view);
 
 		holder.mUView.setOnClickListener(v -> {
@@ -101,8 +99,8 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 			final ActivityOptionsCompat compat = ActivityOptionsCompat.makeSceneTransitionAnimation(mMainActivity
 					, holder.mImageView, mMainActivity.getString(R.string.transition_album_art));
 			Intent intent = new Intent(mMainActivity, AlbumDetailActivity.class);
-			intent.putExtra("key", keyWords);
-			intent.putExtra("_id", mAlbumNameList.get(holder.getAdapterPosition()).getAlbumId());
+			intent.putExtra(AlbumDetailActivity.IntentKey.ALBUM_NAME, keyWords);
+			intent.putExtra(AlbumDetailActivity.IntentKey.ID, mAlbumNameList.get(holder.getAdapterPosition()).getAlbumId());
 			mMainActivity.startActivity(intent, compat.toBundle());
 		});
 
@@ -131,10 +129,10 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 						}
 					})
 					.into(viewHolder.mImageView);
+		} else {
+			final AlbumItem albumItem = mAlbumNameList.get(viewHolder.getAdapterPosition());
+			albumLoader(mMainActivity, viewHolder, albumItem);
 		}
-
-//		AlbumItem albumItem = mAlbumNameList.get(viewHolder.getAdapterPosition());
-//		albumLoader(mMainActivity, viewHolder, albumItem);
 	}
 
 	private void albumLoader(@NonNull final Context activity, @NonNull final ViewHolder holder, final AlbumItem albumItem) {
@@ -147,167 +145,174 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
 		final String[] albumPath = {null};
 
-		final Cursor cursor = activity.getContentResolver().query(
-				Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + albumId)
-				, new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
+		// load from def-db
+//		final Cursor cursor = activity.getContentResolver().query(
+//				Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + albumId)
+//				, new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
+//
+//		if (cursor != null && cursor.getCount() != 0) {
+//			cursor.moveToFirst();
+//			albumPath[0] = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART));
+//			cursor.close();
+//		} else {
+//			Log.d(TAG, "albumLoader: the DEFAULT_DB is null or empty!");
+//		}
+//
+//		final String baseCoverPath = albumPath[0];
+//
+//		if (baseCoverPath != null && !TextUtils.isEmpty(baseCoverPath)) {
+//			final File file = new File(baseCoverPath);
+//			if (file.exists()) {
+//				Log.d(TAG, "albumLoader: the album id DEFAULT_DB is ability, loading def");
+//				loadPath2ImageView(baseCoverPath, holder);
+//			} else {
+//				//load default res
+//				imageView.post(() -> GlideApp.with(imageView)
+//						.load(R.drawable.default_album_art)
+//						.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+//						.centerCrop()
+//						.override(100, 100)
+//						.diskCacheStrategy(DiskCacheStrategy.NONE)
+//						.into(imageView));
+//			}
+//		} else {
 
-		if (cursor != null && cursor.getCount() != 0) {
-			cursor.moveToFirst();
-			albumPath[0] = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART));
-			cursor.close();
-		} else {
-			Log.d(TAG, "albumLoader: the DEFAULT_DB is null or empty!");
-		}
+		Log.d(TAG, "albumLoader: the album id DEFAULT_DB is NOT ability, loading from {network or diskCache}");
 
-		final String baseCoverPath = albumPath[0];
+		//检查是否勾选了网络Album
+		if (PreferenceUtil.getDefault(activity).getBoolean(Values.SharedPrefsTag.USE_NET_WORK_ALBUM, false)) {
+			final List<CustomAlbumPath> customs = LitePal.where("mAlbumId = ?", String.valueOf(albumId)).find(CustomAlbumPath.class);
 
-		if (baseCoverPath != null && !TextUtils.isEmpty(baseCoverPath)) {
-			final File file = new File(baseCoverPath);
-			if (file.exists()) {
-				Log.d(TAG, "albumLoader: the album id DEFAULT_DB is ability, loading def");
-				loadPath2ImageView(baseCoverPath, holder);
-			} else {
-				//load default res
-				imageView.post(() -> GlideApp.with(imageView)
-						.load(R.drawable.default_album_art)
-						.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-						.centerCrop()
-						.override(100, 100)
-						.diskCacheStrategy(DiskCacheStrategy.NONE)
-						.into(imageView));
-			}
-		} else {
-			Log.d(TAG, "albumLoader: the album id DEFAULT_DB is NOT ability, loading from {network or diskCache}");
-			//检查是否勾选了网络Album
-			if (PreferenceUtil.getDefault(activity).getBoolean(Values.SharedPrefsTag.USE_NET_WORK_ALBUM, false)) {
-				final List<CustomAlbumPath> customs = LitePal.where("mAlbumId = ?", String.valueOf(albumId)).find(CustomAlbumPath.class);
+			//检测DB是否准备完成(IntentService 是否完成)
+			if (customs.size() != 0) {
+				final CustomAlbumPath custom = customs.get(0);
 
-				//检测DB是否准备完成(IntentService 是否完成)
-				if (customs.size() != 0) {
-					final CustomAlbumPath custom = customs.get(0);
+				try {
+					final File file = new File(custom.getAlbumArt());
 
-					try {
-						final File file = new File(custom.getAlbumArt());
+					//判断CUSTOM_DB下albumArt是否存在
+					if ("null".equals(custom.getAlbumArt()) && !file.exists()) {
 
-						//判断CUSTOM_DB下albumArt是否存在
-						if ("null".equals(custom.getAlbumArt()) && !file.exists()) {
+						final String mayPath = MyRecyclerAdapter.Loader.ifExists(albumId);
 
-							final String mayPath = MyRecyclerAdapter.Loader.ifExists(albumId);
+						if (mayPath != null) {
+							Log.d(TAG, "onBindViewHolder: (in CUSTOM_DB) DB not ability, path is ability" +
+									", save in db and loading...");
 
-							if (mayPath != null) {
-								Log.d(TAG, "onBindViewHolder: (in CUSTOM_DB) DB not ability, path is ability, save in db and loading...");
+							custom.setAlbumArt(mayPath);
+							custom.save();
+							loadPath2ImageView(mayPath, holder);
+						} else {
+							//DB内不存在Cover, 且缓存也不存在, 进行下载
+							final String request = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" +
+									App.LAST_FM_KEY +
+									"&artist=" +
+									artist +
+									"&album=" +
+									albumName;
 
-								custom.setAlbumArt(mayPath);
-								custom.save();
-								loadPath2ImageView(mayPath, holder);
-							} else {
-								//DB内不存在Cover, 且缓存也不存在, 进行下载
-								final String request = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" +
-										App.LAST_FM_KEY +
-										"&artist=" +
-										artist +
-										"&album=" +
-										albumName;
-								HttpUtil.sedOkHttpRequest(request, new Callback() {
-									@Override
-									public void onFailure(@NotNull Call call, @NotNull IOException e) {
-										imageView.post(() -> Toast.makeText(activity, e.getMessage(), Toast.LENGTH_SHORT).show());
-									}
+							HttpUtil.sedOkHttpRequest(request, new Callback() {
+								@Override
+								public void onFailure(@NotNull Call call, @NotNull IOException e) {
+									imageView.post(() -> Toast.makeText(activity, e.getMessage(), Toast.LENGTH_SHORT).show());
+								}
 
-									@Override
-									public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-										if (response.body() != null) {
+								@Override
+								public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+									if (response.body() != null) {
 
-											final Document document = Jsoup.parse(response.body().string(), "UTF-8", new Parser(new XmlTreeBuilder()));
-											final Elements content = document.getElementsByAttribute("status");
-											final String status = content.select("lfm[status]").attr("status");
+										final Document document = Jsoup.parse(response.body().string()
+												, "UTF-8", new Parser(new XmlTreeBuilder()));
 
-											if (RESULT_OK.equals(status)) {
-												StringBuilder img = new StringBuilder(content.select("image[size=extralarge]").text());
+										final Elements content = document.getElementsByAttribute("status");
+										final String status = content.select("lfm[status]").attr("status");
 
-												if (img.toString().contains("http") && img.toString().contains("https")) {
-													Log.d(TAG, "onResponse: ok, now downloading...");
+										if (RESULT_OK.equals(status)) {
+											StringBuilder img = new StringBuilder(content.select("image[size=extralarge]").text());
 
-													DownloadUtil.get().download(img.toString(), Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separatorChar + "AlbumCovers"
-															, albumId + "." + img.substring(img.lastIndexOf(".") + 1), new DownloadUtil.OnDownloadListener() {
-																@Override
-																public void onDownloadSuccess(File file) {
-																	Log.d(TAG, "onDownloadSuccess: " + file.getAbsolutePath());
-																	content.clear();
+											if (img.toString().contains("http") && img.toString().contains("https")) {
+												Log.d(TAG, "onResponse: ok, now downloading...");
 
-																	final String newPath = file.getAbsolutePath();
-																	final CustomAlbumPath c = customs.get(0);
-																	c.setAlbumArt(newPath);
-																	c.save();
+												DownloadUtil.get().download(
+														img.toString(),
+														Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separatorChar + "AlbumCovers",
+														albumId + "." + img.substring(img.lastIndexOf(".") + 1), new DownloadUtil.OnDownloadListener() {
+															@Override
+															public void onDownloadSuccess(File file) {
+																Log.d(TAG, "onDownloadSuccess: " + file.getAbsolutePath());
+																content.clear();
 
-																	try {
-																		if (Data.sMusicBinder.getCurrentItem().getAlbumId() == albumId && Data.getCurrentCover() == null) {
-																			Data.setCurrentCover(BitmapFactory.decodeFile(newPath));
-																		}
-																	} catch (RemoteException e) {
-																		e.printStackTrace();
+																final String newPath = file.getAbsolutePath();
+																final CustomAlbumPath c = customs.get(0);
+																c.setAlbumArt(newPath);
+																c.save();
+
+																try {
+																	if (Data.sMusicBinder.getCurrentItem().getAlbumId() == albumId && Data.getCurrentCover() == null) {
+																		Data.setCurrentCover(BitmapFactory.decodeFile(newPath));
 																	}
-
-																	loadPath2ImageView(file.getAbsolutePath(), holder);
+																} catch (RemoteException e) {
+																	e.printStackTrace();
 																}
 
-																@Override
-																public void onDownloading(int progress) {
+																loadPath2ImageView(file.getAbsolutePath(), holder);
+															}
 
-																}
+															@Override
+															public void onDownloading(int progress) {
 
-																@Override
-																public void onDownloadFailed(Exception e) {
-																	Log.d(TAG, "onDownloadFailed: " + img.toString() + " " + e.getMessage());
-																}
-															});
-												} else {
-													Log.d(TAG, "onResponse: img url error" + img);
-													loadDefaultArt(holder);
-												}
+															}
+
+															@Override
+															public void onDownloadFailed(Exception e) {
+																Log.d(TAG, "onDownloadFailed: " + img.toString() + " " + e.getMessage());
+															}
+														});
 											} else {
-												Log.d(TAG, "onResponse: result not ok");
+												Log.d(TAG, "onResponse: img url error" + img);
 												loadDefaultArt(holder);
 											}
 										} else {
-											Log.d(TAG, "onResponse: response is NUll!");
-											imageView.post(() -> Toast.makeText(activity, "response is NUll!", Toast.LENGTH_SHORT).show());
+											Log.d(TAG, "onResponse: result not ok");
 											loadDefaultArt(holder);
 										}
+									} else {
+										Log.d(TAG, "onResponse: response is NUll!");
+										imageView.post(() -> Toast.makeText(activity, "response is NUll!", Toast.LENGTH_SHORT).show());
+										loadDefaultArt(holder);
 									}
-								});
-							}
-
-						} else {
-							Log.d(TAG, "albumLoader: has data in DB, loading...");
-							loadPath2ImageView(file.getAbsolutePath(), holder);
+								}
+							});
 						}
-					} catch (Exception e) {
-						Log.d(TAG, "albumLoader: load customAlbum Error, loading default..., msg: " + e.getMessage());
-						loadDefaultArt(holder);
+					} else {
+						Log.d(TAG, "albumLoader: has data in DB, loading...");
+						loadPath2ImageView(file.getAbsolutePath(), holder);
 					}
-				} else {
-					Log.d(TAG, "customDB size is 0");
+				} catch (Exception e) {
+					Log.d(TAG, "albumLoader: load customAlbum Error, loading default..., msg: " + e.getMessage());
 					loadDefaultArt(holder);
 				}
 			} else {
-				Log.d(TAG, "albumLoader: load from Cache..., msg: FROM NET switch not checked");
-				if (!TextUtils.isEmpty(baseCoverPath) && !"null".equals(baseCoverPath)) {
-					assert baseCoverPath != null;
-					File file = new File(baseCoverPath);
-					if (file.exists()) {
-						Log.d(TAG, "albumLoader: exists...");
-						loadPath2ImageView(baseCoverPath, holder);
-					} else {
-						loadDefaultArt(holder);
-					}
-				} else {
-					Log.d(TAG, "albumLoader: not exists");
-					loadDefaultArt(holder);
-				}
+				Log.d(TAG, "customDB size is 0");
+				loadDefaultArt(holder);
 			}
+		} else {
+			loadDefaultArt(holder);
+//				Log.d(TAG, "albumLoader: load from Cache..., msg: FROM NET switch not checked");
+//				if (!TextUtils.isEmpty(baseCoverPath) && !"null".equals(baseCoverPath)) {
+//					assert baseCoverPath != null;
+//					File file = new File(baseCoverPath);
+//					if (file.exists()) {
+//						Log.d(TAG, "albumLoader: exists...");
+//						loadPath2ImageView(baseCoverPath, holder);
+//					} else {
+//						loadDefaultArt(holder);
+//					}
+//				} else {
+//					Log.d(TAG, "albumLoader: not exists");
+//					loadDefaultArt(holder);
+//				}
 		}
-
 	}
 
 	/**

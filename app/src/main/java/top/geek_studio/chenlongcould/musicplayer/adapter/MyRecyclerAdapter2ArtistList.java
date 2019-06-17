@@ -118,25 +118,26 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 				return;
 			}
 
-			List<ArtistArtPath> customs = LitePal.where("mArtistId = ?", String.valueOf(artistId)).find(ArtistArtPath.class);
+			LitePal.useDefault();
+			List<ArtistArtPath> customs = LitePal.where("mArtistId = ?", String.valueOf(artistId))
+					.find(ArtistArtPath.class);
 
 			if (customs.size() != 0) {
 				final ArtistArtPath custom = customs.get(0);
 
-				String path = custom.getArtistArt();
+				final String path = custom.getArtistArt();
 
 				if (TextUtils.isEmpty(path) || path.toLowerCase().equals("null") || path.toLowerCase().equals("none")) {
 
 					final String mayPath = ifExists(artistId);
 
 					if (mayPath != null) {
-						Log.d(TAG, "onBindViewHolder: (in CUSTOM_DB) DB not ability, path is ability, save in db and loading...");
+						Log.d(TAG, "onBindViewHolder: (in CUSTOM_DB) DB not ability, path is ability, save in db " +
+								"and loading...");
 
 						custom.setArtistArt(mayPath);
 						custom.save();
-
 						loadToImageView(holder, index, mayPath);
-
 					} else {
 						Log.d(TAG, "onBindViewHolder: (in CUSTOM_DB) DB not ability, path not ability, download...");
 						//download
@@ -224,6 +225,7 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 						Log.d(TAG, "onBindViewHolder: already in DB but not a file path");
 						// 存在于数据库 但 路径失效了
 						loadDEF(holder, index);
+						custom.delete();
 					}
 				}
 			} else {

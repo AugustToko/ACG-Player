@@ -74,7 +74,7 @@ public final class DBArtSync extends IntentService {
 					LitePal.deleteAll(CustomAlbumPath.class);
 					do {
 						int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID));
-//					Log.d(TAG, "handleActionSyncAlbum: add albumId: " + albumId);
+						Log.d(TAG, "handleActionSyncAlbum: add albumId: " + albumId);
 						CustomAlbumPath customAlbumPath = new CustomAlbumPath();
 						customAlbumPath.setAlbumId(albumId);
 						customAlbumPath.save();
@@ -101,7 +101,7 @@ public final class DBArtSync extends IntentService {
 					LitePal.deleteAll(ArtistArtPath.class);
 					do {
 						int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID));
-//					Log.d(TAG, "handleActionSyncAlbum: add artist: " + artistId);
+						Log.d(TAG, "handleActionSyncAlbum: add artist: " + artistId);
 						ArtistArtPath artistArtPath = new ArtistArtPath();
 						artistArtPath.setArtistId(artistId);
 						artistArtPath.save();

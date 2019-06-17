@@ -927,6 +927,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 						final String bgPath = ThemeUtils.getBgFileByName(theme, area);
 
+						// todo 自定义模糊
 						GlideApp.with(MainActivity.this).load(bgPath)
 								.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
 								.apply(bitmapTransform(new BlurTransformation(10, 10)))

@@ -30,7 +30,6 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.media.session.MediaButtonReceiver;
-import io.reactivex.disposables.Disposable;
 import org.litepal.LitePal;
 import org.litepal.LitePalDB;
 import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
@@ -225,8 +224,6 @@ public final class MusicService extends Service {
 
 	private PowerManager.WakeLock wakeLock;
 
-	private List<Disposable> disposableList = new ArrayList<>();
-
 	public MusicService() {
 		Log.d(TAG, "MusicService: ");
 	}
@@ -249,9 +246,7 @@ public final class MusicService extends Service {
 		wakeLock.setReferenceCounted(false);
 
 		MusicControl.init(MusicService.this);
-
 		NotificationTool.init(MusicService.this);
-
 
 		final ComponentName mediaButtonReceiverComponentName = new ComponentName(getApplicationContext()
 				, MediaButtonIntentReceiver.class);
@@ -265,11 +260,13 @@ public final class MusicService extends Service {
 		mediaSession.setCallback(new MediaSessionCompat.Callback() {
 			@Override
 			public void onPlay() {
+				Log.d(TAG, "onPlay: setCallback");
 				MusicControl.intentPlay(MusicService.this);
 			}
 
 			@Override
 			public void onPause() {
+				Log.d(TAG, "onPause: ");
 				MusicControl.intentPause(MusicService.this);
 			}
 
@@ -292,11 +289,13 @@ public final class MusicService extends Service {
 
 			@Override
 			public void onSeekTo(long pos) {
+				Log.d(TAG, "onSeekTo: " + pos);
 				MusicControl.seekTo((int) pos);
 			}
 
 			@Override
 			public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
+				Log.d(TAG, "onMediaButtonEvent: ");
 				return MediaButtonIntentReceiver.handleIntent(MusicService.this, mediaButtonEvent);
 			}
 		});
@@ -323,7 +322,7 @@ public final class MusicService extends Service {
 	private void updateMediaSessionMetaData() {
 		CustomThreadPool.post(() -> {
 			final MusicItem song = mMusicItem;
-			Log.d(TAG, "updateMediaSessionMetaData: " + song.getMusicID());
+//			Log.d(TAG, "updateMediaSessionMetaData: " + song.getMusicID());
 
 			if (song.getMusicID() == -1) {
 				mediaSession.setMetadata(null);
