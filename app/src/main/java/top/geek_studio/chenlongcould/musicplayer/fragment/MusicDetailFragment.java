@@ -1152,8 +1152,8 @@ public final class MusicDetailFragment extends BaseFragment {
 						}
 					});
 					animator.start();
-					break;
 				}
+				break;
 				case MusicService.PlayType.REPEAT_LIST: {
 					mRepeatButton.setImageResource(R.drawable.ic_repeat_one_white_24dp);
 					PreferenceUtil.getDefault(mMainActivity).edit().putString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_ONE).apply();
@@ -1187,12 +1187,13 @@ public final class MusicDetailFragment extends BaseFragment {
 						}
 					});
 					animator.start();
-					break;
 				}
+				break;
 				default:
 			}
 
-			Log.d(TAG, "setClickListener: repeat mode: " + PreferenceUtil.getDefault(mMainActivity).getString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE));
+			Log.d(TAG, "setClickListener: current repeat mode: " + PreferenceUtil.getDefault(mMainActivity)
+					.getString(Values.SharedPrefsTag.PLAY_TYPE, MusicService.PlayType.REPEAT_NONE));
 		});
 
 		mRepeatButton.setOnLongClickListener(v -> {

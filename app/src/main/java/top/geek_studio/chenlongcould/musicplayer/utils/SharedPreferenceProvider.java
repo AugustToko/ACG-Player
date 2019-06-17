@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Process;
 import android.util.ArrayMap;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -19,6 +20,8 @@ import java.util.Set;
 
 
 public class SharedPreferenceProvider extends ContentProvider {
+
+	public static final String TAG = "MySharedPrefsProvider";
 
 	private Map<String, MethodProcess> processerMap = new ArrayMap<>();
 	private MethodProcess methodQueryPid = new MethodProcess() {
@@ -55,6 +58,7 @@ public class SharedPreferenceProvider extends ContentProvider {
 				}
 				case OpEntry.VALUE_TYPE_INT: {
 					int value = preferences.getInt(key, extras.getInt(OpEntry.KEY_VALUE));
+					Log.d(TAG, "process: int val: " + value);
 					extras.putInt(OpEntry.KEY_VALUE, value);
 					return extras;
 				}
@@ -79,21 +83,18 @@ public class SharedPreferenceProvider extends ContentProvider {
 			}
 		}
 	};
-	private MethodProcess methodContainKey = new MethodProcess() {
-		@Override
-		public Bundle process(@Nullable String arg, @Nullable Bundle extras) {
-			if (extras == null) {
-				throw new IllegalArgumentException("methodQueryValues, extras is null!");
-			}
-			Context ctx = getContext();
-			if (ctx == null) {
-				throw new IllegalArgumentException("methodQueryValues, ctx is null!");
-			}
-			String key = extras.getString(OpEntry.KEY_KEY);
-			SharedPreferences preferences = ctx.getSharedPreferences(arg, Context.MODE_PRIVATE);
-			extras.putBoolean(PreferenceUtil.KEY_VALUES, preferences.contains(key));
-			return extras;
+	private MethodProcess methodContainKey = (arg, extras) -> {
+		if (extras == null) {
+			throw new IllegalArgumentException("methodQueryValues, extras is null!");
 		}
+		Context ctx = getContext();
+		if (ctx == null) {
+			throw new IllegalArgumentException("methodQueryValues, ctx is null!");
+		}
+		String key = extras.getString(OpEntry.KEY_KEY);
+		SharedPreferences preferences = ctx.getSharedPreferences(arg, Context.MODE_PRIVATE);
+		extras.putBoolean(PreferenceUtil.KEY_VALUES, preferences.contains(key));
+		return extras;
 	};
 	private MethodProcess methodEditor = new MethodProcess() {
 		@Override

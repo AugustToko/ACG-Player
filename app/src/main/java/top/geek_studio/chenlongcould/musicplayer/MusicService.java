@@ -709,7 +709,7 @@ public final class MusicService extends Service {
 							.setExtras(bundle);
 
 					final MediaDescriptionCompat descriptionCompat = builder.build();
-					if (lastId == id) {
+					if (!HAS_PLAYED && lastId == id) {
 						final MusicItem.Builder b2 = new MusicItem.Builder(id, name, path)
 							.musicAlbum(albumName)
 							.addTime(addTime)
@@ -720,7 +720,7 @@ public final class MusicService extends Service {
 							.addAlbumId(albumId)
 							.addArtistId(artistId);
 						mMusicItem = b2.build();
-
+						MusicControl.reset(false);
 						MusicControl.setDataSource(MusicService.this, descriptionCompat);
 						HAS_PLAYED = true;
 					}
