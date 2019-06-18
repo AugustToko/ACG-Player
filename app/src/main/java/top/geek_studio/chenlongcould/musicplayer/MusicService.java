@@ -224,6 +224,10 @@ public final class MusicService extends Service {
 
 	private PowerManager.WakeLock wakeLock;
 
+	private HandlerThread handlerThread;
+
+	private Handler mHandler;
+
 	public MusicService() {
 		Log.d(TAG, "MusicService: ");
 	}
@@ -238,6 +242,10 @@ public final class MusicService extends Service {
 			stopSelf();
 			return;
 		}
+
+		handlerThread = new HandlerThread("MusicService-handlerThread");
+		handlerThread.start();
+		mHandler = new Handler(handlerThread.getLooper());
 
 		serviceWeakReference = new WeakReference<>(this);
 
@@ -564,6 +572,14 @@ public final class MusicService extends Service {
 				}
 				break;
 
+				case ServiceActions.ACTION_SLEEP: {
+					long time = intent.getLongExtra("time", -1);
+					if (time != -1) {
+						mHandler.postDelayed(() -> MusicControl.intentPause(MusicService.this), time);
+					}
+				}
+				break;
+
 				default:
 			}
 
@@ -842,6 +858,8 @@ public final class MusicService extends Service {
 
 		// TODO: 2019/6/3 实现功能
 		String ACTION_STOP = ACG_PLAYER_PACKAGE_NAME + ".stop";
+
+		String ACTION_SLEEP = ACG_PLAYER_PACKAGE_NAME + ".sleep";
 	}
 
 	/**
@@ -927,8 +945,8 @@ public final class MusicService extends Service {
 					.setStyle(mediaStyle)
 					.setLargeIcon(description.getIconBitmap())
 					.setContentIntent(pi)
-					.setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(context,
-							PlaybackStateCompat.ACTION_STOP))
+//					.setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(context,
+//							PlaybackStateCompat.ACTION_STOP))
 					.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 					.setWhen(System.currentTimeMillis())
 					.setColor(Utils.Ui.getPrimaryColor(context))
@@ -977,8 +995,8 @@ public final class MusicService extends Service {
 					.setLargeIcon(description == null ? Utils.Audio.getCoverBitmapFull(context
 							, mMusicItem.getAlbumId()) : description.getIconBitmap())
 					.setContentIntent(pi)
-					.setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(context,
-							PlaybackStateCompat.ACTION_STOP))
+//					.setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(context,
+//							PlaybackStateCompat.ACTION_STOP))
 					.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 					.setWhen(System.currentTimeMillis())
 					.setColor(Utils.Ui.getPrimaryColor(context))

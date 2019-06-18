@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        >
+    <item
+            android:width="1080px"
+            android:height="1920px"
+            >
+        <bitmap android:src="@drawable/ramp" />
+    </item>
+
+    <item
+            android:width="350dp"
+            android:height="350dp"
+            android:gravity="center"
+            android:top="-70dp"
+            >
+        <bitmap android:src="@drawable/icon_text" />
+    </item>
+
+    <item
+            android:width="100dp"
+            android:height="100dp"
+            android:gravity="center"
+            android:top="-250dp"
+            >
+        <bitmap android:src="@drawable/icon" />
+    </item>
+</layer-list>

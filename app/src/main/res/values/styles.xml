@@ -27,11 +27,11 @@
     <style name="SplashActivityTheme" parent="MyBaseTheme">
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
-        <item name="android:windowBackground">@drawable/activity_bg_bitmap</item>
+        <item name="android:windowBackground">@drawable/splash</item>
     </style>
 
     <style name="MainActivityTheme" parent="MyBaseTheme">
-        <item name="android:windowBackground">@drawable/activity_bg_bitmap</item>
+        <item name="android:windowBackground">@drawable/splash</item>
         <!--colorPrimaryDark 默认作用于状态栏颜色-->
         <!--<item name="colorPrimaryDark">@color/colorPrimaryDark</item>-->
         <item name="android:navigationBarColor">@android:color/transparent</item>

@@ -26,6 +26,13 @@
             app:showAsAction="always" />
 
     <item
+            android:id="@+id/menu_toolbar_timer"
+            android:icon="@drawable/ic_timer_white_24dp"
+            android:title="@string/timer"
+            app:showAsAction="ifRoom"
+            />
+
+    <item
             android:id="@+id/menu_toolbar_trash_can"
             android:icon="@drawable/ic_delete_white_24dp"
             android:title="@string/drop_to_trash_can"

@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -128,8 +129,9 @@ public final class MusicDetailFragment extends BaseFragment {
 	private HandlerThread mHandlerThread;
 	/**
 	 * 最后一次加载的album id
+	 *
 	 * @see #setCurrentData(MusicItem, Bitmap, boolean...)
-	 * */
+	 */
 	private static int mLastAlbumId = -1;
 	/**
 	 * for {@link #setUpImage(Bitmap, ImageView, ImageView, TextView)}
@@ -662,6 +664,19 @@ public final class MusicDetailFragment extends BaseFragment {
 						Utils.Audio.openEqualizer(mMainActivity, item.getAlbumId());
 					}
 				}
+				break;
+
+				case R.id.menu_toolbar_timer: {
+					new TimePickerDialog(mMainActivity, (view, hourOfDay, minute) -> {
+						final long time = hourOfDay * 360000 + minute * 60000;
+						final Intent intent = new Intent(mMainActivity, MusicService.class);
+						intent.setAction(MusicService.ServiceActions.ACTION_SLEEP);
+						intent.putExtra("time", time);
+						mMainActivity.startService(intent);
+					}, 0, 0, true).show();
+
+				}
+				break;
 
 				case R.id.menu_toolbar_debug: {
 					// none
