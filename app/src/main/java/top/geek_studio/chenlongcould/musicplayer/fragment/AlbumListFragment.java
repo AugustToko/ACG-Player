@@ -172,11 +172,11 @@ public final class AlbumListFragment extends BaseListFragment {
 				LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mMainActivity) {
 					@Override
 					protected int getExtraLayoutSpace(RecyclerView.State state) {
-						return 500;
+						return 700;
 					}
 				};
 				linearLayoutManager.setItemPrefetchEnabled(true);
-				linearLayoutManager.setInitialPrefetchItemCount(6);
+				linearLayoutManager.setInitialPrefetchItemCount(15);
 				mRecyclerView.setLayoutManager(linearLayoutManager);
 			}
 			break;
@@ -185,11 +185,11 @@ public final class AlbumListFragment extends BaseListFragment {
 						, mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2)) {
 					@Override
 					protected int getExtraLayoutSpace(RecyclerView.State state) {
-						return 500;
+						return 700;
 					}
 				};
 				gridLayoutManager.setItemPrefetchEnabled(true);
-				gridLayoutManager.setInitialPrefetchItemCount(6);
+				gridLayoutManager.setInitialPrefetchItemCount(15);
 				mRecyclerView.setLayoutManager(gridLayoutManager);
 			}
 			break;
@@ -198,6 +198,7 @@ public final class AlbumListFragment extends BaseListFragment {
 
 		mAdapter2AlbumListAdapter = new MyRecyclerAdapter2AlbumList(mMainActivity, albumItemList, type);
 
+		mRecyclerView.setItemViewCacheSize(15);
 		mRecyclerView.setAdapter(mAdapter2AlbumListAdapter);
 	}
 

@@ -128,4 +128,7 @@
     <string name="set_recyclerview_item_style">设置recyclerView项目样式</string>
     <string name="recyclerview_item_style">RecyclerView项目样式</string>
     <string name="artist_layout">艺术家布局</string>
+    <string name="timer">计时器</string>
+    <string name="privacy_policy">隐私政策</string>
+    <string name="dark_mode">夜间模式</string>
 </resources>

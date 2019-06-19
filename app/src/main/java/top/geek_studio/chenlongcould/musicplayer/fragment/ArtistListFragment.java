@@ -9,6 +9,7 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -79,7 +80,7 @@ public final class ArtistListFragment extends BaseListFragment {
 			case MyRecyclerAdapter2ArtistList.LINEAR_TYPE: {
 				final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mMainActivity);
 				linearLayoutManager.setItemPrefetchEnabled(true);
-				linearLayoutManager.setInitialPrefetchItemCount(6);
+				linearLayoutManager.setInitialPrefetchItemCount(15);
 				mRecyclerView.setLayoutManager(linearLayoutManager);
 			}
 			break;
@@ -87,7 +88,7 @@ public final class ArtistListFragment extends BaseListFragment {
 				final GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity()
 						, mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2));
 				gridLayoutManager.setItemPrefetchEnabled(true);
-				gridLayoutManager.setInitialPrefetchItemCount(6);
+				gridLayoutManager.setInitialPrefetchItemCount(15);
 				mRecyclerView.setLayoutManager(gridLayoutManager);
 			}
 			break;
@@ -97,6 +98,7 @@ public final class ArtistListFragment extends BaseListFragment {
 		}
 
 		mAdapter2ArtistList = new MyRecyclerAdapter2ArtistList(mMainActivity, artistItemList, type);
+		mRecyclerView.setItemViewCacheSize(15);
 		mRecyclerView.setAdapter(mAdapter2ArtistList);
 	}
 
@@ -107,17 +109,26 @@ public final class ArtistListFragment extends BaseListFragment {
 		} else {
 			ArtistThreadPool.post(() -> {
 				if (artistItemList.size() == 0) {
-					final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, null, null, null, null);
+					final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Artists
+							.EXTERNAL_CONTENT_URI, null, null, null, null);
 					if (cursor != null) {
 						cursor.moveToFirst();
+						if (cursor.getCount() > 0) {
+							do {
+								String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
+								String albumId = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID));
+								ArtistItem artistItem;
+								try {
+									artistItem = new ArtistItem(albumName, Integer.parseInt(albumId));
+								} catch (NumberFormatException e) {
+									Toast.makeText(mMainActivity, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+									return;
+								}
+								artistItemList.add(artistItem);
+								artistItemListBackup.add(artistItem);
+							} while (cursor.moveToNext());
 
-						do {
-							String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
-							String albumId = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID));
-							final ArtistItem artistItem = new ArtistItem(albumName, Integer.parseInt(albumId));
-							artistItemList.add(artistItem);
-							artistItemListBackup.add(artistItem);
-						} while (cursor.moveToNext());
+						}
 
 						cursor.close();
 						mView.post(() -> {

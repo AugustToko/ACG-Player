@@ -80,11 +80,11 @@ public final class MusicListFragment extends BaseListFragment {
 		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mActivity) {
 			@Override
 			protected int getExtraLayoutSpace(RecyclerView.State state) {
-				return 500;
+				return 700;
 			}
 		};
 		linearLayoutManager.setItemPrefetchEnabled(true);
-		linearLayoutManager.setInitialPrefetchItemCount(6);
+		linearLayoutManager.setInitialPrefetchItemCount(15);
 
 		adapter = new MyRecyclerAdapter(mActivity, Data.sMusicItems
 				, new MyRecyclerAdapter.Config(preferences.getInt(Values.SharedPrefsTag
@@ -92,9 +92,7 @@ public final class MusicListFragment extends BaseListFragment {
 
 		mMusicListBinding.includeRecycler.recyclerView.setLayoutManager(linearLayoutManager);
 		mMusicListBinding.includeRecycler.recyclerView.setHasFixedSize(true);
-		mMusicListBinding.includeRecycler.recyclerView.setItemViewCacheSize(5);
-		mMusicListBinding.includeRecycler.recyclerView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
-		mMusicListBinding.includeRecycler.recyclerView.setDrawingCacheEnabled(true);
+		mMusicListBinding.includeRecycler.recyclerView.setItemViewCacheSize(15);
 		mMusicListBinding.includeRecycler.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 			@Override
 			public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {

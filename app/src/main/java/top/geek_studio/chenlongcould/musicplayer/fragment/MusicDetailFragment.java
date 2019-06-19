@@ -659,14 +659,21 @@ public final class MusicDetailFragment extends BaseFragment {
 				break;
 
 				case R.id.menu_toolbar_eq: {
-					final MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
-					if (item != null) {
+					final MusicItem item = Data.sCurrentMusicItem;
+					if (item != null && item.getMusicID() != -1) {
 						Utils.Audio.openEqualizer(mMainActivity, item.getAlbumId());
+					} else {
+						Toast.makeText(mMainActivity, "Plz play a song first!", Toast.LENGTH_SHORT).show();
 					}
 				}
 				break;
 
 				case R.id.menu_toolbar_timer: {
+					if (Data.sCurrentMusicItem == null || Data.sCurrentMusicItem.getMusicID() == -1) {
+						Toast.makeText(mMainActivity, "You need play music first!", Toast.LENGTH_SHORT).show();
+						return true;
+					}
+
 					new TimePickerDialog(mMainActivity, (view, hourOfDay, minute) -> {
 						final long time = hourOfDay * 360000 + minute * 60000;
 						if (time == 0) {

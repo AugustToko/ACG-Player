@@ -1156,19 +1156,19 @@ public final class MainActivity extends BaseListActivity implements MainContract
 				break;
 				case R.id.dart_mode: {
 					boolean isDarkMode = PreferenceUtil.getDefault(MainActivity.this)
-							.getBoolean(Values.SharedPrefsTag.DART_MODE, true);
+							.getBoolean(Values.SharedPrefsTag.DART_MODE, false);
 					if (isDarkMode) {
-						menuItem.setCheckable(false);
 						PreferenceUtil.getDefault(MainActivity.this)
 								.edit().putBoolean(Values.SharedPrefsTag.DART_MODE, false).apply();
 						UiModeManager UiModeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
 						UiModeManager.setNightMode(android.app.UiModeManager.MODE_NIGHT_NO);
+						mMainBinding.navigationView.getMenu().findItem(R.id.dart_mode).setChecked(false);
 					} else {
-						menuItem.setCheckable(true);
 						PreferenceUtil.getDefault(MainActivity.this)
 								.edit().putBoolean(Values.SharedPrefsTag.DART_MODE, true).apply();
 						UiModeManager UiModeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
 						UiModeManager.setNightMode(android.app.UiModeManager.MODE_NIGHT_YES);
+						mMainBinding.navigationView.getMenu().findItem(R.id.dart_mode).setChecked(true);
 					}
 				}
 				break;
