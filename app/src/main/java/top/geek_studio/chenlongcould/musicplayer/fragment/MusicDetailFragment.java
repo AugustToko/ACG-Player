@@ -669,6 +669,11 @@ public final class MusicDetailFragment extends BaseFragment {
 				case R.id.menu_toolbar_timer: {
 					new TimePickerDialog(mMainActivity, (view, hourOfDay, minute) -> {
 						final long time = hourOfDay * 360000 + minute * 60000;
+						if (time == 0) {
+							Toast.makeText(mMainActivity, "Why not pause music by button?"
+									, Toast.LENGTH_SHORT).show();
+							return;
+						}
 						final Intent intent = new Intent(mMainActivity, MusicService.class);
 						intent.setAction(MusicService.ServiceActions.ACTION_SLEEP);
 						intent.putExtra("time", time);

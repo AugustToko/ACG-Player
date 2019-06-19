@@ -726,14 +726,14 @@ public final class MusicService extends Service {
 					final MediaDescriptionCompat descriptionCompat = builder.build();
 					if (!HAS_PLAYED && lastId == id) {
 						final MusicItem.Builder b2 = new MusicItem.Builder(id, name, path)
-							.musicAlbum(albumName)
-							.addTime(addTime)
-							.artist(artist)
-							.duration(duration)
-							.mimeName(mimeType)
-							.size(size)
-							.addAlbumId(albumId)
-							.addArtistId(artistId);
+								.musicAlbum(albumName)
+								.addTime(addTime)
+								.artist(artist)
+								.duration(duration)
+								.mimeName(mimeType)
+								.size(size)
+								.addAlbumId(albumId)
+								.addArtistId(artistId);
 						mMusicItem = b2.build();
 						MusicControl.reset(false);
 						MusicControl.setDataSource(MusicService.this, descriptionCompat);
@@ -1155,15 +1155,7 @@ public final class MusicService extends Service {
 
 		private synchronized static void prepareAndPlay() {
 			if (mediaPlayer == null) return;
-
-			try {
-				mediaPlayer.prepare();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (IllegalStateException e) {
-				e.printStackTrace();
-				mediaPlayer.reset();
-			}
+			mediaPlayer.prepareAsync();
 		}
 
 		private synchronized static int getDuration() {

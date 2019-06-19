@@ -17,6 +17,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
@@ -26,10 +27,7 @@ import io.reactivex.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
 import org.litepal.LitePal;
 import org.litepal.LitePalDB;
-import top.geek_studio.chenlongcould.musicplayer.App;
-import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.*;
 import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
@@ -79,15 +77,36 @@ public final class MusicListFragment extends BaseListFragment {
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		mMusicListBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_list, container, false);
-		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mActivity);
+		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mActivity) {
+			@Override
+			protected int getExtraLayoutSpace(RecyclerView.State state) {
+				return 500;
+			}
+		};
 		linearLayoutManager.setItemPrefetchEnabled(true);
 		linearLayoutManager.setInitialPrefetchItemCount(6);
-		mMusicListBinding.includeRecycler.recyclerView.setLayoutManager(linearLayoutManager);
-		mMusicListBinding.includeRecycler.recyclerView.setHasFixedSize(true);
+
 		adapter = new MyRecyclerAdapter(mActivity, Data.sMusicItems
 				, new MyRecyclerAdapter.Config(preferences.getInt(Values.SharedPrefsTag
 				.RECYCLER_VIEW_ITEM_STYLE, 0), true));
+
+		mMusicListBinding.includeRecycler.recyclerView.setLayoutManager(linearLayoutManager);
+		mMusicListBinding.includeRecycler.recyclerView.setHasFixedSize(true);
+		mMusicListBinding.includeRecycler.recyclerView.setItemViewCacheSize(5);
+		mMusicListBinding.includeRecycler.recyclerView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
+		mMusicListBinding.includeRecycler.recyclerView.setDrawingCacheEnabled(true);
+		mMusicListBinding.includeRecycler.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+			@Override
+			public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+				if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+					GlideApp.with(mActivity).resumeRequests();
+				} else {
+					GlideApp.with(mActivity).pauseRequests();
+				}
+			}
+		});
 		mMusicListBinding.includeRecycler.recyclerView.setAdapter(adapter);
+
 		loadData();
 		return mMusicListBinding.getRoot();
 	}

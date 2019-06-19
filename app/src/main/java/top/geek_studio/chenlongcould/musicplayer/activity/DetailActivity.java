@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.ColorInt;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.material.snackbar.Snackbar;
@@ -48,6 +49,7 @@ public final class DetailActivity extends BaseCompatActivity {
 		List<Detail> infos = LitePal.findAll(Detail.class);
 
 		if (infos.size() != 0) {
+			detailBinding.includeContent.body.setVisibility(View.VISIBLE);
 			ArrayList<MusicItem> itemHelperList = new ArrayList<>();
 			for (MusicItem item : Data.sMusicItems) {
 				for (Detail info : infos) {
@@ -175,12 +177,13 @@ public final class DetailActivity extends BaseCompatActivity {
 
 		} else {
 //			Toast.makeText(this, "Database is empty!", Toast.LENGTH_SHORT).show();
+			detailBinding.includeContent.body.setVisibility(View.INVISIBLE);
 			ViewGroup group = (ViewGroup) detailBinding.getRoot();
-			group.removeView(detailBinding.includeContent.body);
 			TextView textView = new TextView(this);
 			textView.setText(getString(R.string.data_overview_empty));
 			textView.setGravity(Gravity.CENTER);
 			textView.setTextSize(30);
+			textView.setTextColor(ContextCompat.getColor(DetailActivity.this, R.color.primary_title_color));
 			group.addView(textView);
 			CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) textView.getLayoutParams();
 			params.gravity = Gravity.CENTER;

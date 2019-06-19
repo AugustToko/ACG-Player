@@ -1181,7 +1181,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		mDrawerToggle.syncState();
 		mMainBinding.drawerLayout.addDrawerListener(mDrawerToggle);
 		boolean isDarkMode = PreferenceUtil.getDefault(MainActivity.this)
-				.getBoolean(Values.SharedPrefsTag.DART_MODE, true);
+				.getBoolean(Values.SharedPrefsTag.DART_MODE, false);
 
 		// init menu
 		if (isDarkMode) {

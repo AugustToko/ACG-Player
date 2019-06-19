@@ -25,6 +25,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
 import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
@@ -150,6 +151,17 @@ public final class AlbumListFragment extends BaseListFragment {
 		if (view == null) return;
 
 		mRecyclerView = view.findViewById(R.id.recycler_view);
+		mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+			@Override
+			public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+				if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+					GlideApp.with(mMainActivity).resumeRequests();
+				} else {
+					GlideApp.with(mMainActivity).pauseRequests();
+				}
+			}
+		});
+
 //		mRecyclerView.setHasFixedSize(true);
 
 		//get type
@@ -157,14 +169,25 @@ public final class AlbumListFragment extends BaseListFragment {
 		int type = mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
 		switch (type) {
 			case MyRecyclerAdapter2AlbumList.LINEAR_TYPE: {
-				LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mMainActivity);
+				LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mMainActivity) {
+					@Override
+					protected int getExtraLayoutSpace(RecyclerView.State state) {
+						return 500;
+					}
+				};
 				linearLayoutManager.setItemPrefetchEnabled(true);
 				linearLayoutManager.setInitialPrefetchItemCount(6);
 				mRecyclerView.setLayoutManager(linearLayoutManager);
 			}
 			break;
 			case MyRecyclerAdapter2AlbumList.GRID_TYPE: {
-				GridLayoutManager gridLayoutManager = new GridLayoutManager(mMainActivity, mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2));
+				GridLayoutManager gridLayoutManager = new GridLayoutManager(mMainActivity
+						, mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2)) {
+					@Override
+					protected int getExtraLayoutSpace(RecyclerView.State state) {
+						return 500;
+					}
+				};
 				gridLayoutManager.setItemPrefetchEnabled(true);
 				gridLayoutManager.setInitialPrefetchItemCount(6);
 				mRecyclerView.setLayoutManager(gridLayoutManager);
