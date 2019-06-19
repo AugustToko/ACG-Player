@@ -24,48 +24,53 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/index_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            android:ellipsize="start"
-            android:singleLine="true"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="100" />
+                android:id="@+id/index_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:ellipsize="start"
+                android:singleLine="true"
+                android:textSize="16sp"
+                android:textColor="@color/sub_title_color"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="100" />
 
 
         <TextView
-            android:id="@+id/item_in_detail_ext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="8dp"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toStartOf="@+id/item_menu"
-            app:layout_constraintTop_toBottomOf="@+id/item_main_text"
-            tools:text="@string/app_name" />
+                android:id="@+id/item_in_detail_ext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="8dp"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textSize="12sp"
+                android:textColor="@color/sub_title_color"
+                app:layout_constraintEnd_toStartOf="@+id/item_menu"
+                app:layout_constraintTop_toBottomOf="@+id/item_main_text"
+                tools:text="@string/app_name"
+                android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="parent"
+                />
 
         <TextView
-            android:id="@+id/album_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="8dp"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:text="@string/album"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toStartOf="@+id/item_in_detail_ext"
-            app:layout_constraintStart_toStartOf="@+id/item_main_text"
-            app:layout_constraintTop_toBottomOf="@+id/item_main_text" />
+                android:id="@+id/album_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="8dp"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="@string/album"
+                android:textColor="@color/sub_title_color"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toStartOf="@+id/item_in_detail_ext"
+                app:layout_constraintStart_toStartOf="@+id/item_main_text"
+                app:layout_constraintTop_toBottomOf="@+id/item_main_text" />
 
         <TextView
                 android:id="@+id/item_main_text"
@@ -76,7 +81,7 @@
                 android:ellipsize="end"
                 android:singleLine="true"
                 android:text="@string/music"
-                android:textColor="?android:textColorPrimary"
+                android:textColor="@color/primary_title_color"
                 android:textSize="18sp"
                 app:layout_constraintStart_toEndOf="@+id/index_textview"
                 app:layout_constraintTop_toTopOf="parent"
@@ -86,19 +91,19 @@
 
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/item_menu"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="8dp"
-            android:background="?android:selectableItemBackgroundBorderless"
-            android:contentDescription="@string/menu_button"
-            android:src="@drawable/ic_more_vert_24px"
-            android:tint="#636363"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+                android:id="@+id/item_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:background="?android:selectableItemBackgroundBorderless"
+                android:contentDescription="@string/menu_button"
+                android:src="@drawable/ic_more_vert_24px"
+                android:tint="@color/drawable_color"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

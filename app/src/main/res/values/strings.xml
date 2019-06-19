@@ -13,7 +13,6 @@
     <string name="app_name" translatable="false">ACG player</string>
     <string name="open">open</string>
     <string name="close">close</string>
-    <string name="play_status">Play Status</string>
     <string name="key_id_1" translatable="false">the_key_one</string>
     <string name="key_id_2" translatable="false">the_key_two</string>
     <string name="key_id_3" translatable="false">the_key_three</string>
@@ -54,9 +53,7 @@
     <string name="set_tablayout_with_music_cover_accent_color" translatable="false">Set TabLayout with music cover accent color</string>
     <string name="auto_night_mode">Night Mode</string>
     <string name="set_app_background_color_dark">Set app background color dark</string>
-    <string name="title_activity_sets">Settings</string>
 
-    <string name="pref_title_vibrate" translatable="false">Vibrate</string>
     <string name="next_play">Next Play</string>
     <string name="album_layout">Album Layout</string>
     <string name="linear">Linear</string>
@@ -70,27 +67,20 @@
     <string name="del">Delete</string>
     <string name="shadow">Shadow</string>
     <string name="list_icon" translatable="false">list_icon</string>
-    <string name="add_to_play_list">Add To Playlist</string>
     <string name="new_list">Create A New List</string>
     <string name="enter_name">Enter a name</string>
-    <string name="cannot_empty">Cannot Empty</string>
     <string name="cancel">Cancel</string>
     <string name="sure">Sure</string>
     <string name="eq">EQ</string>
     <string name="tab_file">File Viewer</string>
     <string name="no_audio_ID" translatable="false">No Audio Id</string>
-    <string name="no_equalizer">No EQ</string>
 
     <string name="title_activity_car_view" translatable="false">CarViewActivity</string>
-    <string name="dummy_button" translatable="false">Dummy Button</string>
-    <string name="dummy_content" translatable="false">DUMMY\nCONTENT</string>
     <string name="car_mode">Car Mode</string>
     <string name="history">History</string>
-    <string name="fav">Favourite</string>
     <string name="random_play">Shuffle Play</string>
     <string name="theme_image">Theme Image</string>
     <string name="title_activity_theme">ThemeActivity</string>
-    <string name="action_settings">Settings</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
@@ -168,17 +158,14 @@
     <string name="close_the_tab_x_int">Close the tab %1$s ?</string>
     <string name="type_somthing">TYPE SOMETHING</string>
     <string name="transition_album_art" translatable="false">album_art_transition</string>
-    <string name="detail_header_cover" translatable="false">Detail_Header_Cover</string>
     <string name="force_use_net_album">Force use Net-Album</string>
     <string name="drop_to_trash_can">Drop to trash can</string>
     <string name="do_not_show_again">Do not show again</string>
-    <string name="title_activity_scrolling" translatable="false">ScrollingActivity</string>
     <string name="set_title_color">Set title color</string>
     <string name="recyclerview_item_style">RecyclerView item style</string>
     <string name="set_recyclerview_item_style">Set recyclerView item style</string>
     <string name="show_detail">Show Detail</string>
     <string name="artist_layout">Artist layout</string>
-    <string name="title_activity_song_detail">SongDetailActivity</string>
     <string name="detail">Detail</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="click_to_learn_more">Click to learn more</string>
@@ -195,4 +182,5 @@
     <string name="add_to_black_list">Add to black list</string>
     <string name="tab_add_notice">This button is used to add a TAB to the main page. You can press TAB to close the page. If you want to re-add TAB, you can click on the last \"+\" button</string>
     <string name="timer">Timer</string>
+    <string name="dark_mode">Dark Mode</string>
 </resources>

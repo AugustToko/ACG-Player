@@ -30,7 +30,6 @@
             android:layout_margin="1dp"
             android:shadowColor="@android:color/transparent"
             android:shadowRadius="0"
-            app:cardBackgroundColor="@color/card_bg"
             app:cardCornerRadius="3dp"
             app:cardElevation="0dp" />
 

@@ -120,15 +120,6 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 	 */
 	abstract public String getActivityTAG();
 
-	/**
-	 * Load the usual menu, no item is selected({@link androidx.recyclerview.widget.RecyclerView})
-	 */
-	abstract public void inflateCommonMenu();
-
-	/**
-	 * Load the selection menu, has item in selected({@link androidx.recyclerview.widget.RecyclerView})
-	 */
-	abstract public void inflateChooseMenu();
 //
 //	/**
 //	 * send empty message to activity

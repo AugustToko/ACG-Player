@@ -54,6 +54,8 @@ public final class AlbumListFragment extends BaseListFragment {
 
 	private List<AlbumItem> albumItemListBackup = new ArrayList<>();
 
+	private View mView;
+
 	public static AlbumListFragment newInstance() {
 		return new AlbumListFragment();
 	}
@@ -79,10 +81,10 @@ public final class AlbumListFragment extends BaseListFragment {
 
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.fragment_album_list, container, false);
-		setRecyclerViewData(view);
+		mView = inflater.inflate(R.layout.fragment_album_list, container, false);
+		setRecyclerViewData(mView);
 		initAlbumData();
-		return view;
+		return mView;
 	}
 
 	private void initAlbumData() {
@@ -109,10 +111,10 @@ public final class AlbumListFragment extends BaseListFragment {
 						} while (cursor.moveToNext());
 
 						cursor.close();
-						mRecyclerView.post(() -> {
-//						mAdapter2AlbumListAdapter.notifyItemRangeInserted(0, albumItemList.size() - 1)
-							mAdapter2AlbumListAdapter.notifyDataSetChanged();
+						mView.post(() -> {
+							if (mAdapter2AlbumListAdapter != null) mAdapter2AlbumListAdapter.notifyDataSetChanged();
 						});
+
 					}   //initData
 				}
 			}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Integer>() {
@@ -124,7 +126,7 @@ public final class AlbumListFragment extends BaseListFragment {
 
 				@Override
 				public void onNext(Integer integer) {
-					mAdapter2AlbumListAdapter.notifyDataSetChanged();
+					if (mAdapter2AlbumListAdapter != null) mAdapter2AlbumListAdapter.notifyDataSetChanged();
 					Log.d(TAG, "onNext: load data album: " + integer);
 				}
 
@@ -148,7 +150,7 @@ public final class AlbumListFragment extends BaseListFragment {
 		if (view == null) return;
 
 		mRecyclerView = view.findViewById(R.id.recycler_view);
-		mRecyclerView.setHasFixedSize(true);
+//		mRecyclerView.setHasFixedSize(true);
 
 		//get type
 		final SharedPreferences mDef = preferences;
@@ -220,4 +222,5 @@ public final class AlbumListFragment extends BaseListFragment {
 		}
 		return false;
 	}
+
 }

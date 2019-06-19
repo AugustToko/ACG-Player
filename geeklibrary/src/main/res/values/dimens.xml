@@ -1,5 +1,4 @@
 <resources>
-    <dimen name="status_add_toolbar_height">80dp</dimen>
     <dimen name="toolbar_padding">25dp</dimen>
     <dimen name="line_height">2dp</dimen>
 </resources>

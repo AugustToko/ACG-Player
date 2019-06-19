@@ -109,6 +109,11 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
+
+		if (i == 0 || i == 1) {
+			viewHolder.itemView.setPadding(0, MainActivity.PADDING, 0, 0);
+		}
+
 		viewHolder.mAlbumText.setText(mAlbumNameList.get(viewHolder.getAdapterPosition()).getAlbumName());
 		viewHolder.mImageView.setTag(R.string.key_id_3, mAlbumNameList.get(viewHolder.getAdapterPosition()).getmArtwork());
 
@@ -390,6 +395,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 	@Override
 	public void onViewRecycled(@NonNull ViewHolder holder) {
 		super.onViewRecycled(holder);
+		holder.itemView.setPadding(0, 0, 0, 0);
 		holder.mImageView.setTag(R.string.key_id_3, null);
 		holder.invalidate();
 	}

@@ -20,6 +20,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
@@ -96,7 +98,6 @@ public final class ThemeActivity extends BaseCompatActivity {
 
 		themeDir = getExternalFilesDir(ThemeStore.DIR_NAME);
 
-		inflateCommonMenu();
 		mThemeBinding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
 		mDBHelper = new MyThemeDBHelper(this, ThemeStore.DATA_BASE_NAME, null, 1);
@@ -130,67 +131,65 @@ public final class ThemeActivity extends BaseCompatActivity {
 	}
 
 	@Override
-	public void inflateCommonMenu() {
-		mThemeBinding.toolbar.inflateMenu(R.menu.menu_toolbar_theme);
-		mThemeBinding.toolbar.setOnMenuItemClickListener(menuItem -> {
-			switch (menuItem.getItemId()) {
-				case R.id.menu_toolbar_theme_add: {
-					Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-					intent.setType("application/zip");
-					intent.addCategory(Intent.CATEGORY_OPENABLE);
-					startActivityForResult(intent, REQUEST_ADD_THEME);
-				}
-				break;
-
-				case R.id.menu_toolbar_theme_reset: {
-					final AlertDialog.Builder builder = new AlertDialog.Builder(ThemeActivity.this);
-					builder.setTitle(getString(R.string.sure_int));
-					builder.setMessage(getString(R.string.sure_set_def_theme_int));
-					builder.setCancelable(true);
-					builder.setNegativeButton(getString(R.string.sure), (dialog, which) -> {
-						Data.sTheme = null;
-						SharedPreferences.Editor editor = super.preferences.edit();
-						editor.putString(Values.SharedPrefsTag.SELECT_THEME, DEFAULT_THEME);
-						editor.apply();
-						editor.putBoolean(Values.SharedPrefsTag.THEME_USE_NOTE, false);
-						editor.apply();
-
-						loadDataUI();
-					});
-					builder.setPositiveButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
-					builder.show();
-
-				}
-				break;
-
-				case R.id.menu_toolbar_theme_sync: {
-					loadDataUI();
-				}
-				break;
-
-				case R.id.menu_toolbar_theme_load_def: {
-					preferences.edit().putBoolean(Values.SharedPrefsTag.LOAD_DEFAULT_THEME, true).apply();
-					loadDataUI();
-				}
-				break;
-
-				case R.id.menu_toolbar_theme_note: {
-					final SharedPreferences.Editor preferences = super.preferences.edit();
-					preferences.putBoolean(Values.SharedPrefsTag.THEME_USE_NOTE, false);
-					preferences.apply();
-					noteCheck();
-				}
-				break;
-
-				default:
-			}
-			return true;
-		});
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.menu_toolbar_theme, menu);
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
-	public void inflateChooseMenu() {
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.menu_toolbar_theme_add: {
+				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+				intent.setType("application/zip");
+				intent.addCategory(Intent.CATEGORY_OPENABLE);
+				startActivityForResult(intent, REQUEST_ADD_THEME);
+			}
+			break;
 
+			case R.id.menu_toolbar_theme_reset: {
+				final AlertDialog.Builder builder = new AlertDialog.Builder(ThemeActivity.this);
+				builder.setTitle(getString(R.string.sure_int));
+				builder.setMessage(getString(R.string.sure_set_def_theme_int));
+				builder.setCancelable(true);
+				builder.setNegativeButton(getString(R.string.sure), (dialog, which) -> {
+					Data.sTheme = null;
+					SharedPreferences.Editor editor = super.preferences.edit();
+					editor.putString(Values.SharedPrefsTag.SELECT_THEME, DEFAULT_THEME);
+					editor.apply();
+					editor.putBoolean(Values.SharedPrefsTag.THEME_USE_NOTE, false);
+					editor.apply();
+
+					loadDataUI();
+				});
+				builder.setPositiveButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
+				builder.show();
+
+			}
+			break;
+
+			case R.id.menu_toolbar_theme_sync: {
+				loadDataUI();
+			}
+			break;
+
+			case R.id.menu_toolbar_theme_load_def: {
+				preferences.edit().putBoolean(Values.SharedPrefsTag.LOAD_DEFAULT_THEME, true).apply();
+				loadDataUI();
+			}
+			break;
+
+			case R.id.menu_toolbar_theme_note: {
+				final SharedPreferences.Editor preferences = super.preferences.edit();
+				preferences.putBoolean(Values.SharedPrefsTag.THEME_USE_NOTE, false);
+				preferences.apply();
+				noteCheck();
+			}
+			break;
+
+			default:
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 	private void noteCheck() {

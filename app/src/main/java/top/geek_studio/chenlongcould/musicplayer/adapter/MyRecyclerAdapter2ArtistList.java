@@ -67,6 +67,8 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 
 	@Override
 	public void onViewRecycled(@NonNull ViewHolder holder) {
+		super.onViewRecycled(holder);
+		holder.itemView.setPadding(0, 0, 0, 0);
 		holder.mArtistImage.setTag(R.string.key_id_2, -1);
 		holder.invalidate();
 	}
@@ -97,6 +99,11 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
+
+		if (i == 0 || i == 1) {
+			viewHolder.itemView.setPadding(0, MainActivity.PADDING, 0, 0);
+		}
+
 		viewHolder.mArtistText.setText(mArtistItems.get(i).getArtistName());
 		viewHolder.mArtistImage.setTag(R.string.key_id_2, i);
 		dataSet(i, viewHolder);
@@ -295,7 +302,7 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 	 * Load default image into imageView
 	 *
 	 * @param holder viewHolder
-	 * @param index     tag
+	 * @param index  tag
 	 */
 	private void loadDEF(ViewHolder holder, int index) {
 		if (verify(holder.mArtistImage, index)) {

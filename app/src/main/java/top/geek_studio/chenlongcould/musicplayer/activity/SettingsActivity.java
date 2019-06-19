@@ -9,6 +9,8 @@ import android.graphics.Color;
 import android.os.*;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
@@ -183,51 +185,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 		ConstraintLayout constraintLayout = findViewById(R.id.theme_settings);
 		constraintLayout.setOnClickListener(v -> startActivity(new Intent(SettingsActivity.this, ThemeActivity.class)));
 
-		inflateCommonMenu();
-
 		initPreView();
-
-		mToolbar.setOnMenuItemClickListener(menuItem -> {
-			switch (menuItem.getItemId()) {
-				case R.id.menu_toolbar_settings_reset: {
-
-					SharedPreferences.Editor editor = preferences.edit();
-					editor.putInt(Values.SharedPrefsTag.ACCENT_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorAccent));
-					editor.putInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimary));
-					editor.putInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark));
-					editor.apply();
-
-					clearAnimation();
-					ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), preferences.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimary)), ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimary));
-					animator.setDuration(300);
-					animator.addUpdateListener(animation -> {
-						mPrimaryImage.setBackgroundColor((Integer) animation.getAnimatedValue());
-						mAppBarLayout.setBackgroundColor((Integer) animation.getAnimatedValue());
-						mToolbar.setBackgroundColor((Integer) animation.getAnimatedValue());
-					});
-
-					ValueAnimator animator2 = ValueAnimator.ofObject(new ArgbEvaluator(), preferences.getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark)), ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark));
-					animator2.setDuration(300);
-					animator2.addUpdateListener(animation -> {
-						mPrimaryDarkImage.setBackgroundColor((Integer) animator2.getAnimatedValue());
-						getWindow().setNavigationBarColor((Integer) animator2.getAnimatedValue());
-					});
-
-					ValueAnimator animator3 = ValueAnimator.ofObject(new ArgbEvaluator(), preferences.getInt(Values.SharedPrefsTag.ACCENT_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorAccent)), ContextCompat.getColor(SettingsActivity.this, R.color.colorAccent));
-					animator3.setDuration(300);
-					animator3.addUpdateListener(animation -> mAccentImage.setBackgroundColor((Integer) animator3.getAnimatedValue()));
-
-					animator.start();
-					animator2.start();
-					animator3.start();
-
-					clearAnimation();
-				}
-				break;
-				default:
-			}
-			return false;
-		});
 
 		mToolbar.setNavigationOnClickListener(v -> onBackPressed());
 
@@ -623,13 +581,51 @@ public final class SettingsActivity extends BaseCompatActivity {
 	}
 
 	@Override
-	public void inflateCommonMenu() {
-		mToolbar.inflateMenu(R.menu.menu_toolbar_settings);
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.menu_toolbar_settings, menu);
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
-	public void inflateChooseMenu() {
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.menu_toolbar_settings_reset: {
+				SharedPreferences.Editor editor = preferences.edit();
+				editor.putInt(Values.SharedPrefsTag.ACCENT_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorAccent));
+				editor.putInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimary));
+				editor.putInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark));
+				editor.apply();
 
+				clearAnimation();
+				ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), preferences.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimary)), ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimary));
+				animator.setDuration(300);
+				animator.addUpdateListener(animation -> {
+					mPrimaryImage.setBackgroundColor((Integer) animation.getAnimatedValue());
+					mAppBarLayout.setBackgroundColor((Integer) animation.getAnimatedValue());
+					mToolbar.setBackgroundColor((Integer) animation.getAnimatedValue());
+				});
+
+				ValueAnimator animator2 = ValueAnimator.ofObject(new ArgbEvaluator(), preferences.getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark)), ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark));
+				animator2.setDuration(300);
+				animator2.addUpdateListener(animation -> {
+					mPrimaryDarkImage.setBackgroundColor((Integer) animator2.getAnimatedValue());
+					getWindow().setNavigationBarColor((Integer) animator2.getAnimatedValue());
+				});
+
+				ValueAnimator animator3 = ValueAnimator.ofObject(new ArgbEvaluator(), preferences.getInt(Values.SharedPrefsTag.ACCENT_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorAccent)), ContextCompat.getColor(SettingsActivity.this, R.color.colorAccent));
+				animator3.setDuration(300);
+				animator3.addUpdateListener(animation -> mAccentImage.setBackgroundColor((Integer) animator3.getAnimatedValue()));
+
+				animator.start();
+				animator2.start();
+				animator3.start();
+
+				clearAnimation();
+			}
+			break;
+			default:
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 	private void clearAnimation() {

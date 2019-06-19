@@ -87,16 +87,6 @@ public final class ArtistDetailActivity extends BaseListActivity implements Arti
 		return TAG;
 	}
 
-	@Override
-	public void inflateCommonMenu() {
-
-	}
-
-	@Override
-	public void inflateChooseMenu() {
-
-	}
-
 	private void initData() {
 		final Intent intent = getIntent();
 

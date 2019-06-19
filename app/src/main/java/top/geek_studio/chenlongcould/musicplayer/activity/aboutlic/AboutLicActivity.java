@@ -56,16 +56,6 @@ public final class AboutLicActivity extends BaseCompatActivity implements AboutL
 	public String getActivityTAG() {
 		return TAG;
 	}
-	
-	@Override
-	public void inflateCommonMenu() {
-		//not need
-	}
-	
-	@Override
-	public void inflateChooseMenu() {
-		//not need
-	}
 
 	@Override
 	public void setPresenter(AboutLicContract.Presenter presenter) {

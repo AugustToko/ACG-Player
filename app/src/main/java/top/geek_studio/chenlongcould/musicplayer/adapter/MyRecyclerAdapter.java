@@ -8,6 +8,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Environment;
@@ -436,11 +437,11 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		holder.mUView.setOnLongClickListener(v -> {
 			for (MusicItem item : mSelected) {
 				if (item.getMusicID() == mMusicItems.get(holder.getAdapterPosition()).getMusicID()) {
-					holder.mBody.setBackgroundColor(ContextCompat.getColor(mActivity, R.color.card_bg));
+					holder.mBody.setBackgroundColor(Color.TRANSPARENT);
 					mSelected.remove(mMusicItems.get(holder.getAdapterPosition()));
 					if (mSelected.size() == 0) {
 						isChoose = false;
-						mActivity.inflateCommonMenu();
+						mActivity.supportInvalidateOptionsMenu();
 					}
 					return true;
 				}
@@ -451,7 +452,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 			holder.mBody.setBackgroundColor(Utils.Ui.getAccentColor(mActivity));
 
-			mActivity.inflateChooseMenu();
+			mActivity.supportInvalidateOptionsMenu();
 			return true;
 		});
 
@@ -471,7 +472,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		if (mSelected.contains(mMusicItems.get(holder.getAdapterPosition()))) {
 			holder.mBody.setBackgroundColor(Utils.Ui.getAccentColor(mActivity));
 		} else {
-			holder.mBody.setBackgroundColor(ContextCompat.getColor(mActivity, R.color.card_bg));
+			holder.mBody.setBackgroundColor(Color.TRANSPARENT);
 		}
 
 		holder.mMusicText.setText(mMusicItems.get(holder.getAdapterPosition()).getMusicName());
@@ -547,7 +548,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 				// select or un-select
 				if (mSelected.contains(itemClicked)) {
-					((ItemHolder) holder).mBody.setBackgroundColor(ContextCompat.getColor(mActivity, R.color.card_bg));
+					((ItemHolder) holder).mBody.setBackgroundColor(Color.TRANSPARENT);
 					mSelected.remove(mMusicItems.get(holder.getAdapterPosition()));
 				} else {
 					mSelected.add(mMusicItems.get(holder.getAdapterPosition()));
@@ -556,7 +557,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 				if (mSelected.size() == 0) {
 					isChoose = false;
-					mActivity.inflateCommonMenu();
+					mActivity.supportInvalidateOptionsMenu();
 				}
 
 			} else {
@@ -860,9 +861,9 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 	public void clearSelection() {
 		mSelected.clear();
-		mActivity.inflateCommonMenu();
+		mActivity.supportInvalidateOptionsMenu();
 		for (ItemHolder holder : mViewHolders) {
-			holder.mBody.setBackgroundColor(ContextCompat.getColor(mActivity, R.color.card_bg));
+			holder.mBody.setBackgroundColor(Color.TRANSPARENT);
 		}
 	}
 

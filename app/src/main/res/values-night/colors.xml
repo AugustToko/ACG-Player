@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="drawable_color">#757575</color>
+    <color name="drawable_color">#FFFFFF</color>
 
     <color name="colorPrimary">#f44336</color>
     <color name="colorPrimaryDark">#d32f2f</color>
@@ -15,22 +15,23 @@
     <color name="toolbarColor">@color/colorPrimary</color>
 
     <!--all textView (type title)-->
-    <color name="primary_title_color">#3c3c3c</color>
-    <color name="sub_title_color">#5C5C5C</color>
+    <color name="primary_title_color">#FFFFFF</color>
+    <color name="sub_title_color">#CFCFCF</color>
 
     <color name="notVeryBlack">#1d1d1d</color>
     <color name="notVeryWhite">#f4f4f4</color>
 
     <color name="activityDefaultColor">#ffffff</color>
 
-    <color name="line_color">#0A000000</color>
+    <color name="line_color">#0AACACAC</color>
 
     <color name="png_image_background">#19000000</color>
     <color name="win_background_color">#fafafa</color>
     <color name="theme_in_use_item_bg_color">#7a00f2ff</color>
 
+    <!--view color-->
     <color name="card_bg">#56FFFFFF</color>
-    <color name="background_color">#fff</color>
+    <color name="background_color">#131313</color>
     <color name="panel_color">#9E9E9E</color>
 
 </resources>

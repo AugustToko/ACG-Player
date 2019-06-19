@@ -17,7 +17,6 @@
     <style name="MainActivityTheme" parent="MyBaseTheme">
         <item name="android:windowBackground">@drawable/splash</item>
         <item name="actionOverflowButtonStyle">@style/MyOverflowButtonStyle</item>
-        <item name="actionBarPopupTheme"></item>
         <!--colorPrimaryDark 默认作用于状态栏颜色-->
         <!--<item name="colorPrimaryDark">@color/colorPrimaryDark</item>-->
         <item name="android:navigationBarColor">@android:color/transparent</item>
@@ -49,7 +48,8 @@
 
     <style name="LightTheme.AppBarOverlay" parent="Theme.MaterialComponents" />
 
-    <style name="DayNightTheme.PopupOverlay" parent="Theme.MaterialComponents.Light" />
+    <style name="DayNightTheme.PopupOverlay" parent="Theme.MaterialComponents.Light">
+    </style>
 
     <!--actionbar-->
     <style name="MyOverflowButtonStyle" parent="Widget.AppCompat.ActionButton.Overflow">

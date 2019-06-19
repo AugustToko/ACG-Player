@@ -50,6 +50,8 @@ public final class ArtistListFragment extends BaseListFragment {
 		return new ArtistListFragment();
 	}
 
+	private View mView;
+
 	@Override
 	public void onAttach(@NotNull Context context) {
 		super.onAttach(context);
@@ -58,17 +60,17 @@ public final class ArtistListFragment extends BaseListFragment {
 
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-		final View view = inflater.inflate(R.layout.fragment_album_list, container, false);
-		setRecyclerViewData(view);
+		mView = inflater.inflate(R.layout.fragment_album_list, container, false);
+		setRecyclerViewData(mView);
 		initArtistData();
-		return view;
+		return mView;
 	}
 
 	public void setRecyclerViewData(@Nullable View view) {
 		if (view == null) return;
 
 		mRecyclerView = view.findViewById(R.id.recycler_view);
-		mRecyclerView.setHasFixedSize(true);
+//		mRecyclerView.setHasFixedSize(true);
 
 		//get type
 		final SharedPreferences mDef = PreferenceUtil.getDefault(mMainActivity);
@@ -118,7 +120,9 @@ public final class ArtistListFragment extends BaseListFragment {
 						} while (cursor.moveToNext());
 
 						cursor.close();
-						mRecyclerView.post(() -> mAdapter2ArtistList.notifyDataSetChanged());
+						mView.post(() -> {
+							if (mAdapter2ArtistList != null) mAdapter2ArtistList.notifyDataSetChanged();
+						});
 					}   //initData
 				}
 			});
@@ -181,4 +185,5 @@ public final class ArtistListFragment extends BaseListFragment {
 		}
 		return false;
 	}
+
 }

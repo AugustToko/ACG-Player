@@ -251,7 +251,6 @@ public final class ListViewActivity extends BaseListActivity {
 		return false;
 	}
 
-	@Override
 	public void inflateCommonMenu() {
 		mToolbar.getMenu().clear();
 		mToolbar.inflateMenu(R.menu.menu_public);
@@ -273,7 +272,6 @@ public final class ListViewActivity extends BaseListActivity {
 		});
 	}
 
-	@Override
 	public void inflateChooseMenu() {
 		mToolbar.getMenu().clear();
 		mToolbar.inflateMenu(R.menu.menu_toolbar_main_choose);

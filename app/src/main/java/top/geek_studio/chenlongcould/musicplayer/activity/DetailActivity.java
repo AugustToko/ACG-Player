@@ -200,16 +200,6 @@ public final class DetailActivity extends BaseCompatActivity {
 	}
 
 	@Override
-	public void inflateCommonMenu() {
-
-	}
-
-	@Override
-	public void inflateChooseMenu() {
-
-	}
-
-	@Override
 	public void initStyle() {
 		super.initStyle();
 		@ColorInt int accentColor = Utils.Ui.getAccentColor(this);

@@ -30,7 +30,8 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.util.List;
 
-public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
+public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdapter.ViewHolder>
+		implements FastScrollRecyclerView.SectionedAdapter {
 
 	private static final String TAG = "MyWaitListAdapter";
 

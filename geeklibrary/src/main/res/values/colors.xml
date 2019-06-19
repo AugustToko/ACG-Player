@@ -15,11 +15,9 @@
     <color name="colorAccent">#FF5252</color>
 
     <!--Blue-->
-    <color name="blue">#3F51B5</color>
     <color name="blue_dark">#303F9F</color>
-    <color name="pink_light">#ff4081</color>
 
-    <color name="title_color">?android:textColorPrimary</color>
+    <color name="primary_title_color">?android:textColorPrimary</color>
     <color name="notVeryWhite">#f4f4f4</color>
 
     <color name="line_color">#c1c1c1</color>

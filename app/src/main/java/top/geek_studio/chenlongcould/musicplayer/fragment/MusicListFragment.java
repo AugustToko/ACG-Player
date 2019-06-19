@@ -34,6 +34,7 @@ import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentMusicListBinding;
+import top.geek_studio.chenlongcould.musicplayer.model.Item;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
@@ -44,7 +45,7 @@ import java.util.List;
 /**
  * @author chenlongcould
  */
-public final class MusicListFragment extends BaseFragment {
+public final class MusicListFragment extends BaseListFragment {
 
 	public static final String TAG = "MusicListFragment";
 	private FragmentMusicListBinding mMusicListBinding;
@@ -88,7 +89,6 @@ public final class MusicListFragment extends BaseFragment {
 				.RECYCLER_VIEW_ITEM_STYLE, 0), true));
 		mMusicListBinding.includeRecycler.recyclerView.setAdapter(adapter);
 		loadData();
-
 		return mMusicListBinding.getRoot();
 	}
 
@@ -234,6 +234,28 @@ public final class MusicListFragment extends BaseFragment {
 
 	public FragmentMusicListBinding getMusicListBinding() {
 		return mMusicListBinding;
+	}
+
+	@Override
+	public boolean removeItem(@Nullable Item item) {
+		if (item instanceof MusicItem) {
+			Data.sMusicItems.remove(item);
+			Data.sMusicItemsBackUp.remove(item);
+			Data.sPlayOrderList.remove(item);
+			Data.sPlayOrderListBackup.remove(item);
+		}
+		return false;
+	}
+
+	@Override
+	public boolean addItem(@Nullable Item item) {
+		if (item instanceof MusicItem) {
+			Data.sMusicItems.add((MusicItem) item);
+			Data.sMusicItemsBackUp.add((MusicItem) item);
+			Data.sPlayOrderList.add((MusicItem) item);
+			Data.sPlayOrderListBackup.add((MusicItem) item);
+		}
+		return false;
 	}
 
 }

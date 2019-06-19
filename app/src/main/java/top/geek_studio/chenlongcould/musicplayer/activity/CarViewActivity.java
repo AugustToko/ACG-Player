@@ -81,16 +81,6 @@ public final class CarViewActivity extends BaseCompatActivity {
 	}
 
 	@Override
-	public void inflateCommonMenu() {
-
-	}
-
-	@Override
-	public void inflateChooseMenu() {
-
-	}
-
-	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Values.CurrentData.CURRENT_UI_MODE = Values.UIMODE.MODE_CAR;
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);

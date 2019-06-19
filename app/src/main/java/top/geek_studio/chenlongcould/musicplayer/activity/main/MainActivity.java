@@ -1,6 +1,7 @@
 package top.geek_studio.chenlongcould.musicplayer.activity.main;
 
 import android.app.ActivityManager;
+import android.app.UiModeManager;
 import android.content.*;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -26,7 +27,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatImageView;
-import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -468,13 +468,15 @@ public final class MainActivity extends BaseListActivity implements MainContract
 			return;
 		}
 
-		if (fileViewFragment != null) {
-			final File file = fileViewFragment.getCurrentFile();
+		if (mCurrentShowedFragment instanceof FileViewFragment) {
+			final FileViewFragment fragment = (FileViewFragment) mCurrentShowedFragment;
+			final File file = fragment.getCurrentFile();
 			if (file != null && !file.getPath().equals(Environment.getExternalStorageDirectory().getPath())) {
-				fileViewFragment.onBackPressed();
+				fragment.onBackPressed();
 				return;
 			}
 		}
+
 		//4
 		if (backPressed) {
 			finish();
@@ -492,103 +494,130 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	}
 
 	@Override
-	public void inflateCommonMenu() {
-		final Toolbar toolbar = mMainBinding.toolBar;
-		toolbar.getMenu().clear();
-		toolbar.inflateMenu(R.menu.menu_toolbar_main_common);
-		final Menu menu = mMainBinding.toolBar.getMenu();
-
-		final MenuItem searchItem = menu.findItem(R.id.menu_toolbar_search);
-		mSearchView.setMenuItem(searchItem);
-
-		toolbar.setOnMenuItemClickListener(item -> {
-			final SharedPreferences.Editor editor = preferences.edit();
-
-			switch (item.getItemId()) {
-				case R.id.menu_toolbar_exit: {
-					fullExit();
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		menu.clear();
+		if (musicListFragment == null || musicListFragment.getAdapter() == null
+				|| musicListFragment.getAdapter().getSelected().size() == 0) {
+			getMenuInflater().inflate(R.menu.menu_toolbar_main_common, menu);
+			if (mCurrentShowedFragment != null) {
+				boolean showAlbumMenu = false;
+				boolean showArtistMenu = false;
+				switch (Values.CurrentData.CURRENT_PAGE_INDEX) {
+					case 0: {
+						showAlbumMenu = false;
+						showArtistMenu = false;
+					}
+					break;
+					case 1: {
+						showAlbumMenu = true;
+						showArtistMenu = false;
+					}
+					break;
+					case 2: {
+						showAlbumMenu = false;
+						showArtistMenu = true;
+					}
+					break;
+					case 3: {
+						showAlbumMenu = false;
+						showArtistMenu = false;
+					}
+					break;
+					case 4: {
+						showAlbumMenu = false;
+						showArtistMenu = false;
+					}
+					break;
 				}
-				break;
-
-				/*--------------- 快速 随机 播放 ----------------*/
-				case R.id.menu_toolbar_fast_play: {
-					//just fast random play, without change Data.sPlayOrderList
-					ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
-				}
-				break;
-
-				case R.id.menu_toolbar_album_linear: {
-					editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.LINEAR_TYPE);
-					editor.apply();
-					albumListFragment.setRecyclerViewData(albumListFragment.getView());
-				}
-				break;
-
-				case R.id.menu_toolbar_album_grid: {
-					editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
-					editor.apply();
-					albumListFragment.setRecyclerViewData(albumListFragment.getView());
-				}
-				break;
-
-				case R.id.menu_toolbar_artist_linear: {
-					editor.putInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.LINEAR_TYPE);
-					editor.apply();
-					artistListFragment.setRecyclerViewData(artistListFragment.getView());
-				}
-				break;
-
-				case R.id.menu_toolbar_artist_grid: {
-					editor.putInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.GRID_TYPE);
-					editor.apply();
-					artistListFragment.setRecyclerViewData(artistListFragment.getView());
-				}
-				break;
-
-				case R.id.menu_toolbar_reload: {
-					if (mCurrentShowedFragment != null) mCurrentShowedFragment.reloadData();
-				}
-				break;
-				default:
+				setMenuIconAlphaAnimation(menu.findItem(R.id.menu_toolbar_album_layout)
+						, showAlbumMenu, true);
+				setMenuIconAlphaAnimation(menu.findItem(R.id.menu_toolbar_artist_layout)
+						, showArtistMenu, true);
 			}
-			return true;
-		});
+		} else {
+			getMenuInflater().inflate(R.menu.menu_toolbar_main_choose, menu);
+		}
+		final MenuItem searchItem = menu.findItem(R.id.menu_toolbar_search);
+		if (searchItem != null) mSearchView.setMenuItem(searchItem);
+
+		return super.onPrepareOptionsMenu(menu);
 	}
 
-	/**
-	 * use this
-	 */
 	@Override
-	public void inflateChooseMenu() {
-		mMainBinding.toolBar.getMenu().clear();
-		mMainBinding.toolBar.inflateMenu(R.menu.menu_toolbar_main_choose);
-		mMainBinding.toolBar.setOnMenuItemClickListener(menuItem -> {
-			switch (menuItem.getItemId()) {
-				case R.id.menu_toolbar_main_choose_addlist: {
-					ArrayList<MusicItem> helper = new ArrayList<>(musicListFragment.getAdapter().getSelected());
+	public boolean onOptionsItemSelected(MenuItem item) {
+		final SharedPreferences.Editor editor = preferences.edit();
+		switch (item.getItemId()) {
+			case R.id.menu_toolbar_exit: {
+				fullExit();
+			}
+			break;
 
-					PlayListsUtil.addListDialog(MainActivity.this, helper);
-				}
-				break;
-				case R.id.menu_toolbar_main_choose_share: {
-					MusicUtil.sharMusic(MainActivity.this, musicListFragment.getAdapter().getSelected());
-				}
-				break;
-				case R.id.menu_toolbar_main_choose_waitplay: {
-					for (final MusicItem item : musicListFragment.getAdapter().getSelected()) {
-						try {
-							Data.sMusicBinder.addNextWillPlayItem(item);
-						} catch (RemoteException e) {
-							e.printStackTrace();
-						}
+			// common
+			case R.id.menu_toolbar_fast_play: {
+				//just fast random play, without change Data.sPlayOrderList
+				ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
+			}
+			break;
+
+			case R.id.menu_toolbar_album_linear: {
+				editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.LINEAR_TYPE);
+				editor.apply();
+				albumListFragment.setRecyclerViewData(albumListFragment.getView());
+			}
+			break;
+
+			case R.id.menu_toolbar_album_grid: {
+				editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
+				editor.apply();
+				albumListFragment.setRecyclerViewData(albumListFragment.getView());
+			}
+			break;
+
+			case R.id.menu_toolbar_artist_linear: {
+				editor.putInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.LINEAR_TYPE);
+				editor.apply();
+				artistListFragment.setRecyclerViewData(artistListFragment.getView());
+			}
+			break;
+
+			case R.id.menu_toolbar_artist_grid: {
+				editor.putInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.GRID_TYPE);
+				editor.apply();
+				artistListFragment.setRecyclerViewData(artistListFragment.getView());
+			}
+			break;
+
+			case R.id.menu_toolbar_reload: {
+				if (mCurrentShowedFragment != null) mCurrentShowedFragment.reloadData();
+			}
+			break;
+
+			// choose
+			case R.id.menu_toolbar_main_choose_addlist: {
+				ArrayList<MusicItem> helper = new ArrayList<>(musicListFragment.getAdapter().getSelected());
+				PlayListsUtil.addListDialog(MainActivity.this, helper);
+				musicListFragment.getAdapter().clearSelection();
+			}
+			break;
+			case R.id.menu_toolbar_main_choose_share: {
+				MusicUtil.sharMusic(MainActivity.this, musicListFragment.getAdapter().getSelected());
+				musicListFragment.getAdapter().clearSelection();
+			}
+			break;
+			case R.id.menu_toolbar_main_choose_waitplay: {
+				for (final MusicItem musicItem : musicListFragment.getAdapter().getSelected()) {
+					try {
+						Data.sMusicBinder.addNextWillPlayItem(musicItem);
+					} catch (RemoteException e) {
+						e.printStackTrace();
 					}
 				}
-				break;
-				default:
+				musicListFragment.getAdapter().clearSelection();
 			}
-			musicListFragment.getAdapter().clearSelection();
-			return true;
-		});
+			break;
+			default:
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 	/**
@@ -684,45 +713,37 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 				if (type == '1') {
 					mCurrentShowedFragment = musicListFragment;
-
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
-//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true, false);
+//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
+//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
 				}
 
 				if (type == '2') {
 					mCurrentShowedFragment = albumListFragment;
-
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), true, true);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
-//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true, false);
+//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), true, true);
+//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
 				}
 
 				if (type == '3') {
 					mCurrentShowedFragment = artistListFragment;
-
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), true, true);
-//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), true, false);
+//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
+//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), true, true);
 				}
 
 				//playlist
 				if (type == '4') {
 					mCurrentShowedFragment = playListFragment;
-
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
-//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), false, false);
+//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
+//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
 				}
 
 				//file_viewer
 				if (type == '5') {
 					mCurrentShowedFragment = fileViewFragment;
-
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
-					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
-//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_search), false, false);
+//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
+//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
 				}
+
+				supportInvalidateOptionsMenu();
 			}
 
 			@Override
@@ -761,7 +782,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	}
 
 	private void setSubTitleType(final char type) {
-
 		String content = "-";
 
 		switch (type) {
@@ -1089,6 +1109,8 @@ public final class MainActivity extends BaseListActivity implements MainContract
 			}
 		});
 
+		mMainBinding.navigationView.inflateMenu(R.menu.menu_nav);
+
 		mMainBinding.navigationView.setNavigationItemSelectedListener(menuItem -> {
 			switch (menuItem.getItemId()) {
 				case R.id.menu_nav_exit: {
@@ -1126,6 +1148,24 @@ public final class MainActivity extends BaseListActivity implements MainContract
 					Toast.makeText(this, "NONE", Toast.LENGTH_SHORT).show();
 				}
 				break;
+				case R.id.dart_mode: {
+					boolean isDarkMode = PreferenceUtil.getDefault(MainActivity.this)
+							.getBoolean(Values.SharedPrefsTag.DART_MODE, true);
+					if (isDarkMode) {
+						menuItem.setCheckable(false);
+						PreferenceUtil.getDefault(MainActivity.this)
+								.edit().putBoolean(Values.SharedPrefsTag.DART_MODE, false).apply();
+						UiModeManager UiModeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
+						UiModeManager.setNightMode(android.app.UiModeManager.MODE_NIGHT_NO);
+					} else {
+						menuItem.setCheckable(true);
+						PreferenceUtil.getDefault(MainActivity.this)
+								.edit().putBoolean(Values.SharedPrefsTag.DART_MODE, true).apply();
+						UiModeManager UiModeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
+						UiModeManager.setNightMode(android.app.UiModeManager.MODE_NIGHT_YES);
+					}
+				}
+				break;
 				default:
 			}
 			return true;
@@ -1134,10 +1174,15 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		mDrawerToggle = new ActionBarDrawerToggle(this, mMainBinding.drawerLayout, mMainBinding.toolBar, R.string.open, R.string.close);
 		mDrawerToggle.syncState();
 		mMainBinding.drawerLayout.addDrawerListener(mDrawerToggle);
+		boolean isDarkMode = PreferenceUtil.getDefault(MainActivity.this)
+				.getBoolean(Values.SharedPrefsTag.DART_MODE, true);
 
-		inflateCommonMenu();
-		getMenu().findItem(R.id.menu_toolbar_album_layout).setVisible(false);
-		getMenu().findItem(R.id.menu_toolbar_artist_layout).setVisible(false);
+		// init menu
+		if (isDarkMode) {
+			mMainBinding.navigationView.getMenu().findItem(R.id.dart_mode).setChecked(true);
+		} else {
+			mMainBinding.navigationView.getMenu().findItem(R.id.dart_mode).setChecked(true);
+		}
 
 		// at the end, set real_blur
 		new Handler().post(() -> {
@@ -1385,10 +1430,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 	public ActivityMainBinding getMainBinding() {
 		return mMainBinding;
-	}
-
-	public final Menu getMenu() {
-		return mMainBinding.toolBar.getMenu();
 	}
 
 	@Override

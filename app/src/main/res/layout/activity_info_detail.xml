@@ -16,13 +16,13 @@
             android:theme="@style/LightTheme.AppBarOverlay">
 
             <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
-                app:navigationIcon="@drawable/ic_arrow_back_white_24dp"
-                app:popupTheme="@style/LightTheme.PopupOverlay"
-                app:title="@string/data_overview" />
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:background="?attr/colorPrimary"
+                    app:navigationIcon="@drawable/ic_arrow_back_white_24dp"
+                    app:popupTheme="@style/DayNightTheme.PopupOverlay"
+                    app:title="@string/data_overview" />
 
         </com.google.android.material.appbar.AppBarLayout>
 

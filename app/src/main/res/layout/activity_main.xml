@@ -31,7 +31,7 @@
                     android:id="@+id/main_body"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@android:color/background_light"
+                    android:background="@color/background_color"
                     >
 
                 <ImageView
@@ -52,6 +52,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             />
+
+                    <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
 
                     <com.github.mmin18.widget.RealtimeBlurView
                             android:id="@+id/real_blur"
@@ -77,10 +79,11 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="?actionBarSize"
                                 android:background="@android:color/transparent"
-                                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                                app:popupTheme="@style/DayNightTheme.PopupOverlay"
                                 app:subtitle="@string/app_name"
                                 app:title="@string/app_name"
                                 >
+                            <!--app:layout_scrollFlags="scroll|enterAlways"-->
 
                         </androidx.appcompat.widget.Toolbar>
 
@@ -135,7 +138,6 @@
                 android:layout_gravity="start"
                 android:fitsSystemWindows="true"
                 app:headerLayout="@layout/navigation_view_header_one"
-                app:menu="@menu/menu_nav"
                 >
 
             <androidx.constraintlayout.widget.ConstraintLayout

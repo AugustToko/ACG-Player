@@ -145,18 +145,11 @@ public final class PlayListFragment extends BaseListFragment {
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		mPlayListBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_playlist, container, false);
-
 		mPlayListBinding.addRecent.setOnClickListener(v -> {
 			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
 			intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, ListViewActivity.ListType.ACTION_ADD_RECENT);
 			startActivity(intent);
 		});
-
-//		mPlayListBinding.favourite.setOnClickListener(v -> {
-//			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
-//			intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, ListViewActivity.ListType.ACTION_FAVOURITE);
-//			startActivity(intent);
-//		});
 
 		mPlayListBinding.history.setOnClickListener(v -> {
 			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
@@ -169,10 +162,6 @@ public final class PlayListFragment extends BaseListFragment {
 			intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, ListViewActivity.ListType.ACTION_TRASH_CAN);
 			startActivity(intent);
 		});
-
-		mPlayListBinding.recentName.setTextColor(ContextCompat.getColor(mMainActivity, R.color.title_color));
-//		mPlayListBinding.favouriteName.setTextColor(ContextCompat.getColor(mMainActivity, R.color.title_color));
-		mPlayListBinding.historyName.setTextColor(ContextCompat.getColor(mMainActivity, R.color.title_color));
 
 		mPlayListBinding.recyclerView.setLayoutManager(new LinearLayoutManager(mMainActivity));
 		mPlayListBinding.recyclerView.setHasFixedSize(true);
@@ -218,7 +207,7 @@ public final class PlayListFragment extends BaseListFragment {
 	}
 
 	public static class NotLeakHandler extends Handler {
-		
+
 		private WeakReference<PlayListFragment> mWeakReference;
 
 		public static final int RE_LOAD_PLAY_LIST = 80001;

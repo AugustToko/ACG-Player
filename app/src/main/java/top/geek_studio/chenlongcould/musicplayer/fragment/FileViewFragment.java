@@ -1,14 +1,3 @@
-/*
- * ************************************************************
- * 文件：FileViewFragment.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月17日 17:31:46
- * 上次修改时间：2019年01月17日 17:29:00
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.musicplayer.fragment;
 
 import android.content.Context;
@@ -38,6 +27,7 @@ import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentFileViewerBinding;
+import top.geek_studio.chenlongcould.musicplayer.model.Item;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -46,7 +36,7 @@ import java.util.Date;
 import java.util.List;
 
 // FIXME: 2019/5/22 bugs...
-public final class FileViewFragment extends BaseFragment {
+public final class FileViewFragment extends BaseListFragment {
 
 	public static final String TAG = "FileViewFragment";
 
@@ -134,6 +124,18 @@ public final class FileViewFragment extends BaseFragment {
 		mMyAdapter.notifyDataSetChanged();
 	}
 
+	@Override
+	public boolean removeItem(@Nullable Item item) {
+		// none
+		return false;
+	}
+
+	@Override
+	public boolean addItem(@Nullable Item item) {
+		// none
+		return false;
+	}
+
 	class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
 
 		private List<File> mFiles;
@@ -158,6 +160,8 @@ public final class FileViewFragment extends BaseFragment {
 
 		@Override
 		public void onBindViewHolder(@NonNull MyAdapter.ViewHolder holder, int position) {
+
+			if (position == 0) holder.itemView.setPadding(0, MainActivity.PADDING, 0, 0);
 
 //            show file size (b kb mb gb)
 			if (!mFiles.get(position).isDirectory()) {
@@ -231,6 +235,14 @@ public final class FileViewFragment extends BaseFragment {
 		@Override
 		public String getSectionName(int position) {
 			return String.valueOf(mFileItems.get(position).getName().charAt(0));
+		}
+
+		@Override
+		public void onViewRecycled(@NonNull ViewHolder holder) {
+			super.onViewRecycled(holder);
+
+			// reset
+			holder.itemView.setPadding(0, 0, 0, 0);
 		}
 
 		@Override

@@ -206,14 +206,4 @@ final public class AboutActivity extends BaseCompatActivity {
 	public String getActivityTAG() {
 		return TAG;
 	}
-
-	@Override
-	public void inflateCommonMenu() {
-		//not need
-	}
-
-	@Override
-	public void inflateChooseMenu() {
-		//not need
-	}
 }
