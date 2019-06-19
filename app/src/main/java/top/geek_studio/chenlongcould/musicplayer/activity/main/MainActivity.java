@@ -257,6 +257,12 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		}
 	}
 
+	@Override
+	protected void onPause() {
+		super.onPause();
+		runOnUiThread(() -> GlideApp.with(MainActivity.this).pauseRequests());
+	}
+
 	/**
 	 * check if open file, uri, http or others.
 	 */
@@ -1181,7 +1187,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		if (isDarkMode) {
 			mMainBinding.navigationView.getMenu().findItem(R.id.dart_mode).setChecked(true);
 		} else {
-			mMainBinding.navigationView.getMenu().findItem(R.id.dart_mode).setChecked(true);
+			mMainBinding.navigationView.getMenu().findItem(R.id.dart_mode).setChecked(false);
 		}
 
 		// at the end, set real_blur

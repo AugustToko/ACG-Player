@@ -244,27 +244,30 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 
 	private void loadToImageView(@NonNull final ViewHolder holder, int index, @NonNull final String path) {
 		if (verify(holder.mArtistImage, index)) {
-			holder.mArtistImage.post(() -> GlideApp.with(mMainActivity)
-					.load(path)
-					.placeholder(R.drawable.default_album_art)
-					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-					.diskCacheStrategy(DiskCacheStrategy.NONE)
-					.into(new CustomTarget<Drawable>() {
-						@Override
-						public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-							if (resource instanceof Animatable) {
-								((Animatable) resource).start();
+			holder.mArtistImage.post(() -> {
+				if (mMainActivity.isDestroyed()) return;
+				GlideApp.with(mMainActivity)
+						.load(path)
+						.placeholder(R.drawable.default_album_art)
+						.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+						.diskCacheStrategy(DiskCacheStrategy.NONE)
+						.into(new CustomTarget<Drawable>() {
+							@Override
+							public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+								if (resource instanceof Animatable) {
+									((Animatable) resource).start();
+								}
+								holder.mArtistImage.setImageDrawable(resource);
+								holder.invalidate();
+								holder.setBluredView(holder.mArtistImage);
 							}
-							holder.mArtistImage.setImageDrawable(resource);
-							holder.invalidate();
-							holder.setBluredView(holder.mArtistImage);
-						}
 
-						@Override
-						public void onLoadCleared(@Nullable Drawable placeholder) {
+							@Override
+							public void onLoadCleared(@Nullable Drawable placeholder) {
 
-						}
-					}));
+							}
+						});
+			});
 		}
 	}
 
@@ -306,27 +309,26 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 	 */
 	private void loadDEF(ViewHolder holder, int index) {
 		if (verify(holder.mArtistImage, index)) {
+			if (mMainActivity.isDestroyed()) return;
 //			Log.d(TAG, "key_test(loadDEF): tagId: " + imageView.getTag(R.string.key_id_2) + " pos: " + index);
-			holder.mArtistImage.post(() -> {
-				GlideApp.with(mMainActivity)
-						.load(R.drawable.default_album_art)
-						.placeholder(R.drawable.default_album_art)
-						.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-						.diskCacheStrategy(DiskCacheStrategy.NONE)
-						.into(new CustomTarget<Drawable>() {
-							@Override
-							public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-								holder.mArtistImage.setImageDrawable(resource);
-								holder.invalidate();
-								holder.setBluredView(holder.mArtistImage);
-							}
+			holder.mArtistImage.post(() -> GlideApp.with(mMainActivity)
+					.load(R.drawable.default_album_art)
+					.placeholder(R.drawable.default_album_art)
+					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+					.diskCacheStrategy(DiskCacheStrategy.NONE)
+					.into(new CustomTarget<Drawable>() {
+						@Override
+						public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+							holder.mArtistImage.setImageDrawable(resource);
+							holder.invalidate();
+							holder.setBluredView(holder.mArtistImage);
+						}
 
-							@Override
-							public void onLoadCleared(@Nullable Drawable placeholder) {
+						@Override
+						public void onLoadCleared(@Nullable Drawable placeholder) {
 
-							}
-						});
-			});
+						}
+					}));
 
 		}
 	}
