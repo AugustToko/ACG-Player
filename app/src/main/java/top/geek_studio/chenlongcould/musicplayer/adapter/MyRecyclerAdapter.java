@@ -55,7 +55,6 @@ import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
-import top.geek_studio.chenlongcould.musicplayer.threadPool.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
@@ -156,16 +155,19 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		//在 MusicListFragment 的第一选项上面添加"快速随机播放项目"
 		if (itemType == MOD_TYPE && mActivity instanceof MainActivity) {
 
+			Log.d("PADDING_DEBUG", "onCreateViewHolder: ");
 			//style switch
 			switch (mConfig.styleId) {
 				case 1: {
 					view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_list_item_mod_style_1, viewGroup, false);
 					holder = new ModHolderS1(view);
+					view.setPadding(0, MainActivity.PADDING, 0, 0);
 				}
 				break;
 				default: {
 					view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_list_item_mod, viewGroup, false);
 					holder = new ModHolder(view);
+					view.setPadding(0, MainActivity.PADDING, 0, 0);
 				}
 
 			}
@@ -185,7 +187,6 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 					holder = new ItemHolder(view);
 				}
 			}
-
 		}
 
 		mViewHolders.add(holder);
@@ -462,10 +463,6 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 
-		if (mActivity.getActivityTAG().equals(MainActivity.TAG)) {
-			if (i == 0) viewHolder.itemView.setPadding(0, MainActivity.PADDING, 0, 0);
-		}
-
 		final ItemHolder holder = ((ItemHolder) viewHolder);
 
 		//check selection
@@ -498,7 +495,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 					, mMusicItems.get(i)));
 		}
 
-		ItemCoverThreadPool.post(() -> {
+		CustomThreadPool.post(() -> {
 
 			switch (mConfig.styleId) {
 				case 1: {

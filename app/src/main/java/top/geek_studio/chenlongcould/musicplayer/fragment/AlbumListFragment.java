@@ -83,7 +83,6 @@ public final class AlbumListFragment extends BaseListFragment {
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		mView = inflater.inflate(R.layout.fragment_album_list, container, false);
-		setRecyclerViewData(mView);
 		initAlbumData();
 		return mView;
 	}
@@ -144,13 +143,55 @@ public final class AlbumListFragment extends BaseListFragment {
 		}
 	}
 
-	/**
-	 * by firstStartApp, change Layout...
-	 */
-	public void setRecyclerViewData(@Nullable View view) {
-		if (view == null) return;
+	public RecyclerView getRecyclerView() {
+		return mRecyclerView;
+	}
 
-		mRecyclerView = view.findViewById(R.id.recycler_view);
+	public MyRecyclerAdapter2AlbumList getAdapter() {
+		return mAdapter2AlbumListAdapter;
+	}
+
+	public List<AlbumItem> getAlbumItemList() {
+		return albumItemList;
+	}
+
+	public List<AlbumItem> getAlbumItemListBackup() {
+		return albumItemListBackup;
+	}
+
+	@Override
+	public boolean removeItem(@Nullable Item item) {
+		if (!(item instanceof AlbumItem)) return false;
+
+		final AlbumItem albumItem = (AlbumItem) item;
+
+		if (albumItemList != null && mAdapter2AlbumListAdapter != null && albumItem.getAlbumId() != -1) {
+			int pos = albumItemList.indexOf(albumItem);
+			boolean result = albumItemList.remove(albumItem);
+			mAdapter2AlbumListAdapter.notifyItemRemoved(pos);
+			return result;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean addItem(@Nullable Item item) {
+		if (!(item instanceof AlbumItem)) return false;
+
+		final AlbumItem albumItem = (AlbumItem) item;
+
+		if (albumItemList != null && mAdapter2AlbumListAdapter != null && albumItem.getAlbumId() != -1) {
+			boolean result = albumItemList.add(albumItem);
+			mAdapter2AlbumListAdapter.notifyItemInserted(albumItemList.size() - 1);
+			return result;
+		}
+		return false;
+	}
+
+	public void initRecyclerView() {
+		if (mView == null) return;
+
+		mRecyclerView = mView.findViewById(R.id.recycler_view);
 		mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 			@Override
 			public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -201,50 +242,4 @@ public final class AlbumListFragment extends BaseListFragment {
 		mRecyclerView.setItemViewCacheSize(15);
 		mRecyclerView.setAdapter(mAdapter2AlbumListAdapter);
 	}
-
-	public RecyclerView getRecyclerView() {
-		return mRecyclerView;
-	}
-
-	public MyRecyclerAdapter2AlbumList getAdapter() {
-		return mAdapter2AlbumListAdapter;
-	}
-
-	public List<AlbumItem> getAlbumItemList() {
-		return albumItemList;
-	}
-
-	public List<AlbumItem> getAlbumItemListBackup() {
-		return albumItemListBackup;
-	}
-
-	@Override
-	public boolean removeItem(@Nullable Item item) {
-		if (!(item instanceof AlbumItem)) return false;
-
-		final AlbumItem albumItem = (AlbumItem) item;
-
-		if (albumItemList != null && mAdapter2AlbumListAdapter != null && albumItem.getAlbumId() != -1) {
-			int pos = albumItemList.indexOf(albumItem);
-			boolean result = albumItemList.remove(albumItem);
-			mAdapter2AlbumListAdapter.notifyItemRemoved(pos);
-			return result;
-		}
-		return false;
-	}
-
-	@Override
-	public boolean addItem(@Nullable Item item) {
-		if (!(item instanceof AlbumItem)) return false;
-
-		final AlbumItem albumItem = (AlbumItem) item;
-
-		if (albumItemList != null && mAdapter2AlbumListAdapter != null && albumItem.getAlbumId() != -1) {
-			boolean result = albumItemList.add(albumItem);
-			mAdapter2AlbumListAdapter.notifyItemInserted(albumItemList.size() - 1);
-			return result;
-		}
-		return false;
-	}
-
 }

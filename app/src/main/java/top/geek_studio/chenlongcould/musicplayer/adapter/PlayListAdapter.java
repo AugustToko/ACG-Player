@@ -67,7 +67,6 @@ public final class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.
 		// TODO: 2019/5/27
 		holder.mPopupMenu.setOnMenuItemClickListener(item -> {
 			switch (item.getItemId()) {
-				
 				//del
 				case Menu.FIRST: {
 

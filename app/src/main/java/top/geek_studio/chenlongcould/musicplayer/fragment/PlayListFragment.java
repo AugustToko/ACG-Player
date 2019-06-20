@@ -45,6 +45,7 @@ public final class PlayListFragment extends BaseListFragment {
 	public static final String TAG = "PlayListFragment";
 
 	private FragmentPlaylistBinding mPlayListBinding;
+
 	private MainActivity mMainActivity;
 
 	public static NotLeakHandler mHandler;
@@ -127,19 +128,15 @@ public final class PlayListFragment extends BaseListFragment {
 
 				//done
 				emitter.onNext(0);
-			}).subscribeOn(Schedulers.newThread())
-					.observeOn(AndroidSchedulers.mainThread())
-					.subscribe(integer -> {
-						if (integer == 0) {
-
-							//load recyclerView
-							mPlayListAdapter = new PlayListAdapter(this, mPlayListItemList);
-							mPlayListBinding.recyclerView.setAdapter(mPlayListAdapter);
-						}
-					});
+			}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(integer -> {
+				if (integer == 0) {
+					//load recyclerView
+					mPlayListAdapter = new PlayListAdapter(this, mPlayListItemList);
+					mPlayListBinding.recyclerView.setAdapter(mPlayListAdapter);
+				}
+			});
 			Data.sDisposables.add(disposable);
 		}
-
 	}
 
 	@Override
@@ -190,6 +187,10 @@ public final class PlayListFragment extends BaseListFragment {
 			return result;
 		}
 		return false;
+	}
+
+	public FragmentPlaylistBinding getmPlayListBinding() {
+		return mPlayListBinding;
 	}
 
 	@Override

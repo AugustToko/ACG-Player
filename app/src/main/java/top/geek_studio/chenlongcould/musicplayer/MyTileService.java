@@ -59,7 +59,7 @@ public final class MyTileService extends TileService {
 			if (Data.sMusicBinder == null) {
 				Intent intent = new Intent(this, MusicService.class);
 				startService(intent);
-				Data.HAS_BIND = bindService(intent, sServiceConnection, BIND_AUTO_CREATE);
+				bindService(intent, sServiceConnection, BIND_AUTO_CREATE);
 			}
 		} else {
 			Toast.makeText(this, "Need Permission, please open the app...", Toast.LENGTH_SHORT).show();

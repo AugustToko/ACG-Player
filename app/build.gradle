@@ -19,7 +19,7 @@ android {
         versionName '2.6.8.8(20190619)'
         testInstrumentationRunner "android.support.albumLoader.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config
-        versionCode 135
+        versionCode 136
         flavorDimensions "default"
         multiDexEnabled = false
     }

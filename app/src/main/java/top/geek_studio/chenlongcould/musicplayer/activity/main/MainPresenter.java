@@ -47,14 +47,13 @@ public class MainPresenter implements MainContract.Presenter {
 
 	@Override
 	public void start() {
-
+		// none
 	}
 
 	@Override
 	public void checkUpdate(@NonNull final BaseCompatActivity activity) {
 		CustomThreadPool.post(() -> GCSutil.checkUpdate(activity, GeekProject.ACG_Player
 				, PackageTool.getVerCode(activity)));
-
 	}
 
 	@Override
@@ -72,7 +71,7 @@ public class MainPresenter implements MainContract.Presenter {
 	public void initData(@NonNull MainActivity activity) {
 		final Intent intent = new Intent(activity, MusicService.class);
 		activity.startService(intent);
-		activity.bindService(intent, activity.sServiceConnection, Context.BIND_AUTO_CREATE);
+		Data.HAS_BIND = activity.bindService(intent, activity.sServiceConnection, Context.BIND_AUTO_CREATE);
 
 		DBArtSync.startActionSyncArtist(activity);
 		DBArtSync.startActionSyncAlbum(activity);

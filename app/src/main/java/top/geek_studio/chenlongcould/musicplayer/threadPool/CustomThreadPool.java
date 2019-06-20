@@ -17,7 +17,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public final class CustomThreadPool {
-	private static final int KEEP_ALIVE = 10;
+	private static final int KEEP_ALIVE = 20;
 	private static CustomThreadPool mInstance = null;
 	private ThreadPoolExecutor mThreadPoolExec;
 

@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -61,10 +62,7 @@ import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityMainBinding;
 import top.geek_studio.chenlongcould.musicplayer.fragment.*;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
-import top.geek_studio.chenlongcould.musicplayer.threadPool.AlbumThreadPool;
-import top.geek_studio.chenlongcould.musicplayer.threadPool.ArtistThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
-import top.geek_studio.chenlongcould.musicplayer.threadPool.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
@@ -80,7 +78,7 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 /**
  * @author chenlongcould
  */
-public final class MainActivity extends BaseListActivity implements MainContract.View {
+public final class MainActivity extends BaseListActivity implements MainContract.View, ViewTreeObserver.OnGlobalLayoutListener {
 
 	public static final String TAG = "MainActivity";
 
@@ -111,12 +109,11 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		}
 	};
 
-	private AppBarLayout.OnOffsetChangedListener mOnOffsetChangedListener = new AppBarLayout.OnOffsetChangedListener() {
-		@Override
-		public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-			mMainBinding.realBlur.setTranslationY(mMainBinding.realBlur.getTranslationX() + verticalOffset);
-		}
-	};
+	/**
+	 * @see MusicService#DEFAULT_SHORT_DURATION
+	 */
+	@Deprecated
+	public static final int DEFAULT_SHORT_DURATION = MusicService.DEFAULT_SHORT_DURATION;
 
 	public static final char MUSIC_LIST_FRAGMENT_ID = '1';
 	public static final char ALBUM_LIST_FRAGMENT_ID = '2';
@@ -124,11 +121,13 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	public static final char PLAY_LIST_FRAGMENT_ID = '4';
 	public static final char FILE_LIST_FRAGMENT_ID = '5';
 	public static final char MUSIC_DETAIL_FRAGMENT_ID = '6';
-
-	/**
-	 * skip short song (if below 20s)
-	 */
-	public static final int DEFAULT_SHORT_DURATION = 20000;
+	@Deprecated
+	private AppBarLayout.OnOffsetChangedListener mOnOffsetChangedListener = new AppBarLayout.OnOffsetChangedListener() {
+		@Override
+		public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+			mMainBinding.realBlur.setTranslationY(mMainBinding.realBlur.getTranslationX() + verticalOffset);
+		}
+	};
 
 	/**
 	 * 1 is MUSIC_LIST TAB
@@ -141,17 +140,13 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	 */
 	public static final String DEFAULT_TAB_ORDER = "12345";
 
-	/**
-	 * 检测当前 slide 的位置.
-	 * 当滑动 slide {@link SlidingUpPanelLayout} 时, 迅速点击可滑动区域外, slide 会卡住.
-	 * 但 slide 状态会变为 {@link SlidingUpPanelLayout.PanelState#COLLAPSED}.
-	 * 故立此 FLAG.
-	 */
-	public static float CURRENT_SLIDE_OFFSET = 1;
-
 	public static boolean ANIMATION_FLAG = true;
+
 	private final ArrayList<String> mTitles = new ArrayList<>();
+	// flag
 	private boolean toolbarClicked = false;
+
+	// flag
 	private boolean backPressed = false;
 
 	/**
@@ -159,12 +154,12 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	 */
 	private List<BaseFragment> mFragmentList = new ArrayList<>();
 
-	private MusicDetailFragment musicDetailFragment;
-	private MusicListFragment musicListFragment;
-	private AlbumListFragment albumListFragment;
-	private ArtistListFragment artistListFragment;
-	private FileViewFragment fileViewFragment;
-	private PlayListFragment playListFragment;
+	private volatile MusicDetailFragment musicDetailFragment;
+	private volatile MusicListFragment musicListFragment;
+	private volatile AlbumListFragment albumListFragment;
+	private volatile ArtistListFragment artistListFragment;
+	private volatile FileViewFragment fileViewFragment;
+	private volatile PlayListFragment playListFragment;
 
 	private BaseFragment mCurrentShowedFragment;
 
@@ -197,15 +192,11 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 	private ActivityMainBinding mMainBinding;
 	private ActionBarDrawerToggle mDrawerToggle;
-	private MyPagerAdapter mPagerAdapter;
 	private ImageView mNavHeaderImageView;
 
 	@SuppressWarnings("FieldCanBeLocal")
 	private MaterialSearchView mSearchView;
 
-	/**
-	 * ----------------- fragment(s) ----------------------
-	 */
 	private HandlerThread mHandlerThread;
 
 	/**
@@ -222,6 +213,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 		initView();
 
+		// init P
 		new MainPresenter(this);
 
 		mPresenter.initPermission(this);
@@ -282,7 +274,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 		if (Data.sMusicBinder != null && uri != null) {
 			List<MusicItem> songs = null;
-//
+
 			if (uri.getScheme() != null && uri.getAuthority() != null) {
 				if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
 					String songId = null;
@@ -568,28 +560,28 @@ public final class MainActivity extends BaseListActivity implements MainContract
 			case R.id.menu_toolbar_album_linear: {
 				editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.LINEAR_TYPE);
 				editor.apply();
-				albumListFragment.setRecyclerViewData(albumListFragment.getView());
+				albumListFragment.initRecyclerView();
 			}
 			break;
 
 			case R.id.menu_toolbar_album_grid: {
 				editor.putInt(Values.SharedPrefsTag.ALBUM_LIST_DISPLAY_TYPE, MyRecyclerAdapter2AlbumList.GRID_TYPE);
 				editor.apply();
-				albumListFragment.setRecyclerViewData(albumListFragment.getView());
+				albumListFragment.initRecyclerView();
 			}
 			break;
 
 			case R.id.menu_toolbar_artist_linear: {
 				editor.putInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.LINEAR_TYPE);
 				editor.apply();
-				artistListFragment.setRecyclerViewData(artistListFragment.getView());
+				artistListFragment.initRecyclerView();
 			}
 			break;
 
 			case R.id.menu_toolbar_artist_grid: {
 				editor.putInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.GRID_TYPE);
 				editor.apply();
-				artistListFragment.setRecyclerViewData(artistListFragment.getView());
+				artistListFragment.initRecyclerView();
 			}
 			break;
 
@@ -600,7 +592,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 			// choose
 			case R.id.menu_toolbar_main_choose_addlist: {
-				ArrayList<MusicItem> helper = new ArrayList<>(musicListFragment.getAdapter().getSelected());
+				final ArrayList<MusicItem> helper = new ArrayList<>(musicListFragment.getAdapter().getSelected());
 				PlayListsUtil.addListDialog(MainActivity.this, helper);
 				musicListFragment.getAdapter().clearSelection();
 			}
@@ -681,8 +673,8 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 		Values.CurrentData.CURRENT_PAGE_INDEX = 0;
 
-		mPagerAdapter = new MyPagerAdapter(getSupportFragmentManager(), mFragmentList, mTitles);
-		mMainBinding.viewPager.setAdapter(mPagerAdapter);
+		MyPagerAdapter pagerAdapter = new MyPagerAdapter(getSupportFragmentManager(), mFragmentList, mTitles);
+		mMainBinding.viewPager.setAdapter(pagerAdapter);
 		mMainBinding.viewPager.setOffscreenPageLimit(mTitles.size() > 1 ? mTitles.size() - 1 : 1);
 
 		mMainBinding.viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -785,6 +777,8 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 		//default
 		mCurrentShowedFragment = musicListFragment;
+
+		mMainBinding.appbar.getViewTreeObserver().addOnGlobalLayoutListener(MainActivity.this);
 	}
 
 	private void setSubTitleType(final char type) {
@@ -825,6 +819,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	protected void onDestroy() {
 		try {
 			unbindService(sServiceConnection);
+			Data.HAS_BIND = false;
 		} catch (Exception e) {
 			Log.d(TAG, "onDestroy: " + e.getMessage());
 		}
@@ -833,14 +828,23 @@ public final class MainActivity extends BaseListActivity implements MainContract
 			Data.getCurrentCover().recycle();
 		}
 
-		Data.HAS_BIND = false;
+		mCurrentShowedFragment = null;
+		musicListFragment = null;
+		playListFragment = null;
+		fileViewFragment = null;
+		artistListFragment = null;
+		musicDetailFragment = null;
+
 		mHandlerThread.quit();
 		mFragmentList.clear();
+
+		Data.sCurrentMusicItem = null;
+		Data.sPlayOrderList.clear();
+		Data.sMusicItems.clear();
+		Data.sMusicItemsBackUp.clear();
+		Data.sPlayOrderListBackup.clear();
 		Data.sHistoryPlayed.clear();
 
-		AlbumThreadPool.finish();
-		ItemCoverThreadPool.finish();
-		ArtistThreadPool.finish();
 		CustomThreadPool.finish();
 
 		App.clearDisposable();
@@ -883,9 +887,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 		mHandlerThread.quit();
 		CustomThreadPool.finish();
-		AlbumThreadPool.finish();
-		ArtistThreadPool.finish();
-		ItemCoverThreadPool.finish();
 
 		runOnUiThread(this::finish);
 	}
@@ -988,7 +989,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		mSearchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextSubmit(String query) {
-				musicListFragment.getMusicListBinding().includeRecycler.recyclerView.stopScroll();
+				musicListFragment.mMusicListBinding.includeRecycler.recyclerView.stopScroll();
 				return true;
 			}
 
@@ -1004,7 +1005,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 			if (toolbarClicked) {
 				switch (Values.CurrentData.CURRENT_PAGE_INDEX) {
 					case 0: {
-						musicListFragment.getMusicListBinding().includeRecycler.recyclerView.smoothScrollToPosition(0);
+						musicListFragment.mMusicListBinding.includeRecycler.recyclerView.smoothScrollToPosition(0);
 					}
 					break;
 					case 1: {
@@ -1054,8 +1055,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 				}
 
 				MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.RECYCLER_SCROLL);
-
-				CURRENT_SLIDE_OFFSET = slideOffset;
 
 				mMainBinding.mainBody.setTranslationY(0 - slideOffset * 120);
 
@@ -1156,16 +1155,16 @@ public final class MainActivity extends BaseListActivity implements MainContract
 				break;
 				case R.id.dart_mode: {
 					boolean isDarkMode = PreferenceUtil.getDefault(MainActivity.this)
-							.getBoolean(Values.SharedPrefsTag.DART_MODE, false);
+							.getBoolean(Values.SharedPrefsTag.DARK_MODE, false);
 					if (isDarkMode) {
 						PreferenceUtil.getDefault(MainActivity.this)
-								.edit().putBoolean(Values.SharedPrefsTag.DART_MODE, false).apply();
+								.edit().putBoolean(Values.SharedPrefsTag.DARK_MODE, false).apply();
 						UiModeManager UiModeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
 						UiModeManager.setNightMode(android.app.UiModeManager.MODE_NIGHT_NO);
 						mMainBinding.navigationView.getMenu().findItem(R.id.dart_mode).setChecked(false);
 					} else {
 						PreferenceUtil.getDefault(MainActivity.this)
-								.edit().putBoolean(Values.SharedPrefsTag.DART_MODE, true).apply();
+								.edit().putBoolean(Values.SharedPrefsTag.DARK_MODE, true).apply();
 						UiModeManager UiModeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
 						UiModeManager.setNightMode(android.app.UiModeManager.MODE_NIGHT_YES);
 						mMainBinding.navigationView.getMenu().findItem(R.id.dart_mode).setChecked(true);
@@ -1181,7 +1180,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		mDrawerToggle.syncState();
 		mMainBinding.drawerLayout.addDrawerListener(mDrawerToggle);
 		boolean isDarkMode = PreferenceUtil.getDefault(MainActivity.this)
-				.getBoolean(Values.SharedPrefsTag.DART_MODE, false);
+				.getBoolean(Values.SharedPrefsTag.DARK_MODE, false);
 
 		// init menu
 		if (isDarkMode) {
@@ -1189,18 +1188,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		} else {
 			mMainBinding.navigationView.getMenu().findItem(R.id.dart_mode).setChecked(false);
 		}
-
-		// at the end, set real_blur
-		new Handler().post(() -> {
-			CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) mMainBinding.realBlur.getLayoutParams();
-			layoutParams.height = mMainBinding.appbar.getHeight();
-
-			PADDING = layoutParams.height;
-
-			mMainBinding.realBlur.setLayoutParams(layoutParams);
-
-			mMainBinding.appbar.addOnOffsetChangedListener(mOnOffsetChangedListener);
-		});
 	}
 
 	private void initTab() {
@@ -1315,7 +1302,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 				SharedPreferences.Editor editor = preferences.edit();
 				editor.putString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER) + typeAdded);
 				editor.apply();
-				mPagerAdapter.notifyDataSetChanged();
+				mMainBinding.viewPager.getAdapter().notifyDataSetChanged();
 
 				//添加tab 后重设监听
 				mMainBinding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -1377,28 +1364,27 @@ public final class MainActivity extends BaseListActivity implements MainContract
 					((LinearLayout) tab.view).setOnLongClickListener(v -> {
 						int pos = tab.getPosition();
 
-						AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+						final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 						builder.setTitle(getString(R.string.are_u_sure));
 						builder.setMessage(getString(R.string.close_the_tab_x_int, tab.getText()));
 						builder.setCancelable(true);
 						builder.setPositiveButton(getString(R.string.sure), (dialog, which) -> {
 							final SharedPreferences.Editor editor = preferences.edit();
-							final String tabOrder = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
+							final String tabOrder = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT
+									, DEFAULT_TAB_ORDER);
 							assert tabOrder != null;
 							final StringBuilder currentOrder = new StringBuilder(tabOrder);
 							currentOrder.deleteCharAt(pos);
 							editor.putString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, currentOrder.toString());
 
-							boolean result = editor.commit();
+							editor.apply();
 
-							if (result) {
-								mTitles.remove(pos);
-								mFragmentList.remove(pos);
-								mPagerAdapter.notifyDataSetChanged();
-								mMainBinding.tabLayout.removeTabAt(finalI);
+							mTitles.remove(pos);
+							mFragmentList.remove(pos);
+							mMainBinding.viewPager.getAdapter().notifyDataSetChanged();
+							mMainBinding.tabLayout.removeTabAt(finalI);
 
-								mMainBinding.viewPager.setOffscreenPageLimit(mTitles.size() > 1 ? mTitles.size() - 1 : 1);
-							}
+							mMainBinding.viewPager.setOffscreenPageLimit(mTitles.size() > 1 ? mTitles.size() - 1 : 1);
 
 							dialog.dismiss();
 						});
@@ -1451,6 +1437,21 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	@Override
 	public void setPresenter(MainContract.Presenter presenter) {
 		mPresenter = presenter;
+	}
+
+	@Override
+	public void onGlobalLayout() {
+		CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) mMainBinding.realBlur.getLayoutParams();
+		layoutParams.height = mMainBinding.appbar.getHeight();
+		PADDING = layoutParams.height;
+		mMainBinding.realBlur.setLayoutParams(layoutParams);
+		mMainBinding.appbar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+		musicListFragment.initRecyclerView();
+		albumListFragment.initRecyclerView();
+		artistListFragment.initRecyclerView();
+		playListFragment.getmPlayListBinding().getRoot().setPadding(0, PADDING, 0, 0);
+
 	}
 
 ////////////get///////////////////////get///////////////////////get/////////////////

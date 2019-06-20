@@ -24,7 +24,7 @@ import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter2ArtistList;
 import top.geek_studio.chenlongcould.musicplayer.model.ArtistItem;
 import top.geek_studio.chenlongcould.musicplayer.model.Item;
-import top.geek_studio.chenlongcould.musicplayer.threadPool.ArtistThreadPool;
+import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 
 import java.util.ArrayList;
@@ -62,44 +62,8 @@ public final class ArtistListFragment extends BaseListFragment {
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		mView = inflater.inflate(R.layout.fragment_album_list, container, false);
-		setRecyclerViewData(mView);
 		initArtistData();
 		return mView;
-	}
-
-	public void setRecyclerViewData(@Nullable View view) {
-		if (view == null) return;
-
-		mRecyclerView = view.findViewById(R.id.recycler_view);
-//		mRecyclerView.setHasFixedSize(true);
-
-		//get type
-		final SharedPreferences mDef = PreferenceUtil.getDefault(mMainActivity);
-		int type = mDef.getInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.GRID_TYPE);
-		switch (type) {
-			case MyRecyclerAdapter2ArtistList.LINEAR_TYPE: {
-				final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mMainActivity);
-				linearLayoutManager.setItemPrefetchEnabled(true);
-				linearLayoutManager.setInitialPrefetchItemCount(15);
-				mRecyclerView.setLayoutManager(linearLayoutManager);
-			}
-			break;
-			case MyRecyclerAdapter2ArtistList.GRID_TYPE: {
-				final GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity()
-						, mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2));
-				gridLayoutManager.setItemPrefetchEnabled(true);
-				gridLayoutManager.setInitialPrefetchItemCount(15);
-				mRecyclerView.setLayoutManager(gridLayoutManager);
-			}
-			break;
-			default: {
-				mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-			}
-		}
-
-		mAdapter2ArtistList = new MyRecyclerAdapter2ArtistList(mMainActivity, artistItemList, type);
-		mRecyclerView.setItemViewCacheSize(15);
-		mRecyclerView.setAdapter(mAdapter2ArtistList);
 	}
 
 	private void initArtistData() {
@@ -107,7 +71,7 @@ public final class ArtistListFragment extends BaseListFragment {
 				android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 			ActivityCompat.requestPermissions(mMainActivity, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, Values.REQUEST_WRITE_EXTERNAL_STORAGE);
 		} else {
-			ArtistThreadPool.post(() -> {
+			CustomThreadPool.post(() -> {
 				if (artistItemList.size() == 0) {
 					final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Artists
 							.EXTERNAL_CONTENT_URI, null, null, null, null);
@@ -197,4 +161,38 @@ public final class ArtistListFragment extends BaseListFragment {
 		return false;
 	}
 
+	public void initRecyclerView() {
+		if (mView == null) return;
+
+		mRecyclerView = mView.findViewById(R.id.recycler_view);
+		mRecyclerView.setHasFixedSize(true);
+
+		//get type
+		final SharedPreferences mDef = PreferenceUtil.getDefault(mMainActivity);
+		int type = mDef.getInt(Values.SharedPrefsTag.ARTIST_LIST_DISPLAY_TYPE, MyRecyclerAdapter2ArtistList.GRID_TYPE);
+		switch (type) {
+			case MyRecyclerAdapter2ArtistList.LINEAR_TYPE: {
+				final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mMainActivity);
+				linearLayoutManager.setItemPrefetchEnabled(true);
+				linearLayoutManager.setInitialPrefetchItemCount(15);
+				mRecyclerView.setLayoutManager(linearLayoutManager);
+			}
+			break;
+			case MyRecyclerAdapter2ArtistList.GRID_TYPE: {
+				final GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity()
+						, mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2));
+				gridLayoutManager.setItemPrefetchEnabled(true);
+				gridLayoutManager.setInitialPrefetchItemCount(15);
+				mRecyclerView.setLayoutManager(gridLayoutManager);
+			}
+			break;
+			default: {
+				mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+			}
+		}
+
+		mAdapter2ArtistList = new MyRecyclerAdapter2ArtistList(mMainActivity, artistItemList, type);
+		mRecyclerView.setItemViewCacheSize(15);
+		mRecyclerView.setAdapter(mAdapter2ArtistList);
+	}
 }

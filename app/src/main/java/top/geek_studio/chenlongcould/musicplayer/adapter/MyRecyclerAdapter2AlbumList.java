@@ -74,46 +74,10 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 		mType = type;
 	}
 
-	@NonNull
-	@Override
-	public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-		View view;
-		switch (mType) {
-			case LINEAR_TYPE: {
-				view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_album_list_item, viewGroup, false);
-			}
-			break;
-			case GRID_TYPE: {
-				view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_item_album_grid, viewGroup, false);
-			}
-			break;
-			default:
-				view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_item_album_grid, viewGroup, false);
-		}
-
-		final ViewHolder holder = new ViewHolder(view);
-
-		holder.mUView.setOnClickListener(v -> {
-			String keyWords = mAlbumNameList.get(holder.getAdapterPosition()).getAlbumName();
-
-			final ActivityOptionsCompat compat = ActivityOptionsCompat.makeSceneTransitionAnimation(mMainActivity
-					, holder.mImageView, mMainActivity.getString(R.string.transition_album_art));
-			Intent intent = new Intent(mMainActivity, AlbumDetailActivity.class);
-			intent.putExtra(AlbumDetailActivity.IntentKey.ALBUM_NAME, keyWords);
-			intent.putExtra(AlbumDetailActivity.IntentKey.ID, mAlbumNameList.get(holder.getAdapterPosition()).getAlbumId());
-			mMainActivity.startActivity(intent, compat.toBundle());
-		});
-
-		return holder;
-	}
+	public static final int TYPE_PADDING = 1;
 
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-
-		if (i == 0 || i == 1) {
-			viewHolder.itemView.setPadding(0, MainActivity.PADDING, 0, 0);
-		}
-
 		viewHolder.mAlbumText.setText(mAlbumNameList.get(viewHolder.getAdapterPosition()).getAlbumName());
 		viewHolder.mImageView.setTag(R.string.key_id_3, mAlbumNameList.get(viewHolder.getAdapterPosition()).getmArtwork());
 
@@ -395,7 +359,6 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 	@Override
 	public void onViewRecycled(@NonNull ViewHolder holder) {
 		super.onViewRecycled(holder);
-		holder.itemView.setPadding(0, 0, 0, 0);
 		holder.mImageView.setTag(R.string.key_id_3, null);
 		holder.invalidate();
 	}
@@ -403,6 +366,55 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 	@Override
 	public int getItemCount() {
 		return mAlbumNameList.size();
+	}
+
+	public static final int TYPE_COMMON = 0;
+
+	@NonNull
+	@Override
+	public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+		View view;
+		switch (mType) {
+			case LINEAR_TYPE: {
+				view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_music_album_list_item, viewGroup, false);
+			}
+			break;
+			case GRID_TYPE: {
+				view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_item_album_grid, viewGroup, false);
+			}
+			break;
+			default:
+				view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_item_album_grid, viewGroup, false);
+		}
+
+		if (i == TYPE_PADDING) {
+			view.setPadding(0, MainActivity.PADDING, 0, 0);
+			Log.d(TAG, "onCreateViewHolder: " + MainActivity.PADDING);
+		}
+
+		final ViewHolder holder = new ViewHolder(view);
+
+		holder.mUView.setOnClickListener(v -> {
+			String keyWords = mAlbumNameList.get(holder.getAdapterPosition()).getAlbumName();
+
+			final ActivityOptionsCompat compat = ActivityOptionsCompat.makeSceneTransitionAnimation(mMainActivity
+					, holder.mImageView, mMainActivity.getString(R.string.transition_album_art));
+			Intent intent = new Intent(mMainActivity, AlbumDetailActivity.class);
+			intent.putExtra(AlbumDetailActivity.IntentKey.ALBUM_NAME, keyWords);
+			intent.putExtra(AlbumDetailActivity.IntentKey.ID, mAlbumNameList.get(holder.getAdapterPosition()).getAlbumId());
+			mMainActivity.startActivity(intent, compat.toBundle());
+		});
+
+		return holder;
+	}
+
+	@Override
+	public int getItemViewType(int position) {
+		if (position == 0 || position == 1) {
+			return TYPE_PADDING;
+		} else {
+			return TYPE_COMMON;
+		}
 	}
 
 	@NonNull

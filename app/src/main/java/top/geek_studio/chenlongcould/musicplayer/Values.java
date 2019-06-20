@@ -82,7 +82,7 @@ public interface Values {
 		String SHOW_NOTICE_ADD_TAB = "SHOW_NOTICE_ADD_TAB";
 		String ALBUM_LOCK_SCREEN = "ALBUM_LOCK_SCREEN";
 		String BLUR_ALBUM_LOCK_SCREEN = "BLUR_ALBUM_LOCK_SCREEN";
-		String DART_MODE = "DART_MODE";
+		String DARK_MODE = "DARK_MODE";
 	}
 
 	interface IntentTAG {

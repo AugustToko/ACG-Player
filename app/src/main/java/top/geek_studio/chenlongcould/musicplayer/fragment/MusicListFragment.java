@@ -46,7 +46,9 @@ import java.util.List;
 public final class MusicListFragment extends BaseListFragment {
 
 	public static final String TAG = "MusicListFragment";
-	private FragmentMusicListBinding mMusicListBinding;
+
+	public FragmentMusicListBinding mMusicListBinding;
+
 	private MyRecyclerAdapter adapter;
 
 	private MainActivity mActivity;
@@ -75,36 +77,20 @@ public final class MusicListFragment extends BaseListFragment {
 	}
 
 	@Override
+	public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+		Log.d("PADDING_DEBUG", "onActivityCreated: ");
+		super.onActivityCreated(savedInstanceState);
+	}
+
+	@Override
+	public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+		Log.d("PADDING_DEBUG", "onViewCreated: ");
+		super.onViewCreated(view, savedInstanceState);
+	}
+
+	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		mMusicListBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_list, container, false);
-		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mActivity) {
-			@Override
-			protected int getExtraLayoutSpace(RecyclerView.State state) {
-				return 700;
-			}
-		};
-		linearLayoutManager.setItemPrefetchEnabled(true);
-		linearLayoutManager.setInitialPrefetchItemCount(15);
-
-		adapter = new MyRecyclerAdapter(mActivity, Data.sMusicItems
-				, new MyRecyclerAdapter.Config(preferences.getInt(Values.SharedPrefsTag
-				.RECYCLER_VIEW_ITEM_STYLE, 0), true));
-
-		mMusicListBinding.includeRecycler.recyclerView.setLayoutManager(linearLayoutManager);
-		mMusicListBinding.includeRecycler.recyclerView.setHasFixedSize(true);
-		mMusicListBinding.includeRecycler.recyclerView.setItemViewCacheSize(15);
-		mMusicListBinding.includeRecycler.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-			@Override
-			public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-				if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-					GlideApp.with(mActivity).resumeRequests();
-				} else {
-					GlideApp.with(mActivity).pauseRequests();
-				}
-			}
-		});
-		mMusicListBinding.includeRecycler.recyclerView.setAdapter(adapter);
-
 		loadData();
 		return mMusicListBinding.getRoot();
 	}
@@ -122,7 +108,10 @@ public final class MusicListFragment extends BaseListFragment {
 					boolean loadorder = Data.sPlayOrderList.size() == 0;
 
 					/*---------------------- init Data!!!! -------------------*/
-					final Cursor cursor = mActivity.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+					final Cursor cursor = mActivity.getContentResolver().query(
+							MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null
+							, MediaStore.Audio.Media.DEFAULT_SORT_ORDER
+					);
 					if (cursor != null && cursor.moveToFirst()) {
 						//没有歌曲直接退出app
 						if (cursor.getCount() != 0) {
@@ -188,7 +177,6 @@ public final class MusicListFragment extends BaseListFragment {
 										.addAlbumId(albumId)
 										.addArtistId(artistId);
 
-
 								if (lastId == id) {
 									Data.sCurrentMusicItem = builder.build();
 								}
@@ -229,7 +217,7 @@ public final class MusicListFragment extends BaseListFragment {
 //					builder.show();
 //				}
 
-					adapter.notifyDataSetChanged();
+					if (adapter != null) adapter.notifyDataSetChanged();
 				}
 
 				@Override
@@ -247,10 +235,6 @@ public final class MusicListFragment extends BaseListFragment {
 
 	public final MyRecyclerAdapter getAdapter() {
 		return adapter;
-	}
-
-	public FragmentMusicListBinding getMusicListBinding() {
-		return mMusicListBinding;
 	}
 
 	@Override
@@ -275,4 +259,39 @@ public final class MusicListFragment extends BaseListFragment {
 		return false;
 	}
 
+	@Override
+	public void onDestroy() {
+		Log.d(TAG, "onDestroy: ");
+		super.onDestroy();
+	}
+
+	public void initRecyclerView() {
+		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mActivity) {
+			@Override
+			protected int getExtraLayoutSpace(RecyclerView.State state) {
+				return 700;
+			}
+		};
+		linearLayoutManager.setItemPrefetchEnabled(true);
+		linearLayoutManager.setInitialPrefetchItemCount(15);
+
+		adapter = new MyRecyclerAdapter(mActivity, Data.sMusicItems
+				, new MyRecyclerAdapter.Config(PreferenceUtil.getDefault(mActivity).getInt(Values.SharedPrefsTag
+				.RECYCLER_VIEW_ITEM_STYLE, 0), true));
+		mMusicListBinding.includeRecycler.recyclerView.setLayoutManager(linearLayoutManager);
+		mMusicListBinding.includeRecycler.recyclerView.setHasFixedSize(true);
+		mMusicListBinding.includeRecycler.recyclerView.setItemViewCacheSize(15);
+		mMusicListBinding.includeRecycler.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+			@Override
+			public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+				if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+					GlideApp.with(mActivity).resumeRequests();
+				} else {
+					GlideApp.with(mActivity).pauseRequests();
+				}
+			}
+		});
+		mMusicListBinding.includeRecycler.recyclerView.setAdapter(adapter);
+
+	}
 }

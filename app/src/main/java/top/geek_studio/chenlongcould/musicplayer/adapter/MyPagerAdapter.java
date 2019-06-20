@@ -28,11 +28,12 @@ public final class MyPagerAdapter extends FragmentStatePagerAdapter {
 	private List<String> mTitles;
 
 	public MyPagerAdapter(FragmentManager fm, List<BaseFragment> fragmentList, List<String> titles) {
-		super(fm);
+		super(fm, fragmentList.size());
 		mFragmentList = fragmentList;
 		mTitles = titles;
 	}
 
+	@Override
 	public Fragment getItem(int position) {
 		return mFragmentList.get(position);
 	}
@@ -47,8 +48,10 @@ public final class MyPagerAdapter extends FragmentStatePagerAdapter {
 		return PagerAdapter.POSITION_NONE;
 	}
 
+	@Override
 	public CharSequence getPageTitle(int position) {
 		Log.d(TAG, "getPageTitle: " + position);
 		return mTitles.get(position);
 	}
+
 }

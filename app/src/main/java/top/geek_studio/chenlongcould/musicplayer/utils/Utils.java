@@ -76,10 +76,10 @@ public final class Utils {
 			temp.add("Title: " + item.getMusicName());
 			temp.add("Path: " + item.getMusicPath());
 			temp.add("Media type: " + item.getMimeName());
-			temp.add("Album: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM));
+			temp.add("Album: " + item.getMusicAlbum());
 			temp.add("AlbumArtist: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST));
 			temp.add("Artist: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
-			temp.add("year: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR));
+			temp.add("Year: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR));
 			temp.add("Author: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_AUTHOR));
 			temp.add("Bitrate: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE));
 			temp.add("CD track number: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER));
@@ -87,9 +87,10 @@ public final class Utils {
 			temp.add("COMPOSER: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_COMPOSER));
 			temp.add("Date: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE));
 			temp.add("Disc number: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER));
-			temp.add("Duration: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+			temp.add("Duration: " + item.getDuration());
 			temp.add("Genre: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE));
 			temp.add("Writer: " + retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_WRITER));
+			temp.add("Size: " + item.getSize());
 
 			final List<String> data = new ArrayList<>();
 

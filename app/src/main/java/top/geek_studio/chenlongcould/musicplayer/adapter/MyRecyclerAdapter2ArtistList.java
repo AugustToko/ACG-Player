@@ -42,7 +42,7 @@ import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.database.ArtistArtPath;
 import top.geek_studio.chenlongcould.musicplayer.misc.BlurringView;
 import top.geek_studio.chenlongcould.musicplayer.model.ArtistItem;
-import top.geek_studio.chenlongcould.musicplayer.threadPool.AlbumThreadPool;
+import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 
 import java.io.File;
 import java.io.IOException;
@@ -110,7 +110,7 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 	}
 
 	private void dataSet(final int index, final ViewHolder holder) {
-		AlbumThreadPool.post(() -> {
+		CustomThreadPool.post(() -> {
 
 			ImageView imageView = holder.mArtistImage;
 
