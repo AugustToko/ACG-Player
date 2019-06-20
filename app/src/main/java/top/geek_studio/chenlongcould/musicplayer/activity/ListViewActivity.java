@@ -116,7 +116,7 @@ public final class ListViewActivity extends BaseListActivity {
 					}
 
 					adapter = new MyRecyclerAdapter(this, mMusicItemList, new MyRecyclerAdapter.Config(
-							preferences.getInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 0)
+							PreferenceUtil.getDefault(this).getInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 0)
 							, false));
 					mRecyclerView.setAdapter(adapter);
 				}
@@ -127,8 +127,8 @@ public final class ListViewActivity extends BaseListActivity {
 					currentListName = getIntent().getStringExtra("play_list_name");
 
 					adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList
-							, new MyRecyclerAdapter.Config(preferences.getInt(Values.SharedPrefsTag
-							.RECYCLER_VIEW_ITEM_STYLE, 0), true));
+							, new MyRecyclerAdapter.Config(PreferenceUtil.getDefault(this)
+							.getInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 0), true));
 					mRecyclerView.setAdapter(adapter);
 
 					mDisposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
@@ -194,14 +194,16 @@ public final class ListViewActivity extends BaseListActivity {
 					mMusicItemList.addAll(Data.sHistoryPlayed);
 
 					adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList
-							, new MyRecyclerAdapter.Config(preferences.getInt(Values.SharedPrefsTag
+							, new MyRecyclerAdapter.Config(PreferenceUtil.getDefault(this)
+							.getInt(Values.SharedPrefsTag
 							.RECYCLER_VIEW_ITEM_STYLE, 0), false));
 					mRecyclerView.setAdapter(adapter);
 				}
 				break;
 
 				case ListType.ACTION_TRASH_CAN: {
-					if (preferences.getBoolean(Values.SharedPrefsTag.TRASH_CAN_INFO, true)) {
+					if (PreferenceUtil.getDefault(this).getBoolean(Values.SharedPrefsTag.TRASH_CAN_INFO
+							, true)) {
 						AlertDialog.Builder builder = new AlertDialog.Builder(this)
 								.setTitle("About trash can")
 								.setMessage("You can throw the music into the trash, so you won't hear the song recently unless you actively play it.")
@@ -216,7 +218,8 @@ public final class ListViewActivity extends BaseListActivity {
 					mMusicItemList.addAll(Data.S_TRASH_CAN_LIST);
 
 					adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList
-							, new MyRecyclerAdapter.Config(preferences.getInt(Values.SharedPrefsTag
+							, new MyRecyclerAdapter.Config(PreferenceUtil.getDefault(this)
+							.getInt(Values.SharedPrefsTag
 							.RECYCLER_VIEW_ITEM_STYLE, 0), false));
 					mRecyclerView.setAdapter(adapter);
 

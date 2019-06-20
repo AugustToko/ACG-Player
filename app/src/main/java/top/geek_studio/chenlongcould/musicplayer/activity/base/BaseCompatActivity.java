@@ -6,7 +6,6 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -38,8 +37,6 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 
 	private static final String TAG = "BaseCompatActivity";
 
-	protected SharedPreferences preferences;
-
 	/**
 	 * @deprecated use {@link GkToolbar}
 	 */
@@ -57,8 +54,6 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 
-		preferences = PreferenceUtil.getDefault(this);
-
 		//print TAG
 		Log.d(TAG, "onCreate: " + getActivityTAG());
 
@@ -66,7 +61,7 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 		setTaskDescription(new ActivityManager.TaskDescription((String) getTitle(), null, Utils.Ui.getPrimaryColor(this)));
 
 		//设置状态栏是否全透明
-		if (preferences.getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, true)) {
+		if (PreferenceUtil.getDefault(this).getBoolean(Values.SharedPrefsTag.TRANSPORT_STATUS, true)) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 				Window window = getWindow();
 				window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS

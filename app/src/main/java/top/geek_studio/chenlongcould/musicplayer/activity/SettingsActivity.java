@@ -75,6 +75,8 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 	private AppBarLayout mAppBarLayout;
 
+	private SharedPreferences preferences;
+
 	private ColorPickerDialogListener pickerDialogListener = new ColorPickerDialogListener() {
 		@Override
 		public void onColorSelected(int dialogId, @ColorInt int color) {
@@ -87,7 +89,8 @@ public final class SettingsActivity extends BaseCompatActivity {
 				 * */
 				case PRIMARY: {
 					mPrimaryImage.clearAnimation();
-					ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), preferences.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, R.color.colorPrimary), color);
+					ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), preferences
+							.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, R.color.colorPrimary), color);
 					animator.setDuration(300);
 					animator.addUpdateListener(animation -> {
 						mPrimaryImage.setBackgroundColor((Integer) animation.getAnimatedValue());
@@ -163,6 +166,8 @@ public final class SettingsActivity extends BaseCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		mSettingsBinding = DataBindingUtil.setContentView(this, R.layout.activity_settings);
+
+		preferences = PreferenceUtil.getDefault(this);
 
 		mPrimaryImage = findViewById(R.id.activity_settings_preview_primary);
 		mPrimaryDarkImage = findViewById(R.id.activity_settings_preview_primary_dark);

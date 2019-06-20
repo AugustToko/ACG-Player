@@ -45,6 +45,7 @@ import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseCompatActivit
 import top.geek_studio.chenlongcould.musicplayer.adapter.ThemeAdapter;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityThemeBinding;
 import top.geek_studio.chenlongcould.musicplayer.utils.MyThemeDBHelper;
+import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.io.*;
@@ -72,6 +73,8 @@ public final class ThemeActivity extends BaseCompatActivity {
 
 	private ArrayList<Theme> mThemes = new ArrayList<>();
 
+	private SharedPreferences preferences;
+
 	private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
 			= item -> {
 		switch (item.getItemId()) {
@@ -93,6 +96,8 @@ public final class ThemeActivity extends BaseCompatActivity {
 		mThemeBinding = DataBindingUtil.setContentView(this, R.layout.activity_theme);
 		super.initView(mThemeBinding.toolbar, mThemeBinding.appBarLayout);
 		super.onCreate(savedInstanceState);
+
+		preferences = PreferenceUtil.getDefault(this);
 
 		noteCheck();
 
@@ -154,7 +159,7 @@ public final class ThemeActivity extends BaseCompatActivity {
 				builder.setCancelable(true);
 				builder.setNegativeButton(getString(R.string.sure), (dialog, which) -> {
 					Data.sTheme = null;
-					SharedPreferences.Editor editor = super.preferences.edit();
+					SharedPreferences.Editor editor = PreferenceUtil.getDefault(this).edit();
 					editor.putString(Values.SharedPrefsTag.SELECT_THEME, DEFAULT_THEME);
 					editor.apply();
 					editor.putBoolean(Values.SharedPrefsTag.THEME_USE_NOTE, false);
@@ -180,7 +185,7 @@ public final class ThemeActivity extends BaseCompatActivity {
 			break;
 
 			case R.id.menu_toolbar_theme_note: {
-				final SharedPreferences.Editor preferences = super.preferences.edit();
+				final SharedPreferences.Editor preferences = PreferenceUtil.getDefault(this).edit();
 				preferences.putBoolean(Values.SharedPrefsTag.THEME_USE_NOTE, false);
 				preferences.apply();
 				noteCheck();

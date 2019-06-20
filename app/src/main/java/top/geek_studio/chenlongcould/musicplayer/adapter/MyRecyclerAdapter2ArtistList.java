@@ -84,6 +84,10 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 		}
 		final ViewHolder holder = new ViewHolder(view);
 
+		if (i == MyRecyclerAdapter2AlbumList.TYPE_PADDING) {
+			view.setPadding(0, MainActivity.PADDING, 0, 0);
+		}
+
 		holder.mUView.setOnClickListener(v -> {
 			String keyWords = mArtistItems.get(holder.getAdapterPosition()).getArtistName();
 
@@ -99,11 +103,6 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-
-//		if (i == 0 || i == 1) {
-//			viewHolder.itemView.setPadding(0, MainActivity.PADDING, 0, 0);
-//		}
-
 		viewHolder.mArtistText.setText(mArtistItems.get(i).getArtistName());
 		viewHolder.mArtistImage.setTag(R.string.key_id_2, i);
 		dataSet(i, viewHolder);
@@ -359,6 +358,15 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 	@Override
 	public int getItemCount() {
 		return mArtistItems.size();
+	}
+
+	@Override
+	public int getItemViewType(int position) {
+		if (position == 0 || position == 1) {
+			return MyRecyclerAdapter2AlbumList.TYPE_PADDING;
+		} else {
+			return MyRecyclerAdapter2AlbumList.TYPE_COMMON;
+		}
 	}
 
 	@NonNull

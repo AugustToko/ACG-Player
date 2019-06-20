@@ -516,14 +516,17 @@ public final class MusicDetailFragment extends BaseFragment {
 
 		if (MusicDetailFragment.BackgroundStyle.DETAIL_BACKGROUND.equals(MusicDetailFragment.BackgroundStyle
 				.STYLE_BACKGROUND_BLUR)) {
+			bgUp.post(() -> {
+				if (mMainActivity.isDestroyed() || isDetached() || isRemoving()) return;
 
-			bgUp.post(() -> GlideApp.with(this)
-					.load(bitmap)
-					.dontAnimate()
-					.apply(bitmapTransform(Data.sBlurTransformation))
-					.diskCacheStrategy(DiskCacheStrategy.NONE)
-					.override(SIZE_OF_BLUR, SIZE_OF_BLUR)
-					.into(bgUp));
+				GlideApp.with(mMainActivity)
+						.load(bitmap)
+						.dontAnimate()
+						.apply(bitmapTransform(Data.sBlurTransformation))
+						.diskCacheStrategy(DiskCacheStrategy.NONE)
+						.override(SIZE_OF_BLUR, SIZE_OF_BLUR)
+						.into(bgUp);
+			});
 		} else {
 			if (bitmap != null) {
 				bgUp.setBackgroundColor(targetColor);

@@ -78,7 +78,8 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 /**
  * @author chenlongcould
  */
-public final class MainActivity extends BaseListActivity implements MainContract.View, ViewTreeObserver.OnGlobalLayoutListener {
+public final class MainActivity extends BaseListActivity implements MainContract.View, ViewTreeObserver
+		.OnGlobalLayoutListener {
 
 	public static final String TAG = "MainActivity";
 
@@ -237,7 +238,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 							mPresenter.initPermission(MainActivity.this));
 					builder.setNeutralButton("Cancel!", (dialog, which) -> {
 						dialog.dismiss();
-						finish();
+						commonExit();
 					});
 					builder.show();
 				} else {
@@ -477,7 +478,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 		//4
 		if (backPressed) {
-			finish();
+			commonExit();
 		} else {
 			backPressed = true;
 			Toast.makeText(this, getString(R.string.press_again_to_exit), Toast.LENGTH_SHORT).show();
@@ -816,16 +817,17 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	}
 
 	@Override
+	protected void onSaveInstanceState(@NonNull Bundle outState) {
+		super.onSaveInstanceState(outState);
+	}
+
+	@Override
 	protected void onDestroy() {
 		try {
 			unbindService(sServiceConnection);
 			Data.HAS_BIND = false;
 		} catch (Exception e) {
 			Log.d(TAG, "onDestroy: " + e.getMessage());
-		}
-
-		if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
-			Data.getCurrentCover().recycle();
 		}
 
 		mCurrentShowedFragment = null;
@@ -837,24 +839,29 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 		mHandlerThread.quit();
 		mFragmentList.clear();
-
-		Data.sCurrentMusicItem = null;
-		Data.sPlayOrderList.clear();
-		Data.sMusicItems.clear();
-		Data.sMusicItemsBackUp.clear();
-		Data.sPlayOrderListBackup.clear();
-		Data.sHistoryPlayed.clear();
-
-		CustomThreadPool.finish();
-
+		mMainBinding.unbind();
 		App.clearDisposable();
 
+		super.onDestroy();
+	}
+
+	/**
+	 * Common exit MainActivity
+	 */
+	public void commonExit() {
+		if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
+			Data.getCurrentCover().recycle();
+		}
+		CustomThreadPool.finish();
 		new Thread(() -> {
 			GlideApp.get(MainActivity.this).clearDiskCache();
 			GlideApp.get(MainActivity.this).clearMemory();
 		});
+		finish();
+	}
 
-		super.onDestroy();
+	private void modeChangeExit() {
+		finish();
 	}
 
 	public void fullExit() {
@@ -863,11 +870,13 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		} catch (Exception e) {
 			Log.d(TAG, "fullExit: " + e.getMessage());
 		}
+
 		try {
 			stopService(new Intent(MainActivity.this, MusicService.class));
 		} catch (Exception e) {
 			Log.d(TAG, "fullExit: " + e.getMessage());
 		}
+
 		try {
 			stopService(new Intent(MainActivity.this, MyTileService.class));
 		} catch (Exception e) {
@@ -876,7 +885,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 		//lists
 		Data.sPlayOrderList.clear();
-		Data.sMusicItems.clear();
 		Data.sMusicItemsBackUp.clear();
 		Data.S_TRASH_CAN_LIST.clear();
 
@@ -885,8 +893,18 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		Data.sCurrentMusicItem = null;
 		Data.HAS_PLAYED = false;
 
+		Data.sMusicItems.clear();
+		Data.sMusicItemsBackUp.clear();
+		Data.sPlayOrderListBackup.clear();
+		Data.sHistoryPlayed.clear();
+
 		mHandlerThread.quit();
 		CustomThreadPool.finish();
+
+		new Thread(() -> {
+			GlideApp.get(MainActivity.this).clearDiskCache();
+			GlideApp.get(MainActivity.this).clearMemory();
+		});
 
 		runOnUiThread(this::finish);
 	}
@@ -1154,21 +1172,30 @@ public final class MainActivity extends BaseListActivity implements MainContract
 				}
 				break;
 				case R.id.dart_mode: {
+					startActivity(new Intent(this, EmptyActivity.class));
+					final FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+					transaction.remove(musicDetailFragment)
+							.remove(musicListFragment)
+							.remove(albumListFragment)
+							.remove(artistListFragment)
+							.remove(fileViewFragment)
+							.remove(playListFragment).commitNow();
 					boolean isDarkMode = PreferenceUtil.getDefault(MainActivity.this)
 							.getBoolean(Values.SharedPrefsTag.DARK_MODE, false);
 					if (isDarkMode) {
 						PreferenceUtil.getDefault(MainActivity.this)
 								.edit().putBoolean(Values.SharedPrefsTag.DARK_MODE, false).apply();
+						mMainBinding.navigationView.getMenu().findItem(R.id.dart_mode).setChecked(false);
 						UiModeManager UiModeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
 						UiModeManager.setNightMode(android.app.UiModeManager.MODE_NIGHT_NO);
-						mMainBinding.navigationView.getMenu().findItem(R.id.dart_mode).setChecked(false);
 					} else {
 						PreferenceUtil.getDefault(MainActivity.this)
 								.edit().putBoolean(Values.SharedPrefsTag.DARK_MODE, true).apply();
-						UiModeManager UiModeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
-						UiModeManager.setNightMode(android.app.UiModeManager.MODE_NIGHT_YES);
 						mMainBinding.navigationView.getMenu().findItem(R.id.dart_mode).setChecked(true);
+						UiModeManager modeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
+						modeManager.setNightMode(android.app.UiModeManager.MODE_NIGHT_YES);
 					}
+					modeChangeExit();
 				}
 				break;
 				default:
@@ -1410,8 +1437,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		}
 	}
 
-	////////////get///////////////////////get///////////////////////get/////////////////
-
 	public final ImageView getNavHeaderImageView() {
 		return mNavHeaderImageView;
 	}
@@ -1453,8 +1478,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		playListFragment.getmPlayListBinding().getRoot().setPadding(0, PADDING, 0, 0);
 
 	}
-
-////////////get///////////////////////get///////////////////////get/////////////////
 
 	@SuppressWarnings("WeakerAccess")
 	public static final class NotLeakHandler extends Handler {

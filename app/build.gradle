@@ -16,10 +16,10 @@ android {
         applicationId "top.geek_studio.chenlongcould.musicplayer"
         minSdkVersion 21
         targetSdkVersion 28
-        versionName '2.6.8.8(20190619)'
+        versionName '2.6.8.9(20190629)'
         testInstrumentationRunner "android.support.albumLoader.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config
-        versionCode 136
+        versionCode 137
         flavorDimensions "default"
         multiDexEnabled = false
     }
@@ -66,7 +66,7 @@ android {
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar','*.aar'], dir: 'libs')
+    implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
     implementation project(path: ':geeklibrary')
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta2'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
@@ -113,4 +113,3 @@ dependencies {
     // blur
     implementation 'com.github.mmin18:realtimeblurview:1.2.1'
 }
-

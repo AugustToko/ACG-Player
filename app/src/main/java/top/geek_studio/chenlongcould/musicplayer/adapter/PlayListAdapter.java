@@ -136,7 +136,7 @@ public final class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 		viewHolder.mPlayListName.setText(mPlayListItems.get(i).getName());
-		if (mPlayListItems.get(i).getName().equals(mMainActivity.getString(R.string.favorites))) {
+		if (mMainActivity.getString(R.string.favorites).equals(mPlayListItems.get(i).getName())) {
 			viewHolder.mPopupMenu.getMenu().removeItem(Menu.FIRST + 5);
 		}
 	}

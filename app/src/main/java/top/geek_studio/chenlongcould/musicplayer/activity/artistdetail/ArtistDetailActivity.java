@@ -24,6 +24,7 @@ import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.database.ArtistArtPath;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityArtistDetailOthBinding;
 import top.geek_studio.chenlongcould.musicplayer.misc.SimpleObservableScrollViewCallbacks;
+import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.util.List;
@@ -135,7 +136,8 @@ public final class ArtistDetailActivity extends BaseListActivity implements Arti
 		final View contentView = getWindow().getDecorView().findViewById(android.R.id.content);
 		contentView.post(() -> observableScrollViewCallbacks.onScrollChanged(-headerViewHeight, false, false));
 		mArtistDetailOthBinding.recyclerView.setLayoutManager(new GridLayoutManager(ArtistDetailActivity.this, 1));
-		final MyRecyclerAdapter adapter = new MyRecyclerAdapter(this, mPresenter.getSongs(), new MyRecyclerAdapter.Config(preferences.getInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 0), false));
+		final MyRecyclerAdapter adapter = new MyRecyclerAdapter(this, mPresenter.getSongs(), new MyRecyclerAdapter
+				.Config(PreferenceUtil.getDefault(this).getInt(Values.SharedPrefsTag.RECYCLER_VIEW_ITEM_STYLE, 0), false));
 		mArtistDetailOthBinding.recyclerView.setAdapter(adapter);
 		adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
 			@Override
