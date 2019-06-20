@@ -154,12 +154,12 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	 */
 	private List<BaseFragment> mFragmentList = new ArrayList<>();
 
-	private volatile MusicDetailFragment musicDetailFragment;
-	private volatile MusicListFragment musicListFragment;
-	private volatile AlbumListFragment albumListFragment;
-	private volatile ArtistListFragment artistListFragment;
-	private volatile FileViewFragment fileViewFragment;
-	private volatile PlayListFragment playListFragment;
+	private MusicDetailFragment musicDetailFragment;
+	private MusicListFragment musicListFragment;
+	private AlbumListFragment albumListFragment;
+	private ArtistListFragment artistListFragment;
+	private FileViewFragment fileViewFragment;
+	private PlayListFragment playListFragment;
 
 	private BaseFragment mCurrentShowedFragment;
 
