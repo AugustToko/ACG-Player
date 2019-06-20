@@ -214,6 +214,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		Log.d(TAG, "onCreate: ");
 		preferences = PreferenceUtil.getDefault(this);
 		mHandlerThread = new HandlerThread("HandlerThread@MainActivity");
 		mHandlerThread.start();
@@ -259,6 +260,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 	@Override
 	protected void onPause() {
+		Log.d(TAG, "onPause: ");
 		super.onPause();
 		runOnUiThread(() -> GlideApp.with(MainActivity.this).pauseRequests());
 	}
@@ -424,6 +426,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 	@Override
 	protected void onResume() {
+		Log.d(TAG, "onResume: ");
 		super.onResume();
 
 		if (musicDetailFragment == null) {
@@ -594,7 +597,10 @@ public final class MainActivity extends BaseListActivity implements MainContract
 			break;
 
 			case R.id.menu_toolbar_reload: {
-				if (mCurrentShowedFragment != null) mCurrentShowedFragment.reloadData();
+				if (mCurrentShowedFragment != null) {
+					Log.d(TAG, "onOptionsItemSelected: " + mCurrentShowedFragment);
+					mCurrentShowedFragment.reloadData();
+				}
 			}
 			break;
 
@@ -785,6 +791,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 		//default
 		mCurrentShowedFragment = musicListFragment;
+		Log.d(TAG, "initFragmentData: done");
 	}
 
 	private void setSubTitleType(final char type) {
@@ -822,7 +829,14 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	}
 
 	@Override
+	protected void onStop() {
+		Log.d(TAG, "onStop: ");
+		super.onStop();
+	}
+
+	@Override
 	protected void onDestroy() {
+		Log.d(TAG, "onDestroy: ");
 		try {
 			unbindService(sServiceConnection);
 		} catch (Exception e) {
@@ -1170,6 +1184,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 						UiModeManager.setNightMode(android.app.UiModeManager.MODE_NIGHT_YES);
 						mMainBinding.navigationView.getMenu().findItem(R.id.dart_mode).setChecked(true);
 					}
+					fullExit();
 				}
 				break;
 				default:

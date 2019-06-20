@@ -100,9 +100,9 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 
-		if (i == 0 || i == 1) {
-			viewHolder.itemView.setPadding(0, MainActivity.PADDING, 0, 0);
-		}
+//		if (i == 0 || i == 1) {
+//			viewHolder.itemView.setPadding(0, MainActivity.PADDING, 0, 0);
+//		}
 
 		viewHolder.mArtistText.setText(mArtistItems.get(i).getArtistName());
 		viewHolder.mArtistImage.setTag(R.string.key_id_2, i);

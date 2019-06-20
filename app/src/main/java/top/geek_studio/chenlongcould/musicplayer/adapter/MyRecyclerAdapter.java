@@ -55,7 +55,6 @@ import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
-import top.geek_studio.chenlongcould.musicplayer.threadPool.ItemCoverThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
@@ -462,9 +461,9 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 
-		if (mActivity.getActivityTAG().equals(MainActivity.TAG)) {
-			if (i == 0) viewHolder.itemView.setPadding(0, MainActivity.PADDING, 0, 0);
-		}
+//		if (mActivity.getActivityTAG().equals(MainActivity.TAG)) {
+//			if (i == 0) viewHolder.itemView.setPadding(0, MainActivity.PADDING, 0, 0);
+//		}
 
 		final ItemHolder holder = ((ItemHolder) viewHolder);
 
@@ -477,7 +476,9 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 		holder.mMusicText.setText(mMusicItems.get(holder.getAdapterPosition()).getMusicName());
 		holder.mMusicAlbumName.setText(mMusicItems.get(holder.getAdapterPosition()).getMusicAlbum());
-		String prefix = mMusicItems.get(holder.getAdapterPosition()).getMusicPath().substring(mMusicItems.get(holder.getAdapterPosition()).getMusicPath().lastIndexOf(".") + 1);
+		String prefix = mMusicItems.get(holder.getAdapterPosition()).getMusicPath().substring(
+				mMusicItems.get(holder.getAdapterPosition()).getMusicPath().lastIndexOf(".") + 1
+		);
 		holder.mMusicExtName.setText(prefix);
 		holder.mTime.setText(Data.S_SIMPLE_DATE_FORMAT.format(new Date(mMusicItems.get(holder.getAdapterPosition()).getDuration())));
 
@@ -498,12 +499,14 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 					, mMusicItems.get(i)));
 		}
 
-		ItemCoverThreadPool.post(() -> {
 
-			switch (mConfig.styleId) {
-				case 1: {
+		//noinspection SwitchStatementWithTooFewBranches
+		switch (mConfig.styleId) {
+			case 1: {
+				CustomThreadPool.post(() -> {
 					ItemHolderS1 holderS1 = (ItemHolderS1) holder;
-					final Bitmap bitmap = Utils.Ui.readBitmapFromFile(Utils.Audio.getCoverPath(mActivity, mMusicItems.get(i).getAlbumId()), 50, 50);
+					final Bitmap bitmap = Utils.Ui.readBitmapFromFile(Utils.Audio.getCoverPath(mActivity, mMusicItems
+							.get(i).getAlbumId()), 50, 50);
 					if (bitmap != null) {
 						//color set (album tag)
 						Palette.from(bitmap).generate(p -> {
@@ -517,12 +520,12 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 							}
 						});
 					}
-				}
-				break;
-				default:
+				});
 			}
+			break;
+			default:
+		}
 
-		});
 	}
 
 	@NonNull

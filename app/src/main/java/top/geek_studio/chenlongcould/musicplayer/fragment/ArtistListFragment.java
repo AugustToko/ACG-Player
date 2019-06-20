@@ -71,7 +71,7 @@ public final class ArtistListFragment extends BaseListFragment {
 		if (view == null) return;
 
 		mRecyclerView = view.findViewById(R.id.recycler_view);
-//		mRecyclerView.setHasFixedSize(true);
+		mRecyclerView.setHasFixedSize(true);
 
 		//get type
 		final SharedPreferences mDef = PreferenceUtil.getDefault(mMainActivity);
@@ -79,16 +79,16 @@ public final class ArtistListFragment extends BaseListFragment {
 		switch (type) {
 			case MyRecyclerAdapter2ArtistList.LINEAR_TYPE: {
 				final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mMainActivity);
-				linearLayoutManager.setItemPrefetchEnabled(true);
-				linearLayoutManager.setInitialPrefetchItemCount(15);
+//				linearLayoutManager.setItemPrefetchEnabled(true);
+//				linearLayoutManager.setInitialPrefetchItemCount(15);
 				mRecyclerView.setLayoutManager(linearLayoutManager);
 			}
 			break;
 			case MyRecyclerAdapter2ArtistList.GRID_TYPE: {
 				final GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity()
 						, mDef.getInt(Values.SharedPrefsTag.ALBUM_LIST_GRID_TYPE_COUNT, 2));
-				gridLayoutManager.setItemPrefetchEnabled(true);
-				gridLayoutManager.setInitialPrefetchItemCount(15);
+//				gridLayoutManager.setItemPrefetchEnabled(true);
+//				gridLayoutManager.setInitialPrefetchItemCount(15);
 				mRecyclerView.setLayoutManager(gridLayoutManager);
 			}
 			break;

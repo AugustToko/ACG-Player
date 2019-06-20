@@ -27,7 +27,10 @@ import io.reactivex.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
 import org.litepal.LitePal;
 import org.litepal.LitePalDB;
-import top.geek_studio.chenlongcould.musicplayer.*;
+import top.geek_studio.chenlongcould.musicplayer.App;
+import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
@@ -72,19 +75,20 @@ public final class MusicListFragment extends BaseListFragment {
 	public void onAttach(@NotNull Context context) {
 		super.onAttach(context);
 		mActivity = (MainActivity) getActivity();
+		Log.d(TAG, "onAttach: ");
 	}
 
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		mMusicListBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_list, container, false);
 		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mActivity) {
-			@Override
-			protected int getExtraLayoutSpace(RecyclerView.State state) {
-				return 700;
-			}
+//			@Override
+//			protected int getExtraLayoutSpace(RecyclerView.State state) {
+//				return 700;
+//			}
 		};
-		linearLayoutManager.setItemPrefetchEnabled(true);
-		linearLayoutManager.setInitialPrefetchItemCount(15);
+//		linearLayoutManager.setItemPrefetchEnabled(true);
+//		linearLayoutManager.setInitialPrefetchItemCount(15);
 
 		adapter = new MyRecyclerAdapter(mActivity, Data.sMusicItems
 				, new MyRecyclerAdapter.Config(preferences.getInt(Values.SharedPrefsTag
@@ -92,21 +96,27 @@ public final class MusicListFragment extends BaseListFragment {
 
 		mMusicListBinding.includeRecycler.recyclerView.setLayoutManager(linearLayoutManager);
 		mMusicListBinding.includeRecycler.recyclerView.setHasFixedSize(true);
-		mMusicListBinding.includeRecycler.recyclerView.setItemViewCacheSize(15);
+//		mMusicListBinding.includeRecycler.recyclerView.setItemViewCacheSize(15);
 		mMusicListBinding.includeRecycler.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 			@Override
 			public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-				if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-					GlideApp.with(mActivity).resumeRequests();
-				} else {
-					GlideApp.with(mActivity).pauseRequests();
-				}
+//				if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+//					GlideApp.with(mActivity).resumeRequests();
+//				} else {
+//					GlideApp.with(mActivity).pauseRequests();
+//				}
 			}
 		});
 		mMusicListBinding.includeRecycler.recyclerView.setAdapter(adapter);
 
-		loadData();
+		Log.d(TAG, "onCreateView: ");
 		return mMusicListBinding.getRoot();
+	}
+
+	@Override
+	public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
+		loadData();
 	}
 
 	private void loadData() {
@@ -219,7 +229,7 @@ public final class MusicListFragment extends BaseListFragment {
 
 				@Override
 				public final void onNext(Integer result) {
-					Log.d(TAG, "onNext: music list: " + result);
+//					Log.d(TAG, "onNext: music list: " + result);
 //				if (result == -1) {
 //					AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
 //					builder.setTitle("Error")
@@ -229,7 +239,7 @@ public final class MusicListFragment extends BaseListFragment {
 //					builder.show();
 //				}
 
-					adapter.notifyDataSetChanged();
+//					adapter.notifyDataSetChanged();
 				}
 
 				@Override
@@ -274,5 +284,25 @@ public final class MusicListFragment extends BaseListFragment {
 		}
 		return false;
 	}
+
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		Log.d(TAG, "onDestroyView: ");
+	}
+
+	@Override
+	public void onDetach() {
+		super.onDetach();
+		Log.d(TAG, "onDetach: ");
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		Log.d(TAG, "onDestroy: ");
+		adapter = null;
+	}
+
 
 }
