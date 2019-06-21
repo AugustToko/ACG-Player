@@ -92,7 +92,8 @@ public final class ArtistListFragment extends BaseListFragment {
 								try {
 									artistItem = new ArtistItem(albumName, Integer.parseInt(albumId));
 								} catch (NumberFormatException e) {
-									Toast.makeText(mMainActivity, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+									mMainActivity.runOnUiThread(() -> Toast.makeText(mMainActivity
+											, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show());
 									return;
 								}
 								artistItemList.add(artistItem);

@@ -496,52 +496,49 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		//TODO clean up code
 		menu.clear();
-		if (mCurrentShowedFragment != null) {
 
-			if (mCurrentShowedFragment instanceof PlayListFragment) {
-				getMenuInflater().inflate(R.menu.menu_main_common_playlist, menu);
-			} else {
-				if (musicListFragment == null || musicListFragment.getAdapter() == null
-						|| musicListFragment.getAdapter().getSelected().size() == 0) {
-					getMenuInflater().inflate(R.menu.menu_toolbar_main_common, menu);
-					boolean showAlbumMenu = false;
-					boolean showArtistMenu = false;
-					switch (Values.CurrentData.CURRENT_PAGE_INDEX) {
-						case 0: {
-							showAlbumMenu = false;
-							showArtistMenu = false;
-						}
-						break;
-						case 1: {
-							showAlbumMenu = true;
-							showArtistMenu = false;
-						}
-						break;
-						case 2: {
-							showAlbumMenu = false;
-							showArtistMenu = true;
-						}
-						break;
-						case 3: {
-							showAlbumMenu = false;
-							showArtistMenu = false;
-						}
-						break;
-						case 4: {
-							showAlbumMenu = false;
-							showArtistMenu = false;
-						}
-						break;
+		if (mCurrentShowedFragment instanceof PlayListFragment) {
+			getMenuInflater().inflate(R.menu.menu_main_common_playlist, menu);
+		} else {
+			if (musicListFragment == null || musicListFragment.getAdapter() == null
+					|| musicListFragment.getAdapter().getSelected().size() == 0) {
+				getMenuInflater().inflate(R.menu.menu_toolbar_main_common, menu);
+				boolean showAlbumMenu = false;
+				boolean showArtistMenu = false;
+				switch (Values.CurrentData.CURRENT_PAGE_INDEX) {
+					case 0: {
+						showAlbumMenu = false;
+						showArtistMenu = false;
 					}
-					setMenuIconAlphaAnimation(menu.findItem(R.id.menu_toolbar_album_layout)
-							, showAlbumMenu, true);
-					setMenuIconAlphaAnimation(menu.findItem(R.id.menu_toolbar_artist_layout)
-							, showArtistMenu, true);
-				} else {
-					getMenuInflater().inflate(R.menu.menu_toolbar_main_choose, menu);
+					break;
+					case 1: {
+						showAlbumMenu = true;
+						showArtistMenu = false;
+					}
+					break;
+					case 2: {
+						showAlbumMenu = false;
+						showArtistMenu = true;
+					}
+					break;
+					case 3: {
+						showAlbumMenu = false;
+						showArtistMenu = false;
+					}
+					break;
+					case 4: {
+						showAlbumMenu = false;
+						showArtistMenu = false;
+					}
+					break;
 				}
+				setMenuIconAlphaAnimation(menu.findItem(R.id.menu_toolbar_album_layout)
+						, showAlbumMenu, true);
+				setMenuIconAlphaAnimation(menu.findItem(R.id.menu_toolbar_artist_layout)
+						, showArtistMenu, true);
+			} else {
+				getMenuInflater().inflate(R.menu.menu_toolbar_main_choose, menu);
 			}
-
 		}
 		final MenuItem searchItem = menu.findItem(R.id.menu_toolbar_search);
 		if (searchItem != null) mSearchView.setMenuItem(searchItem);
