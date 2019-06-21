@@ -61,7 +61,6 @@ import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityMainBinding;
 import top.geek_studio.chenlongcould.musicplayer.fragment.*;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
-import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
@@ -637,7 +636,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 					final int result = PlayListsUtil.createPlaylist(context, et.getText().toString());
 
-					playListFragment.addItem(new PlayListItem(result, et.getText().toString()));
+//					playListFragment.addItem(new PlayListItem(result, et.getText().toString()));
 				});
 				builder.show();
 			}
