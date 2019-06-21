@@ -166,6 +166,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		mSettingsBinding = DataBindingUtil.setContentView(this, R.layout.activity_settings);
+		setSupportActionBar(mSettingsBinding.activitySettingsToolbar);
 
 		preferences = PreferenceUtil.getDefault(this);
 
@@ -586,9 +587,9 @@ public final class SettingsActivity extends BaseCompatActivity {
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	public boolean onPrepareOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.menu_toolbar_settings, menu);
-		return super.onCreateOptionsMenu(menu);
+		return true;
 	}
 
 	@Override

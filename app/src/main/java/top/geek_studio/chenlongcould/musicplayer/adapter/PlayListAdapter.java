@@ -32,19 +32,18 @@ public final class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.
 	private PlayListFragment playListFragment;
 
 	public PlayListAdapter(PlayListFragment fragment, List<PlayListItem> playListItems) {
-		mPlayListItems = new ArrayList<>(playListItems);
 		playListFragment = fragment;
 		mMainActivity = (MainActivity) fragment.getActivity();
+		mPlayListItems = playListItems;
 	}
 
-	public List<PlayListItem> getPlayListItems() {
-		return mPlayListItems;
-	}
+//	public List<PlayListItem> getPlayListItems() {
+//		return mPlayListItems;
+//	}
 
-	public void setPlayListItems(List<PlayListItem> mPlayListItems) {
-		this.mPlayListItems.clear();
-		this.mPlayListItems.addAll(mPlayListItems);
-	}
+//	public void setPlayListItems(List<PlayListItem> mPlayListItems) {
+//		this.mPlayListItems = new ArrayList<>(mPlayListItems);
+//	}
 
 	@NonNull
 	@Override

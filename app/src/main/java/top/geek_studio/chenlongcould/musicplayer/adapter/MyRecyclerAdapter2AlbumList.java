@@ -385,11 +385,6 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 				view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_item_album_grid, viewGroup, false);
 		}
 
-		if (i == TYPE_PADDING) {
-			view.setPadding(0, MainActivity.PADDING, 0, 0);
-			Log.d(TAG, "onCreateViewHolder: " + MainActivity.PADDING);
-		}
-
 		final ViewHolder holder = new ViewHolder(view);
 
 		holder.mUView.setOnClickListener(v -> {
@@ -402,6 +397,11 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 			intent.putExtra(AlbumDetailActivity.IntentKey.ID, mAlbumNameList.get(holder.getAdapterPosition()).getAlbumId());
 			mMainActivity.startActivity(intent, compat.toBundle());
 		});
+
+		if (i == TYPE_PADDING) {
+			holder.itemView.setPadding(0, MainActivity.PADDING, 0, 0);
+			Log.d(TAG, "onCreateViewHolder: " + MainActivity.PADDING);
+		}
 
 		return holder;
 	}

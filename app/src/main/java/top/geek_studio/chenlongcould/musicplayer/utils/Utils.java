@@ -18,10 +18,7 @@ import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Display;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.WindowManager;
+import android.view.*;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -718,6 +715,16 @@ public final class Utils {
 						toolbar.getMenu().getItem(i).getIcon().clearColorFilter();
 						toolbar.getMenu().getItem(i).getIcon().setTint(color);
 					}
+				}
+			}
+		}
+
+		public static void setOverToolbarColor(@NonNull final Context context, Menu menu, int... titleColor) {
+			int color = titleColor.length > 0 ? titleColor[0] : getTitleColor(context);
+			for (int i = 0; i < menu.size(); i++) {
+				if (menu.getItem(i).getIcon() != null) {
+					menu.getItem(i).getIcon().clearColorFilter();
+					menu.getItem(i).getIcon().setTint(color);
 				}
 			}
 		}

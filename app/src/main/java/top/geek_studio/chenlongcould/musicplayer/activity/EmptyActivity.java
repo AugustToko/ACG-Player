@@ -22,6 +22,6 @@ public class EmptyActivity extends AppCompatActivity {
 	@Override
 	public void onBackPressed() {
 		startActivity(new Intent(this, MainActivity.class));
-		super.onBackPressed();
+		finish();
 	}
 }

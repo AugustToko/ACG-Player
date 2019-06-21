@@ -854,6 +854,11 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 	@Override
 	protected void onDestroy() {
+		try {
+			unbindService(sServiceConnection);
+		} catch (Exception e) {
+			Log.d(TAG, "fullExit: " + e.getMessage());
+		}
 
 		mCurrentShowedFragment = null;
 		musicListFragment = null;
@@ -874,13 +879,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	 * Common exit MainActivity
 	 */
 	public void commonExit() {
-		try {
-			unbindService(sServiceConnection);
-			Data.HAS_BIND = false;
-		} catch (Exception e) {
-			Log.d(TAG, "onDestroy: " + e.getMessage());
-		}
-
 		if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
 			Data.getCurrentCover().recycle();
 		}
@@ -900,11 +898,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	}
 
 	public void fullExit() {
-		try {
-			unbindService(sServiceConnection);
-		} catch (Exception e) {
-			Log.d(TAG, "fullExit: " + e.getMessage());
-		}
 
 		try {
 			stopService(new Intent(MainActivity.this, MusicService.class));
@@ -1223,12 +1216,14 @@ public final class MainActivity extends BaseListActivity implements MainContract
 						mMainBinding.navigationView.getMenu().findItem(R.id.dart_mode).setChecked(false);
 						UiModeManager UiModeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
 						UiModeManager.setNightMode(android.app.UiModeManager.MODE_NIGHT_NO);
+						Log.d(TAG, "initView: load bright done");
 					} else {
 						PreferenceUtil.getDefault(MainActivity.this)
 								.edit().putBoolean(Values.SharedPrefsTag.DARK_MODE, true).apply();
 						mMainBinding.navigationView.getMenu().findItem(R.id.dart_mode).setChecked(true);
 						UiModeManager modeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
 						modeManager.setNightMode(android.app.UiModeManager.MODE_NIGHT_YES);
+						Log.d(TAG, "initView: load dark done");
 					}
 					modeChangeExit();
 				}

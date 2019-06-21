@@ -85,6 +85,7 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 		final ViewHolder holder = new ViewHolder(view);
 
 		if (i == MyRecyclerAdapter2AlbumList.TYPE_PADDING) {
+			Log.d(TAG, "onCreateViewHolder: set padding");
 			view.setPadding(0, MainActivity.PADDING, 0, 0);
 		}
 

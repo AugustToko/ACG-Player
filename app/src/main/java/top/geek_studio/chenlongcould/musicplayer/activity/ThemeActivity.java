@@ -96,6 +96,7 @@ public final class ThemeActivity extends BaseCompatActivity {
 		mThemeBinding = DataBindingUtil.setContentView(this, R.layout.activity_theme);
 		super.initView(mThemeBinding.toolbar, mThemeBinding.appBarLayout);
 		super.onCreate(savedInstanceState);
+		setSupportActionBar(mThemeBinding.toolbar);
 
 		preferences = PreferenceUtil.getDefault(this);
 
@@ -138,7 +139,8 @@ public final class ThemeActivity extends BaseCompatActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.menu_toolbar_theme, menu);
-		return super.onCreateOptionsMenu(menu);
+		Utils.Ui.setOverToolbarColor(ThemeActivity.this, menu);
+		return true;
 	}
 
 	@Override
@@ -265,13 +267,13 @@ public final class ThemeActivity extends BaseCompatActivity {
 
 	public void loadDataUI() {
 		mThemes.clear();
+		mThemeAdapter.notifyDataSetChanged();
 
 		AlertDialog mDialog = DialogUtil.getLoadingDialog(ThemeActivity.this, "Loading...");
 		mDialog.show();
 		mDisposable = Observable.create((ObservableOnSubscribe<Integer>) observableEmitter -> {
-			final File themeDir = getExternalFilesDir(ThemeStore.DIR_NAME);
 
-			if (themeDir == null) {
+			if (!themeDir.exists()) {
 				return;
 			}
 
