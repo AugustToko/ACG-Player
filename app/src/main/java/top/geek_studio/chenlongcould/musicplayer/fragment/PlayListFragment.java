@@ -7,7 +7,9 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
@@ -36,6 +39,7 @@ import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author chenlongcould
@@ -56,12 +60,27 @@ public final class PlayListFragment extends BaseListFragment {
 
 	/**
 	 * add playlist item
+	 * @deprecated use {@link #addItem(Item)}
 	 */
+	@Deprecated
 	public static void sendAddPlayList(@Nullable PlayListItem playListItem) {
 		Message message = Message.obtain();
 		message.what = PlayListFragment.NotLeakHandler.ADD_TO_PLAYLIST;
 		message.obj = playListItem;
-		PlayListFragment.mHandler.sendEmptyMessage(PlayListFragment.NotLeakHandler.ADD_TO_PLAYLIST);
+		PlayListFragment.mHandler.sendMessage(message);
+	}
+
+	/**
+	 * add playlist item
+	 *
+	 * @deprecated use {@link #removeItem(Item)}
+	 */
+	@Deprecated
+	public static void sendRemovePlayList(@Nullable PlayListItem playListItem) {
+		Message message = Message.obtain();
+		message.what = NotLeakHandler.REMOVE_TO_PLAYLIST;
+		message.obj = playListItem;
+		PlayListFragment.mHandler.sendMessage(message);
 	}
 
 	/**
@@ -83,6 +102,13 @@ public final class PlayListFragment extends BaseListFragment {
 		mHandler = new NotLeakHandler(this);
 	}
 
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		mPlayListBinding.unbind();
+		mPlayListItemList.clear();
+	}
+
 	/**
 	 * reload
 	 * by create list or rename list
@@ -95,6 +121,13 @@ public final class PlayListFragment extends BaseListFragment {
 		return mPlayListAdapter;
 	}
 
+	@Override
+	public void onSaveInstanceState(@NonNull Bundle outState) {
+		Log.d(TAG, "onSaveInstanceState: ");
+		super.onSaveInstanceState(outState);
+		outState.putParcelableArrayList("data", (ArrayList<? extends Parcelable>) mPlayListItemList);
+	}
+
 	/**
 	 * load data
 	 */
@@ -103,9 +136,9 @@ public final class PlayListFragment extends BaseListFragment {
 				android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 			ActivityCompat.requestPermissions(mMainActivity, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, Values.REQUEST_WRITE_EXTERNAL_STORAGE);
 		} else {
-			final Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+			final Disposable disposable = Observable.create((ObservableOnSubscribe<DiffUtil.DiffResult>) emitter -> {
 				mPlayListItemList.clear();
-				Cursor cursor = mMainActivity.getContentResolver()
+				final Cursor cursor = mMainActivity.getContentResolver()
 						.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null);
 				if (cursor != null && cursor.moveToFirst()) {
 					do {
@@ -124,23 +157,29 @@ public final class PlayListFragment extends BaseListFragment {
 						mPlayListItemList.add(new PlayListItem(id, name, filePath, addTime));
 					} while (cursor.moveToNext());
 					cursor.close();
+					DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffCallback(mPlayListItemList, mPlayListAdapter.getPlayListItems()));
+					mPlayListAdapter.setPlayListItems(mPlayListItemList);
+					emitter.onNext(result);
 				}
 
-				//done
-				emitter.onNext(0);
-			}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(integer -> {
-				if (integer == 0) {
-					//load recyclerView
-					mPlayListAdapter = new PlayListAdapter(this, mPlayListItemList);
-					mPlayListBinding.recyclerView.setAdapter(mPlayListAdapter);
-				}
-			});
+			}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(result ->
+					result.dispatchUpdatesTo(mPlayListAdapter));
 			Data.sDisposables.add(disposable);
 		}
 	}
 
 	@Override
+	public void reloadData() {
+		super.reloadData();
+		mHandler.sendEmptyMessage(NotLeakHandler.RE_LOAD_PLAY_LIST);
+	}
+
+	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+		if (savedInstanceState != null) {
+			mPlayListItemList.addAll(Objects.requireNonNull(savedInstanceState.getParcelableArrayList("data")));
+			Log.d(TAG, "onCreateView: " + mPlayListItemList.size());
+		}
 		mPlayListBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_playlist, container, false);
 		mPlayListBinding.addRecent.setOnClickListener(v -> {
 			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
@@ -164,47 +203,71 @@ public final class PlayListFragment extends BaseListFragment {
 		mPlayListBinding.recyclerView.setHasFixedSize(true);
 		mPlayListBinding.recyclerView.addItemDecoration(Data.getItemDecoration(mMainActivity));
 
+		mPlayListAdapter = new PlayListAdapter(this, mPlayListItemList);
+		mPlayListBinding.recyclerView.setAdapter(mPlayListAdapter);
+
 		initData();
 		return mPlayListBinding.getRoot();
 	}
 
 	@Override
-	public void reloadData() {
-		super.reloadData();
-		mHandler.sendEmptyMessage(NotLeakHandler.RE_LOAD_PLAY_LIST);
-	}
-
-	@Override
 	public boolean removeItem(@Nullable Item item) {
-		if (!(item instanceof PlayListItem)) return false;
+		if (!(item instanceof PlayListItem) || item.hashCode() < 0) return false;
+		Log.d(TAG, "addItem: " + item.hashCode());
 
 		final PlayListItem playListItem = (PlayListItem) item;
 
-		if (mPlayListAdapter != null && playListItem.getId() != -1) {
-			int pos = mPlayListItemList.indexOf(playListItem);
-			boolean result = mPlayListItemList.remove(playListItem);
-			mPlayListAdapter.notifyItemRemoved(pos);
-			return result;
-		}
-		return false;
+		Message message = Message.obtain();
+		message.what = PlayListFragment.NotLeakHandler.REMOVE_TO_PLAYLIST;
+		message.obj = playListItem;
+		PlayListFragment.mHandler.sendMessage(message);
+		return true;
 	}
 
-	public FragmentPlaylistBinding getmPlayListBinding() {
+	public FragmentPlaylistBinding getPlayListBinding() {
 		return mPlayListBinding;
 	}
 
 	@Override
 	public boolean addItem(@Nullable Item item) {
-		if (!(item instanceof PlayListItem)) return false;
+		if (!(item instanceof PlayListItem) || item.hashCode() < 0) return false;
+		Log.d(TAG, "addItem: " + item.hashCode());
 
-		final PlayListItem playListItem = (PlayListItem) item;
+		Message message = Message.obtain();
+		message.what = PlayListFragment.NotLeakHandler.ADD_TO_PLAYLIST;
+		message.obj = item;
+		PlayListFragment.mHandler.sendMessage(message);
+		return true;
+	}
 
-		if (mPlayListAdapter != null && playListItem.getId() != -1) {
-			boolean result = mPlayListItemList.add(playListItem);
-			mPlayListAdapter.notifyItemInserted(mPlayListItemList.size() - 1);
-			return result;
+	private static class DiffCallback extends DiffUtil.Callback {
+
+		private List<PlayListItem> oldList, newList;
+
+		public DiffCallback(List<PlayListItem> newList, List<PlayListItem> oldList) {
+			this.newList = oldList;
+			this.oldList = newList;
 		}
-		return false;
+
+		@Override
+		public int getOldListSize() {
+			return oldList.size();
+		}
+
+		@Override
+		public int getNewListSize() {
+			return newList.size();
+		}
+
+		@Override
+		public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+			return oldList.get(oldItemPosition).hashCode() == newList.get(newItemPosition).hashCode();
+		}
+
+		@Override
+		public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+			return oldList.get(oldItemPosition).hashCode() == newList.get(newItemPosition).hashCode();
+		}
 	}
 
 	public static class NotLeakHandler extends Handler {
@@ -213,6 +276,7 @@ public final class PlayListFragment extends BaseListFragment {
 
 		public static final int RE_LOAD_PLAY_LIST = 80001;
 		public static final int ADD_TO_PLAYLIST = 80002;
+		public static final int REMOVE_TO_PLAYLIST = 80003;
 
 		NotLeakHandler(PlayListFragment fragment) {
 			mWeakReference = new WeakReference<>(fragment);
@@ -223,12 +287,37 @@ public final class PlayListFragment extends BaseListFragment {
 			switch (msg.what) {
 				case RE_LOAD_PLAY_LIST: {
 					mWeakReference.get().initData();
-					mWeakReference.get().getPlayListAdapter().notifyDataSetChanged();
 				}
 				break;
 
 				case ADD_TO_PLAYLIST: {
-					mWeakReference.get().addItem((Item) msg.obj);
+					final Disposable disposable = Observable.create((ObservableOnSubscribe<DiffUtil.DiffResult>) emitter -> {
+						final PlayListItem playListItem = (PlayListItem) msg.obj;
+						mWeakReference.get().mPlayListItemList.add(playListItem);
+						final DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffCallback(
+								mWeakReference.get().mPlayListItemList
+								, mWeakReference.get().mPlayListAdapter.getPlayListItems()), true);
+						mWeakReference.get().mPlayListAdapter.setPlayListItems(mWeakReference.get().mPlayListItemList);
+						emitter.onNext(result);
+					}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(result
+							-> result.dispatchUpdatesTo(mWeakReference.get().mPlayListAdapter));
+
+					Data.sDisposables.add(disposable);
+				}
+				break;
+				case REMOVE_TO_PLAYLIST: {
+					final Disposable disposable = Observable.create((ObservableOnSubscribe<DiffUtil.DiffResult>) emitter -> {
+						final PlayListItem playListItem = (PlayListItem) msg.obj;
+						mWeakReference.get().mPlayListItemList.remove(playListItem);
+						final DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffCallback(
+								mWeakReference.get().mPlayListItemList
+								, mWeakReference.get().mPlayListAdapter.getPlayListItems()), true);
+						mWeakReference.get().mPlayListAdapter.setPlayListItems(mWeakReference.get().mPlayListItemList);
+						emitter.onNext(result);
+					}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(result
+							-> result.dispatchUpdatesTo(mWeakReference.get().mPlayListAdapter));
+
+					Data.sDisposables.add(disposable);
 				}
 				break;
 				default:

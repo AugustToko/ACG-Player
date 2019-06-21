@@ -404,10 +404,11 @@ public final class MusicService extends Service {
 			if (ItemList.trashCanList.contains(ItemList.playOrderList.get(index))) {
 				index = random.nextInt(ItemList.playOrderList.size() - 1);
 			} else {
-				ItemList.CURRENT_MUSIC_INDEX = index;
 				break;
 			}
 		}
+
+		ItemList.CURRENT_MUSIC_INDEX = index;
 
 		mMusicItem = MusicUtil.d2m(ItemList.playOrderList.get(index));
 		MusicControl.setDataSource(this, ItemList.playOrderList.get(index));
@@ -755,10 +756,10 @@ public final class MusicService extends Service {
 						if (ItemList.trashCanList.contains(ItemList.playOrderList.get(index))) {
 							index = random.nextInt(ItemList.playOrderList.size() - 1);
 						} else {
-							ItemList.CURRENT_MUSIC_INDEX = index;
 							break;
 						}
 					}
+					ItemList.CURRENT_MUSIC_INDEX = index;
 
 					MediaDescriptionCompat descriptionCompat = ItemList.playOrderList.get(index);
 					mMusicItem = MusicUtil.d2m(descriptionCompat);

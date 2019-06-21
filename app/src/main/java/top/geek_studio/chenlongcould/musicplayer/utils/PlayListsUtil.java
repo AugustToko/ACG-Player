@@ -198,7 +198,7 @@ public final class PlayListsUtil {
 	 * @param context   context
 	 * @param playlists playList that will del
 	 */
-	public static void deletePlaylists(@NonNull final Context context, @NonNull final ArrayList<PlayListItem> playlists) {
+	public static void deletePlaylists(@NonNull final Context context, @NonNull final ArrayList<PlayListItem> playlists, CallBack callback) {
 		final StringBuilder selection = new StringBuilder();
 		selection.append(MediaStore.Audio.Playlists._ID + " IN (");
 		for (int i = 0; i < playlists.size(); i++) {
@@ -211,8 +211,15 @@ public final class PlayListsUtil {
 		try {
 			context.getContentResolver().delete(EXTERNAL_CONTENT_URI, selection.toString(), null);
 			context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
+			callback.done();
 		} catch (SecurityException ignored) {
 		}
+	}
+
+	public interface CallBack {
+
+		void done();
+
 	}
 
 	public static void addToPlaylist(@NonNull final Context context, final MusicItem song, final int playlistId, final boolean showToastOnFinish) {

@@ -2,6 +2,7 @@ package top.geek_studio.chenlongcould.musicplayer.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.transition.Fade;
 import androidx.appcompat.app.AppCompatActivity;
 import top.geek_studio.chenlongcould.musicplayer.R;
@@ -15,6 +16,7 @@ public class EmptyActivity extends AppCompatActivity {
 		getWindow().setExitTransition(new Fade().setDuration(500));
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_empty);
+		new Handler().post(() -> startActivity(new Intent(EmptyActivity.this, MainActivity.class)));
 	}
 
 	@Override

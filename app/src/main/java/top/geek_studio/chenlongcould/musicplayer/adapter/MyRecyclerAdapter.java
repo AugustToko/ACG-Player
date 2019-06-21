@@ -491,6 +491,8 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 			/*--- 添加标记以便避免ImageView因为ViewHolder的复用而出现混乱 ---*/
 			holder.mCoverReference.get().setTag(R.string.key_id_1, mMusicItems.get(holder.getAdapterPosition()));
 
+			if (mMusicItems.size() == 0) return;
+
 			CustomThreadPool.post(() -> Loader.albumLoader(mActivity, holder.mCoverReference.get()
 					, mMusicItems.get(i)));
 		}

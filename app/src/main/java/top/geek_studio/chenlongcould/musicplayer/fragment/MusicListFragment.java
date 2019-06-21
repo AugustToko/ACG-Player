@@ -66,7 +66,7 @@ public final class MusicListFragment extends BaseListFragment {
 	public void reloadData() {
 		Data.sMusicItems.clear();
 		Data.sMusicItemsBackUp.clear();
-		adapter.notifyDataSetChanged();
+		mActivity.runOnUiThread(() -> adapter.notifyDataSetChanged());
 		loadData();
 	}
 
@@ -262,6 +262,7 @@ public final class MusicListFragment extends BaseListFragment {
 	@Override
 	public void onDestroy() {
 		Log.d(TAG, "onDestroy: ");
+		mMusicListBinding.unbind();
 		super.onDestroy();
 	}
 

@@ -32,11 +32,19 @@ public final class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.
 	private PlayListFragment playListFragment;
 
 	public PlayListAdapter(PlayListFragment fragment, List<PlayListItem> playListItems) {
-		mPlayListItems = playListItems;
+		mPlayListItems = new ArrayList<>(playListItems);
 		playListFragment = fragment;
 		mMainActivity = (MainActivity) fragment.getActivity();
 	}
 
+	public List<PlayListItem> getPlayListItems() {
+		return mPlayListItems;
+	}
+
+	public void setPlayListItems(List<PlayListItem> mPlayListItems) {
+		this.mPlayListItems.clear();
+		this.mPlayListItems.addAll(mPlayListItems);
+	}
 
 	@NonNull
 	@Override
@@ -74,8 +82,8 @@ public final class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.
 					if (PlayListsUtil.doesPlaylistExist(mMainActivity, listItem.getId())) {
 						final ArrayList<PlayListItem> playListItems = new ArrayList<>();
 						playListItems.add(listItem);
-						PlayListsUtil.deletePlaylists(mMainActivity, playListItems);
-						playListFragment.removeItem(listItem);
+						PlayListsUtil.deletePlaylists(mMainActivity, playListItems
+								, () -> playListFragment.removeItem(listItem));
 					}
 				}
 				break;

@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat;
 import top.geek_studio.chenlongcould.geeklibrary.GCSutil;
 import top.geek_studio.chenlongcould.geeklibrary.GeekProject;
 import top.geek_studio.chenlongcould.geeklibrary.PackageTool;
+import top.geek_studio.chenlongcould.musicplayer.DBArtSync;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.Values;
@@ -70,10 +71,12 @@ public class MainPresenter implements MainContract.Presenter {
 	public void initData(@NonNull MainActivity activity) {
 		final Intent intent = new Intent(activity, MusicService.class);
 		activity.startService(intent);
-		Data.HAS_BIND = activity.bindService(intent, activity.sServiceConnection, Context.BIND_AUTO_CREATE);
+		if (!Data.HAS_BIND) {
+			Data.HAS_BIND = activity.bindService(intent, activity.sServiceConnection, Context.BIND_AUTO_CREATE);
+		}
 
-//		DBArtSync.startActionSyncArtist(activity);
-//		DBArtSync.startActionSyncAlbum(activity);
+		DBArtSync.startActionSyncArtist(activity);
+		DBArtSync.startActionSyncAlbum(activity);
 
 		mView.initFragmentData();
 	}

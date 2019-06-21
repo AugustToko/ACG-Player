@@ -117,8 +117,6 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 			int artistId = artistItem.getArtistId();
 			String artistName = artistItem.getArtistName();
 
-			Log.d(TAG, "onBindViewHolder: id: " + artistId + " name: " + artistName);
-
 			//if artistName is unknown unset data
 			if ("<unknown>".equals(artistName)) {
 				return;

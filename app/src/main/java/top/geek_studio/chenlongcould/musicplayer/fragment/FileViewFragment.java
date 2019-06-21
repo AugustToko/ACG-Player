@@ -60,6 +60,12 @@ public final class FileViewFragment extends BaseListFragment {
 	}
 
 	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		mFileItems.clear();
+	}
+
+	@Override
 	public void reloadData() {
 		super.reloadData();
 		mFileItems.clear();

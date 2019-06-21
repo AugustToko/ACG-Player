@@ -5,6 +5,7 @@ import android.app.UiModeManager;
 import android.content.*;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,15 +14,13 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.*;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.PopupMenu;
-import android.widget.Toast;
+import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -62,6 +61,7 @@ import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityMainBinding;
 import top.geek_studio.chenlongcould.musicplayer.fragment.*;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
+import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
@@ -494,47 +494,54 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
+		//TODO clean up code
 		menu.clear();
-		if (musicListFragment == null || musicListFragment.getAdapter() == null
-				|| musicListFragment.getAdapter().getSelected().size() == 0) {
-			getMenuInflater().inflate(R.menu.menu_toolbar_main_common, menu);
-			if (mCurrentShowedFragment != null) {
-				boolean showAlbumMenu = false;
-				boolean showArtistMenu = false;
-				switch (Values.CurrentData.CURRENT_PAGE_INDEX) {
-					case 0: {
-						showAlbumMenu = false;
-						showArtistMenu = false;
+		if (mCurrentShowedFragment != null) {
+
+			if (mCurrentShowedFragment instanceof PlayListFragment) {
+				getMenuInflater().inflate(R.menu.menu_main_common_playlist, menu);
+			} else {
+				if (musicListFragment == null || musicListFragment.getAdapter() == null
+						|| musicListFragment.getAdapter().getSelected().size() == 0) {
+					getMenuInflater().inflate(R.menu.menu_toolbar_main_common, menu);
+					boolean showAlbumMenu = false;
+					boolean showArtistMenu = false;
+					switch (Values.CurrentData.CURRENT_PAGE_INDEX) {
+						case 0: {
+							showAlbumMenu = false;
+							showArtistMenu = false;
+						}
+						break;
+						case 1: {
+							showAlbumMenu = true;
+							showArtistMenu = false;
+						}
+						break;
+						case 2: {
+							showAlbumMenu = false;
+							showArtistMenu = true;
+						}
+						break;
+						case 3: {
+							showAlbumMenu = false;
+							showArtistMenu = false;
+						}
+						break;
+						case 4: {
+							showAlbumMenu = false;
+							showArtistMenu = false;
+						}
+						break;
 					}
-					break;
-					case 1: {
-						showAlbumMenu = true;
-						showArtistMenu = false;
-					}
-					break;
-					case 2: {
-						showAlbumMenu = false;
-						showArtistMenu = true;
-					}
-					break;
-					case 3: {
-						showAlbumMenu = false;
-						showArtistMenu = false;
-					}
-					break;
-					case 4: {
-						showAlbumMenu = false;
-						showArtistMenu = false;
-					}
-					break;
+					setMenuIconAlphaAnimation(menu.findItem(R.id.menu_toolbar_album_layout)
+							, showAlbumMenu, true);
+					setMenuIconAlphaAnimation(menu.findItem(R.id.menu_toolbar_artist_layout)
+							, showArtistMenu, true);
+				} else {
+					getMenuInflater().inflate(R.menu.menu_toolbar_main_choose, menu);
 				}
-				setMenuIconAlphaAnimation(menu.findItem(R.id.menu_toolbar_album_layout)
-						, showAlbumMenu, true);
-				setMenuIconAlphaAnimation(menu.findItem(R.id.menu_toolbar_artist_layout)
-						, showArtistMenu, true);
 			}
-		} else {
-			getMenuInflater().inflate(R.menu.menu_toolbar_main_choose, menu);
+
 		}
 		final MenuItem searchItem = menu.findItem(R.id.menu_toolbar_search);
 		if (searchItem != null) mSearchView.setMenuItem(searchItem);
@@ -612,6 +619,30 @@ public final class MainActivity extends BaseListActivity implements MainContract
 					}
 				}
 				musicListFragment.getAdapter().clearSelection();
+			}
+			break;
+			case R.id.menu_toolbar_create_playlist: {
+				final Resources resources = this.getResources();
+				Context context = this;
+
+				final androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
+				builder.setTitle(resources.getString(R.string.enter_name));
+				final EditText et = new EditText(context);
+				builder.setView(et);
+				et.setHint(resources.getString(R.string.enter_name));
+				et.setSingleLine(true);
+				builder.setNegativeButton(resources.getString(R.string.cancel), null);
+				builder.setPositiveButton(resources.getString(R.string.sure), (dialog1, which1) -> {
+					if (TextUtils.isEmpty(et.getText())) {
+						Toast.makeText(context, "Enter a name!", Toast.LENGTH_SHORT).show();
+						return;
+					}
+
+					final int result = PlayListsUtil.createPlaylist(context, et.getText().toString());
+
+					playListFragment.addItem(new PlayListItem(result, et.getText().toString()));
+				});
+				builder.show();
 			}
 			break;
 			default:
@@ -823,12 +854,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 	@Override
 	protected void onDestroy() {
-		try {
-			unbindService(sServiceConnection);
-			Data.HAS_BIND = false;
-		} catch (Exception e) {
-			Log.d(TAG, "onDestroy: " + e.getMessage());
-		}
 
 		mCurrentShowedFragment = null;
 		musicListFragment = null;
@@ -849,14 +874,24 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	 * Common exit MainActivity
 	 */
 	public void commonExit() {
+		try {
+			unbindService(sServiceConnection);
+			Data.HAS_BIND = false;
+		} catch (Exception e) {
+			Log.d(TAG, "onDestroy: " + e.getMessage());
+		}
+
 		if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
 			Data.getCurrentCover().recycle();
 		}
+
 		CustomThreadPool.finish();
+
 		new Thread(() -> {
 			GlideApp.get(MainActivity.this).clearDiskCache();
 			GlideApp.get(MainActivity.this).clearMemory();
 		});
+
 		finish();
 	}
 
@@ -1475,7 +1510,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		musicListFragment.initRecyclerView();
 		albumListFragment.initRecyclerView();
 		artistListFragment.initRecyclerView();
-		playListFragment.getmPlayListBinding().getRoot().setPadding(0, PADDING, 0, 0);
+		playListFragment.getPlayListBinding().getRoot().setPadding(0, PADDING, 0, 0);
 
 	}
 

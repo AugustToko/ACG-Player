@@ -54,6 +54,13 @@ public final class ArtistListFragment extends BaseListFragment {
 	private View mView;
 
 	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		artistItemList.clear();
+		artistItemListBackup.clear();
+	}
+
+	@Override
 	public void onAttach(@NotNull Context context) {
 		super.onAttach(context);
 		mMainActivity = (MainActivity) getActivity();
