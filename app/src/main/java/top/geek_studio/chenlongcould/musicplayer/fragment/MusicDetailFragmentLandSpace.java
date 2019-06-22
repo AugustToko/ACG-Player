@@ -31,6 +31,7 @@ import top.geek_studio.chenlongcould.musicplayer.*;
 import top.geek_studio.chenlongcould.musicplayer.activity.CarViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyWaitListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
+import top.geek_studio.chenlongcould.musicplayer.customView.PlayPauseDrawable;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentMusicDetailLandspaceBinding;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
@@ -54,6 +55,7 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 	private LinearLayoutManager mLinearLayoutManager;
 	private RecyclerView mRecyclerView;
 	private MyWaitListAdapter mWaitListAdapter;
+	private PlayPauseDrawable mPlayPauseDrawable;
 
 	private CarViewActivity mCarViewActivity;
 
@@ -80,6 +82,10 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		mMusicDetail2Binding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_detail_landspace, container, false);
+
+		mPlayPauseDrawable = new PlayPauseDrawable(mCarViewActivity);
+		mPlayPauseDrawable.setPlay(true);
+		mMusicDetail2Binding.includePlayerControlCar.playButton.setImageDrawable(mPlayPauseDrawable);
 
 		mRecyclerView = mMusicDetail2Binding.getRoot().findViewById(R.id.recycler_view);
 
@@ -118,6 +124,11 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 
 				case R.id.menu_toolbar_trash_can: {
 					MusicUtil.dropToTrash(mCarViewActivity, Data.sCurrentMusicItem);
+				}
+				break;
+
+				case R.id.menu_toolbar_timer: {
+					MusicUtil.setTimer(mCarViewActivity);
 				}
 				break;
 				default:
@@ -269,7 +280,7 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 		mMusicDetail2Binding.includePlayerControlCar.randomButton.setOnClickListener(v -> {
 			mMusicDetail2Binding.includePlayerControlCar.randomButton.clearAnimation();
 			final SharedPreferences.Editor editor = preferences.edit();
-			if (preferences.getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM)) {
+			if (Values.TYPE_RANDOM.equals(preferences.getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
 				final ValueAnimator animator = new ValueAnimator();
 				animator.setFloatValues(1f, 0.3f);
 				animator.setDuration(300);
@@ -300,15 +311,7 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 				});
 				animator.start();
 
-//				final MusicItem item = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX);
-
 				Data.shuffleOrderListSync(mCarViewActivity, false);
-
-//				for (int i = 0; i < Data.sMusicItems.size(); i++) {
-//					if (Data.sPlayOrderList.get(i).getMusicID() == item.getMusicID()) {
-//						Values.CurrentData.CURRENT_MUSIC_INDEX = i;
-//					}
-//				}
 
 				mWaitListAdapter.notifyDataSetChanged();
 
@@ -348,12 +351,6 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 
 				Data.shuffleOrderListSync(mCarViewActivity, false);
 
-//				for (int i = 0; i < Data.sMusicItems.size(); i++) {
-//					if (Data.sPlayOrderList.get(i).getMusicID() == item.getMusicID()) {
-//						Values.CurrentData.CURRENT_MUSIC_INDEX = i;
-//					}
-//				}
-
 				mWaitListAdapter.notifyDataSetChanged();
 
 			}
@@ -361,8 +358,10 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 
 		mMusicDetail2Binding.includePlayerControlCar.playButton.setOnClickListener(v -> {
 			if (ReceiverOnMusicPlay.isPlayingMusic()) {
+				mPlayPauseDrawable.setPlay(true);
 				ReceiverOnMusicPlay.startService(mCarViewActivity, MusicService.ServiceActions.ACTION_PAUSE);
 			} else {
+				mPlayPauseDrawable.setPause(true);
 				ReceiverOnMusicPlay.startService(mCarViewActivity, MusicService.ServiceActions.ACTION_PLAY);
 			}
 		});
@@ -431,8 +430,6 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 
 	/**
 	 * update Favourite music icon
-	 *
-	 * @see MusicDetailFragment#updateFav(MusicItem)
 	 * <p>
 	 * TODO merge MusicDetailFragment#updateFav
 	 */

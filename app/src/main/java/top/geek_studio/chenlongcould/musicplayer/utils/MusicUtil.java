@@ -1,5 +1,6 @@
 package top.geek_studio.chenlongcould.musicplayer.utils;
 
+import android.app.TimePickerDialog;
 import android.content.*;
 import android.database.Cursor;
 import android.net.Uri;
@@ -42,6 +43,27 @@ import java.util.Locale;
 public class MusicUtil {
 
 	private static final String TAG = "MusicUtil";
+
+	public static void setTimer(@NonNull final Context context) {
+		if (Data.sCurrentMusicItem == null || Data.sCurrentMusicItem.getMusicID() == -1) {
+			Toast.makeText(context, "You need play music first!", Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		new TimePickerDialog(context, (view, hourOfDay, minute) -> {
+			final long time = hourOfDay * 360000 + minute * 60000;
+			if (time == 0) {
+				Toast.makeText(context, "Why not pause music by button?"
+						, Toast.LENGTH_SHORT).show();
+				return;
+			}
+			final Intent intent = new Intent(context, MusicService.class);
+			intent.setAction(MusicService.ServiceActions.ACTION_SLEEP);
+			intent.putExtra("time", time);
+			context.startService(intent);
+		}, 0, 0, true).show();
+
+	}
 
 	public static Uri getMediaStoreAlbumCoverUri(int albumId) {
 		final Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");

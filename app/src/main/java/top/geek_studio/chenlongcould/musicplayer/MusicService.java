@@ -38,6 +38,7 @@ import top.geek_studio.chenlongcould.musicplayer.broadcast.MyHeadSetPlugReceiver
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.Detail;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
+import top.geek_studio.chenlongcould.musicplayer.misc.AudioRQ;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
@@ -86,10 +87,14 @@ public final class MusicService extends Service {
 	 * service instance of {@link MusicService}
 	 */
 	private static WeakReference<MusicService> serviceWeakReference;
+
+	AudioRQ audioFocusManager = new AudioRQ();
+
 	/**
 	 * 是否播放过音乐
 	 */
 	private static boolean HAS_PLAYED = false;
+
 	/**
 	 * Binder
 	 */
@@ -229,8 +234,25 @@ public final class MusicService extends Service {
 
 	private Handler mHandler;
 
+	private MediaMetadataCompat.Builder mediaMetadataBuilder;
+
+	private Runnable setTimer = () -> MusicControl.intentPause(MusicService.this);
+
 	public MusicService() {
 		Log.d(TAG, "MusicService: ");
+	}
+
+	private static Bitmap copy(Bitmap bitmap) {
+		Bitmap.Config config = bitmap.getConfig();
+		if (config == null) {
+			config = Bitmap.Config.RGB_565;
+		}
+		try {
+			return bitmap.copy(config, false);
+		} catch (OutOfMemoryError e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	@Override
@@ -269,13 +291,11 @@ public final class MusicService extends Service {
 		mediaSession.setCallback(new MediaSessionCompat.Callback() {
 			@Override
 			public void onPlay() {
-				Log.d(TAG, "onPlay: setCallback");
 				MusicControl.intentPlay(MusicService.this);
 			}
 
 			@Override
 			public void onPause() {
-				Log.d(TAG, "onPause: ");
 				MusicControl.intentPause(MusicService.this);
 			}
 
@@ -291,20 +311,17 @@ public final class MusicService extends Service {
 
 			@Override
 			public void onStop() {
-				// TODO: 2019/6/3 待完善
 				MusicControl.stopMusic();
 				stopForeground(true);
 			}
 
 			@Override
 			public void onSeekTo(long pos) {
-				Log.d(TAG, "onSeekTo: " + pos);
 				MusicControl.seekTo((int) pos);
 			}
 
 			@Override
 			public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
-				Log.d(TAG, "onMediaButtonEvent: ");
 				return MediaButtonIntentReceiver.handleIntent(MusicService.this, mediaButtonEvent);
 			}
 		});
@@ -312,13 +329,13 @@ public final class MusicService extends Service {
 				| MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
 				| MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS);
 		mediaSession.setMediaButtonReceiver(mediaButtonReceiverPendingIntent);
-		mediaSession.setActive(true);
 
 		stateBuilder = new PlaybackStateCompat.Builder()
-				.setActions(
-						PlaybackStateCompat.ACTION_PLAY |
-								PlaybackStateCompat.ACTION_PLAY_PAUSE);
+				.setActions(PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PLAY_PAUSE
+						| PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS);
 		mediaSession.setPlaybackState(stateBuilder.build());
+
+		mediaSession.setActive(true);
 
 		loadDataSource();
 
@@ -331,15 +348,17 @@ public final class MusicService extends Service {
 	private void updateMediaSessionMetaData() {
 		CustomThreadPool.post(() -> {
 			final MusicItem song = mMusicItem;
-//			Log.d(TAG, "updateMediaSessionMetaData: " + song.getMusicID());
 
 			if (song.getMusicID() == -1) {
 				mediaSession.setMetadata(null);
 				return;
 			}
 
-			final MediaMetadataCompat.Builder metaData = new MediaMetadataCompat.Builder()
-					.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, song.getArtist())
+			if (mediaMetadataBuilder == null) {
+				mediaMetadataBuilder = new MediaMetadataCompat.Builder();
+			}
+
+			mediaMetadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, song.getArtist())
 					.putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST, song.getArtist())
 					.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, song.getMusicAlbum())
 					.putString(MediaMetadataCompat.METADATA_KEY_TITLE, song.getMusicName())
@@ -349,12 +368,12 @@ public final class MusicService extends Service {
 					.putLong(MediaMetadataCompat.METADATA_KEY_YEAR, 0);
 
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-				metaData.putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, ItemList.playOrderList.size());
+				mediaMetadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, ItemList.playOrderList.size());
 			}
-			metaData.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, ItemList.mCurrentCover);
-			mediaSession.setMetadata(metaData.build());
-			Log.d(TAG, "updateMediaSessionMetaData: build done");
 
+			mediaMetadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, copy(ItemList.mCurrentCover));
+
+			mediaSession.setMetadata(mediaMetadataBuilder.build());
 		});
 	}
 
@@ -562,6 +581,7 @@ public final class MusicService extends Service {
 		MusicControl.release();
 		MusicControl.mediaPlayer = null;
 		mIsServiceDestroyed.set(true);
+		mediaSession.setActive(false);
 
 		if (wakeLock != null) wakeLock.release();
 
@@ -815,7 +835,8 @@ public final class MusicService extends Service {
 				case ServiceActions.ACTION_SLEEP: {
 					long time = intent.getLongExtra("time", -1);
 					if (time != -1) {
-						mHandler.postDelayed(() -> MusicControl.intentPause(MusicService.this), time);
+						mHandler.removeCallbacks(setTimer);
+						mHandler.postDelayed(setTimer, time);
 					}
 				}
 				break;
@@ -948,8 +969,6 @@ public final class MusicService extends Service {
 				channel.setSound(null, null);
 				((NotificationManager) context.getSystemService(NOTIFICATION_SERVICE)).createNotificationChannel(channel);
 			}
-
-
 			actionSkipPrevious = new NotificationCompat.Action.Builder(R.drawable.ic_skip_previous_white_24dp, "intentPrevious",
 					MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)).build();
 
@@ -1006,7 +1025,6 @@ public final class MusicService extends Service {
 		@NonNull
 		private static NotificationCompat.Builder getChannelNotification(final Context context
 				, @NonNull final MediaSessionCompat mediaSessionCompat) {
-
 			MediaControllerCompat controller = mediaSessionCompat.getController();
 			@Nullable MediaMetadataCompat mediaMetadata = controller.getMetadata();
 			@Nullable MediaDescriptionCompat description = null;

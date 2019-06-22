@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
-import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -672,24 +671,7 @@ public final class MusicDetailFragment extends BaseFragment {
 				break;
 
 				case R.id.menu_toolbar_timer: {
-					if (Data.sCurrentMusicItem == null || Data.sCurrentMusicItem.getMusicID() == -1) {
-						Toast.makeText(mMainActivity, "You need play music first!", Toast.LENGTH_SHORT).show();
-						return true;
-					}
-
-					new TimePickerDialog(mMainActivity, (view, hourOfDay, minute) -> {
-						final long time = hourOfDay * 360000 + minute * 60000;
-						if (time == 0) {
-							Toast.makeText(mMainActivity, "Why not pause music by button?"
-									, Toast.LENGTH_SHORT).show();
-							return;
-						}
-						final Intent intent = new Intent(mMainActivity, MusicService.class);
-						intent.setAction(MusicService.ServiceActions.ACTION_SLEEP);
-						intent.putExtra("time", time);
-						mMainActivity.startService(intent);
-					}, 0, 0, true).show();
-
+					MusicUtil.setTimer(mMainActivity);
 				}
 				break;
 
@@ -1695,8 +1677,9 @@ public final class MusicDetailFragment extends BaseFragment {
 								});
 								gkSnackbar.setBackgroundColor(Utils.Ui.getPrimaryColor(mWeakReference.get()))
 										.setBodyViewAlpha(0.8f).setActionTextColor(Color.BLACK);
-								gkSnackbar.show();
-
+								if (mFragmentWeakReference.get().isVisible()) {
+									gkSnackbar.show();
+								}
 							}
 						}
 					});
