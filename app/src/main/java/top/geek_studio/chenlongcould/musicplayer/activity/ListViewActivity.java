@@ -261,6 +261,7 @@ public final class ListViewActivity extends BaseListActivity {
 		mToolbar.setOnMenuItemClickListener(item -> {
 			switch (item.getItemId()) {
 				case R.id.menu_public_random: {
+					if (mMusicItemList.size() == 0) return true;
 					int index = new Random().nextInt(mMusicItemList.size());
 					MusicService.MusicControl.intentItemClick(ListViewActivity.this, mMusicItemList.get(index));
 				}
