@@ -200,11 +200,11 @@ public final class PlayListFragment extends BaseListFragment {
 			startActivity(intent);
 		});
 
-		mPlayListBinding.trashCan.setOnClickListener(v -> {
-			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
-			intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, ListViewActivity.ListType.ACTION_TRASH_CAN);
-			startActivity(intent);
-		});
+//		mPlayListBinding.trashCan.setOnClickListener(v -> {
+//			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
+//			intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, ListViewActivity.ListType.ACTION_TRASH_CAN);
+//			startActivity(intent);
+//		});
 
 		mPlayListBinding.recyclerView.setLayoutManager(new MyLM(mMainActivity));
 		mPlayListBinding.recyclerView.setHasFixedSize(true);

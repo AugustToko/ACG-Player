@@ -6,7 +6,6 @@ import android.provider.MediaStore;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -44,18 +43,23 @@ public final class ListViewActivity extends BaseListActivity {
 	private Toolbar mToolbar;
 	private RecyclerView mRecyclerView;
 	private MyRecyclerAdapter adapter;
+
 	/**
 	 * 保存播放列表下的Music (如果当前type是play_list_item的话 {@link #mType} )
 	 */
 	private List<MusicItem> mMusicItemList = new ArrayList<>();
+
 	/**
 	 * save current playlist name, if current type is play_list_item {@link #mType}
 	 */
 	private String currentListName;
+
 	/**
 	 * different type enter different UI(Activity)
+	 * @see ListType
 	 */
 	private String mType = "null";
+
 	private Disposable mDisposable;
 
 	public static boolean sendMessageStatic(@NonNull Message message) {
@@ -67,6 +71,7 @@ public final class ListViewActivity extends BaseListActivity {
 		return result;
 	}
 
+	@SuppressWarnings("UnusedReturnValue")
 	public static boolean sendEmptyMessageStatic(int what) {
 		boolean result = false;
 		if (handler != null) {
@@ -96,9 +101,6 @@ public final class ListViewActivity extends BaseListActivity {
 		mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
 		mType = getIntent().getStringExtra(IntentTag.INTENT_START_BY);
-
-		Data.sPlayOrderListBackup.clear();
-		Data.sPlayOrderListBackup.addAll(Data.sPlayOrderList);
 
 		if (mType != null) {
 			switch (mType) {
@@ -176,7 +178,6 @@ public final class ListViewActivity extends BaseListActivity {
 							} while (cursor.moveToNext());
 							cursor.close();
 						}
-
 						observableEmitter.onNext(0);
 					}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
 							.subscribe(i -> {
@@ -201,30 +202,30 @@ public final class ListViewActivity extends BaseListActivity {
 				}
 				break;
 
-				case ListType.ACTION_TRASH_CAN: {
-					if (PreferenceUtil.getDefault(this).getBoolean(Values.SharedPrefsTag.TRASH_CAN_INFO
-							, true)) {
-						AlertDialog.Builder builder = new AlertDialog.Builder(this)
-								.setTitle("About trash can")
-								.setMessage("You can throw the music into the trash, so you won't hear the song recently unless you actively play it.")
-								.setNegativeButton("OK", (dialog, which) -> {
-									PreferenceUtil.getDefault(ListViewActivity.this).edit().putBoolean(Values.SharedPrefsTag.TRASH_CAN_INFO, false).apply();
-									dialog.dismiss();
-								});
-						builder.show();
-					}
-
-					mToolbar.setTitle(getString(R.string.trash_can));
-					mMusicItemList.addAll(Data.S_TRASH_CAN_LIST);
-
-					adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList
-							, new MyRecyclerAdapter.Config(PreferenceUtil.getDefault(this)
-							.getInt(Values.SharedPrefsTag
-							.RECYCLER_VIEW_ITEM_STYLE, 0), false));
-					mRecyclerView.setAdapter(adapter);
-
-				}
-				break;
+//				case ListType.ACTION_TRASH_CAN: {
+//					if (PreferenceUtil.getDefault(this).getBoolean(Values.SharedPrefsTag.TRASH_CAN_INFO
+//							, true)) {
+//						AlertDialog.Builder builder = new AlertDialog.Builder(this)
+//								.setTitle("About trash can")
+//								.setMessage("You can throw the music into the trash, so you won't hear the song recently unless you actively play it.")
+//								.setNegativeButton("OK", (dialog, which) -> {
+//									PreferenceUtil.getDefault(ListViewActivity.this).edit().putBoolean(Values.SharedPrefsTag.TRASH_CAN_INFO, false).apply();
+//									dialog.dismiss();
+//								});
+//						builder.show();
+//					}
+//
+//					mToolbar.setTitle(getString(R.string.trash_can));
+//					mMusicItemList.addAll(Data.S_TRASH_CAN_LIST);
+//
+//					adapter = new MyRecyclerAdapter(ListViewActivity.this, mMusicItemList
+//							, new MyRecyclerAdapter.Config(PreferenceUtil.getDefault(this)
+//							.getInt(Values.SharedPrefsTag
+//							.RECYCLER_VIEW_ITEM_STYLE, 0), false));
+//					mRecyclerView.setAdapter(adapter);
+//
+//				}
+//				break;
 				default:
 			}
 
@@ -306,8 +307,6 @@ public final class ListViewActivity extends BaseListActivity {
 		mRecyclerView = null;
 		mMusicItemList.clear();
 
-		Data.sPlayOrderList.clear();
-		Data.sPlayOrderList.addAll(Data.sPlayOrderListBackup);
 		ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_RESET_LIST);
 
 		super.onDestroy();
@@ -324,8 +323,10 @@ public final class ListViewActivity extends BaseListActivity {
 
 	public interface ListType {
 		String ACTION_ADD_RECENT = "add recent";
+		@Deprecated
 		String ACTION_FAVOURITE = "favourite music";
 		String ACTION_HISTORY = "play history";
+		@Deprecated
 		String ACTION_TRASH_CAN = "trash can";
 		String ACTION_PLAY_LIST_ITEM = "play_list_item";
 	}
@@ -345,10 +346,6 @@ public final class ListViewActivity extends BaseListActivity {
 		if (!initDone) Toast.makeText(this, "Wait, loading data...", Toast.LENGTH_SHORT).show();
 
 		super.onBackPressed();
-	}
-
-	public List<MusicItem> getMusicItemList() {
-		return mMusicItemList;
 	}
 
 	public MyRecyclerAdapter getAdapter() {
