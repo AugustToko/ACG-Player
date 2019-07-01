@@ -8,6 +8,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 
+/**
+ * 过渡 Activity
+ */
 public class EmptyActivity extends AppCompatActivity {
 
 	@Override
@@ -17,11 +20,11 @@ public class EmptyActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_empty);
 		new Handler().post(() -> startActivity(new Intent(EmptyActivity.this, MainActivity.class)));
+		finish();
 	}
 
 	@Override
 	public void onBackPressed() {
-		startActivity(new Intent(this, MainActivity.class));
 		finish();
 	}
 }

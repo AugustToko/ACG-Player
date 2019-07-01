@@ -901,11 +901,11 @@ public final class MainActivity extends BaseListActivity implements MainContract
 			Log.d(TAG, "fullExit: " + e.getMessage());
 		}
 
-		try {
-			stopService(new Intent(MainActivity.this, MyTileService.class));
-		} catch (Exception e) {
-			Log.d(TAG, "fullExit: " + e.getMessage());
-		}
+//		try {
+//			stopService(new Intent(MainActivity.this, MyTileService.class));
+//		} catch (Exception e) {
+//			Log.d(TAG, "fullExit: " + e.getMessage());
+//		}
 
 		//lists
 		Data.sPlayOrderList.clear();
