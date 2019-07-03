@@ -111,9 +111,9 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 
 	private void dataSet(final int index, final ViewHolder holder) {
 		CustomThreadPool.post(() -> {
-
 			ImageView imageView = holder.mArtistImage;
 
+			if (mArtistItems.isEmpty()) return;
 			final ArtistItem artistItem = mArtistItems.get(index);
 			int artistId = artistItem.getArtistId();
 			String artistName = artistItem.getArtistName();
