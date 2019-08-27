@@ -106,7 +106,6 @@ public final class AlbumListFragment extends BaseListFragment {
 					final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null, null, null, null);
 					if (cursor != null) {
 						cursor.moveToFirst();
-
 						do {
 							String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM));
 							String albumId = cursor.getString(cursor.getColumnIndexOrThrow("_id"));
@@ -115,17 +114,13 @@ public final class AlbumListFragment extends BaseListFragment {
 							final AlbumItem albumItem = new AlbumItem(albumName, Integer.parseInt(albumId), artist);
 							albumItemList.add(albumItem);
 							albumItemListBackup.add(albumItem);
-							emitter.onNext(albumItemList.size());
 							CustomThreadPool.post(() -> MusicUtil.findArtworkWithId(mMainActivity, albumItem));
 						} while (cursor.moveToNext());
 
 						cursor.close();
-						mView.post(() -> {
-							if (mAdapter2AlbumListAdapter != null) mAdapter2AlbumListAdapter.notifyDataSetChanged();
-						});
-
 					}   //initData
 				}
+				emitter.onComplete();
 			}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Integer>() {
 
 				@Override
@@ -135,8 +130,7 @@ public final class AlbumListFragment extends BaseListFragment {
 
 				@Override
 				public void onNext(Integer integer) {
-					if (mAdapter2AlbumListAdapter != null) mAdapter2AlbumListAdapter.notifyDataSetChanged();
-					Log.d(TAG, "onNext: load data album: " + integer);
+
 				}
 
 				@Override
@@ -146,7 +140,8 @@ public final class AlbumListFragment extends BaseListFragment {
 
 				@Override
 				public void onComplete() {
-
+					if (mAdapter2AlbumListAdapter != null)
+						mAdapter2AlbumListAdapter.notifyDataSetChanged();
 				}
 			});
 		}

@@ -73,14 +73,11 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 	 */
 	private static final int MOD_TYPE = -1;
 
-	/**
-	 * the json data, from network
-	 */
-	private static final String RESULT_OK = "ok";
+//	/**
+//	 * the json data, from network
+//	 */
+//	private static final String RESULT_OK = "ok";
 
-	/**
-	 * MAIN
-	 */
 	private BaseListActivity mActivity;
 
 	/**
@@ -102,10 +99,6 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		mConfig = config;
 	}
 
-//	public MyRecyclerAdapter(BaseFragment fragment, List<MusicItem> musicItems, @NonNull Config config) {
-//		mActivity = fragment.getActivity();
-//	}
-
 	/**
 	 * config for {@link MyRecyclerAdapter}
 	 */
@@ -120,6 +113,8 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 		boolean recordIndex = true;
 
+		boolean needPadding = false;
+
 		public Config() {
 		}
 
@@ -130,6 +125,12 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		public Config(int styleId, boolean recordIndex) {
 			this.styleId = styleId;
 			this.recordIndex = recordIndex;
+		}
+
+		public Config(int styleId, boolean recordIndex, boolean needPadding) {
+			this.styleId = styleId;
+			this.recordIndex = recordIndex;
+			this.needPadding = needPadding;
 		}
 	}
 
@@ -456,6 +457,10 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
+		if (mConfig.needPadding) {
+			if (viewHolder.getAdapterPosition() == 0) viewHolder.itemView.setPadding(0, 350, 0, 0);
+			else viewHolder.itemView.setPadding(0, 0, 0, 0);
+		}
 
 		final ItemHolder holder = ((ItemHolder) viewHolder);
 

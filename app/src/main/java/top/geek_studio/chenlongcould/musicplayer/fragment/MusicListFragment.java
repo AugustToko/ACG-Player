@@ -268,7 +268,7 @@ public final class MusicListFragment extends BaseListFragment {
 
 		adapter = new MyRecyclerAdapter(mActivity, Data.sMusicItems
 				, new MyRecyclerAdapter.Config(PreferenceUtil.getDefault(mActivity).getInt(Values.SharedPrefsTag
-				.RECYCLER_VIEW_ITEM_STYLE, 0), true));
+				.RECYCLER_VIEW_ITEM_STYLE, 0), true, true));
 		mMusicListBinding.includeRecycler.recyclerView.setLayoutManager(linearLayoutManager);
 		mMusicListBinding.includeRecycler.recyclerView.setHasFixedSize(true);
 		mMusicListBinding.includeRecycler.recyclerView.setItemViewCacheSize(15);

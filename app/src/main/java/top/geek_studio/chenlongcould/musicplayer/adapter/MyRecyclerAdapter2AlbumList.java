@@ -58,25 +58,30 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
+		if (viewHolder.getAdapterPosition() == 0 || viewHolder.getAdapterPosition() == 1)
+			viewHolder.itemView.setPadding(0, 350, 0, 0);
+		else viewHolder.itemView.setPadding(0, 0, 0, 0);
+
 		viewHolder.mAlbumText.setText(mAlbumNameList.get(viewHolder.getAdapterPosition()).getAlbumName());
 
 		// set tag
 		if (mAlbumNameList.get(viewHolder.getAdapterPosition()).getmArtwork() != null) {
 			viewHolder.mImageView.setTag(R.string.key_id_3, mAlbumNameList.get(viewHolder.getAdapterPosition()).getmArtwork());
 			CustomThreadPool.post(() -> GlideApp.with(mMainActivity)
-					.load(viewHolder.mImageView.getTag(R.string.key_id_3))
+							.load(viewHolder.mImageView.getTag(R.string.key_id_3))
 //					.load(path)
-					.diskCacheStrategy(DiskCacheStrategy.NONE)
-					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-					.into(new SimpleTarget<Drawable>() {
-						@Override
-						public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-							mMainActivity.runOnUiThread(() -> {
-								viewHolder.mImageView.setImageDrawable(resource);
-								viewHolder.invalidate();
-							});
-						}
-					}));
+							.diskCacheStrategy(DiskCacheStrategy.NONE)
+							.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+							.into(new SimpleTarget<Drawable>() {
+								@Override
+								public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+									mMainActivity.runOnUiThread(() -> {
+										viewHolder.mImageView.setImageDrawable(resource);
+										viewHolder.invalidate();
+									});
+								}
+							})
+			);
 		}
 //		else {
 //			final AlbumItem albumItem = mAlbumNameList.get(viewHolder.getAdapterPosition());

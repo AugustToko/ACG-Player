@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -22,6 +23,13 @@ import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.io.File;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -36,12 +44,6 @@ import top.geek_studio.chenlongcould.musicplayer.adapter.PlayListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentPlaylistBinding;
 import top.geek_studio.chenlongcould.musicplayer.model.Item;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
-
-import java.io.File;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * @author chenlongcould
@@ -188,6 +190,7 @@ public final class PlayListFragment extends BaseListFragment {
 			Log.d(TAG, "onCreateView: " + mPlayListItemList.size());
 		}
 		mPlayListBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_playlist, container, false);
+		mPlayListBinding.getRoot().setPadding(0, 350, 0, 0);
 		mPlayListBinding.addRecent.setOnClickListener(v -> {
 			Intent intent = new Intent(mMainActivity, ListViewActivity.class);
 			intent.putExtra(ListViewActivity.IntentTag.INTENT_START_BY, ListViewActivity.ListType.ACTION_ADD_RECENT);
