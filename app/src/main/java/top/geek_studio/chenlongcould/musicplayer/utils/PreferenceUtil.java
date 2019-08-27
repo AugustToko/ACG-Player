@@ -3,8 +3,8 @@ package top.geek_studio.chenlongcould.musicplayer.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import androidx.annotation.NonNull;
 
+import androidx.annotation.NonNull;
 
 public class PreferenceUtil {
 	public static final String METHOD_CONTAIN_KEY = "method_contain_key";

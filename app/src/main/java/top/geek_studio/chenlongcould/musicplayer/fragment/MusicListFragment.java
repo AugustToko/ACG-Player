@@ -1,9 +1,10 @@
 package top.geek_studio.chenlongcould.musicplayer.fragment;
 
+import android.Manifest;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -11,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -18,16 +20,25 @@ import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import org.jetbrains.annotations.NotNull;
+import org.litepal.LitePal;
+import org.litepal.LitePalDB;
+
+import java.util.HashSet;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import org.jetbrains.annotations.NotNull;
-import org.litepal.LitePal;
-import org.litepal.LitePalDB;
-import top.geek_studio.chenlongcould.musicplayer.*;
+import top.geek_studio.chenlongcould.musicplayer.App;
+import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.GlideApp;
+import top.geek_studio.chenlongcould.musicplayer.MusicService;
+import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
@@ -37,8 +48,6 @@ import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
-
-import java.util.List;
 
 /**
  * @author chenlongcould
@@ -78,13 +87,11 @@ public final class MusicListFragment extends BaseListFragment {
 
 	@Override
 	public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-		Log.d("PADDING_DEBUG", "onActivityCreated: ");
 		super.onActivityCreated(savedInstanceState);
 	}
 
 	@Override
 	public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-		Log.d("PADDING_DEBUG", "onViewCreated: ");
 		super.onViewCreated(view, savedInstanceState);
 	}
 
@@ -97,117 +104,107 @@ public final class MusicListFragment extends BaseListFragment {
 
 	private void loadData() {
 		if (ContextCompat.checkSelfPermission(mActivity,
-				android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-			ActivityCompat.requestPermissions(mActivity, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, Values.REQUEST_WRITE_EXTERNAL_STORAGE);
-		} else {
-			Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
-				if (Data.sMusicItems.isEmpty()) {
+				Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+			ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Values.PermissionCode.REQUEST_WRITE_EXTERNAL_STORAGE);
+			return;
+		}
 
-					SharedPreferences preferences = PreferenceUtil.getDefault(mActivity);
+		Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+			Data.sMusicItems.clear();
+			Data.sPlayOrderList.clear();
 
-					boolean loadorder = Data.sPlayOrderList.size() == 0;
+			/*---------------------- init Data!!!! -------------------*/
+			final Cursor cursor = mActivity.getContentResolver().query(
+					MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null
+					, MediaStore.Audio.Media.DEFAULT_SORT_ORDER
+			);
 
-					/*---------------------- init Data!!!! -------------------*/
-					final Cursor cursor = mActivity.getContentResolver().query(
-							MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null
-							, MediaStore.Audio.Media.DEFAULT_SORT_ORDER
-					);
-					if (cursor != null && cursor.moveToFirst()) {
-						//没有歌曲直接退出app
-						if (cursor.getCount() != 0) {
-							// skip short
-							final boolean skipShort = preferences
-									.getBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
+			if (cursor == null || !cursor.moveToFirst()) return;
 
-							// black list
-							final LitePalDB blackList = new LitePalDB("BlackList", App.BLACK_LIST_VERSION);
-							blackList.addClassName(MyBlackPath.class.getName());
-							LitePal.use(blackList);
-							List<MyBlackPath> lists = LitePal.findAll(MyBlackPath.class);
-							LitePal.useDefault();
+			if (cursor.getCount() == 0) {
+				// TODO: 没有歌曲提示空
+				return;
+			}
 
-							// music that you last played
-							int lastId = preferences.getInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, -1);
+			// skip short
+			final boolean skipShort = preferences
+					.getBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
 
-							do {
-								final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+			// check black list
+			final LitePalDB blackList = new LitePalDB("BlackList", App.BLACK_LIST_VERSION);
+			blackList.addClassName(MyBlackPath.class.getName());
+			LitePal.use(blackList);
+			HashSet<String> blackPaths = new HashSet<>();
 
-								boolean skip = false;
-
-								for (int i = 0; i < lists.size(); i++) {
-									final MyBlackPath bp = lists.get(i);
-
-									if (bp.getDirPath().contains(path) || bp.getDirPath().equals(path)) {
-										skip = true;
-										lists.remove(bp);
-										break;
-									}
-
-								}
-
-								if (skip) {
-									Log.d(TAG, "loadDataSource: skip the song that in the blacklist");
-									continue;
-								}
-
-								final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-								if (skipShort && duration <= MainActivity.DEFAULT_SHORT_DURATION) {
-									Log.d(TAG, "loadDataSource: the music-file duration is " + duration + " (too short)" +
-											", skip...");
-									continue;
-								}
-
-								final String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
-								final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-								final String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
-								final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
-								final int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-								final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-								final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
-								final int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
-								final int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID));
-
-								final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
-										.musicAlbum(albumName)
-										.addTime(addTime)
-										.artist(artist)
-										.duration(duration)
-										.mimeName(mimeType)
-										.size(size)
-										.addAlbumId(albumId)
-										.addArtistId(artistId);
-
-								if (lastId == id) {
-									Data.sCurrentMusicItem = builder.build();
-								}
-
-								final MusicItem item = builder.build();
-								Data.sMusicItems.add(item);
-								Data.sMusicItemsBackUp.add(item);
-
-								if (loadorder) {
-									Data.sPlayOrderList.add(item);
-									Data.sPlayOrderListBackup.add(item);
-								}
-
-								emitter.onNext(Data.sMusicItems.size());
-
-								CustomThreadPool.post(() -> MusicUtil.findArtworkWithId(mActivity, item));
-							}
-							while (cursor.moveToNext());
-							cursor.close();
-						}
-					}
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+				LitePal.findAll(MyBlackPath.class).forEach(myBlackPath -> blackPaths.add(myBlackPath.getDirPath()));
+			} else {
+				for (MyBlackPath s : LitePal.findAll(MyBlackPath.class)) {
+					blackPaths.add(s.getDirPath());
 				}
-			}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Integer>() {
-				@Override
-				public final void onSubscribe(Disposable disposable) {
-					Data.sDisposables.add(disposable);
+			}
+
+			LitePal.useDefault();
+
+			// music that you last played
+			int lastId = preferences.getInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, -1);
+
+			do {
+				final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+				if (blackPaths.contains(path)) return;
+
+				final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+
+				if (skipShort && duration <= MusicService.DEFAULT_SHORT_DURATION) {
+					Log.d(TAG, "loadDataSource: the music-file duration is " + duration + " (too short)" +
+							", skip...");
+					continue;
 				}
 
-				@Override
-				public final void onNext(Integer result) {
-					Log.d(TAG, "onNext: music list: " + result);
+				final String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+				final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+				final String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+				final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+				final int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
+				final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
+				final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
+				final int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+				final int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID));
+
+				final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
+						.musicAlbum(albumName)
+						.addTime(addTime)
+						.artist(artist)
+						.duration(duration)
+						.mimeName(mimeType)
+						.size(size)
+						.addAlbumId(albumId)
+						.addArtistId(artistId);
+
+
+				final MusicItem item = builder.build();
+
+				if (lastId == id) Data.sCurrentMusicItem = item;
+
+				Data.sMusicItems.add(item);
+				Data.sMusicItemsBackUp.add(item);
+
+				Data.sPlayOrderList.add(item);
+				Data.sPlayOrderListBackup.add(item);
+
+				CustomThreadPool.post(() -> MusicUtil.findArtworkWithId(mActivity, item));
+			}
+			while (cursor.moveToNext());
+			cursor.close();
+			emitter.onComplete();
+		}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Integer>() {
+			@Override
+			public final void onSubscribe(Disposable disposable) {
+				Data.sDisposables.add(disposable);
+			}
+
+			@Override
+			public final void onNext(Integer result) {
 //				if (result == -1) {
 //					AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
 //					builder.setTitle("Error")
@@ -216,21 +213,18 @@ public final class MusicListFragment extends BaseListFragment {
 //							.setNegativeButton("OK", (dialog, which) -> dialog.cancel());
 //					builder.show();
 //				}
+			}
 
-					if (adapter != null) adapter.notifyDataSetChanged();
-				}
+			@Override
+			public final void onError(Throwable throwable) {
+				Toast.makeText(mActivity, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+			}
 
-				@Override
-				public final void onError(Throwable throwable) {
-					Toast.makeText(mActivity, throwable.getMessage(), Toast.LENGTH_SHORT).show();
-				}
-
-				@Override
-				public final void onComplete() {
-
-				}
-			});
-		}
+			@Override
+			public final void onComplete() {
+				if (adapter != null) adapter.notifyDataSetChanged();
+			}
+		});
 	}
 
 	public final MyRecyclerAdapter getAdapter() {
@@ -244,6 +238,7 @@ public final class MusicListFragment extends BaseListFragment {
 			Data.sMusicItemsBackUp.remove(item);
 			Data.sPlayOrderList.remove(item);
 			Data.sPlayOrderListBackup.remove(item);
+			return true;
 		}
 		return false;
 	}
@@ -255,24 +250,19 @@ public final class MusicListFragment extends BaseListFragment {
 			Data.sMusicItemsBackUp.add((MusicItem) item);
 			Data.sPlayOrderList.add((MusicItem) item);
 			Data.sPlayOrderListBackup.add((MusicItem) item);
+			return true;
 		}
 		return false;
 	}
 
 	@Override
 	public void onDestroy() {
-		Log.d(TAG, "onDestroy: ");
 		mMusicListBinding.unbind();
 		super.onDestroy();
 	}
 
 	public void initRecyclerView() {
-		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mActivity) {
-			@Override
-			protected int getExtraLayoutSpace(RecyclerView.State state) {
-				return 700;
-			}
-		};
+		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mActivity);
 		linearLayoutManager.setItemPrefetchEnabled(true);
 		linearLayoutManager.setInitialPrefetchItemCount(15);
 
@@ -282,6 +272,7 @@ public final class MusicListFragment extends BaseListFragment {
 		mMusicListBinding.includeRecycler.recyclerView.setLayoutManager(linearLayoutManager);
 		mMusicListBinding.includeRecycler.recyclerView.setHasFixedSize(true);
 		mMusicListBinding.includeRecycler.recyclerView.setItemViewCacheSize(15);
+
 		mMusicListBinding.includeRecycler.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 			@Override
 			public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -292,6 +283,7 @@ public final class MusicListFragment extends BaseListFragment {
 				}
 			}
 		});
+
 		mMusicListBinding.includeRecycler.recyclerView.setAdapter(adapter);
 
 	}

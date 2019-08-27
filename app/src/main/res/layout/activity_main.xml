@@ -55,19 +55,18 @@
 
                     <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
 
-                    <com.github.mmin18.widget.RealtimeBlurView
-                            android:id="@+id/real_blur"
-                            android:layout_width="match_parent"
-                            android:layout_height="0dp"
-                            app:realtimeBlurRadius="30dp"
-                            app:realtimeOverlayColor="#77FFFFFF"
-                            />
+                    <!--                    <com.github.mmin18.widget.RealtimeBlurView-->
+                    <!--                            android:id="@+id/real_blur"-->
+                    <!--                            android:layout_width="match_parent"-->
+                    <!--                            android:layout_height="0dp"-->
+                    <!--                            app:realtimeBlurRadius="30dp"-->
+                    <!--                            app:realtimeOverlayColor="#77FFFFFF"-->
+                    <!--                            />-->
 
                     <com.google.android.material.appbar.AppBarLayout
                             android:id="@+id/appbar"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@android:color/transparent"
+                            android:layout_height="wrap_content" android:background="#96FFFFFF"
                             android:elevation="0dp"
                             app:elevation="0dp"
                             android:paddingTop="@dimen/toolbar_padding_top"

@@ -15,19 +15,22 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
+
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
 import com.google.android.material.appbar.AppBarLayout;
+
+import java.lang.reflect.Field;
+
 import top.geek_studio.chenlongcould.geeklibrary.theme.IStyle;
 import top.geek_studio.chenlongcould.geeklibrary.widget.GkToolbar;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
-
-import java.lang.reflect.Field;
 
 /**
  * @author chenlongcould
@@ -87,18 +90,6 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 	 */
 	protected void setStatusBarTextColor(@NonNull final Activity activity, @ColorInt int color) {
 		Utils.Ui.setStatusBarTextColor(activity, color);
-//		activity.runOnUiThread(() -> {
-//			final View decor = activity.getWindow().getDecorView();
-//			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//				double lum = ColorUtils.calculateLuminance(color);
-//				Log.d(TAG, "setStatusBarTextColor: calculateLuminance: " + lum);
-//				if (lum >= 0.5) {
-//					decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-//				} else {
-//					decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-//				}
-//			}
-//		});
 	}
 
 	/**
@@ -130,6 +121,9 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 		mAppBarLayout = appBarLayout;
 	}
 
+	/**
+	 * 初始化样式, 可重写此方法但请勿回调此方法
+	 */
 	@Override
 	public void initStyle() {
 		setStatusBarTextColor(this, Utils.Ui.getPrimaryColor(this));

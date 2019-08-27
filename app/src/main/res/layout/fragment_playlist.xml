@@ -1,57 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         >
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+            android:layout_width="match_parent" android:layout_height="match_parent"
+            android:orientation="vertical"
+            >
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/add_recent"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:background="@drawable/my_ripple_mask"
-            app:layout_constraintTop_toTopOf="parent">
+                android:id="@+id/add_recent" android:layout_width="match_parent"
+                android:layout_height="60dp" android:background="@drawable/my_ripple_mask"
+                app:layout_constraintTop_toTopOf="parent"
+                >
 
             <ImageView
-                    android:id="@+id/recent_image"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp"
-                    android:contentDescription="@string/app_name"
+                    android:id="@+id/recent_image" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp" android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp" android:contentDescription="@string/app_name"
                     android:src="@drawable/ic_library_add_grey_600_24dp"
                     android:tint="@color/drawable_color"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    />
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp" android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp" android:layout_marginBottom="8dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/recent_image"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintTop_toTopOf="parent"
+                    >
 
                 <TextView
                         android:id="@+id/recent_name"
-                        android:textColorLink="@color/primary_title_color"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:maxLines="1"
+                        android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp" android:maxLines="1"
                         android:text="@string/add_recent"
                         android:textColor="@color/primary_title_color"
-                        android:textSize="18sp"
+                        android:textColorLink="@color/primary_title_color" android:textSize="18sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
@@ -62,53 +53,43 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/line_color"
-            app:layout_constraintTop_toBottomOf="@+id/add_recent" />
+                android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="@color/line_color"
+                app:layout_constraintTop_toBottomOf="@+id/add_recent"
+                />
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/history"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:background="@drawable/my_ripple_mask">
+                android:id="@+id/history" android:layout_width="match_parent"
+                android:layout_height="60dp" android:background="@drawable/my_ripple_mask"
+                >
 
             <ImageView
-                    android:id="@+id/history_image"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp"
-                    android:contentDescription="@string/app_name"
+                    android:id="@+id/history_image" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp" android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp" android:contentDescription="@string/app_name"
                     android:src="@drawable/ic_history_grey_600_24dp"
                     android:tint="@color/drawable_color"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    />
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/history_menu"
-                app:layout_constraintStart_toEndOf="@+id/history_image"
-                app:layout_constraintTop_toTopOf="parent">
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp" android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp" android:layout_marginBottom="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/history_menu"
+                    app:layout_constraintStart_toEndOf="@+id/history_image"
+                    app:layout_constraintTop_toTopOf="parent"
+                    >
 
                 <TextView
-                        android:id="@+id/history_name"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:maxLines="1"
-                        android:text="@string/history"
-                        android:textColor="@color/primary_title_color"
-                        android:textSize="18sp"
+                        android:id="@+id/history_name" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_marginStart="8dp"
+                        android:maxLines="1" android:text="@string/history"
+                        android:textColor="@color/primary_title_color" android:textSize="18sp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         />
@@ -116,30 +97,64 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <ImageView
-                android:id="@+id/history_menu"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="8dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"
-                android:contentDescription="@string/menu_button"
-                android:focusable="true"
-                android:src="@drawable/ic_more_vert_24px"
-                android:tint="#636363"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                    android:id="@+id/history_menu" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp" android:layout_marginBottom="8dp"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true" android:contentDescription="@string/menu_button"
+                    android:focusable="true" android:src="@drawable/ic_more_vert_24px"
+                    android:tint="#636363" android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/line_color"
-            app:layout_constraintTop_toBottomOf="@+id/history" />
+                android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="@color/line_color"
+                app:layout_constraintTop_toBottomOf="@+id/history"
+                />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/black_list" android:layout_width="match_parent"
+                android:layout_height="60dp" android:background="@drawable/my_ripple_mask"
+                >
+
+            <ImageView
+                    android:id="@+id/black_list_image" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp" android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp" android:contentDescription="@string/app_name"
+                    android:src="@drawable/ic_history_grey_600_24dp"
+                    android:tint="@color/drawable_color"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp" android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp" android:layout_marginBottom="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/black_list_image"
+                    app:layout_constraintTop_toTopOf="parent"
+                    >
+
+                <TextView
+                        android:id="@+id/black_list_name" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_marginStart="8dp"
+                        android:maxLines="1" android:text="@string/black_list"
+                        android:textColor="@color/primary_title_color" android:textSize="18sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!--<androidx.constraintlayout.widget.ConstraintLayout-->
         <!--android:id="@+id/trash_can"-->
@@ -209,20 +224,18 @@
 
         <!--</androidx.constraintlayout.widget.ConstraintLayout>-->
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:alpha="0.2"
-            android:clickable="false"
-            android:contentDescription="@string/shadow"
-            android:src="@drawable/ramp_bg_dark" />
+        <!--        <ImageView-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="2dp"-->
+        <!--            android:alpha="0.2"-->
+        <!--            android:clickable="false"-->
+        <!--            android:contentDescription="@string/shadow"-->
+        <!--            android:src="@drawable/ramp_bg_dark" />-->
 
         <com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
-            android:id="@+id/recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-        </com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView>
+                android:id="@+id/recycler_view" android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                />
 
     </LinearLayout>
 

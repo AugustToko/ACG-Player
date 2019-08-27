@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -17,15 +18,19 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import org.jetbrains.annotations.NotNull;
 import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
@@ -34,9 +39,6 @@ import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.model.Item;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author chenlongcould
@@ -199,16 +201,16 @@ public final class AlbumListFragment extends BaseListFragment {
 		if (mView == null) return;
 
 		mRecyclerView = mView.findViewById(R.id.recycler_view);
-		mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-			@Override
-			public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-				if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-					GlideApp.with(mMainActivity).resumeRequests();
-				} else {
-					GlideApp.with(mMainActivity).pauseRequests();
-				}
-			}
-		});
+//		mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//			@Override
+//			public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+//				if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+//					GlideApp.with(mMainActivity).resumeRequests();
+//				} else {
+//					GlideApp.with(mMainActivity).pauseRequests();
+//				}
+//			}
+//		});
 
 		mRecyclerView.setHasFixedSize(true);
 

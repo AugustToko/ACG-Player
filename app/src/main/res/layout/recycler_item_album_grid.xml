@@ -51,8 +51,7 @@
 
                 <top.geek_studio.chenlongcould.musicplayer.misc.BlurringView
                         android:id="@+id/blurring_view"
-                        android:layout_width="match_parent"
-                        android:layout_height="68dp"
+                        android:layout_width="match_parent" android:layout_height="58dp"
                         android:layout_gravity="center"
                         app:blurRadius="10"
                         app:downsampleFactor="2"

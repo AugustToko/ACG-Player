@@ -1,56 +1,36 @@
 package top.geek_studio.chenlongcould.musicplayer.adapter;
 
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
-import android.os.Environment;
-import android.os.RemoteException;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
-import com.bumptech.glide.load.DataSource;
+
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
-import org.jetbrains.annotations.NotNull;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.parser.Parser;
-import org.jsoup.parser.XmlTreeBuilder;
-import org.jsoup.select.Elements;
-import org.litepal.LitePal;
-import top.geek_studio.chenlongcould.geeklibrary.DownloadUtil;
-import top.geek_studio.chenlongcould.geeklibrary.HttpUtil;
-import top.geek_studio.chenlongcould.musicplayer.*;
+
+import java.util.List;
+
+import top.geek_studio.chenlongcould.musicplayer.GlideApp;
+import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.albumdetail.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
 import top.geek_studio.chenlongcould.musicplayer.misc.BlurringView;
 import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
-import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
+import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 
 public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRecyclerAdapter2AlbumList.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
 
@@ -79,280 +59,280 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 		viewHolder.mAlbumText.setText(mAlbumNameList.get(viewHolder.getAdapterPosition()).getAlbumName());
-		viewHolder.mImageView.setTag(R.string.key_id_3, mAlbumNameList.get(viewHolder.getAdapterPosition()).getmArtwork());
 
+		// set tag
 		if (mAlbumNameList.get(viewHolder.getAdapterPosition()).getmArtwork() != null) {
-			GlideApp.with(mMainActivity)
+			viewHolder.mImageView.setTag(R.string.key_id_3, mAlbumNameList.get(viewHolder.getAdapterPosition()).getmArtwork());
+			CustomThreadPool.post(() -> GlideApp.with(mMainActivity)
 					.load(viewHolder.mImageView.getTag(R.string.key_id_3))
+//					.load(path)
 					.diskCacheStrategy(DiskCacheStrategy.NONE)
-					.addListener(new RequestListener<Drawable>() {
+					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+					.into(new SimpleTarget<Drawable>() {
 						@Override
-						public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-							return false;
-						}
-
-						@Override
-						public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-							viewHolder.invalidate();
-							return false;
-						}
-					})
-					.into(viewHolder.mImageView);
-		} else {
-			final AlbumItem albumItem = mAlbumNameList.get(viewHolder.getAdapterPosition());
-			albumLoader(mMainActivity, viewHolder, albumItem);
-		}
-	}
-
-	private void albumLoader(@NonNull final Context activity, @NonNull final ViewHolder holder, final AlbumItem albumItem) {
-
-		final ImageView imageView = holder.mImageView;
-
-		final int albumId = albumItem.getAlbumId();
-		final String artist = albumItem.getArtist();
-		final String albumName = albumItem.getAlbumName();
-
-		final String[] albumPath = {null};
-
-		// load from def-db
-//		final Cursor cursor = activity.getContentResolver().query(
-//				Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + albumId)
-//				, new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
-//
-//		if (cursor != null && cursor.getCount() != 0) {
-//			cursor.moveToFirst();
-//			albumPath[0] = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART));
-//			cursor.close();
-//		} else {
-//			Log.d(TAG, "albumLoader: the DEFAULT_DB is null or empty!");
-//		}
-//
-//		final String baseCoverPath = albumPath[0];
-//
-//		if (baseCoverPath != null && !TextUtils.isEmpty(baseCoverPath)) {
-//			final File file = new File(baseCoverPath);
-//			if (file.exists()) {
-//				Log.d(TAG, "albumLoader: the album id DEFAULT_DB is ability, loading def");
-//				loadPath2ImageView(baseCoverPath, holder);
-//			} else {
-//				//load default res
-//				imageView.post(() -> GlideApp.with(imageView)
-//						.load(R.drawable.default_album_art)
-//						.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-//						.centerCrop()
-//						.override(100, 100)
-//						.diskCacheStrategy(DiskCacheStrategy.NONE)
-//						.into(imageView));
-//			}
-//		} else {
-
-		Log.d(TAG, "albumLoader: the album id DEFAULT_DB is NOT ability, loading from {network or diskCache}");
-
-		//检查是否勾选了网络Album
-		if (PreferenceUtil.getDefault(activity).getBoolean(Values.SharedPrefsTag.USE_NET_WORK_ALBUM, false)) {
-			final List<CustomAlbumPath> customs = LitePal.where("mAlbumId = ?", String.valueOf(albumId)).find(CustomAlbumPath.class);
-
-			//检测DB是否准备完成(IntentService 是否完成)
-			if (customs.size() != 0) {
-				final CustomAlbumPath custom = customs.get(0);
-
-				try {
-					final File file = new File(custom.getAlbumArt());
-
-					//判断CUSTOM_DB下albumArt是否存在
-					if ("null".equals(custom.getAlbumArt()) && !file.exists()) {
-
-						final String mayPath = MyRecyclerAdapter.Loader.ifExists(albumId);
-
-						if (mayPath != null) {
-							Log.d(TAG, "onBindViewHolder: (in CUSTOM_DB) DB not ability, path is ability" +
-									", save in db and loading...");
-
-							custom.setAlbumArt(mayPath);
-							custom.save();
-							loadPath2ImageView(mayPath, holder);
-						} else {
-							//DB内不存在Cover, 且缓存也不存在, 进行下载
-							final String request = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" +
-									App.LAST_FM_KEY +
-									"&artist=" +
-									artist +
-									"&album=" +
-									albumName;
-
-							HttpUtil.sedOkHttpRequest(request, new Callback() {
-								@Override
-								public void onFailure(@NotNull Call call, @NotNull IOException e) {
-									imageView.post(() -> Toast.makeText(activity, e.getMessage(), Toast.LENGTH_SHORT).show());
-								}
-
-								@Override
-								public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-									if (response.body() != null) {
-
-										final Document document = Jsoup.parse(response.body().string()
-												, "UTF-8", new Parser(new XmlTreeBuilder()));
-
-										final Elements content = document.getElementsByAttribute("status");
-										final String status = content.select("lfm[status]").attr("status");
-
-										if (RESULT_OK.equals(status)) {
-											StringBuilder img = new StringBuilder(content.select("image[size=extralarge]").text());
-
-											if (img.toString().contains("http") && img.toString().contains("https")) {
-												Log.d(TAG, "onResponse: ok, now downloading...");
-
-												DownloadUtil.get().download(
-														img.toString(),
-														Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separatorChar + "AlbumCovers",
-														albumId + "." + img.substring(img.lastIndexOf(".") + 1), new DownloadUtil.OnDownloadListener() {
-															@Override
-															public void onDownloadSuccess(File file) {
-																Log.d(TAG, "onDownloadSuccess: " + file.getAbsolutePath());
-																content.clear();
-
-																final String newPath = file.getAbsolutePath();
-																final CustomAlbumPath c = customs.get(0);
-																c.setAlbumArt(newPath);
-																c.save();
-
-																try {
-																	if (Data.sMusicBinder.getCurrentItem().getAlbumId() == albumId && Data.getCurrentCover() == null) {
-																		Data.setCurrentCover(BitmapFactory.decodeFile(newPath));
-																	}
-																} catch (RemoteException e) {
-																	e.printStackTrace();
-																}
-
-																loadPath2ImageView(file.getAbsolutePath(), holder);
-															}
-
-															@Override
-															public void onDownloading(int progress) {
-
-															}
-
-															@Override
-															public void onDownloadFailed(Exception e) {
-																Log.d(TAG, "onDownloadFailed: " + img.toString() + " " + e.getMessage());
-															}
-														});
-											} else {
-												Log.d(TAG, "onResponse: img url error" + img);
-												loadDefaultArt(holder);
-											}
-										} else {
-											Log.d(TAG, "onResponse: result not ok");
-											loadDefaultArt(holder);
-										}
-									} else {
-										Log.d(TAG, "onResponse: response is NUll!");
-										imageView.post(() -> Toast.makeText(activity, "response is NUll!", Toast.LENGTH_SHORT).show());
-										loadDefaultArt(holder);
-									}
-								}
+						public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+							mMainActivity.runOnUiThread(() -> {
+								viewHolder.mImageView.setImageDrawable(resource);
+								viewHolder.invalidate();
 							});
 						}
-					} else {
-						Log.d(TAG, "albumLoader: has data in DB, loading...");
-						loadPath2ImageView(file.getAbsolutePath(), holder);
-					}
-				} catch (Exception e) {
-					Log.d(TAG, "albumLoader: load customAlbum Error, loading default..., msg: " + e.getMessage());
-					loadDefaultArt(holder);
-				}
-			} else {
-				Log.d(TAG, "customDB size is 0");
-				loadDefaultArt(holder);
-			}
-		} else {
-			loadDefaultArt(holder);
-//				Log.d(TAG, "albumLoader: load from Cache..., msg: FROM NET switch not checked");
-//				if (!TextUtils.isEmpty(baseCoverPath) && !"null".equals(baseCoverPath)) {
-//					assert baseCoverPath != null;
-//					File file = new File(baseCoverPath);
-//					if (file.exists()) {
-//						Log.d(TAG, "albumLoader: exists...");
-//						loadPath2ImageView(baseCoverPath, holder);
+					}));
+		}
+//		else {
+//			final AlbumItem albumItem = mAlbumNameList.get(viewHolder.getAdapterPosition());
+//			albumLoader(mMainActivity, viewHolder, albumItem);
+//		}
+	}
+
+//	private void albumLoader(@NonNull final Context activity, @NonNull final ViewHolder holder, final AlbumItem albumItem) {
+//
+//		final ImageView imageView = holder.mImageView;
+//
+//		final int albumId = albumItem.getAlbumId();
+//		final String artist = albumItem.getArtist();
+//		final String albumName = albumItem.getAlbumName();
+//
+//		final String[] albumPath = {null};
+//
+//		// load from def-db
+////		final Cursor cursor = activity.getContentResolver().query(
+////				Uri.parse(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI + String.valueOf(File.separatorChar) + albumId)
+////				, new String[]{MediaStore.Audio.Albums.ALBUM_ART}, null, null, null);
+////
+////		if (cursor != null && cursor.getCount() != 0) {
+////			cursor.moveToFirst();
+////			albumPath[0] = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM_ART));
+////			cursor.close();
+////		} else {
+////			Log.d(TAG, "albumLoader: the DEFAULT_DB is null or empty!");
+////		}
+////
+////		final String baseCoverPath = albumPath[0];
+////
+////		if (baseCoverPath != null && !TextUtils.isEmpty(baseCoverPath)) {
+////			final File file = new File(baseCoverPath);
+////			if (file.exists()) {
+////				Log.d(TAG, "albumLoader: the album id DEFAULT_DB is ability, loading def");
+////				loadPath2ImageView(baseCoverPath, holder);
+////			} else {
+////				//load default res
+////				imageView.post(() -> GlideApp.with(imageView)
+////						.load(R.drawable.default_album_art)
+////						.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+////						.centerCrop()
+////						.override(100, 100)
+////						.diskCacheStrategy(DiskCacheStrategy.NONE)
+////						.into(imageView));
+////			}
+////		} else {
+//
+//		Log.d(TAG, "albumLoader: the album id DEFAULT_DB is NOT ability, loading from {network or diskCache}");
+//
+//		//检查是否勾选了网络Album
+//		if (PreferenceUtil.getDefault(activity).getBoolean(Values.SharedPrefsTag.USE_NET_WORK_ALBUM, false)) {
+//			final List<CustomAlbumPath> customs = LitePal.where("mAlbumId = ?", String.valueOf(albumId)).find(CustomAlbumPath.class);
+//
+//			//检测DB是否准备完成(IntentService 是否完成)
+//			if (customs.size() != 0) {
+//				final CustomAlbumPath custom = customs.get(0);
+//
+//				try {
+//					final File file = new File(custom.getAlbumArt());
+//
+//					//判断CUSTOM_DB下albumArt是否存在
+//					if ("null".equals(custom.getAlbumArt()) && !file.exists()) {
+//
+//						final String mayPath = MyRecyclerAdapter.Loader.ifExists(albumId);
+//
+//						if (mayPath != null) {
+//							Log.d(TAG, "onBindViewHolder: (in CUSTOM_DB) DB not ability, path is ability" +
+//									", save in db and loading...");
+//
+//							custom.setAlbumArt(mayPath);
+//							custom.save();
+//							loadPath2ImageView(mayPath, holder);
+//						} else {
+//							//DB内不存在Cover, 且缓存也不存在, 进行下载
+//							final String request = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" +
+//									App.LAST_FM_KEY +
+//									"&artist=" +
+//									artist +
+//									"&album=" +
+//									albumName;
+//
+//							HttpUtil.sedOkHttpRequest(request, new Callback() {
+//								@Override
+//								public void onFailure(@NotNull Call call, @NotNull IOException e) {
+//									imageView.post(() -> Toast.makeText(activity, e.getMessage(), Toast.LENGTH_SHORT).show());
+//								}
+//
+//								@Override
+//								public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+//									if (response.body() != null) {
+//
+//										final Document document = Jsoup.parse(response.body().string()
+//												, "UTF-8", new Parser(new XmlTreeBuilder()));
+//
+//										final Elements content = document.getElementsByAttribute("status");
+//										final String status = content.select("lfm[status]").attr("status");
+//
+//										if (RESULT_OK.equals(status)) {
+//											StringBuilder img = new StringBuilder(content.select("image[size=extralarge]").text());
+//
+//											if (img.toString().contains("http") && img.toString().contains("https")) {
+//												Log.d(TAG, "onResponse: ok, now downloading...");
+//
+//												DownloadUtil.get().download(
+//														img.toString(),
+//														Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + File.separatorChar + "AlbumCovers",
+//														albumId + "." + img.substring(img.lastIndexOf(".") + 1), new DownloadUtil.OnDownloadListener() {
+//															@Override
+//															public void onDownloadSuccess(File file) {
+//																Log.d(TAG, "onDownloadSuccess: " + file.getAbsolutePath());
+//																content.clear();
+//
+//																final String newPath = file.getAbsolutePath();
+//																final CustomAlbumPath c = customs.get(0);
+//																c.setAlbumArt(newPath);
+//																c.save();
+//
+//																try {
+//																	if (Data.sMusicBinder.getCurrentItem().getAlbumId() == albumId && Data.getCurrentCover() == null) {
+//																		Data.setCurrentCover(BitmapFactory.decodeFile(newPath));
+//																	}
+//																} catch (RemoteException e) {
+//																	e.printStackTrace();
+//																}
+//
+//																loadPath2ImageView(file.getAbsolutePath(), holder);
+//															}
+//
+//															@Override
+//															public void onDownloading(int progress) {
+//
+//															}
+//
+//															@Override
+//															public void onDownloadFailed(Exception e) {
+//																Log.d(TAG, "onDownloadFailed: " + img.toString() + " " + e.getMessage());
+//															}
+//														});
+//											} else {
+//												Log.d(TAG, "onResponse: img url error" + img);
+//												loadDefaultArt(holder);
+//											}
+//										} else {
+//											Log.d(TAG, "onResponse: result not ok");
+//											loadDefaultArt(holder);
+//										}
+//									} else {
+//										Log.d(TAG, "onResponse: response is NUll!");
+//										imageView.post(() -> Toast.makeText(activity, "response is NUll!", Toast.LENGTH_SHORT).show());
+//										loadDefaultArt(holder);
+//									}
+//								}
+//							});
+//						}
 //					} else {
-//						loadDefaultArt(holder);
+//						Log.d(TAG, "albumLoader: has data in DB, loading...");
+//						loadPath2ImageView(file.getAbsolutePath(), holder);
 //					}
-//				} else {
-//					Log.d(TAG, "albumLoader: not exists");
+//				} catch (Exception e) {
+//					Log.d(TAG, "albumLoader: load customAlbum Error, loading default..., msg: " + e.getMessage());
 //					loadDefaultArt(holder);
 //				}
-		}
-	}
-
-	/**
-	 * load from defaultDB {@link MediaStore.Audio.Albums}
-	 */
-	private void loadPath2ImageView(@NonNull final String path, @NonNull final ViewHolder holder) {
-		if (verify(holder.mImageView)) {
-			holder.mImageView.post(() -> GlideApp.with(holder.mImageView)
-					.load(path)
-//						.placeholder(R.drawable.default_album_art)
-					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-					.centerCrop()
-					.diskCacheStrategy(DiskCacheStrategy.NONE)
-					.override(250, 250)
-					.into(new CustomTarget<Drawable>() {
-						@Override
-						public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-							holder.mImageView.setImageDrawable(resource);
-							holder.invalidate();
-							holder.setBluredView(holder.mImageView);
-						}
-
-						@Override
-						public void onLoadCleared(@Nullable Drawable placeholder) {
-
-						}
-					}));
-		}
-	}
-
-	/**
-	 * @param holder view holder
-	 */
-	private void loadDefaultArt(@NonNull final ViewHolder holder) {
-		if (verify(holder.mImageView)) {
-			holder.mImageView.post(() -> GlideApp.with(holder.mImageView)
-					.load(R.drawable.default_album_art)
-					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-					.centerCrop()
-					.diskCacheStrategy(DiskCacheStrategy.NONE)
-					.into(new CustomTarget<Drawable>() {
-						@Override
-						public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-							holder.mImageView.setImageDrawable(resource);
-							holder.invalidate();
-						}
-
-						@Override
-						public void onLoadCleared(@Nullable Drawable placeholder) {
-
-						}
-					}));
-		}
-	}
-
-	/**
-	 * verify if key, null
-	 *
-	 * @param imageView the imageView to verify
-	 */
-	private boolean verify(@NonNull final ImageView imageView) {
-		boolean flag = false;
-		if (imageView.getTag(R.string.key_id_3) == null) {
-			Log.e(TAG, "key null clear_image");
-			GlideApp.with(imageView).clear(imageView);
-		} else {
-			//根据position判断是否为复用ViewHolder
-			flag = true;
-		}
-		return flag;
-	}
+//			} else {
+//				Log.d(TAG, "customDB size is 0");
+//				loadDefaultArt(holder);
+//			}
+//		} else {
+//			loadDefaultArt(holder);
+////				Log.d(TAG, "albumLoader: load from Cache..., msg: FROM NET switch not checked");
+////				if (!TextUtils.isEmpty(baseCoverPath) && !"null".equals(baseCoverPath)) {
+////					assert baseCoverPath != null;
+////					File file = new File(baseCoverPath);
+////					if (file.exists()) {
+////						Log.d(TAG, "albumLoader: exists...");
+////						loadPath2ImageView(baseCoverPath, holder);
+////					} else {
+////						loadDefaultArt(holder);
+////					}
+////				} else {
+////					Log.d(TAG, "albumLoader: not exists");
+////					loadDefaultArt(holder);
+////				}
+//		}
+//	}
+//
+//	/**
+//	 * load from defaultDB {@link MediaStore.Audio.Albums}
+//	 */
+//	private void loadPath2ImageView(@NonNull final String path, @NonNull final ViewHolder holder) {
+//		if (verify(holder.mImageView)) {
+//			holder.mImageView.post(() -> GlideApp.with(holder.mImageView)
+//					.load(path)
+////						.placeholder(R.drawable.default_album_art)
+//					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+//					.centerCrop()
+//					.diskCacheStrategy(DiskCacheStrategy.NONE)
+//					.override(250, 250)
+//					.into(new CustomTarget<Drawable>() {
+//						@Override
+//						public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+//							holder.mImageView.setImageDrawable(resource);
+//							holder.invalidate();
+//							holder.setBluredView(holder.mImageView);
+//						}
+//
+//						@Override
+//						public void onLoadCleared(@Nullable Drawable placeholder) {
+//
+//						}
+//					}));
+//		}
+//	}
+//
+//	/**
+//	 * @param holder view holder
+//	 */
+//	private void loadDefaultArt(@NonNull final ViewHolder holder) {
+//		if (verify(holder.mImageView)) {
+//			holder.mImageView.post(() -> GlideApp.with(holder.mImageView)
+//					.load(R.drawable.default_album_art)
+//					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+//					.centerCrop()
+//					.diskCacheStrategy(DiskCacheStrategy.NONE)
+//					.into(new CustomTarget<Drawable>() {
+//						@Override
+//						public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+//							holder.mImageView.setImageDrawable(resource);
+//							holder.invalidate();
+//						}
+//
+//						@Override
+//						public void onLoadCleared(@Nullable Drawable placeholder) {
+//
+//						}
+//					}));
+//		}
+//	}
+//
+//	/**
+//	 * verify if key, null
+//	 *
+//	 * @param imageView the imageView to verify
+//	 */
+//	private boolean verify(@NonNull final ImageView imageView) {
+//		boolean flag = false;
+//		if (imageView.getTag(R.string.key_id_3) == null) {
+//			Log.e(TAG, "key null clear_image");
+//			GlideApp.with(imageView).clear(imageView);
+//		} else {
+//			//根据position判断是否为复用ViewHolder
+//			flag = true;
+//		}
+//		return flag;
+//	}
 
 	@Override
 	public void onViewRecycled(@NonNull ViewHolder holder) {
@@ -447,11 +427,11 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
 		}
 
-		public void setBluredView(View view) {
+		void setBluredView(View view) {
 			if (blurringView != null) blurringView.setBlurredView(view);
 		}
 
-		public void invalidate() {
+		void invalidate() {
 			if (blurringView != null) blurringView.invalidate();
 		}
 	}

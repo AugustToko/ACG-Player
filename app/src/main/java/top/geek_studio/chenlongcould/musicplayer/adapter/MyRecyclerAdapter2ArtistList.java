@@ -12,18 +12,18 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
+
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -31,6 +31,14 @@ import org.jsoup.parser.Parser;
 import org.jsoup.parser.XmlTreeBuilder;
 import org.jsoup.select.Elements;
 import org.litepal.LitePal;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 import top.geek_studio.chenlongcould.geeklibrary.DownloadUtil;
 import top.geek_studio.chenlongcould.geeklibrary.HttpUtil;
 import top.geek_studio.chenlongcould.musicplayer.App;
@@ -43,10 +51,6 @@ import top.geek_studio.chenlongcould.musicplayer.database.ArtistArtPath;
 import top.geek_studio.chenlongcould.musicplayer.misc.BlurringView;
 import top.geek_studio.chenlongcould.musicplayer.model.ArtistItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
 
 public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyRecyclerAdapter2ArtistList.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
 
@@ -105,8 +109,8 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 		viewHolder.mArtistText.setText(mArtistItems.get(i).getArtistName());
-		viewHolder.mArtistImage.setTag(R.string.key_id_2, i);
-		dataSet(i, viewHolder);
+//		viewHolder.mArtistImage.setTag(R.string.key_id_2, i);
+//		dataSet(i, viewHolder);
 	}
 
 	private void dataSet(final int index, final ViewHolder holder) {

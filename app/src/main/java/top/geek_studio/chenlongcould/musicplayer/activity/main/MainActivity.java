@@ -2,7 +2,12 @@ package top.geek_studio.chenlongcould.musicplayer.activity.main;
 
 import android.app.ActivityManager;
 import android.app.UiModeManager;
-import android.content.*;
+import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -12,7 +17,14 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.*;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
+import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
@@ -20,14 +32,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.widget.*;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupMenu;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatImageView;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
@@ -35,12 +51,19 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager.widget.ViewPager;
+
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.tabs.TabLayout;
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+
+import java.io.File;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
@@ -51,26 +74,40 @@ import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.geeklibrary.theme.Theme;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
 import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeUtils;
-import top.geek_studio.chenlongcould.musicplayer.*;
-import top.geek_studio.chenlongcould.musicplayer.activity.*;
+import top.geek_studio.chenlongcould.musicplayer.App;
+import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.GlideApp;
+import top.geek_studio.chenlongcould.musicplayer.IMuiscService;
+import top.geek_studio.chenlongcould.musicplayer.MessageWorker;
+import top.geek_studio.chenlongcould.musicplayer.MusicService;
+import top.geek_studio.chenlongcould.musicplayer.MyTileService;
+import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.activity.AboutActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.CarViewActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.DetailActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.EmptyActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.SettingsActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.ThemeActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseListActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyPagerAdapter;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter2AlbumList;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter2ArtistList;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityMainBinding;
-import top.geek_studio.chenlongcould.musicplayer.fragment.*;
+import top.geek_studio.chenlongcould.musicplayer.fragment.AlbumListFragment;
+import top.geek_studio.chenlongcould.musicplayer.fragment.ArtistListFragment;
+import top.geek_studio.chenlongcould.musicplayer.fragment.BaseFragment;
+import top.geek_studio.chenlongcould.musicplayer.fragment.FileViewFragment;
+import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
+import top.geek_studio.chenlongcould.musicplayer.fragment.MusicListFragment;
+import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
-
-import java.io.File;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -121,11 +158,12 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	public static final char PLAY_LIST_FRAGMENT_ID = '4';
 	public static final char FILE_LIST_FRAGMENT_ID = '5';
 	public static final char MUSIC_DETAIL_FRAGMENT_ID = '6';
+
 	@Deprecated
 	private AppBarLayout.OnOffsetChangedListener mOnOffsetChangedListener = new AppBarLayout.OnOffsetChangedListener() {
 		@Override
 		public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-			mMainBinding.realBlur.setTranslationY(mMainBinding.realBlur.getTranslationX() + verticalOffset);
+//			mMainBinding.realBlur.setTranslationY(mMainBinding.realBlur.getTranslationX() + verticalOffset);
 		}
 	};
 
@@ -143,6 +181,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	public static boolean ANIMATION_FLAG = true;
 
 	private final ArrayList<String> mTitles = new ArrayList<>();
+
 	// flag
 	private boolean toolbarClicked = false;
 
@@ -167,16 +206,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	 * handler
 	 */
 	private static NotLeakHandler mHandler = null;
-
-	@SuppressWarnings("unused")
-	public static boolean sendMessageStatic(@NonNull Message message) {
-		boolean result = false;
-		if (mHandler != null) {
-			mHandler.sendMessage(message);
-			result = true;
-		}
-		return result;
-	}
 
 	@SuppressWarnings("UnusedReturnValue")
 	public static boolean sendEmptyMessageStatic(int what) {
@@ -211,6 +240,8 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		mHandler = new NotLeakHandler(this, mHandlerThread.getLooper());
 		mMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
+		findView();
+
 		initView();
 
 		// init P
@@ -218,9 +249,253 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 		mPresenter.initPermission(this);
 
-		super.onCreate(savedInstanceState);
-
 		mPresenter.checkUpdate(this);
+
+		super.onCreate(savedInstanceState);
+	}
+
+	/**
+	 * 设置底栏滑动
+	 */
+	public void setUpSlideView() {
+		// 底栏滑动事件
+		mMainBinding.slidingLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+			@Override
+			public void onPanelSlide(View panel, float slideOffset) {
+
+				if (musicDetailFragment == null || musicDetailFragment.getNowPlayingBody() == null) {
+					return;
+				}
+
+				MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.RECYCLER_SCROLL);
+
+				mMainBinding.mainBody.setTranslationY(0 - slideOffset * 120);
+
+				float current = 1 - slideOffset;
+
+				musicDetailFragment.getNowPlayingBody().setAlpha(current);
+
+				//在底部, 重置动画初始位置
+				if (current == 1) {
+					musicDetailFragment.setDefAnimation();
+					musicDetailFragment.clearAnimations();
+					ANIMATION_FLAG = true;
+				}
+
+				if (current == 0) {
+					//隐藏BODY
+					musicDetailFragment.getNowPlayingBody().setVisibility(View.INVISIBLE);
+
+					//start animation
+					if (ANIMATION_FLAG) {
+						ANIMATION_FLAG = false;
+						musicDetailFragment.initAnimation();
+					}
+
+				} else {
+					mMainBinding.tabLayout.setVisibility(View.VISIBLE);
+					mMainBinding.tabLayout.setVisibility(View.VISIBLE);
+					musicDetailFragment.getNowPlayingBody().setVisibility(View.VISIBLE);
+				}
+			}
+
+			@Override
+			public final void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+				if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
+					mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+//					if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
+//						setStatusBarTextColor(MainActivity.this, new Palette.Builder(Data.getCurrentCover())
+//								.generate().getLightVibrantColor(Utils.Ui.getPrimaryColor(MainActivity.this)));
+//					}
+				} else if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+					mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+//					final Drawable drawable = mMainBinding.bgImage.getDrawable();
+//					if (drawable instanceof BitmapDrawable) {
+//						BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+//						Bitmap bitmap = bitmapDrawable.getBitmap();
+//						if (bitmap != null && !bitmap.isRecycled()) {
+//							setStatusBarTextColor(MainActivity.this, new Palette.Builder(bitmap)
+//									.generate().getLightVibrantColor(Utils.Ui.getPrimaryColor(MainActivity.this)));
+//						} else {
+//							setStatusBarTextColor(MainActivity.this, Utils.Ui.getPrimaryColor(MainActivity.this));
+//						}
+//					} else {
+//						setStatusBarTextColor(MainActivity.this, Utils.Ui.getPrimaryColor(MainActivity.this));
+//					}
+					Log.d(TAG, "onPanelStateChanged: COLLAPSED");
+				}
+			}
+		});
+	}
+
+	private void findView() {
+		mSearchView = findViewById(R.id.search_view);
+		// Nav 图像
+		mNavHeaderImageView = mMainBinding.navigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
+	}
+
+	/**
+	 * 初始化 View
+	 */
+	protected void initView() {
+		super.initView(mMainBinding.toolBar, mMainBinding.appbar);
+
+		// search
+		mSearchView.setHint(getString(R.string.type_somthing));
+		mSearchView.setHintTextColor(Color.BLACK);
+		mSearchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+			@Override
+			public boolean onQueryTextSubmit(String query) {
+				musicListFragment.mMusicListBinding.includeRecycler.recyclerView.stopScroll();
+				return true;
+			}
+
+			@Override
+			public boolean onQueryTextChange(String newText) {
+				mPresenter.filterData(newText);
+				return true;
+			}
+		});
+
+		// FIXME: 无法正常实现两种滚动
+		// 根据recycler view的滚动程度, 来判断如何返回顶部
+		mMainBinding.toolBar.setOnClickListener(v -> {
+			if (toolbarClicked) {
+				switch (Values.CurrentData.CURRENT_PAGE_INDEX) {
+					case 0: {
+						musicListFragment.mMusicListBinding.includeRecycler.recyclerView.smoothScrollToPosition(0);
+					}
+					break;
+					case 1: {
+						albumListFragment.getRecyclerView().smoothScrollToPosition(0);
+					}
+					break;
+					default:
+				}
+			}
+			toolbarClicked = true;
+			//双击机制
+			mHandler.postDelayed(() -> toolbarClicked = false, 1000);
+		});
+
+		setSupportActionBar(mMainBinding.toolBar);
+
+		final ActionBar actionBar = getSupportActionBar();
+		if (actionBar != null) {
+			actionBar.setDisplayHomeAsUpEnabled(true);
+			actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24px);
+		}
+
+		// Nav 图像点击事件
+		mNavHeaderImageView.setOnClickListener(v -> {
+//			if (musicDetailFragment != null && musicDetailFragment.getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+//				musicDetailFragment.getSlidingUpPanelLayout().setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+//				return;
+//			}
+//			if (mMainBinding.slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+//				mMainBinding.slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+//				return;
+//			}
+			mMainBinding.drawerLayout.closeDrawers();
+		});
+
+		mMainBinding.navigationView.inflateMenu(R.menu.menu_nav);
+		mMainBinding.navigationView.setNavigationItemSelectedListener(menuItem -> {
+			switch (menuItem.getItemId()) {
+				case R.id.menu_nav_exit: {
+					fullExit();
+				}
+				break;
+				case R.id.menu_nav_detail_info: {
+					Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+					startActivity(intent);
+				}
+				break;
+				case R.id.menu_nav_setting: {
+					startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+				}
+				break;
+				case R.id.menu_nav_about: {
+					startActivity(new Intent(MainActivity.this, AboutActivity.class));
+				}
+				break;
+				case R.id.car_mode: {
+					if (Data.HAS_PLAYED) {
+						startActivity(new Intent(MainActivity.this, CarViewActivity.class));
+					} else {
+						// TODO: 国际化
+						Toast.makeText(this, "No music playing...", Toast.LENGTH_SHORT).show();
+					}
+				}
+				break;
+//				case R.id.menu_nav_ad: {
+//					Toast.makeText(this, "This feature is coming soon", Toast.LENGTH_SHORT).show();
+//				}
+//				break;
+//				case R.id.debug: {
+//					Toast.makeText(this, "NONE", Toast.LENGTH_SHORT).show();
+//				}
+//				break;
+				case R.id.dark_night_mode: {
+					startActivity(new Intent(this, EmptyActivity.class));
+
+					mMainBinding.drawerLayout.closeDrawers();
+
+					final FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+					transaction.remove(musicDetailFragment)
+							.remove(musicListFragment)
+							.remove(albumListFragment)
+							.remove(artistListFragment)
+							.remove(fileViewFragment)
+							.remove(playListFragment).commitNow();
+
+					boolean isDarkMode = PreferenceUtil.getDefault(MainActivity.this)
+							.getBoolean(Values.SharedPrefsTag.DARK_MODE, false);
+
+					if (isDarkMode) {
+						PreferenceUtil.getDefault(MainActivity.this)
+								.edit().putBoolean(Values.SharedPrefsTag.DARK_MODE, false).apply();
+						mMainBinding.navigationView.getMenu().findItem(R.id.dark_night_mode).setChecked(false);
+						UiModeManager UiModeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
+						if (UiModeManager != null)
+							UiModeManager.setNightMode(android.app.UiModeManager.MODE_NIGHT_NO);
+						Log.d(TAG, "initView: load bright done");
+					} else {
+						PreferenceUtil.getDefault(MainActivity.this)
+								.edit().putBoolean(Values.SharedPrefsTag.DARK_MODE, true).apply();
+						mMainBinding.navigationView.getMenu().findItem(R.id.dark_night_mode).setChecked(true);
+						UiModeManager modeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
+						if (modeManager != null)
+							modeManager.setNightMode(android.app.UiModeManager.MODE_NIGHT_YES);
+						Log.d(TAG, "initView: load dark done");
+					}
+
+					Values.TEMP.switchNightDone = true;
+					finish();
+				}
+				break;
+				default:
+			}
+			return true;
+		});
+
+		mDrawerToggle = new ActionBarDrawerToggle(this, mMainBinding.drawerLayout, mMainBinding.toolBar, R.string.open, R.string.close);
+		mDrawerToggle.syncState();
+		mMainBinding.drawerLayout.addDrawerListener(mDrawerToggle);
+
+		boolean isDarkMode = false;
+
+		UiModeManager UiModeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
+		if (UiModeManager != null)
+			isDarkMode = UiModeManager.getNightMode() == android.app.UiModeManager.MODE_NIGHT_YES;
+		preferences.edit().putBoolean(Values.SharedPrefsTag.DARK_MODE, isDarkMode).apply();
+
+		// init menu
+		if (isDarkMode) {
+			mMainBinding.navigationView.getMenu().findItem(R.id.dark_night_mode).setChecked(true);
+		} else {
+			mMainBinding.navigationView.getMenu().findItem(R.id.dark_night_mode).setChecked(false);
+		}
 	}
 
 	@Override
@@ -237,7 +512,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 							mPresenter.initPermission(MainActivity.this));
 					builder.setNeutralButton("Cancel!", (dialog, which) -> {
 						dialog.dismiss();
-						commonExit();
+						fullExit();
 					});
 					builder.show();
 				} else {
@@ -418,6 +693,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	protected void onResume() {
 		super.onResume();
 
+		// init MusicDetailFrag
 		if (musicDetailFragment == null) {
 			musicDetailFragment = MusicDetailFragment.newInstance();
 			final FragmentManager fragmentManager = getSupportFragmentManager();
@@ -426,9 +702,13 @@ public final class MainActivity extends BaseListActivity implements MainContract
 			transaction.commit();
 		}
 
-		if (getIntent().getStringExtra(Values.IntentTAG.SHORTCUT_TYPE) != null) {
+		final Intent intent = getIntent();
+		if (intent == null) return;
+
+		// 检查快捷方式
+		if (intent.getStringExtra(Values.IntentTAG.SHORTCUT_TYPE) != null) {
 			//noinspection SwitchStatementWithTooFewBranches
-			switch (getIntent().getStringExtra("SHORTCUT_TYPE")) {
+			switch (intent.getStringExtra(Values.IntentTAG.SHORTCUT_TYPE)) {
 				case App.SHORTCUT_RANDOM: {
 					ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
 				}
@@ -477,7 +757,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 		//4
 		if (backPressed) {
-			commonExit();
+			finish();
 		} else {
 			backPressed = true;
 			Toast.makeText(this, getString(R.string.press_again_to_exit), Toast.LENGTH_SHORT).show();
@@ -655,7 +935,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		mFragmentList.clear();
 
 		String tabOrder = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
-		if (tabOrder == null) tabOrder = DEFAULT_TAB_ORDER;
 
 		for (final char c : tabOrder.toCharArray()) {
 			if (c == '1') {
@@ -713,9 +992,9 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 			@Override
 			public void onPageSelected(int i) {
-				mMainBinding.realBlur.invalidate();
-				mMainBinding.realBlur.requestLayout();
-				mMainBinding.realBlur.refreshDrawableState();
+//				mMainBinding.realBlur.invalidate();
+//				mMainBinding.realBlur.requestLayout();
+//				mMainBinding.realBlur.refreshDrawableState();
 
 				Values.CurrentData.CURRENT_PAGE_INDEX = i;
 
@@ -780,9 +1059,9 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		mMainBinding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
 			@Override
 			public void onTabSelected(TabLayout.Tab tab) {
-				mMainBinding.realBlur.invalidate();
-				mMainBinding.realBlur.requestLayout();
-				mMainBinding.realBlur.refreshDrawableState();
+//				mMainBinding.realBlur.invalidate();
+//				mMainBinding.realBlur.requestLayout();
+//				mMainBinding.realBlur.refreshDrawableState();
 
 				//点击加号不会滑动ViewPager
 				if (tab.getPosition() != mMainBinding.tabLayout.getTabCount() - 1) {
@@ -819,13 +1098,15 @@ public final class MainActivity extends BaseListActivity implements MainContract
 			break;
 
 			case '2': {
-				if (albumListFragment == null || albumListFragment.getAlbumItemList() == null) break;
+				if (albumListFragment == null || albumListFragment.getAlbumItemList() == null)
+					break;
 				content = albumListFragment.getAlbumItemList().size() + " Albums";
 			}
 			break;
 
 			case '3': {
-				if (artistListFragment == null || artistListFragment.getArtistItemList() == null) break;
+				if (artistListFragment == null || artistListFragment.getArtistItemList() == null)
+					break;
 				content = artistListFragment.getArtistItemList().size() + " Artists";
 			}
 			break;
@@ -844,16 +1125,20 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	}
 
 	@Override
-	protected void onSaveInstanceState(@NonNull Bundle outState) {
-		super.onSaveInstanceState(outState);
-	}
-
-	@Override
 	protected void onDestroy() {
-		try {
-			unbindService(sServiceConnection);
-		} catch (Exception e) {
-			Log.d(TAG, "fullExit: " + e.getMessage());
+		Data.sMusicBinder = null;
+
+		if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
+			Data.getCurrentCover().recycle();
+		}
+
+		if (Data.HAS_BIND) {
+			try {
+				unbindService(sServiceConnection);
+				Data.HAS_BIND = false;
+			} catch (Exception e) {
+				Log.d(TAG, "onDestroy: " + e.getMessage());
+			}
 		}
 
 		mCurrentShowedFragment = null;
@@ -868,17 +1153,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		mMainBinding.unbind();
 		App.clearDisposable();
 
-		super.onDestroy();
-	}
-
-	/**
-	 * Common exit MainActivity
-	 */
-	public void commonExit() {
-		if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
-			Data.getCurrentCover().recycle();
-		}
-
 		CustomThreadPool.finish();
 
 		new Thread(() -> {
@@ -886,14 +1160,16 @@ public final class MainActivity extends BaseListActivity implements MainContract
 			GlideApp.get(MainActivity.this).clearMemory();
 		});
 
-		finish();
-	}
-
-	private void modeChangeExit() {
-		finish();
+		super.onDestroy();
 	}
 
 	public void fullExit() {
+		try {
+			unbindService(sServiceConnection);
+			Data.HAS_BIND = false;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		try {
 			stopService(new Intent(MainActivity.this, MusicService.class));
@@ -901,18 +1177,17 @@ public final class MainActivity extends BaseListActivity implements MainContract
 			Log.d(TAG, "fullExit: " + e.getMessage());
 		}
 
-//		try {
-//			stopService(new Intent(MainActivity.this, MyTileService.class));
-//		} catch (Exception e) {
-//			Log.d(TAG, "fullExit: " + e.getMessage());
-//		}
+		try {
+			stopService(new Intent(MainActivity.this, MyTileService.class));
+		} catch (Exception e) {
+			Log.d(TAG, "fullExit: " + e.getMessage());
+		}
 
 		//lists
 		Data.sPlayOrderList.clear();
 		Data.sMusicItemsBackUp.clear();
 		Data.S_TRASH_CAN_LIST.clear();
 
-		Data.sMusicBinder = null;
 		Data.sTheme = null;
 		Data.sCurrentMusicItem = null;
 		Data.HAS_PLAYED = false;
@@ -922,32 +1197,35 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		Data.sPlayOrderListBackup.clear();
 		Data.sHistoryPlayed.clear();
 
-		mHandlerThread.quit();
-		CustomThreadPool.finish();
-
-		new Thread(() -> {
-			GlideApp.get(MainActivity.this).clearDiskCache();
-			GlideApp.get(MainActivity.this).clearMemory();
-		});
-
 		runOnUiThread(this::finish);
 	}
 
+	private boolean initUpperStyle = false;
+
 	@Override
 	public final void initStyle() {
-		mDrawerToggle.getDrawerArrowDrawable().setColor(Color.BLACK);
-		mMainBinding.tabLayout.setTabTextColors(ColorStateList.valueOf(Color.BLACK));
-		Utils.Ui.setOverToolbarColor(mMainBinding.toolBar, Color.BLACK);
+		if (!initUpperStyle) {
+			mDrawerToggle.getDrawerArrowDrawable().setColor(Color.BLACK);
+			mMainBinding.tabLayout.setTabTextColors(ColorStateList.valueOf(Color.BLACK));
+			Utils.Ui.setOverToolbarColor(mMainBinding.toolBar, Color.BLACK);
 
-		mMainBinding.toolBar.setBackgroundColor(Color.TRANSPARENT);
-		mMainBinding.tabLayout.setBackgroundColor(Color.TRANSPARENT);
-		mMainBinding.appbar.setBackgroundColor(Color.TRANSPARENT);
-		setStatusBarTextColor(this, Color.WHITE);
+//			@ColorInt int c = Color.argb(150, 255, 255, 255);
+//
+//			mMainBinding.toolBar.setBackgroundColor(c);
+//			mMainBinding.tabLayout.setBackgroundColor(c);
+//			mMainBinding.appbar.setBackgroundColor(c);
+//
+//			getWindow().setStatusBarColor(c);
+			setStatusBarTextColor(this, Color.BLACK);
+
+			initUpperStyle = true;
+		}
 
 		CustomThreadPool.post(() ->
 				setTaskDescription(new ActivityManager.TaskDescription((String) getTitle()
 						, BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_round)
 						, Utils.Ui.getPrimaryColor(MainActivity.this))));
+
 		mMainBinding.tabLayout.setSelectedTabIndicatorColor(Utils.Ui.getAccentColor(MainActivity.this));
 
 		getWindow().setNavigationBarColor(Utils.Ui.getPrimaryDarkColor(this));
@@ -1020,227 +1298,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 			}
 		});
-	}
-
-	protected void initView() {
-		super.initView(mMainBinding.toolBar, mMainBinding.appbar);
-
-		mSearchView = findViewById(R.id.search_view);
-		mSearchView.setHint(getString(R.string.type_somthing));
-		mSearchView.setHintTextColor(Color.BLACK);
-		mSearchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
-			@Override
-			public boolean onQueryTextSubmit(String query) {
-				musicListFragment.mMusicListBinding.includeRecycler.recyclerView.stopScroll();
-				return true;
-			}
-
-			@Override
-			public boolean onQueryTextChange(String newText) {
-				mPresenter.filterData(newText);
-				return true;
-			}
-		});
-
-//        根据recycler view的滚动程度, 来判断如何返回顶部
-		mMainBinding.toolBar.setOnClickListener(v -> {
-			if (toolbarClicked) {
-				switch (Values.CurrentData.CURRENT_PAGE_INDEX) {
-					case 0: {
-						musicListFragment.mMusicListBinding.includeRecycler.recyclerView.smoothScrollToPosition(0);
-					}
-					break;
-					case 1: {
-						albumListFragment.getRecyclerView().smoothScrollToPosition(0);
-					}
-					break;
-					default:
-				}
-
-			}
-			toolbarClicked = true;
-
-			//双击机制
-			new Handler().postDelayed(() -> toolbarClicked = false, 1000);
-		});
-
-		setSupportActionBar(mMainBinding.toolBar);
-
-		final ActionBar actionBar = getSupportActionBar();
-		if (actionBar != null) {
-			actionBar.setDisplayHomeAsUpEnabled(true);
-			actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24px);
-		}
-
-		mNavHeaderImageView = mMainBinding.navigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
-
-		mNavHeaderImageView.setOnClickListener(v -> {
-			if (musicDetailFragment != null && musicDetailFragment.getSlidingUpPanelLayout().getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
-				musicDetailFragment.getSlidingUpPanelLayout().setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-				return;
-			}
-
-			if (mMainBinding.slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
-				mMainBinding.slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-				return;
-			}
-
-			mMainBinding.drawerLayout.closeDrawers();
-		});
-
-		mMainBinding.slidingLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
-			@Override
-			public void onPanelSlide(View panel, float slideOffset) {
-
-				if (musicDetailFragment == null || musicDetailFragment.getNowPlayingBody() == null) {
-					return;
-				}
-
-				MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.RECYCLER_SCROLL);
-
-				mMainBinding.mainBody.setTranslationY(0 - slideOffset * 120);
-
-				float current = 1 - slideOffset;
-
-				musicDetailFragment.getNowPlayingBody().setAlpha(current);
-
-				//在底部, 重置动画初始位置
-				if (current == 1) {
-					musicDetailFragment.setDefAnimation();
-					musicDetailFragment.clearAnimations();
-					ANIMATION_FLAG = true;
-				}
-
-				if (current == 0) {
-					//隐藏BODY
-					musicDetailFragment.getNowPlayingBody().setVisibility(View.INVISIBLE);
-
-					//start animation
-					if (ANIMATION_FLAG) {
-						ANIMATION_FLAG = false;
-						musicDetailFragment.initAnimation();
-					}
-
-				} else {
-					mMainBinding.tabLayout.setVisibility(View.VISIBLE);
-					mMainBinding.tabLayout.setVisibility(View.VISIBLE);
-					musicDetailFragment.getNowPlayingBody().setVisibility(View.VISIBLE);
-				}
-			}
-
-			@Override
-			public final void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
-				if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
-					mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-//					if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
-//						setStatusBarTextColor(MainActivity.this, new Palette.Builder(Data.getCurrentCover())
-//								.generate().getLightVibrantColor(Utils.Ui.getPrimaryColor(MainActivity.this)));
-//					}
-				} else if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
-					mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-//					final Drawable drawable = mMainBinding.bgImage.getDrawable();
-//					if (drawable instanceof BitmapDrawable) {
-//						BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-//						Bitmap bitmap = bitmapDrawable.getBitmap();
-//						if (bitmap != null && !bitmap.isRecycled()) {
-//							setStatusBarTextColor(MainActivity.this, new Palette.Builder(bitmap)
-//									.generate().getLightVibrantColor(Utils.Ui.getPrimaryColor(MainActivity.this)));
-//						} else {
-//							setStatusBarTextColor(MainActivity.this, Utils.Ui.getPrimaryColor(MainActivity.this));
-//						}
-//					} else {
-//						setStatusBarTextColor(MainActivity.this, Utils.Ui.getPrimaryColor(MainActivity.this));
-//					}
-					Log.d(TAG, "onPanelStateChanged: COLLAPSED");
-				}
-			}
-		});
-
-		mMainBinding.navigationView.inflateMenu(R.menu.menu_nav);
-
-		mMainBinding.navigationView.setNavigationItemSelectedListener(menuItem -> {
-			switch (menuItem.getItemId()) {
-				case R.id.menu_nav_exit: {
-					fullExit();
-				}
-				break;
-				case R.id.menu_nav_detail_info: {
-					Intent intent = new Intent(MainActivity.this, DetailActivity.class);
-					startActivity(intent);
-				}
-				break;
-				case R.id.menu_nav_setting: {
-					Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-					startActivity(intent);
-				}
-				break;
-				case R.id.menu_nav_about: {
-					Intent intent = new Intent(MainActivity.this, AboutActivity.class);
-					startActivity(intent);
-				}
-				break;
-				case R.id.car_mode: {
-					if (Data.HAS_PLAYED) {
-						startActivity(new Intent(MainActivity.this, CarViewActivity.class));
-					} else {
-						Toast.makeText(this, "No music playing...", Toast.LENGTH_SHORT).show();
-					}
-				}
-				break;
-				case R.id.menu_nav_ad: {
-					Toast.makeText(this, "This feature is coming soon", Toast.LENGTH_SHORT).show();
-				}
-				break;
-				case R.id.debug: {
-					Toast.makeText(this, "NONE", Toast.LENGTH_SHORT).show();
-				}
-				break;
-				case R.id.dart_mode: {
-					startActivity(new Intent(this, EmptyActivity.class));
-					final FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-					transaction.remove(musicDetailFragment)
-							.remove(musicListFragment)
-							.remove(albumListFragment)
-							.remove(artistListFragment)
-							.remove(fileViewFragment)
-							.remove(playListFragment).commitNow();
-					boolean isDarkMode = PreferenceUtil.getDefault(MainActivity.this)
-							.getBoolean(Values.SharedPrefsTag.DARK_MODE, false);
-					if (isDarkMode) {
-						PreferenceUtil.getDefault(MainActivity.this)
-								.edit().putBoolean(Values.SharedPrefsTag.DARK_MODE, false).apply();
-						mMainBinding.navigationView.getMenu().findItem(R.id.dart_mode).setChecked(false);
-						UiModeManager UiModeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
-						UiModeManager.setNightMode(android.app.UiModeManager.MODE_NIGHT_NO);
-						Log.d(TAG, "initView: load bright done");
-					} else {
-						PreferenceUtil.getDefault(MainActivity.this)
-								.edit().putBoolean(Values.SharedPrefsTag.DARK_MODE, true).apply();
-						mMainBinding.navigationView.getMenu().findItem(R.id.dart_mode).setChecked(true);
-						UiModeManager modeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
-						modeManager.setNightMode(android.app.UiModeManager.MODE_NIGHT_YES);
-						Log.d(TAG, "initView: load dark done");
-					}
-					modeChangeExit();
-				}
-				break;
-				default:
-			}
-			return true;
-		});
-
-		mDrawerToggle = new ActionBarDrawerToggle(this, mMainBinding.drawerLayout, mMainBinding.toolBar, R.string.open, R.string.close);
-		mDrawerToggle.syncState();
-		mMainBinding.drawerLayout.addDrawerListener(mDrawerToggle);
-		boolean isDarkMode = PreferenceUtil.getDefault(MainActivity.this)
-				.getBoolean(Values.SharedPrefsTag.DARK_MODE, false);
-
-		// init menu
-		if (isDarkMode) {
-			mMainBinding.navigationView.getMenu().findItem(R.id.dart_mode).setChecked(true);
-		} else {
-			mMainBinding.navigationView.getMenu().findItem(R.id.dart_mode).setChecked(false);
-		}
 	}
 
 	private void initTab() {
@@ -1492,10 +1549,10 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 	@Override
 	public void onGlobalLayout() {
-		CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) mMainBinding.realBlur.getLayoutParams();
-		layoutParams.height = mMainBinding.appbar.getHeight();
-		PADDING = layoutParams.height;
-		mMainBinding.realBlur.setLayoutParams(layoutParams);
+//		CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) mMainBinding.realBlur.getLayoutParams();
+//		layoutParams.height = mMainBinding.appbar.getHeight();
+//		PADDING = layoutParams.height;
+//		mMainBinding.realBlur.setLayoutParams(layoutParams);
 		mMainBinding.appbar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
 		musicListFragment.initRecyclerView();

@@ -9,13 +9,14 @@
                 android:title="@string/car_mode"
                 />
         <item
-                android:id="@+id/dart_mode"
+                android:id="@+id/dark_night_mode"
                 android:title="@string/dark_mode"
                 android:icon="@drawable/ic_view_agenda_black_24dp"
                 android:checkable="true"
                 android:checked="false"
                 />
     </group>
+
     <item android:title="@string/more_info">
         <menu>
             <item

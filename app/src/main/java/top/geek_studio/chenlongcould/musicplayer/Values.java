@@ -12,8 +12,14 @@ public interface Values {
 
 	/**
 	 * permission RequestCode
+	 * @deprecated use {@link PermissionCode#REQUEST_WRITE_EXTERNAL_STORAGE}
 	 */
+	@Deprecated
 	byte REQUEST_WRITE_EXTERNAL_STORAGE = 60;
+
+	interface PermissionCode {
+		byte REQUEST_WRITE_EXTERNAL_STORAGE = 60;
+	}
 
 	/**
 	 * For {@link top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore.ThemeColumns#THUMBNAIL}
@@ -134,4 +140,7 @@ public interface Values {
 		public static String DETAIL_BACKGROUND = STYLE_BACKGROUND_BLUR;
 	}
 
+	final class TEMP {
+		public static boolean switchNightDone = false;
+	}
 }
