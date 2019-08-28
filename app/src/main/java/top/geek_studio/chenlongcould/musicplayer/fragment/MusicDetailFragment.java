@@ -676,7 +676,7 @@ public final class MusicDetailFragment extends BaseFragment {
 		mToolbar.setOnMenuItemClickListener(menuItem -> {
 			switch (menuItem.getItemId()) {
 				case R.id.menu_toolbar_fast_play: {
-					ReceiverOnMusicPlay.startService(mMainActivity, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
+					MainActivity.startService(mMainActivity, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
 				}
 				break;
 
@@ -1121,14 +1121,16 @@ public final class MusicDetailFragment extends BaseFragment {
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				ReceiverOnMusicPlay.seekTo(seekBar.getProgress());
-				ReceiverOnMusicPlay.startService(mMainActivity, MusicService.ServiceActions.ACTION_PLAY);
+				MainActivity.startService(mMainActivity, MusicService.ServiceActions.ACTION_PLAY);
 			}
 		});
 
 		mSlidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
 			@Override
 			public void onPanelSlide(View panel, float slideOffset) {
-				mSlideUpGroup.setTranslationY(0 - slideOffset * 120);
+				// 当移动 view 位置会出现不和谐的颜色
+//				mSlideUpGroup.setTranslationY(0 - slideOffset * 120);
+
 				if (slideOffset == 0) {
 					mMainActivity.getMainBinding().slidingLayout.setTouchEnabled(true);
 					mMainActivity.getMainBinding().slidingLayout.setEnabled(true);
@@ -1349,9 +1351,9 @@ public final class MusicDetailFragment extends BaseFragment {
 		});
 
 		mPreviousButton.setOnClickListener(v -> {
-			Intent next = new Intent(MusicService.ServiceActions.ACTION_PN);
+			final Intent next = new Intent(MusicService.ServiceActions.ACTION_PN);
 			next.putExtra("pnType", MusicService.ServiceActions.ACTION_PN_PREVIOUS);
-			ReceiverOnMusicPlay.startService(mMainActivity, next);
+			MainActivity.startService(mMainActivity, next);
 		});
 
 		mPreviousButton.setOnLongClickListener(v -> {
@@ -1394,12 +1396,12 @@ public final class MusicDetailFragment extends BaseFragment {
 		// 判断是否播放过, 如没有默认随机播放
 		if (Data.sCurrentMusicItem.getMusicID() != -1) {
 			if (ReceiverOnMusicPlay.isPlayingMusic()) {
-				ReceiverOnMusicPlay.startService(mMainActivity, MusicService.ServiceActions.ACTION_PAUSE);
+				MainActivity.startService(mMainActivity, MusicService.ServiceActions.ACTION_PAUSE);
 			} else {
-				ReceiverOnMusicPlay.startService(mMainActivity, MusicService.ServiceActions.ACTION_PLAY);
+				MainActivity.startService(mMainActivity, MusicService.ServiceActions.ACTION_PLAY);
 			}
 		} else {
-			ReceiverOnMusicPlay.startService(mMainActivity, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
+			MainActivity.startService(mMainActivity, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
 		}
 	}
 
@@ -1769,7 +1771,7 @@ public final class MusicDetailFragment extends BaseFragment {
 				break;
 
 				default: {
-
+					break;
 				}
 			}
 		}

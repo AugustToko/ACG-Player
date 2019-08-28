@@ -40,7 +40,7 @@ public class MainPresenter implements MainContract.Presenter {
 
 	private SharedPreferences preferences;
 
-	public MainPresenter(MainContract.View mView) {
+	MainPresenter(MainContract.View mView) {
 		this.mView = mView;
 		mView.setPresenter(this);
 		preferences = PreferenceUtil.getDefault(mView.getContext());
@@ -62,7 +62,7 @@ public class MainPresenter implements MainContract.Presenter {
 		if (ContextCompat.checkSelfPermission(activity,
 				android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 			ActivityCompat.requestPermissions(activity, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}
-					, Values.REQUEST_WRITE_EXTERNAL_STORAGE);
+					, Values.PermissionCode.REQUEST_WRITE_EXTERNAL_STORAGE);
 		} else {
 			initData(activity);
 		}
@@ -70,10 +70,12 @@ public class MainPresenter implements MainContract.Presenter {
 
 	@Override
 	public void initData(@NonNull MainActivity activity) {
+
+		// initService
 		final Intent intent = new Intent(activity, MusicService.class);
-		activity.startService(intent);
+		MainActivity.startService(activity, intent);
 		if (!Data.HAS_BIND) {
-			Data.HAS_BIND = activity.bindService(intent, activity.sServiceConnection, Context.BIND_AUTO_CREATE);
+			Data.HAS_BIND = activity.bindService(intent, activity.mServiceConnection, Context.BIND_AUTO_CREATE);
 		}
 
 //		DBArtSync.startActionSyncArtist(activity);
@@ -84,12 +86,8 @@ public class MainPresenter implements MainContract.Presenter {
 
 	@Override
 	public void filterData(String key) {
-
-		Log.d(TAG, "filterData: " + key);
-
 		final String tabOrder = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT
 				, MainActivity.DEFAULT_TAB_ORDER);
-		assert tabOrder != null;
 
 		if (tabOrder.charAt(Values.CurrentData.CURRENT_PAGE_INDEX) == MainActivity.MUSIC_LIST_FRAGMENT_ID) {
 			if (TextUtils.isEmpty(key)) {

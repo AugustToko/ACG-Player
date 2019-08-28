@@ -14,8 +14,7 @@
             android:id="@+id/info_bar_background"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="@string/current_info_background"
-            android:src="@color/background_color"
+            android:contentDescription="@string/current_info_background" android:src="#00FFFFFF"
             android:scaleType="centerCrop"
             />
 
@@ -24,8 +23,7 @@
             android:layout_width="75dp"
             android:layout_height="75dp"
             android:layout_gravity="center_vertical"
-            android:contentDescription="@string/app_name"
-            android:src="@drawable/ic_audiotrack_24px"
+            android:contentDescription="@string/app_name" android:src="@drawable/default_album_art"
             android:transitionName="@string/image_trans_album"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"

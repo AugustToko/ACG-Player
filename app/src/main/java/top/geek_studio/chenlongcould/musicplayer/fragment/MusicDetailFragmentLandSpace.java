@@ -19,6 +19,7 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.SeekBar;
 import android.widget.Toast;
+
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,9 +27,19 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import top.geek_studio.chenlongcould.musicplayer.*;
+
+import java.lang.ref.WeakReference;
+import java.util.Date;
+
+import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.GlideApp;
+import top.geek_studio.chenlongcould.musicplayer.MusicService;
+import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.CarViewActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyWaitListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.customView.PlayPauseDrawable;
@@ -36,9 +47,6 @@ import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentMusicDetail
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
-
-import java.lang.ref.WeakReference;
-import java.util.Date;
 
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
@@ -99,7 +107,7 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 		mMusicDetail2Binding.toolbar.setOnMenuItemClickListener(menuItem -> {
 			switch (menuItem.getItemId()) {
 				case R.id.menu_toolbar_fast_play: {
-					ReceiverOnMusicPlay.startService(mCarViewActivity, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
+					MainActivity.startService(mCarViewActivity, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
 				}
 				break;
 
@@ -359,10 +367,10 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 		mMusicDetail2Binding.includePlayerControlCar.playButton.setOnClickListener(v -> {
 			if (ReceiverOnMusicPlay.isPlayingMusic()) {
 				mPlayPauseDrawable.setPlay(true);
-				ReceiverOnMusicPlay.startService(mCarViewActivity, MusicService.ServiceActions.ACTION_PAUSE);
+				MainActivity.startService(mCarViewActivity, MusicService.ServiceActions.ACTION_PAUSE);
 			} else {
 				mPlayPauseDrawable.setPause(true);
-				ReceiverOnMusicPlay.startService(mCarViewActivity, MusicService.ServiceActions.ACTION_PLAY);
+				MainActivity.startService(mCarViewActivity, MusicService.ServiceActions.ACTION_PLAY);
 			}
 		});
 

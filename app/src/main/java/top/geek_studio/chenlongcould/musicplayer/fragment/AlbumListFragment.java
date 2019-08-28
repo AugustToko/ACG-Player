@@ -19,6 +19,9 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.simplecityapps.recyclerview_fastscroll.interfaces.OnFastScrollStateChangeListener;
+import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -31,6 +34,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
@@ -47,7 +51,7 @@ public final class AlbumListFragment extends BaseListFragment {
 
 	public static final String TAG = "AlbumListFragment";
 
-	private RecyclerView mRecyclerView;
+	private FastScrollRecyclerView mRecyclerView;
 
 	private MainActivity mMainActivity;
 
@@ -245,5 +249,20 @@ public final class AlbumListFragment extends BaseListFragment {
 
 		mRecyclerView.setItemViewCacheSize(15);
 		mRecyclerView.setAdapter(mAdapter2AlbumListAdapter);
+
+		mRecyclerView.setOnFastScrollStateChangeListener(new OnFastScrollStateChangeListener() {
+			@Override
+			public void onFastScrollStart() {
+				MyRecyclerAdapter2AlbumList.stopLoadImage = true;
+				GlideApp.with(mMainActivity).pauseRequests();
+			}
+
+			@Override
+			public void onFastScrollStop() {
+				MyRecyclerAdapter2AlbumList.stopLoadImage = false;
+				GlideApp.with(mMainActivity).resumeRequests();
+				mAdapter2AlbumListAdapter.notifyDataSetChanged();
+			}
+		});
 	}
 }

@@ -1,7 +1,12 @@
 package top.geek_studio.chenlongcould.musicplayer.utils;
 
 import android.app.TimePickerDialog;
-import android.content.*;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,26 +21,37 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
+
 import org.litepal.LitePal;
 import org.litepal.LitePalDB;
-import top.geek_studio.chenlongcould.geeklibrary.Private;
-import top.geek_studio.chenlongcould.musicplayer.*;
-import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseListActivity;
-import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.database.Detail;
-import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
-import top.geek_studio.chenlongcould.musicplayer.model.*;
-import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import top.geek_studio.chenlongcould.geeklibrary.Private;
+import top.geek_studio.chenlongcould.musicplayer.App;
+import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.MessageWorker;
+import top.geek_studio.chenlongcould.musicplayer.MusicService;
+import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseListActivity;
+import top.geek_studio.chenlongcould.musicplayer.database.Detail;
+import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
+import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
+import top.geek_studio.chenlongcould.musicplayer.model.Item;
+import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
+import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
+import top.geek_studio.chenlongcould.musicplayer.model.Playlist;
+import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 
 /**
  * @author Karim Abou Zeid (kabouzeid)
@@ -145,7 +161,7 @@ public class MusicUtil {
 						}
 
 						final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-						if (skipShort && duration <= MainActivity.DEFAULT_SHORT_DURATION) {
+						if (skipShort && duration <= MusicService.DEFAULT_SHORT_DURATION) {
 							Log.d(TAG, "loadDataSource: the music-file duration is " + duration + " (too short)" +
 									", skip...");
 							continue;

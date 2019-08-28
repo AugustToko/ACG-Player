@@ -8,12 +8,12 @@ import android.util.AttributeSet;
 import android.view.Menu;
 import android.widget.TextView;
 
-import java.lang.reflect.Field;
-
 import androidx.annotation.ColorInt;
 import androidx.annotation.FloatRange;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+
+import java.lang.reflect.Field;
 
 /**
  * @author : chenlongcould
@@ -69,11 +69,7 @@ public class GkToolbar extends Toolbar {
             f2.setAccessible(true);
             mTitleTextView = (TextView) f.get(mToolbar);
             mSubTitleTextView = (TextView) f2.get(mToolbar);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+		} catch (NoSuchFieldException | IllegalAccessException | ClassNotFoundException e) {
             e.printStackTrace();
         }
 

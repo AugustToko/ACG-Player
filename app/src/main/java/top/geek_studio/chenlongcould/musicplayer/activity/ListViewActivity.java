@@ -1,32 +1,43 @@
 package top.geek_studio.chenlongcould.musicplayer.activity;
 
 import android.database.Cursor;
-import android.os.*;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.appbar.AppBarLayout;
-import io.reactivex.Observable;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-import top.geek_studio.chenlongcould.musicplayer.*;
-import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseListActivity;
-import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
-import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
-import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
-import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
-import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.MessageWorker;
+import top.geek_studio.chenlongcould.musicplayer.MusicService;
+import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Values;
+import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseListActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
+import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
+import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
+import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 
 /**
  * @author chenlongcould
@@ -308,7 +319,7 @@ public final class ListViewActivity extends BaseListActivity {
 		mRecyclerView = null;
 		mMusicItemList.clear();
 
-		ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_RESET_LIST);
+		MainActivity.startService(this, MusicService.ServiceActions.ACTION_RESET_LIST);
 
 		super.onDestroy();
 	}

@@ -109,7 +109,7 @@ public final class MyRecyclerAdapter2ArtistList extends RecyclerView.Adapter<MyR
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 		if (viewHolder.getAdapterPosition() == 0 || viewHolder.getAdapterPosition() == 1)
-			viewHolder.itemView.setPadding(0, 350, 0, 0);
+			viewHolder.itemView.setPadding(0, MainActivity.PADDING, 0, 0);
 		else viewHolder.itemView.setPadding(0, 0, 0, 0);
 
 		viewHolder.mArtistText.setText(mArtistItems.get(i).getArtistName());

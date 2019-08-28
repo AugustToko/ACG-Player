@@ -6,43 +6,61 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.os.*;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Switch;
+import android.widget.Toast;
+
 import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
+
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.google.android.material.appbar.AppBarLayout;
 import com.jrummyapps.android.colorpicker.ColorPickerDialog;
 import com.jrummyapps.android.colorpicker.ColorPickerDialogListener;
+
 import org.litepal.LitePal;
 import org.litepal.LitePalDB;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import top.geek_studio.chenlongcould.geeklibrary.DialogUtil;
-import top.geek_studio.chenlongcould.musicplayer.*;
+import top.geek_studio.chenlongcould.musicplayer.App;
+import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.GlideApp;
+import top.geek_studio.chenlongcould.musicplayer.MusicService;
+import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseCompatActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivitySettingsBinding;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
-import static top.geek_studio.chenlongcould.musicplayer.Values.SharedPrefsTag.*;
+import static top.geek_studio.chenlongcould.musicplayer.Values.SharedPrefsTag.HIDE_SHORT_SONG;
+import static top.geek_studio.chenlongcould.musicplayer.Values.SharedPrefsTag.NOTIFICATION_COLORIZED;
+import static top.geek_studio.chenlongcould.musicplayer.Values.SharedPrefsTag.USE_NET_WORK_ALBUM;
 
 /**
  * @author chenlongcould
@@ -71,8 +89,6 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 	private ImageView mTitleImage;
 
-	private Toolbar mToolbar;
-
 	private AppBarLayout mAppBarLayout;
 
 	private SharedPreferences preferences;
@@ -95,7 +111,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 					animator.addUpdateListener(animation -> {
 						mPrimaryImage.setBackgroundColor((Integer) animation.getAnimatedValue());
 						mAppBarLayout.setBackgroundColor((Integer) animation.getAnimatedValue());
-						mToolbar.setBackgroundColor((Integer) animation.getAnimatedValue());
+						mSettingsBinding.activitySettingsToolbar.setBackgroundColor((Integer) animation.getAnimatedValue());
 					});
 					animator.start();
 					editor.putInt(Values.SharedPrefsTag.PRIMARY_COLOR, color);
@@ -144,7 +160,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 					animator.setDuration(300);
 					animator.addUpdateListener(animation -> {
 						mTitleImage.setBackgroundColor((Integer) animation.getAnimatedValue());
-						Utils.Ui.setOverToolbarColor(mToolbar, color);
+						Utils.Ui.setOverToolbarColor(mSettingsBinding.activitySettingsToolbar, color);
 					});
 					animator.start();
 					editor.putInt(Values.SharedPrefsTag.TITLE_COLOR, color);
@@ -174,11 +190,10 @@ public final class SettingsActivity extends BaseCompatActivity {
 		mPrimaryDarkImage = findViewById(R.id.activity_settings_preview_primary_dark);
 		mAccentImage = findViewById(R.id.activity_settings_preview_acc);
 		mTitleImage = findViewById(R.id.activity_settings_preview_title);
-		mToolbar = findViewById(R.id.activity_settings_toolbar);
 		mAppBarLayout = findViewById(R.id.activity_settings_appbar);
 		mStyleSwitch = findViewById(R.id.activity_settings_style_switch);
 
-		super.initView(mToolbar, mAppBarLayout);
+		super.initView(mSettingsBinding.activitySettingsToolbar, mAppBarLayout);
 		super.onCreate(savedInstanceState);
 
 		//find xx
@@ -193,7 +208,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 		initPreView();
 
-		mToolbar.setNavigationOnClickListener(v -> onBackPressed());
+		mSettingsBinding.activitySettingsToolbar.setNavigationOnClickListener(v -> onBackPressed());
 
 		primaryOpt.setOnClickListener(v -> {
 			ColorPickerDialog colorPickerDialog = ColorPickerDialog.newBuilder().setColor(preferences.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, Color.parseColor("#008577")))
@@ -347,9 +362,9 @@ public final class SettingsActivity extends BaseCompatActivity {
 			if (Data.HAS_PLAYED) {
 				try {
 					if (Data.sMusicBinder.isPlayingMusic()) {
-						ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_PLAY);
+						MainActivity.startService(this, MusicService.ServiceActions.ACTION_PLAY);
 					} else {
-						ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_PAUSE);
+						MainActivity.startService(this, MusicService.ServiceActions.ACTION_PAUSE);
 					}
 				} catch (RemoteException e) {
 					e.printStackTrace();
@@ -582,18 +597,13 @@ public final class SettingsActivity extends BaseCompatActivity {
 	}
 
 	@Override
-	public String getActivityTAG() {
-		return TAG;
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
+	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.menu_toolbar_settings, menu);
-		return true;
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.menu_toolbar_settings_reset: {
 				SharedPreferences.Editor editor = preferences.edit();
@@ -603,15 +613,23 @@ public final class SettingsActivity extends BaseCompatActivity {
 				editor.apply();
 
 				clearAnimation();
-				ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), preferences.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimary)), ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimary));
+
+				final ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(),
+						preferences.getInt(Values.SharedPrefsTag.PRIMARY_COLOR, ContextCompat
+								.getColor(SettingsActivity.this, R.color.colorPrimary)),
+						ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimary));
+
 				animator.setDuration(300);
 				animator.addUpdateListener(animation -> {
 					mPrimaryImage.setBackgroundColor((Integer) animation.getAnimatedValue());
 					mAppBarLayout.setBackgroundColor((Integer) animation.getAnimatedValue());
-					mToolbar.setBackgroundColor((Integer) animation.getAnimatedValue());
+					mSettingsBinding.activitySettingsToolbar.setBackgroundColor((Integer) animation.getAnimatedValue());
 				});
 
-				ValueAnimator animator2 = ValueAnimator.ofObject(new ArgbEvaluator(), preferences.getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR, ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark)), ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark));
+				final ValueAnimator animator2 = ValueAnimator.ofObject(new ArgbEvaluator(),
+						preferences.getInt(Values.SharedPrefsTag.PRIMARY_DARK_COLOR,
+								ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark)),
+						ContextCompat.getColor(SettingsActivity.this, R.color.colorPrimaryDark));
 				animator2.setDuration(300);
 				animator2.addUpdateListener(animation -> {
 					mPrimaryDarkImage.setBackgroundColor((Integer) animator2.getAnimatedValue());
@@ -634,9 +652,14 @@ public final class SettingsActivity extends BaseCompatActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	@Override
+	public String getActivityTAG() {
+		return TAG;
+	}
+
 	private void clearAnimation() {
 		mPrimaryImage.clearAnimation();
-		mToolbar.clearAnimation();
+		mSettingsBinding.activitySettingsToolbar.clearAnimation();
 		mAppBarLayout.clearAnimation();
 		mPrimaryDarkImage.clearAnimation();
 		mAccentImage.clearAnimation();
@@ -663,7 +686,7 @@ public final class SettingsActivity extends BaseCompatActivity {
 				.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.BackgroundStyle.STYLE_BACKGROUND_BLUR)));
 
 		mSettingsBinding.textDHideShort.setText(getString(R.string.skip_songs_that_are_less_than_the_minimum_duration
-				, MainActivity.DEFAULT_SHORT_DURATION));
+				, MusicService.DEFAULT_SHORT_DURATION));
 	}
 
 	@Override

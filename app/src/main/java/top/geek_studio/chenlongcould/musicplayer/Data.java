@@ -22,7 +22,7 @@ import io.reactivex.disposables.Disposable;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import top.geek_studio.chenlongcould.geeklibrary.recycler_tools.RecycleViewDivider;
 import top.geek_studio.chenlongcould.geeklibrary.theme.Theme;
-import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
+import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 
 /**
@@ -60,7 +60,7 @@ public final class Data {
 	public synchronized static void syncPlayOrderList(final Context context, final List<MusicItem> items) {
 		Data.sPlayOrderList.clear();
 		Data.sPlayOrderList.addAll(items);
-		ReceiverOnMusicPlay.startService(context, MusicService.ServiceActions.ACTION_CLEAR_ITEMS);
+		MainActivity.startService(context, MusicService.ServiceActions.ACTION_CLEAR_ITEMS);
 
 		// TODO: 2019/5/31 性能问题
 		for (MusicItem item : Data.sPlayOrderList) {
@@ -96,7 +96,7 @@ public final class Data {
 			intent.putExtra("random_seed", seed);
 		}
 
-		ReceiverOnMusicPlay.startService(context, intent);
+		MainActivity.startService(context, intent);
 	}
 
 	/**
@@ -123,7 +123,7 @@ public final class Data {
 	public static IMuiscService sMusicBinder;
 
 	public synchronized static void syncPlayOrderList(final Context context) {
-		ReceiverOnMusicPlay.startService(context, MusicService.ServiceActions.ACTION_CLEAR_ITEMS);
+		MainActivity.startService(context, MusicService.ServiceActions.ACTION_CLEAR_ITEMS);
 
 		// TODO: 2019/5/31 性能问题
 		for (final MusicItem item : Data.sPlayOrderList) {

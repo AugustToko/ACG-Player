@@ -3,107 +3,89 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:sothree="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:tools="http://schemas.android.com/tools" tools:context=".activity.main.MainActivity"
         >
 
     <androidx.drawerlayout.widget.DrawerLayout
-            android:id="@+id/drawer_layout"
-            android:layout_width="match_parent"
+            android:id="@+id/drawer_layout" android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:context=".activity.main.MainActivity"
             tools:openDrawer="end"
             >
 
         <com.sothree.slidinguppanel.SlidingUpPanelLayout
-                android:id="@+id/sliding_layout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="bottom"
-                app:umanoPanelHeight="@dimen/current_info_bar_height"
-                app:umanoShadowHeight="2dp"
+                android:id="@+id/sliding_layout" android:layout_width="match_parent"
+                android:layout_height="match_parent" android:clickable="true"
+                android:focusable="true" android:gravity="bottom"
+                app:umanoPanelHeight="@dimen/current_info_bar_height" app:umanoShadowHeight="2dp"
                 sothree:umanoDragView="@id/touch_view"
                 sothree:umanoScrollableView="@id/activity_music_detail_include_recycler"
+                app:umanoOverlay="true"
                 >
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/main_body"
-                    android:layout_width="match_parent"
+                    android:id="@+id/main_body" android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@color/background_color"
                     >
 
                 <ImageView
-                        android:id="@+id/bg_image"
-                        android:layout_width="match_parent"
+                        android:id="@+id/bg_image" android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:contentDescription="background image"
+                        android:contentDescription="Background image" android:scaleType="centerCrop"
                         />
 
                 <androidx.coordinatorlayout.widget.CoordinatorLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_width="match_parent" android:layout_height="match_parent"
                         >
 
                     <androidx.viewpager.widget.ViewPager
-                            android:id="@+id/view_pager"
-                            android:layout_width="match_parent"
+                            android:id="@+id/view_pager" android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             />
 
                     <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
 
-                    <!--                    <com.github.mmin18.widget.RealtimeBlurView-->
-                    <!--                            android:id="@+id/real_blur"-->
-                    <!--                            android:layout_width="match_parent"-->
-                    <!--                            android:layout_height="0dp"-->
-                    <!--                            app:realtimeBlurRadius="30dp"-->
-                    <!--                            app:realtimeOverlayColor="#77FFFFFF"-->
-                    <!--                            />-->
+                    <!--                    <FrameLayout-->
+                    <!--                            android:layout_width="match_parent" android:layout_height="130dp">-->
+
+                    <!--                    </FrameLayout>-->
 
                     <com.google.android.material.appbar.AppBarLayout
-                            android:id="@+id/appbar"
-                            android:layout_width="match_parent"
+                            android:id="@+id/appbar" android:layout_width="match_parent"
                             android:layout_height="wrap_content" android:background="#96FFFFFF"
-                            android:elevation="0dp"
-                            app:elevation="0dp"
-                            android:paddingTop="@dimen/toolbar_padding_top"
+                            android:elevation="0dp" android:paddingTop="@dimen/toolbar_padding_top"
                             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                            app:elevation="0dp" tools:background="#8A8A8A"
                             >
 
                         <androidx.appcompat.widget.Toolbar
-                                android:id="@+id/tool_bar"
-                                android:layout_width="match_parent"
+                                android:id="@+id/tool_bar" android:layout_width="match_parent"
                                 android:layout_height="?actionBarSize"
                                 android:background="@android:color/transparent"
+                                app:layout_scrollFlags="scroll|enterAlways"
                                 app:popupTheme="@style/DayNightTheme.PopupOverlay"
                                 app:subtitle="@string/app_name"
                                 app:title="@string/app_name"
+                                tools:menu="@menu/menu_toolbar_main_common"
                                 >
                             <!--app:layout_scrollFlags="scroll|enterAlways"-->
 
                         </androidx.appcompat.widget.Toolbar>
 
                         <com.google.android.material.tabs.TabLayout
-                                android:id="@+id/tab_layout"
-                                android:layout_width="match_parent"
+                                android:id="@+id/tab_layout" android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:background="@android:color/transparent"
                                 android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
                                 app:tabIndicatorColor="@color/colorAccent"
-                                app:tabIndicatorHeight="2dp"
-                                app:tabMode="scrollable"
-                                app:tabSelectedTextColor="#fff"
-                                app:tabTextColor="#8fffffff"
+                                app:tabIndicatorHeight="2dp" app:tabMode="scrollable"
+                                app:tabSelectedTextColor="#fff" app:tabTextColor="#8fffffff"
                                 />
 
                     </com.google.android.material.appbar.AppBarLayout>
 
                     <com.miguelcatalan.materialsearchview.MaterialSearchView
-                            android:id="@+id/search_view"
-                            android:layout_width="match_parent"
+                            android:id="@+id/search_view" android:layout_width="match_parent"
                             android:layout_height="?actionBarSize"
                             android:layout_marginTop="@dimen/toolbar_padding_top"
                             android:visibility="visible"
@@ -114,15 +96,13 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <FrameLayout
-                    android:id="@+id/frame_wait"
-                    android:layout_width="match_parent"
+                    android:id="@+id/frame_wait" android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     >
 
                 <!--400dp is albumHeight-->
                 <View
-                        android:id="@+id/touch_view"
-                        android:layout_width="match_parent"
+                        android:id="@+id/touch_view" android:layout_width="match_parent"
                         android:layout_height="400dp"
                         />
 
@@ -131,55 +111,42 @@
         </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
         <com.google.android.material.navigation.NavigationView
-                android:id="@+id/navigation_view"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="start"
+                android:id="@+id/navigation_view" android:layout_width="wrap_content"
+                android:layout_height="match_parent" android:layout_gravity="start"
                 android:fitsSystemWindows="true"
                 app:headerLayout="@layout/navigation_view_header_one"
                 >
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/style_nav"
-                    android:layout_width="match_parent"
-                    android:layout_height="230dp"
-                    android:layout_gravity="bottom"
-                    android:visibility="gone"
-                    tools:visibility="visible"
+                    android:id="@+id/style_nav" android:layout_width="match_parent"
+                    android:layout_height="230dp" android:layout_gravity="bottom"
+                    android:visibility="gone" tools:visibility="visible"
                     >
 
                 <ImageView
-                        android:id="@+id/style_img_nav"
-                        android:layout_width="180dp"
-                        android:layout_height="230dp"
-                        android:layout_marginStart="130dp"
+                        android:id="@+id/style_img_nav" android:layout_width="180dp"
+                        android:layout_height="230dp" android:layout_marginStart="130dp"
                         android:contentDescription="@string/theme_image"
                         android:scaleType="fitCenter"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        tools:src="#0f0"
+                        app:layout_constraintStart_toStartOf="parent" tools:src="#0f0"
                         />
 
                 <TextView
                         android:id="@+id/style_text_nav_title"
                         style="@style/Base.Widget.AppCompat.AutoCompleteTextView"
-                        android:layout_width="152dp"
-                        android:layout_height="wrap_content"
+                        android:layout_width="152dp" android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/margin_16"
-                        android:layout_marginTop="85dp"
-                        android:gravity="center"
-                        android:singleLine="true"
-                        android:textSize="16sp"
+                        android:layout_marginTop="85dp" android:gravity="center"
+                        android:singleLine="true" android:textSize="16sp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="@+id/style_img_nav"
                         tools:text="@string/app_name"
                         />
 
                 <TextView
-                        android:id="@+id/style_text_nav_name"
-                        android:layout_width="135dp"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
+                        android:id="@+id/style_text_nav_name" android:layout_width="135dp"
+                        android:layout_height="wrap_content" android:gravity="center"
                         android:singleLine="true"
                         app:layout_constraintEnd_toEndOf="@+id/style_text_nav_title"
                         app:layout_constraintStart_toStartOf="@+id/style_text_nav_title"

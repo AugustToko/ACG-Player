@@ -15,8 +15,14 @@ import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Binder;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.Process;
-import android.os.*;
 import android.provider.MediaStore;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
@@ -24,14 +30,26 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.media.session.MediaButtonReceiver;
+
 import org.litepal.LitePal;
 import org.litepal.LitePalDB;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.MediaButtonIntentReceiver;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.MyHeadSetPlugReceiver;
@@ -44,15 +62,6 @@ import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
-
-import java.io.File;
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author chenlongcould
@@ -134,28 +143,28 @@ public final class MusicService extends Service {
 		public void setCurrentMusicData(MusicItem item) {
 			if (item != null && item.getMusicID() != -1) {
 				mMusicItem = item;
-				ItemList.CURRENT_MUSIC_INDEX = ItemList.playOrderList.indexOf(mMusicItem);
+				ItemListData.CURRENT_MUSIC_INDEX = ItemListData.playOrderList.indexOf(mMusicItem);
 			}
 		}
 
 		@Override
 		public void addNextWillPlayItem(MusicItem item) {
-			ItemList.nextWillplay.add(MusicUtil.m2d(item));
+			ItemListData.nextWillplay.add(MusicUtil.m2d(item));
 		}
 
 		@Override
 		public void addToOrderList(MusicItem item) {
-			ItemList.playOrderList.add(MusicUtil.m2d(item));
+			ItemListData.playOrderList.add(MusicUtil.m2d(item));
 		}
 
 		@Override
 		public void removeFromOrderList(MusicItem item) {
-			ItemList.playOrderList.remove(item);
+			ItemListData.playOrderList.remove(item);
 		}
 
 		@Override
 		public void syncOrderList(int[] array) {
-			ItemList.playOrderList.clear();
+			ItemListData.playOrderList.clear();
 			for (int i : array) {
 				Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null
 						, MediaStore.Audio.Media._ID + "=?", new String[]{String.valueOf(i)}, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
@@ -181,6 +190,7 @@ public final class MusicService extends Service {
 //							.size(size)
 //							.addAlbumId(albumId)
 //							.addArtistId(artistId);
+
 					final Bundle bundle = new Bundle();
 					bundle.putInt("albumId", albumId);
 					bundle.putInt("artistId", artistId);
@@ -198,7 +208,7 @@ public final class MusicService extends Service {
 							.setMediaUri(Uri.fromFile(new File(path)))
 							.setExtras(bundle);
 
-					ItemList.playOrderList.add(builder.build());
+					ItemListData.playOrderList.add(builder.build());
 					cursor.close();
 				}
 			}
@@ -211,12 +221,12 @@ public final class MusicService extends Service {
 
 		@Override
 		public int getCurrentIndex() {
-			return ItemList.CURRENT_MUSIC_INDEX;
+			return ItemListData.CURRENT_MUSIC_INDEX;
 		}
 
 		@Override
 		public void setCurrentIndex(int index) {
-			ItemList.CURRENT_MUSIC_INDEX = index;
+			ItemListData.CURRENT_MUSIC_INDEX = index;
 		}
 	};
 
@@ -257,8 +267,6 @@ public final class MusicService extends Service {
 
 	@Override
 	public void onCreate() {
-		Log.d(TAG, "onCreate: ");
-
 		if (ContextCompat.checkSelfPermission(this,
 				Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 			Log.d(TAG, "onCreate: start service, but do not have permission \" WRITE_EXTERNAL_STORAGE \"");
@@ -269,54 +277,64 @@ public final class MusicService extends Service {
 		handlerThread = new HandlerThread("MusicService-handlerThread");
 		handlerThread.start();
 		mHandler = new Handler(handlerThread.getLooper());
-
 		serviceWeakReference = new WeakReference<>(this);
 
 		final PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-		wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
-		wakeLock.setReferenceCounted(false);
+		if (powerManager != null) {
+			wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
+			wakeLock.setReferenceCounted(false);
+		}
 
 		MusicControl.init(MusicService.this);
 		NotificationTool.init(MusicService.this);
 
 		final ComponentName mediaButtonReceiverComponentName = new ComponentName(getApplicationContext()
 				, MediaButtonIntentReceiver.class);
+
 		final Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
 		mediaButtonIntent.setComponent(mediaButtonReceiverComponentName);
 		final PendingIntent mediaButtonReceiverPendingIntent = PendingIntent.getBroadcast(getApplicationContext()
 				, 0, mediaButtonIntent, 0);
-
 		mediaSession = new MediaSessionCompat(this, "ACG-Player", mediaButtonReceiverComponentName
 				, mediaButtonReceiverPendingIntent);
+
+		// 设置媒体按钮(耳机按钮)监听
+		mediaSession.setMediaButtonReceiver(mediaButtonReceiverPendingIntent);
 		mediaSession.setCallback(new MediaSessionCompat.Callback() {
 			@Override
 			public void onPlay() {
+				Log.d(TAG, "onPlay: mediaSession");
 				MusicControl.intentPlay(MusicService.this);
 			}
 
 			@Override
 			public void onPause() {
+				Log.d(TAG, "onPause: mediaSession");
 				MusicControl.intentPause(MusicService.this);
 			}
 
 			@Override
 			public void onSkipToNext() {
+				Log.d(TAG, "onSkipToNext: mediaSession");
 				MusicControl.intentNext(MusicService.this);
 			}
 
 			@Override
 			public void onSkipToPrevious() {
+				Log.d(TAG, "onSkipToPrevious: mediaSession");
 				MusicControl.intentPrevious(MusicService.this);
 			}
 
 			@Override
 			public void onStop() {
+				Log.d(TAG, "onStop: mediaSession");
 				MusicControl.stopMusic();
 				stopForeground(true);
 			}
 
 			@Override
 			public void onSeekTo(long pos) {
+				Log.d(TAG, "onSeekTo: mediaSession");
 				MusicControl.seekTo((int) pos);
 			}
 
@@ -328,7 +346,6 @@ public final class MusicService extends Service {
 		mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
 				| MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
 				| MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS);
-		mediaSession.setMediaButtonReceiver(mediaButtonReceiverPendingIntent);
 
 		stateBuilder = new PlaybackStateCompat.Builder()
 				.setActions(PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PLAY_PAUSE
@@ -345,6 +362,9 @@ public final class MusicService extends Service {
 		registerReceiver(mMyHeadSetPlugReceiver, intentFilter);
 	}
 
+	/**
+	 * 更新当前歌曲元数据
+	 */
 	private void updateMediaSessionMetaData() {
 		CustomThreadPool.post(() -> {
 			final MusicItem song = mMusicItem;
@@ -363,15 +383,15 @@ public final class MusicService extends Service {
 					.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, song.getMusicAlbum())
 					.putString(MediaMetadataCompat.METADATA_KEY_TITLE, song.getMusicName())
 					.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, song.getDuration())
-					.putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, ItemList.CURRENT_MUSIC_INDEX + 1)
+					.putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, ItemListData.CURRENT_MUSIC_INDEX + 1)
 					// TODO: 2019/6/4 add  year
 					.putLong(MediaMetadataCompat.METADATA_KEY_YEAR, 0);
 
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-				mediaMetadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, ItemList.playOrderList.size());
+				mediaMetadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, ItemListData.playOrderList.size());
 			}
 
-			mediaMetadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, copy(ItemList.mCurrentCover));
+			mediaMetadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, copy(ItemListData.mCurrentCover));
 
 			mediaSession.setMetadata(mediaMetadataBuilder.build());
 		});
@@ -413,24 +433,24 @@ public final class MusicService extends Service {
 	/**
 	 * 随机选择一个item，然后设置，准备播放
 	 */
-	private void setRandomItemPrepare() {
+	private void setRandomItemPreparePlay() {
 		//get data
 		final Random random = new Random();
-		int index = random.nextInt(ItemList.playOrderList.size() - 1);
+		int index = random.nextInt(ItemListData.playOrderList.size() - 1);
 
 		// 循环检测是否播放到 “垃圾桶” 中的歌曲，如是，则跳过
 		for (; ; ) {
-			if (ItemList.trashCanList.contains(ItemList.playOrderList.get(index))) {
-				index = random.nextInt(ItemList.playOrderList.size() - 1);
+			if (ItemListData.trashCanList.contains(ItemListData.playOrderList.get(index))) {
+				index = random.nextInt(ItemListData.playOrderList.size() - 1);
 			} else {
 				break;
 			}
 		}
 
-		ItemList.CURRENT_MUSIC_INDEX = index;
+		ItemListData.CURRENT_MUSIC_INDEX = index;
 
-		mMusicItem = MusicUtil.d2m(ItemList.playOrderList.get(index));
-		MusicControl.setDataSource(this, ItemList.playOrderList.get(index));
+		mMusicItem = MusicUtil.d2m(ItemListData.playOrderList.get(index));
+		MusicControl.setDataSource(this, ItemListData.playOrderList.get(index));
 		MusicControl.prepareAndPlay();
 	}
 
@@ -439,19 +459,21 @@ public final class MusicService extends Service {
 	 *
 	 * @param playType 播放的模式 (向前 或者 向后)
 	 */
-	public int getIndex(@NonNull String playType) {
+	public int getIndex(@Nullable String playType) {
+		if (playType == null) return -1;
+
 		int targetIndex = 0;
 		if (playType.contains(ServiceActions.ACTION_PN_NEXT)) {
-			targetIndex = ItemList.CURRENT_MUSIC_INDEX + 1;
+			targetIndex = ItemListData.CURRENT_MUSIC_INDEX + 1;
 			//超出范围自动跳转0
-			if (targetIndex > ItemList.playOrderList.size() - 1) {
+			if (targetIndex > ItemListData.playOrderList.size() - 1) {
 				targetIndex = 0;
 			}
 		} else if (playType.contains(ServiceActions.ACTION_PN_PREVIOUS)) {
-			targetIndex = ItemList.CURRENT_MUSIC_INDEX - 1;
+			targetIndex = ItemListData.CURRENT_MUSIC_INDEX - 1;
 			if (targetIndex < 0) {
 				//超出范围超转最后
-				targetIndex = ItemList.playOrderList.size() - 1;
+				targetIndex = ItemListData.playOrderList.size() - 1;
 			}
 		}
 		return targetIndex;
@@ -465,7 +487,7 @@ public final class MusicService extends Service {
 	private synchronized void loadDataSource() {
 		if (ContextCompat.checkSelfPermission(this,
 				android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-			ItemList.playOrderList.clear();
+			ItemListData.playOrderList.clear();
 
 			MediaControllerCompat controller = mediaSession.getController();
 
@@ -551,8 +573,8 @@ public final class MusicService extends Service {
 						HAS_PLAYED = true;
 					}
 
-					ItemList.playOrderList.add(descriptionCompat);
-					ItemList.playOrderListBK.add(descriptionCompat);
+					ItemListData.playOrderList.add(descriptionCompat);
+					ItemListData.playOrderListBK.add(descriptionCompat);
 					controller.addQueueItem(descriptionCompat);
 				}
 				while (cursor.moveToNext());
@@ -587,13 +609,13 @@ public final class MusicService extends Service {
 
 		mMusicItem = null;
 
-		ItemList.historyList.clear();
-		ItemList.playOrderList.clear();
-		ItemList.playOrderListBK.clear();
-		ItemList.trashCanList.clear();
+		ItemListData.historyList.clear();
+		ItemListData.playOrderList.clear();
+		ItemListData.playOrderListBK.clear();
+		ItemListData.trashCanList.clear();
 
-		if (ItemList.mCurrentCover != null && !ItemList.mCurrentCover.isRecycled()) {
-			ItemList.mCurrentCover.recycle();
+		if (ItemListData.mCurrentCover != null && !ItemListData.mCurrentCover.isRecycled()) {
+			ItemListData.mCurrentCover.recycle();
 		}
 
 		try {
@@ -610,7 +632,7 @@ public final class MusicService extends Service {
 		if (seed == 0) {
 			loadDataSource();
 		} else {
-			Collections.shuffle(ItemList.playOrderList, new Random(seed));
+			Collections.shuffle(ItemListData.playOrderList, new Random(seed));
 		}
 	}
 
@@ -623,14 +645,14 @@ public final class MusicService extends Service {
 			Log.d(TAG, "onStartCommand: action: " + intent.getAction() + " extra: " + intent.getExtras());
 		}
 
-		if (ItemList.playOrderList.size() == 0) {
+		if (ItemListData.playOrderList.size() == 0) {
 			Log.d(TAG, "onStartCommand: order list is empty, reload...");
 			loadDataSource();
 		}
 
 		final String action = intent.getAction();
 
-		if (action != null && ItemList.playOrderList.size() > 0) {
+		if (action != null && ItemListData.playOrderList.size() > 0) {
 			final Intent updateUI = new Intent();
 			updateUI.setComponent(new ComponentName(getPackageName(), Values.BroadCast.ReceiverOnMusicPlay));
 
@@ -640,16 +662,16 @@ public final class MusicService extends Service {
 			switch (action) {
 				//no ui update
 				case ServiceActions.ACTION_CLEAR_ITEMS: {
-					ItemList.playOrderList.clear();
-					ItemList.CURRENT_MUSIC_INDEX = 0;
+					ItemListData.playOrderList.clear();
+					ItemListData.CURRENT_MUSIC_INDEX = 0;
 				}
 				break;
 
 				//no ui update
 				case ServiceActions.ACTION_RESET_LIST: {
-					ItemList.playOrderList.clear();
-					ItemList.playOrderList.addAll(ItemList.playOrderListBK);
-					ItemList.CURRENT_MUSIC_INDEX = 0;
+					ItemListData.playOrderList.clear();
+					ItemListData.playOrderList.addAll(ItemListData.playOrderListBK);
+					ItemListData.CURRENT_MUSIC_INDEX = 0;
 				}
 				break;
 
@@ -664,9 +686,9 @@ public final class MusicService extends Service {
 //					int[] musicIds = intent.getIntArrayExtra("insert_music_id");
 //					if (musicIds != null && musicIds.length > 0) {
 //						for (final int id : musicIds) {
-//							for (final MusicItem item : ItemList.musicItems) {
+//							for (final MusicItem item : ItemListData.musicItems) {
 //								if (item.getMusicID() == id) {
-//									ItemList.playOrderList.add(ItemList.CURRENT_MUSIC_INDEX, item);
+//									ItemListData.playOrderList.add(ItemListData.CURRENT_MUSIC_INDEX, item);
 //								}
 //							}
 //						}
@@ -676,26 +698,22 @@ public final class MusicService extends Service {
 
 				case ServiceActions.ACTION_PAUSE: {
 					MusicControl.pauseMusic();
-					flashMode = ReceiverOnMusicPlay.PAUSE;
+					flashMode = ReceiverOnMusicPlay.FLASH_UI_PAUSE;
 				}
 				break;
 
 				case ServiceActions.ACTION_PLAY: {
 
-					Log.d(TAG, "onStartCommand: case play");
-
 					// 1 没有播放过 也没有找到上次打开app 最后播放的数据
 					if (!HAS_PLAYED && mMusicItem == null) {
-						setRandomItemPrepare();
+						setRandomItemPreparePlay();
 						flashMode = ReceiverOnMusicPlay.FLASH_UI_COMMON;
 						updateMediaSessionMetaData();
 
-						Log.d(TAG, "onStartCommand: has not play");
 						// 2 已经播放过了
 					} else if (HAS_PLAYED && mMusicItem != null) {
-						flashMode = ReceiverOnMusicPlay.PLAY;
+						flashMode = ReceiverOnMusicPlay.FLASH_UI_PLAY;
 						MusicControl.playMusic();
-						Log.d(TAG, "onStartCommand: play: already played");
 					}
 
 				}
@@ -703,8 +721,8 @@ public final class MusicService extends Service {
 
 				case ServiceActions.ACTION_PN: {
 					//检测是否指定下一首播放
-					if (ItemList.nextWillplay.size() != 0) {
-						MediaDescriptionCompat descriptionCompat = ItemList.nextWillplay.get(0);
+					if (ItemListData.nextWillplay.size() != 0) {
+						MediaDescriptionCompat descriptionCompat = ItemListData.nextWillplay.get(0);
 						saveData();
 						mMusicItem = MusicUtil.d2m(descriptionCompat);
 						MusicControl.setDataSource(this, descriptionCompat);
@@ -713,7 +731,7 @@ public final class MusicService extends Service {
 
 						MusicControl.prepareAndPlay();
 
-						ItemList.nextWillplay.remove(descriptionCompat);
+						ItemListData.nextWillplay.remove(descriptionCompat);
 
 						flashMode = ReceiverOnMusicPlay.FLASH_UI_COMMON;
 
@@ -739,19 +757,21 @@ public final class MusicService extends Service {
 						break;
 					}
 
-					ItemList.CURRENT_MUSIC_INDEX = getIndex(pnType);
+					ItemListData.CURRENT_MUSIC_INDEX = getIndex(pnType);
+					if (ItemListData.CURRENT_MUSIC_INDEX == -1)
+						ItemListData.CURRENT_MUSIC_INDEX = 0;
 
 					// 循环检测是否播放到 “垃圾桶” 中的歌曲，如是，则跳过
 					for (; ; ) {
-						final MediaDescriptionCompat item = ItemList.playOrderList.get(ItemList.CURRENT_MUSIC_INDEX);
-						if (ItemList.trashCanList.contains(item)) {
-							ItemList.CURRENT_MUSIC_INDEX = getIndex(pnType);
+						final MediaDescriptionCompat item = ItemListData.playOrderList.get(ItemListData.CURRENT_MUSIC_INDEX);
+						if (ItemListData.trashCanList.contains(item)) {
+							ItemListData.CURRENT_MUSIC_INDEX = getIndex(pnType);
 						} else {
 							break;
 						}
 					}
 
-					MediaDescriptionCompat descriptionCompat = ItemList.playOrderList.get(ItemList.CURRENT_MUSIC_INDEX);
+					MediaDescriptionCompat descriptionCompat = ItemListData.playOrderList.get(ItemListData.CURRENT_MUSIC_INDEX);
 					saveData();
 					mMusicItem = MusicUtil.d2m(descriptionCompat);
 					MusicControl.setDataSource(this, descriptionCompat);
@@ -769,19 +789,19 @@ public final class MusicService extends Service {
 
 					//get data
 					final Random random = new Random();
-					int index = random.nextInt(ItemList.playOrderList.size() - 1);
+					int index = random.nextInt(ItemListData.playOrderList.size() - 1);
 
 					// 循环检测是否播放到 “垃圾桶” 中的歌曲，如是，则跳过
 					for (; ; ) {
-						if (ItemList.trashCanList.contains(ItemList.playOrderList.get(index))) {
-							index = random.nextInt(ItemList.playOrderList.size() - 1);
+						if (ItemListData.trashCanList.contains(ItemListData.playOrderList.get(index))) {
+							index = random.nextInt(ItemListData.playOrderList.size() - 1);
 						} else {
 							break;
 						}
 					}
-					ItemList.CURRENT_MUSIC_INDEX = index;
+					ItemListData.CURRENT_MUSIC_INDEX = index;
 
-					MediaDescriptionCompat descriptionCompat = ItemList.playOrderList.get(index);
+					MediaDescriptionCompat descriptionCompat = ItemListData.playOrderList.get(index);
 					mMusicItem = MusicUtil.d2m(descriptionCompat);
 					MusicControl.setDataSource(this, descriptionCompat);
 					updateMediaSessionMetaData();
@@ -794,9 +814,12 @@ public final class MusicService extends Service {
 
 				case ServiceActions.ACTION_ITEM_CLICK: {
 					saveData();
-					mMusicItem = intent.getParcelableExtra("item");
+					MusicItem item = intent.getParcelableExtra("item");
+					if (item == null) break;
+
+					mMusicItem = item;
 					MediaDescriptionCompat descriptionCompat = MusicUtil.m2d(mMusicItem);
-					ItemList.CURRENT_MUSIC_INDEX = ItemList.playOrderList.indexOf(descriptionCompat);
+					ItemListData.CURRENT_MUSIC_INDEX = ItemListData.playOrderList.indexOf(descriptionCompat);
 					MusicControl.setDataSource(this, descriptionCompat);
 					updateMediaSessionMetaData();
 					MusicControl.prepareAndPlay();
@@ -806,22 +829,21 @@ public final class MusicService extends Service {
 				break;
 
 				case ServiceActions.ACTION_TOGGLE_PLAY_PAUSE: {
-					saveData();
+
 					if (MusicControl.isPlayingMusic()) {
 						MusicControl.pauseMusic();
-						flashMode = ReceiverOnMusicPlay.PAUSE;
+						flashMode = ReceiverOnMusicPlay.FLASH_UI_PAUSE;
 					} else {
-						// 从未播放过说明没有设置过DataSource，同时也不要记录播放统计
 						if (!HAS_PLAYED) {
-							Log.d(TAG, "onStartCommand: has not played");
-							setRandomItemPrepare();
+							Log.d(TAG, "onStartCommand: has not played, random playing");
 							updateMediaSessionMetaData();
+							setRandomItemPreparePlay();
 							flashMode = ReceiverOnMusicPlay.FLASH_UI_COMMON;
 						} else {
-							Log.d(TAG, "onStartCommand: has played");
-							flashMode = ReceiverOnMusicPlay.PLAY;
+							Log.d(TAG, "onStartCommand: has played, so resume music");
+							flashMode = ReceiverOnMusicPlay.FLASH_UI_PLAY;
+							MusicControl.playMusic();
 						}
-						MusicControl.playMusic();
 					}
 				}
 				break;
@@ -845,11 +867,13 @@ public final class MusicService extends Service {
 			}
 
 			if (flashMode != -1) {
+				Log.d(TAG, "onStartCommand: update ui, mode: " + flashMode);
+
 				updateUI.putExtra("play_type", flashMode);
 				updateUI.putExtra("item", mMusicItem);
 				sendBroadcast(updateUI, Values.Permission.BROAD_CAST);
 
-				if (flashMode != ReceiverOnMusicPlay.PAUSE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 					Intent tile = new Intent(MusicService.this, MyTileService.class);
 					tile.setAction(MyTileService.ACTION_SET_TITLE);
 					tile.putExtra("title", mMusicItem.getMusicName());
@@ -871,6 +895,9 @@ public final class MusicService extends Service {
 		String PN_TYPE = "pnType";
 	}
 
+	/**
+	 * 服务动作集合
+	 */
 	public interface ServiceActions {
 		/**
 		 * special
@@ -884,8 +911,8 @@ public final class MusicService extends Service {
 		/**
 		 * common
 		 */
-		String ACTION_PLAY = ACG_PLAYER_PACKAGE_NAME + ".play";
-		String ACTION_PAUSE = ACG_PLAYER_PACKAGE_NAME + ".intentPause";
+		String ACTION_PLAY = ACG_PLAYER_PACKAGE_NAME + ".intent_play";
+		String ACTION_PAUSE = ACG_PLAYER_PACKAGE_NAME + ".intent_pause";
 		String ACTION_PN = ACG_PLAYER_PACKAGE_NAME + ".pntype";
 		String ACTION_PN_NEXT = ACG_PLAYER_PACKAGE_NAME + ".pnnext";
 		String ACTION_PN_PREVIOUS = ACG_PLAYER_PACKAGE_NAME + ".pnprevious";
@@ -910,6 +937,8 @@ public final class MusicService extends Service {
 		 */
 		String ACTION_INSERT_MUSIC = ACG_PLAYER_PACKAGE_NAME + ".insertmusic";
 
+		String ACTION_UPDATE_NOTIFICATION = ACG_PLAYER_PACKAGE_NAME + ".update_notification";
+
 		/**
 		 * @apiNote 目前用于媒体按钮
 		 */
@@ -924,7 +953,7 @@ public final class MusicService extends Service {
 	/**
 	 * data store
 	 */
-	private static class ItemList {
+	private static class ItemListData {
 		static int CURRENT_MUSIC_INDEX = 0;
 
 		///////////////////////////DATA//////////////////////////
@@ -943,7 +972,7 @@ public final class MusicService extends Service {
 			if (item == null || item.getMediaId() == null || item.getExtras() == null) {
 				return;
 			}
-			ItemList.mCurrentCover = Utils.Audio.getCoverBitmapFull(serviceWeakReference.get()
+			ItemListData.mCurrentCover = Utils.Audio.getCoverBitmapFull(serviceWeakReference.get()
 					, item.getExtras().getInt("albumId"));
 		}
 	}
@@ -1011,10 +1040,14 @@ public final class MusicService extends Service {
 
 			builder.addAction(actionSkipPrevious);
 
-			builder.addAction(new NotificationCompat.Action.Builder(MusicControl.isPlayingMusic() ?
-					R.drawable.ic_pause_white_24dp : R.drawable.ic_play_arrow_grey_600_24dp, "togglePausePlay"
-					, MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_PLAY_PAUSE)).build()
-			);
+			if (MusicControl.isPlayingMusic()) {
+				builder.addAction(new NotificationCompat.Action.Builder(MusicControl.isPlayingMusic() ?
+						R.drawable.ic_pause_white_24dp : R.drawable.ic_play_arrow_grey_600_24dp, "togglePausePlay"
+						, MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_PLAY_PAUSE)).build()
+				);
+
+			}
+
 
 			builder.addAction(actionSkipnext);
 
@@ -1051,8 +1084,6 @@ public final class MusicService extends Service {
 					.setLargeIcon(description == null ? Utils.Audio.getCoverBitmapFull(context
 							, mMusicItem.getAlbumId()) : description.getIconBitmap())
 					.setContentIntent(pi)
-//					.setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(context,
-//							PlaybackStateCompat.ACTION_STOP))
 					.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 					.setWhen(System.currentTimeMillis())
 					.setColor(Utils.Ui.getPrimaryColor(context))
@@ -1076,47 +1107,54 @@ public final class MusicService extends Service {
 
 		private static MediaPlayer mediaPlayer = null;
 
+		public enum PlayerState {
+			PLAYING,
+			STOPED,
+			PAUSED,
+			NONE
+		}
+
+		public static PlayerState playerState = PlayerState.NONE;
+
+		/**
+		 * 音乐最后位置
+		 */
+		public static int lastPosition = 0;
+
 		public synchronized static void init(@NonNull final Context context) {
 			if (mediaPlayer != null) return;
 
-			CustomThreadPool.post(() -> {
-				mediaPlayer = new MediaPlayer();
-				MusicControl.mediaPlayer.setOnCompletionListener(mp -> {
-					//noinspection ConstantConditions
-					switch (PreferenceUtil.getDefault(context).getString(Values.SharedPrefsTag.PLAY_TYPE, PlayType.REPEAT_NONE)) {
-						case PlayType.REPEAT_LIST: {
-							// TODO: 2019/5/30
-						}
-						break;
-
-						case PlayType.REPEAT_NONE: {
-							if (ItemList.CURRENT_MUSIC_INDEX != ItemList.playOrderList.size()) {
-								Intent intent = new Intent(ServiceActions.ACTION_PN);
-								intent.putExtra(IntentTAG.PN_TYPE, ServiceActions.ACTION_PN_NEXT);
-								ReceiverOnMusicPlay.startService(context, intent);
-							}
-						}
-						break;
-
-						case PlayType.REPEAT_ONE: {
-							MusicControl.seekTo(0);
-							MusicControl.playMusic();
-						}
-						break;
+			mediaPlayer = new MediaPlayer();
+			MusicControl.mediaPlayer.setOnCompletionListener(mp -> {
+				switch (PreferenceUtil.getDefault(context).getString(Values.SharedPrefsTag.PLAY_TYPE, PlayType.REPEAT_NONE)) {
+					case PlayType.REPEAT_LIST: {
+						// TODO: 2019/5/30
 					}
-				});
+					break;
 
-				MusicControl.mediaPlayer.setOnErrorListener((mp, what, extra) -> {
-					mp.reset();
-					return true;
-				});
+					case PlayType.REPEAT_NONE: {
+						intentNext(context);
+					}
+					break;
 
-				mediaPlayer.setOnPreparedListener(mp -> {
-					mp.start();
-					serviceWeakReference.get().startFN();
-					HAS_PLAYED = true;
-				});
+					case PlayType.REPEAT_ONE: {
+						MusicControl.seekTo(0);
+						MusicControl.playMusic();
+					}
+					break;
+				}
+			});
 
+			MusicControl.mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+				mp.reset();
+				return true;
+			});
+
+			mediaPlayer.setOnPreparedListener(mp -> {
+				mp.start();
+				serviceWeakReference.get().startFN();
+				HAS_PLAYED = true;
+				playerState = PlayerState.PLAYING;
 			});
 		}
 
@@ -1152,13 +1190,17 @@ public final class MusicService extends Service {
 		}
 
 		/**
-		 * play music
+		 * play music (仅用于已准备好的 mediaPlayer)
 		 * use {@link MediaPlayer#setOnPreparedListener(MediaPlayer.OnPreparedListener)}
 		 */
 		private synchronized static void playMusic() {
-			if (mediaPlayer == null) return;
+			if (mediaPlayer == null) {
+				Log.d(TAG, "playMusic: mediaPlayer is null !");
+				return;
+			}
 
 			mediaPlayer.start();
+			playerState = PlayerState.PLAYING;
 			HAS_PLAYED = true;
 			serviceWeakReference.get().startFN();
 			// update last played
@@ -1171,7 +1213,10 @@ public final class MusicService extends Service {
 		private synchronized static void pauseMusic() {
 			if (mediaPlayer == null) return;
 
+			lastPosition = mediaPlayer.getCurrentPosition();
+
 			mediaPlayer.pause();
+			playerState = PlayerState.PAUSED;
 			serviceWeakReference.get().startFN();
 			serviceWeakReference.get().stopForeground(false);
 		}
@@ -1180,6 +1225,7 @@ public final class MusicService extends Service {
 			if (mediaPlayer == null) return;
 
 			mediaPlayer.stop();
+			playerState = PlayerState.STOPED;
 			serviceWeakReference.get().stopForeground(true);
 		}
 
@@ -1197,11 +1243,9 @@ public final class MusicService extends Service {
 
 			try {
 				mediaPlayer.setDataSource(context, item.getMediaUri());
-				ItemList.historyList.add(item);
-				ItemList.updateCurrentCover(item);
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (IllegalStateException e) {
+				ItemListData.historyList.add(item);
+				ItemListData.updateCurrentCover(item);
+			} catch (IOException | IllegalStateException e) {
 				e.printStackTrace();
 				mediaPlayer.reset();
 			}
@@ -1242,38 +1286,31 @@ public final class MusicService extends Service {
 			if (context == null) return;
 			Intent next = new Intent(MusicService.ServiceActions.ACTION_PN);
 			next.putExtra(IntentTAG.PN_TYPE, MusicService.ServiceActions.ACTION_PN_NEXT);
-			ReceiverOnMusicPlay.startService(context, next);
+			MainActivity.startService(context, next);
 		}
 
 		public static void intentPrevious(@Nullable final Context context) {
 			if (context == null) return;
 			Intent next = new Intent(MusicService.ServiceActions.ACTION_PN);
 			next.putExtra(IntentTAG.PN_TYPE, ServiceActions.ACTION_PN_PREVIOUS);
-			ReceiverOnMusicPlay.startService(context, next);
+			MainActivity.startService(context, next);
 		}
 
 		public static void intentItemClick(@NonNull final Context context, @NonNull MusicItem item) {
 			final Intent intent = new Intent(MusicService.ServiceActions.ACTION_ITEM_CLICK);
 			intent.putExtra("item", item);
-			ReceiverOnMusicPlay.startService(context, intent);
+			MainActivity.startService(context, intent);
 		}
 
 		public static void intentPlay(@NonNull final Context context) {
 			final Intent intent = new Intent(ServiceActions.ACTION_PLAY);
-			ReceiverOnMusicPlay.startService(context, intent);
+			MainActivity.startService(context, intent);
 		}
 
 		public static void intentPause(@NonNull final Context context) {
 			final Intent intent = new Intent(ServiceActions.ACTION_PAUSE);
-			ReceiverOnMusicPlay.startService(context, intent);
+			MainActivity.startService(context, intent);
 		}
 
-		public static void intentTogglePlayPause(@NonNull final Context context) {
-			if (isPlayingMusic()) {
-				intentPause(context);
-			} else {
-				intentPlay(context);
-			}
-		}
 	}
 }

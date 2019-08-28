@@ -54,7 +54,6 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.albumdetail.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseListActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
@@ -67,6 +66,8 @@ import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdapter.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
 
 	private static final String TAG = "MyRecyclerAdapter";
+
+	public static boolean stopLoadImage = false;
 
 	/**
 	 * @see top.geek_studio.chenlongcould.musicplayer.R.layout#recycler_music_list_item_mod
@@ -168,7 +169,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 			}
 
 			//when clicked ModHolder(fastPlay item)
-			holder.itemView.setOnClickListener(v -> ReceiverOnMusicPlay.startService(mActivity, MusicService.ServiceActions.ACTION_FAST_SHUFFLE));
+			holder.itemView.setOnClickListener(v -> MainActivity.startService(mActivity, MusicService.ServiceActions.ACTION_FAST_SHUFFLE));
 
 		} else {
 			switch (mConfig.styleId) {
@@ -458,7 +459,8 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 		if (mConfig.needPadding) {
-			if (viewHolder.getAdapterPosition() == 0) viewHolder.itemView.setPadding(0, 350, 0, 0);
+			if (viewHolder.getAdapterPosition() == 0)
+				viewHolder.itemView.setPadding(0, MainActivity.PADDING, 0, 0);
 			else viewHolder.itemView.setPadding(0, 0, 0, 0);
 		}
 
@@ -476,6 +478,8 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		String prefix = mMusicItems.get(holder.getAdapterPosition()).getMusicPath().substring(mMusicItems.get(holder.getAdapterPosition()).getMusicPath().lastIndexOf(".") + 1);
 		holder.mMusicExtName.setText(prefix);
 		holder.mTime.setText(Data.S_SIMPLE_DATE_FORMAT.format(new Date(mMusicItems.get(holder.getAdapterPosition()).getDuration())));
+
+		if (stopLoadImage) return;
 
 		if (mMusicItems.get(holder.getAdapterPosition()).getArtwork() != null) {
 			/*--- 添加标记以便避免ImageView因为ViewHolder的复用而出现混乱 ---*/

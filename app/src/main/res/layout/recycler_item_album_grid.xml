@@ -2,13 +2,12 @@
 <FrameLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/u_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        xmlns:tools="http://schemas.android.com/tools" android:id="@+id/u_view"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_margin="2dp"
         >
 
+    <!--用于点击水波-->
     <FrameLayout
             android:layout_width="match_parent" android:layout_height="match_parent"
             android:foreground="@drawable/my_ripple_mask"
@@ -32,10 +31,10 @@
                             android:id="@+id/recycler_item_album_image"
                             android:layout_width="match_parent" android:layout_height="match_parent"
                             android:contentDescription="@string/app_name"
-                            android:scaleType="centerCrop" app:layout_constraintEnd_toEndOf="parent"
+                            android:scaleType="centerCrop" android:src="@drawable/default_album_art"
+                            app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
-                            android:src="@drawable/default_album_art"
                             />
 
                     <!--<com.github.mmin18.widget.RealtimeBlurView-->
@@ -51,29 +50,29 @@
                             android:id="@+id/blurring_view" android:layout_width="match_parent"
                             android:layout_height="58dp" android:layout_gravity="center"
                             app:blurRadius="10" app:downsampleFactor="2"
-                            app:overlayColor="#4DFFFFFF"
+                            app:layout_constraintBottom_toBottomOf="@+id/recycler_item_album_image"
                             app:layout_constraintEnd_toEndOf="@+id/recycler_item_album_image"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintBottom_toBottomOf="@+id/recycler_item_album_image"
+                            app:overlayColor="#4DFFFFFF"
                             />
 
                     <TextView
                             android:id="@+id/recycler_item_song_album_name"
-                            android:clickable="false" android:layout_width="match_parent"
-                            android:layout_height="wrap_content" android:gravity="center"
-                            android:ellipsize="end" android:singleLine="true"
-                            android:textColor="#fff" android:textSize="18sp"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"
                             android:layout_marginHorizontal="@dimen/margin_16"
-                            tools:text="@string/app_name" tools:layout_editor_absoluteX="16dp"
+                            android:layout_marginTop="8dp" android:clickable="false"
+                            android:ellipsize="end" android:gravity="center"
+                            android:singleLine="true" android:textColor="#fff"
+                            android:textSize="18sp"
                             app:layout_constraintBottom_toBottomOf="@+id/blurring_view"
-                            android:layout_marginTop="8dp"
                             app:layout_constraintTop_toTopOf="@+id/blurring_view"
+                            tools:layout_editor_absoluteX="16dp" tools:text="@string/app_name"
                             />
 
                     <TextView
-                            android:id="@+id/debug_text" tools:text="DEBUG" android:textColor="#fff"
-                            android:layout_width="match_parent" android:layout_height="match_parent"
-                            android:visibility="gone"
+                            android:id="@+id/debug_text" android:layout_width="match_parent"
+                            android:layout_height="match_parent" android:textColor="#fff"
+                            android:visibility="gone" tools:text="DEBUG"
                             />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>

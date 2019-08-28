@@ -21,6 +21,8 @@ import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.simplecityapps.recyclerview_fastscroll.interfaces.OnFastScrollStateChangeListener;
+
 import org.jetbrains.annotations.NotNull;
 import org.litepal.LitePal;
 import org.litepal.LitePalDB;
@@ -181,7 +183,6 @@ public final class MusicListFragment extends BaseListFragment {
 						.addAlbumId(albumId)
 						.addArtistId(artistId);
 
-
 				final MusicItem item = builder.build();
 
 				if (lastId == id) Data.sCurrentMusicItem = item;
@@ -285,6 +286,19 @@ public final class MusicListFragment extends BaseListFragment {
 		});
 
 		mMusicListBinding.includeRecycler.recyclerView.setAdapter(adapter);
+		mMusicListBinding.includeRecycler.recyclerView.setOnFastScrollStateChangeListener(new OnFastScrollStateChangeListener() {
+			@Override
+			public void onFastScrollStart() {
+				MyRecyclerAdapter.stopLoadImage = true;
+				GlideApp.with(mActivity).pauseRequests();
+			}
 
+			@Override
+			public void onFastScrollStop() {
+				MyRecyclerAdapter.stopLoadImage = false;
+				GlideApp.with(mActivity).resumeRequests();
+				adapter.notifyDataSetChanged();
+			}
+		});
 	}
 }

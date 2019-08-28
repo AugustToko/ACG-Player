@@ -34,6 +34,11 @@ import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 
 public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRecyclerAdapter2AlbumList.ViewHolder> implements FastScrollRecyclerView.SectionedAdapter {
 
+	/**
+	 * 是否停止加载图片
+	 */
+	public static boolean stopLoadImage = false;
+
 	public static final int LINEAR_TYPE = 0;
 	public static final int GRID_TYPE = 1;
 	private static final String TAG = "AlbumAdapter";
@@ -59,10 +64,12 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 		if (viewHolder.getAdapterPosition() == 0 || viewHolder.getAdapterPosition() == 1)
-			viewHolder.itemView.setPadding(0, 350, 0, 0);
+			viewHolder.itemView.setPadding(0, MainActivity.PADDING, 0, 0);
 		else viewHolder.itemView.setPadding(0, 0, 0, 0);
 
 		viewHolder.mAlbumText.setText(mAlbumNameList.get(viewHolder.getAdapterPosition()).getAlbumName());
+
+		if (stopLoadImage) return;
 
 		// set tag
 		if (mAlbumNameList.get(viewHolder.getAdapterPosition()).getmArtwork() != null) {
@@ -432,9 +439,9 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
 		}
 
-		void setBluredView(View view) {
-			if (blurringView != null) blurringView.setBlurredView(view);
-		}
+//		void setBluredView(View view) {
+//			if (blurringView != null) blurringView.setBlurredView(view);
+//		}
 
 		void invalidate() {
 			if (blurringView != null) blurringView.invalidate();

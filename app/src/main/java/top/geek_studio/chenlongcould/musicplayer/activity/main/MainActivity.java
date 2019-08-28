@@ -44,6 +44,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.databinding.DataBindingUtil;
@@ -54,7 +55,6 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.tabs.TabLayout;
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -121,51 +121,19 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 	private MainContract.Presenter mPresenter;
 
+	/**
+	 * 用于 list 定部padding
+	 */
 	public static int PADDING = 0;
 
 	/**
-	 * connect {@link MusicService}
-	 */
-	public ServiceConnection sServiceConnection = new ServiceConnection() {
-		@Override
-		public void onServiceConnected(ComponentName name, IBinder service) {
-			Data.sMusicBinder = IMuiscService.Stub.asInterface(service);
-
-			if (Values.TYPE_RANDOM.equals(PreferenceUtil.getDefault(MainActivity.this)
-					.getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
-
-				Data.shuffleOrderListSync(MainActivity.this, false);
-			}
-
-			receivedIntentCheck(getIntent());
-		}
-
-		@Override
-		public void onServiceDisconnected(ComponentName name) {
-			Data.sMusicBinder = null;
-		}
-	};
-
-	/**
-	 * @see MusicService#DEFAULT_SHORT_DURATION
-	 */
-	@Deprecated
-	public static final int DEFAULT_SHORT_DURATION = MusicService.DEFAULT_SHORT_DURATION;
-
+	 * fragment id
+	 * */
 	public static final char MUSIC_LIST_FRAGMENT_ID = '1';
 	public static final char ALBUM_LIST_FRAGMENT_ID = '2';
 	public static final char ARTIST_LIST_FRAGMENT_ID = '3';
 	public static final char PLAY_LIST_FRAGMENT_ID = '4';
-	public static final char FILE_LIST_FRAGMENT_ID = '5';
 	public static final char MUSIC_DETAIL_FRAGMENT_ID = '6';
-
-	@Deprecated
-	private AppBarLayout.OnOffsetChangedListener mOnOffsetChangedListener = new AppBarLayout.OnOffsetChangedListener() {
-		@Override
-		public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-//			mMainBinding.realBlur.setTranslationY(mMainBinding.realBlur.getTranslationX() + verticalOffset);
-		}
-	};
 
 	/**
 	 * 1 is MUSIC_LIST TAB
@@ -197,7 +165,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	private MusicListFragment musicListFragment;
 	private AlbumListFragment albumListFragment;
 	private ArtistListFragment artistListFragment;
-	private FileViewFragment fileViewFragment;
 	private PlayListFragment playListFragment;
 
 	private BaseFragment mCurrentShowedFragment;
@@ -223,7 +190,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	private ActionBarDrawerToggle mDrawerToggle;
 	private ImageView mNavHeaderImageView;
 
-	@SuppressWarnings("FieldCanBeLocal")
 	private MaterialSearchView mSearchView;
 
 	private HandlerThread mHandlerThread;
@@ -342,6 +308,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 		// search
 		mSearchView.setHint(getString(R.string.type_somthing));
+		mSearchView.setBackgroundColor(Color.argb(240, 255, 255, 255));
 		mSearchView.setHintTextColor(Color.BLACK);
 		mSearchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
 			@Override
@@ -446,7 +413,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 							.remove(musicListFragment)
 							.remove(albumListFragment)
 							.remove(artistListFragment)
-							.remove(fileViewFragment)
 							.remove(playListFragment).commitNow();
 
 					boolean isDarkMode = PreferenceUtil.getDefault(MainActivity.this)
@@ -710,7 +676,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 			//noinspection SwitchStatementWithTooFewBranches
 			switch (intent.getStringExtra(Values.IntentTAG.SHORTCUT_TYPE)) {
 				case App.SHORTCUT_RANDOM: {
-					ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
+					startService(this, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
 				}
 				break;
 				default:
@@ -837,7 +803,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 			// common
 			case R.id.menu_toolbar_fast_play: {
 				//just fast random play, without change Data.sPlayOrderList
-				ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
+				startService(this, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
 			}
 			break;
 
@@ -969,13 +935,13 @@ public final class MainActivity extends BaseListActivity implements MainContract
 				mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab4));
 			}
 
-			if (c == '5') {
-				final String tab5 = getResources().getString(R.string.tab_file);
-				mTitles.add(tab5);
-				fileViewFragment = FileViewFragment.newInstance();
-				mFragmentList.add(fileViewFragment);
-				mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab5));
-			}
+//			if (c == '5') {
+//				final String tab5 = getResources().getString(R.string.tab_file);
+//				mTitles.add(tab5);
+//				fileViewFragment = FileViewFragment.newInstance();
+//				mFragmentList.add(fileViewFragment);
+//				mMainBinding.tabLayout.addTab(mMainBinding.tabLayout.newTab().setText(tab5));
+//			}
 		}
 
 		Values.CurrentData.CURRENT_PAGE_INDEX = 0;
@@ -1040,14 +1006,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 //					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
 //					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
 				}
-
-				//file_viewer
-				if (type == '5') {
-					mCurrentShowedFragment = fileViewFragment;
-//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_album_layout), false, true);
-//					setMenuIconAlphaAnimation(getMenu().findItem(R.id.menu_toolbar_artist_layout), false, true);
-				}
-
 				supportInvalidateOptionsMenu();
 			}
 
@@ -1134,7 +1092,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 		if (Data.HAS_BIND) {
 			try {
-				unbindService(sServiceConnection);
+				unbindService(mServiceConnection);
 				Data.HAS_BIND = false;
 			} catch (Exception e) {
 				Log.d(TAG, "onDestroy: " + e.getMessage());
@@ -1144,7 +1102,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		mCurrentShowedFragment = null;
 		musicListFragment = null;
 		playListFragment = null;
-		fileViewFragment = null;
+//		fileViewFragment = null;
 		artistListFragment = null;
 		musicDetailFragment = null;
 
@@ -1165,7 +1123,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 	public void fullExit() {
 		try {
-			unbindService(sServiceConnection);
+			unbindService(mServiceConnection);
 			Data.HAS_BIND = false;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1219,6 +1177,8 @@ public final class MainActivity extends BaseListActivity implements MainContract
 			setStatusBarTextColor(this, Color.BLACK);
 
 			initUpperStyle = true;
+
+
 		}
 
 		CustomThreadPool.post(() ->
@@ -1321,7 +1281,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		popupMenu.getMenu().add(Menu.NONE, Menu.FIRST + 1, 0, getString(R.string.tab_album));
 		popupMenu.getMenu().add(Menu.NONE, Menu.FIRST + 2, 0, getString(R.string.tab_artist));
 		popupMenu.getMenu().add(Menu.NONE, Menu.FIRST + 3, 0, getString(R.string.tab_playlist));
-		popupMenu.getMenu().add(Menu.NONE, Menu.FIRST + 4, 0, getString(R.string.tab_fileviewer));
+//		popupMenu.getMenu().add(Menu.NONE, Menu.FIRST + 4, 0, getString(R.string.tab_fileviewer));
 
 		popupMenu.setOnMenuItemClickListener(item -> {
 
@@ -1513,9 +1473,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	public void setSubtitle(@NonNull final CharSequence subTitle) {
 		try {
 			super.setToolbarSubTitleWithAlphaAnimation(mMainBinding.toolBar, subTitle);
-		} catch (NoSuchFieldException e) {
-			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-		} catch (IllegalAccessException e) {
+		} catch (NoSuchFieldException | IllegalAccessException e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		}
 	}
@@ -1549,17 +1507,15 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 	@Override
 	public void onGlobalLayout() {
-//		CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) mMainBinding.realBlur.getLayoutParams();
-//		layoutParams.height = mMainBinding.appbar.getHeight();
-//		PADDING = layoutParams.height;
-//		mMainBinding.realBlur.setLayoutParams(layoutParams);
+		CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) mMainBinding.appbar.getLayoutParams();
+		layoutParams.height = mMainBinding.appbar.getHeight();
+		PADDING = layoutParams.height;
 		mMainBinding.appbar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
 		musicListFragment.initRecyclerView();
 		albumListFragment.initRecyclerView();
 		artistListFragment.initRecyclerView();
 		playListFragment.getPlayListBinding().getRoot().setPadding(0, PADDING, 0, 0);
-
 	}
 
 	@SuppressWarnings("WeakerAccess")
@@ -1629,7 +1585,41 @@ public final class MainActivity extends BaseListActivity implements MainContract
 				default:
 			}
 		}
-
 	}
 
+	public static void startService(@NonNull Context context, @NonNull String action) {
+		final ComponentName serviceName = new ComponentName(context, MusicService.class);
+		Intent intent = new Intent(action);
+		intent.setComponent(serviceName);
+		ContextCompat.startForegroundService(context, intent);
+	}
+
+	public static void startService(@NonNull Context context, @NonNull Intent intent) {
+		final ComponentName serviceName = new ComponentName(context, MusicService.class);
+		intent.setComponent(serviceName);
+		ContextCompat.startForegroundService(context, intent);
+	}
+
+	/**
+	 * connect {@link MusicService}
+	 */
+	public ServiceConnection mServiceConnection = new ServiceConnection() {
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			Data.sMusicBinder = IMuiscService.Stub.asInterface(service);
+
+			if (PreferenceUtil.getDefault(MainActivity.this)
+					.getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM)) {
+
+				Data.shuffleOrderListSync(MainActivity.this, false);
+			}
+
+			receivedIntentCheck(getIntent());
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			Data.sMusicBinder = null;
+		}
+	};
 }

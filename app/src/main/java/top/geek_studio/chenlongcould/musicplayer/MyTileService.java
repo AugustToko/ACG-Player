@@ -12,10 +12,12 @@ import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.util.Log;
 import android.widget.Toast;
+
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
+
 import io.reactivex.disposables.Disposable;
-import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
+import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 
 /**
@@ -114,14 +116,14 @@ public final class MyTileService extends TileService {
 			getQsTile().setLabel("Playing...");
 			getQsTile().setIcon(Icon.createWithResource(this, R.drawable.ic_audiotrack_24px));
 			getQsTile().updateTile();
-			ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
+			MainActivity.startService(this, MusicService.ServiceActions.ACTION_FAST_SHUFFLE);
 		} else {
 			mEnable = false;
 			getQsTile().setState(Tile.STATE_INACTIVE);
 			getQsTile().setLabel(title);
 			getQsTile().setIcon(Icon.createWithResource(this, R.drawable.ic_audiotrack_24px));
 			getQsTile().updateTile();
-			ReceiverOnMusicPlay.startService(this, MusicService.ServiceActions.ACTION_PAUSE);
+			MainActivity.startService(this, MusicService.ServiceActions.ACTION_PAUSE);
 		}
 	}
 

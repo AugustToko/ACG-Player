@@ -1,22 +1,18 @@
 package top.geek_studio.chenlongcould.musicplayer.broadcast;
 
-import android.annotation.TargetApi;
-import android.app.Activity;
-import android.content.*;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Build;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.util.Log;
-import androidx.annotation.NonNull;
+
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
+
 import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.IMuiscService;
-import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.CarViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity;
@@ -24,7 +20,6 @@ import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
-import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 /**
@@ -35,8 +30,8 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 	public static final String TAG = "ReceiverOnMusicPlay";
 
 	public static final byte FLASH_UI_COMMON = 127;
-	public static final byte PLAY = 100;
-	public static final byte PAUSE = 101;
+	public static final byte FLASH_UI_PLAY = 100;
+	public static final byte FLASH_UI_PAUSE = 101;
 
 	public static final String INTENT_PLAY_TYPE = "play_type";
 	public static final byte TOGGLE_FAV = 102;
@@ -60,9 +55,7 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		}
 		try {
 			return Data.sMusicBinder.isPlayingMusic();
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		} catch (IllegalStateException e) {
+		} catch (RemoteException | IllegalStateException e) {
 			e.printStackTrace();
 		}
 		return false;
@@ -142,59 +135,14 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		return null;
 	}
 
-	@TargetApi(Build.VERSION_CODES.KITKAT)
 	public static String getSongIdFromMediaProvider(Uri uri) {
 		return DocumentsContract.getDocumentId(uri).split(":")[1];
 	}
-
 
 	public synchronized static void sureCar() {
 		//set data (image and name)
 		if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.UIMODE.MODE_CAR)) {
 			CarViewActivity.sendEmptyMessage(CarViewActivity.NotLeakHandler.SET_DATA);
-		}
-	}
-
-	public static void startService(@NonNull Context context, @NonNull String action) {
-		final ComponentName serviceName = new ComponentName(context, MusicService.class);
-		Intent intent = new Intent(action);
-		intent.setComponent(serviceName);
-		context.startService(intent);
-		bindServiceImp(context, intent);
-	}
-
-	public static void startService(@NonNull Context context, @NonNull Intent intent) {
-		final ComponentName serviceName = new ComponentName(context, MusicService.class);
-		intent.setComponent(serviceName);
-		context.startService(intent);
-		bindServiceImp(context, intent);
-	}
-
-	public static void startForeceService(@NonNull Context context, @NonNull Intent intent) {
-		Log.d(TAG, "startForeceService: ");
-		final ComponentName serviceName = new ComponentName(context, MusicService.class);
-		intent.setComponent(serviceName);
-		ContextCompat.startForegroundService(context, intent);
-		bindServiceImp(context, intent);
-	}
-
-	public static void bindServiceImp(@NonNull final Context context, Intent intent) {
-		if (context instanceof Activity && Data.sMusicBinder == null) {
-			context.bindService(intent, new ServiceConnection() {
-				@Override
-				public void onServiceConnected(ComponentName name, IBinder service) {
-					Data.sMusicBinder = IMuiscService.Stub.asInterface(service);
-
-					if (Values.TYPE_RANDOM.equals(PreferenceUtil.getDefault(context).getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON))) {
-						Data.shuffleOrderListSync(context, false);
-					}
-				}
-
-				@Override
-				public void onServiceDisconnected(ComponentName name) {
-					Data.sMusicBinder = null;
-				}
-			}, Context.BIND_AUTO_CREATE);
 		}
 	}
 
@@ -235,14 +183,14 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 				}
 				break;
 
-				case PLAY: {
+				case FLASH_UI_PLAY: {
 					MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
 					Log.d(TAG, "onReceive: after resume");
 				}
 				break;
 
 				//intentPause music
-				case PAUSE: {
+				case FLASH_UI_PAUSE: {
 					MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PAUSE);
 					Log.d(TAG, "onReceive: after intentPause");
 				}

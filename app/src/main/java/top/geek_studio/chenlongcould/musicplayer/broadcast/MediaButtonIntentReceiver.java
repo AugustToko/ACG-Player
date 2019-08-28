@@ -24,7 +24,9 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import android.view.KeyEvent;
+
 import top.geek_studio.chenlongcould.musicplayer.MusicService;
+import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 
 /**
  * Used to control headset playback.
@@ -57,7 +59,6 @@ final public class MediaButtonIntentReceiver extends BroadcastReceiver {
 					final int clickCount = msg.arg1;
 
 					Log.v(TAG, "Handling headset click, count = " + clickCount);
-
 					final Intent intent = new Intent();
 
 					switch (clickCount) {
@@ -84,7 +85,7 @@ final public class MediaButtonIntentReceiver extends BroadcastReceiver {
 
 					if (intent.getAction() != null) {
 						final Context context = (Context) msg.obj;
-						ReceiverOnMusicPlay.startForeceService(context, intent);
+						MainActivity.startService(context, intent);
 					}
 					break;
 			}
@@ -166,7 +167,7 @@ final public class MediaButtonIntentReceiver extends BroadcastReceiver {
 							if (pnType != null) {
 								i.putExtra("pnType", pnType);
 							}
-							ReceiverOnMusicPlay.startForeceService(context, i);
+							MainActivity.startService(context, i);
 						}
 						return true;
 					}
@@ -178,15 +179,18 @@ final public class MediaButtonIntentReceiver extends BroadcastReceiver {
 
 	private static void acquireWakeLockAndSendMessage(Context context, Message msg, long delay) {
 		if (mWakeLock == null) {
-			Context appContext = context.getApplicationContext();
-			PowerManager pm = (PowerManager) appContext.getSystemService(Context.POWER_SERVICE);
-			mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, context.getPackageName() + ":wakelockB");
-			mWakeLock.setReferenceCounted(false);
+			final Context appContext = context.getApplicationContext();
+			final PowerManager pm = (PowerManager) appContext.getSystemService(Context.POWER_SERVICE);
+			if (pm != null) {
+				mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, context.getPackageName() + ":wakelockB");
+				mWakeLock.setReferenceCounted(false);
+			}
 		}
-		Log.v(TAG, "Acquiring wake lock and sending " + msg.what);
-		// Make sure we don't indefinitely hold the wake lock under any circumstances
-		mWakeLock.acquire(10000);
 
+		// 获取唤醒锁定和发送
+		Log.v(TAG, "Acquiring wake lock and sending " + msg.what);
+		// 确保在任何情况下我们都不会无限期地保持唤醒锁定
+		mWakeLock.acquire(10000);
 		mHandler.sendMessageDelayed(msg, delay);
 	}
 
@@ -210,4 +214,5 @@ final public class MediaButtonIntentReceiver extends BroadcastReceiver {
 			abortBroadcast();
 		}
 	}
+
 }
