@@ -1,7 +1,5 @@
 package top.geek_studio.chenlongcould.musicplayer.activity.main;
 
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.text.TextUtils;
@@ -15,7 +13,6 @@ import top.geek_studio.chenlongcould.geeklibrary.GCSutil;
 import top.geek_studio.chenlongcould.geeklibrary.GeekProject;
 import top.geek_studio.chenlongcould.geeklibrary.PackageTool;
 import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseCompatActivity;
 import top.geek_studio.chenlongcould.musicplayer.fragment.AlbumListFragment;
@@ -70,14 +67,6 @@ public class MainPresenter implements MainContract.Presenter {
 
 	@Override
 	public void initData(@NonNull MainActivity activity) {
-
-		// initService
-		final Intent intent = new Intent(activity, MusicService.class);
-		MainActivity.startService(activity, intent);
-		if (!Data.HAS_BIND) {
-			Data.HAS_BIND = activity.bindService(intent, activity.mServiceConnection, Context.BIND_AUTO_CREATE);
-		}
-
 //		DBArtSync.startActionSyncArtist(activity);
 //		DBArtSync.startActionSyncAlbum(activity);
 

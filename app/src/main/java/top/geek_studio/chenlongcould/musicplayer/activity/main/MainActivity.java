@@ -128,7 +128,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 	/**
 	 * fragment id
-	 * */
+	 */
 	public static final char MUSIC_LIST_FRAGMENT_ID = '1';
 	public static final char ALBUM_LIST_FRAGMENT_ID = '2';
 	public static final char ARTIST_LIST_FRAGMENT_ID = '3';
@@ -200,6 +200,13 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		// initService
+		final Intent intent = new Intent(this, MusicService.class);
+		MainActivity.startService(this, intent);
+		if (!Data.HAS_BIND) {
+			Data.HAS_BIND = bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+		}
+
 		preferences = PreferenceUtil.getDefault(this);
 		mHandlerThread = new HandlerThread("HandlerThread@MainActivity");
 		mHandlerThread.start();
@@ -252,6 +259,8 @@ public final class MainActivity extends BaseListActivity implements MainContract
 					//隐藏BODY
 					musicDetailFragment.getNowPlayingBody().setVisibility(View.INVISIBLE);
 
+					Utils.Ui.setStatusBarTextColor(MainActivity.this, Color.WHITE);
+
 					//start animation
 					if (ANIMATION_FLAG) {
 						ANIMATION_FLAG = false;
@@ -262,6 +271,8 @@ public final class MainActivity extends BaseListActivity implements MainContract
 					mMainBinding.tabLayout.setVisibility(View.VISIBLE);
 					mMainBinding.tabLayout.setVisibility(View.VISIBLE);
 					musicDetailFragment.getNowPlayingBody().setVisibility(View.VISIBLE);
+
+					Utils.Ui.setStatusBarTextColor(MainActivity.this, Color.BLACK);
 				}
 			}
 
@@ -352,6 +363,14 @@ public final class MainActivity extends BaseListActivity implements MainContract
 			actionBar.setDisplayHomeAsUpEnabled(true);
 			actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24px);
 		}
+
+//		Resources resources = getResources();
+//		int resourceId = resources.getIdentifier("navigation_bar_height","dimen", "android");
+//		int height = resources.getDimensionPixelSize(resourceId);
+//
+//		mMainBinding.appbar.addOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
+//			mMainBinding.slidingLayout.setPanelHeight(height + (int) (verticalOffset * 1.5));
+//		});
 
 		// Nav 图像点击事件
 		mNavHeaderImageView.setOnClickListener(v -> {
@@ -499,6 +518,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	/**
 	 * check if open file, uri, http or others.
 	 */
+	// fixme: bugs
 	@Override
 	public void receivedIntentCheck(@Nullable Intent intent) {
 		if (intent == null) {
@@ -1512,6 +1532,8 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		PADDING = layoutParams.height;
 		mMainBinding.appbar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
+		Log.d(TAG, "initView: appbar height: " + mMainBinding.appbar.getHeight());
+
 		musicListFragment.initRecyclerView();
 		albumListFragment.initRecyclerView();
 		artistListFragment.initRecyclerView();
@@ -1591,13 +1613,13 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		final ComponentName serviceName = new ComponentName(context, MusicService.class);
 		Intent intent = new Intent(action);
 		intent.setComponent(serviceName);
-		ContextCompat.startForegroundService(context, intent);
+		startService(context, intent);
 	}
 
 	public static void startService(@NonNull Context context, @NonNull Intent intent) {
 		final ComponentName serviceName = new ComponentName(context, MusicService.class);
 		intent.setComponent(serviceName);
-		ContextCompat.startForegroundService(context, intent);
+		context.startService(intent);
 	}
 
 	/**
@@ -1607,6 +1629,14 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			Data.sMusicBinder = IMuiscService.Stub.asInterface(service);
+
+			if (Data.sCurrentMusicItem != null && Data.sCurrentMusicItem.getMusicID() > -1 && Data.sMusicBinder != null) {
+				try {
+					Data.sMusicBinder.loadMusicItem(Data.sCurrentMusicItem);
+				} catch (RemoteException e) {
+					e.printStackTrace();
+				}
+			}
 
 			if (PreferenceUtil.getDefault(MainActivity.this)
 					.getString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_COMMON).equals(Values.TYPE_RANDOM)) {

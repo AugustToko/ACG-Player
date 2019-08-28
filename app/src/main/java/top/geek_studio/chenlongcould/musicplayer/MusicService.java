@@ -79,10 +79,20 @@ public final class MusicService extends Service {
 	 * 短音频排除基准 2s
 	 */
 	public static final int DEFAULT_SHORT_DURATION = 20000;
+
 	/**
 	 * "短播放" 收录基准
 	 */
 	public static final int MINIMUM_PLAY_TIME = 3000;
+
+	/**
+	 * 准备完 MediaPlayer 但不播放
+	 *
+	 * @see MediaPlayer
+	 * @see MediaPlayer#setOnPreparedListener(MediaPlayer.OnPreparedListener)
+	 */
+	private static boolean stopPlay = false;
+
 	/**
 	 * 耳机插拔监听
 	 */
@@ -111,7 +121,7 @@ public final class MusicService extends Service {
 
 		@Override
 		public void reset() {
-			MusicControl.reset(false);
+			MusicControl.reset();
 		}
 
 		@Override
@@ -137,14 +147,6 @@ public final class MusicService extends Service {
 		@Override
 		public void release() {
 			MusicControl.release();
-		}
-
-		@Override
-		public void setCurrentMusicData(MusicItem item) {
-			if (item != null && item.getMusicID() != -1) {
-				mMusicItem = item;
-				ItemListData.CURRENT_MUSIC_INDEX = ItemListData.playOrderList.indexOf(mMusicItem);
-			}
 		}
 
 		@Override
@@ -227,6 +229,31 @@ public final class MusicService extends Service {
 		@Override
 		public void setCurrentIndex(int index) {
 			ItemListData.CURRENT_MUSIC_INDEX = index;
+		}
+
+		@Override
+		public void loadMusicItem(MusicItem item) {
+			Log.d(TAG, "loadMusicItem: ");
+
+			if (item != null && item.getMusicID() != -1) {
+				mMusicItem = item;
+				MediaDescriptionCompat descriptionCompat = MusicUtil.m2d(mMusicItem);
+				ItemListData.CURRENT_MUSIC_INDEX = ItemListData.playOrderList.indexOf(descriptionCompat);
+				MusicControl.setDataSource(MusicService.this, descriptionCompat);
+
+				stopPlay = true;
+
+				try {
+					MusicControl.mediaPlayer.prepare();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+				updateMediaSessionMetaData();
+				HAS_PLAYED = true;
+
+				Log.d(TAG, "loadMusicItem: done");
+			}
 		}
 	};
 
@@ -400,13 +427,18 @@ public final class MusicService extends Service {
 	/**
 	 * save play data
 	 */
+	// fixme: bugs
 	private static void saveData() {
 		if (HAS_PLAYED && mMusicItem != null && mMusicItem.getMusicID() != -1) {
 			CustomThreadPool.post(() -> {
 				final List<Detail> infos = LitePal.where("MusicId = ?",
 						String.valueOf(mMusicItem.getMusicID())).find(Detail.class);
+
+				final Detail detail;
+				// 更新
 				if (infos.size() > 0) {
-					Detail detail = infos.get(0);
+
+					detail = infos.get(0);
 					if (MusicControl.getCurrentPosition() < MINIMUM_PLAY_TIME) {
 						detail.setMinimumPlayTimes(detail.getMinimumPlayTimes() + 1);
 					} else {
@@ -414,8 +446,11 @@ public final class MusicService extends Service {
 					}
 					detail.setPlayTimes(detail.getPlayTimes() + 1);
 					detail.save();
+
+					// 新建
 				} else {
-					Detail detail = new Detail();
+
+					detail = new Detail();
 					detail.setMusicId(mMusicItem.getMusicID());
 					if (MusicControl.getCurrentPosition() < MINIMUM_PLAY_TIME) {
 						detail.setMinimumPlayTimes(detail.getMinimumPlayTimes() + 1);
@@ -427,7 +462,7 @@ public final class MusicService extends Service {
 				}
 			});
 		}
-		MusicControl.reset(false);
+		MusicControl.reset();
 	}
 
 	/**
@@ -501,8 +536,8 @@ public final class MusicService extends Service {
 						.getBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
 
 				// last played music id
-				int lastId = PreferenceUtil.getDefault(serviceWeakReference.get())
-						.getInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, -1);
+//				int lastId = PreferenceUtil.getDefault(serviceWeakReference.get())
+//						.getInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, -1);
 
 				// black list
 				final LitePalDB blackList = new LitePalDB("BlackList", 1);
@@ -557,21 +592,21 @@ public final class MusicService extends Service {
 							.setExtras(bundle);
 
 					final MediaDescriptionCompat descriptionCompat = builder.build();
-					if (!HAS_PLAYED && lastId == id) {
-						final MusicItem.Builder b2 = new MusicItem.Builder(id, name, path)
-								.musicAlbum(albumName)
-								.addTime(addTime)
-								.artist(artist)
-								.duration(duration)
-								.mimeName(mimeType)
-								.size(size)
-								.addAlbumId(albumId)
-								.addArtistId(artistId);
-						mMusicItem = b2.build();
-						MusicControl.reset(false);
-						MusicControl.setDataSource(MusicService.this, descriptionCompat);
-						HAS_PLAYED = true;
-					}
+//					if (!HAS_PLAYED && lastId == id) {
+//						final MusicItem.Builder b2 = new MusicItem.Builder(id, name, path)
+//								.musicAlbum(albumName)
+//								.addTime(addTime)
+//								.artist(artist)
+//								.duration(duration)
+//								.mimeName(mimeType)
+//								.size(size)
+//								.addAlbumId(albumId)
+//								.addArtistId(artistId);
+//						mMusicItem = b2.build();
+//						MusicControl.reset(false);
+//						MusicControl.setDataSource(MusicService.this, descriptionCompat);
+//						HAS_PLAYED = true;
+//					}
 
 					ItemListData.playOrderList.add(descriptionCompat);
 					ItemListData.playOrderListBK.add(descriptionCompat);
@@ -585,7 +620,6 @@ public final class MusicService extends Service {
 
 	/**
 	 * start notification
-	 * call by {@link MusicControl#playMusic()}
 	 */
 	private void startFN() {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -703,27 +737,26 @@ public final class MusicService extends Service {
 				break;
 
 				case ServiceActions.ACTION_PLAY: {
-
-					// 1 没有播放过 也没有找到上次打开app 最后播放的数据
-					if (!HAS_PLAYED && mMusicItem == null) {
+					if (HAS_PLAYED && mMusicItem != null) {
+						MusicControl.resume();
+						flashMode = ReceiverOnMusicPlay.FLASH_UI_PLAY;
+						Log.d(TAG, "onStartCommand: play not first");
+					} else {
 						setRandomItemPreparePlay();
 						flashMode = ReceiverOnMusicPlay.FLASH_UI_COMMON;
 						updateMediaSessionMetaData();
-
-						// 2 已经播放过了
-					} else if (HAS_PLAYED && mMusicItem != null) {
-						flashMode = ReceiverOnMusicPlay.FLASH_UI_PLAY;
-						MusicControl.playMusic();
+						Log.d(TAG, "onStartCommand: play with first");
 					}
-
 				}
 				break;
 
 				case ServiceActions.ACTION_PN: {
+
+					saveData();
+
 					//检测是否指定下一首播放
 					if (ItemListData.nextWillplay.size() != 0) {
 						MediaDescriptionCompat descriptionCompat = ItemListData.nextWillplay.get(0);
-						saveData();
 						mMusicItem = MusicUtil.d2m(descriptionCompat);
 						MusicControl.setDataSource(this, descriptionCompat);
 
@@ -742,7 +775,6 @@ public final class MusicService extends Service {
 					// NO UI UPDATE
 					if (PlayType.REPEAT_ONE.equals(PreferenceUtil.getDefault(serviceWeakReference.get())
 							.getString(Values.SharedPrefsTag.PLAY_TYPE, PlayType.REPEAT_NONE))) {
-						saveData();
 						MusicControl.seekTo(0);
 						break;
 					}
@@ -752,7 +784,6 @@ public final class MusicService extends Service {
 
 					if (ServiceActions.ACTION_PN_PREVIOUS.equals(pnType)
 							&& MusicControl.getCurrentPosition() / mMusicItem.getDuration() > 20) {
-						saveData();
 						MusicControl.seekTo(0);
 						break;
 					}
@@ -772,7 +803,6 @@ public final class MusicService extends Service {
 					}
 
 					MediaDescriptionCompat descriptionCompat = ItemListData.playOrderList.get(ItemListData.CURRENT_MUSIC_INDEX);
-					saveData();
 					mMusicItem = MusicUtil.d2m(descriptionCompat);
 					MusicControl.setDataSource(this, descriptionCompat);
 
@@ -785,6 +815,7 @@ public final class MusicService extends Service {
 				break;
 
 				case ServiceActions.ACTION_FAST_SHUFFLE: {
+
 					saveData();
 
 					//get data
@@ -813,7 +844,9 @@ public final class MusicService extends Service {
 				break;
 
 				case ServiceActions.ACTION_ITEM_CLICK: {
+
 					saveData();
+
 					MusicItem item = intent.getParcelableExtra("item");
 					if (item == null) break;
 
@@ -842,7 +875,7 @@ public final class MusicService extends Service {
 						} else {
 							Log.d(TAG, "onStartCommand: has played, so resume music");
 							flashMode = ReceiverOnMusicPlay.FLASH_UI_PLAY;
-							MusicControl.playMusic();
+							MusicControl.resume();
 						}
 					}
 				}
@@ -1103,9 +1136,16 @@ public final class MusicService extends Service {
 
 	}
 
+	@SuppressWarnings({"WeakerAccess"})
 	public static class MusicControl {
 
 		private static MediaPlayer mediaPlayer = null;
+
+		public static void resume() {
+			if (mediaPlayer == null) return;
+
+			mediaPlayer.start();
+		}
 
 		public enum PlayerState {
 			PLAYING,
@@ -1126,6 +1166,9 @@ public final class MusicService extends Service {
 
 			mediaPlayer = new MediaPlayer();
 			MusicControl.mediaPlayer.setOnCompletionListener(mp -> {
+
+				saveData();
+
 				switch (PreferenceUtil.getDefault(context).getString(Values.SharedPrefsTag.PLAY_TYPE, PlayType.REPEAT_NONE)) {
 					case PlayType.REPEAT_LIST: {
 						// TODO: 2019/5/30
@@ -1139,7 +1182,7 @@ public final class MusicService extends Service {
 
 					case PlayType.REPEAT_ONE: {
 						MusicControl.seekTo(0);
-						MusicControl.playMusic();
+						MusicControl.resume();
 					}
 					break;
 				}
@@ -1151,48 +1194,35 @@ public final class MusicService extends Service {
 			});
 
 			mediaPlayer.setOnPreparedListener(mp -> {
+				if (stopPlay) {
+					stopPlay = false;
+					return;
+				}
+
 				mp.start();
 				serviceWeakReference.get().startFN();
 				HAS_PLAYED = true;
 				playerState = PlayerState.PLAYING;
+
+				if (mMusicItem != null) {
+					PreferenceUtil.getDefault(context).edit()
+							.putInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, mMusicItem.getMusicID()).apply();
+				}
 			});
 		}
 
-		private synchronized static void reset(final boolean saveData) {
+		private synchronized static void reset() {
 			if (mediaPlayer == null) return;
-//			/*
-//			 * 记录播放信息
-//			 * */
-//			if (HAS_PLAYED && mMusicItem != null && saveData) {
-//				final List<Detail> infos = LitePal.where("MusicId = ?", String.valueOf(mMusicItem.getMusicID())).find(Detail.class);
-//				if (infos.size() > 0) {
-//					Detail detail = infos.get(0);
-//					if (mediaPlayer.getCurrentPosition() < MINIMUM_PLAY_TIME) {
-//						detail.setMinimumPlayTimes(detail.getMinimumPlayTimes() + 1);
-//					} else {
-//						detail.setPlayDuration(detail.getPlayDuration() + mediaPlayer.getCurrentPosition());
-//					}
-//					detail.setPlayTimes(detail.getPlayTimes() + 1);
-//					detail.save();
-//				} else {
-//					Detail detail = new Detail();
-//					detail.setMusicId(mMusicItem.getMusicID());
-//					if (mediaPlayer.getCurrentPosition() < MINIMUM_PLAY_TIME) {
-//						detail.setMinimumPlayTimes(detail.getMinimumPlayTimes() + 1);
-//					} else {
-//						detail.setPlayDuration(detail.getPlayDuration() + mediaPlayer.getCurrentPosition());
-//					}
-//					detail.setPlayTimes(detail.getPlayTimes() + 1);
-//					detail.save();
-//				}
-//			}
+
 			mediaPlayer.reset();
 		}
 
 		/**
 		 * play music (仅用于已准备好的 mediaPlayer)
-		 * use {@link MediaPlayer#setOnPreparedListener(MediaPlayer.OnPreparedListener)}
+		 *
+		 * @deprecated use {@link MediaPlayer#setOnPreparedListener(MediaPlayer.OnPreparedListener)}
 		 */
+		@Deprecated
 		private synchronized static void playMusic() {
 			if (mediaPlayer == null) {
 				Log.d(TAG, "playMusic: mediaPlayer is null !");

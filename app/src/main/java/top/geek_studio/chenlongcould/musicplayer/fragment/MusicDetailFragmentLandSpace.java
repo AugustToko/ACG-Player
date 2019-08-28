@@ -454,7 +454,7 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 		updateSeek();
 
 		mMusicDetail2Binding.includeSeekBarCar.seekBar.setProgress(0);
-		mMusicDetail2Binding.includeSeekBarCar.rightText.setText(String.valueOf(Data.S_SIMPLE_DATE_FORMAT.format(new Date(ReceiverOnMusicPlay.getDuration()))));
+		mMusicDetail2Binding.includeSeekBarCar.rightText.setText(Data.S_SIMPLE_DATE_FORMAT.format(new Date(ReceiverOnMusicPlay.getDuration())));
 		mMusicDetail2Binding.includeSeekBarCar.seekBar.setMax(ReceiverOnMusicPlay.getDuration());
 	}
 
@@ -462,12 +462,12 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 		mCarViewActivity.runOnUiThread(() -> {
 			//load image
 			GlideApp.with(MusicDetailFragmentLandSpace.this)
-					.load(Data.getCurrentCover() == null ? R.drawable.ic_audiotrack_24px : Data.getCurrentCover())
+					.load(Data.getCurrentCover() == null ? R.drawable.default_album_art : Data.getCurrentCover())
 					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
 					.into(mMusicDetail2Binding.albumImage);
 
 			GlideApp.with(MusicDetailFragmentLandSpace.this)
-					.load(Data.getCurrentCover() == null ? R.drawable.ic_audiotrack_24px : Data.getCurrentCover())
+					.load(Data.getCurrentCover() == null ? R.drawable.default_album_art : Data.getCurrentCover())
 					.apply(bitmapTransform(Data.sBlurTransformationCarView))
 					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
 					.into(mMusicDetail2Binding.backgroundImage);

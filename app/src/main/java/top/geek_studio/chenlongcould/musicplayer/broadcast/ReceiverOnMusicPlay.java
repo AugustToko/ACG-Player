@@ -86,17 +86,6 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		}
 	}
 
-	@SuppressWarnings("unused")
-	public synchronized static void setMusicItem(final MusicItem item) {
-		if (Data.sMusicBinder != null) {
-			try {
-				Data.sMusicBinder.setCurrentMusicData(item);
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
 	@Nullable
 	public static MusicItem getCurrentItem() {
 		if (Data.sMusicBinder == null) {

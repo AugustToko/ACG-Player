@@ -16,12 +16,13 @@ android {
         applicationId "top.geek_studio.chenlongcould.musicplayer"
         minSdkVersion 21
         targetSdkVersion 29
-        versionName '2.6.9.6(20190701)'
+        versionName '2.7.0.0(20190828)'
         testInstrumentationRunner "android.support.albumLoader.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config
-        versionCode 144
+        versionCode 145
         flavorDimensions "default"
         multiDexEnabled = false
+        proguardFiles 'proguard-rules.pro'
     }
     buildTypes {
         release {
@@ -53,7 +54,7 @@ android {
 //            }
 //        }
 //    }
-    buildToolsVersion '28.0.3'
+    buildToolsVersion '29.0.2'
     compileOptions {
         sourceCompatibility '1.8'
         targetCompatibility '1.8'

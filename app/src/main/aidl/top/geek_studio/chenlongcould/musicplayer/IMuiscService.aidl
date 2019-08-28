@@ -11,9 +11,6 @@ interface IMuiscService {
     void seekTo(in int position);
     void release();
 
-    //other data input
-    void setCurrentMusicData(in MusicItem item);
-
     void addNextWillPlayItem(in MusicItem item);
 
     void addToOrderList(in MusicItem item);
@@ -27,4 +24,6 @@ interface IMuiscService {
     int getCurrentIndex();
 
     void setCurrentIndex(in int index);
+
+    void loadMusicItem(in MusicItem item);
 }

@@ -296,6 +296,8 @@ public class MusicUtil {
 		bundle.putString("mimeType", item.getMimeName());
 		bundle.putLong("duration", item.getDuration());
 
+		Log.d(TAG, "m2d: " + Uri.fromFile(new File(item.getMusicPath())));
+
 		final MediaDescriptionCompat.Builder builder = new MediaDescriptionCompat.Builder()
 				.setTitle(item.getMusicName())
 				.setSubtitle(item.getMusicAlbum())

@@ -8,15 +8,24 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.os.RemoteException;
 import android.provider.MediaStore;
-import android.view.*;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
+
+import java.util.List;
+
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
@@ -27,8 +36,6 @@ import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
-
-import java.util.List;
 
 public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdapter.ViewHolder>
 		implements FastScrollRecyclerView.SectionedAdapter {
@@ -200,7 +207,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 			mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, mContext.getString(R.string.add_to_playlist));
 			mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, mContext.getString(R.string.show_album));
 			mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, mContext.getString(R.string.more_info));
-			mMenu.add(Menu.NONE, Menu.FIRST + 6, 0, mContext.getString(R.string.drop_to_trash_can));
+//			mMenu.add(Menu.NONE, Menu.FIRST + 6, 0, mContext.getString(R.string.drop_to_trash_can));
 
 			MenuInflater menuInflater = mContext.getMenuInflater();
 			menuInflater.inflate(R.menu.recycler_song_item_menu, mMenu);

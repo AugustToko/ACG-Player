@@ -84,7 +84,6 @@ public interface Values {
 		 */
 		String LAST_PLAY_MUSIC_ID = "LAST_PLAY_MUSIC_ID";
 
-		String TRASH_CAN_INFO = "TRASH_CAN_INFO";
 		String SHOW_NOTICE_ADD_TAB = "SHOW_NOTICE_ADD_TAB";
 		String ALBUM_LOCK_SCREEN = "ALBUM_LOCK_SCREEN";
 		String BLUR_ALBUM_LOCK_SCREEN = "BLUR_ALBUM_LOCK_SCREEN";
@@ -124,21 +123,6 @@ public interface Values {
 		public static final String MODE_CAR = "car";
 	}
 
-	/**
-	 * 对于 {@link top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment} 中的背景进行样式设定
-	 *
-	 * @deprecated use {@link top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment.BackgroundStyle}
-	 */
-	@Deprecated
-	final class BackgroundStyle {
-		public static final String STYLE_BACKGROUND_BLUR = "BLUR";
-		public static final String STYLE_BACKGROUND_AUTO_COLOR = "AUTO_COLOR";
-
-		/**
-		 * background style model
-		 */
-		public static String DETAIL_BACKGROUND = STYLE_BACKGROUND_BLUR;
-	}
 
 	final class TEMP {
 		public static boolean switchNightDone = false;

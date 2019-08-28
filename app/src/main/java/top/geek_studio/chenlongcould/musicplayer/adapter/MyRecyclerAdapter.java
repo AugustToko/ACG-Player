@@ -954,7 +954,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 			mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, resources.getString(R.string.more_info));
 			mMenu.add(Menu.NONE, Menu.FIRST + 6, 0, resources.getString(R.string.share));
-			mMenu.add(Menu.NONE, Menu.FIRST + 7, 0, resources.getString(R.string.drop_to_trash_can));
+//			mMenu.add(Menu.NONE, Menu.FIRST + 7, 0, resources.getString(R.string.drop_to_trash_can));
 			mMenu.add(Menu.NONE, Menu.FIRST + 8, 0, resources.getString(R.string.add_to_black_list));
 			mMenu.add(Menu.NONE, Menu.FIRST + 9, 0, resources.getString(R.string.del));
 

@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -151,9 +152,10 @@ public final class MusicDetailFragment extends BaseFragment {
 	/**
 	 * 最后一次加载的album id
 	 *
-	 * @see #setCurrentData(MusicItem, Bitmap, boolean...)
+	 * @see #setCurrentMusicData(MusicItem, Bitmap, boolean...)
 	 */
 	private static int mLastAlbumId = -1;
+
 	/**
 	 * for {@link #setUpImage(Bitmap, ImageView, ImageView, TextView)}
 	 *
@@ -251,7 +253,6 @@ public final class MusicDetailFragment extends BaseFragment {
 		clearAnimations();
 
 		setUpToolbar();
-
 
 		mMusicAlbumImageOth3.setX(0 - mMusicAlbumImage.getWidth());
 		mMusicAlbumImageOth2.setX(mMusicAlbumImage.getWidth() * 2);
@@ -509,6 +510,9 @@ public final class MusicDetailFragment extends BaseFragment {
 	private int targetColor;
 	private List<Disposable> disposables = new ArrayList<>();
 
+	/**
+	 * 仅设置图像
+	 */
 	private void setUpImage(@Nullable final Bitmap bitmap, @NonNull final ImageView bgUp
 			, @NonNull final ImageView bgDown, final TextView nextText) {
 
@@ -604,30 +608,28 @@ public final class MusicDetailFragment extends BaseFragment {
 
 	}
 
-	/**
-	 * preLoad data
-	 */
-	private void preLoad() {
-		final MusicItem item = Data.sCurrentMusicItem;
-		if (item != null && item.getMusicID() != -1) {
-			final Bitmap cover = Utils.Audio.getCoverBitmapFull(getContext(), item.getAlbumId());
-			setCurrentData(item, cover, true);
-
-			try {
-				if (Data.sMusicBinder != null && Data.sMusicBinder.isPlayingMusic()) {
-					mPlayPauseDrawable.setPause(true);
-					mPlayPauseDrawable2InfoBar.setPause(true);
-				}
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			} catch (IllegalStateException e) {
-				e.printStackTrace();
-			}
-
-		} else {
-			Log.d(TAG, "preLoad: item is null");
-		}
-	}
+//	/**
+//	 * preLoad data
+//	 */
+//	private void preLoad() {
+//		final MusicItem item = Data.sCurrentMusicItem;
+//		if (item != null && item.getMusicID() != -1) {
+//			final Bitmap cover = Utils.Audio.getCoverBitmapFull(getContext(), item.getAlbumId());
+//			setCurrentMusicData(item, cover, true);
+//
+//			try {
+//				if (Data.sMusicBinder != null && Data.sMusicBinder.isPlayingMusic()) {
+//					mPlayPauseDrawable.setPause(true);
+//					mPlayPauseDrawable2InfoBar.setPause(true);
+//				}
+//			} catch (RemoteException | IllegalStateException e) {
+//				e.printStackTrace();
+//			}
+//
+//		} else {
+//			Log.d(TAG, "preLoad: item is null");
+//		}
+//	}
 
 	public static MusicDetailFragment newInstance() {
 		return new MusicDetailFragment();
@@ -651,8 +653,6 @@ public final class MusicDetailFragment extends BaseFragment {
 		findView(view);
 
 		initView(view);
-
-		preLoad();
 
 		//init seekBar
 		mHandler.sendEmptyMessage(NotLeakHandler.INIT_SEEK_BAR);
@@ -749,26 +749,27 @@ public final class MusicDetailFragment extends BaseFragment {
 		mPlayButton.setScaleY(0);
 	}
 
-	private void setCurrentData(@NonNull final MusicItem item, @Nullable final Bitmap cover, boolean... forceLoadImage) {
+
+	private void setCurrentMusicData(@NonNull final MusicItem item, @Nullable final Bitmap cover, boolean... loadImage) {
 		mMainActivity.runOnUiThread(() -> {
-			setSlideInfoBar(item.getMusicName(), item.getMusicAlbum(), cover);
 			mCurrentMusicNameText.setText(item.getMusicName());
 			mCurrentAlbumNameText.setText(item.getMusicAlbum());
 
-			// 根据专辑图更改状态栏明暗
+			setSlideInfoBar(item.getMusicName(), item.getMusicAlbum(), cover);
+
+//			// 根据专辑图更改状态栏明暗
 //			if (cover != null && !cover.isRecycled()) {
 //				Utils.Ui.setStatusBarTextColor(mMainActivity, new Palette.Builder(cover)
 //						.generate().getLightVibrantColor(Utils.Ui.getPrimaryColor(mMainActivity)));
 //			}
 
 			// update album id
-			if (item.getAlbumId() != mLastAlbumId || forceLoadImage.length > 0) {
+			if (item.getAlbumId() != mLastAlbumId || loadImage.length > 0) {
 				setUpImage(cover, mBGup, mBGdown, mNextWillText);
 				mLastAlbumId = item.getAlbumId();
 			}
 
 			updateFav(item);
-
 		});
 	}
 
@@ -985,7 +986,6 @@ public final class MusicDetailFragment extends BaseFragment {
 	 * @param cover     music cover image, it is @NullAble(some types of music do not have cover)
 	 */
 	private void setSlideInfoBar(final String songName, final String albumName, @Nullable final Bitmap cover) {
-
 		mMainActivity.runOnUiThread(() -> {
 			setIconLightOrDark(cover);
 
@@ -1583,19 +1583,22 @@ public final class MusicDetailFragment extends BaseFragment {
 	@SuppressWarnings("WeakerAccess")
 	public static final class NotLeakHandler extends Handler {
 
+		private static final int SEEK_BAR_UPDATE = 53;        //just for this fragment
+
+		public static final int INIT_SEEK_BAR = 54;
+
 		/**
-		 * For {@link #mHandler}
+		 * @deprecated use {@link #SETUP_MUSIC_DATA}
 		 */
-		public static final int INIT_SEEK_BAR = 54;        //just for this
-		public static final int SET_SEEK_BAR = 59;
-		public static final int RECYCLER_SCROLL = 55001;
+		@Deprecated
+		public static final int SET_CURRENT_DATA = 55;
+
+		public static final int SETUP_MUSIC_DATA = 56;
 		public static final int SET_BUTTON_PAUSE = 57;
 		public static final int SET_BUTTON_PLAY = 58;
-		public static final int setCurrentInfoWithoutMainImage = 60;
+		public static final int SET_SEEK_BAR = 59;
 		public static final int TOGGLE_FAV = 61;
-		private static final int SEEK_BAR_UPDATE = 53;        //just for this
-
-		public static final int SET_CURRENT_DATA = 55;
+		public static final int RECYCLER_SCROLL = 62;
 
 		private WeakReference<MainActivity> mWeakReference;
 
@@ -1644,8 +1647,7 @@ public final class MusicDetailFragment extends BaseFragment {
 				case SEEK_BAR_UPDATE: {
 					mWeakReference.get().runOnUiThread(() -> {
 						//点击body 或 music 正在播放 才可以进行seekBar更新
-						if (Data.sMusicBinder == null || !MusicUtil.availableCurrentItem()
-								|| !ReceiverOnMusicPlay.isPlayingMusic()) {
+						if (!ReceiverOnMusicPlay.isPlayingMusic() || !MusicUtil.availableCurrentItem()) {
 							return;
 						}
 
@@ -1752,16 +1754,8 @@ public final class MusicDetailFragment extends BaseFragment {
 				}
 				break;
 
-				case setCurrentInfoWithoutMainImage: {
-					final Bundle data = msg.getData();
-					mFragmentWeakReference.get().setCurrentInfoWithoutMainImage(Data.sCurrentMusicItem.getMusicName()
-							, Data.sCurrentMusicItem.getMusicAlbum(), Data.getCurrentCover());
-					data.clear();
-				}
-				break;
-
 				case SET_CURRENT_DATA: {
-					mFragmentWeakReference.get().setCurrentData(Data.sCurrentMusicItem, Data.getCurrentCover());
+					mFragmentWeakReference.get().setCurrentMusicData(Data.sCurrentMusicItem, Data.getCurrentCover());
 				}
 				break;
 
@@ -1769,6 +1763,13 @@ public final class MusicDetailFragment extends BaseFragment {
 					mWeakReference.get().runOnUiThread(() -> mFragmentWeakReference.get().updateFav(Data.sCurrentMusicItem));
 				}
 				break;
+
+				case SETUP_MUSIC_DATA: {
+					MusicItem item = (MusicItem) msg.obj;
+					Bitmap art = BitmapFactory.decodeFile(item.getArtwork());
+					Data.setCurrentCover(art);
+					mFragmentWeakReference.get().setCurrentMusicData(item, art, true);
+				}
 
 				default: {
 					break;

@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -185,15 +186,19 @@ public final class MusicListFragment extends BaseListFragment {
 
 				final MusicItem item = builder.build();
 
-				if (lastId == id) Data.sCurrentMusicItem = item;
-
 				Data.sMusicItems.add(item);
 				Data.sMusicItemsBackUp.add(item);
 
 				Data.sPlayOrderList.add(item);
 				Data.sPlayOrderListBackup.add(item);
 
-				CustomThreadPool.post(() -> MusicUtil.findArtworkWithId(mActivity, item));
+				if (lastId == id) {
+					MusicUtil.findArtworkWithId(mActivity, item);
+					Data.sCurrentMusicItem = item;
+				} else {
+					CustomThreadPool.post(() -> MusicUtil.findArtworkWithId(mActivity, item));
+				}
+
 			}
 			while (cursor.moveToNext());
 			cursor.close();
@@ -224,6 +229,14 @@ public final class MusicListFragment extends BaseListFragment {
 			@Override
 			public final void onComplete() {
 				if (adapter != null) adapter.notifyDataSetChanged();
+
+				// 更新最后播放
+				if (Data.sCurrentMusicItem != null && Data.sCurrentMusicItem.getMusicID() > -1) {
+					final Message message = Message.obtain();
+					message.obj = Data.sCurrentMusicItem;
+					message.what = MusicDetailFragment.NotLeakHandler.SETUP_MUSIC_DATA;
+					MusicDetailFragment.sendMessage(message);
+				}
 			}
 		});
 	}

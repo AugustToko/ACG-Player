@@ -10,7 +10,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
@@ -52,6 +51,7 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseCompatActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivitySettingsBinding;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
@@ -360,14 +360,10 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 			// TODO: 2019/5/30 专门设立一个 action 用来更新 notification
 			if (Data.HAS_PLAYED) {
-				try {
-					if (Data.sMusicBinder.isPlayingMusic()) {
-						MainActivity.startService(this, MusicService.ServiceActions.ACTION_PLAY);
-					} else {
-						MainActivity.startService(this, MusicService.ServiceActions.ACTION_PAUSE);
-					}
-				} catch (RemoteException e) {
-					e.printStackTrace();
+				if (ReceiverOnMusicPlay.isPlayingMusic()) {
+					MainActivity.startService(this, MusicService.ServiceActions.ACTION_PLAY);
+				} else {
+					MainActivity.startService(this, MusicService.ServiceActions.ACTION_PAUSE);
 				}
 			}
 		});
@@ -671,8 +667,8 @@ public final class SettingsActivity extends BaseCompatActivity {
 	private void initPreView() {
 //		mNightSwitch.setChecked(Values.BackgroundStyle.NIGHT_MODE);
 
-		mStyleSwitch.setChecked(Values.BackgroundStyle.STYLE_BACKGROUND_AUTO_COLOR.equals(preferences
-				.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.BackgroundStyle.STYLE_BACKGROUND_BLUR)));
+		mStyleSwitch.setChecked(MusicDetailFragment.BackgroundStyle.STYLE_BACKGROUND_AUTO_COLOR.equals(preferences
+				.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, MusicDetailFragment.BackgroundStyle.STYLE_BACKGROUND_BLUR)));
 
 		mSettingsBinding.colorNotiSwitch.setChecked(preferences.getBoolean(NOTIFICATION_COLORIZED, true));
 
@@ -682,8 +678,8 @@ public final class SettingsActivity extends BaseCompatActivity {
 
 		mSettingsBinding.albumSwitch.setChecked(preferences.getBoolean(USE_NET_WORK_ALBUM, false));
 
-		mStyleSwitch.setChecked(Values.BackgroundStyle.STYLE_BACKGROUND_BLUR.equals(preferences
-				.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, Values.BackgroundStyle.STYLE_BACKGROUND_BLUR)));
+		mStyleSwitch.setChecked(MusicDetailFragment.BackgroundStyle.STYLE_BACKGROUND_BLUR.equals(preferences
+				.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, MusicDetailFragment.BackgroundStyle.STYLE_BACKGROUND_BLUR)));
 
 		mSettingsBinding.textDHideShort.setText(getString(R.string.skip_songs_that_are_less_than_the_minimum_duration
 				, MusicService.DEFAULT_SHORT_DURATION));
