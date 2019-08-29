@@ -6,25 +6,21 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.RemoteException;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
 
 import org.litepal.LitePal;
@@ -42,8 +38,8 @@ import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.MessageWorker;
 import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseListActivity;
+import top.geek_studio.chenlongcould.musicplayer.database.DataModel;
 import top.geek_studio.chenlongcould.musicplayer.database.Detail;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
 import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
@@ -60,8 +56,8 @@ public class MusicUtil {
 
 	private static final String TAG = "MusicUtil";
 
-	public static void setTimer(@NonNull final Context context) {
-		if (Data.sCurrentMusicItem == null || Data.sCurrentMusicItem.getMusicID() == -1) {
+	public static void setTimer(@NonNull final Context context, final DataModel dataModel) {
+		if (dataModel.mCurrentMusicItem == null || dataModel.mCurrentMusicItem.getMusicID() == -1) {
 			Toast.makeText(context, "You need play music first!", Toast.LENGTH_SHORT).show();
 			return;
 		}
@@ -109,106 +105,6 @@ public class MusicUtil {
 			intent.putExtra(Intent.EXTRA_TEXT, content.toString());
 			context.startActivity(intent);
 		});
-	}
-
-	public static boolean loadDataSource(final Context context) {
-		//noinspection StatementWithEmptyBody
-		if (Data.sMusicItems.isEmpty()) {
-
-			SharedPreferences preferences = PreferenceUtil.getDefault(context);
-
-			/*---------------------- init Data!!!! -------------------*/
-			final Cursor cursor = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-			if (cursor != null && cursor.moveToFirst()) {
-				//没有歌曲直接退出app
-				if (cursor.getCount() == 0) {
-					return false;
-				} else {
-
-					// skip short
-					final boolean skipShort = preferences
-							.getBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
-
-					// black list
-					final LitePalDB blackList = new LitePalDB("BlackList", App.BLACK_LIST_VERSION);
-					blackList.addClassName(MyBlackPath.class.getName());
-					LitePal.use(blackList);
-					List<MyBlackPath> lists = LitePal.findAll(MyBlackPath.class);
-					LitePal.useDefault();
-
-					// music that you last played
-					int lastId = preferences.getInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, -1);
-
-					do {
-						final String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-
-						boolean skip = false;
-
-						for (int i = 0; i < lists.size(); i++) {
-							final MyBlackPath bp = lists.get(i);
-
-							if (bp.getDirPath().contains(path) || bp.getDirPath().equals(path)) {
-								skip = true;
-								lists.remove(bp);
-								break;
-							}
-
-						}
-
-						if (skip) {
-							Log.d(TAG, "loadDataSource: skip the song that in the blacklist");
-							continue;
-						}
-
-						final int duration = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-						if (skipShort && duration <= MusicService.DEFAULT_SHORT_DURATION) {
-							Log.d(TAG, "loadDataSource: the music-file duration is " + duration + " (too short)" +
-									", skip...");
-							continue;
-						}
-
-						final String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
-						final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-						final String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
-						final int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
-						final int size = (int) cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE));
-						final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-						final long addTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED));
-						final int albumId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
-						final int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST_ID));
-
-						final MusicItem.Builder builder = new MusicItem.Builder(id, name, path)
-								.musicAlbum(albumName)
-								.addTime(addTime)
-								.artist(artist)
-								.duration(duration)
-								.mimeName(mimeType)
-								.size(size)
-								.addAlbumId(albumId)
-								.addArtistId(artistId);
-
-
-						if (lastId == id) {
-							Data.sCurrentMusicItem = builder.build();
-						}
-
-						final MusicItem item = builder.build();
-						Data.sMusicItems.add(item);
-						Data.sMusicItemsBackUp.add(item);
-
-						CustomThreadPool.post(() -> findArtworkWithId(context, item));
-					}
-					while (cursor.moveToNext());
-					cursor.close();
-				}
-			} else {
-				//cursor null or getCount == 0
-				return false;
-			}
-		} else {
-			// already have data
-		}
-		return true;
 	}
 
 	public static void findArtworkWithId(@NonNull final Context context, final Item item) {
@@ -307,12 +203,6 @@ public class MusicUtil {
 				.setMediaUri(Uri.fromFile(new File(item.getMusicPath())))
 				.setExtras(bundle);
 		return builder.build();
-	}
-
-	public static boolean availableCurrentItem() {
-		boolean result;
-		result = Data.sCurrentMusicItem != null && Data.sCurrentMusicItem.getMusicID() != -1;
-		return result;
 	}
 
 	public static void setRingtone(@NonNull final Context context, final int id) {
@@ -690,9 +580,13 @@ public class MusicUtil {
 					for (final MusicItem item : items) {
 						Data.sPlayOrderList.remove(item);
 						Data.sPlayOrderListBackup.remove(item);
-						Data.S_TRASH_CAN_LIST.remove(item);
 						worker.removeItem(item);
 						LitePal.deleteAll(Detail.class, "musicId=?", String.valueOf(item.getMusicID()));
+						try {
+							Data.sMusicBinder.removeFromOrderList(item);
+						} catch (RemoteException e) {
+							e.printStackTrace();
+						}
 					}
 				} while (cursor.moveToNext());
 
@@ -721,8 +615,6 @@ public class MusicUtil {
 				cursor.close();
 			}
 			context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
-			// sync order list
-			Data.syncPlayOrderList(context);
 
 			// TODO: 2019/6/7 统一使用 worker
 			// final reload music item in music list fragment
@@ -730,37 +622,6 @@ public class MusicUtil {
 
 //			Toast.makeText(context, context.getString(R.string.deleted_x_songs, songs.size()), Toast.LENGTH_SHORT).show();
 		} catch (SecurityException ignored) {
-		}
-	}
-
-	// TODO: 2019/6/8 dropToTrash
-	public static void dropToTrash(@NonNull Context context, @Nullable MusicItem item) {
-		if (item == null) return;
-
-		if (PreferenceUtil.getDefault(context).getBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, true)) {
-			final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-			builder.setTitle(context.getString(R.string.sure_int));
-			builder.setMessage(context.getString(R.string.drop_to_trash_can));
-			final FrameLayout frameLayout = new FrameLayout(context);
-			final CheckBox checkBox = new CheckBox(context);
-			checkBox.setText(context.getString(R.string.do_not_show_again));
-			frameLayout.addView(checkBox);
-			final FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-			params.leftMargin = (int) context.getResources().getDimension(R.dimen.margin_16);
-			checkBox.setLayoutParams(params);
-			builder.setView(frameLayout);
-			builder.setCancelable(true);
-			builder.setNegativeButton(context.getString(R.string.sure), (dialog, which) -> {
-				if (checkBox.isChecked()) {
-					PreferenceUtil.getDefault(context).edit().putBoolean(Values.SharedPrefsTag.TIP_NOTICE_DROP_TRASH, false).apply();
-				}
-				Data.S_TRASH_CAN_LIST.add(item);
-				dialog.dismiss();
-			});
-			builder.setPositiveButton(context.getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
-			builder.show();
-		} else {
-			Data.S_TRASH_CAN_LIST.add(item);
 		}
 	}
 

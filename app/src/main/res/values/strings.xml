@@ -33,7 +33,7 @@
 
     <string name="image_trans_album" translatable="false">image trans album</string>
     <string name="color_accent">Color Accent</string>
-    <string name="colorprimarydark">Color Primary Dark</string>
+    <string name="color_primary_dark">Color Primary Dark</string>
     <string name="_00_00" translatable="false">00:00</string>
     <string name="settings">Settings</string>
     <string name="about">About</string>
@@ -139,7 +139,7 @@
     <string name="favorites">Favorites</string>
     <string name="black_list">Black List</string>
     <string name="skip_the_directory_that_in_the_blacklist">Ignore audio in the blacklist directory</string>
-    <string name="shortest_time">Ignore too short audio</string>
+    <string name="Ignore_short_time">Ignore too short audio</string>
     <string name="skip_songs_that_are_less_than_the_minimum_duration">Skip songs that are less than the minimum duration: %1$d</string>
     <string name="filter">Filter</string>
     <string name="remove_frome_black_list">Remove from the blacklist</string>
@@ -176,7 +176,7 @@
     <string name="delete_artist_images_from_sdcard_download_artist">Delete artist images from /sdcard/DownLoad/Artist</string>
     <string name="clean_artists_images">Clean Artists Images</string>
     <string name="delete_covers_from_sdcard_download_albumcovers">Delete covers from /sdcard/DownLoad/AlbumCovers</string>
-    <string name="clean_album_covers">Clean Album Covers</string>
+    <string name="clear_album_covers">Clean Album Covers</string>
     <string name="album_cover_by_network">Album Cover By Network</string>
     <string name="get_cover_from_network_sdcard_download_albumcovers">Get cover from network, /sdcard/DownLoad/AlbumCovers</string>
     <string name="add_to_black_list">Add to black list</string>

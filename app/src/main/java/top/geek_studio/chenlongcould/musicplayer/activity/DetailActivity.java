@@ -8,25 +8,30 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.ColorInt;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
+
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.material.snackbar.Snackbar;
+
 import org.litepal.LitePal;
-import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.GlideApp;
-import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseCompatActivity;
-import top.geek_studio.chenlongcould.musicplayer.database.Detail;
-import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityInfoDetailBinding;
-import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
-import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import top.geek_studio.chenlongcould.musicplayer.Data;
+import top.geek_studio.chenlongcould.musicplayer.GlideApp;
+import top.geek_studio.chenlongcould.musicplayer.R;
+import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseCompatActivity;
+import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.database.Detail;
+import top.geek_studio.chenlongcould.musicplayer.databinding.ActivityInfoDetailBinding;
+import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
+import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 public final class DetailActivity extends BaseCompatActivity {
 
@@ -51,7 +56,9 @@ public final class DetailActivity extends BaseCompatActivity {
 		if (infos.size() != 0) {
 			detailBinding.includeContent.body.setVisibility(View.VISIBLE);
 			ArrayList<MusicItem> itemHelperList = new ArrayList<>();
-			for (MusicItem item : Data.sMusicItems) {
+
+			// todo: activityWeakReference
+			for (MusicItem item : MainActivity.activityWeakReference.get().getDataModel().mMusicItems) {
 				for (Detail info : infos) {
 					if (info.getMusicId() == item.getMusicID()) {
 						itemHelperList.add(item);

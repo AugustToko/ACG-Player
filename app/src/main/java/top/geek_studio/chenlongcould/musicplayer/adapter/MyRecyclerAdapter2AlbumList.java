@@ -21,6 +21,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
+import java.util.HashMap;
 import java.util.List;
 
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
@@ -48,6 +49,9 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
 	private MainActivity mMainActivity;
 
+	private HashMap<String, Runnable> runnableHashMap = new HashMap<>();
+
+
 	/**
 	 * the json data, from network
 	 */
@@ -71,24 +75,31 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
 		if (stopLoadImage) return;
 
+		String path = mAlbumNameList.get(viewHolder.getAdapterPosition()).getmArtwork();
+
+		viewHolder.mImageView.setTag(R.string.key_id_3, mAlbumNameList.get(viewHolder.getAdapterPosition()).getmArtwork());
+
 		// set tag
-		if (mAlbumNameList.get(viewHolder.getAdapterPosition()).getmArtwork() != null) {
-			viewHolder.mImageView.setTag(R.string.key_id_3, mAlbumNameList.get(viewHolder.getAdapterPosition()).getmArtwork());
-			CustomThreadPool.post(() -> GlideApp.with(mMainActivity)
-							.load(viewHolder.mImageView.getTag(R.string.key_id_3))
-//					.load(path)
-							.diskCacheStrategy(DiskCacheStrategy.NONE)
-							.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
-							.into(new SimpleTarget<Drawable>() {
-								@Override
-								public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-									mMainActivity.runOnUiThread(() -> {
-										viewHolder.mImageView.setImageDrawable(resource);
-										viewHolder.invalidate();
-									});
-								}
-							})
-			);
+		if (path != null) {
+			final Runnable runnable = () -> {
+				GlideApp.with(mMainActivity)
+						.load(path)
+						.diskCacheStrategy(DiskCacheStrategy.NONE)
+						.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+						.into(new SimpleTarget<Drawable>() {
+							@Override
+							public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+								mMainActivity.runOnUiThread(() -> {
+									viewHolder.mImageView.setImageDrawable(resource);
+									viewHolder.invalidate();
+								});
+							}
+						});
+				runnableHashMap.remove(path);
+			};
+
+			runnableHashMap.put(path, runnable);
+			CustomThreadPool.post(runnable);
 		}
 //		else {
 //			final AlbumItem albumItem = mAlbumNameList.get(viewHolder.getAdapterPosition());
@@ -349,6 +360,12 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 	@Override
 	public void onViewRecycled(@NonNull ViewHolder holder) {
 		super.onViewRecycled(holder);
+		holder.mImageView.setImageDrawable(null);
+		GlideApp.with(holder.mImageView).clear(holder.mImageView);
+
+		final String k = (String) holder.mImageView.getTag(R.string.key_id_3);
+		CustomThreadPool.removeTask(runnableHashMap.get(k));
+
 		holder.mImageView.setTag(R.string.key_id_3, null);
 		holder.invalidate();
 	}

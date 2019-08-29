@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -33,12 +34,12 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter2AlbumList;
+import top.geek_studio.chenlongcould.musicplayer.database.DataModel;
 import top.geek_studio.chenlongcould.musicplayer.model.AlbumItem;
 import top.geek_studio.chenlongcould.musicplayer.model.Item;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
@@ -62,6 +63,8 @@ public final class AlbumListFragment extends BaseListFragment {
 	private List<AlbumItem> albumItemListBackup = new ArrayList<>();
 
 	private View mView;
+
+	private DataModel dataModel;
 
 	public static AlbumListFragment newInstance() {
 		return new AlbumListFragment();
@@ -89,6 +92,13 @@ public final class AlbumListFragment extends BaseListFragment {
 	}
 
 	@Override
+	public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		dataModel = ViewModelProviders.of(getActivity()).get(DataModel.class);
+		initAlbumData();
+	}
+
+	@Override
 	public FragmentType getFragmentType() {
 		return FragmentType.ALBUM_LIST_FRAGMENT;
 	}
@@ -96,7 +106,7 @@ public final class AlbumListFragment extends BaseListFragment {
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		mView = inflater.inflate(R.layout.fragment_album_list, container, false);
-		initAlbumData();
+		initRecyclerView();
 		return mView;
 	}
 
@@ -129,7 +139,7 @@ public final class AlbumListFragment extends BaseListFragment {
 
 				@Override
 				public void onSubscribe(Disposable d) {
-					Data.sDisposables.add(d);
+					dataModel.mDisposables.add(d);
 				}
 
 				@Override

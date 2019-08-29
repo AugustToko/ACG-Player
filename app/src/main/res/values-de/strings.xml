@@ -13,7 +13,7 @@
 	<string name="play_list">Wiedergabeliste</string>
 	<string name="add_recent">Zuletzt hinzufügen</string>
     <string name="color_accent">Farbakzent</string>
-	<string name="colorprimarydark">Farbe primär dunkel</string>
+    <string name="color_primary_dark">Farbe primär dunkel</string>
 	<string name="settings">die Einstellungen</string>
 	<string name="about">Über</string>
 	<string name="exit">Ausgang</string>

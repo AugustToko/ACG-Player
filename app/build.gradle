@@ -16,10 +16,10 @@ android {
         applicationId "top.geek_studio.chenlongcould.musicplayer"
         minSdkVersion 21
         targetSdkVersion 29
-        versionName '2.7.0.0(20190828)'
+        versionName '2.7.0.1(20190828)'
         testInstrumentationRunner "android.support.albumLoader.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config
-        versionCode 145
+        versionCode 146
         flavorDimensions "default"
         multiDexEnabled = false
         proguardFiles 'proguard-rules.pro'
@@ -74,6 +74,7 @@ dependencies {
     implementation 'androidx.palette:palette:1.0.0'
     implementation 'com.google.android.material:material:1.1.0-alpha09'
     implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
     testImplementation 'junit:junit:4.13-beta-3'
     implementation 'com.simplecityapps:recyclerview-fastscroll:2.0.0'
     //glide
@@ -113,4 +114,5 @@ dependencies {
     //    implementation 'me.weishu:free_reflection:1.2.0'
     // blur
     implementation 'com.github.mmin18:realtimeblurview:1.2.1'
+    implementation 'androidx.preference:preference:1.1.0-rc01'
 }

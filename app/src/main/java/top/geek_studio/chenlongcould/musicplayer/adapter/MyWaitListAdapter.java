@@ -33,7 +33,6 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.albumdetail.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseCompatActivity;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
-import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
@@ -62,7 +61,8 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 		View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_in_detail, viewGroup, false);
 		ViewHolder holder = new ViewHolder(view);
 
-		view.setOnClickListener(v -> MusicService.MusicControl.intentItemClick(mContext, mMusicItems.get(holder.getAdapterPosition())));
+		int index = holder.getAdapterPosition();
+		view.setOnClickListener(v -> MusicService.MusicControl.intentItemClick(mContext, mMusicItems.get(index), index));
 
 		holder.mItemMenuButton.setOnClickListener(v -> holder.mPopupMenu.show());
 
@@ -120,12 +120,6 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 							.setCancelable(false)
 							.setNegativeButton(mContext.getString(R.string.done), (dialog, which) -> dialog.dismiss());
 					builder.show();
-				}
-				break;
-
-				// drop to trash can
-				case Menu.FIRST + 6: {
-					MusicUtil.dropToTrash(mContext, mMusicItems.get(holder.getAdapterPosition()));
 				}
 				break;
 			}
@@ -207,7 +201,6 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 			mMenu.add(Menu.NONE, Menu.FIRST + 2, 0, mContext.getString(R.string.add_to_playlist));
 			mMenu.add(Menu.NONE, Menu.FIRST + 4, 0, mContext.getString(R.string.show_album));
 			mMenu.add(Menu.NONE, Menu.FIRST + 5, 0, mContext.getString(R.string.more_info));
-//			mMenu.add(Menu.NONE, Menu.FIRST + 6, 0, mContext.getString(R.string.drop_to_trash_can));
 
 			MenuInflater menuInflater = mContext.getMenuInflater();
 			menuInflater.inflate(R.menu.recycler_song_item_menu, mMenu);

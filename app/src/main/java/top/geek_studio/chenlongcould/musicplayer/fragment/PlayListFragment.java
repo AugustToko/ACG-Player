@@ -20,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -41,6 +42,7 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.PlayListAdapter;
+import top.geek_studio.chenlongcould.musicplayer.database.DataModel;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentPlaylistBinding;
 import top.geek_studio.chenlongcould.musicplayer.model.Item;
 import top.geek_studio.chenlongcould.musicplayer.model.PlayListItem;
@@ -61,6 +63,8 @@ public final class PlayListFragment extends BaseListFragment {
 	private PlayListAdapter mPlayListAdapter;
 
 	public List<PlayListItem> mPlayListItemList = new ArrayList<>();
+
+	private DataModel dataModel;
 
 	/**
 	 * add playlist item
@@ -133,6 +137,13 @@ public final class PlayListFragment extends BaseListFragment {
 		outState.putParcelableArrayList("data", (ArrayList<? extends Parcelable>) mPlayListItemList);
 	}
 
+	@Override
+	public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		dataModel = ViewModelProviders.of(getActivity()).get(DataModel.class);
+		initData();
+	}
+
 	/**
 	 * load data
 	 */
@@ -173,7 +184,7 @@ public final class PlayListFragment extends BaseListFragment {
 					mPlayListAdapter.notifyDataSetChanged();
 				}
 			});
-			Data.sDisposables.add(disposable);
+			dataModel.mDisposables.add(disposable);
 		}
 	}
 
@@ -216,7 +227,6 @@ public final class PlayListFragment extends BaseListFragment {
 		mPlayListAdapter = new PlayListAdapter(this, mPlayListItemList);
 		mPlayListBinding.recyclerView.setAdapter(mPlayListAdapter);
 
-		initData();
 		return mPlayListBinding.getRoot();
 	}
 
@@ -317,7 +327,7 @@ public final class PlayListFragment extends BaseListFragment {
 //					}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(result
 //							-> result.dispatchUpdatesTo(mWeakReference.get().mPlayListAdapter));
 //
-//					Data.sDisposables.add(disposable);
+//					Data.mDisposables.add(disposable);
 				}
 				break;
 				case REMOVE_TO_PLAYLIST: {
@@ -337,7 +347,7 @@ public final class PlayListFragment extends BaseListFragment {
 //					}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(result
 //							-> result.dispatchUpdatesTo(mWeakReference.get().mPlayListAdapter));
 //
-//					Data.sDisposables.add(disposable);
+//					Data.mDisposables.add(disposable);
 				}
 				break;
 				default:

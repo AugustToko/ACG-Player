@@ -1,15 +1,6 @@
-/*
- * ************************************************************
- * 文件：ItemCoverThreadPool.java  模块：app  项目：MusicPlayer
- * 当前修改时间：2019年01月27日 13:11:38
- * 上次修改时间：2019年01月27日 13:08:48
- * 作者：chenlongcould
- * Geek Studio
- * Copyright (c) 2019
- * ************************************************************
- */
-
 package top.geek_studio.chenlongcould.musicplayer.threadPool;
+
+import androidx.annotation.Nullable;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -22,7 +13,6 @@ public final class CustomThreadPool {
 	private ThreadPoolExecutor mThreadPoolExec;
 
 	private CustomThreadPool() {
-
 		int coreNum = Runtime.getRuntime().availableProcessors();
 		int maxPoolSize = coreNum * 2;
 		BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>();
@@ -34,6 +24,11 @@ public final class CustomThreadPool {
 			mInstance = new CustomThreadPool();
 		}
 		mInstance.mThreadPoolExec.execute(runnable);
+	}
+
+	public static void removeTask(@Nullable Runnable runnable) {
+		if (runnable == null) return;
+		mInstance.mThreadPoolExec.remove(runnable);
 	}
 
 	public static void finish() {

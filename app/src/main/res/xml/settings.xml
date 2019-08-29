@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+        xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/app_color">
+        <Preference
+                android:key="PRIMARY_COLOR"
+                android:summary="@string/this_is_body_color_like_toolbar"
+                android:title="@string/color_primary"
+                />
+        <Preference
+                android:key="PRIMARY_COLOR_DARK"
+                android:summary="@string/this_is_dark_color_like_status_bar"
+                android:title="@string/color_primary_dark"
+                />
+        <Preference
+                android:key="ACCENT_COLOR" android:summary="@string/the_accent_color_like_button"
+                android:title="@string/color_accent"
+                />
+        <Preference
+                android:key="TEXT_COLOR"
+                android:summary="@string/modify_the_title_color_on_a_toolbar_tablayout"
+                android:title="@string/set_title_color"
+                />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/style_settings">
+        <Preference
+                android:key="RECYCLER_VIEW_STYLE"
+                android:summary="@string/set_recyclerview_item_style"
+                android:title="@string/recyclerview_item_style"
+                />
+        <SwitchPreferenceCompat
+                android:key="BLUR_DETAIL_BACKGROUND"
+                android:summary="@string/set_background_color_or_image_with_blur"
+                android:title="@string/set_background_color_or_image_with_blur"
+                />
+        <Preference
+                android:key="SET_THEME" android:summary="@string/set_theme"
+                android:title="@string/theme"
+                />
+        <SwitchPreferenceCompat
+                android:key="NOTIFICATION_COLOR"
+                android:summary="@string/set_noti_background_colorized"
+                android:title="@string/color_noti"
+                />
+        <SwitchPreferenceCompat
+                android:key="SET_STATUS_BAR_MASK"
+                android:summary="@string/set_status_bar_translucent_no_black_square_mask"
+                android:title="@string/set_status_bar_translucent"
+                />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/filter">
+        <SwitchPreferenceCompat
+                android:key="IGNORE_SHOOT"
+                android:summary="@string/skip_songs_that_are_less_than_the_minimum_duration"
+                android:title="@string/Ignore_short_time"
+                />
+        <Preference
+                android:key="BLACK_LIST"
+                android:summary="@string/skip_the_directory_that_in_the_blacklist"
+                android:title="@string/black_list"
+                />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/other">
+        <SwitchPreferenceCompat
+                android:key="NTE_ALBUM"
+                android:summary="@string/get_cover_from_network_sdcard_download_albumcovers"
+                android:title="@string/album_cover_by_network"
+                />
+    </PreferenceCategory>
+    <Preference
+            android:key="CLEAR_ALBUM_COVERS"
+            android:summary="@string/delete_covers_from_sdcard_download_albumcovers"
+            android:title="@string/clear_album_covers"
+            />
+    <Preference
+            android:key="CLEAR_ARTIST_COVERS"
+            android:summary="@string/delete_artist_images_from_sdcard_download_artist"
+            android:title="@string/clean_artists_images"
+            />
+</PreferenceScreen>

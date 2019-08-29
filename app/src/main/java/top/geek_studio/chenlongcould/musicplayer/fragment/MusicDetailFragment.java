@@ -44,6 +44,7 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -80,7 +81,9 @@ import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyWaitListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.customView.PlayPauseDrawable;
+import top.geek_studio.chenlongcould.musicplayer.database.DataModel;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
+import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
@@ -91,7 +94,7 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 /**
  * @author chenlongcould
  */
-public final class MusicDetailFragment extends BaseFragment {
+public final class MusicDetailFragment extends BaseDetailFragment {
 
 	public static final String TAG = "MusicDetailFragment";
 
@@ -149,12 +152,6 @@ public final class MusicDetailFragment extends BaseFragment {
 	private ConstraintLayout mSlideUpGroup;
 
 	private HandlerThread mHandlerThread;
-	/**
-	 * 最后一次加载的album id
-	 *
-	 * @see #setCurrentMusicData(MusicItem, Bitmap, boolean...)
-	 */
-	private static int mLastAlbumId = -1;
 
 	/**
 	 * for {@link #setUpImage(Bitmap, ImageView, ImageView, TextView)}
@@ -162,52 +159,6 @@ public final class MusicDetailFragment extends BaseFragment {
 	 * @see ViewAnimationUtils#createCircularReveal
 	 */
 	private final int m_Position = 200;
-
-	private final PopupMenu.OnMenuItemClickListener clickListener = item -> {
-		switch (item.getItemId()) {
-			case Menu.FIRST + 1: {
-				final MusicItem currentItem = ReceiverOnMusicPlay.getCurrentItem();
-				if (currentItem != null) {
-					final String albumName = currentItem.getMusicAlbum();
-					final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
-							MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{albumName}, null);
-
-					//int MusicDetailActivity
-					final Intent intent = new Intent(mMainActivity, AlbumDetailActivity.class);
-					intent.putExtra(AlbumDetailActivity.IntentKey.ALBUM_NAME, albumName);
-					if (cursor != null) {
-						cursor.moveToFirst();
-						int id = Integer.parseInt(cursor.getString(0));
-						intent.putExtra(AlbumDetailActivity.IntentKey.ID, id);
-						cursor.close();
-					}
-					startActivity(intent);
-				}
-			}
-			break;
-			case Menu.FIRST + 2: {
-				AlertDialog dialog = Utils.Audio.getMusicDetailDialog(mMainActivity, Data.sCurrentMusicItem);
-				if (dialog != null) dialog.show();
-			}
-			break;
-
-			case Menu.FIRST + 3: {
-				final MusicItem target = ReceiverOnMusicPlay.getCurrentItem();
-				if (target != null) {
-					MusicUtil.dropToTrash(mMainActivity, target);
-				}
-			}
-			break;
-
-			// add to playlist
-			case Menu.FIRST + 4: {
-				PlayListsUtil.addListDialog(mMainActivity, Data.sCurrentMusicItem);
-			}
-			break;
-			default:
-		}
-		return true;
-	};
 
 	@SuppressWarnings("unused")
 	public static boolean sendMessage(@NonNull Message message) {
@@ -510,6 +461,46 @@ public final class MusicDetailFragment extends BaseFragment {
 	private int targetColor;
 	private List<Disposable> disposables = new ArrayList<>();
 
+	private DataModel dataModel;
+
+	private final PopupMenu.OnMenuItemClickListener clickListener = item -> {
+		switch (item.getItemId()) {
+			case Menu.FIRST + 1: {
+				final MusicItem currentItem = ReceiverOnMusicPlay.getCurrentItem();
+				if (currentItem != null) {
+					final String albumName = currentItem.getMusicAlbum();
+					final Cursor cursor = mMainActivity.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, null,
+							MediaStore.Audio.Albums.ALBUM + "= ?", new String[]{albumName}, null);
+
+					//int MusicDetailActivity
+					final Intent intent = new Intent(mMainActivity, AlbumDetailActivity.class);
+					intent.putExtra(AlbumDetailActivity.IntentKey.ALBUM_NAME, albumName);
+					if (cursor != null) {
+						cursor.moveToFirst();
+						int id = Integer.parseInt(cursor.getString(0));
+						intent.putExtra(AlbumDetailActivity.IntentKey.ID, id);
+						cursor.close();
+					}
+					startActivity(intent);
+				}
+			}
+			break;
+			case Menu.FIRST + 2: {
+				AlertDialog dialog = Utils.Audio.getMusicDetailDialog(mMainActivity, dataModel.mCurrentMusicItem);
+				if (dialog != null) dialog.show();
+			}
+			break;
+
+			// add to playlist
+			case Menu.FIRST + 4: {
+				PlayListsUtil.addListDialog(mMainActivity, dataModel.mCurrentMusicItem);
+			}
+			break;
+			default:
+		}
+		return true;
+	};
+
 	/**
 	 * 仅设置图像
 	 */
@@ -612,7 +603,7 @@ public final class MusicDetailFragment extends BaseFragment {
 //	 * preLoad data
 //	 */
 //	private void preLoad() {
-//		final MusicItem item = Data.sCurrentMusicItem;
+//		final MusicItem item = Data.mCurrentMusicItem;
 //		if (item != null && item.getMusicID() != -1) {
 //			final Bitmap cover = Utils.Audio.getCoverBitmapFull(getContext(), item.getAlbumId());
 //			setCurrentMusicData(item, cover, true);
@@ -669,6 +660,12 @@ public final class MusicDetailFragment extends BaseFragment {
 		mMainActivity.setUpSlideView();
 	}
 
+	@Override
+	public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		dataModel = ViewModelProviders.of(getActivity()).get(DataModel.class);
+	}
+
 	private void setUpToolbar() {
 		/*------------------toolbar--------------------*/
 		mToolbar.inflateMenu(R.menu.menu_toolbar_in_detail);
@@ -688,7 +685,7 @@ public final class MusicDetailFragment extends BaseFragment {
 				break;
 
 				case R.id.menu_toolbar_eq: {
-					final MusicItem item = Data.sCurrentMusicItem;
+					final MusicItem item = dataModel.mCurrentMusicItem;
 					if (item != null && item.getMusicID() != -1) {
 						Utils.Audio.openEqualizer(mMainActivity, item.getAlbumId());
 					} else {
@@ -698,17 +695,12 @@ public final class MusicDetailFragment extends BaseFragment {
 				break;
 
 				case R.id.menu_toolbar_timer: {
-					MusicUtil.setTimer(mMainActivity);
+					MusicUtil.setTimer(mMainActivity, dataModel);
 				}
 				break;
 
 				case R.id.menu_toolbar_debug: {
 					// none
-				}
-				break;
-
-				case R.id.menu_toolbar_trash_can: {
-					MusicUtil.dropToTrash(mMainActivity, Data.sCurrentMusicItem);
 				}
 				break;
 				default:
@@ -750,7 +742,7 @@ public final class MusicDetailFragment extends BaseFragment {
 	}
 
 
-	private void setCurrentMusicData(@NonNull final MusicItem item, @Nullable final Bitmap cover, boolean... loadImage) {
+	private void setCurrentMusicData(@NonNull final MusicItem item, @Nullable final Bitmap cover) {
 		mMainActivity.runOnUiThread(() -> {
 			mCurrentMusicNameText.setText(item.getMusicName());
 			mCurrentAlbumNameText.setText(item.getMusicAlbum());
@@ -763,11 +755,7 @@ public final class MusicDetailFragment extends BaseFragment {
 //						.generate().getLightVibrantColor(Utils.Ui.getPrimaryColor(mMainActivity)));
 //			}
 
-			// update album id
-			if (item.getAlbumId() != mLastAlbumId || loadImage.length > 0) {
-				setUpImage(cover, mBGup, mBGdown, mNextWillText);
-				mLastAlbumId = item.getAlbumId();
-			}
+			setUpImage(cover, mBGup, mBGdown, mNextWillText);
 
 			updateFav(item);
 		});
@@ -777,7 +765,7 @@ public final class MusicDetailFragment extends BaseFragment {
 	 * init & start animations
 	 */
 	public final void initAnimation() {
-		setIconLightOrDark(Data.getCurrentCover());
+		setIconLightOrDark(dataModel.currentCover);
 		/*
 		 * init view animation
 		 * */
@@ -1060,7 +1048,8 @@ public final class MusicDetailFragment extends BaseFragment {
 	}
 
 	private void showPopupMenu(Context context, View view) {
-		if (Data.sCurrentMusicItem == null || Data.sCurrentMusicItem.getMusicID() == -1) return;
+		if (dataModel.mCurrentMusicItem == null || dataModel.mCurrentMusicItem.getMusicID() == -1)
+			return;
 
 		/*---------------------- Menu -----------------------*/
 		PopupMenu mPopupMenu = new PopupMenu(context, view);
@@ -1279,9 +1268,10 @@ public final class MusicDetailFragment extends BaseFragment {
 				});
 				animator.start();
 
-				Data.shuffleOrderListSync(mMainActivity, true);
-
-				mMyWaitListAdapter.notifyDataSetChanged();
+				CustomThreadPool.post(() -> {
+					shuffleOrderListSync(true, dataModel, preferences);
+					mMainActivity.runOnUiThread(() -> mMyWaitListAdapter.notifyDataSetChanged());
+				});
 
 			} else {
 				editor.putString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_RANDOM).apply();
@@ -1313,8 +1303,11 @@ public final class MusicDetailFragment extends BaseFragment {
 				});
 				animator.start();
 
-				Data.shuffleOrderListSync(mMainActivity, false);
-				mMyWaitListAdapter.notifyDataSetChanged();
+				CustomThreadPool.post(() -> {
+					shuffleOrderListSync(false, dataModel, preferences);
+					mMainActivity.runOnUiThread(() -> mMyWaitListAdapter.notifyDataSetChanged());
+				});
+
 			}
 		});
 
@@ -1394,7 +1387,7 @@ public final class MusicDetailFragment extends BaseFragment {
 	 */
 	private void playPause() {
 		// 判断是否播放过, 如没有默认随机播放
-		if (Data.sCurrentMusicItem.getMusicID() != -1) {
+		if (dataModel.mCurrentMusicItem.getMusicID() != -1) {
 			if (ReceiverOnMusicPlay.isPlayingMusic()) {
 				MainActivity.startService(mMainActivity, MusicService.ServiceActions.ACTION_PAUSE);
 			} else {
@@ -1427,14 +1420,14 @@ public final class MusicDetailFragment extends BaseFragment {
 		anim.start();
 	}
 
-	private void setCurrentInfoWithoutMainImage(@NonNull final String name, @NonNull final String albumName, final Bitmap cover) {
-		mMainActivity.runOnUiThread(() -> {
-			mCurrentMusicNameText.setText(name);
-			mCurrentAlbumNameText.setText(albumName);
-			setUpImage(cover, mBGup, mBGdown, mNextWillText);
-			setSlideInfoBar(name, albumName, cover);
-		});
-	}
+//	private void setCurrentInfoWithoutMainImage(@NonNull final String name, @NonNull final String albumName, final Bitmap cover) {
+//		mMainActivity.runOnUiThread(() -> {
+//			mCurrentMusicNameText.setText(name);
+//			mCurrentAlbumNameText.setText(albumName);
+//			setUpImage(cover, mBGup, mBGdown, mNextWillText);
+//			setSlideInfoBar(name, albumName, cover);
+//		});
+//	}
 
 	private void hideToolbar() {
 		hideToolbar = true;
@@ -1466,9 +1459,13 @@ public final class MusicDetailFragment extends BaseFragment {
 	 */
 	private void updateFav(@Nullable MusicItem item) {
 		if (item != null) {
-			@DrawableRes int id = MusicUtil.isFavorite(mMainActivity, item) ? R.drawable.ic_favorite_white_24dp : R.drawable.ic_favorite_border_white_24dp;
-			mToolbar.getMenu().findItem(R.id.menu_toolbar_love).setIcon(id);
-			mInfoBarFavButton.setImageResource(id);
+			CustomThreadPool.post(() -> {
+				@DrawableRes int id = MusicUtil.isFavorite(mMainActivity, item) ? R.drawable.ic_favorite_white_24dp : R.drawable.ic_favorite_border_white_24dp;
+				mMainActivity.runOnUiThread(() -> {
+					mToolbar.getMenu().findItem(R.id.menu_toolbar_love).setIcon(id);
+					mInfoBarFavButton.setImageResource(id);
+				});
+			});
 		}
 	}
 
@@ -1616,11 +1613,12 @@ public final class MusicDetailFragment extends BaseFragment {
 			switch (msg.what) {
 				case INIT_SEEK_BAR: {
 					mWeakReference.get().runOnUiThread(() -> {
-						if (!MusicUtil.availableCurrentItem()) {
+						MusicItem i = mFragmentWeakReference.get().dataModel.mCurrentMusicItem;
+						if (i == null || i.getMusicID() == -1) {
 							return;
 						}
 
-						int duration = (int) Data.sCurrentMusicItem.getDuration();
+						int duration = (int) mFragmentWeakReference.get().dataModel.mCurrentMusicItem.getDuration();
 						if (duration == 0) return;
 
 						Log.d(TAG, "handleMessage: INIT_SEEK_BAR: duration: " + duration);
@@ -1647,11 +1645,12 @@ public final class MusicDetailFragment extends BaseFragment {
 				case SEEK_BAR_UPDATE: {
 					mWeakReference.get().runOnUiThread(() -> {
 						//点击body 或 music 正在播放 才可以进行seekBar更新
-						if (!ReceiverOnMusicPlay.isPlayingMusic() || !MusicUtil.availableCurrentItem()) {
+						MusicItem i = mFragmentWeakReference.get().dataModel.mCurrentMusicItem;
+						if (i == null || i.getMusicID() == -1) {
 							return;
 						}
 
-						int duration = (int) Data.sCurrentMusicItem.getDuration();
+						int duration = (int) mFragmentWeakReference.get().dataModel.mCurrentMusicItem.getDuration();
 
 						// sometimes it may be zero (0)
 						if (duration == 0) duration = 1;
@@ -1722,7 +1721,7 @@ public final class MusicDetailFragment extends BaseFragment {
 
 				case RECYCLER_SCROLL: {
 					mWeakReference.get().runOnUiThread(() -> mFragmentWeakReference.get().mLinearLayoutManager
-							.scrollToPositionWithOffset(Data.getCurrentIndex() == Data.sMusicItems.size()
+							.scrollToPositionWithOffset(Data.getCurrentIndex() == mFragmentWeakReference.get().dataModel.mMusicItems.size()
 									? Data.getCurrentIndex()
 									: Data.getCurrentIndex() + 1, 0));
 				}
@@ -1755,20 +1754,34 @@ public final class MusicDetailFragment extends BaseFragment {
 				break;
 
 				case SET_CURRENT_DATA: {
-					mFragmentWeakReference.get().setCurrentMusicData(Data.sCurrentMusicItem, Data.getCurrentCover());
+					Log.d(TAG, "handleMessage: SET_CURRENT_DATA");
+					mFragmentWeakReference.get().setCurrentMusicData(mFragmentWeakReference.get()
+							.dataModel.mCurrentMusicItem, mFragmentWeakReference.get().dataModel.currentCover);
 				}
 				break;
 
 				case TOGGLE_FAV: {
-					mWeakReference.get().runOnUiThread(() -> mFragmentWeakReference.get().updateFav(Data.sCurrentMusicItem));
+					mWeakReference.get().runOnUiThread(() -> mFragmentWeakReference.get().updateFav(mFragmentWeakReference.get().dataModel.mCurrentMusicItem));
 				}
 				break;
 
 				case SETUP_MUSIC_DATA: {
-					MusicItem item = (MusicItem) msg.obj;
-					Bitmap art = BitmapFactory.decodeFile(item.getArtwork());
-					Data.setCurrentCover(art);
-					mFragmentWeakReference.get().setCurrentMusicData(item, art, true);
+					Log.d(TAG, "handleMessage: SETUP_MUSIC_DATA");
+
+					final MusicItem item = (MusicItem) msg.obj;
+					if (item == null || item.getMusicID() == -1) return;
+
+					mFragmentWeakReference.get().dataModel.mCurrentMusicItem = item;
+					Bitmap art;
+
+					if (item.getArtwork() == null || item.getArtwork().equals("null")) {
+						art = Utils.Audio.getCoverBitmapFull(mWeakReference.get(), item.getAlbumId());
+					} else {
+						art = BitmapFactory.decodeFile(item.getArtwork());
+					}
+
+					mFragmentWeakReference.get().dataModel.currentCover = art;
+					mFragmentWeakReference.get().setCurrentMusicData(item, art);
 				}
 
 				default: {

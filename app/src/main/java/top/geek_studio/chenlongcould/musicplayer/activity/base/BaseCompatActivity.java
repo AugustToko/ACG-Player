@@ -106,13 +106,6 @@ public abstract class BaseCompatActivity extends AppCompatActivity implements IS
 	 */
 	abstract public String getActivityTAG();
 
-//
-//	/**
-//	 * send empty message to activity
-//	 * @return if send done return true else false
-//	 * */
-//	abstract public boolean sendEmptyMessageStatic(int what);
-
 	/**
 	 * set up view
 	 */

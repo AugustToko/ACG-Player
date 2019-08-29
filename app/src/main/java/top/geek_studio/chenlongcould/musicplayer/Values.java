@@ -71,11 +71,6 @@ public interface Values {
 		 */
 		String CUSTOM_TAB_LAYOUT = "CUSTOM_TAB_LAYOUT";
 
-		/**
-		 * 提示是否扔进垃圾桶的警告
-		 */
-		String TIP_NOTICE_DROP_TRASH = "TIP_NOTICE_DROP_TRASH";
-
 		@Deprecated
 		String RECYCLER_VIEW_ITEM_STYLE = "RECYCLER_VIEW_ITEM_STYLE";
 
@@ -88,6 +83,8 @@ public interface Values {
 		String ALBUM_LOCK_SCREEN = "ALBUM_LOCK_SCREEN";
 		String BLUR_ALBUM_LOCK_SCREEN = "BLUR_ALBUM_LOCK_SCREEN";
 		String DARK_MODE = "DARK_MODE";
+
+		String RANDOM_LIST_SEED = "RANDOM_LIST_SEED";
 	}
 
 	interface IntentTAG {
@@ -107,15 +104,7 @@ public interface Values {
 	}
 
 	final class CurrentData {
-
 		public static String CURRENT_UI_MODE = UIMODE.MODE_COMMON;
-
-		/**
-		 * TEMP DATA
-		 * default value -1 or null
-		 */
-		public static int CURRENT_PAGE_INDEX = 0;
-
 	}
 
 	final class UIMODE {
@@ -125,6 +114,9 @@ public interface Values {
 
 
 	final class TEMP {
+		@Deprecated
 		public static boolean switchNightDone = false;
+		public static boolean HAS_LOAD_LAST = false;
 	}
+
 }

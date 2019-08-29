@@ -23,6 +23,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Process;
+import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
@@ -31,6 +32,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
+import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -102,6 +104,7 @@ public final class MusicService extends Service {
 	 * 当前加载完成的 musicItem {@link MusicItem}
 	 */
 	private static MusicItem mMusicItem = null;
+
 	/**
 	 * service instance of {@link MusicService}
 	 */
@@ -231,11 +234,12 @@ public final class MusicService extends Service {
 			ItemListData.CURRENT_MUSIC_INDEX = index;
 		}
 
+		@Deprecated
 		@Override
 		public void loadMusicItem(MusicItem item) {
-			Log.d(TAG, "loadMusicItem: ");
 
 			if (item != null && item.getMusicID() != -1) {
+				Log.d(TAG, "loadMusicItem: " + item.toString());
 				mMusicItem = item;
 				MediaDescriptionCompat descriptionCompat = MusicUtil.m2d(mMusicItem);
 				ItemListData.CURRENT_MUSIC_INDEX = ItemListData.playOrderList.indexOf(descriptionCompat);
@@ -254,6 +258,11 @@ public final class MusicService extends Service {
 
 				Log.d(TAG, "loadMusicItem: done");
 			}
+		}
+
+		@Override
+		public void syncOderList(long seed) {
+			shuffleList(seed);
 		}
 	};
 
@@ -387,6 +396,7 @@ public final class MusicService extends Service {
 		final IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
 		intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
 		registerReceiver(mMyHeadSetPlugReceiver, intentFilter);
+
 	}
 
 	/**
@@ -522,6 +532,7 @@ public final class MusicService extends Service {
 	private synchronized void loadDataSource() {
 		if (ContextCompat.checkSelfPermission(this,
 				android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+
 			ItemListData.playOrderList.clear();
 
 			MediaControllerCompat controller = mediaSession.getController();
@@ -535,7 +546,7 @@ public final class MusicService extends Service {
 				final boolean skipShort = PreferenceUtil.getDefault(serviceWeakReference.get())
 						.getBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
 
-				// last played music id
+//				 last played music id
 //				int lastId = PreferenceUtil.getDefault(serviceWeakReference.get())
 //						.getInt(Values.SharedPrefsTag.LAST_PLAY_MUSIC_ID, -1);
 
@@ -602,10 +613,28 @@ public final class MusicService extends Service {
 //								.size(size)
 //								.addAlbumId(albumId)
 //								.addArtistId(artistId);
-//						mMusicItem = b2.build();
-//						MusicControl.reset(false);
-//						MusicControl.setDataSource(MusicService.this, descriptionCompat);
-//						HAS_PLAYED = true;
+//
+//						MusicItem item = b2.build();
+//
+//						if (item != null && item.getMusicID() != -1) {
+//							mMusicItem = item;
+//							MediaDescriptionCompat descriptionCompat2 = MusicUtil.m2d(mMusicItem);
+//							ItemListData.CURRENT_MUSIC_INDEX = ItemListData.playOrderList.indexOf(descriptionCompat2);
+//							MusicControl.setDataSource(MusicService.this, descriptionCompat2);
+//
+//							stopPlay = true;
+//
+//							try {
+//								MusicControl.mediaPlayer.prepare();
+//							} catch (IOException e) {
+//								e.printStackTrace();
+//							}
+//
+//							updateMediaSessionMetaData();
+//							HAS_PLAYED = true;
+//
+//							Log.d(TAG, "loadMusicItem: done");
+//						}
 //					}
 
 					ItemListData.playOrderList.add(descriptionCompat);
@@ -694,6 +723,37 @@ public final class MusicService extends Service {
 			byte flashMode = -1;
 
 			switch (action) {
+				case ServiceActions.ACTION_LOAD_ITEM: {
+					if (mMusicItem != null && mMusicItem.getMusicID() != -1 && HAS_PLAYED) break;
+
+					Log.d(TAG, "loadMusicItem: ");
+
+					MusicControl.mediaPlayer.reset();
+
+					MusicItem item = intent.getParcelableExtra("item");
+
+					if (item != null && item.getMusicID() != -1) {
+						mMusicItem = item;
+						MediaDescriptionCompat descriptionCompat = MusicUtil.m2d(mMusicItem);
+						ItemListData.CURRENT_MUSIC_INDEX = ItemListData.playOrderList.indexOf(descriptionCompat);
+						MusicControl.setDataSource(MusicService.this, descriptionCompat);
+
+						stopPlay = true;
+
+						try {
+							MusicControl.mediaPlayer.prepare();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+
+						updateMediaSessionMetaData();
+						HAS_PLAYED = true;
+
+						Log.d(TAG, "loadMusicItem: done");
+					}
+				}
+				break;
+
 				//no ui update
 				case ServiceActions.ACTION_CLEAR_ITEMS: {
 					ItemListData.playOrderList.clear();
@@ -708,27 +768,6 @@ public final class MusicService extends Service {
 					ItemListData.CURRENT_MUSIC_INDEX = 0;
 				}
 				break;
-
-				//no ui update
-				case ServiceActions.ACTION_SHUFFLE_ORDER_LIST: {
-					shuffleList(intent.getLongExtra("random_seed", new Random().nextLong()));
-				}
-				break;
-
-//				//no ui update
-//				case ServiceActions.ACTION_INSERT_MUSIC: {
-//					int[] musicIds = intent.getIntArrayExtra("insert_music_id");
-//					if (musicIds != null && musicIds.length > 0) {
-//						for (final int id : musicIds) {
-//							for (final MusicItem item : ItemListData.musicItems) {
-//								if (item.getMusicID() == id) {
-//									ItemListData.playOrderList.add(ItemListData.CURRENT_MUSIC_INDEX, item);
-//								}
-//							}
-//						}
-//					}
-//				}
-//				break;
 
 				case ServiceActions.ACTION_PAUSE: {
 					MusicControl.pauseMusic();
@@ -848,11 +887,12 @@ public final class MusicService extends Service {
 					saveData();
 
 					MusicItem item = intent.getParcelableExtra("item");
-					if (item == null) break;
+					if (item == null || item.getMusicID() < 0) break;
 
 					mMusicItem = item;
-					MediaDescriptionCompat descriptionCompat = MusicUtil.m2d(mMusicItem);
-					ItemListData.CURRENT_MUSIC_INDEX = ItemListData.playOrderList.indexOf(descriptionCompat);
+					final MediaDescriptionCompat descriptionCompat = MusicUtil.m2d(mMusicItem);
+//					ItemListData.CURRENT_MUSIC_INDEX = index;
+
 					MusicControl.setDataSource(this, descriptionCompat);
 					updateMediaSessionMetaData();
 					MusicControl.prepareAndPlay();
@@ -939,8 +979,6 @@ public final class MusicService extends Service {
 
 		String ACTION_RESET_LIST = ACG_PLAYER_PACKAGE_NAME + ".resetlist";
 
-		String ACTION_SHUFFLE_ORDER_LIST = ACG_PLAYER_PACKAGE_NAME + ".shuffleorderlist";
-
 		/**
 		 * common
 		 */
@@ -981,6 +1019,7 @@ public final class MusicService extends Service {
 		String ACTION_STOP = ACG_PLAYER_PACKAGE_NAME + ".stop";
 
 		String ACTION_SLEEP = ACG_PLAYER_PACKAGE_NAME + ".sleep";
+		String ACTION_LOAD_ITEM = ACG_PLAYER_PACKAGE_NAME + ".load_item";
 	}
 
 	/**
@@ -1326,10 +1365,17 @@ public final class MusicService extends Service {
 			MainActivity.startService(context, next);
 		}
 
-		public static void intentItemClick(@NonNull final Context context, @NonNull MusicItem item) {
+		public static void intentItemClick(@NonNull final Context context, @NonNull MusicItem item
+				, @IntRange(from = 0, to = Integer.MAX_VALUE) int index) {
 			final Intent intent = new Intent(MusicService.ServiceActions.ACTION_ITEM_CLICK);
 			intent.putExtra("item", item);
 			MainActivity.startService(context, intent);
+
+			try {
+				Data.sMusicBinder.setCurrentIndex(index);
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
 		}
 
 		public static void intentPlay(@NonNull final Context context) {

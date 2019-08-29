@@ -118,7 +118,7 @@ public final class ListViewActivity extends BaseListActivity {
 				case ListType.ACTION_ADD_RECENT: {
 					mToolbar.setTitle(getResources().getString(R.string.add_recent));
 
-					mMusicItemList.addAll(Data.sMusicItems);
+					mMusicItemList.addAll(MainActivity.activityWeakReference.get().getDataModel().mMusicItems);
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 						mMusicItemList.sort((o1, o2) -> {
 							if (o1 == null || o2 == null) {
@@ -274,7 +274,7 @@ public final class ListViewActivity extends BaseListActivity {
 				case R.id.menu_public_random: {
 					if (mMusicItemList.size() == 0) return true;
 					int index = new Random().nextInt(mMusicItemList.size());
-					MusicService.MusicControl.intentItemClick(ListViewActivity.this, mMusicItemList.get(index));
+					MusicService.MusicControl.intentItemClick(ListViewActivity.this, mMusicItemList.get(index), index);
 				}
 				break;
 

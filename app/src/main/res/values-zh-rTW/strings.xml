@@ -13,7 +13,7 @@
 	<string name="play_list">播放列表</string>
 	<string name="add_recent">添加最近</string>
     <string name="color_accent">色彩強調</string>
-	<string name="colorprimarydark">彩色原色黑暗</string>
+    <string name="color_primary_dark">彩色原色黑暗</string>
 	<string name="settings">設置</string>
 	<string name="about">關於</string>
     <string name="exit">退出</string>
@@ -103,7 +103,7 @@
     <string name="favorites">最愛</string>
     <string name="black_list">黑名單</string>
     <string name="skip_the_directory_that_in_the_blacklist">忽略黑名單目錄中的音頻</string>
-    <string name="shortest_time">忽略過短音頻</string>
+    <string name="Ignore_short_time">忽略過短音頻</string>
     <string name="skip_songs_that_are_less_than_the_minimum_duration">跳過小於最小持續時間(%1$d))的歌曲</string>
     <string name="filter">過濾器</string>
     <string name="remove_frome_black_list">從黑名單中刪除</string>

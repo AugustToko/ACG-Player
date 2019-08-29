@@ -21,6 +21,7 @@ import android.media.MediaMetadataRetriever;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
@@ -67,14 +68,12 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import top.geek_studio.chenlongcould.geeklibrary.widget.GkToolbar;
-import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.GlideApp;
 import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
@@ -673,11 +672,21 @@ public final class Utils {
 		}
 
 		public static AlertDialog createMessageDialog(@NonNull final Activity context, @NonNull final String title, @NonNull final String message) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(context);
+			final AlertDialog.Builder builder = new AlertDialog.Builder(context);
 			builder.setTitle(title);
 			builder.setMessage(message);
 			builder.setCancelable(true);
 			return builder.create();
+		}
+
+		public static void createErrorMessageDialog(@NonNull final Activity context, @NonNull final String title, @NonNull final String message, @NonNull Runnable runnable, int delayTime) {
+			final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+			builder.setTitle(title);
+			builder.setMessage(message);
+			builder.setCancelable(true);
+			builder.create().show();
+
+			new Handler().postDelayed(runnable, delayTime);
 		}
 
 		/**
@@ -805,19 +814,6 @@ public final class Utils {
 			int rgb = 16777215 & baseColor;
 			return a + rgb;
 		}
-	}
-
-	public static final class DataSet {
-
-		/**
-		 * make a random play list, data by {@link Data#sMusicItems}
-		 */
-		public static void makeARandomList() {
-			Data.sPlayOrderList.clear();
-			Data.sPlayOrderList.addAll(Data.sMusicItems);
-			Collections.shuffle(Data.sPlayOrderList);
-		}
-
 	}
 
 	public static final class M3Utils {

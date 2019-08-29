@@ -25,6 +25,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -43,8 +44,10 @@ import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyWaitListAdapter;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.customView.PlayPauseDrawable;
+import top.geek_studio.chenlongcould.musicplayer.database.DataModel;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentMusicDetailLandspaceBinding;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
+import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
@@ -53,7 +56,7 @@ import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 /**
  * @author chenlongcould
  */
-public final class MusicDetailFragmentLandSpace extends BaseFragment {
+public final class MusicDetailFragmentLandSpace extends BaseDetailFragment {
 
 	private static final String TAG = "DetailLandSpace";
 	private static boolean HIDE_TOOLBAR = false;
@@ -64,6 +67,7 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 	private RecyclerView mRecyclerView;
 	private MyWaitListAdapter mWaitListAdapter;
 	private PlayPauseDrawable mPlayPauseDrawable;
+	private DataModel dataModel;
 
 	private CarViewActivity mCarViewActivity;
 
@@ -90,6 +94,8 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		mMusicDetail2Binding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_detail_landspace, container, false);
+
+		dataModel = ViewModelProviders.of(MainActivity.activityWeakReference.get()).get(DataModel.class);
 
 		mPlayPauseDrawable = new PlayPauseDrawable(mCarViewActivity);
 		mPlayPauseDrawable.setPlay(true);
@@ -130,13 +136,8 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 				}
 				break;
 
-				case R.id.menu_toolbar_trash_can: {
-					MusicUtil.dropToTrash(mCarViewActivity, Data.sCurrentMusicItem);
-				}
-				break;
-
 				case R.id.menu_toolbar_timer: {
-					MusicUtil.setTimer(mCarViewActivity);
+					MusicUtil.setTimer(mCarViewActivity, dataModel);
 				}
 				break;
 				default:
@@ -319,9 +320,11 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 				});
 				animator.start();
 
-				Data.shuffleOrderListSync(mCarViewActivity, false);
+				CustomThreadPool.post(() -> {
+					shuffleOrderListSync(true, dataModel, preferences);
+					mCarViewActivity.runOnUiThread(() -> mWaitListAdapter.notifyDataSetChanged());
+				});
 
-				mWaitListAdapter.notifyDataSetChanged();
 
 			} else {
 				editor.putString(Values.SharedPrefsTag.ORDER_TYPE, Values.TYPE_RANDOM).apply();
@@ -357,7 +360,10 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 
 //				final MusicItem item = Data.sPlayOrderList.get(Values.CurrentData.CURRENT_MUSIC_INDEX);
 
-				Data.shuffleOrderListSync(mCarViewActivity, false);
+				CustomThreadPool.post(() -> {
+					shuffleOrderListSync(false, dataModel, preferences);
+					mCarViewActivity.runOnUiThread(() -> mWaitListAdapter.notifyDataSetChanged());
+				});
 
 				mWaitListAdapter.notifyDataSetChanged();
 
@@ -431,7 +437,7 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 		});
 
 		// update at the beginning
-		updateFav(Data.sCurrentMusicItem);
+		updateFav(dataModel.mCurrentMusicItem);
 
 		return mMusicDetail2Binding.getRoot();
 	}
@@ -460,24 +466,24 @@ public final class MusicDetailFragmentLandSpace extends BaseFragment {
 
 	public final void setData() {
 		mCarViewActivity.runOnUiThread(() -> {
+			mCarViewActivity.runOnUiThread(() -> mLinearLayoutManager.scrollToPositionWithOffset(Data.getCurrentIndex() == dataModel.mMusicItems.size() ?
+					Data.getCurrentIndex() : Data.getCurrentIndex() + 1, 0));
+
 			//load image
 			GlideApp.with(MusicDetailFragmentLandSpace.this)
-					.load(Data.getCurrentCover() == null ? R.drawable.default_album_art : Data.getCurrentCover())
+					.load(dataModel.currentCover == null ? R.drawable.default_album_art : dataModel.currentCover)
 					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
 					.into(mMusicDetail2Binding.albumImage);
 
 			GlideApp.with(MusicDetailFragmentLandSpace.this)
-					.load(Data.getCurrentCover() == null ? R.drawable.default_album_art : Data.getCurrentCover())
+					.load(dataModel.currentCover == null ? R.drawable.default_album_art : dataModel.currentCover)
 					.apply(bitmapTransform(Data.sBlurTransformationCarView))
 					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
 					.into(mMusicDetail2Binding.backgroundImage);
 
 			//get name
-			mMusicDetail2Binding.albumText.setText(Data.sCurrentMusicItem.getMusicAlbum());
-			mMusicDetail2Binding.musicName.setText(Data.sCurrentMusicItem.getMusicName());
-
-			mCarViewActivity.runOnUiThread(() -> mLinearLayoutManager.scrollToPositionWithOffset(Data.getCurrentIndex() == Data.sMusicItems.size() ?
-					Data.getCurrentIndex() : Data.getCurrentIndex() + 1, 0));
+			mMusicDetail2Binding.albumText.setText(dataModel.mCurrentMusicItem.getMusicAlbum());
+			mMusicDetail2Binding.musicName.setText(dataModel.mCurrentMusicItem.getMusicName());
 		});
 	}
 

@@ -2,10 +2,13 @@ package top.geek_studio.chenlongcould.musicplayer.activity.main;
 
 import android.content.Context;
 import android.content.Intent;
+
 import androidx.annotation.NonNull;
+
 import top.geek_studio.chenlongcould.musicplayer.BasePresenter;
 import top.geek_studio.chenlongcould.musicplayer.BaseView;
 import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseCompatActivity;
+import top.geek_studio.chenlongcould.musicplayer.database.DataModel;
 import top.geek_studio.chenlongcould.musicplayer.fragment.BaseFragment;
 
 /**
@@ -27,6 +30,8 @@ public interface MainContract {
 
 		@NonNull
 		BaseFragment getFragment(char fragmentId);
+
+		DataModel getDataModel();
 	}
 
 	interface Presenter extends BasePresenter {

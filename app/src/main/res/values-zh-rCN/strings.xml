@@ -13,7 +13,7 @@
 	<string name="play_list">播放列表</string>
 	<string name="add_recent">添加最近</string>
     <string name="color_accent">色彩强调</string>
-	<string name="colorprimarydark">彩色原色黑暗</string>
+    <string name="color_primary_dark">彩色原色黑暗</string>
 	<string name="settings">设置</string>
 	<string name="about">关于</string>
     <string name="exit">退出</string>
@@ -103,7 +103,7 @@
     <string name="favorites">最爱</string>
     <string name="black_list">黑名单</string>
     <string name="skip_the_directory_that_in_the_blacklist">忽略黑名单目录中的音频</string>
-    <string name="shortest_time">忽略过短音频</string>
+    <string name="Ignore_short_time">忽略过短音频</string>
     <string name="skip_songs_that_are_less_than_the_minimum_duration">跳过小于最小持续时间(%1$d)的歌曲</string>
     <string name="filter">过滤器</string>
     <string name="remove_frome_black_list">从黑名单中删除</string>

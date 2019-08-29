@@ -26,4 +26,6 @@ interface IMuiscService {
     void setCurrentIndex(in int index);
 
     void loadMusicItem(in MusicItem item);
+
+    void syncOderList(in long seed);
 }

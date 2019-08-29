@@ -4,8 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Message;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.util.Log;
@@ -15,12 +15,10 @@ import androidx.annotation.Nullable;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.CarViewActivity;
-import top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
-import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 /**
  * @author chenlongcould
@@ -39,6 +37,11 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 	////////////////////////MEDIA CONTROL/////////////////////////////
 
 	public static int getDuration() {
+		if (Data.sMusicBinder == null) {
+			Log.d(TAG, "getDuration: MusicBinder is null.");
+			return 0;
+		}
+
 		int duration = 0;
 		try {
 			duration = Data.sMusicBinder.getDuration();
@@ -145,26 +148,29 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 			switch (type) {
 				//clicked by notif, just resume play
 				case FLASH_UI_COMMON: {
+
 					Log.d(TAG, "onReceive: common");
 
 					final MusicItem item = intent.getParcelableExtra("item");
 					if (item != null && item.getMusicID() != -1) {
-						if (Data.sCurrentMusicItem != null && item.getMusicID() == Data.sCurrentMusicItem.getMusicID()) {
-							Log.d(TAG, "onReceive: item is same break");
-							break;
-						} else {
-							Data.sCurrentMusicItem = item;
-							Data.sHistoryPlayed.add(item);
-							ListViewActivity.sendEmptyMessageStatic(ListViewActivity.NotLeakHandler.NOTI_ADAPTER_CHANGED);
-							Log.d(TAG, "onReceive: common item is not same, new item name: " + item.toString());
-						}
 
-						final Bitmap cover = Utils.Audio.getCoverBitmapFull(context, Data.sCurrentMusicItem.getAlbumId());
+//						if (Data.sCurrentMusicItem != null && item.getMusicID() == Data.sCurrentMusicItem.getMusicID()) {
+//							Log.d(TAG, "onReceive: item is same break");
+//							break;
+//						} else {
+//							Data.sCurrentMusicItem = item;
+//							Data.sHistoryPlayed.add(item);
+//							ListViewActivity.sendEmptyMessageStatic(ListViewActivity.NotLeakHandler.NOTI_ADAPTER_CHANGED);
+//							Log.d(TAG, "onReceive: common item is not same, new item name: " + item.toString());
+//						}
 
-						Data.setCurrentCover(cover);
+						final Message message = Message.obtain();
+						message.what = MusicDetailFragment.NotLeakHandler.SETUP_MUSIC_DATA;
+						message.obj = item;
+
 						MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.INIT_SEEK_BAR);
 						MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_BUTTON_PLAY);
-						MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.SET_CURRENT_DATA);
+						MusicDetailFragment.sendMessage(message);
 						sureCar();
 					} else {
 						Log.d(TAG, "onReceive: common receiver item is null");

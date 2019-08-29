@@ -1,8 +1,9 @@
 package top.geek_studio.chenlongcould.musicplayer.activity.base;
 
 import android.annotation.SuppressLint;
-import android.os.Bundle;
+
 import androidx.annotation.Nullable;
+
 import top.geek_studio.chenlongcould.musicplayer.MessageWorker;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 
@@ -15,11 +16,6 @@ import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 public abstract class BaseListActivity extends BaseCompatActivity implements MessageWorker {
 
 	private static final String TAG = "BaseListActivity";
-
-	@Override
-	protected void onCreate(@Nullable Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-	}
 
 	/**
 	 * 用于对列表的操作
@@ -35,5 +31,5 @@ public abstract class BaseListActivity extends BaseCompatActivity implements Mes
 	 */
 	public boolean addItem(@Nullable final MusicItem item) {
 		return false;
-	};
+	}
 }

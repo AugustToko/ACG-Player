@@ -6,7 +6,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Message;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +19,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -44,6 +45,7 @@ import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
+import top.geek_studio.chenlongcould.musicplayer.database.DataModel;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
 import top.geek_studio.chenlongcould.musicplayer.databinding.FragmentMusicListBinding;
 import top.geek_studio.chenlongcould.musicplayer.model.Item;
@@ -51,6 +53,7 @@ import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
+import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
 /**
  * @author chenlongcould
@@ -65,6 +68,8 @@ public final class MusicListFragment extends BaseListFragment {
 
 	private MainActivity mActivity;
 
+	private DataModel dataModel;
+
 	public static MusicListFragment newInstance() {
 		return new MusicListFragment();
 	}
@@ -76,8 +81,8 @@ public final class MusicListFragment extends BaseListFragment {
 
 	@Override
 	public void reloadData() {
-		Data.sMusicItems.clear();
-		Data.sMusicItemsBackUp.clear();
+		dataModel.mMusicItems.clear();
+		dataModel.mMusicItemsBackUp.clear();
 		mActivity.runOnUiThread(() -> adapter.notifyDataSetChanged());
 		loadData();
 	}
@@ -91,17 +96,14 @@ public final class MusicListFragment extends BaseListFragment {
 	@Override
 	public void onActivityCreated(@Nullable Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-	}
-
-	@Override
-	public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-		super.onViewCreated(view, savedInstanceState);
+		dataModel = ViewModelProviders.of(getActivity()).get(DataModel.class);
+		loadData();
+		initRecyclerView();
 	}
 
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		mMusicListBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_list, container, false);
-		loadData();
 		return mMusicListBinding.getRoot();
 	}
 
@@ -113,39 +115,43 @@ public final class MusicListFragment extends BaseListFragment {
 		}
 
 		Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
-			Data.sMusicItems.clear();
+			dataModel.mMusicItems.clear();
+			dataModel.mMusicItemsBackUp.clear();
 			Data.sPlayOrderList.clear();
+			Data.sPlayOrderListBackup.clear();
 
 			/*---------------------- init Data!!!! -------------------*/
 			final Cursor cursor = mActivity.getContentResolver().query(
-					MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null
-					, MediaStore.Audio.Media.DEFAULT_SORT_ORDER
-			);
+					MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
 
-			if (cursor == null || !cursor.moveToFirst()) return;
+			if (cursor == null || !cursor.moveToFirst()) {
+				Utils.Ui.createMessageDialog(mActivity, "Error", "Cursor is null or cannot move to first").show();
+				new Handler().postDelayed(() -> mActivity.fullExit(), 2000);
+				return;
+			}
 
 			if (cursor.getCount() == 0) {
 				// TODO: 没有歌曲提示空
+				Utils.Ui.createErrorMessageDialog(mActivity, "Error", "Cursor.getCount is empty!", () -> mActivity.fullExit(), 2000);
 				return;
 			}
 
 			// skip short
-			final boolean skipShort = preferences
-					.getBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
+			final boolean skipShort = preferences.getBoolean(Values.SharedPrefsTag.HIDE_SHORT_SONG, true);
 
-			// check black list
+			/*---------- check black list ------------*/
 			final LitePalDB blackList = new LitePalDB("BlackList", App.BLACK_LIST_VERSION);
 			blackList.addClassName(MyBlackPath.class.getName());
 			LitePal.use(blackList);
-			HashSet<String> blackPaths = new HashSet<>();
+			final HashSet<String> blackPaths = new HashSet<>();
 
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 				LitePal.findAll(MyBlackPath.class).forEach(myBlackPath -> blackPaths.add(myBlackPath.getDirPath()));
 			} else {
-				for (MyBlackPath s : LitePal.findAll(MyBlackPath.class)) {
+				for (MyBlackPath s : LitePal.findAll(MyBlackPath.class))
 					blackPaths.add(s.getDirPath());
-				}
 			}
+			/*---------- check black list ------------*/
 
 			LitePal.useDefault();
 
@@ -186,15 +192,15 @@ public final class MusicListFragment extends BaseListFragment {
 
 				final MusicItem item = builder.build();
 
-				Data.sMusicItems.add(item);
-				Data.sMusicItemsBackUp.add(item);
-
+				dataModel.mMusicItems.add(item);
+				dataModel.mMusicItemsBackUp.add(item);
 				Data.sPlayOrderList.add(item);
 				Data.sPlayOrderListBackup.add(item);
 
 				if (lastId == id) {
+					// 提前加载 path
 					MusicUtil.findArtworkWithId(mActivity, item);
-					Data.sCurrentMusicItem = item;
+					dataModel.mCurrentMusicItem = item;
 				} else {
 					CustomThreadPool.post(() -> MusicUtil.findArtworkWithId(mActivity, item));
 				}
@@ -206,19 +212,12 @@ public final class MusicListFragment extends BaseListFragment {
 		}).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).safeSubscribe(new Observer<Integer>() {
 			@Override
 			public final void onSubscribe(Disposable disposable) {
-				Data.sDisposables.add(disposable);
+				dataModel.mDisposables.add(disposable);
 			}
 
 			@Override
 			public final void onNext(Integer result) {
-//				if (result == -1) {
-//					AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-//					builder.setTitle("Error")
-//							.setMessage("Can not find any music or the cursor is null, Will exit.")
-//							.setCancelable(false)
-//							.setNegativeButton("OK", (dialog, which) -> dialog.cancel());
-//					builder.show();
-//				}
+
 			}
 
 			@Override
@@ -229,14 +228,6 @@ public final class MusicListFragment extends BaseListFragment {
 			@Override
 			public final void onComplete() {
 				if (adapter != null) adapter.notifyDataSetChanged();
-
-				// 更新最后播放
-				if (Data.sCurrentMusicItem != null && Data.sCurrentMusicItem.getMusicID() > -1) {
-					final Message message = Message.obtain();
-					message.obj = Data.sCurrentMusicItem;
-					message.what = MusicDetailFragment.NotLeakHandler.SETUP_MUSIC_DATA;
-					MusicDetailFragment.sendMessage(message);
-				}
 			}
 		});
 	}
@@ -248,8 +239,8 @@ public final class MusicListFragment extends BaseListFragment {
 	@Override
 	public boolean removeItem(@Nullable Item item) {
 		if (item instanceof MusicItem) {
-			Data.sMusicItems.remove(item);
-			Data.sMusicItemsBackUp.remove(item);
+			dataModel.mMusicItems.remove(item);
+			dataModel.mMusicItemsBackUp.remove(item);
 			Data.sPlayOrderList.remove(item);
 			Data.sPlayOrderListBackup.remove(item);
 			return true;
@@ -260,8 +251,8 @@ public final class MusicListFragment extends BaseListFragment {
 	@Override
 	public boolean addItem(@Nullable Item item) {
 		if (item instanceof MusicItem) {
-			Data.sMusicItems.add((MusicItem) item);
-			Data.sMusicItemsBackUp.add((MusicItem) item);
+			dataModel.mMusicItems.add((MusicItem) item);
+			dataModel.mMusicItemsBackUp.add((MusicItem) item);
 			Data.sPlayOrderList.add((MusicItem) item);
 			Data.sPlayOrderListBackup.add((MusicItem) item);
 			return true;
@@ -280,7 +271,7 @@ public final class MusicListFragment extends BaseListFragment {
 		linearLayoutManager.setItemPrefetchEnabled(true);
 		linearLayoutManager.setInitialPrefetchItemCount(15);
 
-		adapter = new MyRecyclerAdapter(mActivity, Data.sMusicItems
+		adapter = new MyRecyclerAdapter(mActivity, dataModel.mMusicItems
 				, new MyRecyclerAdapter.Config(PreferenceUtil.getDefault(mActivity).getInt(Values.SharedPrefsTag
 				.RECYCLER_VIEW_ITEM_STYLE, 0), true, true));
 		mMusicListBinding.includeRecycler.recyclerView.setLayoutManager(linearLayoutManager);

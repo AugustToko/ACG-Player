@@ -4,7 +4,6 @@ import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.graphics.drawable.Icon;
@@ -12,22 +11,18 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import io.reactivex.disposables.Disposable;
-import org.litepal.LitePal;
-import top.geek_studio.chenlongcould.geeklibrary.theme.ThemeStore;
-import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
-import top.geek_studio.chenlongcould.musicplayer.database.ArtistArtPath;
-import top.geek_studio.chenlongcould.musicplayer.database.CustomAlbumPath;
-import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
-import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
-import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
 
-import java.io.File;
+import org.litepal.LitePal;
+
 import java.util.Collections;
 import java.util.List;
+
+import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
 
 /**
  * @author chenlongcould
@@ -52,17 +47,6 @@ public final class App extends Application {
 	
 	private ShortcutManager mShortcutManager;
 	
-	/**
-	 * @see Disposable#dispose()
-	 */
-	public static void clearDisposable() {
-		for (Disposable disposable : Data.sDisposables) {
-			if (disposable != null && !disposable.isDisposed()) {
-				disposable.dispose();
-			}
-		}
-	}
-
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -92,25 +76,22 @@ public final class App extends Application {
 //				}
 //			});
 
-			// 升级版本清空数据
-			if (PreferenceUtil.getDefault(this).getInt(VERSION_CODE, 0) != VER_CODE) {
-				Log.d(TAG, "onCreate: clear data");
-
-				final File file = getExternalFilesDir(ThemeStore.DIR_NAME);
-				if (file != null && file.exists()) {
-					Utils.IO.delFolder(file.getAbsolutePath());
-				}
-
-				//add version code
-				final SharedPreferences.Editor verEdit = PreferenceUtil.getDefault(this).edit();
-				verEdit.putLong(VERSION_CODE, VER_CODE);
-				verEdit.apply();
-
-				LitePal.deleteAll(CustomAlbumPath.class);
-				LitePal.deleteAll(ArtistArtPath.class);
-
-
-			}
+//			// 升级版本清空数据
+//			if (PreferenceUtil.getDefault(this).getInt(VERSION_CODE, 0) != VER_CODE) {
+//
+//				final File file = getExternalFilesDir(ThemeStore.DIR_NAME);
+//				if (file != null && file.exists()) {
+//					Utils.IO.delFolder(file.getAbsolutePath());
+//				}
+//
+//				//add version code
+//				final SharedPreferences.Editor verEdit = PreferenceUtil.getDefault(this).edit();
+//				verEdit.putLong(VERSION_CODE, VER_CODE);
+//				verEdit.apply();
+//
+//				LitePal.deleteAll(CustomAlbumPath.class);
+//				LitePal.deleteAll(ArtistArtPath.class);
+//			}
 
 			MusicDetailFragment.BackgroundStyle.DETAIL_BACKGROUND = PreferenceManager.getDefaultSharedPreferences(this)
 					.getString(Values.SharedPrefsTag.DETAIL_BG_STYLE, MusicDetailFragment.BackgroundStyle.STYLE_BACKGROUND_BLUR);
@@ -122,7 +103,8 @@ public final class App extends Application {
 		}
 
 	}
-	
+
+
 	/**
 	 * 获取进程名。
 	 * 由于app是一个多进程应用，因此每个进程被os创建时，
@@ -158,8 +140,7 @@ public final class App extends Application {
 				|| "top.geek_studio.chenlongcould.musicplayer.Common".equals(getProcessName(this))) {
 			
 			if (level == TRIM_MEMORY_MODERATE) {
-				Data.S_TRASH_CAN_LIST.clear();
-				
+
 			}
 			
 			GlideApp.get(this).trimMemory(level);

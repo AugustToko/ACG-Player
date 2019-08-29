@@ -10,16 +10,16 @@
   -->
 
 <androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="180dp">
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+        android:layout_height="180dp"
+        >
 
     <ImageView
-        android:id="@+id/nav_view_image"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@drawable/ic_audiotrack_24px"
-        android:contentDescription="@string/todo"
-        android:foreground="@drawable/my_ripple_mask" />
+            android:id="@+id/nav_view_image" android:layout_width="match_parent"
+            android:layout_height="match_parent" android:contentDescription="@string/todo"
+            android:foreground="@drawable/my_ripple_mask" android:src="@drawable/default_album_art"
+            tools:scaleType="centerCrop"
+            />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -13,7 +13,7 @@
 	<string name="play_list">Play List</string>
 	<string name="add_recent">Add Recent</string>
     <string name="color_accent">Color Accent</string>
-	<string name="colorprimarydark">Color Primary Dark</string>
+    <string name="color_primary_dark">Color Primary Dark</string>
 	<string name="settings">Settings</string>
 	<string name="about">About</string>
 	<string name="exit">Exit</string>
@@ -103,7 +103,7 @@
     <string name="favorites">Favorites</string>
     <string name="black_list">Black List</string>
     <string name="skip_the_directory_that_in_the_blacklist">Skip the directory that in the blacklist</string>
-    <string name="shortest_time">Ignore too short audio</string>
+    <string name="Ignore_short_time">Ignore too short audio</string>
     <string name="skip_songs_that_are_less_than_the_minimum_duration">Skip songs that are less than the minimum duration: %1$d</string>
     <string name="filter">Filter</string>
     <string name="remove_frome_black_list">Remove from the blacklist</string>

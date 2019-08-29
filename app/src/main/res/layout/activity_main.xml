@@ -8,18 +8,16 @@
 
     <androidx.drawerlayout.widget.DrawerLayout
             android:id="@+id/drawer_layout" android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:openDrawer="end"
+            android:layout_height="match_parent" tools:openDrawer="start"
             >
 
         <com.sothree.slidinguppanel.SlidingUpPanelLayout
                 android:id="@+id/sliding_layout" android:layout_width="match_parent"
                 android:layout_height="match_parent" android:clickable="true"
-                android:focusable="true" android:gravity="bottom"
+                android:focusable="true" android:gravity="bottom" app:umanoOverlay="true"
                 app:umanoPanelHeight="@dimen/current_info_bar_height" app:umanoShadowHeight="2dp"
                 sothree:umanoDragView="@id/touch_view"
                 sothree:umanoScrollableView="@id/activity_music_detail_include_recycler"
-                app:umanoOverlay="true"
                 >
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -52,7 +50,7 @@
 
                     <com.google.android.material.appbar.AppBarLayout
                             android:id="@+id/appbar" android:layout_width="match_parent"
-                            android:layout_height="wrap_content" android:background="#96FFFFFF"
+                            android:layout_height="wrap_content" android:background="#E6FFFFFF"
                             android:elevation="0dp" android:paddingTop="@dimen/toolbar_padding_top"
                             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
                             app:elevation="0dp" tools:background="#8A8A8A"
@@ -64,8 +62,7 @@
                                 android:background="@android:color/transparent"
                                 app:layout_scrollFlags="scroll|enterAlways"
                                 app:popupTheme="@style/DayNightTheme.PopupOverlay"
-                                app:subtitle="@string/app_name"
-                                app:title="@string/app_name"
+                                app:subtitle="@string/app_name" app:title="@string/app_name"
                                 tools:menu="@menu/menu_toolbar_main_common"
                                 >
                             <!--app:layout_scrollFlags="scroll|enterAlways"-->
@@ -113,7 +110,7 @@
         <com.google.android.material.navigation.NavigationView
                 android:id="@+id/navigation_view" android:layout_width="wrap_content"
                 android:layout_height="match_parent" android:layout_gravity="start"
-                android:fitsSystemWindows="true"
+                android:background="#E6FFFFFF" android:fitsSystemWindows="true"
                 app:headerLayout="@layout/navigation_view_header_one"
                 >
 

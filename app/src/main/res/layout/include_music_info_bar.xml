@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/current_info_bar_height"
         android:foreground="?android:selectableItemBackgroundBorderless"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" android:background="@color/background_color"
         >
 
     <ImageView
