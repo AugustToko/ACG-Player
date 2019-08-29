@@ -1184,6 +1184,7 @@ public final class MusicService extends Service {
 			if (mediaPlayer == null) return;
 
 			mediaPlayer.start();
+			serviceWeakReference.get().startFN();
 		}
 
 		public enum PlayerState {
