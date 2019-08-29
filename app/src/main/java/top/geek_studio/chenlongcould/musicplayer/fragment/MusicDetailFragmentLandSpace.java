@@ -100,9 +100,11 @@ public final class MusicDetailFragmentLandSpace extends BaseDetailFragment {
 		mPlayPauseDrawable = new PlayPauseDrawable(mCarViewActivity);
 		mPlayPauseDrawable.setPlay(true);
 		mMusicDetail2Binding.includePlayerControlCar.playButton.setImageDrawable(mPlayPauseDrawable);
+		mMusicDetail2Binding.includePlayerControlCar.playButton.setColorFilter(Color.BLACK);
 
 		mRecyclerView = mMusicDetail2Binding.getRoot().findViewById(R.id.recycler_view);
 
+		mLinearLayoutManager = new LinearLayoutManager(mCarViewActivity);
 		mLinearLayoutManager = new LinearLayoutManager(mCarViewActivity);
 		mRecyclerView = mMusicDetail2Binding.getRoot().findViewById(R.id.recycler_view);
 		mWaitListAdapter = new MyWaitListAdapter(mCarViewActivity, Data.sPlayOrderList);
@@ -158,9 +160,9 @@ public final class MusicDetailFragmentLandSpace extends BaseDetailFragment {
 		setData();
 
 		if (Data.HAS_PLAYED) {
-			mMusicDetail2Binding.includePlayerControlCar.playButton.setImageResource(R.drawable.ic_pause_black_24dp);
+			mPlayPauseDrawable.setPlay(true);
 		} else {
-			mMusicDetail2Binding.includePlayerControlCar.playButton.setImageResource(R.drawable.ic_play_arrow_grey_600_24dp);
+			mPlayPauseDrawable.setPause(true);
 		}
 
 		mMusicDetail2Binding.includePlayerControlCar.nextButton.setOnClickListener(v -> MusicService.MusicControl.intentNext(mCarViewActivity));

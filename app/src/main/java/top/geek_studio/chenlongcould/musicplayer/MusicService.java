@@ -1196,7 +1196,7 @@ public final class MusicService extends Service {
 
 		public static PlayerState playerState = PlayerState.NONE;
 
-		/**
+		/**`
 		 * 音乐最后位置
 		 */
 		public static int lastPosition = 0;
