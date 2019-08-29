@@ -29,7 +29,6 @@ import java.util.List;
 import top.geek_studio.chenlongcould.musicplayer.Data;
 import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.albumdetail.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseCompatActivity;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
@@ -48,8 +47,6 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
 	private BaseCompatActivity mContext;
 
-	private ViewHolder currentBind;
-
 	public MyWaitListAdapter(BaseCompatActivity context, List<MusicItem> musicItems) {
 		mMusicItems = musicItems;
 		mContext = context;
@@ -60,9 +57,6 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 	public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
 		View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_in_detail, viewGroup, false);
 		ViewHolder holder = new ViewHolder(view);
-
-		int index = holder.getAdapterPosition();
-		view.setOnClickListener(v -> MusicService.MusicControl.intentItemClick(mContext, mMusicItems.get(index), index));
 
 		holder.mItemMenuButton.setOnClickListener(v -> holder.mPopupMenu.show());
 
@@ -138,22 +132,25 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 
-		currentBind = viewHolder;
-
 		final String prefix = mMusicItems.get(i).getMusicPath().substring(mMusicItems.get(i).getMusicPath().lastIndexOf(".") + 1);
+
+		int index = viewHolder.getAdapterPosition();
+		if (index != -1) {
+			viewHolder.itemView.setOnClickListener(v -> MusicService.MusicControl.intentItemClick(mContext, mMusicItems.get(index), index));
+		}
 
 		viewHolder.mIndexText.setText(String.valueOf(i));
 		viewHolder.mMusicNameText.setText(mMusicItems.get(i).getMusicName());
 		viewHolder.mAlbumText.setText(mMusicItems.get(i).getMusicAlbum());
 		viewHolder.mExtName.setText(prefix);
 
-		if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.UIMODE.MODE_CAR)) {
+		if (mContext.getActivityTAG().contains("Car")) {
 			// TODO: 2019/1/11 if bg is light
-			currentBind.mMusicNameText.setTextColor(Color.WHITE);
-			currentBind.mAlbumText.setTextColor(Color.WHITE);
-			currentBind.mIndexText.setTextColor(Color.WHITE);
-			currentBind.mExtName.setTextColor(Color.WHITE);
-			currentBind.mItemMenuButton.setColorFilter(Color.WHITE);
+			viewHolder.mMusicNameText.setTextColor(Color.WHITE);
+			viewHolder.mAlbumText.setTextColor(Color.WHITE);
+			viewHolder.mIndexText.setTextColor(Color.WHITE);
+			viewHolder.mExtName.setTextColor(Color.WHITE);
+			viewHolder.mItemMenuButton.setColorFilter(Color.WHITE);
 		}
 	}
 

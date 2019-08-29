@@ -140,7 +140,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		NONE,
 	}
 
-	private State mState = State.NONE;
+	public State mState = State.NONE;
 
 	/**
 	 * fragment id
@@ -893,7 +893,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 			}
 			break;
 			case R.id.menu_toolbar_main_choose_share: {
-				MusicUtil.sharMusic(MainActivity.this, musicListFragment.getAdapter().getSelected());
+				MusicUtil.sharMusic(MainActivity.this, new ArrayList<>(musicListFragment.getAdapter().getSelected()));
 				musicListFragment.getAdapter().clearSelection();
 			}
 			break;

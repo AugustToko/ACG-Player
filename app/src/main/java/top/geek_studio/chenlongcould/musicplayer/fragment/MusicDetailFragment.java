@@ -533,7 +533,8 @@ public final class MusicDetailFragment extends BaseDetailFragment {
 		if (MusicDetailFragment.BackgroundStyle.DETAIL_BACKGROUND.equals(MusicDetailFragment.BackgroundStyle
 				.STYLE_BACKGROUND_BLUR)) {
 			bgUp.post(() -> {
-				if (mMainActivity.isDestroyed() || isDetached() || isRemoving()) return;
+				if (mMainActivity.isDestroyed() || isDetached() || isRemoving() || mMainActivity.mState != MainActivity.State.COMMON)
+					return;
 
 				GlideApp.with(mMainActivity)
 						.load(bitmap)

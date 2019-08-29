@@ -39,6 +39,7 @@ import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import top.geek_studio.chenlongcould.musicplayer.Data;
@@ -78,7 +79,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 	private ArrayList<ItemHolder> mViewHolders = new ArrayList<>();
 
-	private ArrayList<MusicItem> mSelected = new ArrayList<>();
+	private HashSet<MusicItem> mSelected = new HashSet<>();
 
 	private boolean isChoose = false;
 
@@ -856,7 +857,7 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 		return mMusicItems.size();
 	}
 
-	public ArrayList<MusicItem> getSelected() {
+	public HashSet<MusicItem> getSelected() {
 		return mSelected;
 	}
 

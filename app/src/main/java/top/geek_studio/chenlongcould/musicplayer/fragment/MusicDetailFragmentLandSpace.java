@@ -105,7 +105,6 @@ public final class MusicDetailFragmentLandSpace extends BaseDetailFragment {
 		mRecyclerView = mMusicDetail2Binding.getRoot().findViewById(R.id.recycler_view);
 
 		mLinearLayoutManager = new LinearLayoutManager(mCarViewActivity);
-		mLinearLayoutManager = new LinearLayoutManager(mCarViewActivity);
 		mRecyclerView = mMusicDetail2Binding.getRoot().findViewById(R.id.recycler_view);
 		mWaitListAdapter = new MyWaitListAdapter(mCarViewActivity, Data.sPlayOrderList);
 		mRecyclerView.setLayoutManager(mLinearLayoutManager);

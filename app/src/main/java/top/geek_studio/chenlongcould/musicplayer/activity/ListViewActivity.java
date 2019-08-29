@@ -294,7 +294,7 @@ public final class ListViewActivity extends BaseListActivity {
 		mToolbar.setOnMenuItemClickListener(item -> {
 			switch (item.getItemId()) {
 				case R.id.menu_toolbar_main_choose_share: {
-					MusicUtil.sharMusic(ListViewActivity.this, adapter.getSelected());
+					MusicUtil.sharMusic(ListViewActivity.this, new ArrayList<>(adapter.getSelected()));
 				}
 				break;
 
