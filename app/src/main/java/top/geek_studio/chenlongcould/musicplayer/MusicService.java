@@ -155,17 +155,20 @@ public final class MusicService extends Service {
 
 		//检测是否指定下一首播放
 		if (ItemListData.nextWillplay.size() != 0) {
-			MediaDescriptionCompat descriptionCompat = ItemListData.nextWillplay.get(0);
+			final MediaDescriptionCompat descriptionCompat = ItemListData.nextWillplay.get(0);
 			mMusicItem = MusicUtil.d2m(descriptionCompat);
+			ItemListData.nextWillplay.remove(descriptionCompat);
+
+			MusicControl.reset();
+
 			MusicControl.setDataSource(this, descriptionCompat);
 
 			updateMediaSessionMetaData();
 
 			MusicControl.prepareAndPlay();
 
-			ItemListData.nextWillplay.remove(descriptionCompat);
-
 			broadCast(ReceiverOnMusicPlay.FLASH_UI_COMMON, true);
+			return;
 		}
 
 		//检测循环
@@ -254,7 +257,8 @@ public final class MusicService extends Service {
 
 		@Override
 		public void addNextWillPlayItem(MusicItem item) {
-			ItemListData.nextWillplay.add(MusicUtil.m2d(item));
+			if (item != null && item.getMusicID() != -1)
+				ItemListData.nextWillplay.add(MusicUtil.m2d(item));
 		}
 
 		@Override
@@ -404,7 +408,9 @@ public final class MusicService extends Service {
 		Log.d(TAG, "MusicService: ");
 	}
 
-	private static Bitmap copy(Bitmap bitmap) {
+	private static Bitmap copy(@Nullable Bitmap bitmap) {
+		if (bitmap == null) return null;
+
 		Bitmap.Config config = bitmap.getConfig();
 		if (config == null) {
 			config = Bitmap.Config.RGB_565;
@@ -996,12 +1002,6 @@ public final class MusicService extends Service {
 		String ACTION_FAST_SHUFFLE = ACG_PLAYER_PACKAGE_NAME + ".fastshuffle";
 
 		String ACTION_TOGGLE_FAVOURITE = ACG_PLAYER_PACKAGE_NAME + ".togglefav";
-
-		/**
-		 * int extra key: next_item_id
-		 */
-		@Deprecated
-		String ACTION_NEXT_WILL_PLAY = ACG_PLAYER_PACKAGE_NAME + ".nextwillplay";
 
 		/**
 		 * key: insert_music_id

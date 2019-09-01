@@ -489,6 +489,8 @@ public final class MainActivity extends BaseListActivity implements MainContract
 //				break;
 				case R.id.dark_night_mode: {
 //					menuItem.setEnabled(false);
+					Utils.Ui.createMessageDialog(MainActivity.this, "Loading...", "Please wait...").show();
+
 					mState = State.SWITCHING_DAY_NIGHT_MODE;
 
 					mLive2DContent.removeAllViews();
@@ -499,7 +501,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 					Data.HAS_BIND = false;
 					unbindService(mServiceConnection);
 
-					mMainBinding.drawerLayout.closeDrawers();
+//					mMainBinding.drawerLayout.closeDrawers();
 
 					startActivity(new Intent(this, EmptyActivity.class));
 

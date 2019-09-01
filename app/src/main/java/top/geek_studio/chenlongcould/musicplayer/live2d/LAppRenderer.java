@@ -33,9 +33,15 @@ public class LAppRenderer implements GLSurfaceView.Renderer {
 	private float accelX = 0;
 	private float accelY = 0;
 
+	private boolean pause = false;
+
 	public LAppRenderer(LAppLive2DManager live2DMgr, boolean... setUpBackgroundImage) {
 		this.delegate = live2DMgr;
 		if (setUpBackgroundImage.length > 0) setBg = setUpBackgroundImage[0];
+	}
+
+	public void pause() {
+		pause = true;
 	}
 
 	@Override
@@ -71,6 +77,7 @@ public class LAppRenderer implements GLSurfaceView.Renderer {
 
 	@Override
 	public void onDrawFrame(GL10 gl) {
+		if (pause) return;
 
 		gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 

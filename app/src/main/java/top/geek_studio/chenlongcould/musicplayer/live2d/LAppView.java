@@ -150,6 +150,10 @@ public class LAppView extends GLSurfaceView {
 			if (LAppDefine.DEBUG_LOG) Log.d(TAG, "stop accelHelper");
 			accelHelper.stop();
 		}
+
+		if (renderer != null) {
+			renderer.pause();
+		}
 	}
 
 	public void setupView(int width, int height) {

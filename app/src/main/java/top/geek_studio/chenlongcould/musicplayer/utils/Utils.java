@@ -198,7 +198,23 @@ public final class Utils {
 		 * full
 		 */
 		public static Bitmap getCoverBitmapFull(Context context, int albumId) {
-			return path2CoverByDB(context, getCoverPath(context, albumId));
+
+			final String path = getCoverPath(context, albumId);
+
+			if (TextUtils.isEmpty(path) || path.equals("null") || path.equals(NONE)) {
+				return getDrawableBitmap(context, R.drawable.default_album_art, true);
+			}
+
+			final File file = new File(path);
+			if (!file.exists()) {
+				return getDrawableBitmap(context, R.drawable.default_album_art, true);
+			} else {
+				if (file.isDirectory()) {
+					return getDrawableBitmap(context, R.drawable.default_album_art, true);
+				}
+			}
+
+			return BitmapFactory.decodeFile(path);
 		}
 
 		@Nullable
@@ -344,8 +360,11 @@ public final class Utils {
 		}
 
 		@SuppressWarnings("SameParameterValue")
-		private static Bitmap getDrawableBitmap(@NonNull Context context, @DrawableRes int vectorDrawableId) {
-			return Ui.readBitmapFromRes(context, vectorDrawableId, 100, 100);
+		private static Bitmap getDrawableBitmap(@NonNull Context context, @DrawableRes int vectorDrawableId, boolean... full) {
+
+			boolean b = full.length > 0 && full[0];
+
+			return b ? Ui.readBitmapFromRes(context, vectorDrawableId, 400, 400) : Ui.readBitmapFromRes(context, vectorDrawableId, 100, 100);
 		}
 
 		/**
@@ -671,11 +690,11 @@ public final class Utils {
 			activity.getWindow().setNavigationBarColor(getPrimaryDarkColor(activity));
 		}
 
-		public static AlertDialog createMessageDialog(@NonNull final Activity context, @NonNull final String title, @NonNull final String message) {
+		public static AlertDialog createMessageDialog(@NonNull final Activity context, @NonNull final String title, @NonNull final String message, boolean... touch2Dissmiss) {
 			final AlertDialog.Builder builder = new AlertDialog.Builder(context);
 			builder.setTitle(title);
 			builder.setMessage(message);
-			builder.setCancelable(true);
+			builder.setCancelable(touch2Dissmiss.length > 0 && touch2Dissmiss[0]);
 			return builder.create();
 		}
 
