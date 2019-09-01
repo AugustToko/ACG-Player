@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu
         xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools" tools:showIn="navigation_view"
         >
     <group android:id="@+id/group_1">
         <item
@@ -9,11 +10,8 @@
                 android:title="@string/car_mode"
                 />
         <item
-                android:id="@+id/dark_night_mode"
-                android:title="@string/dark_mode"
-                android:icon="@drawable/ic_view_agenda_black_24dp"
-                android:checkable="true"
-                android:checked="false"
+                android:id="@+id/dark_night_mode" android:checkable="true" android:checked="false"
+                android:icon="@drawable/ic_view_agenda_black_24dp" android:title="@string/dark_mode"
                 />
     </group>
 
@@ -30,14 +28,12 @@
         <menu>
             <item
                     android:id="@+id/menu_nav_setting"
-                    android:icon="@drawable/ic_settings_black_24dp"
-                    android:title="@string/settings"
+                    android:icon="@drawable/ic_settings_black_24dp" android:title="@string/settings"
                     />
             <item
                     android:id="@+id/menu_nav_ad"
                     android:icon="@drawable/ic_attach_money_black_24dp"
-                    android:title="@string/donate"
-                    android:visible="false"
+                    android:title="@string/donate" android:visible="false"
                     />
             <item
                     android:id="@+id/menu_nav_about"
@@ -46,15 +42,12 @@
                     />
             <item
                     android:id="@+id/menu_nav_exit"
-                    android:icon="@drawable/ic_exit_to_app_black_24dp"
-                    android:title="@string/exit"
+                    android:icon="@drawable/ic_exit_to_app_black_24dp" android:title="@string/exit"
                     />
             <!--todo debug option-->
             <item
-                    android:id="@+id/debug"
-                    android:icon="@drawable/ic_info_outline_white_24dp"
-                    android:title="DEBUG"
-                    android:visible="false"
+                    android:id="@+id/debug" android:icon="@drawable/ic_info_outline_white_24dp"
+                    android:title="DEBUG" android:visible="false"
                     />
         </menu>
 

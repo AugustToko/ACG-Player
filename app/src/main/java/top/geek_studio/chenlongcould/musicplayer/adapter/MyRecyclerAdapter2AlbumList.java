@@ -75,8 +75,7 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
 		if (stopLoadImage) return;
 
-		String path = mAlbumNameList.get(viewHolder.getAdapterPosition()).getmArtwork();
-
+		final String path = mAlbumNameList.get(viewHolder.getAdapterPosition()).getmArtwork();
 		viewHolder.mImageView.setTag(R.string.key_id_3, mAlbumNameList.get(viewHolder.getAdapterPosition()).getmArtwork());
 
 		// set tag
@@ -100,6 +99,11 @@ public final class MyRecyclerAdapter2AlbumList extends RecyclerView.Adapter<MyRe
 
 			runnableHashMap.put(path, runnable);
 			CustomThreadPool.post(runnable);
+		} else {
+			GlideApp.with(viewHolder.mImageView)
+					.load(mMainActivity.getDrawable(R.drawable.default_album_art))
+					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+					.into(viewHolder.mImageView);
 		}
 //		else {
 //			final AlbumItem albumItem = mAlbumNameList.get(viewHolder.getAdapterPosition());

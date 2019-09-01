@@ -27,10 +27,10 @@ import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import java.util.List;
 
 import top.geek_studio.chenlongcould.musicplayer.Data;
-import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.activity.albumdetail.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseCompatActivity;
+import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.PlayListsUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.Utils;
@@ -136,7 +136,7 @@ public final class MyWaitListAdapter extends RecyclerView.Adapter<MyWaitListAdap
 
 		int index = viewHolder.getAdapterPosition();
 		if (index != -1) {
-			viewHolder.itemView.setOnClickListener(v -> MusicService.MusicControl.intentItemClick(mContext, mMusicItems.get(index), index));
+			viewHolder.itemView.setOnClickListener(v -> ReceiverOnMusicPlay.onItemClicked(mMusicItems.get(index), index));
 		}
 
 		viewHolder.mIndexText.setText(String.valueOf(i));

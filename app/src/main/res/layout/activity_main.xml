@@ -28,8 +28,8 @@
 
                 <ImageView
                         android:id="@+id/bg_image" android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:contentDescription="Background image" android:scaleType="centerCrop"
+                        android:layout_height="match_parent" android:contentDescription="BG"
+                        android:scaleType="centerCrop"
                         />
 
                 <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -40,13 +40,7 @@
                             android:id="@+id/view_pager" android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             />
-
                     <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
-
-                    <!--                    <FrameLayout-->
-                    <!--                            android:layout_width="match_parent" android:layout_height="130dp">-->
-
-                    <!--                    </FrameLayout>-->
 
                     <com.google.android.material.appbar.AppBarLayout
                             android:id="@+id/appbar" android:layout_width="match_parent"
@@ -97,10 +91,9 @@
                     android:layout_height="match_parent"
                     >
 
-                <!--400dp is albumHeight-->
                 <View
                         android:id="@+id/touch_view" android:layout_width="match_parent"
-                        android:layout_height="400dp"
+                        android:layout_height="@dimen/album_image_height"
                         />
 
             </FrameLayout>
@@ -110,7 +103,7 @@
         <com.google.android.material.navigation.NavigationView
                 android:id="@+id/navigation_view" android:layout_width="wrap_content"
                 android:layout_height="match_parent" android:layout_gravity="start"
-                android:background="#E6FFFFFF" android:fitsSystemWindows="true"
+                android:background="#E6FFFFFF"
                 app:headerLayout="@layout/navigation_view_header_one"
                 >
 

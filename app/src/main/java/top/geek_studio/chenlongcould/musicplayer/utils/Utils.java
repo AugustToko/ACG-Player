@@ -679,7 +679,7 @@ public final class Utils {
 			return builder.create();
 		}
 
-		public static void createErrorMessageDialog(@NonNull final Activity context, @NonNull final String title, @NonNull final String message, @NonNull Runnable runnable, int delayTime) {
+		public static void showErrorDialog(@NonNull final Activity context, @NonNull final String title, @NonNull final String message, @NonNull Runnable runnable, int delayTime) {
 			final AlertDialog.Builder builder = new AlertDialog.Builder(context);
 			builder.setTitle(title);
 			builder.setMessage(message);
@@ -689,9 +689,6 @@ public final class Utils {
 			new Handler().postDelayed(runnable, delayTime);
 		}
 
-		/**
-		 * use Application Context
-		 */
 		public static void fastToast(@NonNull final Context context, @NonNull final String content) {
 			Toast.makeText(context, content, Toast.LENGTH_SHORT).show();
 		}

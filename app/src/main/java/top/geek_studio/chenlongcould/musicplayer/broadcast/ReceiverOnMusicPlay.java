@@ -67,14 +67,14 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 	public static int getCurrentPosition() {
 		if (Data.sMusicBinder == null) {
 			Log.d(TAG, "getCurrentPosition: MusicBinder is null.");
-			return 0;
+			return -1;
 		}
 		try {
 			return Data.sMusicBinder.getCurrentPosition();
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
-		return 0;
+		return -1;
 	}
 
 	public static void seekTo(int nowPosition) {
@@ -84,6 +84,26 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		}
 		try {
 			Data.sMusicBinder.seekTo(nowPosition);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void next() {
+		if (Data.sMusicBinder == null) return;
+
+		try {
+			Data.sMusicBinder.next();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void previous() {
+		if (Data.sMusicBinder == null) return;
+
+		try {
+			Data.sMusicBinder.previous();
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -101,6 +121,17 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public static void onItemClicked(@Nullable MusicItem item, int index) {
+		if (Data.sMusicBinder == null) return;
+
+		try {
+			Data.sMusicBinder.onItemClick(item);
+			Data.sMusicBinder.setCurrentIndex(index);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Nullable
@@ -135,6 +166,26 @@ public final class ReceiverOnMusicPlay extends BroadcastReceiver {
 		//set data (image and name)
 		if (Values.CurrentData.CURRENT_UI_MODE.equals(Values.UIMODE.MODE_CAR)) {
 			CarViewActivity.sendEmptyMessage(CarViewActivity.NotLeakHandler.SET_DATA);
+		}
+	}
+
+	public static void play() {
+		if (Data.sMusicBinder == null) return;
+
+		try {
+			Data.sMusicBinder.start();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void pause() {
+		if (Data.sMusicBinder == null) return;
+
+		try {
+			Data.sMusicBinder.pause();
+		} catch (RemoteException e) {
+			e.printStackTrace();
 		}
 	}
 

@@ -16,10 +16,10 @@ android {
         applicationId "top.geek_studio.chenlongcould.musicplayer"
         minSdkVersion 21
         targetSdkVersion 29
-        versionName '2.7.0.5(20190829)'
+        versionName '2.7.0.5(20190901)'
         testInstrumentationRunner "android.support.albumLoader.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config
-        versionCode 147
+        versionCode 149
         flavorDimensions "default"
         multiDexEnabled = false
         proguardFiles 'proguard-rules.pro'
@@ -62,8 +62,7 @@ android {
     dataBinding {
         enabled = true
     }
-    productFlavors {
-    }
+
 }
 
 dependencies {
@@ -75,6 +74,8 @@ dependencies {
     implementation 'com.google.android.material:material:1.1.0-alpha09'
     implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
+    implementation 'androidx.navigation:navigation-fragment:2.0.0'
+    implementation 'androidx.navigation:navigation-ui:2.0.0'
     testImplementation 'junit:junit:4.13-beta-3'
     implementation 'com.simplecityapps:recyclerview-fastscroll:2.0.0'
     //glide
@@ -88,8 +89,9 @@ dependencies {
     annotationProcessor 'androidx.annotation:annotation:1.1.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
     implementation 'com.jrummyapps:colorpicker:2.1.7'
-//    implementation 'com.sothree.slidinguppanel:library:3.4.0'
-    implementation 'com.github.hannesa2:AndroidSlidingUpPanel:4.0.0' // Android X
+    //    implementation 'com.sothree.slidinguppanel:library:3.4.0'
+    implementation 'com.github.hannesa2:AndroidSlidingUpPanel:4.0.0'
+    // Android X
     implementation 'org.jetbrains:annotations:15.0'
     implementation 'io.reactivex.rxjava2:rxjava:2.2.4'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
@@ -104,7 +106,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.12.1'
     implementation 'com.squareup.okio:okio:2.1.0'
     implementation 'org.jsoup:jsoup:1.12.1'
-//    implementation 'android.arch.navigation:navigation-fragment:1.0.0'
+    //    implementation 'android.arch.navigation:navigation-fragment:1.0.0'
     //litepal
     implementation 'org.litepal.android:java:3.0.0'
     //searchview
@@ -115,4 +117,5 @@ dependencies {
     // blur
     implementation 'com.github.mmin18:realtimeblurview:1.2.1'
     implementation 'androidx.preference:preference:1.1.0-rc01'
+    implementation files('src/main/libs/live2d_android.jar')
 }

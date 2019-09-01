@@ -67,15 +67,6 @@ public final class Data {
 		return 0;
 	}
 
-	public static void setCurrentIndex(int index) {
-		if (index < 0) return;
-		try {
-			sMusicBinder.setCurrentIndex(index);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-	}
-
 	/**
 	 * for {@link top.geek_studio.chenlongcould.musicplayer.activity.ListViewActivity}
 	 */

@@ -132,7 +132,7 @@ public final class MusicListFragment extends BaseListFragment {
 
 			if (cursor.getCount() == 0) {
 				// TODO: 没有歌曲提示空
-				Utils.Ui.createErrorMessageDialog(mActivity, "Error", "Cursor.getCount is empty!", () -> mActivity.fullExit(), 2000);
+				Utils.Ui.showErrorDialog(mActivity, "Error", "Cursor.getCount is empty!", () -> mActivity.fullExit(), 2000);
 				return;
 			}
 

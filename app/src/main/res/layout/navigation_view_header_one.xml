@@ -17,7 +17,7 @@
 
     <ImageView
             android:id="@+id/nav_view_image" android:layout_width="match_parent"
-            android:layout_height="match_parent" android:contentDescription="@string/todo"
+            android:layout_height="match_parent" android:contentDescription="@string/album"
             android:foreground="@drawable/my_ripple_mask" android:src="@drawable/default_album_art"
             tools:scaleType="centerCrop"
             />

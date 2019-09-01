@@ -29,11 +29,13 @@ import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -107,6 +109,10 @@ import top.geek_studio.chenlongcould.musicplayer.fragment.FileViewFragment;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicDetailFragment;
 import top.geek_studio.chenlongcould.musicplayer.fragment.MusicListFragment;
 import top.geek_studio.chenlongcould.musicplayer.fragment.PlayListFragment;
+import top.geek_studio.chenlongcould.musicplayer.live2d.LAppLive2DManager;
+import top.geek_studio.chenlongcould.musicplayer.live2d.LAppView;
+import top.geek_studio.chenlongcould.musicplayer.live2d.utils.android.FileManager;
+import top.geek_studio.chenlongcould.musicplayer.live2d.utils.android.SoundManager;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
@@ -219,6 +225,8 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 	private DataModel dataModel;
 
+	private LAppLive2DManager live2DMgr;
+
 	/**
 	 * onXXX
 	 * At Override
@@ -226,6 +234,10 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Debug.startMethodTracing();
+
+		// live2D
+		SoundManager.init(this);
+		live2DMgr = new LAppLive2DManager();
 
 		activityWeakReference = new WeakReference<>(this);
 
@@ -275,8 +287,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 					return;
 				}
 
-				MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.RECYCLER_SCROLL);
-
 				mMainBinding.mainBody.setTranslationY(0 - slideOffset * 120);
 
 				float current = 1 - slideOffset;
@@ -313,6 +323,8 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 			@Override
 			public final void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+				MusicDetailFragment.sendEmptyMessage(MusicDetailFragment.NotLeakHandler.RECYCLER_SCROLL);
+
 				if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
 					mMainBinding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 //					if (Data.getCurrentCover() != null && !Data.getCurrentCover().isRecycled()) {
@@ -334,7 +346,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 //					} else {
 //						setStatusBarTextColor(MainActivity.this, Utils.Ui.getPrimaryColor(MainActivity.this));
 //					}
-					Log.d(TAG, "onPanelStateChanged: COLLAPSED");
 				}
 			}
 		});
@@ -346,11 +357,48 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		mNavHeaderImageView = mMainBinding.navigationView.getHeaderView(0).findViewById(R.id.nav_view_image);
 	}
 
+	private LAppView mlAppView;
+	private FrameLayout mLive2DContent;
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		mlAppView.onPause();
+	}
+
+	private void setUpLive2D() {
+
+		mlAppView = live2DMgr.createView(this, true);
+		mlAppView.setBackground(null);
+		mlAppView.setBackgroundColor(Color.TRANSPARENT);
+
+		mLive2DContent = new FrameLayout(this);
+		mLive2DContent.addView(mlAppView);
+
+		FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mlAppView.getLayoutParams();
+		lp.gravity = Gravity.BOTTOM | Gravity.END;
+		lp.width = 400;
+		lp.height = 800;
+
+		mMainBinding.navigationView.addView(mLive2DContent);
+
+		FileManager.init(this.getApplicationContext());
+
+		mlAppView.setLongClickable(true);
+		mlAppView.setOnLongClickListener(view -> {
+			Utils.Ui.createMessageDialog(MainActivity.this, "Hi", "这里是 ACG Player 助手酱 ~").show();
+			return false;
+		});
+
+	}
+
 	/**
 	 * 初始化 View
 	 */
 	protected void initView() {
 		super.initView(mMainBinding.toolBar, mMainBinding.appbar);
+
+		setUpLive2D();
 
 		// search
 		mSearchView.setHint(getString(R.string.type_somthing));
@@ -410,7 +458,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 				}
 				break;
 				case R.id.menu_nav_detail_info: {
-					Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+					final Intent intent = new Intent(MainActivity.this, DetailActivity.class);
 					startActivity(intent);
 				}
 				break;
@@ -441,7 +489,10 @@ public final class MainActivity extends BaseListActivity implements MainContract
 //				break;
 				case R.id.dark_night_mode: {
 //					menuItem.setEnabled(false);
-//					mState = State.SWITCHING_DAY_NIGHT_MODE;
+					mState = State.SWITCHING_DAY_NIGHT_MODE;
+
+					mLive2DContent.removeAllViews();
+					mlAppView.onPause();
 
 					// 取消 bind 服务, 以便于重新连接服务, 然后触发回调
 					Data.sMusicBinder = null;
@@ -506,6 +557,12 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		} else {
 			mMainBinding.navigationView.getMenu().findItem(R.id.dark_night_mode).setChecked(false);
 		}
+	}
+
+	@Override
+	protected void onSaveInstanceState(@NonNull Bundle outState) {
+		super.onSaveInstanceState(outState);
+
 	}
 
 	@Override
@@ -625,7 +682,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 				try {
 					final MusicItem item = songs.get(0);
 					Data.sMusicBinder.addNextWillPlayItem(item);
-					MusicService.MusicControl.intentNext(this);
+					ReceiverOnMusicPlay.next();
 					Log.d(TAG, "playFromUri: done");
 				} catch (RemoteException e) {
 					e.printStackTrace();
@@ -705,6 +762,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	@Override
 	protected void onResume() {
 		super.onResume();
+		mlAppView.onResume();
 		GlideApp.with(this).resumeRequests();
 
 		// init MusicDetailFrag
@@ -784,11 +842,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 			new Handler().postDelayed(() -> backPressed = false, 2000);
 		}
 
-	}
-
-	@Override
-	public String getActivityTAG() {
-		return TAG;
 	}
 
 	@Override
@@ -1164,6 +1217,9 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		Values.TEMP.HAS_LOAD_LAST = false;
 		activityWeakReference.clear();
 		activityWeakReference = null;
+		mLive2DContent.removeAllViews();
+		mlAppView = null;
+		FileManager.clearContext();
 		super.onDestroy();
 	}
 
@@ -1665,6 +1721,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 				}
 			} else {
 				final MusicItem item = ReceiverOnMusicPlay.getCurrentItem();
+				Log.d(TAG, "onServiceConnected: load from remote server");
 				if (item != null && item.getMusicID() != -1) {
 					MusicUtil.findArtworkWithId(MainActivity.this, item);
 					dataModel.mCurrentMusicItem = item;
@@ -1700,5 +1757,10 @@ public final class MainActivity extends BaseListActivity implements MainContract
 			Data.sMusicBinder = null;
 		}
 	};
+
+	@Override
+	public String getActivityTAG() {
+		return TAG;
+	}
 
 }

@@ -58,23 +58,23 @@
                 app:layout_constraintTop_toTopOf="parent"
                 >
 
-            <ImageView
-                    android:id="@+id/activity_music_detail_album_image_3"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/album_image_height" android:layout_marginTop="0dp"
-                    android:contentDescription="@string/activity_music_detail_album_image"
-                    android:foreground="?android:attr/selectableItemBackgroundBorderless"
-                    android:scaleType="centerCrop" app:layout_constraintTop_toTopOf="parent"
-                    />
+            <!--            <ImageView-->
+            <!--                    android:id="@+id/activity_music_detail_album_image_3"-->
+            <!--                    android:layout_width="match_parent"-->
+            <!--                    android:layout_height="@dimen/album_image_height" android:layout_marginTop="0dp"-->
+            <!--                    android:contentDescription="@string/activity_music_detail_album_image"-->
+            <!--                    android:foreground="?android:attr/selectableItemBackgroundBorderless"-->
+            <!--                    android:scaleType="centerCrop" app:layout_constraintTop_toTopOf="parent"-->
+            <!--                    />-->
 
-            <ImageView
-                    android:id="@+id/activity_music_detail_album_image_2"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/album_image_height" android:layout_marginTop="0dp"
-                    android:contentDescription="@string/activity_music_detail_album_image"
-                    android:foreground="?android:attr/selectableItemBackgroundBorderless"
-                    android:scaleType="centerCrop" app:layout_constraintTop_toTopOf="parent"
-                    />
+            <!--            <ImageView-->
+            <!--                    android:id="@+id/activity_music_detail_album_image_2"-->
+            <!--                    android:layout_width="match_parent"-->
+            <!--                    android:layout_height="@dimen/album_image_height" android:layout_marginTop="0dp"-->
+            <!--                    android:contentDescription="@string/activity_music_detail_album_image"-->
+            <!--                    android:foreground="?android:attr/selectableItemBackgroundBorderless"-->
+            <!--                    android:scaleType="centerCrop" app:layout_constraintTop_toTopOf="parent"-->
+            <!--                    />-->
 
             <ImageView
                     android:id="@+id/activity_music_detail_album_image" android:layout_width="0dp"

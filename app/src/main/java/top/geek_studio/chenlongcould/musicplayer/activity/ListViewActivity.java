@@ -35,6 +35,7 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseListActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.adapter.MyRecyclerAdapter;
+import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
 import top.geek_studio.chenlongcould.musicplayer.utils.PreferenceUtil;
@@ -274,7 +275,7 @@ public final class ListViewActivity extends BaseListActivity {
 				case R.id.menu_public_random: {
 					if (mMusicItemList.size() == 0) return true;
 					int index = new Random().nextInt(mMusicItemList.size());
-					MusicService.MusicControl.intentItemClick(ListViewActivity.this, mMusicItemList.get(index), index);
+					ReceiverOnMusicPlay.onItemClicked(mMusicItemList.get(index), index);
 				}
 				break;
 

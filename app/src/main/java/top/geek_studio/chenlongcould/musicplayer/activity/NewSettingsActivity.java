@@ -5,7 +5,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
 import top.geek_studio.chenlongcould.musicplayer.R;
-import top.geek_studio.chenlongcould.musicplayer.activity.ui.newsettings.NewSettingsFragment;
+import top.geek_studio.chenlongcould.musicplayer.fragment.NewSettingsFragment;
 
 public class NewSettingsActivity extends AppCompatActivity {
 

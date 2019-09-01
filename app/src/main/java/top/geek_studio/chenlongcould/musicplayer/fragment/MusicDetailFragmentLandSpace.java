@@ -158,13 +158,13 @@ public final class MusicDetailFragmentLandSpace extends BaseDetailFragment {
 
 		setData();
 
-		if (Data.HAS_PLAYED) {
+		if (Data.HAS_PLAYED || ReceiverOnMusicPlay.isPlayingMusic()) {
 			mPlayPauseDrawable.setPlay(true);
 		} else {
 			mPlayPauseDrawable.setPause(true);
 		}
 
-		mMusicDetail2Binding.includePlayerControlCar.nextButton.setOnClickListener(v -> MusicService.MusicControl.intentNext(mCarViewActivity));
+		mMusicDetail2Binding.includePlayerControlCar.nextButton.setOnClickListener(v -> ReceiverOnMusicPlay.next());
 
 		mMusicDetail2Binding.includePlayerControlCar.nextButton.setOnLongClickListener(v -> {
 			int nowPosition = mMusicDetail2Binding.includeSeekBarCar.seekBar.getProgress() + ReceiverOnMusicPlay.getDuration() / 20;
@@ -186,9 +186,8 @@ public final class MusicDetailFragmentLandSpace extends BaseDetailFragment {
 			if (ReceiverOnMusicPlay.getCurrentPosition() > ReceiverOnMusicPlay.getDuration() / 20 || Data.getCurrentIndex() == 0) {
 				ReceiverOnMusicPlay.seekTo(0);
 			} else {
-				MusicService.MusicControl.intentPrevious(mCarViewActivity);
+				ReceiverOnMusicPlay.previous();
 			}
-
 		});
 
 		mMusicDetail2Binding.includePlayerControlCar.previousButton.setOnLongClickListener(v -> {
@@ -374,10 +373,10 @@ public final class MusicDetailFragmentLandSpace extends BaseDetailFragment {
 		mMusicDetail2Binding.includePlayerControlCar.playButton.setOnClickListener(v -> {
 			if (ReceiverOnMusicPlay.isPlayingMusic()) {
 				mPlayPauseDrawable.setPlay(true);
-				MainActivity.startService(mCarViewActivity, MusicService.ServiceActions.ACTION_PAUSE);
+				ReceiverOnMusicPlay.pause();
 			} else {
 				mPlayPauseDrawable.setPause(true);
-				MainActivity.startService(mCarViewActivity, MusicService.ServiceActions.ACTION_PLAY);
+				ReceiverOnMusicPlay.play();
 			}
 		});
 

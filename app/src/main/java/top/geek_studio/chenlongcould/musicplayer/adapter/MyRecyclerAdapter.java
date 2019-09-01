@@ -50,6 +50,7 @@ import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.albumdetail.AlbumDetailActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseListActivity;
 import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
+import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.model.MusicItem;
 import top.geek_studio.chenlongcould.musicplayer.threadPool.CustomThreadPool;
 import top.geek_studio.chenlongcould.musicplayer.utils.MusicUtil;
@@ -490,6 +491,11 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 			runnableHashMap.put(path, runnable);
 			CustomThreadPool.post(runnable);
+		} else {
+			GlideApp.with(holder.mCover)
+					.load(mActivity.getDrawable(R.drawable.default_album_art))
+					.transition(DrawableTransitionOptions.withCrossFade(Values.DEF_CROSS_FATE_TIME))
+					.into(holder.mCover);
 		}
 //		else {
 //			/*--- 添加标记以便避免ImageView因为ViewHolder的复用而出现混乱 ---*/
@@ -570,8 +576,8 @@ public final class MyRecyclerAdapter extends RecyclerView.Adapter<MyRecyclerAdap
 
 			} else {
 				int index = holder.getAdapterPosition();
-				Data.setCurrentIndex(index);
-				MusicService.MusicControl.intentItemClick(mActivity, mMusicItems.get(index), index);
+				Log.d(TAG, "onMusicItemClick: index : " + index);
+				ReceiverOnMusicPlay.onItemClicked(mMusicItems.get(index), index);
 			}
 		});
 	}

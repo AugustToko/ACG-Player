@@ -50,7 +50,6 @@ import top.geek_studio.chenlongcould.musicplayer.MusicService;
 import top.geek_studio.chenlongcould.musicplayer.R;
 import top.geek_studio.chenlongcould.musicplayer.Values;
 import top.geek_studio.chenlongcould.musicplayer.activity.base.BaseCompatActivity;
-import top.geek_studio.chenlongcould.musicplayer.activity.main.MainActivity;
 import top.geek_studio.chenlongcould.musicplayer.broadcast.ReceiverOnMusicPlay;
 import top.geek_studio.chenlongcould.musicplayer.database.MyBlackPath;
 import top.geek_studio.chenlongcould.musicplayer.databinding.ActivitySettingsBinding;
@@ -361,9 +360,9 @@ public final class SettingsActivity extends BaseCompatActivity {
 			// TODO: 2019/5/30 专门设立一个 action 用来更新 notification
 			if (Data.HAS_PLAYED) {
 				if (ReceiverOnMusicPlay.isPlayingMusic()) {
-					MainActivity.startService(this, MusicService.ServiceActions.ACTION_PLAY);
+					ReceiverOnMusicPlay.play();
 				} else {
-					MainActivity.startService(this, MusicService.ServiceActions.ACTION_PAUSE);
+					ReceiverOnMusicPlay.pause();
 				}
 			}
 		});

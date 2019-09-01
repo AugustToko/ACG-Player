@@ -36,7 +36,8 @@
             android:roundIcon="@mipmap/ic_launcher_round" android:screenOrientation="portrait"
             android:theme="@style/LightTheme" tools:replace="android:allowBackup"
             >
-        <activity android:name=".activity.NewSettingsActivity"></activity>
+        <activity android:name=".live2d.SampleApplication" />
+        <activity android:name=".activity.NewSettingsActivity" />
         <activity
                 android:name=".activity.EmptyActivity" android:theme="@style/DialogTheme"
                 />
