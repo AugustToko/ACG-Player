@@ -525,35 +525,33 @@ public final class MusicService extends Service {
 	 * 更新当前歌曲元数据
 	 */
 	private void updateMediaSessionMetaData() {
-		CustomThreadPool.post(() -> {
-			final MusicItem song = mMusicItem;
+		final MusicItem song = mMusicItem;
 
-			if (song.getMusicID() == -1) {
-				mediaSession.setMetadata(null);
-				return;
-			}
+		if (song.getMusicID() == -1) {
+			mediaSession.setMetadata(null);
+			return;
+		}
 
-			if (mediaMetadataBuilder == null) {
-				mediaMetadataBuilder = new MediaMetadataCompat.Builder();
-			}
+		if (mediaMetadataBuilder == null) {
+			mediaMetadataBuilder = new MediaMetadataCompat.Builder();
+		}
 
-			mediaMetadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, song.getArtist())
-					.putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST, song.getArtist())
-					.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, song.getMusicAlbum())
-					.putString(MediaMetadataCompat.METADATA_KEY_TITLE, song.getMusicName())
-					.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, song.getDuration())
-					.putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, ItemListData.CURRENT_MUSIC_INDEX + 1)
-					// TODO: 2019/6/4 add  year
-					.putLong(MediaMetadataCompat.METADATA_KEY_YEAR, 0);
+		mediaMetadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, song.getArtist())
+				.putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST, song.getArtist())
+				.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, song.getMusicAlbum())
+				.putString(MediaMetadataCompat.METADATA_KEY_TITLE, song.getMusicName())
+				.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, song.getDuration())
+				.putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, ItemListData.CURRENT_MUSIC_INDEX + 1)
+				// TODO: 2019/6/4 add  year
+				.putLong(MediaMetadataCompat.METADATA_KEY_YEAR, 0);
 
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-				mediaMetadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, ItemListData.playOrderList.size());
-			}
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			mediaMetadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, ItemListData.playOrderList.size());
+		}
 
-			mediaMetadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, copy(ItemListData.mCurrentCover));
+		mediaMetadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, copy(ItemListData.mCurrentCover));
 
-			mediaSession.setMetadata(mediaMetadataBuilder.build());
-		});
+		mediaSession.setMetadata(mediaMetadataBuilder.build());
 	}
 
 	/**
@@ -862,7 +860,7 @@ public final class MusicService extends Service {
 
 				case ServiceActions.ACTION_PN:
 					nextOrPrevious(intent.getStringExtra("pnType"));
-				break;
+					break;
 
 				case ServiceActions.ACTION_PAUSE:
 					pause();
@@ -870,7 +868,7 @@ public final class MusicService extends Service {
 
 				case ServiceActions.ACTION_PLAY:
 					start();
-				break;
+					break;
 
 				case ServiceActions.ACTION_FAST_SHUFFLE: {
 
@@ -1075,14 +1073,13 @@ public final class MusicService extends Service {
 
 			actionSkipnext = new NotificationCompat.Action.Builder(R.drawable.ic_skip_next_white_24dp, "intentNext",
 					MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_SKIP_TO_NEXT)).build();
-
 		}
 
-		private static NotificationCompat.Builder getNotification25(final Context context, @NonNull final MediaSessionCompat mediaSessionCompat) {
+		private static NotificationCompat.Builder getNotification25(@NonNull final Context context, @NonNull final MediaSessionCompat mediaSessionCompat) {
 
-			MediaControllerCompat controller = mediaSessionCompat.getController();
-			MediaMetadataCompat mediaMetadata = controller.getMetadata();
-			MediaDescriptionCompat description = mediaMetadata.getDescription();
+			final MediaControllerCompat controller = mediaSessionCompat.getController();
+			final MediaMetadataCompat mediaMetadata = controller.getMetadata();
+			final MediaDescriptionCompat description = mediaMetadata.getDescription();
 
 			androidx.media.app.NotificationCompat.MediaStyle mediaStyle = new androidx.media.app.NotificationCompat.MediaStyle();
 			mediaStyle.setMediaSession(mediaSessionCompat.getSessionToken())
@@ -1120,7 +1117,6 @@ public final class MusicService extends Service {
 
 			}
 
-
 			builder.addAction(actionSkipnext);
 
 			return builder;
@@ -1130,16 +1126,16 @@ public final class MusicService extends Service {
 		@NonNull
 		private static NotificationCompat.Builder getChannelNotification(final Context context
 				, @NonNull final MediaSessionCompat mediaSessionCompat) {
-			MediaControllerCompat controller = mediaSessionCompat.getController();
-			@Nullable MediaMetadataCompat mediaMetadata = controller.getMetadata();
+			final MediaControllerCompat controller = mediaSessionCompat.getController();
+			@Nullable final MediaMetadataCompat mediaMetadata = controller.getMetadata();
 			@Nullable MediaDescriptionCompat description = null;
 			if (mediaMetadata != null) description = mediaMetadata.getDescription();
 
 			//pi(s)
-			Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
-			PendingIntent pi = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+			final Intent intent = new Intent(context, MainActivity.class).putExtra("intent_args", "by_notification");
+			final PendingIntent pi = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-			androidx.media.app.NotificationCompat.MediaStyle mediaStyle = new androidx.media.app.NotificationCompat.MediaStyle();
+			final androidx.media.app.NotificationCompat.MediaStyle mediaStyle = new androidx.media.app.NotificationCompat.MediaStyle();
 			mediaStyle.setMediaSession(mediaSessionCompat.getSessionToken())
 					//小型化通知的按钮布局
 					.setShowActionsInCompactView(0, 1, 2)

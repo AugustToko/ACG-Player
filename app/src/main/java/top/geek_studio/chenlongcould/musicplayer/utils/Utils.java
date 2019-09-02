@@ -694,7 +694,7 @@ public final class Utils {
 			final AlertDialog.Builder builder = new AlertDialog.Builder(context);
 			builder.setTitle(title);
 			builder.setMessage(message);
-			builder.setCancelable(touch2Dissmiss.length > 0 && touch2Dissmiss[0]);
+			builder.setCancelable(touch2Dissmiss.length <= 0 || touch2Dissmiss[0]);
 			return builder.create();
 		}
 
