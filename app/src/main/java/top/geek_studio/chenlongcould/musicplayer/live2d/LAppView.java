@@ -41,7 +41,6 @@ public class LAppView extends GLSurfaceView {
 		setFocusable(true);
 	}
 
-
 	public void setLive2DManager(LAppLive2DManager live2DMgr) {
 		this.delegate = live2DMgr;
 		this.renderer = new LAppRenderer(live2DMgr, false);

@@ -66,7 +66,4 @@ public class FileManager {
 		return context.get().getAssets().openFd(path);
 	}
 
-	public static void clearContext() {
-		context.clear();
-	}
 }

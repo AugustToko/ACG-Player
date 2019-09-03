@@ -19,7 +19,7 @@ android {
         versionName '2.7.0.7(20190902)'
         testInstrumentationRunner "android.support.albumLoader.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config
-        versionCode 151
+        versionCode 152
         flavorDimensions "default"
         multiDexEnabled = false
         proguardFiles 'proguard-rules.pro'

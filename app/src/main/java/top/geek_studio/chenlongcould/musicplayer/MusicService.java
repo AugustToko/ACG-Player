@@ -786,7 +786,8 @@ public final class MusicService extends Service {
 		MusicControl.release();
 		MusicControl.mediaPlayer = null;
 		mIsServiceDestroyed.set(true);
-		mediaSession.setActive(false);
+
+		if (mediaSession != null) mediaSession.setActive(false);
 
 		if (wakeLock != null) wakeLock.release();
 

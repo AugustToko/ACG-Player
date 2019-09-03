@@ -134,6 +134,8 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 	public static WeakReference<MainActivity> activityWeakReference;
 
+	private List<AlertDialog> dialogList = new ArrayList<>();
+
 	/**
 	 * 用于 list 定部padding
 	 */
@@ -367,6 +369,7 @@ public final class MainActivity extends BaseListActivity implements MainContract
 	}
 
 	private void setUpLive2D() {
+		FileManager.init(this.getApplicationContext());
 
 		mlAppView = live2DMgr.createView(this, true);
 		mlAppView.setBackground(null);
@@ -374,22 +377,18 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 		mLive2DContent = new FrameLayout(this);
 		mLive2DContent.addView(mlAppView);
+		mMainBinding.navigationView.addView(mLive2DContent);
 
 		FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mlAppView.getLayoutParams();
 		lp.gravity = Gravity.BOTTOM | Gravity.END;
 		lp.width = 400;
 		lp.height = 800;
 
-		mMainBinding.navigationView.addView(mLive2DContent);
-
-		FileManager.init(this.getApplicationContext());
-
 		mlAppView.setLongClickable(true);
 		mlAppView.setOnLongClickListener(view -> {
 			Utils.Ui.createMessageDialog(MainActivity.this, "Hi", "这里是 ACG Player 助手酱 ~").show();
 			return false;
 		});
-
 	}
 
 	/**
@@ -489,7 +488,9 @@ public final class MainActivity extends BaseListActivity implements MainContract
 //				break;
 				case R.id.dark_night_mode: {
 //					menuItem.setEnabled(false);
-					Utils.Ui.createMessageDialog(MainActivity.this, "Loading...", "Please wait...").show();
+					final AlertDialog dialog = Utils.Ui.createMessageDialog(MainActivity.this, "Loading...", "Please wait...");
+					dialogList.add(dialog);
+					dialog.show();
 
 					mState = State.SWITCHING_DAY_NIGHT_MODE;
 
@@ -1071,10 +1072,6 @@ public final class MainActivity extends BaseListActivity implements MainContract
 
 				String order = preferences.getString(Values.SharedPrefsTag.CUSTOM_TAB_LAYOUT, DEFAULT_TAB_ORDER);
 
-				if (order == null) {
-					order = DEFAULT_TAB_ORDER;
-				}
-
 				char type = order.charAt(i);
 				setSubTitleType(type);
 
@@ -1219,9 +1216,14 @@ public final class MainActivity extends BaseListActivity implements MainContract
 		Values.TEMP.HAS_LOAD_LAST = false;
 		activityWeakReference.clear();
 		activityWeakReference = null;
-		mLive2DContent.removeAllViews();
-		mlAppView = null;
-		FileManager.clearContext();
+
+//		mLive2DContent.removeAllViews();
+//		mlAppView = null;
+
+		for (final AlertDialog d : dialogList) {
+			if (d != null) d.dismiss();
+		}
+
 		super.onDestroy();
 	}
 
