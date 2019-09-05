@@ -1,5 +1,5 @@
 # ACG-Player
-# 该项目已经废弃, 请转到 [ACG Player X]()
+# 该项目已经废弃, 请转到 [ACG Player X](https://github.com/AugustToko/ACG-Player-X)
 ## ℃_C
 ## 酷安: https://www.coolapk.com/apk/209705
 ## MIUI http://app.mi.com/details?id=top.geek_studio.chenlongcould.musicplayer.Common
